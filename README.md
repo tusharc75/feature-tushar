@@ -1,6 +1,6 @@
 # OMS Frontend App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Frontend for OMS CRM App
 
 ### Yarn Package Manager is used
 
