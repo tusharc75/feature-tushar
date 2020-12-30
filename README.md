@@ -2,11 +2,7 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Used Package Manager
-
-### Yarn
-
-####
+### Yarn Package Manager is used
 
 Download Yarn Globally with:
 
