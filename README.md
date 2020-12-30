@@ -6,7 +6,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 Download Yarn Globally with:
 
-### `npm i yarn`
+### `npm i -g yarn`
 
 ## Available Scripts
 
