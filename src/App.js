@@ -1,11 +1,11 @@
 import { ThemeProvider } from "@material-ui/core";
 import { theme } from "./constants/AppConfig";
-import Opportunities from "./pages/Opportunities";
+import Leads from "./pages/Leads";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Opportunities />
+      <Leads />
     </ThemeProvider>
   );
 }
