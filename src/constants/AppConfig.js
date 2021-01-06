@@ -1,0 +1,10 @@
+import { createMuiTheme } from "@material-ui/core/styles";
+
+export const theme = createMuiTheme({
+  palette: {
+    darkBg: "#09445A",
+    lightBg: "#91A2A9",
+    textDark: "#082D3A",
+    textLight: "#91A2A9",
+  },
+});
