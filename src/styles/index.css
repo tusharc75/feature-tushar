@@ -1,0 +1,33 @@
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+}
+
+/* body::-webkit-scrollbar {
+  background-color: #fff;
+  width: 12px;
+}
+body::-webkit-scrollbar-track {
+  background-color: #fff;
+}
+body::-webkit-scrollbar-thumb {
+  background-color: #babac0;
+  border-radius: 16px;
+  border: 2px solid #fff;
+} */
+
+.MuiButton-root {
+  padding: 6px 16px !important;
+}
+
+.MuiOutlinedInput-input {
+  padding: 12px 14px !important;
+}
+
+.MuiLink-root {
+  font-size: 14px;
+}
