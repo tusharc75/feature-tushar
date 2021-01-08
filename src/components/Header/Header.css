@@ -1,0 +1,9 @@
+.MuiToolbar-root {
+  min-height: 55px !important;
+}
+
+.MuiButton-root {
+  text-transform: capitalize !important;
+  margin-left: 20px !important;
+  font-weight: normal !important;
+}
