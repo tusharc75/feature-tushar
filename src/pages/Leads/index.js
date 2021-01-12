@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import { makeStyles, withStyles } from "@material-ui/core/styles";
+import { makeStyles, withStyles, useTheme } from "@material-ui/core/styles";
 import {
   Box,
   Typography,
-  Link,
-  Divider,
-  Button,
   Grid,
   Paper,
   Table,
@@ -27,52 +24,11 @@ import {
 import { FilterList, SortByAlpha, Search } from "@material-ui/icons";
 import "./style.css";
 
+import Layout from "../../components/Layout";
+import Container from "../../components/Container";
+import NavLinks from "../../components/NavLinks";
+
 const useStyles = makeStyles((theme) => ({
-  root: {
-    padding: theme.spacing(2),
-    height: "100%",
-  },
-  head: {
-    display: "flex",
-    justifyContent: "space-between",
-  },
-  linksContainer: {
-    display: "flex",
-  },
-  links: {
-    color: theme.palette.textDark,
-  },
-  linkDivider: {
-    backgroundColor: theme.palette.darkBg,
-    margin: "0 1rem",
-
-    "&:last-child": {
-      display: "none",
-    },
-  },
-  headButtons: {
-    display: "flex",
-  },
-  newBtn: {
-    textTransform: "none",
-    background: theme.palette.darkBg,
-    marginRight: 15,
-    color: "white",
-
-    "&:hover": {
-      background: theme.palette.darkBg,
-    },
-  },
-  deleteBtn: {
-    textTransform: "none",
-    background: theme.palette.lightBg,
-    color: "white",
-
-    "&:hover": {
-      background: theme.palette.lightBg,
-    },
-  },
-
   tableContainer: {
     padding: "30px 20px",
     marginTop: 20,
@@ -122,54 +78,28 @@ const StyledTableCell = withStyles((theme) => ({
 }))(TableCell);
 
 const Leads = () => {
+  const theme = useTheme();
+
   const classes = useStyles();
   const [age, setAge] = useState("All");
-
-  const onLinkClick = (event) => event.preventDefault();
 
   const handleChange = (event) => {
     setAge(event.target.value);
   };
-  return (
-    <Box component="div" className={classes.root}>
-      {/* Links Section */}
-      <Grid container component="div" className={classes.head}>
-        <Grid item>
-          <Typography component="div" className={classes.linksContainer}>
-            {[
-              "Import from Excel",
-              "Export to Excel",
-              "Download Template",
-              "Email a Link",
-            ].map((item, i) => (
-              <React.Fragment key={i}>
-                <Link href="#" onClick={onLinkClick} className={classes.links}>
-                  {item}
-                </Link>
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  className={classes.linkDivider}
-                />
-              </React.Fragment>
-            ))}
-          </Typography>
-        </Grid>
 
-        <Grid item>
-          <Box className={classes.headButtons}>
-            <Button disableElevation className={classes.newBtn}>
-              New Lead
-            </Button>
-            <Button disableElevation className={classes.deleteBtn}>
-              Delete Lead
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
+  const buttonProps = [
+    { title: "New Lead", bg: theme.palette.darkBg, color: "#fff" },
+    { title: "Delete Lead", bg: theme.palette.lightBg, color: "#fff" },
+  ];
+
+  console.log(theme);
+  return (
+    <Layout>
+      {/* Links Section */}
+      <NavLinks ButtonProps={buttonProps} />
 
       {/* Tables Begins Here */}
-      <Paper elevation={0} className={classes.tableContainer}>
+      <Container>
         <Grid container>
           <Grid item xs={6}>
             <FormControl style={{ minWidth: "170px" }}>
@@ -390,7 +320,7 @@ const Leads = () => {
           rowsPerPage={10}
           onChangePage={() => console.log("page changed")}
         />
-      </Paper>
+      </Container>
 
       <Typography
         component="div"
@@ -400,7 +330,7 @@ const Leads = () => {
       >
         &copy; 2020, equipt.com, Inc, or its affiliates
       </Typography>
-    </Box>
+    </Layout>
   );
 };
 

@@ -1,93 +1,30 @@
 import React, { useState } from "react";
-import { makeStyles, useTheme, withStyles } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Box,
   Typography,
-  Link,
-  Divider,
-  Button,
   Grid,
-  Paper,
   Select,
   InputLabel,
-  Checkbox,
   MenuItem,
   FormControl,
-  IconButton,
   TextField,
   Switch,
   Avatar,
 } from "@material-ui/core";
-import { FilterList, SortByAlpha, Search } from "@material-ui/icons";
 import "./style.css";
 
+import Layout from "../../components/Layout";
+import Container from "../../components/Container";
+import BoxWithBorder from "../../components/BoxWithBorder";
+import NavLinks from "../../components/NavLinks";
+
 const useStyles = makeStyles((theme) => ({
-  root: {
-    padding: theme.spacing(2),
-  },
-  head: {
-    display: "flex",
-    justifyContent: "space-between",
-  },
-  linksContainer: {
-    display: "flex",
-  },
-  links: {
-    color: theme.palette.textDark,
-  },
-  linkDivider: {
-    backgroundColor: theme.palette.darkBg,
-    margin: "0 1rem",
-
-    "&:last-child": {
-      display: "none",
-    },
-  },
-  headButtons: {
-    display: "flex",
-  },
-  convertBtn: {
-    textTransform: "none",
-    background: theme.palette.darkBg,
-    marginRight: 15,
-    color: "white",
-    "&:hover": {
-      background: theme.palette.darkBg,
-    },
-  },
-  saveBtn: {
-    textTransform: "none",
-    background: theme.palette.darkBg,
-    marginRight: 15,
-    color: "white",
-
-    "&:hover": {
-      background: theme.palette.darkBg,
-    },
-  },
-  deleteBtn: {
-    textTransform: "none",
-    background: theme.palette.lightBg,
-    color: "white",
-
-    "&:hover": {
-      background: theme.palette.lightBg,
-    },
-  },
-  leadContainer: {
-    padding: theme.spacing(2),
-    marginTop: theme.spacing(2),
-  },
-  leadForm: {
-    padding: "34px 22px",
-    border: "1px solid #D4D6D7",
-    borderRadius: 4,
-  },
   profile: {
     marginTop: theme.spacing(3),
     marginBottom: theme.spacing(5),
   },
-  information: {
+  informationText: {
     marginTop: theme.spacing(5),
   },
   inputField: {
@@ -95,6 +32,15 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     marginRight: theme.spacing(12),
     marginBottom: theme.spacing(5),
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+      marginRight: theme.spacing(5),
+      flexDirection: "column",
+      alignItems: "flex-start",
+    },
+    [theme.breakpoints.down("md")]: {
+      marginRight: theme.spacing(5),
+    },
   },
   inputLable: {
     flex: "0.4",
@@ -107,7 +53,10 @@ const useStyles = makeStyles((theme) => ({
   },
   input: {
     width: 250,
-    justifySelf: "f",
+    [theme.breakpoints.down("xs")]: {
+      marginTop: theme.spacing(2),
+      width: "100%",
+    },
   },
   footerText: {
     textAlign: "center",
@@ -119,62 +68,33 @@ const NewLead = () => {
   const theme = useTheme();
   const [qualifyinTimeline, setQualifyingTimeline] = useState("");
 
-  const onLinkClick = (event) => event.preventDefault();
-
   const handleChange = (event) => {
     setQualifyingTimeline(event.target.value);
   };
-  return (
-    <Box component="div" className={classes.root}>
-      {/* Links Section */}
-      <Grid container component="div" className={classes.head}>
-        <Grid item>
-          <Typography component="div" className={classes.linksContainer}>
-            {[
-              "Import from Excel",
-              "Export to Excel",
-              "Download Template",
-              "Email a Link",
-            ].map((item, i) => (
-              <React.Fragment key={i}>
-                <Link href="#" onClick={onLinkClick} className={classes.links}>
-                  {item}
-                </Link>
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  className={classes.linkDivider}
-                />
-              </React.Fragment>
-            ))}
-          </Typography>
-        </Grid>
 
-        <Grid item>
-          <Box className={classes.headButtons}>
-            <Button disableElevation className={classes.convertBtn}>
-              Convert to Opportunity
-            </Button>
-            <Button disableElevation className={classes.saveBtn}>
-              Save
-            </Button>
-            <Button disableElevation className={classes.deleteBtn}>
-              Delete
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
+  const buttonProps = [
+    {
+      title: "Convert to Opportunity",
+      bg: theme.palette.darkBg,
+      color: "#fff",
+    },
+    { title: "Save", bg: theme.palette.darkBg, color: "#fff" },
+    { title: "Delete", bg: theme.palette.lightBg, color: "#fff" },
+  ];
+  return (
+    <Layout>
+      {/* Links Section */}
+      <NavLinks ButtonProps={buttonProps} />
 
       {/* Form Begins Here */}
-      <Paper elevation={0} className={classes.leadContainer}>
-        <Box component="div" className={classes.leadForm}>
+      <Container>
+        <BoxWithBorder>
           <Typography
             variant="h5"
             style={{ color: theme.palette.textLight, textAlign: "center" }}
           >
             Create New Lead
           </Typography>
-
           <Box component="div" className={classes.profile}>
             <Typography style={{ marginBottom: theme.spacing(3) }}>
               Lead Image
@@ -184,8 +104,7 @@ const NewLead = () => {
           <Box component="div">
             <Typography>Lead Information</Typography>
           </Box>
-
-          <Grid container className={classes.information}>
+          <Grid container className={classes.informationText}>
             {/* Left Side Form */}
             <Grid item xs={12} md={6}>
               <Box component="div" className={classes.inputField}>
@@ -200,6 +119,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* First Name */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>
                   First Name
@@ -212,6 +133,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Title */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Title</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -222,6 +145,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Phone */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Phone</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -232,6 +157,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Mobile */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Mobile</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -242,6 +169,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Qualifying Timeline */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>
                   Qualifying Timeline
@@ -267,6 +196,8 @@ const NewLead = () => {
                   </Select>
                 </FormControl>
               </Box>
+
+              {/* Lead Source */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>
                   Lead Source
@@ -291,6 +222,8 @@ const NewLead = () => {
                   </Select>
                 </FormControl>
               </Box>
+
+              {/* Select Industry */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Industry</Typography>
                 <FormControl className={classes.input} variant="outlined">
@@ -313,6 +246,8 @@ const NewLead = () => {
                   </Select>
                 </FormControl>
               </Box>
+
+              {/* Revenue */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Revenue</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -323,6 +258,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Email Opt In */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>
                   Email Opt In
@@ -338,10 +275,9 @@ const NewLead = () => {
 
             {/* Right Side Form */}
             <Grid item xs={12} md={6}>
+              {/* Company */}
               <Box component="div" className={classes.inputField}>
-                <Typography className={classes.inputLable}>
-                  Lead Owner
-                </Typography>
+                <Typography className={classes.inputLable}>Company</Typography>
                 <Typography className={classes.inputContainer} component="div">
                   <TextField
                     className={classes.input}
@@ -350,6 +286,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Last Name */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>
                   Last Name
@@ -362,6 +300,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Email */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Email</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -372,6 +312,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Fax */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Fax</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -382,6 +324,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Website */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Website</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -392,6 +336,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Lead Status */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>
                   Lead Status
@@ -416,6 +362,8 @@ const NewLead = () => {
                   </Select>
                 </FormControl>
               </Box>
+
+              {/* No of Employees */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>
                   No. of Employees
@@ -428,6 +376,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Rating */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Rating</Typography>
                 <FormControl className={classes.input} variant="outlined">
@@ -450,6 +400,8 @@ const NewLead = () => {
                   </Select>
                 </FormControl>
               </Box>
+
+              {/* Skype ID */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Skype ID</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -460,6 +412,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Twitter */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>Twitter</Typography>
                 <Typography className={classes.inputContainer} component="div">
@@ -470,6 +424,8 @@ const NewLead = () => {
                   />
                 </Typography>
               </Box>
+
+              {/* Secondary Email */}
               <Box component="div" className={classes.inputField}>
                 <Typography className={classes.inputLable}>
                   Secondary Email
@@ -484,12 +440,11 @@ const NewLead = () => {
               </Box>
             </Grid>
           </Grid>
-
+          {/* Address Information */}
           <Box component="div">
             <Typography>Address Information</Typography>
           </Box>
-
-          <Grid container className={classes.information}>
+          <Grid container className={classes.informationText}>
             {/* Left Side Form */}
             <Grid item xs={12} md={6}>
               <Box component="div" className={classes.inputField}>
@@ -549,11 +504,11 @@ const NewLead = () => {
             </Grid>
           </Grid>
 
+          {/* Lead Description */}
           <Box component="div">
             <Typography>Lead Description</Typography>
           </Box>
-
-          <Grid container className={classes.information}>
+          <Grid container className={classes.informationText}>
             {/* Left Side Form */}
             <Grid item xs={12} md={6}>
               <Box component="div" className={classes.inputField}>
@@ -575,8 +530,8 @@ const NewLead = () => {
             {/* Right Side Form */}
             <Grid item xs={12} md={6}></Grid>
           </Grid>
-        </Box>
-      </Paper>
+        </BoxWithBorder>
+      </Container>
 
       <Typography
         component="div"
@@ -586,7 +541,7 @@ const NewLead = () => {
       >
         &copy; 2020, equipt.com, Inc, or its affiliates
       </Typography>
-    </Box>
+    </Layout>
   );
 };
 

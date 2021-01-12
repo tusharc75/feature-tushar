@@ -1,27 +1,8 @@
-* {
-  margin: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: "Roboto", sans-serif;
-}
-
-#root {
-  margin: 0;
-  background: #eef9fd;
-}
-
 .MuiLink-root {
   font-size: 14px;
-  color: #91a2a9;
 }
 
 .MuiTableCell-head {
   font-size: 14px !important;
   color: "#aaa" !important;
-}
-
-.MuiOutlinedInput-input {
-  padding: 12px 14px !important;
 }

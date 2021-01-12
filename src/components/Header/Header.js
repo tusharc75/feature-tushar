@@ -5,10 +5,10 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Typography,
   Button,
   Menu,
   MenuItem,
+  Box,
 } from "@material-ui/core";
 import {
   Search,
@@ -19,7 +19,7 @@ import {
   HelpOutline,
   ExpandMore,
 } from "@material-ui/icons";
-import { logo } from "../../assets";
+import { SVG } from "../../assets";
 
 import "./Header.css";
 
@@ -34,12 +34,7 @@ const useStyles = makeStyles((theme) => ({
   menuButton: {
     marginRight: theme.spacing(2),
   },
-  title: {
-    display: "none",
-    [theme.breakpoints.up("sm")]: {
-      display: "block",
-    },
-  },
+
   search: {
     position: "relative",
     borderRadius: theme.shape.borderRadius,
@@ -153,9 +148,9 @@ const Header = () => {
     <div>
       <AppBar position="fixed" className={classes.appBar}>
         <Toolbar>
-          <Typography className={classes.title} component="div">
-            <img src={logo} alt="equip logo" />
-          </Typography>
+          <Box component="div">
+            <img src={SVG("Logo")} alt="equip logo" />
+          </Box>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
             <IconButton aria-label="search" color="inherit">
