@@ -201,7 +201,7 @@ const AddDoa = () => {
           />
         )}
         <BrandHeader
-          total={4}
+          total={dataRows.length}
           totalHeading={"Total no. of Users"}
           active={1,78,786}
           activeHeading={"DOA - Active"}
