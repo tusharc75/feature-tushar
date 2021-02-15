@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
     },
       width: 18,
       height: 18,
-      margin: 5
+      margin: 2
   },
 
   disabled: {
@@ -98,17 +98,6 @@ const useStyles = makeStyles((theme) => ({
       cursor: "no-drop"
     },
     color: "#91A2A9"
-  },
-  addIcon: {
-    width: 18,
-    height: 20,
-    color:  "#09445A"
-  },
-
-  deleteIcon: {
-    width: 18,
-    height: 20,
-    color:  "#91A2A9"
   }
 }));
 
@@ -164,8 +153,8 @@ const AddDoa = () => {
       headerName: "",
       renderCell: (params) => (
         <div>
-          <span><Edit className={`${ userSelected && userSelected.id === params.row.id ? "": classes.disabled} classes.actionIcon`} onClick={() => userSelected && userSelected.id === params.row.id? setOpen(true): void(0)}/></span>
-          <span><Delete className={`${ userSelected && userSelected.id === params.row.id ? "": classes.disabled} classes.actionIcon`}/></span>
+          <span><Edit className={`${ userSelected && userSelected.id === params.row.id ? "": classes.disabled} ${classes.actionIcon}`} onClick={() => userSelected && userSelected.id === params.row.id? setOpen(true): void(0)}/></span>
+          <span><Delete className={`${ userSelected && userSelected.id === params.row.id ? "": classes.disabled} ${classes.actionIcon}`}/></span>
         </div>
       ),
       disableColumnMenu: true,
