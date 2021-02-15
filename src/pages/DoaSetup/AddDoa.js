@@ -143,6 +143,11 @@ const AddDoa = () => {
     }
   };
 
+  const deleteUsers = () => {
+    const newDataRows = dataRows.filter( ob => ob._id !== userSelected._id);
+    setDataRows(newDataRows);
+  }
+
   const columns = [
     { field: "name", headerName: "Name", width: 200, disableClickEventBubbling: true },
     { field: "contactDetails", headerName: "Contact Details", width: 200, disableClickEventBubbling: true },
@@ -154,7 +159,7 @@ const AddDoa = () => {
       renderCell: (params) => (
         <div>
           <span><Edit className={`${ userSelected && userSelected.id === params.row.id ? "": classes.disabled} ${classes.actionIcon}`} onClick={() => userSelected && userSelected.id === params.row.id? setOpen(true): void(0)}/></span>
-          <span><Delete className={`${ userSelected && userSelected.id === params.row.id ? "": classes.disabled} ${classes.actionIcon}`}/></span>
+          <span><Delete className={`${ userSelected && userSelected.id === params.row.id ? "": classes.disabled} ${classes.actionIcon}`} onClick={deleteUsers}/></span>
         </div>
       ),
       disableColumnMenu: true,
@@ -176,7 +181,6 @@ const AddDoa = () => {
       return elm;
     })
     setDataRows(newDataRow);
-    console.log(dataRows);
   }
 
   return (
