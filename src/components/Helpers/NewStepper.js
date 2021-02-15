@@ -6,27 +6,11 @@ import {
   Step,
   StepLabel,
   StepConnector,
-  Button,
   Grid,
   Typography,
-  Box,
   Paper,
 } from "@material-ui/core";
-import { Edit } from "@material-ui/icons";
 import { Check } from "@material-ui/icons";
-
-function getStepContent(stepIndex) {
-  switch (stepIndex) {
-    case 0:
-      return "Select campaign settings...";
-    case 1:
-      return "What is an ad group anyways?";
-    case 2:
-      return "This is the bit I really care about!";
-    default:
-      return "Unknown stepIndex";
-  }
-}
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -55,7 +39,7 @@ const QontoConnector = withStyles((theme) => ({
     right: "calc(10% - 16px)",
   },
   line: {
-    borderColor: "#eaeaf0",
+    borderColor: "#09445A",
     borderTopWidth: 3,
     borderRadius: 1,
     color: "#09445A"
