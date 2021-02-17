@@ -9,6 +9,7 @@ import AddNewOpportunity from "./pages/Opportunities/AddNewOpportunity";
 import PrivateRoute from "./components/PrivateRoute";
 import { useData } from "./StateProvider/Provider";
 import CreateBrand from "./pages/Brand/CreateBrand";
+import AddDoa from "./pages/DoaSetup/AddDoa";
 
 function App() {
   const {
@@ -34,6 +35,7 @@ function App() {
         <Route exact path="/leads" component={Leads} />
         <Route exact path="/new-lead" component={NewLead} />
         <Route exact path="/opportunities" component={Opportunities} />
+        <Route exact path="/add-doa" component={AddDoa} />
         <PrivateRoute exact path="/new-opp">
           <AddNewOpportunity />
         </PrivateRoute>
