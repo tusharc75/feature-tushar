@@ -262,7 +262,7 @@ const AddDoa = () => {
                     <Button
                       color="inherit"
                       className={classes.actionBtn}
-                      onClick={() => {}}
+                      onClick={() => setOpen(true)}
                     >
                       Add Doa
                     </Button>
