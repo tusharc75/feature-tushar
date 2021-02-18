@@ -133,11 +133,11 @@ const AddDoa = () => {
   let [doaDetails, setDoaDetails] = useState([]);
 
 
-  const handleRowSelection = ({ rowIds }) => {
-    if (rowIds.length > 1) {
+  const handleRowSelection = ({ selectionModel }) => {
+    if (selectionModel.length > 1) {
       setUserSelected({});
     } else {
-      const id = rowIds[0];
+      const id = selectionModel[0];
       const row = dataRows.find(({_id}) => id === _id);
       setUserSelected(row);
     }
@@ -241,8 +241,8 @@ const AddDoa = () => {
               pageSize={5}
               checkboxSelection
               disableSelectionOnClick
-              onSelectionChange={handleRowSelection}
               disableMultipleSelection
+              onSelectionModelChange={(e) => { handleRowSelection(e) }}
             />
           </div>
           <Box marginY={5} />
