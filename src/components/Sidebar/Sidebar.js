@@ -12,6 +12,11 @@ import {
   ListItemText,
 } from "@material-ui/core";
 
+import {
+  ChevronRight,
+  ChevronLeft,
+} from "@material-ui/icons";
+
 import { SVG } from "../../assets";
 import Header from "../Header/Header";
 import Loader from "../Loader";
@@ -110,11 +115,7 @@ export default function SideBar({ children }) {
         <Toolbar />
         <div className={classes.toolbar}>
           <IconButton onClick={handleToggleDrawer}>
-            <img
-              className={classes.menuIcon}
-              src={SVG("Menu Icon")}
-              alt="menu"
-            />
+            {toggleDrawer ? <ChevronLeft /> : <ChevronRight />}
           </IconButton>
         </div>
 
