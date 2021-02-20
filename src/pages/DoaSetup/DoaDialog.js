@@ -14,6 +14,7 @@ import {
 } from "@material-ui/core";
 import { Formik, Form, Field, FieldArray } from 'formik';
 import { Add, Delete } from "@material-ui/icons";
+import NumberFormat from "react-number-format";
 
 const DoaDialog = ({userSelected, user, open, setOpen, updatedUser}) => {
 
@@ -42,6 +43,29 @@ const DoaDialog = ({userSelected, user, open, setOpen, updatedUser}) => {
     const classes = useStyles(),
     users = userSelected.length > 0 ? userSelected: [{id: user[0].id, name: user[0].name, limit: 0}];
 
+    const currencies = [
+        {label: "USD", sign: "$", groupStyle: "thousand"},
+        {label: "AUD", sign: "$", groupStyle: "thousand"},
+        {label: "INR", sign: "₹", groupStyle: "lakh"}
+    ];
+
+    const CurrencyFormat = (props) => {
+        const { inputRef, id, ...other } = props;
+        const currencySelected = id
+        ? currencies.find( em => em.label === id)
+        : currencies[0];
+      
+        return (
+          <NumberFormat
+            {...other}
+            thousandSeparator
+            thousandsGroupStyle={currencySelected.groupStyle}
+            prefix={currencySelected.sign}
+            isNumericString
+            getInputRef={inputRef}
+          />
+        );
+    };
     return (
     <Dialog
         open={open}
@@ -77,7 +101,8 @@ const DoaDialog = ({userSelected, user, open, setOpen, updatedUser}) => {
                                         alignItems="center"
                                     >
                                         <Grid item md={1}> Sr </Grid>
-                                        <Grid item md={5}> Users </Grid>
+                                        <Grid item md={4}> Users </Grid>
+                                        <Grid item md={1}> Currency </Grid>
                                         <Grid item md={4}> Amount </Grid>
                                         <Grid item md={2}></Grid>
                                     </Grid>
@@ -98,7 +123,7 @@ const DoaDialog = ({userSelected, user, open, setOpen, updatedUser}) => {
                                                     key={index}
                                                 >
                                                 <Grid item md={1}>{index+ 1}</Grid> 
-                                                <Grid item md={5}>
+                                                <Grid item md={4}>
                                                     <Field
                                                         fullWidth
                                                         variant="outlined"
@@ -126,6 +151,34 @@ const DoaDialog = ({userSelected, user, open, setOpen, updatedUser}) => {
                                                     : null}
                                                     </Field>
                                                 </Grid>
+                                                <Grid item md={1}>
+                                                    <Field
+                                                        fullWidth
+                                                        variant="outlined"
+                                                        component={TextField}
+                                                        type="text"
+                                                        select
+                                                        name="currency"
+                                                        value={userVal.currency || "USD"}
+                                                        onChange={(e) => {
+                                                            // setCurrencySelected(i)
+                                                            arrayHelpers.replace(index, {
+                                                            ...values.users[index],
+                                                            ...{["currency"]: e.target.value}
+                                                        })}}
+                                                    >
+                                                    {currencies.map((option, i) => (
+                                                        <MenuItem
+                                                            key={i}
+                                                            placeholder="Select Users"
+                                                            value={option.label}
+                                                        >
+                                                            {option.label}
+                                                        </MenuItem>
+                                                        ))
+                                                    }
+                                                    </Field>
+                                                </Grid>
                                                 <Grid item md={4}>
                                                     <Field
                                                         fullWidth
@@ -135,10 +188,15 @@ const DoaDialog = ({userSelected, user, open, setOpen, updatedUser}) => {
                                                         name="limit"
                                                         placeholder="Enter Amount"
                                                         value={userVal.limit}
+                                                        // id={userVal.id}
+                                                        id={userVal.currency}
                                                         onChange={(e) => arrayHelpers.replace(index, {
                                                             ...values.users[index],
-                                                            ["limit"]: e.target.value
+                                                            ["limit"]: e.target.value.replace(/[^0-9]/g,'')
                                                         })}
+                                                        InputProps={{
+                                                            inputComponent: CurrencyFormat,
+                                                        }}
                                                     />
                                                 </Grid>
                                                     <span><Add className={classes.addIcon} onClick={() => arrayHelpers.push({"name": "", "limit": 0})}/></span>
