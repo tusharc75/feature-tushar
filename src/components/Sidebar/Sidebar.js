@@ -10,6 +10,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Box
 } from "@material-ui/core";
 
 import {
@@ -23,6 +24,7 @@ import Loader from "../Loader";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.css";
 import SidebarList from "./SidebarList";
+import BreadCrumbs from "../BreadCrumbs";
 
 const drawerWidth = 240;
 
@@ -153,7 +155,14 @@ export default function SideBar({ children }) {
 
       <main className={classes.content}>
         <Toolbar />
-        {userLoading ? <Loader /> : children}
+        {
+          userLoading ? <Loader /> : <Box>
+            <BreadCrumbs />
+            <Box marginY={2} />
+            {children}
+          </Box>
+        }
+
       </main>
     </div>
   );

@@ -1,7 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 import reducer, { initialState } from "./reducer";
 import { SET_USER, USER_LOADING } from "./actionTypes";
-import axios from "axios";
 import { UserMe } from "../axios";
 
 const StateContext = createContext();

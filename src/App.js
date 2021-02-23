@@ -10,6 +10,9 @@ import PrivateRoute from "./components/PrivateRoute";
 import { useData } from "./StateProvider/Provider";
 import CreateBrand from "./pages/Brand/CreateBrand";
 import AddDoa from "./pages/DoaSetup/AddDoa";
+import Contact from "./pages/Contact";
+import Account from "./pages/Account";
+import CreateAccount from "./pages/Account/CreateAccount";
 
 function App() {
   const {
@@ -32,16 +35,19 @@ function App() {
           path="/login"
           render={({ location }) => conditionalRedirect(Login, location)}
         />
-        <Route exact path="/leads" component={Leads} />
+        <Route exact path="/" component={Leads} />
         <Route exact path="/new-lead" component={NewLead} />
         <Route exact path="/opportunities" component={Opportunities} />
         <Route exact path="/add-doa" component={AddDoa} />
         <PrivateRoute exact path="/new-opp">
           <AddNewOpportunity />
         </PrivateRoute>
-        <PrivateRoute exact path="/">
+        {/* <PrivateRoute exact path="/">
           <CreateBrand />
-        </PrivateRoute>
+        </PrivateRoute> */}
+        <Route exact path="/contact" component={Contact} />
+        <Route exact path="/account/new" component={CreateAccount} />
+        <Route exact path="/account" component={Account} />
       </Switch>
     </ThemeProvider>
   );

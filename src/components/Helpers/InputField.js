@@ -3,7 +3,8 @@ import { Grid, Box } from "@material-ui/core";
 
 import FormTypes from "./FormTypes";
 
-const InputField = ({ fieldsData, ...rest }) => {
+const InputField = (props) => {
+  const { fieldsData, errors, touched, values, setFieldValue, ...rest } = props;
   const [formsData, setFormsData] = useState([]);
 
   useEffect(() => {
@@ -39,7 +40,17 @@ const InputField = ({ fieldsData, ...rest }) => {
               <Grid spacing={2} container>
                 {form.sectionFields.map((field) => (
                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                    <FormTypes {...rest} fieldData={field} />
+                    <FormTypes
+                      {...rest}
+                      values={values}
+                      errors={errors}
+                      touched={touched}
+                      label={field.fieldLabel}
+                      name={field.fieldName}
+                      type={field.type}
+                      options={field.option}
+                      setFieldValue={setFieldValue}
+                    />
                   </Grid>
                 ))}
               </Grid>

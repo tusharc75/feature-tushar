@@ -1,207 +1,229 @@
-import React from "react";
 import PropTypes from "prop-types";
 import {
-  MenuItem,
-  FormControl,
-  InputLabel,
+  TextField,
+  Switch,
   FormControlLabel,
+  Checkbox,
+  FormControl,
+  FormLabel,
+  RadioGroup,
   Radio,
 } from "@material-ui/core";
-import {
-  TextField,
-  Select,
-  Switch,
-  CheckboxWithLabel,
-  RadioGroup,
-} from "formik-material-ui";
-import { Field } from "formik";
-import NumberFormat from "react-number-format";
-
-// for currency
-const NumberFormatCustom = (props) => {
-  const { inputRef, ...other } = props;
-
-  return <NumberFormat {...other} isNumericString getInputRef={inputRef} />;
-};
-
-const CurrencyFormat = (props) => {
-  const { inputRef, ...other } = props;
-
-  return (
-    <NumberFormat
-      {...other}
-      thousandSeparator
-      isNumericString
-      prefix="$"
-      getInputRef={inputRef}
-    />
-  );
-};
+import { Autocomplete } from "@material-ui/lab";
+import MuiPhoneInput from "material-ui-phone-number";
 
 const FormTypes = (props) => {
-  const { fieldData, ...rest } = props;
+  const {
+    type,
+    label,
+    name,
+    errors,
+    values,
+    options,
+    touched,
+    setFieldValue,
+    onChange,
+    ...rest
+  } = props;
 
-  return {
-    singleLine: (
-      <Field
-        fullWidth
-        variant="outlined"
-        type="text"
-        component={TextField}
-        name={fieldData.fieldName}
-        label={fieldData.fieldLabel}
-        {...rest}
-      />
-    ),
-    dropDown: (
-      <Field
-        fullWidth
-        variant="outlined"
-        component={TextField}
-        type="text"
-        select
-        name={fieldData.fieldName}
-        label={fieldData.fieldLabel}
-        {...rest}
+  return type === "singleLine" ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      type="text"
+      label={label}
+      name={name}
+      value={values[name]}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+    />
+  ) : type === "number" ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      type="number"
+      label={label}
+      name={name}
+      value={values[name]}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+    />
+  ) : type === "email" ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      type="email"
+      label={label}
+      name={name}
+      value={values[name]}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+    />
+  ) : type === "password" ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      type="password"
+      label={label}
+      name={name}
+      value={values[name]}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+    />
+  ) : type === "mobileNumber" ? (
+    <MuiPhoneInput
+      {...rest}
+      defaultCountry={"us"}
+      disableAreaCodes
+      enableLongNumbers
+      countryCodeEditab={false}
+      disableCountryCode
+      variant="outlined"
+      label={label}
+      name={name}
+      value={values[name]}
+      onChange={(val) => setFieldValue(name, val)}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
+    />
+  ) : type === "dropDown" ? (
+    <Autocomplete
+      {...rest}
+      options={options?.map((opt) => opt.optionLabel)}
+      getOptionLabel={(option) => option}
+      getOptionSelected={(option, val) => option === val}
+      value={values[name]}
+      onChange={(e, val) => setFieldValue(name, val)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          name={name}
+          label={label}
+          variant="outlined"
+          error={touched.language && Boolean(errors.language)}
+          helperText={touched.language && errors.language}
+        />
+      )}
+    />
+  ) : type === "multiSelect" ? (
+    <Autocomplete
+      {...rest}
+      multiple
+      options={options?.map((opt) => opt.optionLabel)}
+      getOptionLabel={(option) => option}
+      value={values[name]}
+      getOptionSelected={(option, val) => option === val}
+      onChange={(e, value) => setFieldValue(name, value)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="outlined"
+          label={label}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+        />
+      )}
+    />
+  ) : type === "switch" ? (
+    <FormControlLabel
+      control={
+        <Switch
+          name={name}
+          checked={values[name]}
+          onChange={
+            onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          }
+          color="secondary"
+        />
+      }
+      label={values[name] ? "Active" : "Inactive"}
+    />
+  ) : type === "checkbox" ? (
+    <FormControlLabel
+      control={
+        <Checkbox
+          name={name}
+          checked={values[name]}
+          onChange={
+            onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          }
+          color="secondary"
+        />
+      }
+      label={label}
+    />
+  ) : type === "radio" ? (
+    <FormControl component="fieldset">
+      <FormLabel component="legend">{label}</FormLabel>
+      <RadioGroup
+        aria-label="gender"
+        name={name}
+        value={values[name]}
+        onChange={(e) => setFieldValue(name, e.target.value)}
       >
-        {fieldData.option
-          ? fieldData.option.map((option, i) => (
-              <MenuItem key={i} value={option.optionLabel}>
-                {option.optionLabel}
-              </MenuItem>
-            ))
-          : ""}
-      </Field>
-    ),
-    multiSelect: (
-      <FormControl {...rest} fullWidth variant="outlined">
-        <InputLabel htmlFor={fieldData.fieldName}>
-          {fieldData.fieldLabel}
-        </InputLabel>
-        <Field
-          label={fieldData.fieldLabel}
-          component={Select}
-          type="text"
-          name={fieldData.fieldName}
-          multiple={true}
-          inputProps={{ name: fieldData.fieldName, id: fieldData.fieldName }}
-        >
-          {fieldData.option
-            ? fieldData.option.map((option) => (
-                <MenuItem
-                  key={option.order}
-                  value={
-                    option.optionValue ? option.optionValue : option.optionLabel
-                  }
-                >
-                  {option.optionLabel}
-                </MenuItem>
-              ))
-            : ""}
-        </Field>
-      </FormControl>
-    ),
-    switch: (
-      <FormControlLabel
-        control={
-          <Field
-            component={Switch}
-            type="checkbox"
-            name={fieldData.fieldName}
-            {...rest}
+        {options.map((opt) => (
+          <FormControlLabel
+            key={opt.order}
+            value={opt.optionLabel}
+            control={<Radio />}
+            label={opt.optionLabel}
           />
-        }
-        label={fieldData.fieldLabel}
-      />
-    ),
-    email: (
-      <Field
-        fullWidth
-        variant="outlined"
-        component={TextField}
-        type="email"
-        name={fieldData.fieldName}
-        label={fieldData.fieldLabel}
-        {...rest}
-      />
-    ),
-    mobileNumber: (
-      <Field
-        fullWidth
-        variant="outlined"
-        type="tel"
-        component={TextField}
-        name={fieldData.fieldName}
-        label={fieldData.fieldLabel}
-        {...rest}
-      />
-    ),
-    number: (
-      <Field
-        fullWidth
-        variant="outlined"
-        component={TextField}
-        label={fieldData.fieldLabel}
-        name={fieldData.fieldName}
-        InputProps={{
-          inputComponent: NumberFormatCustom,
-        }}
-        {...rest}
-      />
-    ),
-    multiLine: (
-      <Field
-        fullWidth
-        variant="outlined"
-        component={TextField}
-        type="text"
-        multiline
-        name={fieldData.fieldName}
-        label={fieldData.fieldLabel}
-        {...rest}
-      />
-    ),
-    currency: (
-      <Field
-        fullWidth
-        variant="outlined"
-        component={TextField}
-        label={fieldData.fieldLabel}
-        name={fieldData.fieldName}
-        InputProps={{
-          inputComponent: CurrencyFormat,
-        }}
-        {...rest}
-      />
-    ),
-    checkBox: (
-      <Field
-        component={CheckboxWithLabel}
-        type="checkbox"
-        Label={{ label: fieldData.fieldLabel }}
-        name={fieldData.fieldName}
-        {...rest}
-      />
-    ),
-    radio: (
-      <Field component={RadioGroup} name={fieldData.fieldName}>
-        {fieldData.option
-          ? fieldData.option.map((option, i) => (
-              <FormControlLabel
-                key={i}
-                value={option.radioName}
-                control={<Radio />}
-                label={option.radioLabel}
-              />
-            ))
-          : ""}
-      </Field>
-    ),
-  }[fieldData.type];
+        ))}
+      </RadioGroup>
+    </FormControl>
+  ) : type === "multiLine" ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      type="text"
+      label={label}
+      name={name}
+      rows={4}
+      value={values[name]}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
+      onChange={(e) => setFieldValue(name, e.target.value)}
+      multiline
+    />
+
+    // <Field
+    //   fullWidth
+    //   variant="outlined"
+    //   component={TextField}
+    //   type="text"
+    //   multiline
+    //   name={fieldData.fieldName}
+    //   label={fieldData.fieldLabel}
+    //   {...rest}
+    // />
+  ) : null;
+  //  type === "currency" ? (
+  //   <Field
+  //     fullWidth
+  //     variant="outlined"
+  //     component={TextField}
+  //     label={fieldData.fieldLabel}
+  //     name={fieldData.fieldName}
+  //     InputProps={{
+  //       inputComponent: CurrencyFormat,
+  //     }}
+  //     {...rest}
+  //   />
+  // ) : null;
 };
 
 FormTypes.propTypes = {
-  fieldData: PropTypes.object.isRequired,
+  type: PropTypes.string,
+  label: PropTypes.string,
+  name: PropTypes.string,
+  errors: PropTypes.object,
+  touched: PropTypes.object,
+  values: PropTypes.object,
+  setFieldValue: PropTypes.func,
 };
 
 export default FormTypes;
