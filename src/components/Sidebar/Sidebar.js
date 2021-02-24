@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -10,22 +10,19 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Collapse,
   Box
 } from "@material-ui/core";
-
-import {
-  ChevronRight,
-  ChevronLeft,
-} from "@material-ui/icons";
-
+import { Link, withRouter } from 'react-router-dom'
 import { SVG } from "../../assets";
 import Header from "../Header/Header";
 import Loader from "../Loader";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.css";
 import SidebarList from "./SidebarList";
+import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@material-ui/icons"
 import BreadCrumbs from "../BreadCrumbs";
-
+const _ = require('lodash')
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
@@ -86,15 +83,37 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SideBar({ children }) {
+function SideBar({ children, location }) {
   const {
     state: { user, userLoading },
   } = useData();
   const classes = useStyles();
+  const [open, setOpen] = useState(true);
+  const pathnames = location.pathname.split("/").filter((x) => x)
+
   const [toggleDrawer, setToggleDrawer] = React.useState(false);
 
   const handleToggleDrawer = () => {
     setToggleDrawer(!toggleDrawer);
+  };
+
+  const listItems = () => {
+    if (user) {
+      const sections = [];
+      user.role.sideBar.forEach((item) => {
+        if (!sections.includes(item.sectionName)) {
+          sections.push(item.sectionName);
+        }
+      });
+
+      return sections.map((section) => {
+        const lists = user.role.sideBar.filter(
+          (list) => list.sectionName === section
+        );
+        const items = lists.map((item) => item);
+        return { section, items };
+      });
+    }
   };
 
   return (
@@ -118,6 +137,11 @@ export default function SideBar({ children }) {
         <div className={classes.toolbar}>
           <IconButton onClick={handleToggleDrawer}>
             {toggleDrawer ? <ChevronLeft /> : <ChevronRight />}
+            {/* <img
+              className={classes.menuIcon}
+              src={SVG("Menu Icon")}
+              alt="menu"
+            /> */}
           </IconButton>
         </div>
 
@@ -151,6 +175,47 @@ export default function SideBar({ children }) {
             )}
           </List>
         </div>
+
+        <div
+          className={clsx(classes.drawerContainer, {
+            [classes.hide]: !toggleDrawer,
+          })}
+        >
+          <List>
+            {user &&
+              listItems().map((listItem, i) => (
+                <React.Fragment key={i}>
+                  <ListItem button onClick={() => setOpen(!open)}>
+                    <ListItemText primary={listItem.section} />
+                    {open ? <ExpandLess /> : <ExpandMore />}
+                  </ListItem>
+                  <Collapse in={open} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                      {listItem.items.map((item, j) => (
+                        <Link
+                          key={j}
+                          to={`/${_.kebabCase(listItem.section)}/${_.lowerCase(
+                            item.name
+                          )}`}
+                        >
+                          <ListItem
+                            button
+                            selected={pathnames.includes(
+                              _.lowerCase(item.name)
+                            )}
+                            className={classes.nested}
+                          >
+                            <ListItemText primary={item.name} />
+                          </ListItem>
+                        </Link>
+                      ))}
+                    </List>
+                  </Collapse>
+                </React.Fragment>
+              ))}
+          </List>
+        </div>
+
       </Drawer>
 
       <main className={classes.content}>
@@ -167,3 +232,4 @@ export default function SideBar({ children }) {
     </div>
   );
 }
+export default withRouter(SideBar)
