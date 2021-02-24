@@ -14,10 +14,6 @@ import {
   Box
 } from "@material-ui/core";
 import { Link, withRouter } from 'react-router-dom'
-import {
-  ChevronRight,
-  ChevronLeft,
-} from "@material-ui/icons";
 import { SVG } from "../../assets";
 import Header from "../Header/Header";
 import Loader from "../Loader";
@@ -25,8 +21,8 @@ import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.css";
 import SidebarList from "./SidebarList";
 import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@material-ui/icons"
-const _ = require('lodash')
 import BreadCrumbs from "../BreadCrumbs";
+const _ = require('lodash')
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
