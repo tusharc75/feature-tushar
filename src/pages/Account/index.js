@@ -18,6 +18,7 @@ import {
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
+import { ExpandMore } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
 
 export default function Account() {
@@ -32,7 +33,8 @@ export default function Account() {
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 0, limit: 5 });
+    const [query, setQuery] = useState({ page: 1, limit: 5 });
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const columns = [
         {
@@ -103,30 +105,8 @@ export default function Account() {
         if (user) {
             getAccounts(user.user.brand);
         }
-        // if (state) {
-        //     getEntiy(state.entityId);
-        // }
-
-        // getEntityCount();
-
-        // return () => setSelectedEntity(null);
         // eslint-disable-next-line
     }, [user]);
-
-    // useEffect(() => {
-    //     if (user) {
-    //         GetFields("Account", id)
-    //             .then(({ data }) => {
-    //                 const fields = data?.map((f) => f.fieldData);
-    //                 setUserFormFields(fields);
-    //                 setLoadingUserFields(false);
-    //             })
-    //         // return () => {
-    //         //     cleanup
-    //         // }
-    //     }
-    // }, [])
-
     const getAccounts = (brandId) => {
         setLoading(true);
         // GetAccounts(brandId).then(({ data }) => {
@@ -162,6 +142,15 @@ export default function Account() {
         setDataRows([...rows]);
     }, [accountData])
 
+    // ****** ACTIONS BUTTON STUFF *********
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
     const clickCreateNew = () => {
         history.push({
             pathname: "/account/new",
@@ -186,12 +175,6 @@ export default function Account() {
     const handleSortModelChange = (params) => {
         if (params?.sortModel && params.sortModel.length > 0) {
             let temp = { ...params.sortModel[0] };
-            if (temp.field === "name") {
-                temp.field = "firstName";
-            }
-            if (temp.field === "status") {
-                temp.field = "blocked";
-            }
             setQuery((prevState) => ({
                 ...prevState,
                 page: 1,
@@ -216,7 +199,9 @@ export default function Account() {
                 </Button>
                 <Box component="span" marginX={1} />
 
-                {/* <Button
+                <Button
+                    // disabled={Boolean(!selectedBrand)}
+                    disabled={dataRows.filter((d) => d.isChecked).length === 0}
                     variant="outlined"
                     color="default"
                     onClick={openActions}
@@ -227,12 +212,20 @@ export default function Account() {
                 <Menu
                     anchorEl={anchorEl}
                     keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "left"
+                    }}
                     id="action-menu"
                     open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                >
-                    <MenuItem>Delete</MenuItem>
-                </Menu> */}
+                    onClose={closeActions}>
+
+                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length !== 1}>
+                        Delete
+                    </MenuItem>
+                </Menu>
+
             </BrandHeader>
 
             <Paper style={{ marginTop: 15 }}>
