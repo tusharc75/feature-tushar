@@ -16,6 +16,8 @@ import demoImg from "../../assets/clip-hardworking-man.png";
 import { useData } from "../../StateProvider/Provider";
 import { SET_USER, USER_LOADING } from "../../StateProvider/actionTypes";
 
+import { UserLogin } from '../../axios/index';
+
 const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: theme.spacing(5),
@@ -60,20 +62,19 @@ const Login = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     dispatch({ type: USER_LOADING, payload: true });
+    const data = {
+      email: values.email,
+      password: values.password,
+    };
 
-    await axios
-      .post("/user/login", {
-        email: values.email,
-        password: values.password,
-      })
-      .then((res) => {
-        setSubmitting(false);
-        const { data } = res.data;
+    UserLogin(data).then((res) => {
+      setSubmitting(false);
+      const { data } = res;
 
-        localStorage.setItem("token", data.token);
-        dispatch({ type: SET_USER, payload: data });
-        dispatch({ type: USER_LOADING, payload: false });
-      })
+      localStorage.setItem("token", data.token);
+      dispatch({ type: SET_USER, payload: data });
+      dispatch({ type: USER_LOADING, payload: false });
+    })
       .catch((err) => {
         dispatch({ type: USER_LOADING, payload: false });
         console.log(err);
@@ -107,8 +108,8 @@ const Login = () => {
               <h2>Login</h2>
               <Formik
                 initialValues={{
-                  email: "", //vebholic@gmail.com
-                  password: "", //fgsfdhD#@43
+                  email: "punit@gmail.com",
+                  password: "soR$Tw83n92ghs2",
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -120,6 +121,7 @@ const Login = () => {
                       name="email"
                       type="email"
                       label="Email"
+                      variant="outlined"
                     />
                     <br />
                     <Field
@@ -127,6 +129,7 @@ const Login = () => {
                       type="password"
                       label="Password"
                       name="password"
+                      variant="outlined"
                     />
                     {isSubmitting && <LinearProgress />}
                     <br />
