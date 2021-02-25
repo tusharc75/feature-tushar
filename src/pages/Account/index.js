@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetFields } from '../../axios/index';
+import { GetAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
@@ -32,6 +32,7 @@ export default function Account() {
     const [loadingAccountData, setLoadingAccountData] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
+    const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
     const [query, setQuery] = useState({ page: 1, limit: 5 });
     const [anchorEl, setAnchorEl] = useState(null);
@@ -98,7 +99,7 @@ export default function Account() {
             width: 75,
         },
         { field: "accountName", headerName: "Account Name", width: 200 },
-        { field: "rootAccount", headerName: "Root Account", width: 200 },
+        { field: "masterAccount", headerName: "Master Account", width: 200 },
     ];
 
     useEffect(() => {
@@ -107,30 +108,22 @@ export default function Account() {
         }
         // eslint-disable-next-line
     }, [user]);
-    const getAccounts = (brandId) => {
+
+    useEffect(() => {
+        if (user) {
+            getAccounts(user.user.brand);
+        }
+    }, [query]);
+
+    const getAccounts = (brand) => {
         setLoading(true);
-        // GetAccounts(brandId).then(({ data }) => {
+        let searchParams = { brand: brand, ...query };
 
-        //     setRowCount(count);
-        //     setAccountData(data);
-        //     getRows(data);
-        //     setLoading(false);
-        // });
-
-        let data = [
-            {
-                _id: "1",
-                accountName: "First Account",
-                rootAccount: "Account 1"
-            },
-            {
-                _id: "2",
-                accountName: "Second Account",
-                rootAccount: "Account 2"
-            }
-        ];
-        setAccountData([...data]);
-        setLoading(false);
+        GetAccounts(searchParams).then(({ data, count }) => {
+            setAccountData(data);
+            setRowCount(count)
+            setLoading(false);
+        });
     }
 
     useEffect(() => {
@@ -221,7 +214,7 @@ export default function Account() {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}>
 
-                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length !== 1}>
+                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}>
                         Delete
                     </MenuItem>
                 </Menu>
@@ -247,7 +240,7 @@ export default function Account() {
                             onPageSizeChange={handlePageSize}
                             pageSize={query.limit}
                             page={query.page}
-                            rowCount={dataRows.length}
+                            rowCount={rowCount}
                             rowsPerPageOptions={[5, 10, 20]}
                             onSortModelChange={handleSortModelChange}
                         />
