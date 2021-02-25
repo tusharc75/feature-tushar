@@ -27,12 +27,28 @@ export const GetContacts = async () => {
     return data;
 };
 
-export const GetAccounts = async (brandId) => {
-    const { data } = await api().get(`${BASE_URL}/sa-field?brand=${brandId}`);
-    return data;
-};
-
 export const GetFields = async (resource, id) => {
     const { data } = await api().get(`/sa-field?brand=${id}&resource=${resource}`);
     return data;
 };
+
+export const GetAccounts = async (params) => {
+    // const { data } = await api().get(`${BASE_URL}/account?brand=${brandId}`);
+    let url = "/account";
+    url = getSearchQuery(url, params);
+    const { data } = await api().get(url);
+    return data;
+};
+
+export const getSearchQuery = (url, params) => {
+    if (params && Object.keys(params).length > 0) {
+        url = url.indexOf("?") >= 0 ? url + "&" : url + "?";
+        Object.keys(params).forEach((k, i) => {
+            url = url + `${k}=${params[k]}`;
+            if (i < Object.keys(params).length - 1) {
+                url = url + "&";
+            }
+        });
+    }
+    return url
+}
