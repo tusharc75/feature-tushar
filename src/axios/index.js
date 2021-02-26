@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { getSearchQuery } from '../services/util'
 const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
 // const BASE_URL = "http://localhost:4000";
 
@@ -27,12 +27,20 @@ export const GetContacts = async () => {
     return data;
 };
 
-export const GetAccounts = async (brandId) => {
-    const { data } = await api().get(`${BASE_URL}/sa-field?brand=${brandId}`);
+export const GetAccounts = async (params) => {
+    let url = "/account";
+    url = getSearchQuery(url, params);
+    const { data } = await api().get(url);
     return data;
 };
 
+
 export const GetFields = async (resource, id) => {
     const { data } = await api().get(`/sa-field?brand=${id}&resource=${resource}`);
+    return data;
+};
+
+export const checkEmailExist = async (email) => {
+    const { data } = await api().get(`/user/emailExist/${email}`);
     return data;
 };

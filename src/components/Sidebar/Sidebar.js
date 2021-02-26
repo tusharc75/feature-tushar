@@ -88,7 +88,7 @@ function SideBar({ children, location }) {
     state: { user, userLoading },
   } = useData();
   const classes = useStyles();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState({});
   const pathnames = location.pathname.split("/").filter((x) => x)
 
   const [toggleDrawer, setToggleDrawer] = React.useState(false);
@@ -115,6 +115,11 @@ function SideBar({ children, location }) {
       });
     }
   };
+  const handleCollapse = section => {
+    let tempdata = { ...open }
+    tempdata[section] = !tempdata[section] || false
+    setOpen(tempdata)
+  }
 
   return (
     <div className={classes.root}>
@@ -185,12 +190,14 @@ function SideBar({ children, location }) {
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>
-                  <ListItem button onClick={() => setOpen(!open)}>
+                  <ListItem button
+                    key={listItem.section + "" + i}
+                    onClick={() => handleCollapse(listItem.section)}>
                     <ListItemText primary={listItem.section} />
-                    {open ? <ExpandLess /> : <ExpandMore />}
+                    {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                   </ListItem>
-                  <Collapse in={open} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
+                  <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding >
                       {listItem.items.map((item, j) => (
                         <Link
                           key={j}

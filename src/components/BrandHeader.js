@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BrandHeader = (props) => {
-  const { total, totalHeading, active, activeHeading, inActive, inActiveHeading, heading, children } = props;
+  const { total, totalHeading, active, activeHeading, inActive, inActiveHeading, heading, children, showHeading } = props;
   const classes = useStyles();
 
   return (
@@ -25,9 +25,12 @@ const BrandHeader = (props) => {
       <Container className={classes.root} style={{ minHeight: "100%", marginTop: 0 }}>
         <Grid container justify="space-between">
           <Grid item>
-            <Typography variant="h6" component="h2">
-              {heading}
-            </Typography>
+            {
+              showHeading ?
+                <Typography variant="h6" component="h2">
+                  {heading}
+                </Typography> : null
+            }
           </Grid>
           <Grid item>{children}</Grid>
         </Grid>
@@ -40,8 +43,8 @@ const BrandHeader = (props) => {
               </Typography>
             </Box>
           ) : (
-            ""
-          )}
+              ""
+            )}
           <Box component="span" marginX={1} />
           {active ? (
             <Box className={classes.box}>
@@ -51,8 +54,8 @@ const BrandHeader = (props) => {
               </Typography>
             </Box>
           ) : (
-            ""
-          )}
+              ""
+            )}
           <Box component="span" marginX={1} />
           {inActive ? (
             <Box className={classes.box}>
@@ -62,8 +65,8 @@ const BrandHeader = (props) => {
               </Typography>
             </Box>
           ) : (
-            ""
-          )}
+              ""
+            )}
         </Box>
       </Container>
     </React.Fragment>
