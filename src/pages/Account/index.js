@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetFields } from '../../axios/index';
+import { GetAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
@@ -33,6 +33,7 @@ export default function Account() {
     const [loadingAccountData, setLoadingAccountData] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
+    const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
     const [query, setQuery] = useState({ page: 1, limit: 5 });
     const [anchorEl, setAnchorEl] = useState(null);
