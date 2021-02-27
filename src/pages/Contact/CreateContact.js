@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetFields } from '../../axios/index';
+import { GetFields, CreateNewContact } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
-import { Box } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
 import { getObjKeys } from '../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,19 +22,21 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function CreateAccount() {
+export default function CreateContact() {
 
     const classes = useStyles();
+    const history = useHistory();
 
     const { state: { user } } = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
         initialValues: {},
     });
+    const [isFormSubmitted, setIsFormSubmitted] = useState(false)
 
     useEffect(() => {
         if (user) {
-            getAccountFields();
+            getContactFields();
         }
         // eslint-disable-next-line
     }, [user]);
@@ -49,8 +52,8 @@ export default function CreateAccount() {
         return errors;
     };
 
-    const getAccountFields = () => {
-        GetFields('Account').then(({ data }) => {
+    const getContactFields = () => {
+        GetFields('Contact').then(({ data }) => {
 
             const newFields = [];
             data.map((_f) => newFields.push(_f.fieldData));
@@ -62,10 +65,22 @@ export default function CreateAccount() {
         });
     };
 
+    const handleSave = (values) => {
+        setIsFormSubmitted(true);
+        CreateNewContact(values).then(() => {
+            history.push({
+                pathname: "/contact"
+            });
+        }, error => {
+            setIsFormSubmitted(false);
+        })
+    }
+
     return (
         <Layout>
             {
-                entityData.fields.length > 0 && <Box className={classes.box}>
+                entityData.fields.length > 0 &&
+                <Box className={classes.box}>
                     <Formik
                         initialValues={entityData.initialValues}
                         validate={formValidation}
@@ -89,10 +104,24 @@ export default function CreateAccount() {
                                         size="small"
                                         fullWidth
                                     />
+
+                                    <Box display="flex" justifyContent="flex-end">
+                                        <Button
+                                            disabled={isFormSubmitted}
+                                            type="submit"
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={() => { handleSave(values) }}
+                                        >
+                                            Create Contact
+                                        </Button>
+                                    </Box>
                                 </>
                             </Form>
                         )}
+
                     </Formik>
+
                 </Box>
             }
 
