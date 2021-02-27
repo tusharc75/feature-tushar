@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetAccounts } from '../../axios/index';
+import { GetAccounts, RemoveAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
@@ -20,6 +20,7 @@ import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
 import { ExpandMore } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
+import ConfirmationDialog from './../../components/Helpers/ConfirmationDialog';
 
 export default function Account() {
 
@@ -34,8 +35,12 @@ export default function Account() {
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 1, limit: 5 });
+    const [query, setQuery] = useState({ page: 0, limit: 5 });
     const [anchorEl, setAnchorEl] = useState(null);
+    const [open, setOpen] = useState(false);
+    const [errorMsg, setErroMsg] = useState("");
+    const [msgType, setMsgType] = useState("");
+    const [showConfirmBox, setShowConfirmBox] = useState(false);
 
     const columns = [
         {
@@ -104,20 +109,20 @@ export default function Account() {
 
     useEffect(() => {
         if (user) {
-            getAccounts(user.user.brand);
+            getAccounts();
         }
         // eslint-disable-next-line
     }, [user]);
 
     useEffect(() => {
         if (user) {
-            getAccounts(user.user.brand);
+            getAccounts();
         }
     }, [query]);
 
-    const getAccounts = (brand) => {
+    const getAccounts = () => {
         setLoading(true);
-        let searchParams = { brand: brand, ...query };
+        let searchParams = { ...query };
 
         GetAccounts(searchParams).then(({ data, count }) => {
             setAccountData(data);
@@ -177,6 +182,33 @@ export default function Account() {
         }
     };
 
+    const handleDeleteAccount = () => {
+
+        const selectedRecords = dataRows.filter(d => d.isChecked).map(m => { return m.id });
+        setLoading(true);
+        RemoveAccounts({ ids: selectedRecords }).then(() => {
+            debugger;
+            getAccounts();
+            setLoading(false);
+        })
+
+
+        // let recLen = selectedRecs.length;
+        // if (selectedRecs && recLen > 0) {
+        //     selectedRecs.forEach(async (curId, i) => {
+        //         let data = await deleteBrand({ id: curId });
+        //         if (i === recLen - 1 && data.status === 200) {
+        //             setOpen(true);
+        //             setErroMsg(data.message);
+        //             setMsgType("success");
+        //             getAccounts();
+        //         }
+        //     });
+        //     setShowConfirmBox(false);
+        //     // setSelectedRecs([]);
+        // }
+    };
+
     return (
         <Layout>
 
@@ -214,7 +246,8 @@ export default function Account() {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}>
 
-                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}>
+                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                        onClick={() => setShowConfirmBox(true)}>
                         Delete
                     </MenuItem>
                 </Menu>
@@ -246,6 +279,15 @@ export default function Account() {
                         />
                     </div>
                     {/* </Box> */}
+
+                    {showConfirmBox ? (
+                        <ConfirmationDialog
+                            open={showConfirmBox}
+                            message={`Are you sure you want to delete selected accounts ?`}
+                            onClose={() => setShowConfirmBox(false)}
+                            onOk={handleDeleteAccount}
+                        />
+                    ) : null}
 
                 </BoxWithBorder>
             </Paper>

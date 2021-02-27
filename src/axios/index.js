@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
-// const BASE_URL = "http://localhost:4000";
+// const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
+const BASE_URL = "http://localhost:4000";
 
 const api = () => {
     const token = localStorage.getItem("token");
@@ -37,6 +37,12 @@ export const GetAccounts = async (params) => {
     let url = "/account";
     url = getSearchQuery(url, params);
     const { data } = await api().get(url);
+    return data;
+};
+
+export const RemoveAccounts = async (obj) => {
+    let url = "/account/remove";
+    const { data } = await api().put(url, obj);
     return data;
 };
 
