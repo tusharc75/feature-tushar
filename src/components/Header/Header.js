@@ -9,13 +9,13 @@ import {
   Menu,
   MenuItem,
   Box,
+  Badge,
+  InputBase,
 } from "@material-ui/core";
 import {
   Search,
   AccountCircle,
-  FilterList,
-  Add,
-  Settings,
+  Notifications,
   HelpOutline,
   ExpandMore,
 } from "@material-ui/icons";
@@ -28,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   appBar: {
-    backgroundColor: theme.palette.darkBg,
     zIndex: theme.zIndex.drawer + 1,
   },
   menuButton: {
@@ -68,19 +67,29 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
     transition: theme.transitions.create("width"),
     width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
+    [theme.breakpoints.up("sm")]: {
+      width: "12ch",
+      "&:focus": {
+        width: "20ch",
+      },
     },
   },
   sectionDesktop: {
     display: "none",
     [theme.breakpoints.up("md")]: {
       display: "flex",
+      alignItems: "center",
     },
   },
   sectionMobile: {
     display: "flex",
     [theme.breakpoints.up("md")]: {
+      display: "none",
+    },
+  },
+  servicesButton: {
+    display: "block",
+    [theme.breakpoints.down("sm")]: {
       display: "none",
     },
   },
@@ -146,33 +155,36 @@ const Header = () => {
 
   return (
     <div>
-      <AppBar position="fixed" className={classes.appBar}>
+      <AppBar position="fixed" className={classes.appBar} color="primary">
         <Toolbar>
-          <Box component="div">
+          <Box component="div" display="flex" alignItems="center" flexGrow={1}>
             <img src={SVG("Logo")} alt="equip logo" />
+            <Box marginLeft={2} className={classes.servicesButton}>
+              <Button
+                aria-controls={arcelorMenuId}
+                color="inherit"
+                onClick={openArcelorMenu}
+              >
+                Services <ExpandMore />
+              </Button>
+            </Box>
+            <div className={classes.search}>
+              <div className={classes.searchIcon}>
+                <Search />
+              </div>
+              <InputBase
+                fullWidth
+                placeholder="Search…"
+                type="search"
+                classes={{
+                  root: classes.inputRoot,
+                  input: classes.inputInput,
+                }}
+                inputProps={{ "aria-label": "search" }}
+              />
+            </div>
           </Box>
-          <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
-            <IconButton aria-label="search" color="inherit">
-              <Search />
-            </IconButton>
-
-            <IconButton aria-label="filter" color="inherit">
-              <FilterList />
-            </IconButton>
-
-            <IconButton aria-label="add" color="inherit">
-              <Add />
-            </IconButton>
-
-            <IconButton aria-label="settings" color="inherit">
-              <Settings />
-            </IconButton>
-
-            <IconButton aria-label="help" color="inherit">
-              <HelpOutline />
-            </IconButton>
-
             <Button
               aria-controls={supportMenuId}
               color="inherit"
@@ -180,13 +192,15 @@ const Header = () => {
             >
               Support <ExpandMore />
             </Button>
-            <Button
-              aria-controls={arcelorMenuId}
-              color="inherit"
-              onClick={openArcelorMenu}
-            >
-              ArcelorMittal <ExpandMore />
-            </Button>
+            <IconButton aria-label="settings" color="inherit">
+              <Badge badgeContent={1} color="secondary">
+                <Notifications />
+              </Badge>
+            </IconButton>
+
+            <IconButton aria-label="help" color="inherit">
+              <HelpOutline />
+            </IconButton>
 
             <IconButton
               edge="end"
