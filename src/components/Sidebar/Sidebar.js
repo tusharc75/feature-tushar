@@ -11,18 +11,23 @@ import {
   ListItemIcon,
   ListItemText,
   Collapse,
-  Box
+  Box,
 } from "@material-ui/core";
-import { Link, withRouter } from 'react-router-dom'
+import { Link, withRouter } from "react-router-dom";
 import { SVG } from "../../assets";
 import Header from "../Header/Header";
 import Loader from "../Loader";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.css";
 import SidebarList from "./SidebarList";
-import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@material-ui/icons"
+import {
+  ExpandLess,
+  ExpandMore,
+  ChevronLeft,
+  ChevronRight,
+} from "@material-ui/icons";
 import BreadCrumbs from "../BreadCrumbs";
-const _ = require('lodash')
+const _ = require("lodash");
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
@@ -199,12 +204,7 @@ function SideBar({ children, location }) {
                   <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding >
                       {listItem.items.map((item, j) => (
-                        <Link
-                          key={j}
-                          to={`/${_.kebabCase(listItem.section)}/${_.lowerCase(
-                            item.name
-                          )}`}
-                        >
+                        <Link key={j} to={`/${_.lowerCase(item.name)}`}>
                           <ListItem
                             button
                             selected={pathnames.includes(
@@ -222,21 +222,21 @@ function SideBar({ children, location }) {
               ))}
           </List>
         </div>
-
       </Drawer>
 
       <main className={classes.content}>
         <Toolbar />
-        {
-          userLoading ? <Loader /> : <Box>
-            <BreadCrumbs />
-            <Box marginY={2} />
-            {children}
-          </Box>
-        }
-
+        {userLoading ? (
+          <Loader />
+        ) : (
+            <Box>
+              <BreadCrumbs />
+              <Box marginY={2} />
+              {children}
+            </Box>
+          )}
       </main>
     </div>
   );
 }
-export default withRouter(SideBar)
+export default withRouter(SideBar);

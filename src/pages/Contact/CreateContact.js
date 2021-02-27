@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetFields } from '../../axios/index';
+import { GetFields, CreateNewContact } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import { Box, Button } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, formValidation } from '../../constants/helpers';
+import { getObjKeys } from '../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
-import CustomButton from '../../components/Helpers/Button'
-import { commonStyle } from './CommonStyles'
-import { useHistory } from 'react-router-dom'
-import { contactPage } from '../../routes/Contacts'
-import "../Account/account.css"
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
-    ...commonStyle(theme)
+    root: {
+        minHeight: "100%!important",
+        marginTop: 0
+    },
+    box: {
+        backgroundColor: "#fff",
+        borderRadius: 6,
+        padding: theme.spacing(0.5, 1.5),
+        padding: "20px 200px"
+    },
 }));
 
 export default function CreateContact() {
@@ -26,17 +31,28 @@ export default function CreateContact() {
         fields: [],
         initialValues: {},
     });
-    const [loading, setLoading] = useState(false)
-    const [ContactData, setContactData] = useState({})
+    const [isFormSubmitted, setIsFormSubmitted] = useState(false)
 
     useEffect(() => {
         if (user) {
-            getContactFields(user.user.brand);
+            getContactFields();
         }
+        // eslint-disable-next-line
     }, [user]);
 
-    const getContactFields = (brandId) => {
-        GetFields('Contact', brandId).then(({ data }) => {
+    const formValidation = (values) => {
+        const errors = {};
+        entityData.fields.forEach((field) => {
+            if (field.required && !values[field.fieldName]) {
+                errors[field.fieldName] = `${field.fieldLabel} is required`;
+            }
+        });
+
+        return errors;
+    };
+
+    const getContactFields = () => {
+        GetFields('Contact').then(({ data }) => {
 
             const newFields = [];
             data.map((_f) => newFields.push(_f.fieldData));
@@ -48,52 +64,33 @@ export default function CreateContact() {
         });
     };
 
-    const goToBackPage = () => {
-        history.push({
-            pathname: contactPage.path
+    const handleSave = (values) => {
+        setIsFormSubmitted(true);
+        CreateNewContact(values).then(() => {
+            history.push({
+                pathname: "/contact"
+            });
+        }, error => {
+            setIsFormSubmitted(false);
         })
     }
 
-    const handleSubmit = (setTouched, values, setValues, setErrors, saveAndNew) => {
-        setLoading(true)
-        const errors = formValidation(values, entityData.fields);
-        if (Object.keys(errors).length) {
-            entityData.fields.forEach((input) => {
-                if (input.required) {
-                    setTouched(input.fieldName, true);
-                }
-            });
-        } else {
-            console.log("handleSubmit ~ values", values)
-            setContactData(values)
-            setValues(getObjKeys("", entityData.fields));
-            setErrors({});
-            if (saveAndNew) {
-
-            }
-            else {
-                goToBackPage()
-            }
-        }
-        // setLoading(false)
-    }
     return (
         <Layout>
             {
-                entityData.fields.length > 0 && <Box className={classes.box}>
+                entityData.fields.length > 0 &&
+                <Box className={classes.box}>
                     <Formik
                         initialValues={entityData.initialValues}
-                        validate={(values) => formValidation(values, entityData.fields)}
+                        validate={formValidation}
                     >
                         {({
-                            setValues,
-                            setErrors,
+                            setFieldTouched,
                             values,
                             errors,
                             touched,
                             setFieldValue,
-                            setFieldTouched,
-                            validateForm
+                            validateForm,
                         }) => (
                             <Form>
                                 <>
@@ -106,33 +103,24 @@ export default function CreateContact() {
                                         size="small"
                                         fullWidth
                                     />
-                                    <div className="footer">
-                                        <Button onClick={goToBackPage} variant="outlined" color="primary">
-                                            Cancel
-                                    </Button>
-                                        <CustomButton
-                                            loading={loading}
-                                            disabled={loading}
-                                            variant="outlined"
-                                            color="primary"
-                                            onClick={() => handleSubmit(setFieldTouched, values, setValues, setErrors, true)}
-                                        >
-                                            Save and New
-                                     </CustomButton>
-                                        <CustomButton
-                                            loading={loading}
-                                            disabled={loading}
+
+                                    <Box display="flex" justifyContent="flex-end">
+                                        <Button
+                                            disabled={isFormSubmitted}
+                                            type="submit"
                                             variant="contained"
                                             color="primary"
-                                            onClick={() => handleSubmit(setFieldTouched, values, setValues, setErrors)}
+                                            onClick={() => { handleSave(values) }}
                                         >
-                                            Save
-                                     </CustomButton>
-                                    </div>
+                                            Create Contact
+                                        </Button>
+                                    </Box>
                                 </>
                             </Form>
                         )}
+
                     </Formik>
+
                 </Box>
             }
 

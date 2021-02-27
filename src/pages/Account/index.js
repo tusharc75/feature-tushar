@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetAccounts } from '../../axios/index';
+import { GetAccounts, RemoveAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
@@ -34,7 +34,7 @@ export default function Account() {
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 1, limit: 5 });
+    const [query, setQuery] = useState({ page: 0, limit: 5 });
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
@@ -294,6 +294,33 @@ export default function Account() {
             setSelectedRecs([])
         }
     }
+
+    const handleDeleteAccount = () => {
+
+        const selectedRecords = dataRows.filter(d => d.isChecked).map(m => { return m.id });
+        setLoading(true);
+        RemoveAccounts({ ids: selectedRecords }).then(() => {
+            debugger;
+            getAccounts();
+            setLoading(false);
+        })
+
+
+        // let recLen = selectedRecs.length;
+        // if (selectedRecs && recLen > 0) {
+        //     selectedRecs.forEach(async (curId, i) => {
+        //         let data = await deleteBrand({ id: curId });
+        //         if (i === recLen - 1 && data.status === 200) {
+        //             setOpen(true);
+        //             setErroMsg(data.message);
+        //             setMsgType("success");
+        //             getAccounts();
+        //         }
+        //     });
+        //     setShowConfirmBox(false);
+        //     // setSelectedRecs([]);
+        // }
+    };
 
     return (
         <Layout>

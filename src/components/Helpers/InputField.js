@@ -50,6 +50,7 @@ const InputField = (props) => {
                       type={field.type}
                       options={field.option}
                       setFieldValue={setFieldValue}
+                      required={field.required}
                     />
                   </Grid>
                 ))}

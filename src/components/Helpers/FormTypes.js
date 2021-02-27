@@ -12,12 +12,15 @@ import {
   Grid,
   Typography,
   useTheme,
+  Avatar,
 } from "@material-ui/core";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import { Autocomplete } from "@material-ui/lab";
 import MuiPhoneInput from "material-ui-phone-number";
 import parse from "autosuggest-highlight/parse";
 import throttle from "lodash/throttle";
+
+import currencies from "../../constants/currency_with_country.json";
 
 const autocompleteService = { current: null };
 
@@ -37,6 +40,7 @@ const FormTypes = (props) => {
   } = props;
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
+  const [currencyData, setCurrencyData] = React.useState([]);
 
   const fetch = React.useMemo(
     () =>
@@ -45,6 +49,17 @@ const FormTypes = (props) => {
       }, 200),
     []
   );
+
+  React.useEffect(() => {
+    const sortedArr = currencies.sort((a, b) =>
+      a.name.toUpperCase() < b.name.toUpperCase()
+        ? -1
+        : a.name.toUpperCase() > b.name.toUpperCase()
+          ? 1
+          : 0
+    );
+    setCurrencyData(sortedArr);
+  }, []);
 
   React.useEffect(() => {
     let active = true;
@@ -57,12 +72,12 @@ const FormTypes = (props) => {
         return undefined;
       }
 
-      if (values.address === "") {
+      if (values[name] === "") {
         setOptions(value ? [value] : []);
         return undefined;
       }
 
-      fetch({ input: values.address }, (results) => {
+      fetch({ input: values[name] }, (results) => {
         if (active) {
           let newOptions = [];
           if (value) {
@@ -78,7 +93,7 @@ const FormTypes = (props) => {
     return () => {
       active = false;
     };
-  }, [type, value, values.address, fetch]);
+  }, [type, value, values[name], fetch]);
 
   return type === "singleLine" ? (
     <TextField
@@ -181,10 +196,49 @@ const FormTypes = (props) => {
           name={name}
           label={label}
           variant="outlined"
-          error={touched.language && Boolean(errors.language)}
-          helperText={touched.language && errors.language}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
         />
       )}
+    />
+  ) : type === "currency" ? (
+    <Autocomplete
+      {...rest}
+      fullWidth
+      value={values.currency}
+      options={currencyData}
+      getOptionLabel={(option) => `${option.currencyCode} - ${option.name}`}
+      onChange={(e, val) => setFieldValue("currency", val)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="outlined"
+          name={name}
+          label={label}
+          error={touched.currency && Boolean(errors.currency)}
+          helperText={touched.currency && errors.currency}
+        />
+      )}
+      renderOption={(option) => {
+        const { currencyCode, name, countryCode } = option;
+        return (
+          <Grid container alignItems="center">
+            <Grid item>
+              <Avatar
+                variant="rounded"
+                src={`https://restcountries.eu/data/${countryCode.toLowerCase()}.svg`}
+                style={{ marginRight: 20, width: "40px", height: "30px" }}
+              />
+            </Grid>
+            <Grid item xs>
+              <Typography>{currencyCode}</Typography>
+              <Typography variant="body2" color="textSecondary">
+                {name}
+              </Typography>
+            </Grid>
+          </Grid>
+        );
+      }}
     />
   ) : type === "multiSelect" ? (
     <Autocomplete
@@ -219,7 +273,7 @@ const FormTypes = (props) => {
           color="secondary"
         />
       }
-      label={values[name] ? "Inactive" : "Active"}
+      label={label}
     />
   ) : type === "checkBox" ? (
     <FormControlLabel
@@ -258,6 +312,7 @@ const FormTypes = (props) => {
     </FormControl>
   ) : type === "location" ? (
     <Autocomplete
+      {...rest}
       getOptionLabel={(option) =>
         typeof option === "string" ? option : option.description
       }
