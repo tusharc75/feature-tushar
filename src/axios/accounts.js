@@ -1,8 +1,12 @@
 import api from './axios'
 
-export const deleteAccounts = async (params) => {
-    if (params._id) {
-        const { data } = await api().delete(`/sa-field/${params._id}`)
+export const deleteAccounts = async (req) => {
+    const { data } = await api().put(`/account/remove`, req)
+    return data;
+}
+export const getAccountData = async (id) => {
+    if (id) {
+        const { data } = await api().get(`/account/${id}`)
         return data;
     }
 }

@@ -36,7 +36,7 @@ export const GetAccounts = async (params) => {
 
 
 export const GetFields = async (resource, id) => {
-    const { data } = await api().get(`/sa-field?brand=${id}&resource=${resource}`);
+    const { data } = await api().get(`/field?resource=${resource}`);
     return data;
 };
 

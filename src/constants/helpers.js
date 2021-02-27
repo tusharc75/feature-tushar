@@ -2,16 +2,16 @@ import { checkEmailExist, GetFields } from '../axios/index'
 export const getObjKeys = (val = "", arr) => {
     const obj = {};
     for (const key of arr) {
-        console.log(key)
         if (key.type === "dropDown") {
-            obj[key.fieldName] = val ? val : key.option ? key.option[0].optionLabel;
-        } else if (key.type === "multiSelect") {
-            obj[key.fieldName] = val ? val : [];
-        } else if (key.type === "switch") {
-            obj[key.fieldName] = val ? val : false;
-        } else {
-            obj[key.fieldName] = val;
-        }
+            obj[key.fieldName] = val ? val : {}
+        } else
+            if (key.type === "multiSelect") {
+                obj[key.fieldName] = val ? val : [];
+            } else if (key.type === "switch") {
+                obj[key.fieldName] = val ? val : false;
+            } else {
+                obj[key.fieldName] = val;
+            }
     }
 
     return obj;

@@ -13,9 +13,8 @@ import {
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
-import { ExpandMore } from "@material-ui/icons";
+import { ExpandMore, AddOutlined, EditOutlined } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import { GetAccounts } from '../../axios/index'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { deleteAccounts } from '../../axios/accounts'
 import CustomToast from '../../components/Helpers/CustomToast'
@@ -38,7 +37,6 @@ export default function Account() {
     const [query, setQuery] = useState({ page: 1, limit: 5 });
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
-    const [rowCount, setRowCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
     const [showConfirmBox, setShowConfirmBox] = useState(false)
     const [alertData, setAlertData] = useState({})
@@ -138,10 +136,64 @@ export default function Account() {
             width: 75,
         },
         { field: "accountName", headerName: "Account Name", width: 200 },
+        {
+            field: "typeOfAccount",
+            headerName: "Type",
+            width: 200,
+            renderCell: (params) => (
+                <>
+                    {
+                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                    }
+                </>
+            )
+        },
+        {
+            field: "industry",
+            headerName: "Industry",
+            width: 200,
+            renderCell: (params) => (
+                <>
+                    {
+                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                    }
+                </>
+            )
+        },
+        {
+            field: "parentAccount",
+            headerName: "Parent Account",
+            width: 200,
+            renderCell: (params) => (
+                <>
+                    {
+                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                    }
+                </>
+            )
+        },
         { field: "phone", headerName: "Phone", width: 200 },
-        { field: "rootAccount", headerName: "Root Account", width: 200 },
+        // {
+        //     field: "Actions",
+        //     headerName: "Actions",
+        //     width: 200,
+        //     renderCell: (params) => (
+        //         <span><EditOutlined button fontSize="small" onClick={() => handleEdit(params)} /></span>
+        //     )
+        // },
+        // { field: "rootAccount", headerName: "Root Account", width: 200 },
     ];
 
+    const handleEdit = data => {
+        console.log("🚀 ~ file: index.js ~ line 189 ~ Account ~ data", data)
+        history.push({
+            pathname: "/account/new",
+            state: {
+                accountId: data.row.id,
+            },
+        });
+
+    }
     const handleSearch = (e) => {
         if (query.page !== 1) {
             setQuery((prevState) => ({ ...prevState, page: 1 }));
@@ -152,14 +204,14 @@ export default function Account() {
     const fetchAccounts = async () => {
         if (user) {
             setLoading(true);
-            let searchParams = { brand: user.user.brand, ...query }
+            let searchParams = { ...query }
             searchParams = searchVal
                 ? { ...searchParams, search: searchVal }
                 : { ...searchParams };
             let tdata = await GetAccounts(searchParams)
 
-            setRowCount(tdata.count)
             if (tdata?.data && tdata.data.length > 0) {
+                setRowCount(tdata.count)
                 setAccountData(tdata.data)
             }
             setLoading(false);
@@ -230,13 +282,14 @@ export default function Account() {
     const handleDeleteAccounts = async () => {
         let recLen = selectedRecs.length
         if (selectedRecs && recLen > 0) {
-            // selectedRecs.forEach(async (curId, i) => {
-            //     let data = await deleteAccounts({ _id: curId })
-            //     if ((i === recLen - 1) && data.status === 200) {
-            //         handleSnackbar(data.message, 'success', true)
-            //         fetchAccounts();
-            //     }
-            // })
+            let reqs = {
+                ids: [...selectedRecs]
+            }
+            let data = await deleteAccounts(reqs)
+            if (data.status === 200) {
+                handleSnackbar(data.message, 'success', true)
+                fetchAccounts();
+            }
             setShowConfirmBox(false)
             setSelectedRecs([])
         }
@@ -263,10 +316,18 @@ export default function Account() {
                     color="primary"
                     onClick={clickCreateNew}
                 >
-                    Create Account
+                    <AddOutlined /> Add
                 </Button>
                 <Box component="span" marginX={1} />
-
+                <Button
+                    disabled={true}
+                    variant="outlined"
+                    color="default"
+                    aria-controls="action-menu"
+                >
+                    Import
+                </Button>
+                <Box component="span" marginX={1} />
                 <Button
                     disabled={dataRows.filter((d) => d.isChecked).length === 0}
                     variant="outlined"
@@ -276,6 +337,7 @@ export default function Account() {
                 >
                     Actions <ExpandMore />
                 </Button>
+
                 <Menu
                     anchorEl={anchorEl}
                     keepMounted

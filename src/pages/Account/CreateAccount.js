@@ -10,7 +10,7 @@ import InputField from '../../components/Helpers/InputField';
 import CustomButton from '../../components/Helpers/Button'
 import { commonStyle } from '../Contact/CommonStyles'
 import { accountPage } from '../../routes/Accounts'
-import { craeteAccount } from '../../axios/accounts'
+import { craeteAccount, getAccountData } from '../../axios/accounts'
 import { useHistory } from 'react-router-dom'
 import CustomToast from '../../components/Helpers/CustomToast'
 import { getErrorMessage } from '../../services/util'
@@ -31,36 +31,57 @@ export default function CreateAccount() {
         initialValues: {},
     });
     const [loading, setLoading] = useState(false)
+    const [edit, setIsEdit] = useState(false)
     const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
     const [alertData, setAlertData] = useState({})
 
-
     useEffect(() => {
-        if (user) {
+
+        if (history?.location?.state?.accountId) {
+            setIsEdit(true)
+            fetchAccountData()
+        }
+        else if (user) {
             getAccountFields(user.user.brand);
         }
     }, [user]);
 
-    // const formValidation = (values) => {
-    //     const errors = {};
-    //     entityData.fields.forEach((field) => {
-    //         if (field.required && !values[field.fieldName]) {
-    //             errors[field.fieldName] = `${field.fieldLabel} is required`;
-    //         }
-    //     });
+    const fetchAccountData = async () => {
+        let accId = history.location.state.accountId
+        try {
+            let data = await getAccountData(accId)
+            if (data.status === 200 && Object.keys(data.data)) {
+                let initialVal = {}
+                Object.keys(data.data).map(k => {
+                    if (typeof data.data[k] === 'object') {
+                        initialVal[k] = data.data[k].optionValue || ''
+                    }
+                    if (Array.isArray(data.data[k]) && data.data[k].length) {
+                        initialVal[k] = []
+                        data.data[k].map(val => {
+                            initialVal[k] = [...initialVal, val.optionValue]
+                        })
+                    }
+                })
+                getAccountFields(undefined, initialVal)
+            }
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
+            }
+        }
 
-    //     return errors;
-    // };
-
-    const getAccountFields = (brandId) => {
+    }
+    const getAccountFields = (brandId, values) => {
+        console.log("🚀 ~ file: CreateAccount.js ~ line 78 ~ getAccountFields ~ values", values)
         GetFields('Account', brandId).then(({ data }) => {
-
             const newFields = [];
             data.map((_f) => newFields.push(_f.fieldData));
-
             setEntityData({
                 fields: newFields,
-                initialValues: getObjKeys("", newFields),
+                initialValues: values ? values : getObjKeys("", newFields),
             });
         });
     };
@@ -89,13 +110,37 @@ export default function CreateAccount() {
             values.employees = parseInt(values.employees)
         }
 
+        let tempFields = entityData.fields
+        tempFields.map(f => {
+            let fName = f.fieldName
+            if (f.type === "dropDown" && values[fName]) {
+                if (f?.option && f.option.length) {
+                    f.option.filter(obj => {
+                        if (obj.optionValue === values[fName]) {
+                            values[fName] = obj
+                            return true
+                        }
+                    })
+                }
+            }
+            if (f.type === "multiSelect" && values[fName] && values[fName].length > 0) {
+                if (f?.option && f.option.length) {
+                    f.option.map(obj => {
+                        let i = values[fName].indexOf(obj.optionValue)
+                        if (i >= 0) {
+                            values[fName][i] = obj
+                        }
+                    })
+                }
+            }
+        })
         Object.keys(values).forEach(key => {
-            if (["--Select--", "--None--"].indexOf(values[key]) >= 0) {
+            if (!values[key] || (typeof values[key] === 'object' && Object.keys(values[key]).length == 0)) {
                 delete values[key]
             }
         })
 
-        if (user?.user?.brand) values.brand = user.user.brand
+        // if (user?.user?.brand) values.brand = user.user.brand
         return values
     }
 
@@ -106,6 +151,9 @@ export default function CreateAccount() {
                 handleSnackbar(data.message, 'success', true)
                 if (!saveAndNew) {
                     goToBackPage()
+                }
+                else {
+                    getAccountFields()
                 }
                 handleLoading(false, saveAndNew)
             }
@@ -135,7 +183,6 @@ export default function CreateAccount() {
                 }
             });
         } else {
-            // console.log("handleSubmit ~ values", values)
             values = getModiFiedValues(values)
             handleCreateAccount(values, saveAndNew)
             setValues(getObjKeys("", entityData.fields));
@@ -143,39 +190,7 @@ export default function CreateAccount() {
         }
 
     }
-    const searchParentAccount = value => {
-        // if (parentAccount) {
-        //     clearTimeout(parentAccount);
-        // }
 
-        // parentAccount = setTimeout(async () => {
-        //     let data = await GetAccounts({ brand: user.user.brand, search: value })
-        //     populateFieldsData(data)
-        // }, 300);
-        populateFieldsData()
-    }
-    const populateFieldsData = data => {
-        // if (data && data.length > 0){
-
-        // }
-        let temp = entityData.fields
-        if (temp && temp.length > 0) {
-            temp = temp.map(obj => {
-                if (obj.fieldName === "parentAccount") {
-                    obj.option = [...obj.option,
-                    { optionLabel: "test account", order: 2, default: false }
-                    ]
-                }
-                return obj
-            })
-        }
-
-    }
-    const handleFields = (field, value) => {
-        if (field === "parentAccount" && value.length > 2) {
-            searchParentAccount(value)
-        }
-    }
     return (
         <Layout>
             {
@@ -208,7 +223,6 @@ export default function CreateAccount() {
                                         errors={errors}
                                         values={values}
                                         setFieldValue={setFieldValue}
-                                        onTextChange={handleFields}
                                         touched={touched}
                                         fieldsData={entityData.fields}
                                         size="small"
