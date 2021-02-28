@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import {
-  Drawer,
-  Toolbar,
-  List,
+  Box,
   CssBaseline,
+  Drawer,
   IconButton,
+  List,
   ListItem,
   ListItemText,
+  Toolbar,
   Collapse,
-  Box,
 } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
 // import { SVG } from "../../assets";
@@ -19,12 +19,14 @@ import Loader from "../Loader";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.css";
 import {
-  ExpandLess,
-  ExpandMore,
   ChevronLeft,
   ChevronRight,
+  ExpandMore,
+  ExpandLess,
 } from "@material-ui/icons";
 import BreadCrumbs from "../BreadCrumbs";
+import SidebarList from "./SidebarList";
+
 const _ = require("lodash");
 const drawerWidth = 240;
 
@@ -221,4 +223,5 @@ function SideBar({ children, location }) {
     </div>
   );
 }
+
 export default withRouter(SideBar);
