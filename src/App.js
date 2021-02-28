@@ -13,7 +13,7 @@ import AddDoa from "./pages/DoaSetup/AddDoa";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account";
 import CreateAccount from "./pages/Account/CreateAccount";
-import CreateContact from "./pages/Contact/CreateContact";
+import CreateContact from "./pages/Contact/CreateContact"
 
 function App() {
   const {
@@ -24,8 +24,8 @@ function App() {
     return !user ? (
       <Comp />
     ) : (
-      <Redirect to={{ pathname: "/", state: { from: location } }} />
-    );
+        <Redirect to={{ pathname: "/", state: { from: location } }} />
+      );
   };
 
   return (
@@ -49,6 +49,7 @@ function App() {
         <Route exact path="/contact" component={Contact} />
         <Route exact path="/contact/new" component={CreateContact} />
         <Route exact path="/account/new" component={CreateAccount} />
+        {/* <Route exact path="/crm/account" component={Account} /> */}
         <Route exact path="/account" component={Account} />
       </Switch>
     </ThemeProvider>

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getSearchQuery } from '../services/util'
 
 const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
 
@@ -46,6 +47,15 @@ export const GetContacts = async (params) => {
     return data;
 };
 
+// export const GetFields = async (resource, id) => {
+//     const { data } = await api().get(`/field?resource=${resource}`);
+//     return data;
+// };
+
+export const checkEmailExist = async (email) => {
+    const { data } = await api().get(`/user/emailExist/${email}`);
+    return data;
+};
 export const RemoveContacts = async (obj) => {
     let url = "/contact/remove";
     const { data } = await api().put(url, obj);
@@ -58,17 +68,3 @@ export const CreateNewContact = async (obj) => {
     return data;
 };
 
-
-
-export const getSearchQuery = (url, params) => {
-    if (params && Object.keys(params).length > 0) {
-        url = url.indexOf("?") >= 0 ? url + "&" : url + "?";
-        Object.keys(params).forEach((k, i) => {
-            url = url + `${k}=${params[k]}`;
-            if (i < Object.keys(params).length - 1) {
-                url = url + "&";
-            }
-        });
-    }
-    return url
-}

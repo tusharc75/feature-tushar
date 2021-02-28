@@ -26,7 +26,6 @@ export default function CreateContact() {
 
     const classes = useStyles();
     const history = useHistory();
-
     const { state: { user } } = useData();
     const [entityData, setEntityData] = useState({
         fields: [],

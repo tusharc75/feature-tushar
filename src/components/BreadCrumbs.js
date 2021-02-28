@@ -2,6 +2,7 @@ import _ from "lodash";
 import { Breadcrumbs, Link as MuiLink, Typography } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
 import { capitalize } from "../constants/helpers";
+import "./sidebar.css"
 
 const BreadCrumbs = (props) => {
     const {
@@ -32,7 +33,7 @@ const BreadCrumbs = (props) => {
                 const to = `/${pathnames.slice(0, index + 1).join("/")}`;
 
                 return last ? (
-                    <Typography color="textPrimary" key={val}>
+                    <Typography color="textPrimary" key={val} className="pathNames">
                         {capitalize(val)}
                     </Typography>
                 ) : (
