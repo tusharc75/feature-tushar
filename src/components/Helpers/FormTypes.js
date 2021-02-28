@@ -321,7 +321,7 @@ const FormTypes = (props) => {
       autoComplete
       includeInputInList
       filterSelectedOptions
-      value={value}
+      value={values[name]}
       onChange={(event, newValue) => {
         setOptions(newValue ? [newValue, ...optionsList] : optionsList);
         setValue(newValue);

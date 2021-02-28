@@ -22,7 +22,7 @@ import { deleteAccounts, getDataToClone } from '../../axios/accounts'
 import CustomToast from '../../components/Helpers/CustomToast'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { getErrorMessage } from '../../services/util'
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import BlockIcon from '@material-ui/icons/Block';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 
 let accountTimeout
@@ -39,7 +39,7 @@ export default function Account() {
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 0, limit: 5 });
+    const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
@@ -144,7 +144,7 @@ export default function Account() {
                     }}
                 /> : <Tooltip title="You must be the owner of this account to get the selection functionality" >
                         <IconButton>
-                            <InfoOutlinedIcon />
+                            <BlockIcon />
                         </IconButton>
                     </Tooltip >
             ),
@@ -157,7 +157,7 @@ export default function Account() {
             field: "clone", headerName: " ",
             renderCell: (params) => (
                 <Tooltip title="Clone">
-                    <IconButton aria-label="copy" onClick={() => { cloneAccount(params.row._id) }}>
+                    <IconButton color="error" aria-label="copy" onClick={() => { cloneAccount(params.row._id) }}>
                         <FileCopyOutlinedIcon />
                     </IconButton>
                 </Tooltip>
@@ -346,11 +346,10 @@ export default function Account() {
                 /> : null
             }
 
-            <BrandHeader total={entitiesCount} heading="Accounts"
-                showHeading={false}
-            >
+
+            <Paper className="account-header">
                 <SearchBox onSearch={handleSearch} value={searchVal} />
-                <Box component="span" marginX={1} />
+
                 <Button
                     variant="contained"
                     color="primary"
@@ -358,7 +357,7 @@ export default function Account() {
                 >
                     <AddOutlined /> Add
                 </Button>
-                <Box component="span" marginX={1} />
+
                 <Button
                     disabled={true}
                     variant="outlined"
@@ -367,7 +366,7 @@ export default function Account() {
                 >
                     Import
                 </Button>
-                <Box component="span" marginX={1} />
+
                 <Button
                     disabled={dataRows.filter((d) => d.isChecked).length === 0}
                     variant="outlined"
@@ -396,12 +395,11 @@ export default function Account() {
                         Delete
                     </MenuItem>
                 </Menu>
-
-            </BrandHeader>
+            </Paper>
 
             <Paper style={{ marginTop: 15 }}>
                 <BoxWithBorder>
-                    <div style={{ width: "100%", height: "400px" }}>
+                    <div className="account-grid-height">
                         <DataGrid
                             components={{
                                 Toolbar: GridToolbar,
@@ -418,7 +416,7 @@ export default function Account() {
                             pageSize={query.limit}
                             page={query.page}
                             rowCount={rowCount}
-                            rowsPerPageOptions={[5, 10, 20]}
+                            rowsPerPageOptions={[25, 50, 75]}
                             onSortModelChange={handleSortModelChange}
                             density="compact"
                         />

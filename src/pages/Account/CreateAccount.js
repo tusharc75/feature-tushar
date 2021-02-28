@@ -245,10 +245,12 @@ export default function CreateAccount() {
                                             size="small"
                                             fullWidth
                                         />
-                                        <div className="footer">
+
+                                        <Box display="flex" justifyContent="flex-end" className="gap-2">
                                             <Button onClick={goToBackPage} variant="outlined" color="primary" >
                                                 Cancel
-                                    </Button>
+                                            </Button>
+                                            
                                             <CustomButton
                                                 loading={saveAndNewLoading}
                                                 disabled={saveAndNewLoading}
@@ -261,7 +263,8 @@ export default function CreateAccount() {
                                                 }}
                                             >
                                                 {isEdit ? "Update" : "Save"}  and New
-                                     </CustomButton>
+                                            </CustomButton>
+                                            
                                             <CustomButton
                                                 loading={loading}
                                                 disabled={loading}
@@ -275,7 +278,7 @@ export default function CreateAccount() {
                                             >
                                                 {isEdit ? "Update" : "Save"}
                                             </CustomButton>
-                                        </div>
+                                        </Box>
                                     </>
                                 </Form>
                             )}
