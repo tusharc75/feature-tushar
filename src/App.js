@@ -13,7 +13,7 @@ import Contact from './pages/Contact'
 import Account from './pages/Account'
 import CreateAccount from './pages/Account/CreateAccount'
 import CreateContact from './pages/Contact/CreateContact'
-
+import AccountDetailPage from "./pages/Account/AccountDetailPage"
 
 function App() {
     const {
