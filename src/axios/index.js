@@ -1,10 +1,7 @@
 import axios from "axios";
 import { getSearchQuery } from '../services/util'
-const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
-// const BASE_URL = "http://localhost:4000";
 
-// const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
-// const BASE_URL = "http://localhost:4000";
+const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
 
 const api = () => {
     const token = localStorage.getItem("token");
