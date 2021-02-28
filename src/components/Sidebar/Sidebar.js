@@ -186,7 +186,7 @@ function SideBar({ children, location }) {
           </List>
         </div>
 
-        <div
+        {/* <div
           className={clsx(classes.drawerContainer, {
             [classes.hide]: !toggleDrawer,
           })}
@@ -221,7 +221,7 @@ function SideBar({ children, location }) {
                 </React.Fragment>
               ))}
           </List>
-        </div>
+        </div> */}
       </Drawer>
 
       <main className={classes.content}>
