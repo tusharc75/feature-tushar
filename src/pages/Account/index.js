@@ -19,6 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { deleteAccounts } from '../../axios/accounts'
 import CustomToast from '../../components/Helpers/CustomToast'
 import SearchBox from '../../components/Helpers/SearchBox'
+import { getErrorMessage } from '../../services/util'
 
 let accountTimeout
 export default function Account() {
@@ -181,7 +182,7 @@ export default function Account() {
         //         <span><EditOutlined button fontSize="small" onClick={() => handleEdit(params)} /></span>
         //     )
         // },
-        // { field: "rootAccount", headerName: "Root Account", width: 200 },
+        { field: "rootAccount", headerName: "Root Account", width: 200 },
     ];
 
     const handleEdit = data => {
@@ -280,47 +281,28 @@ export default function Account() {
     }
 
     const handleDeleteAccounts = async () => {
-        let recLen = selectedRecs.length
-        if (selectedRecs && recLen > 0) {
-            let reqs = {
-                ids: [...selectedRecs]
+        try {
+            let recLen = selectedRecs.length
+            if (selectedRecs && recLen > 0) {
+                let reqs = {
+                    ids: [...selectedRecs]
+                }
+                let data = await deleteAccounts(reqs)
+                if (data.status === 200) {
+                    handleSnackbar(data.message, 'success', true)
+                    fetchAccounts();
+                }
+                setShowConfirmBox(false)
+                setSelectedRecs([])
             }
-            let data = await deleteAccounts(reqs)
-            if (data.status === 200) {
-                handleSnackbar(data.message, 'success', true)
-                fetchAccounts();
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
             }
-            setShowConfirmBox(false)
-            setSelectedRecs([])
         }
     }
-
-    const handleDeleteAccount = () => {
-
-        const selectedRecords = dataRows.filter(d => d.isChecked).map(m => { return m.id });
-        setLoading(true);
-        RemoveAccounts({ ids: selectedRecords }).then(() => {
-            debugger;
-            getAccounts();
-            setLoading(false);
-        })
-
-
-        // let recLen = selectedRecs.length;
-        // if (selectedRecs && recLen > 0) {
-        //     selectedRecs.forEach(async (curId, i) => {
-        //         let data = await deleteBrand({ id: curId });
-        //         if (i === recLen - 1 && data.status === 200) {
-        //             setOpen(true);
-        //             setErroMsg(data.message);
-        //             setMsgType("success");
-        //             getAccounts();
-        //         }
-        //     });
-        //     setShowConfirmBox(false);
-        //     // setSelectedRecs([]);
-        // }
-    };
 
     return (
         <Layout>

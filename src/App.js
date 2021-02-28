@@ -49,7 +49,8 @@ function App() {
         <Route exact path="/contact" component={Contact} />
         <Route exact path="/contact/new" component={CreateContact} />
         <Route exact path="/account/new" component={CreateAccount} />
-        <Route exact path="/crm/account" component={Account} />
+        {/* <Route exact path="/crm/account" component={Account} /> */}
+        <Route exact path="/account" component={Account} />
       </Switch>
     </ThemeProvider>
   );

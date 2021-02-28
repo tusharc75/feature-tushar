@@ -50,10 +50,10 @@ export const GetContacts = async (params) => {
     return data;
 };
 
-export const GetFields = async (resource, id) => {
-    const { data } = await api().get(`/field?resource=${resource}`);
-    return data;
-};
+// export const GetFields = async (resource, id) => {
+//     const { data } = await api().get(`/field?resource=${resource}`);
+//     return data;
+// };
 
 export const checkEmailExist = async (email) => {
     const { data } = await api().get(`/user/emailExist/${email}`);

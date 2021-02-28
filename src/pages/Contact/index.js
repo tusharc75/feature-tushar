@@ -169,24 +169,6 @@ export default function Contact() {
         }
     }
 
-    const handlePageSize = (params) => {
-        if (params.pageSize !== query.limit) {
-            setQuery({ page: 1, limit: params.pageSize });
-        }
-    }
-
-    const handleSortModelChange = (params) => {
-        if (params?.sortModel && params.sortModel.length > 0) {
-            let temp = { ...params.sortModel[0] };
-            setQuery((prevState) => ({
-                ...prevState,
-                page: 1,
-                sortBy: temp.field,
-                orderBy: temp.sort,
-            }));
-        }
-    };
-
     const handleDeleteContact = () => {
 
         const selectedRecords = dataRows.filter(d => d.isChecked).map(m => { return m.id });
@@ -231,21 +213,6 @@ export default function Contact() {
         }
     }
 
-    const handleDeleteContacts = async () => {
-        let recLen = selectedRecs.length
-        if (selectedRecs && recLen > 0) {
-            // selectedRecs.forEach(async (curId, i) => {
-            //     let data = await deleteContacts({ _id: curId })
-            //     if ((i === recLen - 1) && data.status === 200) {
-            //         handleSnackbar(data.message, 'success', true)
-            //         fetchContacts();
-            //     }
-            // })
-            handleSnackbar("Snackbar demo", 'success', true)
-            setShowConfirmBox(false)
-            setSelectedRecs([])
-        }
-    }
 
     return (
         <Layout>

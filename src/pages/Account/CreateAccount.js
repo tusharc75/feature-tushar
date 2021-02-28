@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
 import { GetFields } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
 import { getObjKeys, formValidation } from '../../constants/helpers';
@@ -31,7 +31,7 @@ export default function CreateAccount() {
         initialValues: {},
     });
     const [loading, setLoading] = useState(false)
-    const [edit, setIsEdit] = useState(false)
+    const [isEdit, setIsEdit] = useState(false)
     const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
     const [alertData, setAlertData] = useState({})
 
@@ -56,12 +56,12 @@ export default function CreateAccount() {
                     if (typeof data.data[k] === 'object') {
                         initialVal[k] = data.data[k].optionValue || ''
                     }
-                    if (Array.isArray(data.data[k]) && data.data[k].length) {
-                        initialVal[k] = []
-                        data.data[k].map(val => {
-                            initialVal[k] = [...initialVal, val.optionValue]
-                        })
-                    }
+                    // if (Array.isArray(data.data[k]) && data.data[k].length) {
+                    //     initialVal[k] = []
+                    //     data.data[k].map(val => {
+                    //         initialVal[k] = [...initialVal, val.optionValue]
+                    //     })
+                    // }
                 })
                 getAccountFields(undefined, initialVal)
             }
@@ -75,7 +75,6 @@ export default function CreateAccount() {
 
     }
     const getAccountFields = (brandId, values) => {
-        console.log("🚀 ~ file: CreateAccount.js ~ line 78 ~ getAccountFields ~ values", values)
         GetFields('Account', brandId).then(({ data }) => {
             const newFields = [];
             data.map((_f) => newFields.push(_f.fieldData));
@@ -202,68 +201,72 @@ export default function CreateAccount() {
                 /> : null
             }
             {
-                entityData.fields.length > 0 && <Box className={classes.box}>
-                    <Formik
-                        initialValues={entityData.initialValues}
-                        validate={(values) => formValidation(values, entityData.fields)}
-                    >
-                        {({
-                            setValues,
-                            setErrors,
-                            values,
-                            errors,
-                            touched,
-                            setFieldValue,
-                            setFieldTouched,
-                            validateForm
-                        }) => (
-                            <Form>
-                                <>
-                                    <InputField
-                                        errors={errors}
-                                        values={values}
-                                        setFieldValue={setFieldValue}
-                                        touched={touched}
-                                        fieldsData={entityData.fields}
-                                        size="small"
-                                        fullWidth
-                                    />
-                                    <div className="footer">
-                                        <Button onClick={goToBackPage} variant="outlined" color="primary" >
-                                            Cancel
+                entityData.fields.length > 0 ?
+                    <Box className={classes.box}>
+                        <Formik
+                            initialValues={entityData.initialValues}
+                            validate={(values) => formValidation(values, entityData.fields)}
+                        >
+                            {({
+                                setValues,
+                                setErrors,
+                                values,
+                                errors,
+                                touched,
+                                setFieldValue,
+                                setFieldTouched,
+                                validateForm
+                            }) => (
+                                <Form>
+                                    <>
+                                        <InputField
+                                            errors={errors}
+                                            values={values}
+                                            setFieldValue={setFieldValue}
+                                            touched={touched}
+                                            fieldsData={entityData.fields}
+                                            size="small"
+                                            fullWidth
+                                        />
+                                        <div className="footer">
+                                            <Button onClick={goToBackPage} variant="outlined" color="primary" >
+                                                Cancel
                                     </Button>
-                                        <CustomButton
-                                            loading={saveAndNewLoading}
-                                            disabled={saveAndNewLoading}
-                                            style={{ float: "right" }}
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                handleSubmit(setFieldTouched, values, setValues, setErrors, true)
-                                            }}
-                                        >
-                                            Save and New
+                                            <CustomButton
+                                                loading={saveAndNewLoading}
+                                                disabled={saveAndNewLoading}
+                                                style={{ float: "right" }}
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    handleSubmit(setFieldTouched, values, setValues, setErrors, true)
+                                                }}
+                                            >
+                                                {isEdit ? "Update" : "Save"}  and New
                                      </CustomButton>
-                                        <CustomButton
-                                            loading={loading}
-                                            disabled={loading}
-                                            style={{ float: "right" }}
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                handleSubmit(setFieldTouched, values, setValues, setErrors, false)
-                                            }}
-                                        >
-                                            Save
-                                     </CustomButton>
-                                    </div>
-                                </>
-                            </Form>
-                        )}
-                    </Formik>
-                </Box>
+                                            <CustomButton
+                                                loading={loading}
+                                                disabled={loading}
+                                                style={{ float: "right" }}
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    handleSubmit(setFieldTouched, values, setValues, setErrors, false)
+                                                }}
+                                            >
+                                                {isEdit ? "Update" : "Save"}
+                                            </CustomButton>
+                                        </div>
+                                    </>
+                                </Form>
+                            )}
+                        </Formik>
+                    </Box>
+                    : <Box className={classes.box} style={{ textAlign: 'center' }}>
+                        <span >  <CircularProgress /> Fetching Data</span>
+                    </Box>
             }
 
         </Layout>

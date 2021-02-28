@@ -1,3 +1,3 @@
 export const accountPage = {
-    path: '/crm/account'
+    path: '/account'
 }
