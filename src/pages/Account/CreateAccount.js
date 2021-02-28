@@ -9,11 +9,13 @@ import { getObjKeys, formValidation } from '../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import CustomButton from '../../components/Helpers/Button'
 import { commonStyle } from '../Contact/CommonStyles'
-import { accountPage } from '../../routes/Accounts'
-import { craeteAccount, getAccountData } from '../../axios/accounts'
+import { accountPage, accountDetailPage } from '../../routes/Accounts'
+import { craeteAccount, getAccountData, updateAccount } from '../../axios/accounts'
 import { useHistory } from 'react-router-dom'
 import CustomToast from '../../components/Helpers/CustomToast'
 import { getErrorMessage } from '../../services/util'
+import _ from 'lodash'
+
 import "./account.css"
 
 const useStyles = makeStyles((theme) => ({
@@ -30,7 +32,13 @@ export default function CreateAccount() {
         fields: [],
         initialValues: {},
     });
+    const [cloneValues, setCloneValues] = useState({
+        fields: [],
+        initialValues: {},
+    })
+
     const [loading, setLoading] = useState(false)
+    const [editId, setEditId] = useState('')
     const [isEdit, setIsEdit] = useState(false)
     const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
     const [alertData, setAlertData] = useState({})
@@ -47,22 +55,13 @@ export default function CreateAccount() {
     }, [user]);
 
     const fetchAccountData = async () => {
+        setLoading(true)
         let accId = history.location.state.accountId
+        setEditId(accId)
         try {
             let data = await getAccountData(accId)
             if (data.status === 200 && Object.keys(data.data)) {
-                let initialVal = {}
-                Object.keys(data.data).map(k => {
-                    if (typeof data.data[k] === 'object') {
-                        initialVal[k] = data.data[k].optionValue || ''
-                    }
-                    // if (Array.isArray(data.data[k]) && data.data[k].length) {
-                    //     initialVal[k] = []
-                    //     data.data[k].map(val => {
-                    //         initialVal[k] = [...initialVal, val.optionValue]
-                    //     })
-                    // }
-                })
+                let initialVal = data.data
                 getAccountFields(undefined, initialVal)
             }
         }
@@ -82,12 +81,24 @@ export default function CreateAccount() {
                 fields: newFields,
                 initialValues: values ? values : getObjKeys("", newFields),
             });
+            setCloneValues({
+                fields: newFields,
+                initialValues: values ? values : getObjKeys("", newFields),
+            })
+            setLoading(false)
         });
     };
 
-    const goToBackPage = () => {
+    const goToBackPage = (id) => {
+        let state = {}
+        if (id) {
+            state = {
+                accountId: id,
+            }
+        }
         history.push({
-            pathname: accountPage.path
+            pathname: accountDetailPage.path,
+            state
         })
     }
 
@@ -102,6 +113,7 @@ export default function CreateAccount() {
 
     const getModiFiedValues = values => {
         values = { ...values }
+
         if (values.employees === "") {
             delete values.employees
         }
@@ -109,7 +121,7 @@ export default function CreateAccount() {
             values.employees = parseInt(values.employees)
         }
 
-        let tempFields = entityData.fields
+        let tempFields = _.cloneDeep(entityData.fields)
         tempFields.map(f => {
             let fName = f.fieldName
             if (f.type === "dropDown" && values[fName]) {
@@ -145,14 +157,25 @@ export default function CreateAccount() {
 
     const handleCreateAccount = async (values, saveAndNew) => {
         try {
-            let data = await craeteAccount(values)
+            let data
+            if (isEdit) {
+                data = await updateAccount(values)
+            }
+            else {
+                data = await craeteAccount(values)
+            }
             if (data.status === 200) {
                 handleSnackbar(data.message, 'success', true)
-                if (!saveAndNew) {
-                    goToBackPage()
+                if (isEdit) {
+                    goToBackPage(data?.data?._id)
                 }
                 else {
-                    getAccountFields()
+                    if (!saveAndNew) {
+                        goToBackPage(data?.data?._id)
+                    }
+                    else {
+                        getAccountFields()
+                    }
                 }
                 handleLoading(false, saveAndNew)
             }
@@ -172,9 +195,9 @@ export default function CreateAccount() {
             open: isOpen
         })
     };
-    const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew) => {
+    const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
         handleLoading(true, saveAndNew)
-        const errors = formValidation(values, entityData.fields);
+        const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
                 if (input.required) {
@@ -183,13 +206,18 @@ export default function CreateAccount() {
             });
         } else {
             values = getModiFiedValues(values)
+            if (isEdit && editId) {
+                values._id = editId
+            }
             handleCreateAccount(values, saveAndNew)
-            setValues(getObjKeys("", entityData.fields));
+            if (saveAndNew) {
+                resetForm()
+            }
+            setValues(getObjKeys("", _.cloneDeep(cloneValues.fields)));
             setErrors({});
         }
 
     }
-
     return (
         <Layout>
             {
@@ -215,7 +243,8 @@ export default function CreateAccount() {
                                 touched,
                                 setFieldValue,
                                 setFieldTouched,
-                                validateForm
+                                validateForm,
+                                resetForm
                             }) => (
                                 <Form>
                                     <>
@@ -228,23 +257,26 @@ export default function CreateAccount() {
                                             size="small"
                                             fullWidth
                                         />
-                                        <div className="footer">
+                                        <div className="footer" style={isEdit ? { width: "25%" } : { width: "40%" }}>
                                             <Button onClick={goToBackPage} variant="outlined" color="primary" >
                                                 Cancel
                                     </Button>
-                                            <CustomButton
-                                                loading={saveAndNewLoading}
-                                                disabled={saveAndNewLoading}
-                                                style={{ float: "right" }}
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={(e) => {
-                                                    e.preventDefault()
-                                                    handleSubmit(setFieldTouched, values, setValues, setErrors, true)
-                                                }}
-                                            >
-                                                {isEdit ? "Update" : "Save"}  and New
-                                     </CustomButton>
+                                            {
+                                                isEdit ? null :
+                                                    <CustomButton
+                                                        loading={saveAndNewLoading}
+                                                        disabled={saveAndNewLoading}
+                                                        style={{ float: "right" }}
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            handleSubmit(setFieldTouched, values, setValues, setErrors, true, resetForm)
+                                                        }}
+                                                    >
+                                                        Save and New
+                                                    </CustomButton>}
+
                                             <CustomButton
                                                 loading={loading}
                                                 disabled={loading}
@@ -253,7 +285,7 @@ export default function CreateAccount() {
                                                 color="primary"
                                                 onClick={(e) => {
                                                     e.preventDefault()
-                                                    handleSubmit(setFieldTouched, values, setValues, setErrors, false)
+                                                    handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
                                                 }}
                                             >
                                                 {isEdit ? "Update" : "Save"}

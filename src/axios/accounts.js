@@ -14,3 +14,7 @@ export const craeteAccount = async (request) => {
     const { data } = await api().post('/account', request)
     return data;
 }
+export const updateAccount = async (request) => {
+    const { data } = await api().put('/account', request)
+    return data;
+}
