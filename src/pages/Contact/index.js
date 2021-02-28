@@ -22,6 +22,7 @@ import { ExpandMore } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 
+let contactTimeout
 export default function Contact() {
 
     const { state: { user } } = useData();
@@ -168,24 +169,6 @@ export default function Contact() {
         }
     }
 
-    const handlePageSize = (params) => {
-        if (params.pageSize !== query.limit) {
-            setQuery({ page: 1, limit: params.pageSize });
-        }
-    }
-
-    const handleSortModelChange = (params) => {
-        if (params?.sortModel && params.sortModel.length > 0) {
-            let temp = { ...params.sortModel[0] };
-            setQuery((prevState) => ({
-                ...prevState,
-                page: 1,
-                sortBy: temp.field,
-                orderBy: temp.sort,
-            }));
-        }
-    };
-
     const handleDeleteContact = () => {
 
         const selectedRecords = dataRows.filter(d => d.isChecked).map(m => { return m.id });
@@ -211,6 +194,25 @@ export default function Contact() {
         //     // setSelectedRecs([]);
         // }
     };
+
+    const handlePageSize = (params) => {
+        if (params.pageSize !== query.limit) {
+            setQuery({ page: 1, limit: params.pageSize });
+        }
+    };
+
+    const handleSortModelChange = (params) => {
+        if (params?.sortModel && params.sortModel.length > 0) {
+            let temp = { ...params.sortModel[0] };
+            setQuery((prevState) => ({
+                ...prevState,
+                page: 1,
+                sortBy: temp.field,
+                orderBy: temp.sort,
+            }));
+        }
+    }
+
 
     return (
         <Layout>
