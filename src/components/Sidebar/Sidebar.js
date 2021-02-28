@@ -155,6 +155,7 @@ function SideBar({ children, location }) {
             /> */}
           </IconButton>
         </div>
+
         <div
           className={clsx(classes.drawerContainer, {
             [classes.hide]: !toggleDrawer,
@@ -167,32 +168,23 @@ function SideBar({ children, location }) {
             <ListItem button>
               <ListItemText primary="Activities" />
             </ListItem>
-            {user && (
-              <SidebarList
-                toggleDrawer={toggleDrawer}
-                sidebarItem={user.role.sideBar}
-              />
-            )}
-          </List>
-        </div>
-
-        {/* <div
-          className={clsx(classes.drawerContainer, {
-            [classes.hide]: !toggleDrawer,
-          })}
-        >
-          <List>
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>
-                  <ListItem button
+                  <ListItem
+                    button
                     key={listItem.section + "" + i}
-                    onClick={() => handleCollapse(listItem.section)}>
+                    onClick={() => handleCollapse(listItem.section)}
+                  >
                     <ListItemText primary={listItem.section} />
                     {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                   </ListItem>
-                  <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding >
+                  <Collapse
+                    in={open[listItem.section]}
+                    timeout="auto"
+                    unmountOnExit
+                  >
+                    <List component="div" disablePadding>
                       {listItem.items.map((item, j) => (
                         <Link key={j} to={`/${_.lowerCase(item.name)}`}>
                           <ListItem
@@ -211,7 +203,7 @@ function SideBar({ children, location }) {
                 </React.Fragment>
               ))}
           </List>
-        </div> */}
+        </div>
       </Drawer>
 
       <main className={classes.content}>
