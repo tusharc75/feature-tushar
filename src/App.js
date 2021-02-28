@@ -48,7 +48,9 @@ function App() {
         </PrivateRoute> */}
         <Route exact path="/contact" component={Contact} />
         <Route exact path="/contact/new" component={CreateContact} />
+        <Route exact path="/contact/:id" component={CreateContact} />
         <Route exact path="/account/new" component={CreateAccount} />
+        <Route exact path="/account/clone/:id" component={CreateAccount} />
         {/* <Route exact path="/crm/account" component={Account} /> */}
         <Route exact path="/account" component={Account} />
       </Switch>
