@@ -201,7 +201,7 @@ export default function CreateAccount() {
         } else {
             values = getModiFiedValues(values)
             handleCreateAccount(values, saveAndNew)
-            setValues(getObjKeys("", entityData.fields));
+            // setValues(getObjKeys("", entityData.fields));
             setErrors({});
         }
 

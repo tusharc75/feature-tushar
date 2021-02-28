@@ -142,11 +142,11 @@ export default function Account() {
                         //   }
                         // }
                     }}
-                /> : <Tooltip title="You must be the owener of this account to get the selection functionality">
+                /> : <Tooltip title="You must be the owner of this account to get the selection functionality" >
                         <IconButton>
                             <InfoOutlinedIcon />
                         </IconButton>
-                    </Tooltip>
+                    </Tooltip >
             ),
             disableColumnMenu: true,
             sortable: false,
@@ -242,7 +242,7 @@ export default function Account() {
                 : { ...searchParams };
             let tdata = await GetAccounts(searchParams)
 
-            if (tdata?.data && tdata.data.length > 0) {
+            if (tdata?.data) {
                 setRowCount(tdata.count)
                 setAccountData(tdata.data)
             }
