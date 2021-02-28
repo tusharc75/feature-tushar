@@ -13,7 +13,7 @@ import AddDoa from "./pages/DoaSetup/AddDoa";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account";
 import CreateAccount from "./pages/Account/CreateAccount";
-import CreateContact from "./pages/Contact/CreateContact"
+import CreateContact from "./pages/Contact/CreateContact";
 
 function App() {
   const {
@@ -24,8 +24,8 @@ function App() {
     return !user ? (
       <Comp />
     ) : (
-        <Redirect to={{ pathname: "/", state: { from: location } }} />
-      );
+      <Redirect to={{ pathname: "/", state: { from: location } }} />
+    );
   };
 
   return (
@@ -36,21 +36,37 @@ function App() {
           path="/login"
           render={({ location }) => conditionalRedirect(Login, location)}
         />
-        <Route exact path="/" component={Leads} />
-        <Route exact path="/new-lead" component={NewLead} />
-        <Route exact path="/opportunities" component={Opportunities} />
-        <Route exact path="/add-doa" component={AddDoa} />
+        <PrivateRoute exact path="/">
+          <Leads />
+        </PrivateRoute>
+        <PrivateRoute exact path="/new-lead">
+          <NewLead />
+        </PrivateRoute>
+        <PrivateRoute exact path="/opportunities">
+          <Opportunities />
+        </PrivateRoute>
+        <PrivateRoute exact path="/add-doa">
+          <AddDoa />
+        </PrivateRoute>
         <PrivateRoute exact path="/new-opp">
           <AddNewOpportunity />
         </PrivateRoute>
         {/* <PrivateRoute exact path="/">
           <CreateBrand />
         </PrivateRoute> */}
-        <Route exact path="/contact" component={Contact} />
-        <Route exact path="/contact/new" component={CreateContact} />
-        <Route exact path="/account/new" component={CreateAccount} />
+        <PrivateRoute exact path="/contact">
+          <Contact />
+        </PrivateRoute>
+        <PrivateRoute exact path="/contact/new">
+          <CreateContact />
+        </PrivateRoute>
+        <PrivateRoute exact path="/account/new">
+          <CreateAccount />
+        </PrivateRoute>
         {/* <Route exact path="/crm/account" component={Account} /> */}
-        <Route exact path="/account" component={Account} />
+        <PrivateRoute exact path="/account">
+          <Account />
+        </PrivateRoute>
       </Switch>
     </ThemeProvider>
   );

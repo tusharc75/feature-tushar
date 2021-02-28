@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Container,
@@ -8,15 +8,14 @@ import {
   Button,
   LinearProgress,
 } from "@material-ui/core";
-import axios from "axios";
 import { Formik, Form, Field } from "formik";
 import { TextField } from "formik-material-ui";
 
 import demoImg from "../../assets/clip-hardworking-man.png";
 import { useData } from "../../StateProvider/Provider";
-import { SET_USER, USER_LOADING } from "../../StateProvider/actionTypes";
+import { SET_USER } from "../../StateProvider/actionTypes";
 
-import { UserLogin } from '../../axios/index';
+import { UserLogin } from "../../axios/index";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -59,24 +58,24 @@ const useStyles = makeStyles((theme) => ({
 const Login = () => {
   const { dispatch } = useData();
   const classes = useStyles();
+  const [isSubmitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (values, { setSubmitting }) => {
-    dispatch({ type: USER_LOADING, payload: true });
+  const handleSubmit = async (values) => {
+    setSubmitting(true);
     const data = {
       email: values.email,
       password: values.password,
     };
 
-    UserLogin(data).then((res) => {
-      setSubmitting(false);
-      const { data } = res;
-
-      localStorage.setItem("token", data.token);
-      dispatch({ type: SET_USER, payload: data });
-      dispatch({ type: USER_LOADING, payload: false });
-    })
+    UserLogin(data)
+      .then((res) => {
+        setSubmitting(false);
+        const { data } = res;
+        localStorage.setItem("token", data.token);
+        dispatch({ type: SET_USER, payload: data });
+      })
       .catch((err) => {
-        dispatch({ type: USER_LOADING, payload: false });
+        setSubmitting(false);
         console.log(err);
       });
   };
@@ -114,7 +113,7 @@ const Login = () => {
                 validate={validateForm}
                 onSubmit={handleSubmit}
               >
-                {({ submitForm, isSubmitting }) => (
+                {({ submitForm }) => (
                   <Form className={classes.form}>
                     <Field
                       component={TextField}
@@ -131,8 +130,8 @@ const Login = () => {
                       name="password"
                       variant="outlined"
                     />
-                    {isSubmitting && <LinearProgress />}
                     <br />
+                    {isSubmitting && <LinearProgress />}
                     <Button
                       variant="contained"
                       color="primary"

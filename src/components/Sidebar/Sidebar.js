@@ -8,18 +8,16 @@ import {
   CssBaseline,
   IconButton,
   ListItem,
-  ListItemIcon,
   ListItemText,
   Collapse,
   Box,
 } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
-import { SVG } from "../../assets";
+// import { SVG } from "../../assets";
 import Header from "../Header/Header";
 import Loader from "../Loader";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.css";
-import SidebarList from "./SidebarList";
 import {
   ExpandLess,
   ExpandMore,
@@ -58,13 +56,13 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: "hidden",
-    width: theme.spacing(8) + 1,
+    width: theme.spacing(7) + 1,
     // [theme.breakpoints.up("sm")]: {
     //   width: theme.spacing(9) + 1,
     // },
   },
   toolbar: {
-    background: theme.palette.textLight,
+    background: "#dcdcdc",
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
@@ -82,9 +80,12 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     flexGrow: 1,
-    width: "calc(100% - 65px)",
+    width: "calc(100% - 57px)",
     padding: theme.spacing(2),
     background: "#eef9fd",
+  },
+  nested: {
+    paddingLeft: theme.spacing(4),
   },
 }));
 
@@ -94,7 +95,7 @@ function SideBar({ children, location }) {
   } = useData();
   const classes = useStyles();
   const [open, setOpen] = useState({});
-  const pathnames = location.pathname.split("/").filter((x) => x)
+  const pathnames = location.pathname.split("/").filter((x) => x);
 
   const [toggleDrawer, setToggleDrawer] = React.useState(false);
 
@@ -120,11 +121,11 @@ function SideBar({ children, location }) {
       });
     }
   };
-  const handleCollapse = section => {
-    let tempdata = { ...open }
-    tempdata[section] = !tempdata[section] || false
-    setOpen(tempdata)
-  }
+  const handleCollapse = (section) => {
+    let tempdata = { ...open };
+    tempdata[section] = !tempdata[section] || false;
+    setOpen(tempdata);
+  };
 
   return (
     <div className={classes.root}>
@@ -154,27 +155,16 @@ function SideBar({ children, location }) {
             /> */}
           </IconButton>
         </div>
-
-        <div className={classes.drawerContainer}>
+        <div
+          className={clsx(classes.drawerContainer, {
+            [classes.hide]: !toggleDrawer,
+          })}
+        >
           <List>
             <ListItem button>
-              <ListItemIcon>
-                <img
-                  className={classes.drawerIcon}
-                  src={SVG("Dashboard")}
-                  alt="dashboard"
-                />
-              </ListItemIcon>
               <ListItemText primary="Dashboard" />
             </ListItem>
             <ListItem button>
-              <ListItemIcon>
-                <img
-                  className={classes.drawerIcon}
-                  src={SVG("Activities")}
-                  alt="activities"
-                />
-              </ListItemIcon>
               <ListItemText primary="Activities" />
             </ListItem>
             {user && (
@@ -229,12 +219,12 @@ function SideBar({ children, location }) {
         {userLoading ? (
           <Loader />
         ) : (
-            <Box>
-              <BreadCrumbs />
-              <Box marginY={2} />
-              {children}
-            </Box>
-          )}
+          <Box>
+            <BreadCrumbs />
+            <Box marginY={2} />
+            {children}
+          </Box>
+        )}
       </main>
     </div>
   );

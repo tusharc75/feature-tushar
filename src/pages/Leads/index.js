@@ -91,8 +91,6 @@ const Leads = () => {
     { title: "New Lead", bg: theme.palette.darkBg, color: "#fff" },
     { title: "Delete Lead", bg: theme.palette.lightBg, color: "#fff" },
   ];
-
-  console.log(theme);
   return (
     <Layout>
       {/* Links Section */}
