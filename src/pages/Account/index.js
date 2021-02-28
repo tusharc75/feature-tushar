@@ -207,7 +207,6 @@ export default function Account() {
                 </>
             )
         },
-        { field: "rootAccount", headerName: "Root Account", width: 200 },
     ];
 
     const handleEdit = data => {
@@ -404,7 +403,9 @@ export default function Account() {
                 <BoxWithBorder>
                     <div style={{ width: "100%", height: "400px" }}>
                         <DataGrid
-                            showToolbar
+                            components={{
+                                Toolbar: GridToolbar,
+                            }}
                             rows={loading ? [] : dataRows}
                             columns={columns}
                             loading={loading}

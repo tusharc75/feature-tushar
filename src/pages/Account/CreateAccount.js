@@ -108,7 +108,7 @@ export default function CreateAccount() {
 
     const goToBackPage = (id) => {
         let state = {}
-        if (id) {
+        if (id && typeof id === 'string') {
             state = {
                 accountId: id,
             }
@@ -116,6 +116,12 @@ export default function CreateAccount() {
         history.push({
             pathname: accountDetailPage.path,
             state
+        })
+    }
+
+    const goToBackPageListing = (e) => {
+        history.push({
+            pathname: accountPage.path,
         })
     }
 
@@ -230,7 +236,14 @@ export default function CreateAccount() {
             if (saveAndNew) {
                 resetForm()
             }
+            if (!isEdit && saveAndNew) {
+                setEntityData({
+                    fields: entityData.fields,
+                    initialValues: {},
+                })
+            }
             setValues(getObjKeys("", _.cloneDeep(cloneValues.fields)));
+
             setErrors({});
         }
 
@@ -249,7 +262,7 @@ export default function CreateAccount() {
                 entityData.fields.length > 0 ?
                     <Box className={classes.box}>
                         <Formik
-                            initialValues={entityData.initialValues}
+                            initialValues={getObjKeys("", entityData.fields)}
                             validate={(values) => formValidation(values, entityData.fields)}
                         >
                             {({
@@ -274,11 +287,11 @@ export default function CreateAccount() {
                                             size="small"
                                             fullWidth
                                         />
-                                        <div className="footer" style={isEdit ? { width: "25%" } : { width: "40%" }}>
-                                            <Button onClick={goToBackPage} variant="outlined" color="primary" >
+                                        <div className="footer" style={{ width: "22%" }}>
+                                            <Button onClick={goToBackPageListing} variant="outlined" color="primary" >
                                                 Cancel
                                     </Button>
-                                            {
+                                            {/* {
                                                 isEdit ? null :
                                                     <CustomButton
                                                         loading={saveAndNewLoading}
@@ -287,12 +300,12 @@ export default function CreateAccount() {
                                                         variant="contained"
                                                         color="primary"
                                                         onClick={(e) => {
-                                                            e.preventDefault()
                                                             handleSubmit(setFieldTouched, values, setValues, setErrors, true, resetForm)
                                                         }}
+                                                        type="submit"
                                                     >
                                                         Save and New
-                                                    </CustomButton>}
+                                                    </CustomButton>} */}
 
                                             <CustomButton
                                                 loading={loading}
@@ -318,6 +331,6 @@ export default function CreateAccount() {
                     </Box>
             }
 
-        </Layout>
+        </Layout >
     )
 }
