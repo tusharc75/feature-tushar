@@ -9,17 +9,20 @@ export const Provider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-
-    UserMe().then((res) => {
-      const { data } = res;
-      dispatch({ type: SET_USER, payload: data });
-
-      dispatch({ type: USER_LOADING, payload: false });
-    })
-      .catch((err) => {
-        dispatch({ type: USER_LOADING, payload: false });
-        console.log(err);
-      });
+    const token = localStorage.getItem("token");
+    if (token) {
+      UserMe()
+        .then((res) => {
+          const { data } = res;
+          dispatch({ type: SET_USER, payload: data });
+          dispatch({ type: USER_LOADING, payload: false });
+        })
+        .catch((err) => {
+          localStorage.setItem("token", "");
+          dispatch({ type: USER_LOADING, payload: false });
+          console.log(err);
+        });
+    }
   }, []);
 
   return (

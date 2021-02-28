@@ -10,8 +10,8 @@ import InputField from '../../components/Helpers/InputField';
 import CustomButton from '../../components/Helpers/Button'
 import { commonStyle } from '../Contact/CommonStyles'
 import { accountPage, accountDetailPage } from '../../routes/Accounts'
-import { craeteAccount, getAccountData, updateAccount } from '../../axios/accounts'
-import { useHistory } from 'react-router-dom'
+import { craeteAccount, getAccountData, updateAccount, getDataToClone } from '../../axios/accounts'
+import { useHistory, useParams } from 'react-router-dom'
 import CustomToast from '../../components/Helpers/CustomToast'
 import { getErrorMessage } from '../../services/util'
 import _ from 'lodash'
@@ -27,6 +27,8 @@ export default function CreateAccount() {
 
     const classes = useStyles();
     const history = useHistory();
+    let { id } = useParams();
+
     const { state: { user } } = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -43,11 +45,26 @@ export default function CreateAccount() {
     const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
     const [alertData, setAlertData] = useState({})
 
-    useEffect(() => {
-
+    useEffect(async () => {
         if (history?.location?.state?.accountId) {
             setIsEdit(true)
             fetchAccountData()
+        }
+        else if (id) {
+            GetFields('Account').then(({ data }) => {
+                const newFields = [];
+                data.map((_f) => newFields.push(_f.fieldData));
+
+                getDataToClone(id).then((dataToClone) => {
+                    setEntityData({
+                        fields: newFields,
+                        initialValues: dataToClone.data ? dataToClone.data : getObjKeys("", newFields),
+                    });
+                    setLoading(false);
+                }, error => {
+                    setLoading(false);
+                });
+            });
         }
         else if (user) {
             getAccountFields(user.user.brand);

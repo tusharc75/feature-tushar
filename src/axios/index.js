@@ -1,19 +1,8 @@
 import axios from "axios";
+import api from './axios'
 import { getSearchQuery } from '../services/util'
+
 const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
-// const BASE_URL = "http://localhost:4000";
-
-// const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
-// const BASE_URL = "http://localhost:4000";
-
-const api = () => {
-    const token = localStorage.getItem("token");
-
-    return axios.create({
-        baseURL: BASE_URL,
-        headers: { authorization: `Bearer ${token}` },
-    });
-};
 
 export const UserLogin = async (inputData) => {
     const { data } = await axios.post(`${BASE_URL}/user/login`, inputData);

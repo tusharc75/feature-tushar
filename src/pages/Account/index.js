@@ -9,6 +9,8 @@ import {
     Menu,
     MenuItem,
     Paper,
+    Tooltip,
+    IconButton
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
@@ -16,12 +18,14 @@ import BrandHeader from '../../components/BrandHeader';
 import { ExpandMore, AddOutlined, EditOutlined, VisibilityOutlined } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { deleteAccounts } from '../../axios/accounts'
+import { deleteAccounts, getDataToClone } from '../../axios/accounts'
 import CustomToast from '../../components/Helpers/CustomToast'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { getErrorMessage } from '../../services/util'
 import { accountDetailPage } from '../../routes/Accounts'
 import _ from "lodash";
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 
 let accountTimeout
 export default function Account() {
@@ -70,9 +74,16 @@ export default function Account() {
             ...u,
             isChecked: false,
             id: u._id,
+            allowToDelete: u.allowToDelete
         }));
         setDataRows([...rows]);
     }, [accountData])
+
+    const cloneAccount = async (accountId) => {
+        history.push({
+            pathname: `/account/clone/${accountId}`,
+        });
+    }
 
     const columns = [
         {
@@ -86,7 +97,9 @@ export default function Account() {
                         setCheckAllAccounts(ev.target.checked);
                         const gridData = dataRows;
                         gridData.map((d) => {
-                            d.isChecked = ev.target.checked;
+                            if (d.allowToDelete) {
+                                d.isChecked = ev.target.checked;
+                            }
                             return d;
                         });
                         setDataRows([...gridData]);
@@ -94,8 +107,9 @@ export default function Account() {
                 />
             ),
             renderCell: (params) => (
-                <Checkbox
+                params.allowToDelete ? <Checkbox
                     color="primary"
+                    // disabled={!params.allowToDelete}
                     checked={params.value}
                     onChange={(ev) => {
                         const gridData = dataRows;
@@ -115,12 +129,30 @@ export default function Account() {
                         }
                         handleSelectedAccounts(params.row.id, ev.target.checked)
                     }}
-                />
+                /> : <Tooltip title="You must be the owener of this account to get the selection functionality">
+                        <IconButton>
+                            <InfoOutlinedIcon />
+                        </IconButton>
+                    </Tooltip>
             ),
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
-            width: 75,
+            width: 75
+        },
+        {
+            field: "clone", headerName: " ",
+            renderCell: (params) => (
+                <Tooltip title="Clone">
+                    <IconButton aria-label="copy" onClick={() => { cloneAccount(params.row._id) }}>
+                        <FileCopyOutlinedIcon />
+                    </IconButton>
+                </Tooltip>
+            ),
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            width: 75
         },
         { field: "accountName", headerName: "Account Name", width: 200 },
         {
