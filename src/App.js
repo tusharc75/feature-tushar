@@ -13,6 +13,7 @@ import AddDoa from "./pages/DoaSetup/AddDoa";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account";
 import CreateAccount from "./pages/Account/CreateAccount";
+import CreateContact from "./pages/Contact/CreateContact";
 
 function App() {
   const {
@@ -56,9 +57,13 @@ function App() {
         <PrivateRoute exact path="/contact">
           <Contact />
         </PrivateRoute>
+        <PrivateRoute exact path="/contact/new">
+          <CreateContact />
+        </PrivateRoute>
         <PrivateRoute exact path="/account/new">
           <CreateAccount />
         </PrivateRoute>
+        {/* <Route exact path="/crm/account" component={Account} /> */}
         <PrivateRoute exact path="/account">
           <Account />
         </PrivateRoute>

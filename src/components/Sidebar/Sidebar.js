@@ -94,7 +94,7 @@ function SideBar({ children, location }) {
     state: { user, userLoading },
   } = useData();
   const classes = useStyles();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState({});
   const pathnames = location.pathname.split("/").filter((x) => x);
 
   const [toggleDrawer, setToggleDrawer] = React.useState(false);
@@ -120,6 +120,11 @@ function SideBar({ children, location }) {
         return { section, items };
       });
     }
+  };
+  const handleCollapse = (section) => {
+    let tempdata = { ...open };
+    tempdata[section] = !tempdata[section] || false;
+    setOpen(tempdata);
   };
 
   return (
@@ -162,15 +167,32 @@ function SideBar({ children, location }) {
             <ListItem button>
               <ListItemText primary="Activities" />
             </ListItem>
+            {user && (
+              <SidebarList
+                toggleDrawer={toggleDrawer}
+                sidebarItem={user.role.sideBar}
+              />
+            )}
+          </List>
+        </div>
+
+        {/* <div
+          className={clsx(classes.drawerContainer, {
+            [classes.hide]: !toggleDrawer,
+          })}
+        >
+          <List>
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>
-                  <ListItem button onClick={() => setOpen(!open)}>
+                  <ListItem button
+                    key={listItem.section + "" + i}
+                    onClick={() => handleCollapse(listItem.section)}>
                     <ListItemText primary={listItem.section} />
-                    {open ? <ExpandLess /> : <ExpandMore />}
+                    {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                   </ListItem>
-                  <Collapse in={open} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
+                  <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding >
                       {listItem.items.map((item, j) => (
                         <Link key={j} to={`/${_.lowerCase(item.name)}`}>
                           <ListItem
@@ -189,7 +211,7 @@ function SideBar({ children, location }) {
                 </React.Fragment>
               ))}
           </List>
-        </div>
+        </div> */}
       </Drawer>
 
       <main className={classes.content}>

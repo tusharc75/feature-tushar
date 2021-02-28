@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetAccounts } from '../../axios/index';
+import { GetAccounts, RemoveAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
     Button,
     Checkbox,
-    Container,
-    Chip,
-    CircularProgress,
-    Divider,
     Menu,
     MenuItem,
-    Typography,
     Paper,
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
-import { ExpandMore } from "@material-ui/icons";
+import { ExpandMore, AddOutlined, EditOutlined } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import { deleteAccounts } from '../../axios/accounts'
+import CustomToast from '../../components/Helpers/CustomToast'
+import SearchBox from '../../components/Helpers/SearchBox'
+import { getErrorMessage } from '../../services/util'
 
+let accountTimeout
 export default function Account() {
 
     const { state: { user } } = useData();
@@ -34,8 +35,43 @@ export default function Account() {
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 1, limit: 5 });
+    const [query, setQuery] = useState({ page: 0, limit: 5 });
     const [anchorEl, setAnchorEl] = useState(null);
+    const [renderCount, setRenderCount] = useState(0);
+    const [selectedRecs, setSelectedRecs] = useState([])
+    const [showConfirmBox, setShowConfirmBox] = useState(false)
+    const [alertData, setAlertData] = useState({})
+    const [searchVal, setSearchVal] = useState("");
+
+    useEffect(() => {
+        let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+
+        if (accountTimeout) {
+            clearTimeout(accountTimeout);
+        }
+
+        accountTimeout = setTimeout(() => {
+            fetchAccounts();
+        }, millisec);
+
+    }, [searchVal]);
+
+    useEffect(() => {
+        if (renderCount > 0) {
+            if (user) {
+                fetchAccounts();
+            }
+        } else setRenderCount((preCount) => preCount + 1);
+    }, [query, user]);
+
+    useEffect(() => {
+        let rows = accountData?.map((u) => ({
+            ...u,
+            isChecked: false,
+            id: u._id,
+        }));
+        setDataRows([...rows]);
+    }, [accountData])
 
     const columns = [
         {
@@ -76,6 +112,7 @@ export default function Account() {
                         } else {
                             setCheckAllAccounts(false);
                         }
+                        handleSelectedAccounts(params.row.id, ev.target.checked)
 
                         // if (checkedRecords.length === 1) {
                         //   const id = checkedRecords[0].id;
@@ -90,6 +127,7 @@ export default function Account() {
                         //     });
                         //   }
                         // }
+
                     }}
                 />
             ),
@@ -99,41 +137,99 @@ export default function Account() {
             width: 75,
         },
         { field: "accountName", headerName: "Account Name", width: 200 },
-        { field: "masterAccount", headerName: "Master Account", width: 200 },
+        {
+            field: "typeOfAccount",
+            headerName: "Type",
+            width: 200,
+            renderCell: (params) => (
+                <>
+                    {
+                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                    }
+                </>
+            )
+        },
+        {
+            field: "industry",
+            headerName: "Industry",
+            width: 200,
+            renderCell: (params) => (
+                <>
+                    {
+                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                    }
+                </>
+            )
+        },
+        {
+            field: "parentAccount",
+            headerName: "Parent Account",
+            width: 200,
+            renderCell: (params) => (
+                <>
+                    {
+                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                    }
+                </>
+            )
+        },
+        { field: "phone", headerName: "Phone", width: 200 },
+        // {
+        //     field: "Actions",
+        //     headerName: "Actions",
+        //     width: 200,
+        //     renderCell: (params) => (
+        //         <span><EditOutlined button fontSize="small" onClick={() => handleEdit(params)} /></span>
+        //     )
+        // },
+        { field: "rootAccount", headerName: "Root Account", width: 200 },
     ];
 
-    useEffect(() => {
-        if (user) {
-            getAccounts(user.user.brand);
-        }
-        // eslint-disable-next-line
-    }, [user]);
-
-    useEffect(() => {
-        if (user) {
-            getAccounts(user.user.brand);
-        }
-    }, [query]);
-
-    const getAccounts = (brand) => {
-        setLoading(true);
-        let searchParams = { brand: brand, ...query };
-
-        GetAccounts(searchParams).then(({ data, count }) => {
-            setAccountData(data);
-            setRowCount(count)
-            setLoading(false);
+    const handleEdit = data => {
+        console.log("🚀 ~ file: index.js ~ line 189 ~ Account ~ data", data)
+        history.push({
+            pathname: "/account/new",
+            state: {
+                accountId: data.row.id,
+            },
         });
+
+    }
+    const handleSearch = (e) => {
+        if (query.page !== 1) {
+            setQuery((prevState) => ({ ...prevState, page: 1 }));
+        }
+        setSearchVal(e.target.value);
+    };
+
+    const fetchAccounts = async () => {
+        if (user) {
+            setLoading(true);
+            let searchParams = { ...query }
+            searchParams = searchVal
+                ? { ...searchParams, search: searchVal }
+                : { ...searchParams };
+            let tdata = await GetAccounts(searchParams)
+
+            if (tdata?.data && tdata.data.length > 0) {
+                setRowCount(tdata.count)
+                setAccountData(tdata.data)
+            }
+            setLoading(false);
+        }
+
     }
 
-    useEffect(() => {
-        let rows = accountData?.map((u) => ({
-            ...u,
-            isChecked: false,
-            id: u._id,
-        }));
-        setDataRows([...rows]);
-    }, [accountData])
+    const handleSelectedAccounts = (id, isChecked) => {
+        let tempSelectedRecs = [...selectedRecs], curRecIndex = selectedRecs.indexOf(id)
+        if (isChecked && curRecIndex < 0) {
+            tempSelectedRecs = [...selectedRecs, id]
+        }
+        else if (!isChecked && curRecIndex >= 0) {
+            tempSelectedRecs.splice(curRecIndex, 1)
+        }
+        setSelectedRecs(tempSelectedRecs)
+    }
 
     // ****** ACTIONS BUTTON STUFF *********
     const openActions = (event) => {
@@ -153,17 +249,24 @@ export default function Account() {
         });
     }
 
+    const handleSnackbar = (msg, type, isOpen) => {
+        setAlertData({
+            errorMsg: msg,
+            type: type,
+            open: isOpen
+        })
+    };
     const handlePage = (params) => {
         if (query.page !== params.page) {
             setQuery((prevState) => ({ ...prevState, page: params.page }));
         }
-    }
+    };
 
     const handlePageSize = (params) => {
         if (params.pageSize !== query.limit) {
             setQuery({ page: 1, limit: params.pageSize });
         }
-    }
+    };
 
     const handleSortModelChange = (params) => {
         if (params?.sortModel && params.sortModel.length > 0) {
@@ -175,25 +278,66 @@ export default function Account() {
                 orderBy: temp.sort,
             }));
         }
-    };
+    }
+
+    const handleDeleteAccounts = async () => {
+        try {
+            let recLen = selectedRecs.length
+            if (selectedRecs && recLen > 0) {
+                let reqs = {
+                    ids: [...selectedRecs]
+                }
+                let data = await deleteAccounts(reqs)
+                if (data.status === 200) {
+                    handleSnackbar(data.message, 'success', true)
+                    fetchAccounts();
+                }
+                setShowConfirmBox(false)
+                setSelectedRecs([])
+            }
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
+            }
+        }
+    }
 
     return (
         <Layout>
+            {
+                alertData ? <CustomToast
+                    open={alertData.open || false}
+                    close={() => handleSnackbar('', '', false)}
+                    errorMsg={alertData.errorMsg || ''}
+                    type={alertData.type || ''}
+                /> : null
+            }
 
-            <BrandHeader total={entitiesCount} heading="Accounts">
-                {/* <SearchBox onSearch={handleSearch} value={searchVal} /> */}
+            <BrandHeader total={entitiesCount} heading="Accounts"
+                showHeading={false}
+            >
+                <SearchBox onSearch={handleSearch} value={searchVal} />
                 <Box component="span" marginX={1} />
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={clickCreateNew}
                 >
-                    Create Account
+                    <AddOutlined /> Add
                 </Button>
                 <Box component="span" marginX={1} />
-
                 <Button
-                    // disabled={Boolean(!selectedBrand)}
+                    disabled={true}
+                    variant="outlined"
+                    color="default"
+                    aria-controls="action-menu"
+                >
+                    Import
+                </Button>
+                <Box component="span" marginX={1} />
+                <Button
                     disabled={dataRows.filter((d) => d.isChecked).length === 0}
                     variant="outlined"
                     color="default"
@@ -202,6 +346,7 @@ export default function Account() {
                 >
                     Actions <ExpandMore />
                 </Button>
+
                 <Menu
                     anchorEl={anchorEl}
                     keepMounted
@@ -214,7 +359,9 @@ export default function Account() {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}>
 
-                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}>
+                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length !== 1}
+                        onClick={() => setShowConfirmBox(true)}
+                    >
                         Delete
                     </MenuItem>
                 </Menu>
@@ -223,7 +370,6 @@ export default function Account() {
 
             <Paper style={{ marginTop: 15 }}>
                 <BoxWithBorder>
-                    {/* <Box component="div" marginY={1}> */}
                     <div style={{ width: "100%", height: "400px" }}>
                         <DataGrid
                             components={{
@@ -243,10 +389,18 @@ export default function Account() {
                             rowCount={rowCount}
                             rowsPerPageOptions={[5, 10, 20]}
                             onSortModelChange={handleSortModelChange}
+                            density="compact"
                         />
                     </div>
-                    {/* </Box> */}
-
+                    {
+                        showConfirmBox ?
+                            <ConfirmationDialog
+                                open={showConfirmBox}
+                                message={`Are you sure you want to delete these entities`}
+                                onClose={() => setShowConfirmBox(false)}
+                                onOk={handleDeleteAccounts}
+                            /> : null
+                    }
                 </BoxWithBorder>
             </Paper>
         </Layout>
