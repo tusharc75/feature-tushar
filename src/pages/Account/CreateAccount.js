@@ -42,6 +42,7 @@ export default function CreateAccount() {
     const [loading, setLoading] = useState(false)
     const [editId, setEditId] = useState('')
     const [isEdit, setIsEdit] = useState(false)
+    const [updateFieldValues, setUpdateFieldValues] = useState({})
     const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
     const [alertData, setAlertData] = useState({})
 
@@ -79,6 +80,7 @@ export default function CreateAccount() {
             let data = await getAccountData(accId)
             if (data.status === 200 && Object.keys(data.data)) {
                 let initialVal = data.data
+                setUpdateFieldValues(initialVal)
                 getAccountFields(undefined, initialVal)
             }
         }
@@ -97,10 +99,6 @@ export default function CreateAccount() {
                 fields: newFields,
                 initialValues: values ? values : getObjKeys("", newFields),
             });
-            setCloneValues({
-                fields: newFields,
-                initialValues: values ? values : getObjKeys("", newFields),
-            })
             setLoading(false)
         });
     };
@@ -177,6 +175,13 @@ export default function CreateAccount() {
         return values
     }
 
+    const showErroeMes = (err, saveAndNew) => {
+        let errMes = getErrorMessage(err)
+        if (errMes) {
+            handleSnackbar(errMes, 'error', true)
+        }
+        handleLoading(false, saveAndNew)
+    }
     const handleCreateAccount = async (values, saveAndNew) => {
         try {
             let data
@@ -203,11 +208,7 @@ export default function CreateAccount() {
             }
         }
         catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
-            handleLoading(false, saveAndNew)
+            showErroeMes(err, saveAndNew)
         }
     }
     const handleSnackbar = (msg, type, isOpen) => {
@@ -241,8 +242,12 @@ export default function CreateAccount() {
                     initialValues: {},
                 })
             }
-            setValues(getObjKeys("", _.cloneDeep(cloneValues.fields)));
-
+            if (isEdit) {
+                setValues({ ...updateFieldValues });
+            }
+            else {
+                setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
+            }
             setErrors({});
         }
     }
@@ -261,7 +266,7 @@ export default function CreateAccount() {
                 entityData.fields.length > 0 ?
                     <Box className={classes.box}>
                         <Formik
-                            initialValues={getObjKeys("", entityData.fields)}
+                            initialValues={entityData.initialValues}
                             validate={(values) => formValidation(values, entityData.fields)}
                         >
                             {({

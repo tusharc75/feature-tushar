@@ -10,7 +10,7 @@ import PrivateRoute from './components/PrivateRoute'
 import { useData } from './StateProvider/Provider'
 import AddDoa from './pages/DoaSetup/AddDoa'
 import Contact from './pages/Contact'
-import Account from './pages/Account'
+import Account from './pages/Account/index'
 import CreateAccount from './pages/Account/CreateAccount'
 import CreateContact from './pages/Contact/CreateContact'
 import AccountDetailPage from "./pages/Account/AccountDetailPage"
