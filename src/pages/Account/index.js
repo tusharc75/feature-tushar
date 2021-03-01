@@ -129,11 +129,11 @@ export default function Account() {
                         }
                         handleSelectedAccounts(params.row.id, ev.target.checked)
                     }}
-                /> : <Tooltip title="You must be the owener of this account to get the selection functionality">
+                /> : <Tooltip title="You must be the owner of this account to get the selection functionality" >
                         <IconButton>
                             <InfoOutlinedIcon />
                         </IconButton>
-                    </Tooltip>
+                    </Tooltip >
             ),
             disableColumnMenu: true,
             sortable: false,
