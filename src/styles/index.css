@@ -35,9 +35,9 @@ body::-webkit-scrollbar-thumb {
   padding: 6px 16px !important;
 }
 
-.MuiOutlinedInput-input {
+/* .MuiOutlinedInput-input {
   padding: 12px 14px !important;
-}
+} */
 
 .MuiOutlinedInput-inputMultiline {
   padding: 0 !important;
