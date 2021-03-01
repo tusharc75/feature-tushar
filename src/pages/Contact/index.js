@@ -17,10 +17,11 @@ import {
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
-import BrandHeader from '../../components/BrandHeader';
 import { ExpandMore } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import AddIcon from '@material-ui/icons/Add';
+import './contact.css';
 
 let contactTimeout
 export default function Contact() {
@@ -217,17 +218,16 @@ export default function Contact() {
     return (
         <Layout>
 
-            <BrandHeader total={entitiesCount} heading="Contacts">
-                {/* <SearchBox onSearch={handleSearch} value={searchVal} /> */}
-                <Box component="span" marginX={1} />
+            <Paper className="contact-header">
+
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={clickCreateNew}
+                    startIcon={<AddIcon />}
                 >
-                    Create Contact
-                </Button>
-                <Box component="span" marginX={1} />
+                    Add
+                    </Button>
 
                 <Button
                     // disabled={Boolean(!selectedBrand)}
@@ -256,13 +256,13 @@ export default function Contact() {
                         Delete
                     </MenuItem>
                 </Menu>
-
-            </BrandHeader>
+            </Paper>
 
             <Paper style={{ marginTop: 15 }}>
+
                 <BoxWithBorder>
                     {/* <Box component="div" marginY={1}> */}
-                    <div style={{ width: "100%", height: "400px" }}>
+                    <div className="contact-grid-height">
                         <DataGrid
                             components={{
                                 Toolbar: GridToolbar,
@@ -279,8 +279,9 @@ export default function Contact() {
                             pageSize={query.limit}
                             page={query.page}
                             rowCount={rowCount}
-                            rowsPerPageOptions={[5, 10, 20]}
+                            rowsPerPageOptions={[25, 50, 75]}
                             onSortModelChange={handleSortModelChange}
+                            density="compact"
                         />
                     </div>
                     {/* </Box> */}
@@ -296,6 +297,6 @@ export default function Contact() {
 
                 </BoxWithBorder>
             </Paper>
-        </Layout>
+        </Layout >
     )
 }

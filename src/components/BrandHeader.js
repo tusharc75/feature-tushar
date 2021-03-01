@@ -22,7 +22,7 @@ const BrandHeader = (props) => {
 
   return (
     <React.Fragment>
-      <Container className={classes.root} style={{ minHeight: "100%", marginTop: 0 }}>
+      <Container>
         <Grid container justify="space-between">
           <Grid item>
             {
