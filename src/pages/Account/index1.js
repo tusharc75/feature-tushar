@@ -41,7 +41,7 @@ export default function Account() {
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 0, limit: 5 });
+    const [query, setQuery] = useState({ page: 1, limit: 10 });
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
@@ -283,7 +283,6 @@ export default function Account() {
     };
 
     const handlePageSize = (params) => {
-        console.log("🚀 ~ file: index.js ~ line 286 ~ handlePageSize ~ params", params)
         if (params.pageSize !== query.limit) {
             setQuery({ page: 1, limit: params.pageSize });
         }

@@ -5,7 +5,9 @@ import {
     useTheme,
     makeStyles,
     Button,
-    CircularProgress
+    Grid,
+    CircularProgress,
+    Typography
 } from "@material-ui/core";
 import { useHistory, useLocation } from "react-router-dom";
 import _ from "lodash";
@@ -14,9 +16,11 @@ import { GetFields } from '../../axios/index';
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import CustomToast from "../../components/Helpers/CustomToast";
 import Layout from "../../components/Layout";
-import BrandHeader from "../../components/BrandHeader";
+import CustomHeader from "./CustomHeader";
 import { accountPage } from '../../routes/Accounts'
 import { craeteAccount, getAccountData } from '../../axios/accounts'
+import { CheckBoxOutlineBlankRounded, DeviceHubOutlined } from '@material-ui/icons'
+import { Link, withRouter } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
 import DetailPage from './DetailPage'
 
@@ -60,11 +64,15 @@ const Roles = () => {
                 if (typeof values[fd.fieldName] === "object" && values[fd.fieldName].optionLabel) {
                     val = values[fd.fieldName].optionLabel
                 }
-                if (Array.isArray(values[fd.fieldName]) && values[fd.fieldName].length) {
+                else if (Array.isArray(values[fd.fieldName]) && values[fd.fieldName].length) {
                     values[fd.fieldName].forEach(v => {
                         if (v.optionLabel) val = val ? val + "," + v.optionLabel : v.optionLabel
                     })
                 }
+                else {
+                    val = values[fd.fieldName]
+                }
+
 
                 if (td[fd.sectionName]) {
                     td[fd.sectionName] = {
@@ -99,54 +107,80 @@ const Roles = () => {
     }
 
     const tabs = ["Table", "Users"];
-
+    const quickLinks = [
+        {
+            label: "Account Heirarchy",
+            count: 0
+        },
+        {
+            label: "Projects",
+            count: 0
+        },
+        {
+            label: "Opportunity",
+            count: 0
+        },
+        {
+            label: "Qoutes",
+            count: 0
+        },
+        {
+            label: "Accounts Teams",
+            count: 0
+        },
+        {
+            label: "Contacts",
+            count: 0
+        },
+    ]
     return (
         <>
             <Layout>
                 <div>
-                    <BrandHeader heading="Roles"
+                    <CustomHeader
+                        heading="Account"
                         style={{ marginTop: "150px", minHeight: "200px" }}
-                        showHeading={false}>
-
+                        showHeading={true}>
                         <Box component="span" marginX={1} />
                         <Button
-                            variant="contained"
+                            variant="outlined"
                             color="primary"
-                        >
-                            Add
-                  </Button>
-                        <Box component="span" marginX={1} />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                        >
-                            Edit
-                  </Button>
-                        <Box component="span" marginX={1} />
-                        <Button
-                            variant="contained"
-                            color="primary"
+                            style={{ backgroundColor: 'aliceblue' }}
                         >
                             Delete
                   </Button>
-                    </BrandHeader>
-                    <Container >
-                        <div style={{ width: "100%" }}>
-                            {
-                                loading ? <Box style={{ textAlign: 'center' }}>
-                                    <span >  <CircularProgress /> Fetching Data</span>
-                                </Box> :
-                                    <DetailPage
-                                        data={data}
-                                    />
-                            }
-                        </div>
+                    </CustomHeader>
+
+                    <Container style={{ width: "100%", backgroundColor: 'aliceblue' }}>
+                        <Grid container spacing={5}>
+                            <Grid item sm={8} md={8} lg={8}>
+                                <div style={{ backgroundColor: 'white' }}>
+                                    {
+                                        loading ? <Box style={{ textAlign: 'center' }}>
+                                            <span >  <CircularProgress /> Fetching Data</span>
+                                        </Box> :
+                                            <DetailPage
+                                                data={data}
+                                            />
+                                    }
+                                </div>
+                            </Grid>
+                            <Grid item sm={4} md={4} lg={4} style={{ backgroundColor: 'aliceblue' }}  >
+                                <div style={{ backgroundColor: 'white', marginBottom: '10px' }}>
+                                    {
+                                        quickLinks && quickLinks.length ?
+                                            quickLinks.map(k => {
+                                                return <><Link>{k.label || ''}({k.count || 0})</Link><br /></>
+                                            }) :
+                                            null
+                                    }
+                                </div>
+                                <div style={{ backgroundColor: 'white' }}>
+                                    <Typography>Related Contacts</Typography>
+                                </div>
+                            </Grid>
+                        </Grid>
                     </Container>
-                    <FullScreenDialog heading={"AccountDetails"}>
-
-                    </FullScreenDialog>
-
-
                 </div>
             </Layout>
         </>
