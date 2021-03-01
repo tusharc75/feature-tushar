@@ -16,7 +16,9 @@ export const craeteAccount = async (request) => {
     const { data } = await api().post('/account', request)
     return data;
 }
-
+export const updateAccount = async (request) => {
+    const { data } = await api().put('/account', request)
+}
 export const getDataToClone = async (accountId) => {
     const { data } = await api().get(`/account/clone/${accountId}`)
     return data;

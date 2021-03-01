@@ -15,7 +15,7 @@ import {
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
-import { ExpandMore, AddOutlined, EditOutlined } from "@material-ui/icons";
+import { ExpandMore, AddOutlined, EditLocationTwoTone, Visibility } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { deleteAccounts, getDataToClone } from '../../axios/accounts'
@@ -23,7 +23,11 @@ import CustomToast from '../../components/Helpers/CustomToast'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { getErrorMessage } from '../../services/util'
 import BlockIcon from '@material-ui/icons/Block';
-import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
+import { accountDetailPage } from '../../routes/Accounts'
+import _ from "lodash";
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let accountTimeout
 export default function Account() {
@@ -47,6 +51,8 @@ export default function Account() {
     const [alertData, setAlertData] = useState({})
     const [searchVal, setSearchVal] = useState("");
 
+    const [singleAccountDelete, setSingleAccountDelete] = useState({ id: null, show: false, accountName: "" })
+
     useEffect(() => {
         let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
 
@@ -62,11 +68,10 @@ export default function Account() {
 
     useEffect(() => {
         if (renderCount > 0) {
-            if (user) {
-                fetchAccounts();
-            }
+            fetchAccounts();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [query, user]);
+        // eslint-disable-next-line
+    }, [query]);
 
     useEffect(() => {
         let rows = accountData?.map((u) => ({
@@ -127,40 +132,12 @@ export default function Account() {
                             setCheckAllAccounts(false);
                         }
                         handleSelectedAccounts(params.row.id, ev.target.checked)
-
-                        // if (checkedRecords.length === 1) {
-                        //   const id = checkedRecords[0].id;
-                        //   findOneUser(id);
-                        // } else {
-                        //   setSelectedUser(null);
-                        //   if (selectedBrand) {
-                        //     accountData.forEach((u) => {
-                        //       if (u.brand !== selectedBrand.id) {
-                        //         setSelectedBrand(null);
-                        //       }
-                        //     });
-                        //   }
-                        // }
                     }}
-                /> : <Tooltip title="You must be the owner of this account to get the selection functionality" >
+                /> : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the selection functionality">
                         <IconButton>
-                            <BlockIcon />
+                            <BlockIcon fontSize="small" color="error" />
                         </IconButton>
                     </Tooltip >
-            ),
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            width: 75
-        },
-        {
-            field: "clone", headerName: " ",
-            renderCell: (params) => (
-                <Tooltip title="Clone">
-                    <IconButton color="error" aria-label="copy" onClick={() => { cloneAccount(params.row._id) }}>
-                        <FileCopyOutlinedIcon />
-                    </IconButton>
-                </Tooltip>
             ),
             disableColumnMenu: true,
             sortable: false,
@@ -205,50 +182,80 @@ export default function Account() {
             )
         },
         { field: "phone", headerName: "Phone", width: 200 },
-        // {
-        //     field: "Actions",
-        //     headerName: "Actions",
-        //     width: 200,
-        //     renderCell: (params) => (
-        //         <span><EditOutlined button fontSize="small" onClick={() => handleEdit(params)} /></span>
-        //     )
-        // },
-        { field: "rootAccount", headerName: "Root Account", width: 200 },
+
+        {
+            field: "actions", headerName: " ",
+            renderCell: (params) => (
+                <>
+                    <Tooltip title="Edit">
+                        <IconButton aria-label="Edit" onClick={() => handleEdit(params)}>
+                            <EditIcon fontSize="small" color="primary" />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="View">
+                        <IconButton aria-label="View" onClick={() => handleRowClick(params)}>
+                            <Visibility fontSize="small" color="primary" />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Clone">
+                        <IconButton aria-label="Clone" onClick={() => { cloneAccount(params.row._id) }}>
+                            <FileCopyIcon fontSize="small" color="primary" />
+                        </IconButton>
+                    </Tooltip>
+                    {
+                        params.row.allowToDelete ?
+                            <Tooltip title="Delete">
+                                <IconButton aria-label="Delete" onClick={() => {
+                                    setSingleAccountDelete({ show: true, id: params.row._id, accountName: params.row.accountName })
+                                }}>
+                                    <DeleteIcon fontSize="small" color="error" />
+                                </IconButton>
+                            </Tooltip> :
+                            <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the delete functionality">
+                                <IconButton aria-label="Delete">
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                    }
+
+                </>
+            ),
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            width: 200
+        },
     ];
 
     const handleEdit = data => {
-        console.log("🚀 ~ file: index.js ~ line 189 ~ Account ~ data", data)
         history.push({
             pathname: "/account/new",
             state: {
                 accountId: data.row.id,
             },
         });
-
     }
+
     const handleSearch = (e) => {
         if (query.page !== 1) {
-            setQuery((prevState) => ({ ...prevState, page: 1 }));
+            setQuery((prevState) => ({ ...prevState, page: 0 }));
         }
         setSearchVal(e.target.value);
     };
 
     const fetchAccounts = async () => {
-        if (user) {
-            setLoading(true);
-            let searchParams = { ...query }
-            searchParams = searchVal
-                ? { ...searchParams, search: searchVal }
-                : { ...searchParams };
-            let tdata = await GetAccounts(searchParams)
+        setLoading(true);
+        let searchParams = { ...query }
+        searchParams = searchVal
+            ? { ...searchParams, search: searchVal }
+            : { ...searchParams };
+        let tdata = await GetAccounts(searchParams)
 
-            if (tdata?.data) {
-                setRowCount(tdata.count)
-                setAccountData(tdata.data)
-            }
-            setLoading(false);
+        if (tdata?.data) {
+            setRowCount(tdata.count)
+            setAccountData(tdata.data)
         }
-
+        setLoading(false);
     }
 
     const handleSelectedAccounts = (id, isChecked) => {
@@ -287,7 +294,9 @@ export default function Account() {
             open: isOpen
         })
     };
+
     const handlePage = (params) => {
+        console.log("🚀 ~ file: index.js ~ line 258 ~ handlePage ~ params", params)
         if (query.page !== params.page) {
             setQuery((prevState) => ({ ...prevState, page: params.page }));
         }
@@ -335,6 +344,33 @@ export default function Account() {
         }
     }
 
+    const handleSingleDeleteAccounts = async () => {
+        try {
+            let data = await deleteAccounts([handleSingleDeleteAccounts.id])
+            if (data.status === 200) {
+                handleSnackbar(data.message, 'success', true)
+                fetchAccounts();
+            }
+            setShowConfirmBox(false)
+            setSelectedRecs([])
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
+            }
+        }
+    }
+
+    const handleRowClick = e => {
+        history.push({
+            pathname: accountDetailPage.path,
+            state: {
+                accountId: e.row._id,
+            },
+        });
+    }
+
     return (
         <Layout>
             {
@@ -346,17 +382,22 @@ export default function Account() {
                 /> : null
             }
 
+            <BrandHeader heading=""
+                style={{ marginTop: "150px", minHeight: "200px" }}
+                showHeading={false}>
 
-            <Paper className="account-header">
-                <SearchBox onSearch={handleSearch} value={searchVal} />
+                <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
+                <Box component="span" marginX={1} />
 
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={clickCreateNew}
+                    startIcon={<AddOutlined />}
                 >
-                    <AddOutlined /> Add
+                    Add
                 </Button>
+                <Box component="span" marginX={1} />
 
                 <Button
                     disabled={true}
@@ -366,6 +407,7 @@ export default function Account() {
                 >
                     Import
                 </Button>
+                <Box component="span" marginX={1} />
 
                 <Button
                     disabled={dataRows.filter((d) => d.isChecked).length === 0}
@@ -395,7 +437,8 @@ export default function Account() {
                         Delete
                     </MenuItem>
                 </Menu>
-            </Paper>
+
+            </BrandHeader>
 
             <Paper style={{ marginTop: 15 }}>
                 <BoxWithBorder>
@@ -418,6 +461,7 @@ export default function Account() {
                             rowCount={rowCount}
                             rowsPerPageOptions={[25, 50, 75]}
                             onSortModelChange={handleSortModelChange}
+                            // onRowClick={handleRowClick}
                             density="compact"
                         />
                     </div>
@@ -425,9 +469,18 @@ export default function Account() {
                         showConfirmBox ?
                             <ConfirmationDialog
                                 open={showConfirmBox}
-                                message={`Are you sure you want to delete these entities`}
+                                message={`Are you sure you want to delete these accounts`}
                                 onClose={() => setShowConfirmBox(false)}
                                 onOk={handleDeleteAccounts}
+                            /> : null
+                    }
+                    {
+                        singleAccountDelete.show ?
+                            <ConfirmationDialog
+                                open={singleAccountDelete.show}
+                                message={`Are you sure you want to delete account: ${singleAccountDelete.accountName}`}
+                                onClose={() => setSingleAccountDelete({ id: null, show: false })}
+                                onOk={handleSingleDeleteAccounts}
                             /> : null
                     }
                 </BoxWithBorder>
