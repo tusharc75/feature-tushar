@@ -1,76 +1,79 @@
-import {ThemeProvider} from '@material-ui/core'
-import {Redirect, Route, Switch} from 'react-router-dom'
-import {theme} from './constants/AppConfig'
+import { ThemeProvider } from '@material-ui/core'
+import { Redirect, Route, Switch } from 'react-router-dom'
+import { theme } from './constants/AppConfig'
 import Login from './pages/Auth/Login'
 import Leads from './pages/Leads'
 import NewLead from './pages/Leads/NewLead'
 import Opportunities from './pages/Opportunities'
 import AddNewOpportunity from './pages/Opportunities/AddNewOpportunity'
 import PrivateRoute from './components/PrivateRoute'
-import {useData} from './StateProvider/Provider'
+import { useData } from './StateProvider/Provider'
 import AddDoa from './pages/DoaSetup/AddDoa'
 import Contact from './pages/Contact'
 import Account from './pages/Account'
 import CreateAccount from './pages/Account/CreateAccount'
 import CreateContact from './pages/Contact/CreateContact'
-
+import AccountDetailPage from "./pages/Account/AccountDetailPage"
 
 function App() {
     const {
-        state: {user}
+        state: { user }
     } = useData()
-    
+
     const conditionalRedirect = (Comp, location) => {
         return !user ? (
-            <Comp/>
+            <Comp />
         ) : (
-            <Redirect to={{pathname: '/', state: {from: location}}}/>
-        )
+                <Redirect to={{ pathname: '/', state: { from: location } }} />
+            )
     }
-    
+
     return (
         <ThemeProvider theme={theme}>
             <Switch>
                 <Route
                     exact
                     path="/login"
-                    render={({location}) => conditionalRedirect(Login, location)}
+                    render={({ location }) => conditionalRedirect(Login, location)}
                 />
                 <PrivateRoute exact path="/">
-                    <Leads/>
+                    <Leads />
                 </PrivateRoute>
                 <PrivateRoute exact path="/new-lead">
-                    <NewLead/>
+                    <NewLead />
                 </PrivateRoute>
                 <PrivateRoute exact path="/opportunities">
-                    <Opportunities/>
+                    <Opportunities />
                 </PrivateRoute>
                 <PrivateRoute exact path="/add-doa">
-                    <AddDoa/>
+                    <AddDoa />
                 </PrivateRoute>
                 <PrivateRoute exact path="/new-opp">
-                    <AddNewOpportunity/>
+                    <AddNewOpportunity />
                 </PrivateRoute>
                 {/* <PrivateRoute exact path="/">
           <CreateBrand />
         </PrivateRoute> */}
                 <PrivateRoute exact path="/contact">
-                    <Contact/>
+                    <Contact />
                 </PrivateRoute>
                 <PrivateRoute exact path="/contact/new">
-                    <CreateContact/>
+                    <CreateContact />
                 </PrivateRoute>
                 <PrivateRoute exact path="/contact/:id">
-                    <CreateContact/>
+                    <CreateContact />
                 </PrivateRoute>
                 <PrivateRoute exact path="/account">
-                    <Account/>
+                    <Account />
                 </PrivateRoute>
                 <PrivateRoute exact path="/account/new">
-                    <CreateAccount/>
+                    <CreateAccount />
                 </PrivateRoute>
                 <PrivateRoute exact path="/account/clone/:id">
-                    <CreateAccount/>
+                    <CreateAccount />
+                </PrivateRoute>
+                <PrivateRoute exact path="/account/detail">
+                    <AccountDetailPage />
                 </PrivateRoute>
                 {/* <Route exact path="/crm/account" component={Account} /> */}
             </Switch>

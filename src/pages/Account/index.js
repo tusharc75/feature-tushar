@@ -15,13 +15,15 @@ import {
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
-import { ExpandMore, AddOutlined, EditOutlined } from "@material-ui/icons";
+import { ExpandMore, AddOutlined, EditOutlined, VisibilityOutlined } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { deleteAccounts, getDataToClone } from '../../axios/accounts'
 import CustomToast from '../../components/Helpers/CustomToast'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { getErrorMessage } from '../../services/util'
+import { accountDetailPage } from '../../routes/Accounts'
+import _ from "lodash";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 
@@ -39,7 +41,7 @@ export default function Account() {
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 0, limit: 5 });
+    const [query, setQuery] = useState({ page: 1, limit: 10 });
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
@@ -62,11 +64,10 @@ export default function Account() {
 
     useEffect(() => {
         if (renderCount > 0) {
-            if (user) {
-                fetchAccounts();
-            }
+            fetchAccounts();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [query, user]);
+        // eslint-disable-next-line
+    }, [query]);
 
     useEffect(() => {
         let rows = accountData?.map((u) => ({
@@ -127,20 +128,6 @@ export default function Account() {
                             setCheckAllAccounts(false);
                         }
                         handleSelectedAccounts(params.row.id, ev.target.checked)
-
-                        // if (checkedRecords.length === 1) {
-                        //   const id = checkedRecords[0].id;
-                        //   findOneUser(id);
-                        // } else {
-                        //   setSelectedUser(null);
-                        //   if (selectedBrand) {
-                        //     accountData.forEach((u) => {
-                        //       if (u.brand !== selectedBrand.id) {
-                        //         setSelectedBrand(null);
-                        //       }
-                        //     });
-                        //   }
-                        // }
                     }}
                 /> : <Tooltip title="You must be the owner of this account to get the selection functionality" >
                         <IconButton>
@@ -205,19 +192,24 @@ export default function Account() {
             )
         },
         { field: "phone", headerName: "Phone", width: 200 },
-        // {
-        //     field: "Actions",
-        //     headerName: "Actions",
-        //     width: 200,
-        //     renderCell: (params) => (
-        //         <span><EditOutlined button fontSize="small" onClick={() => handleEdit(params)} /></span>
-        //     )
-        // },
-        { field: "rootAccount", headerName: "Root Account", width: 200 },
+        {
+            field: "Actions",
+            headerName: "Actions",
+            width: 200,
+            renderCell: (params) => (
+                <>
+                    <span><EditOutlined button fontSize="small"
+                        style={{ marginRight: '5px' }}
+                        onClick={() => handleEdit(params)} /></span>
+                    <span><VisibilityOutlined button fontSize="small"
+                        onClick={() => handleRowClick(params)}
+                    /></span>
+                </>
+            )
+        },
     ];
 
     const handleEdit = data => {
-        console.log("🚀 ~ file: index.js ~ line 189 ~ Account ~ data", data)
         history.push({
             pathname: "/account/new",
             state: {
@@ -234,21 +226,18 @@ export default function Account() {
     };
 
     const fetchAccounts = async () => {
-        if (user) {
-            setLoading(true);
-            let searchParams = { ...query }
-            searchParams = searchVal
-                ? { ...searchParams, search: searchVal }
-                : { ...searchParams };
-            let tdata = await GetAccounts(searchParams)
+        setLoading(true);
+        let searchParams = { ...query }
+        searchParams = searchVal
+            ? { ...searchParams, search: searchVal }
+            : { ...searchParams };
+        let tdata = await GetAccounts(searchParams)
 
-            if (tdata?.data) {
-                setRowCount(tdata.count)
-                setAccountData(tdata.data)
-            }
-            setLoading(false);
+        if (tdata?.data) {
+            setRowCount(tdata.count)
+            setAccountData(tdata.data)
         }
-
+        setLoading(false);
     }
 
     const handleSelectedAccounts = (id, isChecked) => {
@@ -287,7 +276,9 @@ export default function Account() {
             open: isOpen
         })
     };
+
     const handlePage = (params) => {
+        console.log("🚀 ~ file: index.js ~ line 258 ~ handlePage ~ params", params)
         if (query.page !== params.page) {
             setQuery((prevState) => ({ ...prevState, page: params.page }));
         }
@@ -335,6 +326,15 @@ export default function Account() {
         }
     }
 
+    const handleRowClick = e => {
+        history.push({
+            pathname: accountDetailPage.path,
+            state: {
+                accountId: e.row._id,
+            },
+        });
+    }
+    console.log('query', query, 'c', rowCount)
     return (
         <Layout>
             {
@@ -420,6 +420,7 @@ export default function Account() {
                             rowCount={rowCount}
                             rowsPerPageOptions={[5, 10, 20]}
                             onSortModelChange={handleSortModelChange}
+                            // onRowClick={handleRowClick}
                             density="compact"
                         />
                     </div>
@@ -427,7 +428,7 @@ export default function Account() {
                         showConfirmBox ?
                             <ConfirmationDialog
                                 open={showConfirmBox}
-                                message={`Are you sure you want to delete these entities`}
+                                message={`Are you sure you want to delete these accounts`}
                                 onClose={() => setShowConfirmBox(false)}
                                 onOk={handleDeleteAccounts}
                             /> : null
