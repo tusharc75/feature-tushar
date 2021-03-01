@@ -20,6 +20,7 @@ import {
   ExpandMore,
 } from "@material-ui/icons";
 import { SVG } from "../../assets";
+import UserProfile from "./../UserProfile";
 
 import "./Header.css";
 
@@ -90,6 +91,9 @@ const Header = () => {
   const [supportAnchorEl, setSupportAnchorEl] = React.useState(null);
   const [arcelorAnchorEl, setArcelorAnchorEl] = React.useState(null);
 
+  const [open, setOpen] = React.useState(false);
+  const anchorRef = React.useRef(null);
+
   const isSupportMenuOpen = Boolean(supportAnchorEl);
   const isArcelorMenuOpen = Boolean(arcelorAnchorEl);
 
@@ -108,6 +112,39 @@ const Header = () => {
   const arcelorMenuClose = () => {
     setArcelorAnchorEl(null);
   };
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+
+  const handleClose = (event, option) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+
+    if (option && option.logout) {
+      window.location.reload();
+      localStorage.removeItem("token");
+      history.push({
+        pathname: login.path,
+      });
+    }
+
+    if (option && option.profile) {
+      history.push({
+        pathname: Profile.path,
+      });
+    }
+    setOpen(false);
+  };
+
+  function handleListKeyDown(event) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+    }
+  }
 
   const supportMenuId = "support-menu";
 
@@ -192,14 +229,13 @@ const Header = () => {
               <HelpOutline />
             </IconButton>
 
-            <IconButton
-              edge="end"
-              aria-label="account of current user"
-              aria-haspopup="true"
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
+            <UserProfile
+              anchorRef={anchorRef}
+              open={open}
+              onToggle={handleToggle}
+              onClose={handleClose}
+              onListKeyDown={handleListKeyDown}
+            />
           </div>
         </Toolbar>
       </AppBar>
