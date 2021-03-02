@@ -10,7 +10,7 @@ import InputField from '../../components/Helpers/InputField';
 import CustomButton from '../../components/Helpers/Button'
 import { commonStyle } from '../Contact/CommonStyles'
 import { accountPage, accountDetailPage } from '../../routes/Accounts'
-import { craeteAccount, getAccountData, updateAccount, getDataToClone } from '../../axios/accounts'
+import { createAccount, getAccountData, updateAccount, getDataToClone } from '../../axios/accounts'
 import { useHistory, useParams } from 'react-router-dom'
 import CustomToast from '../../components/Helpers/CustomToast'
 import { getErrorMessage } from '../../services/util'
@@ -187,7 +187,7 @@ export default function CreateAccount() {
                 data = await updateAccount(values)
             }
             else {
-                data = await craeteAccount(values)
+                data = await createAccount(values)
             }
             if (data.status === 200) {
                 handleSnackbar(data.message, 'success', true)
@@ -288,6 +288,7 @@ export default function CreateAccount() {
                                             fieldsData={entityData.fields}
                                             size="small"
                                             fullWidth
+                                            isTooltip={true}
                                         />
 
                                         <Box display="flex" justifyContent="flex-end" className="gap-2">

@@ -186,11 +186,6 @@ export default function Account() {
             field: "actions", headerName: " ",
             renderCell: (params) => (
                 <>
-                    {/* <Tooltip title="Edit">
-                        <IconButton aria-label="Edit" onClick={() => handleEdit(params)}>
-                            <EditIcon fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip> */}
                     <Tooltip title="View">
                         <IconButton aria-label="View" onClick={() => handleRowClick(params)}>
                             <Visibility fontSize="small" color="primary" />
@@ -341,7 +336,7 @@ export default function Account() {
 
     const handleSingleDeleteAccounts = async () => {
         try {
-            let data = await deleteAccounts([handleSingleDeleteAccounts.id])
+            let data = await deleteAccounts({ ids: [singleAccountDelete.id] })
             if (data.status === 200) {
                 handleSnackbar(data.message, 'success', true)
                 fetchAccounts();
@@ -472,7 +467,7 @@ export default function Account() {
                             showConfirmBox ?
                                 <ConfirmationDialog
                                     open={showConfirmBox}
-                                    message={`Are you sure you want to delete these accounts`}
+                                    message={`Are you sure you want to delete these accounts ?`}
                                     onClose={() => setShowConfirmBox(false)}
                                     onOk={handleDeleteAccounts}
                                 /> : null
@@ -481,7 +476,7 @@ export default function Account() {
                             singleAccountDelete.show ?
                                 <ConfirmationDialog
                                     open={singleAccountDelete.show}
-                                    message={`Are you sure you want to delete account: ${singleAccountDelete.accountName}`}
+                                    message={`Are you sure you want to delete account: ${singleAccountDelete.accountName} ?`}
                                     onClose={() => setSingleAccountDelete({ id: null, show: false })}
                                     onOk={handleSingleDeleteAccounts}
                                 /> : null
