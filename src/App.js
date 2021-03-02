@@ -72,7 +72,7 @@ function App() {
                 <PrivateRoute exact path="/account/clone/:id">
                     <CreateAccount />
                 </PrivateRoute>
-                <PrivateRoute exact path="/account/detail">
+                <PrivateRoute exact path="/account/detail/:id">
                     <AccountDetailPage />
                 </PrivateRoute>
                 {/* <Route exact path="/crm/account" component={Account} /> */}

@@ -1,22 +1,27 @@
 import React from 'react'
 import { Typography, Box, Grid } from '@material-ui/core'
+import { EditOutlined } from '@material-ui/icons'
 import { capitalize } from '../../services/util'
-
+import './account.css'
 function DetailPage(props) {
     const { data } = props
     const getNode = (k, val) => {
         return <Grid item xs={6} style={{ padding: "1px" }}>
-            <table cellPadding="5px" cellSpacing='8px'>
-                <tr style={{ width: "90%" }}>
-                    <td style={{ width: '150px' }}><Typography style={{ fontWeight: '700' }} variant='subtitle1' color="textSecondary">{k}</Typography></td>
-                    <td style={{ wordWrap: 'break-word' }}> <Typography variant='subtitle1'><bold> {capitalize(val)}</bold></Typography></td>
+            <table cellPadding="1px" cellSpacing='1px'>
+                <tr className="cTr" style={{}}>
+                    <td className="td1" ><Typography style={{ fontWeight: '700' }} variant='subtitle1' color="textSecondary">{k}</Typography></td>
+                    <td className="td2"> <Typography variant='subtitle1'><bold> {capitalize(val)}</bold></Typography></td>
                 </tr>
             </table>
 
         </Grid>
     }
-    return <div style={{ flexGrow: 1, padding: "5px" }}>
-        <Typography variant='h5' color="primary"> <strong>Details</strong></Typography>
+    return <div className="customDiv12">
+        <div className="customDiv13" >
+            <Typography variant='h5' color="primary"> <strong>Details</strong></Typography>
+            <EditOutlined />
+        </div>
+
         <Grid container spacing={3} style={{ padding: '20px' }}>
             {
                 data && Object.keys(data).length > 0 ?

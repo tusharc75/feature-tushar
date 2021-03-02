@@ -17,16 +17,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const CustomHeader = (props) => {
-    const { total, totalHeading, active, activeHeading, inActive, inActiveHeading, heading, children, showHeading } = props;
+    const { mainPoints, heading, children, showHeading, subHeading } = props;
     const classes = useStyles();
-    let accountName = "BP"
-    let mainPoints = {
-        "Primary Owner": "Joe Smith",
-        "Phone": "+13612463463",
-        "Master Account": "Myntra Corp",
-        "Annual Revenue $m": "$50m"
+    // let mainPoints = {
+    //     "Primary Owner": "Joe Smith",
+    //     "Phone": "+13612463463",
+    //     "Master Account": "Myntra Corp",
+    //     "Annual Revenue $m": "$50m"
 
-    }
+    // }
     console.log("***", mainPoints)
     return (
         <React.Fragment>
@@ -40,7 +39,7 @@ const CustomHeader = (props) => {
                                         {heading}
                                     </Typography>
                                     <Typography variant="h6" component="h2" color="primary">
-                                        {accountName}
+                                        {subHeading}
                                     </Typography>
                                 </>
                                 : null

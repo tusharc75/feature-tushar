@@ -1,61 +1,70 @@
 import React, { useEffect, useState } from 'react';
-import Layout from "../../components/Layout";
-import { GetFields } from '../../axios/index';
-import { useData } from '../../StateProvider/Provider';
-import { Box, Button, CircularProgress } from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
-import { Formik, Form } from "formik";
-import { getObjKeys, formValidation } from '../../constants/helpers';
-import InputField from '../../components/Helpers/InputField';
-import CustomButton from '../../components/Helpers/Button'
-import { commonStyle } from '../Contact/CommonStyles'
-import { accountPage, accountDetailPage } from '../../routes/Accounts'
-import { craeteAccount, getAccountData, updateAccount, getDataToClone } from '../../axios/accounts'
+import Dialog from '@material-ui/core/Dialog';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import { withStyles } from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import Typography from '@material-ui/core/Typography';
+import CreateAccount from './CreateAccount'
+import { getErrorMessage } from '../../../services/util'
+import { getObjKeys, formValidation } from '../../../constants/helpers';
+import { accountPage, accountDetailPage } from '../../../routes/Accounts'
+import { craeteAccount, getAccountData, updateAccount, getDataToClone } from '../../../axios/accounts'
+import { GetFields } from '../../../axios/index';
 import { useHistory, useParams } from 'react-router-dom'
-import CustomToast from '../../components/Helpers/CustomToast'
-import { getErrorMessage } from '../../services/util'
+import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 
-import "./account.css"
+const styles = (theme) => ({
+    root: {
+        margin: 0,
+        padding: theme.spacing(2),
+    },
+    closeButton: {
+        position: 'absolute',
+        right: theme.spacing(1),
+        top: theme.spacing(1),
+        color: theme.palette.grey[500],
+    },
+});
 
-const useStyles = makeStyles((theme) => ({
-    ...commonStyle(theme)
-}));
+const DialogTitle = withStyles(styles)((props) => {
+    const { children, classes, onClose, ...other } = props;
+    return (
+        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+            <Typography variant="h6">{children}</Typography>
+            {onClose ? (
+                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                    <CloseIcon />
+                </IconButton>
+            ) : null}
+        </MuiDialogTitle>
+    );
+});
 
-let parentAccount
-export default function CreateAccount() {
+export default function CreateAccountMain(props) {
 
-    const classes = useStyles();
-    const history = useHistory();
-    let { id } = useParams();
-
+    const { open, onClose, isEdit, id, showSuccessMes } = props
     const { state: { user } } = useData();
+    const history = useHistory();
     const [entityData, setEntityData] = useState({
         fields: [],
         initialValues: {},
     });
-    const [cloneValues, setCloneValues] = useState({
-        fields: [],
-        initialValues: {},
-    })
-
     const [loading, setLoading] = useState(false)
-    const [editId, setEditId] = useState('')
-    const [isEdit, setIsEdit] = useState(false)
     const [updateFieldValues, setUpdateFieldValues] = useState({})
     const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
     const [alertData, setAlertData] = useState({})
 
     useEffect(async () => {
-        if (history?.location?.state?.accountId) {
-            setIsEdit(true)
+        if (isEdit && id) {
             fetchAccountData()
         }
         else if (id) {
             GetFields('Account').then(({ data }) => {
                 const newFields = [];
                 data.map((_f) => newFields.push(_f.fieldData));
-                
+
                 getDataToClone(id).then((dataToClone) => {
                     setEntityData({
                         fields: newFields,
@@ -74,10 +83,8 @@ export default function CreateAccount() {
 
     const fetchAccountData = async () => {
         setLoading(true)
-        let accId = history.location.state.accountId
-        setEditId(accId)
         try {
-            let data = await getAccountData(accId)
+            let data = await getAccountData(id)
             if (data.status === 200 && Object.keys(data.data)) {
                 let initialVal = data.data
                 setUpdateFieldValues(initialVal)
@@ -90,6 +97,7 @@ export default function CreateAccount() {
                 handleSnackbar(errMes, 'error', true)
             }
         }
+
     }
     const getAccountFields = (brandId, values) => {
         GetFields('Account', brandId).then(({ data }) => {
@@ -180,7 +188,7 @@ export default function CreateAccount() {
         }
         handleLoading(false, saveAndNew)
     }
-    const handleCreateAccount = async (values, saveAndNew) => {
+    const handleCreateAccount = async (values, saveAndNew, setValues) => {
         try {
             let data
             if (isEdit) {
@@ -189,14 +197,22 @@ export default function CreateAccount() {
             else {
                 data = await craeteAccount(values)
             }
+
             if (data.status === 200) {
-                handleSnackbar(data.message, 'success', true)
                 if (isEdit) {
-                    goToBackPage(data?.data?._id)
+                    setValues({ ...updateFieldValues });
+                }
+                else {
+                    setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
+                }
+                showSuccessMes(data.message, 'success', true)
+                // handleSnackbar(data.message, 'success', true)
+                if (isEdit) {
+                    onClose({ fetch: true })
                 }
                 else {
                     if (!saveAndNew) {
-                        goToBackPage(data?.data?._id)
+                        onClose({ fetch: true })
                     }
                     else {
                         getAccountFields()
@@ -217,7 +233,6 @@ export default function CreateAccount() {
         })
     };
     const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
-        handleLoading(true, saveAndNew)
         const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
@@ -226,11 +241,12 @@ export default function CreateAccount() {
                 }
             });
         } else {
+            handleLoading(true, saveAndNew)
             values = getModiFiedValues(values)
-            if (isEdit && editId) {
-                values._id = editId
+            if (isEdit && id) {
+                values._id = id
             }
-            handleCreateAccount(values, saveAndNew)
+            handleCreateAccount(values, saveAndNew, setValues)
             if (saveAndNew) {
                 resetForm()
             }
@@ -240,85 +256,33 @@ export default function CreateAccount() {
                     initialValues: {},
                 })
             }
-            if (isEdit) {
-                setValues({ ...updateFieldValues });
-            }
-            else {
-                setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
-            }
+
             setErrors({});
         }
+
     }
-    
-    return (
-        <Layout>
-            {
-                alertData ? <CustomToast
-                    open={alertData.open || false}
-                    close={() => handleSnackbar('', '', false)}
-                    errorMsg={alertData.errorMsg || ''}
-                    type={alertData.type || ''}
-                /> : null
-            }
-            {
-                entityData.fields.length > 0 ?
-                    <Box className={classes.box}>
-                        <Formik
-                            initialValues={entityData.initialValues}
-                            validate={(values) => formValidation(values, entityData.fields)}
-                        >
-                            {({
-                                setValues,
-                                setErrors,
-                                values,
-                                errors,
-                                touched,
-                                setFieldValue,
-                                setFieldTouched,
-                                validateForm,
-                                resetForm
-                            }) => (
-                                <Form>
-                                    <>
-                                        <InputField
-                                            errors={errors}
-                                            values={values}
-                                            setFieldValue={setFieldValue}
-                                            touched={touched}
-                                            fieldsData={entityData.fields}
-                                            size="small"
-                                            fullWidth
-                                        />
 
-                                        <Box display="flex" justifyContent="flex-end" className="gap-2">
-                                            <Button onClick={goToBackPageListing} variant="outlined" color="primary" >
-                                                Cancel
-                                            </Button>
-
-                                            <CustomButton
-                                                loading={loading}
-                                                disabled={loading}
-                                                style={{ float: "right" }}
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={(e) => {
-                                                    e.preventDefault()
-                                                    handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
-                                                }}
-                                            >
-                                                {isEdit ? "Update" : "Save"}
-                                            </CustomButton>
-                                        </Box>
-                                    </>
-                                </Form>
-                            )}
-                        </Formik>
-                    </Box>
-                    : <Box className={classes.box} style={{ textAlign: 'center' }}>
-                        <span >  <CircularProgress /> Fetching Data</span>
-                    </Box>
-            }
-
-        </Layout >
-    )
+    return (<Dialog
+        // fullWidth={true}
+        maxWidth="md"
+        aria-labelledby="customized-dialog-title"
+        onClose={onClose}
+        open={open}
+    >
+        <DialogTitle id="customized-dialog-title"
+            style={{ paddingBottom: "1px", paddingLeft: "24px" }}
+            onClose={onClose}>
+            {isEdit ? 'Update' : 'Add'}  Account
+        </DialogTitle>
+        <CreateAccount
+            alertData={alertData}
+            handleSnackbar={handleSnackbar}
+            entityData={entityData}
+            onClose={onClose}
+            isEdit={isEdit}
+            loading={loading}
+            handleSubmit={handleSubmit}
+        />
+    </Dialog>
+    );
 }
