@@ -36,9 +36,7 @@ export default function Account() {
     const { state: { user } } = useData();
     const history = useHistory();
     const [accountData, setAccountData] = useState([]);
-    const [editData, setEditData] = useState({
-        id: undefined, isEdit: false
-    })
+    const [cloneId, setCloneId] = useState('')
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
@@ -86,9 +84,8 @@ export default function Account() {
     }, [accountData])
 
     const cloneAccount = async (accountId) => {
-        history.push({
-            pathname: `/account/clone/${accountId}`,
-        });
+        setCloneId(accountId)
+        setIsAccDialogVisible(true)
     }
 
     const columns = [
@@ -225,10 +222,6 @@ export default function Account() {
     ];
 
     const handleEdit = data => {
-        setEditData({
-            id: data.row.id,
-            isEdit: true
-        })
     }
 
     const handleSearch = (e) => {
@@ -294,14 +287,12 @@ export default function Account() {
     };
 
     const handlePage = (params) => {
-        console.log("🚀 ~ file: index.js ~ line 258 ~ handlePage ~ params", params)
         if (query.page !== params.page) {
             setQuery((prevState) => ({ ...prevState, page: params.page }));
         }
     };
 
     const handlePageSize = (params) => {
-        console.log("🚀 ~ file: index.js ~ line 286 ~ handlePageSize ~ params", params)
         if (params.pageSize !== query.limit) {
             setQuery({ page: 1, limit: params.pageSize });
         }
@@ -372,8 +363,8 @@ export default function Account() {
             fetchAccounts()
         }
         setIsAccDialogVisible(false)
-        if (editData.isEdit) {
-            setEditData({ id: undefined, isEdit: false })
+        if (cloneId) {
+            setCloneId('')
         }
     }
 
@@ -499,9 +490,8 @@ export default function Account() {
                     <CreateAccountDialog
                         open={isAccDialogVisible}
                         onClose={handleDialogClose}
-                        isEdit={editData.isEdit}
                         showSuccessMes={handleSnackbar}
-                        id={editData.id}
+                        id={cloneId}
                     /> : null
             }
         </>

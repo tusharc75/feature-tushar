@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const CustomHeader = (props) => {
-    const { mainPoints, heading, children, showHeading, subHeading } = props;
+    const { mainPoints, heading, children, showHeading } = props;
     const classes = useStyles();
     // let mainPoints = {
     //     "Primary Owner": "Joe Smith",
@@ -34,14 +34,9 @@ const CustomHeader = (props) => {
                     <Grid item>
                         {
                             showHeading ?
-                                <>
-                                    <Typography variant="h6" component="h2" color="primary">
-                                        {heading}
-                                    </Typography>
-                                    <Typography variant="h6" component="h2" color="primary">
-                                        {subHeading}
-                                    </Typography>
-                                </>
+                                <Typography variant="h6" component="h2" color="primary">
+                                    {heading}
+                                </Typography>
                                 : null
                         }
                     </Grid>

@@ -44,7 +44,7 @@ const DialogTitle = withStyles(styles)((props) => {
 
 export default function CreateAccountMain(props) {
 
-    const { open, onClose, isEdit, id, showSuccessMes } = props
+    const { open, onClose, id, showSuccessMes } = props
     const { state: { user } } = useData();
     const history = useHistory();
     const [entityData, setEntityData] = useState({
@@ -57,10 +57,7 @@ export default function CreateAccountMain(props) {
     const [alertData, setAlertData] = useState({})
 
     useEffect(async () => {
-        if (isEdit && id) {
-            fetchAccountData()
-        }
-        else if (id) {
+        if (id) {
             GetFields('Account').then(({ data }) => {
                 const newFields = [];
                 data.map((_f) => newFields.push(_f.fieldData));
@@ -190,34 +187,13 @@ export default function CreateAccountMain(props) {
     }
     const handleCreateAccount = async (values, saveAndNew, setValues) => {
         try {
-            let data
-            if (isEdit) {
-                data = await updateAccount(values)
-            }
-            else {
-                data = await createAccount(values)
-            }
-
+            let data = await createAccount(values)
+            
             if (data.status === 200) {
-                if (isEdit) {
-                    setValues({ ...updateFieldValues });
-                }
-                else {
-                    setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
-                }
+                onClose({ fetch: true })
+                setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
                 showSuccessMes(data.message, 'success', true)
                 // handleSnackbar(data.message, 'success', true)
-                if (isEdit) {
-                    onClose({ fetch: true })
-                }
-                else {
-                    if (!saveAndNew) {
-                        onClose({ fetch: true })
-                    }
-                    else {
-                        getAccountFields()
-                    }
-                }
                 handleLoading(false, saveAndNew)
             }
         }
@@ -243,20 +219,7 @@ export default function CreateAccountMain(props) {
         } else {
             handleLoading(true, saveAndNew)
             values = getModiFiedValues(values)
-            if (isEdit && id) {
-                values._id = id
-            }
             handleCreateAccount(values, saveAndNew, setValues)
-            if (saveAndNew) {
-                resetForm()
-            }
-            if (!isEdit && saveAndNew) {
-                setEntityData({
-                    fields: entityData.fields,
-                    initialValues: {},
-                })
-            }
-
             setErrors({});
         }
 
@@ -272,14 +235,13 @@ export default function CreateAccountMain(props) {
         <DialogTitle id="customized-dialog-title"
             style={{ paddingBottom: "1px", paddingLeft: "24px" }}
             onClose={onClose}>
-            {isEdit ? 'Update' : 'Add'}  Account
+            Add Account
         </DialogTitle>
         <CreateAccount
             alertData={alertData}
             handleSnackbar={handleSnackbar}
             entityData={entityData}
             onClose={onClose}
-            isEdit={isEdit}
             loading={loading}
             handleSubmit={handleSubmit}
         />
