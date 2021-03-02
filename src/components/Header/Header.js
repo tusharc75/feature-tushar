@@ -21,6 +21,7 @@ import {
 } from "@material-ui/icons";
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
+import { useHistory } from "react-router-dom";
 
 import "./Header.css";
 
@@ -88,6 +89,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = () => {
   const classes = useStyles();
+  const history = useHistory();
+
   const [supportAnchorEl, setSupportAnchorEl] = React.useState(null);
   const [arcelorAnchorEl, setArcelorAnchorEl] = React.useState(null);
 
@@ -127,15 +130,15 @@ const Header = () => {
       window.location.reload();
       localStorage.removeItem("token");
       history.push({
-        pathname: login.path,
+        pathname: "/login",
       });
     }
 
-    if (option && option.profile) {
-      history.push({
-        pathname: Profile.path,
-      });
-    }
+    // if (option && option.profile) {
+    //   history.push({
+    //     pathname: Profile.path,
+    //   });
+    // }
     setOpen(false);
   };
 
