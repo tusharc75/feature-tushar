@@ -1,14 +1,19 @@
-import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+import React, { useEffect, useState } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
+import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
-import CustomButton from '../../../components/Helpers/Button'
+import CreateAccount from './CreateAccount'
+import { getErrorMessage } from '../../../services/util'
+import { getObjKeys, formValidation } from '../../../constants/helpers';
+import { accountPage, accountDetailPage } from '../../../routes/Accounts'
+import { craeteAccount, getAccountData, updateAccount, getDataToClone } from '../../../axios/accounts'
+import { GetFields } from '../../../axios/index';
+import { useHistory, useParams } from 'react-router-dom'
+import { useData } from '../../../StateProvider/Provider';
+import _ from 'lodash'
 
 const styles = (theme) => ({
     root: {
@@ -37,44 +42,247 @@ const DialogTitle = withStyles(styles)((props) => {
     );
 });
 
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
+export default function CreateAccountMain(props) {
 
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+    const { open, onClose, isEdit, id, showSuccessMes } = props
+    const { state: { user } } = useData();
+    const history = useHistory();
+    const [entityData, setEntityData] = useState({
+        fields: [],
+        initialValues: {},
+    });
+    const [loading, setLoading] = useState(false)
+    const [updateFieldValues, setUpdateFieldValues] = useState({})
+    const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
+    const [alertData, setAlertData] = useState({})
 
-export default function CustomizedDialogs() {
-    const [open, setOpen] = React.useState(false);
+    useEffect(async () => {
+        if (isEdit && id) {
+            fetchAccountData()
+        }
+        else if (id) {
+            GetFields('Account').then(({ data }) => {
+                const newFields = [];
+                data.map((_f) => newFields.push(_f.fieldData));
 
-    const handleClickOpen = () => {
-        setOpen(true);
+                getDataToClone(id).then((dataToClone) => {
+                    setEntityData({
+                        fields: newFields,
+                        initialValues: dataToClone.data ? dataToClone.data : getObjKeys("", newFields),
+                    });
+                    setLoading(false);
+                }, error => {
+                    setLoading(false);
+                });
+            });
+        }
+        else if (user) {
+            getAccountFields(user.user.brand);
+        }
+    }, [user]);
+
+    const fetchAccountData = async () => {
+        setLoading(true)
+        try {
+            let data = await getAccountData(id)
+            if (data.status === 200 && Object.keys(data.data)) {
+                let initialVal = data.data
+                setUpdateFieldValues(initialVal)
+                getAccountFields(undefined, initialVal)
+            }
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
+            }
+        }
+
+    }
+    const getAccountFields = (brandId, values) => {
+        GetFields('Account', brandId).then(({ data }) => {
+            const newFields = [];
+            data.map((_f) => newFields.push(_f.fieldData));
+            setEntityData({
+                fields: newFields,
+                initialValues: values ? values : getObjKeys("", newFields),
+            });
+            setLoading(false)
+        });
     };
-    const handleClose = () => {
-        setOpen(false);
-    };
 
-    return (<Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-        <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+    const goToBackPage = (id) => {
+        let state = {}
+        let tempPath = accountDetailPage.path
+        if (id && typeof id === 'string') {
+            tempPath = tempPath + "/" + id
+        }
+        history.push({
+            pathname: tempPath
+        })
+    }
+
+    const goToBackPageListing = (e) => {
+        history.push({
+            pathname: accountPage.path,
+        })
+    }
+
+    const handleLoading = (action, isSaveAndNew = false) => {
+        if (isSaveAndNew) {
+            setSaveAndNewLoading(action)
+        }
+        else {
+            setLoading(action)
+        }
+    }
+
+    const getModiFiedValues = values => {
+        values = { ...values }
+
+        if (values.employees === "") {
+            delete values.employees
+        }
+        else {
+            values.employees = parseInt(values.employees)
+        }
+
+        let tempFields = _.cloneDeep(entityData.fields)
+        tempFields.map(f => {
+            let fName = f.fieldName
+            if (f.type === "dropDown" && values[fName]) {
+                if (f?.option && f.option.length) {
+                    f.option.filter(obj => {
+                        if (obj.optionValue === values[fName]) {
+                            values[fName] = obj
+                            return true
+                        }
+                    })
+                }
+            }
+            if (f.type === "multiSelect" && values[fName] && values[fName].length > 0) {
+                if (f?.option && f.option.length) {
+                    f.option.map(obj => {
+                        let i = values[fName].indexOf(obj.optionValue)
+                        if (i >= 0) {
+                            values[fName][i] = obj
+                        }
+                    })
+                }
+            }
+        })
+        Object.keys(values).forEach(key => {
+            if (!values[key] || (typeof values[key] === 'object' && Object.keys(values[key]).length == 0)) {
+                delete values[key]
+            }
+        })
+
+        // if (user?.user?.brand) values.brand = user.user.brand
+        return values
+    }
+
+    const showErroeMes = (err, saveAndNew) => {
+        let errMes = getErrorMessage(err)
+        if (errMes) {
+            handleSnackbar(errMes, 'error', true)
+        }
+        handleLoading(false, saveAndNew)
+    }
+    const handleCreateAccount = async (values, saveAndNew, setValues) => {
+        try {
+            let data
+            if (isEdit) {
+                data = await updateAccount(values)
+            }
+            else {
+                data = await craeteAccount(values)
+            }
+
+            if (data.status === 200) {
+                if (isEdit) {
+                    setValues({ ...updateFieldValues });
+                }
+                else {
+                    setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
+                }
+                showSuccessMes(data.message, 'success', true)
+                // handleSnackbar(data.message, 'success', true)
+                if (isEdit) {
+                    onClose({ fetch: true })
+                }
+                else {
+                    if (!saveAndNew) {
+                        onClose({ fetch: true })
+                    }
+                    else {
+                        getAccountFields()
+                    }
+                }
+                handleLoading(false, saveAndNew)
+            }
+        }
+        catch (err) {
+            showErroeMes(err, saveAndNew)
+        }
+    }
+    const handleSnackbar = (msg, type, isOpen) => {
+        setAlertData({
+            errorMsg: msg,
+            type: type,
+            open: isOpen
+        })
+    };
+    const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
+        const errors = formValidation(values, _.cloneDeep(entityData.fields));
+        if (Object.keys(errors).length) {
+            entityData.fields.forEach((input) => {
+                if (input.required) {
+                    setTouched(input.fieldName, true);
+                }
+            });
+        } else {
+            handleLoading(true, saveAndNew)
+            values = getModiFiedValues(values)
+            if (isEdit && id) {
+                values._id = id
+            }
+            handleCreateAccount(values, saveAndNew, setValues)
+            if (saveAndNew) {
+                resetForm()
+            }
+            if (!isEdit && saveAndNew) {
+                setEntityData({
+                    fields: entityData.fields,
+                    initialValues: {},
+                })
+            }
+
+            setErrors({});
+        }
+
+    }
+
+    return (<Dialog
+        // fullWidth={true}
+        maxWidth="md"
+        aria-labelledby="customized-dialog-title"
+        onClose={onClose}
+        open={open}
+    >
+        <DialogTitle id="customized-dialog-title"
+            style={{ paddingBottom: "1px", paddingLeft: "24px" }}
+            onClose={onClose}>
             {isEdit ? 'Update' : 'Add'}  Account
         </DialogTitle>
-        <DialogContent dividers>
-        </DialogContent>
-        <DialogActions>
-
-            <Button onClick={handleClose} variant="outlined" >
-                Cancel
-          </Button>
-            <Button onClick={handleClose} color="primary">
-                {isEdit ? 'Update' : 'Add'}
-            </Button>
-        </DialogActions>
+        <CreateAccount
+            alertData={alertData}
+            handleSnackbar={handleSnackbar}
+            entityData={entityData}
+            onClose={onClose}
+            isEdit={isEdit}
+            loading={loading}
+            handleSubmit={handleSubmit}
+        />
     </Dialog>
     );
 }

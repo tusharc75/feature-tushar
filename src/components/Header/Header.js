@@ -21,7 +21,8 @@ import {
 } from "@material-ui/icons";
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
-
+import { useHistory } from "react-router-dom";
+import { login, Profile } from '../../routes/auth'
 import "./Header.css";
 
 const useStyles = makeStyles((theme) => ({
@@ -65,6 +66,7 @@ const useStyles = makeStyles((theme) => ({
     transition: theme.transitions.create("width"),
     width: "100%",
   },
+
   sectionDesktop: {
     display: "none",
     [theme.breakpoints.up("md")]: {
@@ -88,6 +90,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = () => {
   const classes = useStyles();
+  const history = useHistory();
   const [supportAnchorEl, setSupportAnchorEl] = React.useState(null);
   const [arcelorAnchorEl, setArcelorAnchorEl] = React.useState(null);
 

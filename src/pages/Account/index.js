@@ -28,17 +28,17 @@ import _ from "lodash";
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CreateAccountDialog from './CreateAccount/index'
 
 let accountTimeout
 export default function Account() {
 
     const { state: { user } } = useData();
     const history = useHistory();
-
-    const [entitiesCount, setEntitiesCount] = useState(0);
-
     const [accountData, setAccountData] = useState([]);
-    const [loadingAccountData, setLoadingAccountData] = useState(false);
+    const [editData, setEditData] = useState({
+        id: undefined, isEdit: false
+    })
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
@@ -230,12 +230,10 @@ export default function Account() {
     ];
 
     const handleEdit = data => {
-        history.push({
-            pathname: "/account/new",
-            state: {
-                accountId: data.row.id,
-            },
-        });
+        setEditData({
+            id: data.row.id,
+            isEdit: true
+        })
     }
 
     const handleSearch = (e) => {
@@ -251,11 +249,21 @@ export default function Account() {
         searchParams = searchVal
             ? { ...searchParams, search: searchVal }
             : { ...searchParams };
-        let tdata = await GetAccounts(searchParams)
+        try {
+            let tdata = await GetAccounts(searchParams)
+            setRowCount(tdata.count)
+            setAccountData(tdata.data)
+            setLoading(false);
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
+            }
+            setLoading(false);
+        }
 
-        setRowCount(tdata.count)
-        setAccountData(tdata.data)
-        setLoading(false);
+
     }
 
     const handleSelectedAccounts = (id, isChecked) => {
@@ -279,12 +287,7 @@ export default function Account() {
     };
 
     const clickCreateNew = () => {
-        history.push({
-            pathname: "/account/new",
-            // state: {
-            //     brand_id: selectedBrand.id,
-            // },
-        });
+        setIsAccDialogVisible(true)
     }
 
     const handleSnackbar = (msg, type, isOpen) => {
@@ -369,121 +372,143 @@ export default function Account() {
             pathname: tempPath,
         });
     }
+    const handleDialogClose = (params) => {
+        if (params && params.fetch) {
+            fetchAccounts()
+        }
+        setIsAccDialogVisible(false)
+        if (editData.isEdit) {
+            setEditData({ id: undefined, isEdit: false })
+        }
+    }
 
     return (
-        <Layout>
-            {
-                alertData ? <CustomToast
-                    open={alertData.open || false}
-                    close={() => handleSnackbar('', '', false)}
-                    errorMsg={alertData.errorMsg || ''}
-                    type={alertData.type || ''}
-                /> : null
-            }
+        <>
+            <Layout>
+                {
+                    alertData ? <CustomToast
+                        open={alertData.open || false}
+                        close={() => handleSnackbar('', '', false)}
+                        errorMsg={alertData.errorMsg || ''}
+                        type={alertData.type || ''}
+                    /> : null
+                }
 
-            <BrandHeader heading=""
-                style={{ marginTop: "150px", minHeight: "200px" }}
-                showHeading={false}>
+                <BrandHeader heading=""
+                    style={{ marginTop: "150px", minHeight: "200px" }}
+                    showHeading={false}>
 
-                <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
-                <Box component="span" marginX={1} />
+                    <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
+                    <Box component="span" marginX={1} />
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={clickCreateNew}
-                    startIcon={<AddOutlined />}
-                >
-                    Add
-                </Button>
-                <Box component="span" marginX={1} />
-
-                <Button
-                    disabled={true}
-                    variant="outlined"
-                    color="default"
-                    aria-controls="action-menu"
-                >
-                    Import
-                </Button>
-                <Box component="span" marginX={1} />
-
-                <Button
-                    disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                    variant="outlined"
-                    color="default"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                >
-                    Actions <ExpandMore />
-                </Button>
-
-                <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left"
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}>
-
-                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length !== 1}
-                        onClick={() => setShowConfirmBox(true)}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={clickCreateNew}
+                        startIcon={<AddOutlined />}
                     >
-                        Delete
+                        Add
+                </Button>
+                    <Box component="span" marginX={1} />
+
+                    <Button
+                        disabled={true}
+                        variant="outlined"
+                        color="default"
+                        aria-controls="action-menu"
+                    >
+                        Import
+                </Button>
+                    <Box component="span" marginX={1} />
+
+                    <Button
+                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                        variant="outlined"
+                        color="default"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                    >
+                        Actions <ExpandMore />
+                    </Button>
+
+                    <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left"
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}>
+
+                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length !== 1}
+                            onClick={() => setShowConfirmBox(true)}
+                        >
+                            Delete
                     </MenuItem>
-                </Menu>
+                    </Menu>
 
-            </BrandHeader>
+                </BrandHeader>
 
-            <Paper style={{ marginTop: 15 }}>
-                <BoxWithBorder>
-                    <div className="account-grid-height">
-                        <DataGrid
-                            components={{
-                                Toolbar: GridToolbar,
-                            }}
-                            rows={loading ? [] : dataRows}
-                            columns={columns}
-                            loading={loading}
-                            disableSelectionOnClick
-                            disableMultipleSelection
-                            paginationMode="server"
-                            pagination
-                            onPageChange={handlePage}
-                            onPageSizeChange={handlePageSize}
-                            pageSize={query.limit}
-                            page={query.page}
-                            rowCount={rowCount}
-                            rowsPerPageOptions={[25, 50, 75]}
-                            onSortModelChange={handleSortModelChange}
-                            // onRowClick={handleRowClick}
-                            density="compact"
-                        />
-                    </div>
-                    {
-                        showConfirmBox ?
-                            <ConfirmationDialog
-                                open={showConfirmBox}
-                                message={`Are you sure you want to delete these accounts`}
-                                onClose={() => setShowConfirmBox(false)}
-                                onOk={handleDeleteAccounts}
-                            /> : null
-                    }
-                    {
-                        singleAccountDelete.show ?
-                            <ConfirmationDialog
-                                open={singleAccountDelete.show}
-                                message={`Are you sure you want to delete account: ${singleAccountDelete.accountName}`}
-                                onClose={() => setSingleAccountDelete({ id: null, show: false })}
-                                onOk={handleSingleDeleteAccounts}
-                            /> : null
-                    }
-                </BoxWithBorder>
-            </Paper>
-        </Layout>
+                <Paper style={{ marginTop: 15 }}>
+                    <BoxWithBorder>
+                        <div className="account-grid-height">
+                            <DataGrid
+                                components={{
+                                    Toolbar: GridToolbar,
+                                }}
+                                rows={loading ? [] : dataRows}
+                                columns={columns}
+                                loading={loading}
+                                disableSelectionOnClick
+                                disableMultipleSelection
+                                paginationMode="server"
+                                pagination
+                                onPageChange={handlePage}
+                                onPageSizeChange={handlePageSize}
+                                pageSize={query.limit}
+                                page={query.page}
+                                rowCount={rowCount}
+                                rowsPerPageOptions={[25, 50, 75]}
+                                onSortModelChange={handleSortModelChange}
+                                // onRowClick={handleRowClick}
+                                density="compact"
+                            />
+                        </div>
+                        {
+                            showConfirmBox ?
+                                <ConfirmationDialog
+                                    open={showConfirmBox}
+                                    message={`Are you sure you want to delete these accounts`}
+                                    onClose={() => setShowConfirmBox(false)}
+                                    onOk={handleDeleteAccounts}
+                                /> : null
+                        }
+                        {
+                            singleAccountDelete.show ?
+                                <ConfirmationDialog
+                                    open={singleAccountDelete.show}
+                                    message={`Are you sure you want to delete account: ${singleAccountDelete.accountName}`}
+                                    onClose={() => setSingleAccountDelete({ id: null, show: false })}
+                                    onOk={handleSingleDeleteAccounts}
+                                /> : null
+                        }
+
+                    </BoxWithBorder>
+                </Paper>
+            </Layout>
+            {
+                isAccDialogVisible ?
+                    <CreateAccountDialog
+                        open={isAccDialogVisible}
+                        onClose={handleDialogClose}
+                        isEdit={editData.isEdit}
+                        showSuccessMes={handleSnackbar}
+                        id={editData.id}
+                    /> : null
+            }
+        </>
     )
 }

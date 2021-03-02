@@ -1,286 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import Layout from "../../components/Layout";
-import { GetFields } from '../../axios/index';
-import { useData } from '../../StateProvider/Provider';
+import React from 'react';
+import Layout from "../../../components/Layout";
 import { Box, Button, CircularProgress } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, formValidation } from '../../constants/helpers';
-import InputField from '../../components/Helpers/InputField';
-import CustomButton from '../../components/Helpers/Button'
-import { commonStyle } from '../Contact/CommonStyles'
-import { accountPage, accountDetailPage } from '../../routes/Accounts'
-import { craeteAccount, getAccountData, updateAccount, getDataToClone } from '../../axios/accounts'
-import { useHistory, useParams } from 'react-router-dom'
-import CustomToast from '../../components/Helpers/CustomToast'
-import { getErrorMessage } from '../../services/util'
-import _ from 'lodash'
-
-import "./account.css"
+import { formValidation } from '../../../constants/helpers';
+import InputField from '../../../components/Helpers/InputField';
+import CustomButton from '../../../components/Helpers/Button'
+import { commonStyle } from '../../Contact/CommonStyles'
+import CustomToast from '../../../components/Helpers/CustomToast'
+import { withStyles } from '@material-ui/core/styles';
+import MuiDialogContent from '@material-ui/core/DialogContent';
+import MuiDialogActions from '@material-ui/core/DialogActions';
+import Loader from '../../../components/Loader'
+import "../account.css"
 
 const useStyles = makeStyles((theme) => ({
     ...commonStyle(theme)
 }));
 
-let parentAccount
-export default function CreateAccount() {
+const DialogContent = withStyles((theme) => ({
+    root: {
+        padding: theme.spacing(2),
+    },
+}))(MuiDialogContent);
+
+const DialogActions = withStyles((theme) => ({
+    root: {
+        margin: 0,
+        padding: theme.spacing(1),
+    },
+}))(MuiDialogActions);
+
+
+export default function CreateAccount(props) {
 
     const classes = useStyles();
-    const history = useHistory();
-    let { id } = useParams();
+    const { entityData, alertData, handleSnackbar, handleSubmit, loading, isEdit, onClose } = props
 
-    const { state: { user } } = useData();
-    const [entityData, setEntityData] = useState({
-        fields: [],
-        initialValues: {},
-    });
-    const [cloneValues, setCloneValues] = useState({
-        fields: [],
-        initialValues: {},
-    })
-
-    const [loading, setLoading] = useState(false)
-    const [editId, setEditId] = useState('')
-    const [isEdit, setIsEdit] = useState(false)
-    const [updateFieldValues, setUpdateFieldValues] = useState({})
-    const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
-    const [alertData, setAlertData] = useState({})
-
-    useEffect(async () => {
-        if (history?.location?.state?.accountId) {
-            setIsEdit(true)
-            fetchAccountData()
+    return (<>
+        {
+            alertData ? <CustomToast
+                open={alertData.open || false}
+                close={() => handleSnackbar('', '', false)}
+                errorMsg={alertData.errorMsg || ''}
+                type={alertData.type || ''}
+            /> : null
         }
-        else if (id) {
-            GetFields('Account').then(({ data }) => {
-                const newFields = [];
-                data.map((_f) => newFields.push(_f.fieldData));
-
-                getDataToClone(id).then((dataToClone) => {
-                    setEntityData({
-                        fields: newFields,
-                        initialValues: dataToClone.data ? dataToClone.data : getObjKeys("", newFields),
-                    });
-                    setLoading(false);
-                }, error => {
-                    setLoading(false);
-                });
-            });
-        }
-        else if (user) {
-            getAccountFields(user.user.brand);
-        }
-    }, [user]);
-
-    const fetchAccountData = async () => {
-        setLoading(true)
-        let accId = history.location.state.accountId
-        setEditId(accId)
-        try {
-            let data = await getAccountData(accId)
-            if (data.status === 200 && Object.keys(data.data)) {
-                let initialVal = data.data
-                setUpdateFieldValues(initialVal)
-                getAccountFields(undefined, initialVal)
-            }
-        }
-        catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
-        }
-
-    }
-    const getAccountFields = (brandId, values) => {
-        GetFields('Account', brandId).then(({ data }) => {
-            const newFields = [];
-            data.map((_f) => newFields.push(_f.fieldData));
-            setEntityData({
-                fields: newFields,
-                initialValues: values ? values : getObjKeys("", newFields),
-            });
-            setLoading(false)
-        });
-    };
-
-    const goToBackPage = (id) => {
-        let state = {}
-        let tempPath = accountDetailPage.path
-        if (id && typeof id === 'string') {
-            tempPath = tempPath + "/" + id
-        }
-        history.push({
-            pathname: tempPath
-        })
-    }
-
-    const goToBackPageListing = (e) => {
-        history.push({
-            pathname: accountPage.path,
-        })
-    }
-
-    const handleLoading = (action, isSaveAndNew = false) => {
-        if (isSaveAndNew) {
-            setSaveAndNewLoading(action)
-        }
-        else {
-            setLoading(action)
-        }
-    }
-
-    const getModiFiedValues = values => {
-        values = { ...values }
-
-        if (values.employees === "") {
-            delete values.employees
-        }
-        else {
-            values.employees = parseInt(values.employees)
-        }
-
-        let tempFields = _.cloneDeep(entityData.fields)
-        tempFields.map(f => {
-            let fName = f.fieldName
-            if (f.type === "dropDown" && values[fName]) {
-                if (f?.option && f.option.length) {
-                    f.option.filter(obj => {
-                        if (obj.optionValue === values[fName]) {
-                            values[fName] = obj
-                            return true
-                        }
-                    })
-                }
-            }
-            if (f.type === "multiSelect" && values[fName] && values[fName].length > 0) {
-                if (f?.option && f.option.length) {
-                    f.option.map(obj => {
-                        let i = values[fName].indexOf(obj.optionValue)
-                        if (i >= 0) {
-                            values[fName][i] = obj
-                        }
-                    })
-                }
-            }
-        })
-        Object.keys(values).forEach(key => {
-            if (!values[key] || (typeof values[key] === 'object' && Object.keys(values[key]).length == 0)) {
-                delete values[key]
-            }
-        })
-
-        // if (user?.user?.brand) values.brand = user.user.brand
-        return values
-    }
-
-    const showErroeMes = (err, saveAndNew) => {
-        let errMes = getErrorMessage(err)
-        if (errMes) {
-            handleSnackbar(errMes, 'error', true)
-        }
-        handleLoading(false, saveAndNew)
-    }
-    const handleCreateAccount = async (values, saveAndNew) => {
-        try {
-            let data
-            if (isEdit) {
-                data = await updateAccount(values)
-            }
-            else {
-                data = await craeteAccount(values)
-            }
-            if (data.status === 200) {
-                handleSnackbar(data.message, 'success', true)
-                if (isEdit) {
-                    goToBackPage(data?.data?._id)
-                }
-                else {
-                    if (!saveAndNew) {
-                        goToBackPage(data?.data?._id)
-                    }
-                    else {
-                        getAccountFields()
-                    }
-                }
-                handleLoading(false, saveAndNew)
-            }
-        }
-        catch (err) {
-            showErroeMes(err, saveAndNew)
-        }
-    }
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
-    const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
-        handleLoading(true, saveAndNew)
-        const errors = formValidation(values, _.cloneDeep(entityData.fields));
-        if (Object.keys(errors).length) {
-            entityData.fields.forEach((input) => {
-                if (input.required) {
-                    setTouched(input.fieldName, true);
-                }
-            });
-        } else {
-            values = getModiFiedValues(values)
-            if (isEdit && editId) {
-                values._id = editId
-            }
-            handleCreateAccount(values, saveAndNew)
-            if (saveAndNew) {
-                resetForm()
-            }
-            if (!isEdit && saveAndNew) {
-                setEntityData({
-                    fields: entityData.fields,
-                    initialValues: {},
-                })
-            }
-            if (isEdit) {
-                setValues({ ...updateFieldValues });
-            }
-            else {
-                setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
-            }
-            setErrors({});
-        }
-
-    }
-    return (
-        <Layout>
-            {
-                alertData ? <CustomToast
-                    open={alertData.open || false}
-                    close={() => handleSnackbar('', '', false)}
-                    errorMsg={alertData.errorMsg || ''}
-                    type={alertData.type || ''}
-                /> : null
-            }
-            {
-                entityData.fields.length > 0 ?
-                    <Box className={classes.box}>
-                        <Formik
-                            initialValues={entityData.initialValues}
-                            validate={(values) => formValidation(values, entityData.fields)}
-                        >
-                            {({
-                                setValues,
-                                setErrors,
-                                values,
-                                errors,
-                                touched,
-                                setFieldValue,
-                                setFieldTouched,
-                                validateForm,
-                                resetForm
-                            }) => (
-                                <Form>
-                                    <>
+        {
+            entityData.fields.length > 0 ?
+                <>
+                    <Formik
+                        initialValues={entityData.initialValues}
+                        validate={(values) => formValidation(values, entityData.fields)}
+                    >
+                        {({
+                            setValues,
+                            setErrors,
+                            values,
+                            errors,
+                            touched,
+                            setFieldValue,
+                            setFieldTouched,
+                            validateForm,
+                            resetForm
+                        }) => (
+                            <Form>
+                                <>
+                                    <DialogContent dividers style={{ padding: '10px', marginLeft: "15px", marginRight: '15px' }}>
                                         <InputField
                                             errors={errors}
                                             values={values}
@@ -290,35 +76,35 @@ export default function CreateAccount() {
                                             size="small"
                                             fullWidth
                                         />
-                                        <div className="footer" style={{ width: "22%" }}>
-                                            <Button onClick={goToBackPageListing} variant="outlined" color="primary" >
-                                                Cancel
-                                    </Button>
+                                    </DialogContent>
+                                </>
+                                <DialogActions>
+                                    <Button onClick={onClose} variant="outlined" color="primary" >
+                                        Cancel
+                                             </Button>
 
-                                            <CustomButton
-                                                loading={loading}
-                                                disabled={loading}
-                                                style={{ float: "right" }}
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={(e) => {
-                                                    e.preventDefault()
-                                                    handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
-                                                }}
-                                            >
-                                                {isEdit ? "Update" : "Save"}
-                                            </CustomButton>
-                                        </div>
-                                    </>
-                                </Form>
-                            )}
-                        </Formik>
-                    </Box>
-                    : <Box className={classes.box} style={{ textAlign: 'center' }}>
-                        <span >  <CircularProgress /> Fetching Data</span>
-                    </Box>
-            }
-
-        </Layout >
+                                    <CustomButton
+                                        loading={loading}
+                                        disabled={loading}
+                                        style={{ float: "right" }}
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
+                                        }}
+                                    >
+                                        {isEdit ? "Update" : "Save"}
+                                    </CustomButton>
+                                </DialogActions>
+                            </Form>
+                        )}
+                    </Formik>
+                </>
+                : <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
+                    <Loader text="Fetching Data" style={{ marginTop: 100 }} />
+                </DialogContent>
+        }
+    </ >
     )
 }
