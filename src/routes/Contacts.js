@@ -1,3 +1,6 @@
 export const contactPage = {
-    path: "/crm/contact"
+    path: "/contact"
+}
+export const contactDetailPage = {
+    path: "/contact/detail"
 }

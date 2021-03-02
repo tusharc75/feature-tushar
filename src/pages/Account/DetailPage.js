@@ -8,7 +8,7 @@ function DetailPage(props) {
     const getNode = (k, val) => {
         return <Grid item xs={6} style={{ padding: "1px" }}>
             <table cellPadding="1px" cellSpacing='1px'>
-                <tr className="cTr" style={{}}>
+                <tr className="cTr">
                     <td className="td1" ><Typography style={{ fontWeight: '700' }} variant='subtitle1' color="textSecondary">{k}</Typography></td>
                     <td className="td2"> <Typography variant='subtitle1'><bold> {capitalize(val)}</bold></Typography></td>
                 </tr>
