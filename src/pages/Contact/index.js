@@ -6,21 +6,19 @@ import {
     Box,
     Button,
     Checkbox,
-    Container,
-    Chip,
-    CircularProgress,
-    Divider,
     Menu,
     MenuItem,
-    Typography,
+    Tooltip,
+    IconButton,
     Paper,
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
-import { ExpandMore } from "@material-ui/icons";
+import { ExpandMore, Visibility } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
+import { contactDetailPage } from '../../routes/Contacts'
 import './contact.css';
 
 let contactTimeout
@@ -32,7 +30,6 @@ export default function Contact() {
     const [entitiesCount, setEntitiesCount] = useState(0);
 
     const [contactData, setContactData] = useState([]);
-    const [loadingContactData, setLoadingContactData] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
@@ -110,6 +107,18 @@ export default function Contact() {
         { field: "phone", headerName: "Phone", width: 200 },
         { field: "email", headerName: "Email", width: 200 },
         { field: "account", headerName: "Account", width: 200 },
+        {
+            field: "actions", headerName: "Actions ",
+            renderCell: (params) => (
+                <>
+                    <Tooltip title="View">
+                        <IconButton aria-label="View" onClick={() => handleRowClick(params)}>
+                            <Visibility fontSize="small" color="primary" />
+                        </IconButton>
+                    </Tooltip>
+                </>
+            )
+        }
     ];
 
     useEffect(() => {
@@ -145,6 +154,13 @@ export default function Contact() {
         }));
         setDataRows([...rows]);
     }, [contactData])
+
+    const handleRowClick = e => {
+        let tempPath = contactDetailPage.path + '/' + e.row._id
+        history.push({
+            pathname: tempPath,
+        });
+    }
 
     // ****** ACTIONS BUTTON STUFF *********
     const openActions = (event) => {

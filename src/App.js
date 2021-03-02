@@ -11,9 +11,9 @@ import { useData } from './StateProvider/Provider'
 import AddDoa from './pages/DoaSetup/AddDoa'
 import Contact from './pages/Contact'
 import Account from './pages/Account/index'
-import CreateAccount from './pages/Account/CreateAccount'
 import CreateContact from './pages/Contact/CreateContact'
 import AccountDetailPage from "./pages/Account/AccountDetailPage"
+import ContactDetailPage from './pages/Contact/ContactDetailPage'
 
 function App() {
     const {
@@ -66,14 +66,11 @@ function App() {
                 <PrivateRoute exact path="/account">
                     <Account />
                 </PrivateRoute>
-                <PrivateRoute exact path="/account/new">
-                    <CreateAccount />
-                </PrivateRoute>
-                <PrivateRoute exact path="/account/clone/:id">
-                    <CreateAccount />
-                </PrivateRoute>
                 <PrivateRoute exact path="/account/detail/:id">
                     <AccountDetailPage />
+                </PrivateRoute>
+                <PrivateRoute exact path="/contact/detail/:id">
+                    <ContactDetailPage />
                 </PrivateRoute>
                 {/* <Route exact path="/crm/account" component={Account} /> */}
             </Switch>
