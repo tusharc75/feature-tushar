@@ -193,7 +193,7 @@ export default function Account() {
         },
         { field: "phone", headerName: "Phone", width: 200 },
         {
-            field: "actions", headerName: " ",
+            field: "actions", headerName: "Actions ",
             renderCell: (params) => (
                 <>
                     <Tooltip title="View">

@@ -6,30 +6,25 @@ import {
     Typography
 } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
-import _ from "lodash";
-import Container from "../../components/Container";
+import Container from '../../components/Container'
 import { GetFields } from '../../axios/index';
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
-import { accountPage } from '../../routes/Accounts'
-import { getAccountData } from '../../axios/accounts'
+import { getContactData } from '../../axios/contacts'
 import { Link } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
-import DetailPage from './DetailPage'
-import Loader from '../../components/Loader'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { deleteAccounts } from '../../axios/accounts'
-import "./account.css";
-import userEvent from "@testing-library/user-event";
+import { deleteContacts } from '../../axios/contacts'
+import { capitalize } from '../../services/util'
+import '../Account/account.css'
 
 const Roles = () => {
-    const history = useHistory();
     const { state: { user } } = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [alertData, setAlertData] = useState({})
-    const [accountData, setAccountData] = useState({})
+    const [contactData, setContactData] = useState({})
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [data, setData] = useState({})
@@ -37,18 +32,35 @@ const Roles = () => {
     let { id } = useParams();
     useEffect(() => {
         if (id) {
-            fetchAccountData()
+            fetchContactData()
         }
     }, [id]);
 
-    const fetchAccountData = async () => {
+    const fetchContactData = async () => {
         setLoading(true)
         try {
-            let data = await getAccountData(id)
+            let data = await getContactData(id)
             if (data.status === 200) {
-                let initialVal = data.data
-                setAccountData(initialVal)
-                getAccountFields(undefined, initialVal)
+                let tData = data.data
+                let name = capitalize(tData.firstName || '') + ' '
+                name = name + capitalize(tData.middleName || '') + ' '
+                name = name + capitalize(tData.lastName || '')
+                let tempMp = {
+                    phone: tData.phone || '',
+                    email: tData.email || '',
+                    title: tData.title || '',
+                }
+
+                if (tData?.salutation?.optionLabel) {
+                    name = tData.salutation.optionLabel + name
+                }
+                if (tData?.accountName?.optionLabel) {
+                    tempMp["Account Name"] = tData.accountName.optionLabel
+                }
+                setHeadingLbl(name)
+                setMainPoints(tempMp)
+                setContactData(tData)
+                getContactFields(tData)
             }
         }
         catch (err) {
@@ -60,48 +72,10 @@ const Roles = () => {
         }
     }
 
-    const getAccountFields = (brandId, values) => {
-        setHeadingLbl(values.accountName || '')
-        GetFields('Account', brandId).then(({ data }) => {
-            const td = {}, mainPoints = {}
-            data.map((_f) => {
-                let fd = _f.fieldData
+    const getContactFields = (values) => {
 
-                let val = ""
-                if (typeof values[fd.fieldName] === "object" && values[fd.fieldName].optionLabel) {
-                    if ("parentAccount" == fd.fieldName) {
-                        mainPoints[fd.fieldLabel] = values[fd.fieldName].optionLabel
-                    }
-                    val = values[fd.fieldName].optionLabel
-                }
-                else if (Array.isArray(values[fd.fieldName]) && values[fd.fieldName].length) {
-                    values[fd.fieldName].forEach(v => {
-                        if (v.optionLabel) val = val ? val + "," + v.optionLabel : v.optionLabel
-                    })
-                }
-                else {
-                    if (["phone"].indexOf(fd.fieldName) >= 0) {
-                        mainPoints[fd.fieldLabel] = values[fd.fieldName]
-                    }
-                    val = values[fd.fieldName]
-                }
-
-
-                if (td[fd.sectionName]) {
-                    td[fd.sectionName] = {
-                        ...td[fd.sectionName],
-                        [fd.fieldLabel]: val
-                    }
-                }
-                else {
-                    td[fd.sectionName] = {}
-                    td[fd.sectionName] = {
-                        [fd.fieldLabel]: val
-                    }
-                }
-            });
-            setMainPoints(mainPoints)
-            setData(td)
+        GetFields('Contact').then(({ data }) => {
+            setData(data)
             setLoading(false)
         });
     };
@@ -114,13 +88,6 @@ const Roles = () => {
         })
     };
 
-    const goToBackPage = () => {
-        history.push({
-            pathname: accountPage.path
-        })
-    }
-
-    const tabs = ["Table", "Users"];
     const quickLinks = [
         {
             label: "Account Heirarchy",
@@ -148,10 +115,10 @@ const Roles = () => {
         },
     ]
 
-    const handleDeleteAcc = () => {
-        console.log('accountData', accountData)
-        if (accountData?._id) {
-            deleteAccounts([accountData._id]).then(({ data }) => {
+    const handleDeleteContact = () => {
+        console.log('contactData', contactData)
+        if (contactData?._id) {
+            deleteContacts([contactData._id]).then(({ data }) => {
                 if (data.status === 200) {
                     handleSnackbar(data.message, 'success', true)
                 }
@@ -188,16 +155,17 @@ const Roles = () => {
                         showHeading={true}
                     >
                         <Box component="span" marginX={1} />
-                        {
-                            accountData?.owner?.optionValue && user?.user?._id &&
-                                accountData.owner.optionValue === user.user._id ?
-                                <Button
-                                    variant="contained" color="secondary"
-                                    onClick={() => setShowConfirmBox(true)}
-                                >
-                                    Delete
-                            </Button> : null
-                        }
+                        {/* {
+                            contactData?.owner?.optionValue && user?.user?._id &&
+                                contactData.owner.optionValue === user.user._id ? */}
+                        <Button
+                            variant="contained" color="secondary"
+                            onClick={() => setShowConfirmBox(true)}
+                        >
+                            Delete
+                            </Button>
+                        {/* : null
+                        } */}
 
                     </CustomHeader>
 
@@ -205,12 +173,12 @@ const Roles = () => {
                         <Grid container spacing={3}>
                             <Grid item sm={8} md={8} lg={8}>
                                 <div className="detailPageDiv1" >
-                                    {
+                                    {/* {
                                         loading ? <Loader text="Fetching Data" style={{ marginTop: 100 }} /> :
                                             <DetailPage
                                                 data={data}
                                             />
-                                    }
+                                    } */}
                                 </div>
                             </Grid>
                             <Grid item sm={4} md={4} lg={4} className="customGrid" >
@@ -234,9 +202,9 @@ const Roles = () => {
                         {showConfirmBox ? (
                             <ConfirmationDialog
                                 open={showConfirmBox}
-                                message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
+                                message={`Are you sure you want to delete this Account ${contactData.accountName || ''}`}
                                 onClose={() => setShowConfirmBox(false)}
-                                onOk={handleDeleteAcc}
+                                onOk={handleDeleteContact}
                             />
                         ) : null}
                     </Container>
