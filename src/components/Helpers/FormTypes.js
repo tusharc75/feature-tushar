@@ -36,6 +36,7 @@ const FormTypes = (props) => {
     touched,
     setFieldValue,
     onChange,
+    required,
     ...rest
   } = props;
   const [optionsList, setOptions] = React.useState([]);
@@ -102,6 +103,7 @@ const FormTypes = (props) => {
       type="text"
       label={label}
       name={name}
+      required={required}
       value={values[name]}
       error={touched[name] && Boolean(errors[name])}
       helperText={touched[name] && errors[name]}
@@ -117,6 +119,7 @@ const FormTypes = (props) => {
       multiline
       label={label}
       name={name}
+      required={required}
       value={values[name]}
       error={touched[name] && Boolean(errors[name])}
       helperText={touched[name] && errors[name]}
@@ -131,6 +134,7 @@ const FormTypes = (props) => {
       type="number"
       label={label}
       name={name}
+      required={required}
       value={values[name]}
       error={touched[name] && Boolean(errors[name])}
       helperText={touched[name] && errors[name]}
@@ -145,6 +149,7 @@ const FormTypes = (props) => {
       type="email"
       label={label}
       name={name}
+      required={required}
       value={values[name]}
       error={touched[name] && Boolean(errors[name])}
       helperText={touched[name] && errors[name]}
@@ -159,6 +164,7 @@ const FormTypes = (props) => {
       type="password"
       label={label}
       name={name}
+      required={required}
       value={values[name]}
       error={touched[name] && Boolean(errors[name])}
       helperText={touched[name] && errors[name]}
@@ -175,6 +181,7 @@ const FormTypes = (props) => {
       variant="outlined"
       label={label}
       name={name}
+      required={required}
       value={values[name]}
       onChange={onChange ? onChange : (val) => setFieldValue(name, val)}
       error={touched[name] && Boolean(errors[name])}
@@ -183,6 +190,7 @@ const FormTypes = (props) => {
   ) : type === "dropDown" ? (
     <Autocomplete
       {...rest}
+      size="small"
       options={options}
       getOptionLabel={(option) => (option ? option.optionLabel : "")}
       getOptionSelected={(option, val) =>
@@ -194,6 +202,7 @@ const FormTypes = (props) => {
         <TextField
           {...params}
           name={name}
+          required={required}
           label={label}
           variant="outlined"
           error={touched[name] && Boolean(errors[name])}
@@ -215,6 +224,7 @@ const FormTypes = (props) => {
           variant="outlined"
           name={name}
           label={label}
+          required={required}
           error={touched.currency && Boolean(errors.currency)}
           helperText={touched.currency && errors.currency}
         />
@@ -256,6 +266,8 @@ const FormTypes = (props) => {
           {...params}
           variant="outlined"
           label={label}
+          name={name}
+          required={required}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
         />
@@ -321,7 +333,7 @@ const FormTypes = (props) => {
       autoComplete
       includeInputInList
       filterSelectedOptions
-      value={value}
+      value={values[name]}
       onChange={(event, newValue) => {
         setOptions(newValue ? [newValue, ...optionsList] : optionsList);
         setValue(newValue);
@@ -333,9 +345,11 @@ const FormTypes = (props) => {
         <TextField
           {...params}
           variant="outlined"
+          name={name}
           label={label}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
+          required={required}
           {...rest}
         />
       )}

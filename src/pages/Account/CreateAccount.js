@@ -55,7 +55,7 @@ export default function CreateAccount() {
             GetFields('Account').then(({ data }) => {
                 const newFields = [];
                 data.map((_f) => newFields.push(_f.fieldData));
-
+                
                 getDataToClone(id).then((dataToClone) => {
                     setEntityData({
                         fields: newFields,
@@ -90,7 +90,6 @@ export default function CreateAccount() {
                 handleSnackbar(errMes, 'error', true)
             }
         }
-
     }
     const getAccountFields = (brandId, values) => {
         GetFields('Account', brandId).then(({ data }) => {
@@ -249,8 +248,8 @@ export default function CreateAccount() {
             }
             setErrors({});
         }
-
     }
+    
     return (
         <Layout>
             {
@@ -290,25 +289,11 @@ export default function CreateAccount() {
                                             size="small"
                                             fullWidth
                                         />
-                                        <div className="footer" style={{ width: "22%" }}>
+
+                                        <Box display="flex" justifyContent="flex-end" className="gap-2">
                                             <Button onClick={goToBackPageListing} variant="outlined" color="primary" >
                                                 Cancel
-                                    </Button>
-                                            {/* {
-                                                isEdit ? null :
-                                                    <CustomButton
-                                                        loading={saveAndNewLoading}
-                                                        disabled={saveAndNewLoading}
-                                                        style={{ float: "right" }}
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={(e) => {
-                                                            handleSubmit(setFieldTouched, values, setValues, setErrors, true, resetForm)
-                                                        }}
-                                                        type="submit"
-                                                    >
-                                                        Save and New
-                                                    </CustomButton>} */}
+                                            </Button>
 
                                             <CustomButton
                                                 loading={loading}
@@ -323,7 +308,7 @@ export default function CreateAccount() {
                                             >
                                                 {isEdit ? "Update" : "Save"}
                                             </CustomButton>
-                                        </div>
+                                        </Box>
                                     </>
                                 </Form>
                             )}

@@ -8,6 +8,7 @@ import { Formik, Form } from "formik";
 import { getObjKeys } from '../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import { useHistory } from "react-router-dom";
+import CustomContainer from './../../components/Container'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -18,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: "#fff",
         borderRadius: 6,
         padding: theme.spacing(0.5, 1.5),
-        padding: "20px 200px"
+        // padding: "20px 200px"
     },
 }));
 
@@ -75,53 +76,69 @@ export default function CreateContact() {
         })
     }
 
+    const cancel = () => {
+        history.push({
+            pathname: "/contact"
+        })
+    }
+
     return (
         <Layout>
             {
                 entityData.fields.length > 0 &&
-                <Box className={classes.box}>
-                    <Formik
-                        initialValues={entityData.initialValues}
-                        validate={formValidation}
-                    >
-                        {({
-                            setFieldTouched,
-                            values,
-                            errors,
-                            touched,
-                            setFieldValue,
-                            validateForm,
-                        }) => (
-                            <Form>
-                                <>
-                                    <InputField
-                                        errors={errors}
-                                        values={values}
-                                        setFieldValue={setFieldValue}
-                                        touched={touched}
-                                        fieldsData={entityData.fields}
-                                        size="small"
-                                        fullWidth
-                                    />
+                <CustomContainer styles={{ marginTop: 0 }}>
+                    <CustomContainer styles={{ marginTop: 0, minHeight: "100%" }} maxWidth="md">
+                        <Formik
+                            initialValues={entityData.initialValues}
+                            validate={formValidation}
+                        >
+                            {({
+                                setFieldTouched,
+                                values,
+                                errors,
+                                touched,
+                                setFieldValue,
+                                validateForm,
+                            }) => (
+                                <Form>
+                                    <>
+                                        <InputField
+                                            errors={errors}
+                                            values={values}
+                                            setFieldValue={setFieldValue}
+                                            touched={touched}
+                                            fieldsData={entityData.fields}
+                                            size="small"
+                                            fullWidth
+                                        />
 
-                                    <Box display="flex" justifyContent="flex-end">
-                                        <Button
-                                            disabled={isFormSubmitted}
-                                            type="submit"
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={() => { handleSave(values) }}
-                                        >
-                                            Create Contact
+                                        <Box display="flex" justifyContent="flex-end" className="gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outlined"
+                                                color="primary"
+                                                onClick={cancel}
+                                            >
+                                                Cancel
                                         </Button>
-                                    </Box>
-                                </>
-                            </Form>
-                        )}
+                                            <Button
+                                                disabled={isFormSubmitted}
+                                                type="submit"
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => { handleSave(values) }}
+                                            >
+                                                Create Contact
+                                        </Button>
+                                        </Box>
+                                    </>
+                                </Form>
+                            )}
 
-                    </Formik>
+                        </Formik>
 
-                </Box>
+                    </CustomContainer>
+                </CustomContainer>
             }
 
         </Layout>
