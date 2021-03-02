@@ -1,24 +1,20 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core";
+import { Box, Typography } from "@material-ui/core";
 import { CircularProgress } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "grid",
-    placeItems: "center",
-    width: "100%",
-    height: "calc(100vh - 88px)",
-    paddingBottom: theme.spacing(20),
-  },
-}));
-
-const Loader = () => {
-  const classes = useStyles();
-
+const Loader = ({ text, ...rest }) => {
   return (
-    <div className={classes.root}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      {...rest}
+    >
       <CircularProgress />
-    </div>
+      <Box marginY={1} />
+      {text && <Typography variant="caption">{text}</Typography>}
+    </Box>
   );
 };
 

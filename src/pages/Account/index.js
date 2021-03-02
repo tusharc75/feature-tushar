@@ -47,6 +47,7 @@ export default function Account() {
     const [selectedRecs, setSelectedRecs] = useState([])
     const [showConfirmBox, setShowConfirmBox] = useState(false)
     const [alertData, setAlertData] = useState({})
+    const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
     const [searchVal, setSearchVal] = useState("");
 
     useEffect(() => {
@@ -326,11 +327,9 @@ export default function Account() {
     }
 
     const handleRowClick = e => {
+        let tempPath = accountDetailPage.path + '/' + e.row._id
         history.push({
-            pathname: accountDetailPage.path,
-            state: {
-                accountId: e.row._id,
-            },
+            pathname: tempPath,
         });
     }
     console.log('query', query, 'c', rowCount)

@@ -2,51 +2,49 @@ import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import {
     Box,
-    useTheme,
-    makeStyles,
     Button,
     Grid,
-    CircularProgress,
     Typography
 } from "@material-ui/core";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
 import Container from "../../components/Container";
 import { GetFields } from '../../axios/index';
-import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
-import CustomToast from "../../components/Helpers/CustomToast";
 import Layout from "../../components/Layout";
 import CustomHeader from "./CustomHeader";
 import { accountPage } from '../../routes/Accounts'
-import { craeteAccount, getAccountData } from '../../axios/accounts'
-import { CheckBoxOutlineBlankRounded, DeviceHubOutlined } from '@material-ui/icons'
-import { Link, withRouter } from "react-router-dom";
+import { getAccountData } from '../../axios/accounts'
+import { Link } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
 import DetailPage from './DetailPage'
+import Loader from '../../components/Loader'
+import CustomToast from '../../components/Helpers/CustomToast'
+import "./account.css";
 
 const Roles = () => {
     const history = useHistory();
-    const { pathname } = useLocation();
     const [alertData, setAlertData] = useState({})
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState({})
+    const [mainPoints, setMainPoints] = useState({})
+    let { id } = useParams();
     useEffect(() => {
-        if (history?.location?.state?.accountId) {
+        if (id) {
             fetchAccountData()
         }
-    }, [history]);
+    }, [id]);
 
     const fetchAccountData = async () => {
         setLoading(true)
-        let accId = history.location.state.accountId
         try {
-            let data = await getAccountData(accId)
-            if (data.status === 200 && Object.keys(data.data)) {
+            let data = await getAccountData(id)
+            if (data.status === 200) {
                 let initialVal = data.data
                 getAccountFields(undefined, initialVal)
             }
         }
         catch (err) {
+            setLoading(false)
             let errMes = getErrorMessage(err)
             if (errMes) {
                 handleSnackbar(errMes, 'error', true)
@@ -56,12 +54,15 @@ const Roles = () => {
 
     const getAccountFields = (brandId, values) => {
         GetFields('Account', brandId).then(({ data }) => {
-            const td = {};
+            const td = {}, mainPoints = {}
             data.map((_f) => {
                 let fd = _f.fieldData
 
                 let val = ""
                 if (typeof values[fd.fieldName] === "object" && values[fd.fieldName].optionLabel) {
+                    if ("parentAccount" == fd.fieldName) {
+                        mainPoints[fd.fieldName] = values[fd.fieldName].optionLabel
+                    }
                     val = values[fd.fieldName].optionLabel
                 }
                 else if (Array.isArray(values[fd.fieldName]) && values[fd.fieldName].length) {
@@ -70,6 +71,9 @@ const Roles = () => {
                     })
                 }
                 else {
+                    if (["accountName", "phone"].indexOf(fd.fieldName) >= 0) {
+                        mainPoints[fd.fieldName] = values[fd.fieldName]
+                    }
                     val = values[fd.fieldName]
                 }
 
@@ -87,6 +91,7 @@ const Roles = () => {
                     }
                 }
             });
+            setMainPoints(mainPoints)
             setData(td)
             setLoading(false)
         });
@@ -133,14 +138,26 @@ const Roles = () => {
             count: 0
         },
     ]
+
     return (
         <>
             <Layout>
+                {
+                    alertData ? <CustomToast
+                        open={alertData.open || false}
+                        close={() => handleSnackbar('', '', false)}
+                        errorMsg={alertData.errorMsg || ''}
+                        type={alertData.type || ''}
+                    /> : null
+                }
                 <div>
                     <CustomHeader
                         heading="Account"
+                        mainPoints={mainPoints}
                         style={{ marginTop: "150px", minHeight: "200px" }}
-                        showHeading={true}>
+                        showHeading={true}
+                        subHeading={mainPoints.accountName || ''}
+                    >
                         <Box component="span" marginX={1} />
                         <Button
                             variant="outlined"
@@ -151,32 +168,33 @@ const Roles = () => {
                   </Button>
                     </CustomHeader>
 
-                    <Container style={{ width: "100%", backgroundColor: 'aliceblue' }}>
-                        <Grid container spacing={5}>
+                    <Container className="detailPageContainer">
+                        <Grid container spacing={3}>
                             <Grid item sm={8} md={8} lg={8}>
-                                <div style={{ backgroundColor: 'white' }}>
+                                <div className="detailPageDiv1" >
                                     {
-                                        loading ? <Box style={{ textAlign: 'center' }}>
-                                            <span >  <CircularProgress /> Fetching Data</span>
-                                        </Box> :
+                                        loading ? <Loader text="Fetching Data" style={{ marginTop: 100 }} /> :
                                             <DetailPage
                                                 data={data}
                                             />
                                     }
                                 </div>
                             </Grid>
-                            <Grid item sm={4} md={4} lg={4} style={{ backgroundColor: 'aliceblue' }}  >
-                                <div style={{ backgroundColor: 'white', marginBottom: '10px' }}>
+                            <Grid item sm={4} md={4} lg={4} className="customGrid" >
+                                <div className="detailPageDiv2">
                                     {
                                         quickLinks && quickLinks.length ?
                                             quickLinks.map(k => {
-                                                return <><Link>{k.label || ''}({k.count || 0})</Link><br /></>
+                                                return <><Link className="customLink">{k.label || ''}({k.count || 0})</Link><br /></>
                                             }) :
                                             null
                                     }
                                 </div>
-                                <div style={{ backgroundColor: 'white' }}>
-                                    <Typography>Related Contacts</Typography>
+                                <div className="detailPageDiv3" >
+                                    <Typography color="primary" variant="h6">Related Contacts</Typography>
+                                    <Box className="customBox1">
+
+                                    </Box>
                                 </div>
                             </Grid>
                         </Grid>

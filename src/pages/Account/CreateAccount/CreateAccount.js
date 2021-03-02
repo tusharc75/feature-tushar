@@ -294,21 +294,6 @@ export default function CreateAccount() {
                                             <Button onClick={goToBackPageListing} variant="outlined" color="primary" >
                                                 Cancel
                                     </Button>
-                                            {/* {
-                                                isEdit ? null :
-                                                    <CustomButton
-                                                        loading={saveAndNewLoading}
-                                                        disabled={saveAndNewLoading}
-                                                        style={{ float: "right" }}
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={(e) => {
-                                                            handleSubmit(setFieldTouched, values, setValues, setErrors, true, resetForm)
-                                                        }}
-                                                        type="submit"
-                                                    >
-                                                        Save and New
-                                                    </CustomButton>} */}
 
                                             <CustomButton
                                                 loading={loading}
