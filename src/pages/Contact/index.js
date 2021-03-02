@@ -20,6 +20,9 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import { contactDetailPage } from '../../routes/Contacts'
 import './contact.css';
+import CreateContact from './CreateContact/CreateContact';
+import { GetFields } from '../../axios/index';
+import { getObjKeys } from '../../constants/helpers';
 
 let contactTimeout
 export default function Contact() {
@@ -40,6 +43,13 @@ export default function Contact() {
     const [errorMsg, setErroMsg] = useState("");
     const [msgType, setMsgType] = useState("");
     const [showConfirmBox, setShowConfirmBox] = useState(false);
+
+    const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
+
+    const [createContactEntityDetails, setCreateContactEntityDetails] = useState({
+        fields: [],
+        initialValues: {},
+    })
 
     const columns = [
         {
@@ -172,12 +182,25 @@ export default function Contact() {
     };
 
     const clickCreateNew = () => {
-        history.push({
-            pathname: "/contact/new",
-            // state: {
-            //     brand_id: selectedBrand.id,
-            // },
-        });
+
+        // GetFields('Contact').then(({ data }) => {
+
+        //     const newFields = [];
+        //     data.map((_f) => newFields.push(_f.fieldData));
+
+        //     setCreateContactEntityDetails({
+        //         fields: newFields,
+        //         initialValues: getObjKeys("", newFields),
+        //     });
+        setShowCreateContactDialog(true);
+        // });
+
+        // history.push({
+        //     pathname: "/contact/new",
+        //     // state: {
+        //     //     brand_id: selectedBrand.id,
+        //     // },
+        // });
     }
 
     const handlePage = (params) => {
@@ -310,6 +333,18 @@ export default function Contact() {
                             onOk={handleDeleteContact}
                         />
                     ) : null}
+
+                    {
+                        showCreateContactDialog && <CreateContact
+                            open={showCreateContactDialog}
+                            onClose={() => setShowCreateContactDialog(false)}
+                            onSuccess={() => {
+                                setShowCreateContactDialog(false);
+                                getContacts();
+                            }}
+                            entityDetails={createContactEntityDetails}
+                        />
+                    }
 
                 </BoxWithBorder>
             </Paper>

@@ -11,7 +11,7 @@ import { useData } from './StateProvider/Provider'
 import AddDoa from './pages/DoaSetup/AddDoa'
 import Contact from './pages/Contact'
 import Account from './pages/Account/index'
-import CreateContact from './pages/Contact/CreateContact'
+// import CreateContact from './pages/Contact/CreateContact'
 import AccountDetailPage from "./pages/Account/AccountDetailPage"
 import ContactDetailPage from './pages/Contact/ContactDetailPage'
 
@@ -57,12 +57,12 @@ function App() {
                 <PrivateRoute exact path="/contact">
                     <Contact />
                 </PrivateRoute>
-                <PrivateRoute exact path="/contact/new">
+                {/* <PrivateRoute exact path="/contact/new">
                     <CreateContact />
                 </PrivateRoute>
                 <PrivateRoute exact path="/contact/:id">
                     <CreateContact />
-                </PrivateRoute>
+                </PrivateRoute> */}
                 <PrivateRoute exact path="/account">
                     <Account />
                 </PrivateRoute>
