@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import clsx from "clsx";
 import {
     Box,
     Button,
@@ -19,12 +18,20 @@ import { getErrorMessage } from '../../services/util'
 import DetailPage from './DetailPage'
 import Loader from '../../components/Loader'
 import CustomToast from '../../components/Helpers/CustomToast'
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import { useData } from '../../StateProvider/Provider';
+import { deleteAccounts } from '../../axios/accounts'
 import "./account.css";
+import userEvent from "@testing-library/user-event";
 
 const Roles = () => {
     const history = useHistory();
+    const { state: { user } } = useData();
+    const [headingLbl, setHeadingLbl] = useState('')
     const [alertData, setAlertData] = useState({})
+    const [accountData, setAccountData] = useState({})
     const [loading, setLoading] = useState(false)
+    const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [data, setData] = useState({})
     const [mainPoints, setMainPoints] = useState({})
     let { id } = useParams();
@@ -40,6 +47,7 @@ const Roles = () => {
             let data = await getAccountData(id)
             if (data.status === 200) {
                 let initialVal = data.data
+                setAccountData(initialVal)
                 getAccountFields(undefined, initialVal)
             }
         }
@@ -53,6 +61,7 @@ const Roles = () => {
     }
 
     const getAccountFields = (brandId, values) => {
+        setHeadingLbl(values.accountName || '')
         GetFields('Account', brandId).then(({ data }) => {
             const td = {}, mainPoints = {}
             data.map((_f) => {
@@ -61,7 +70,7 @@ const Roles = () => {
                 let val = ""
                 if (typeof values[fd.fieldName] === "object" && values[fd.fieldName].optionLabel) {
                     if ("parentAccount" == fd.fieldName) {
-                        mainPoints[fd.fieldName] = values[fd.fieldName].optionLabel
+                        mainPoints[fd.fieldLabel] = values[fd.fieldName].optionLabel
                     }
                     val = values[fd.fieldName].optionLabel
                 }
@@ -71,8 +80,8 @@ const Roles = () => {
                     })
                 }
                 else {
-                    if (["accountName", "phone"].indexOf(fd.fieldName) >= 0) {
-                        mainPoints[fd.fieldName] = values[fd.fieldName]
+                    if (["phone"].indexOf(fd.fieldName) >= 0) {
+                        mainPoints[fd.fieldLabel] = values[fd.fieldName]
                     }
                     val = values[fd.fieldName]
                 }
@@ -139,6 +148,28 @@ const Roles = () => {
         },
     ]
 
+    const handleDeleteAcc = () => {
+        console.log('accountData', accountData)
+        if (accountData?._id) {
+            deleteAccounts([accountData._id]).then(({ data }) => {
+                if (data.status === 200) {
+                    handleSnackbar(data.message, 'success', true)
+                    fetchAccounts();
+                }
+                setShowConfirmBox(false)
+            }).catch(err => {
+                let errMes = getErrorMessage(err)
+                if (errMes) {
+                    handleSnackbar(errMes, 'error', true)
+                }
+                setShowConfirmBox(false)
+            })
+        }
+        else {
+            setShowConfirmBox(false)
+        }
+
+    }
     return (
         <>
             <Layout>
@@ -152,20 +183,23 @@ const Roles = () => {
                 }
                 <div>
                     <CustomHeader
-                        heading="Account"
+                        heading={headingLbl}
                         mainPoints={mainPoints}
                         style={{ marginTop: "150px", minHeight: "200px" }}
                         showHeading={true}
-                        subHeading={mainPoints.accountName || ''}
                     >
                         <Box component="span" marginX={1} />
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            style={{ backgroundColor: 'aliceblue' }}
-                        >
-                            Delete
-                  </Button>
+                        {
+                            accountData?.owner?.optionValue && user?.user?._id &&
+                                accountData.owner.optionValue === user.user._id ?
+                                <Button
+                                    variant="contained" color="secondary"
+                                    onClick={() => setShowConfirmBox(true)}
+                                >
+                                    Delete
+                            </Button> : null
+                        }
+
                     </CustomHeader>
 
                     <Container className="detailPageContainer">
@@ -198,6 +232,14 @@ const Roles = () => {
                                 </div>
                             </Grid>
                         </Grid>
+                        {showConfirmBox ? (
+                            <ConfirmationDialog
+                                open={showConfirmBox}
+                                message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
+                                onClose={() => setShowConfirmBox(false)}
+                                onOk={handleDeleteAcc}
+                            />
+                        ) : null}
                     </Container>
                 </div>
             </Layout>
