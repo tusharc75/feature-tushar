@@ -113,7 +113,7 @@ export default function Account() {
                 />
             ),
             renderCell: (params) => (
-                params.allowToDelete ? <Checkbox
+                params.row.allowToDelete ? <Checkbox
                     color="primary"
                     // disabled={!params.allowToDelete}
                     checked={params.value}

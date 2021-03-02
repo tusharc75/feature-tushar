@@ -22,7 +22,6 @@ import {
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
 import { useHistory } from "react-router-dom";
-import { login, Profile } from '../../routes/auth'
 import "./Header.css";
 
 const useStyles = makeStyles((theme) => ({
@@ -130,15 +129,15 @@ const Header = () => {
       window.location.reload();
       localStorage.removeItem("token");
       history.push({
-        pathname: login.path,
+        pathname: "/login",
       });
     }
 
-    if (option && option.profile) {
-      history.push({
-        pathname: Profile.path,
-      });
-    }
+    // if (option && option.profile) {
+    //   history.push({
+    //     pathname: Profile.path,
+    //   });
+    // }
     setOpen(false);
   };
 

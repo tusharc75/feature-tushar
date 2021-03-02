@@ -111,6 +111,21 @@ const FormTypes = (props) => {
         onChange ? onChange : (e) => setFieldValue(name, e.target.value)
       }
     />
+  ) : type === "url" ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      type="url"
+      label={label}
+      name={name}
+      required={required}
+      value={values[name]}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
+      onChange={
+        onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+      }
+    />
   ) : type === "multiLine" ? (
     <TextField
       {...rest}
