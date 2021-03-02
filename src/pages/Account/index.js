@@ -29,6 +29,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CreateAccountDialog from './CreateAccount/index'
+import routes from './../../components/Helpers/Routes';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 
 let accountTimeout
 export default function Account() {
@@ -78,7 +80,8 @@ export default function Account() {
             ...u,
             isChecked: false,
             id: u._id,
-            allowToDelete: u.allowToDelete
+            allowToDelete: u.allowToDelete,
+            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : ""
         }));
         setDataRows([...rows]);
     }, [accountData])
@@ -180,8 +183,15 @@ export default function Account() {
                 </>
             )
         },
+        {
+            field: "masterAccount",
+            headerName: "Master Account",
+            width: 200,
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+        },
         { field: "phone", headerName: "Phone", width: 200 },
-
         {
             field: "actions", headerName: "Actions ",
             renderCell: (params) => (
@@ -341,7 +351,7 @@ export default function Account() {
                 handleSnackbar(data.message, 'success', true)
                 fetchAccounts();
             }
-            setShowConfirmBox(false)
+            setSingleAccountDelete({ id: null, show: false, accountName: "" });
             setSelectedRecs([])
         }
         catch (err) {
@@ -371,6 +381,8 @@ export default function Account() {
     return (
         <>
             <Layout>
+                <CustomBreadCrumbs routes={[routes.account]} />
+
                 {
                     alertData ? <CustomToast
                         open={alertData.open || false}
@@ -477,7 +489,7 @@ export default function Account() {
                                 <ConfirmationDialog
                                     open={singleAccountDelete.show}
                                     message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ?`}
-                                    onClose={() => setSingleAccountDelete({ id: null, show: false })}
+                                    onClose={() => setSingleAccountDelete({ id: null, show: false, accountName: "" })}
                                     onOk={handleSingleDeleteAccounts}
                                 /> : null
                         }

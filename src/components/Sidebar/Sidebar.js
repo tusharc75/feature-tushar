@@ -24,7 +24,6 @@ import {
   ExpandMore,
   ExpandLess,
 } from "@material-ui/icons";
-import BreadCrumbs from "../BreadCrumbs";
 import SidebarList from "./SidebarList";
 
 const _ = require("lodash");
@@ -214,7 +213,6 @@ function SideBar({ children, location }) {
           <Loader />
         ) : (
           <Box>
-            <BreadCrumbs />
             <Box marginY={2} />
             {children}
           </Box>
