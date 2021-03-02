@@ -429,7 +429,7 @@ export default function Account() {
                         open={Boolean(anchorEl)}
                         onClose={closeActions}>
 
-                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length !== 1}
+                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
                             onClick={() => setShowConfirmBox(true)}
                         >
                             Delete
@@ -467,7 +467,7 @@ export default function Account() {
                             showConfirmBox ?
                                 <ConfirmationDialog
                                     open={showConfirmBox}
-                                    message={`Are you sure you want to delete these accounts ?`}
+                                    message={`Are you sure, you want to delete selected account(s) ?`}
                                     onClose={() => setShowConfirmBox(false)}
                                     onOk={handleDeleteAccounts}
                                 /> : null
@@ -476,7 +476,7 @@ export default function Account() {
                             singleAccountDelete.show ?
                                 <ConfirmationDialog
                                     open={singleAccountDelete.show}
-                                    message={`Are you sure you want to delete account: ${singleAccountDelete.accountName} ?`}
+                                    message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ?`}
                                     onClose={() => setSingleAccountDelete({ id: null, show: false })}
                                     onOk={handleSingleDeleteAccounts}
                                 /> : null
