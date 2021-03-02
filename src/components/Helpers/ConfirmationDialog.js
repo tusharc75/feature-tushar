@@ -40,7 +40,7 @@ export default function ConfirmationDialogRaw(props) {
             <DialogTitle id="confirmation-dialog-title">Confirm</DialogTitle>
             <DialogContent dividers>
                 {
-                    message ? <Typography>{message} ?</Typography> : null
+                    message ? <Typography>{message}</Typography> : null
                 }
             </DialogContent>
             <DialogActions>
