@@ -35,7 +35,7 @@ const DialogActions = withStyles((theme) => ({
 export default function CreateAccount(props) {
 
     const classes = useStyles();
-    const { entityData, alertData, handleSnackbar, handleSubmit, loading, isEdit, onClose } = props
+    const { entityData, alertData, handleSnackbar, handleSubmit, loading, onClose } = props
 
     return (<>
         {
@@ -94,7 +94,7 @@ export default function CreateAccount(props) {
                                             handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
                                         }}
                                     >
-                                        {isEdit ? "Update" : "Save"}
+                                        Save
                                     </CustomButton>
                                 </DialogActions>
                             </Form>
