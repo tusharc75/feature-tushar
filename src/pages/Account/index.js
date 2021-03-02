@@ -112,7 +112,7 @@ export default function Account() {
                 />
             ),
             renderCell: (params) => (
-                params.allowToDelete ? <Checkbox
+                params.row.allowToDelete ? <Checkbox
                     color="primary"
                     // disabled={!params.allowToDelete}
                     checked={params.value}
@@ -396,16 +396,6 @@ export default function Account() {
                     startIcon={<AddOutlined />}
                 >
                     Add
-                </Button>
-                <Box component="span" marginX={1} />
-
-                <Button
-                    disabled={true}
-                    variant="outlined"
-                    color="default"
-                    aria-controls="action-menu"
-                >
-                    Import
                 </Button>
                 <Box component="span" marginX={1} />
 

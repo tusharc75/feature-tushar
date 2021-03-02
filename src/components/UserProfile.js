@@ -52,12 +52,12 @@ export default function UserProfile(props) {
                                     onKeyDown={onListKeyDown}
                                 >
                                     {/* <MenuItem onClick={onClose}>My account</MenuItem> */}
-                                    <MenuItem onClick={(e) => onClose(e, { profile: true })}>
+                                    {/* <MenuItem onClick={(e) => onClose(e, { profile: true })}>
                                         Profile
-                  </MenuItem>
+                                    </MenuItem> */}
                                     <MenuItem onClick={(e) => onClose(e, { logout: true })}>
                                         Logout
-                  </MenuItem>
+                                    </MenuItem>
                                 </MenuList>
                             </ClickAwayListener>
                         </Paper>
