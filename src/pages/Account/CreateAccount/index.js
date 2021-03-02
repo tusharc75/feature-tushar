@@ -9,7 +9,7 @@ import CreateAccount from './CreateAccount'
 import { getErrorMessage } from '../../../services/util'
 import { getObjKeys, formValidation } from '../../../constants/helpers';
 import { accountPage, accountDetailPage } from '../../../routes/Accounts'
-import { craeteAccount, getAccountData, updateAccount, getDataToClone } from '../../../axios/accounts'
+import { createAccount, getAccountData, updateAccount, getDataToClone } from '../../../axios/accounts'
 import { GetFields } from '../../../axios/index';
 import { useHistory, useParams } from 'react-router-dom'
 import { useData } from '../../../StateProvider/Provider';
@@ -195,7 +195,7 @@ export default function CreateAccountMain(props) {
                 data = await updateAccount(values)
             }
             else {
-                data = await craeteAccount(values)
+                data = await createAccount(values)
             }
 
             if (data.status === 200) {

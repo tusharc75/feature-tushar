@@ -75,6 +75,7 @@ export default function CreateAccount(props) {
                                             fieldsData={entityData.fields}
                                             size="small"
                                             fullWidth
+                                            isTooltip={true}
                                         />
                                     </DialogContent>
                                 </>
@@ -89,6 +90,7 @@ export default function CreateAccount(props) {
                                         style={{ float: "right" }}
                                         variant="contained"
                                         color="primary"
+                                        disabled={Object.keys(errors).length > 0 ? true : false}
                                         onClick={(e) => {
                                             e.preventDefault()
                                             handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)

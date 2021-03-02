@@ -12,7 +12,7 @@ export const getAccountData = async (id) => {
     }
 }
 
-export const craeteAccount = async (request) => {
+export const createAccount = async (request) => {
     const { data } = await api().post('/account', request)
     return data;
 }
