@@ -21,19 +21,22 @@ import { contactPage } from '../../routes/Contacts'
 import { capitalize } from '../../services/util'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import Loader from '../../components/Loader'
 import routes from '../../components/Helpers/Routes';
 import '../Account/account.css'
 
 const Roles = () => {
+    const history = useHistory();
     const { state: { user } } = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [alertData, setAlertData] = useState({})
     const [contactData, setContactData] = useState({})
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
-    const [contactFields, setContactFields] = useState({})
+    const [contactFields, setContactFields] = useState([])
     const [mainPoints, setMainPoints] = useState({})
     const [isUpdating, setUpdating] = useState(false);
+    const [allowedToEdit, setAllowedToEdit] = useState(false)
     const [customizedRoutes, setCustomizedRoutes] = useState([routes.contact]);
     let { id } = useParams();
 
@@ -49,8 +52,7 @@ const Roles = () => {
             let data = await getContactData(id)
             if (data.status === 200) {
                 let tData = data.data
-                handleMainPoints()
-                setCustomizedRoutes([...customizedRoutes, { title: `${tData.firstName} ${tData.lastName}` }]);
+                handleMainPoints(tData)
 
                 let name = capitalize(tData.firstName || '') + ' '
                 name = name + capitalize(tData.middleName || '') + ' '
@@ -64,6 +66,7 @@ const Roles = () => {
                 handleAllowToEditList(tData)
                 setContactData(tData)
                 getContactFields()
+                setCustomizedRoutes([...customizedRoutes, { title: `${tData.firstName} ${tData.lastName}` }]);
             }
         }
         catch (err) {
@@ -84,6 +87,7 @@ const Roles = () => {
         if (data?.accountName?.optionLabel) {
             tempMp["Account Name"] = data.accountName.optionLabel
         }
+        console.log("🚀 ~ file: ContactDetailPage.js ~ line 96 ~ handleMainPoints ~ tempMp", tempMp)
         setMainPoints(tempMp)
     }
     const getContactFields = () => {
@@ -131,7 +135,7 @@ const Roles = () => {
 
     const handleDeleteContact = () => {
         if (contactData?._id) {
-            deleteContacts({ ids: [contactData._id] }).then(({ data }) => {
+            deleteContacts({ ids: [contactData._id] }).then((data) => {
                 if (data.status === 200) {
                     handleSnackbar(data.message, 'success', true)
                     goBackToListing()
@@ -161,7 +165,7 @@ const Roles = () => {
         if (userId) {
             if (rec?.collaborator && rec.collaborator.length) {
                 rec.collaborator.map(obj => {
-                    tList.push(obj.optionValue)
+                    tList.push(obj.user)
                 })
             }
             if (rec?.owner?.optionValue) {
@@ -184,7 +188,7 @@ const Roles = () => {
 
         updateContact(updatedData)
             .then(({ data }) => {
-                fetchAccountData()
+                fetchContactData()
                 handleSnackbar("Successfully saved", 'success', true)
                 setUpdating(false);
             })
@@ -223,17 +227,17 @@ const Roles = () => {
                         showHeading={true}
                     >
                         <Box component="span" marginX={1} />
-                        {/* {
+                        {
                             contactData?.owner?.optionValue && user?.user?._id &&
-                                contactData.owner.optionValue === user.user._id ? */}
-                        <Button
-                            variant="contained" color="secondary"
-                            onClick={() => setShowConfirmBox(true)}
-                        >
-                            Delete
+                                contactData.owner.optionValue === user.user._id ?
+                                <Button
+                                    variant="contained" color="secondary"
+                                    onClick={() => setShowConfirmBox(true)}
+                                >
+                                    Delete
                             </Button>
-                        {/* : null
-                        } */}
+                                : null
+                        }
 
                     </CustomHeader>
 

@@ -196,7 +196,6 @@ const Roles = () => {
             });
     };
     const goBackToListing = () => {
-        console.log("~ goBackToListing")
         history.push({
             pathname: accountPage.path
         });

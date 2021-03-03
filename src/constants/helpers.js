@@ -54,6 +54,7 @@ export const removeEmptyKeys = (obj) => {
     return obj
 }
 
+
 export const capitalize = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
@@ -108,9 +109,3 @@ const isEmailExist = async (email) => {
     }
 };
 
-export const removeEmptyKeys = (obj) => {
-    Object.keys(obj).forEach(
-        (k) => !obj[k] && obj[k] !== undefined && delete obj[k]
-    )
-    return obj
-}

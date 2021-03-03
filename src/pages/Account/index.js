@@ -12,10 +12,10 @@ import {
     Tooltip,
     IconButton,
     Grid,
-    Divider,
-    Link
+    Divider
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { Link } from 'react-router-dom'
 import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
 import { ExpandMore, AddOutlined, EditLocationTwoTone, Visibility } from "@material-ui/icons";
@@ -35,11 +35,14 @@ import CreateAccountDialog from './CreateAccount/index'
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
-
+import './account.css'
 
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
+        border: "1px solid #D4D6D7",
+        borderRadius: 8,
+        padding: theme.spacing(3, 2),
     },
     linksContainer: {
         display: "flex",
@@ -50,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     linkDivider: {
         backgroundColor: theme.palette.darkBg,
         margin: "0 1rem",
-    },
+    }
 }));
 
 let accountTimeout
@@ -67,7 +70,6 @@ export default function Account() {
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
     const [query, setQuery] = useState({ page: 0, limit: 25 });
-
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
@@ -169,7 +171,14 @@ export default function Account() {
             filterable: false,
             width: 75
         },
-        { field: "accountName", headerName: "Account Name", width: 200 },
+        {
+            field: "accountName", headerName: "Account Name", width: 200,
+            renderCell: (params) => (
+                <Link className="accountNameLink" to={`${accountDetailPage.path}/${params.row._id}`}>
+                    {params?.row?.accountName ? params.row.accountName : ''}
+                </Link>
+            )
+        },
         {
             field: "typeOfAccount",
             headerName: "Type",
@@ -219,11 +228,6 @@ export default function Account() {
             field: "actions", headerName: "Actions ",
             renderCell: (params) => (
                 <>
-                    <Tooltip title="View">
-                        <IconButton aria-label="View" onClick={() => handleRowClick(params)}>
-                            <Visibility fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip>
                     <Tooltip title="Clone">
                         <IconButton aria-label="Clone" onClick={() => { cloneAccount(params.row._id) }}>
                             <FileCopyIcon fontSize="small" color="primary" />
@@ -517,8 +521,8 @@ export default function Account() {
                 </BrandHeader>
 
                 <Paper style={{ marginTop: 15 }}>
-                    <BoxWithBorder>
-                        <div className="account-grid-height">
+                    <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
+                        <div className="account-grid-height1">
                             <DataGrid
                                 components={{
                                     Toolbar: GridToolbar,
@@ -554,13 +558,13 @@ export default function Account() {
                             singleAccountDelete.show ?
                                 <ConfirmationDialog
                                     open={singleAccountDelete.show}
-                                    message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ?`}
+                                    message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
                                     onClose={() => setSingleAccountDelete({ id: null, show: false, accountName: "" })}
                                     onOk={handleSingleDeleteAccounts}
                                 /> : null
                         }
 
-                    </BoxWithBorder>
+                    </Box>
                 </Paper>
             </Layout>
             {
