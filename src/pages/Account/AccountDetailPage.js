@@ -3,7 +3,7 @@ import {
     Box,
     Button,
     Grid,
-    Typography
+    Typography,
 } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
@@ -19,9 +19,9 @@ import Loader from '../../components/Loader'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { deleteAccounts } from '../../axios/accounts'
+import { deleteAccounts, updateAccount } from '../../axios/accounts'
+import DetailsPage from '../../components/Shared/DetailsPage'
 import "./account.css";
-import userEvent from "@testing-library/user-event";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import axiosInstance from './../../axios/axiosInstance'
@@ -30,11 +30,13 @@ const Roles = () => {
     const history = useHistory();
     const { state: { user } } = useData();
     const [headingLbl, setHeadingLbl] = useState('')
+    const [allowedToEdit, setAllowedToEdit] = useState(false)
+    const [isUpdating, setUpdating] = useState(false);
     const [alertData, setAlertData] = useState({})
     const [accountData, setAccountData] = useState({})
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
-    const [data, setData] = useState({})
+    const [accountFields, setAccountFields] = useState([])
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState([routes.account]);
 
@@ -48,66 +50,62 @@ const Roles = () => {
 
     const fetchAccountData = async () => {
         setLoading(true)
+
         try {
             axiosInstance().get(`/account/${id}`).then(({ data }) => {
                 setCustomizedRoutes([...customizedRoutes, { title: data.accountName }]);
 
+                setHeadingLbl(data.accountName || '')
+                handleAllowToEditList(data)
+                handleMainPonts(data)
                 setAccountData(data)
-                getAccountFields(data)
+                if (accountFields.length == 0) {
+                    getAccountFields()
+                }
+                else {
+                    setLoading(false)
+                }
             })
         }
         catch (err) {
             setLoading(false)
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
         }
     }
 
-    const getAccountFields = (values) => {
-        setHeadingLbl(values.accountName || '')
+    const handleAllowToEditList = (rec) => {
+        let userId = user?.user?._id
+        let tList = []
+        if (userId) {
+            if (rec?.collaborator && rec.collaborator.length) {
+                rec.collaborator.map(obj => {
+                    tList.push(obj.optionValue)
+                })
+            }
+            if (rec?.owner?.optionValue) {
+                tList.push(rec.owner.optionValue)
+            }
+            if (tList && tList.indexOf(userId) >= 0) {
+                setAllowedToEdit(true)
+            }
+        }
+    }
+    const handleMainPonts = (data) => {
+        let mainPoints = {
+            Phone: data.phone || ''
+        }
+        if (data?.parentAccount?.optionLabel) {
+            mainPoints["Parent Account"] = data.parentAccount.optionLabel
+        }
+        if (data?.owner?.optionLabel) {
+            mainPoints["Primary Owner"] = data.owner.optionLabel
+        }
+        setMainPoints(mainPoints)
+    }
 
+    const getAccountFields = () => {
         axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
-            const td = {}, mainPoints = {}
-            data.map((_f) => {
-                let fd = _f.fieldData
 
-                let val = ""
-                if (typeof values[fd.fieldName] === "object" && values[fd.fieldName].optionLabel) {
-                    if ("parentAccount" == fd.fieldName) {
-                        mainPoints[fd.fieldLabel] = values[fd.fieldName].optionLabel
-                    }
-                    val = values[fd.fieldName].optionLabel
-                }
-                else if (Array.isArray(values[fd.fieldName]) && values[fd.fieldName].length) {
-                    values[fd.fieldName].forEach(v => {
-                        if (v.optionLabel) val = val ? val + "," + v.optionLabel : v.optionLabel
-                    })
-                }
-                else {
-                    if (["phone"].indexOf(fd.fieldName) >= 0) {
-                        mainPoints[fd.fieldLabel] = values[fd.fieldName]
-                    }
-                    val = values[fd.fieldName]
-                }
-
-
-                if (td[fd.sectionName]) {
-                    td[fd.sectionName] = {
-                        ...td[fd.sectionName],
-                        [fd.fieldLabel]: val
-                    }
-                }
-                else {
-                    td[fd.sectionName] = {}
-                    td[fd.sectionName] = {
-                        [fd.fieldLabel]: val
-                    }
-                }
-            });
-            setMainPoints(mainPoints)
-            setData(td)
+            setAccountFields(data)
             setLoading(false)
         });
     };
@@ -120,13 +118,6 @@ const Roles = () => {
         })
     };
 
-    const goToBackPage = () => {
-        history.push({
-            pathname: accountPage.path
-        })
-    }
-
-    const tabs = ["Table", "Users"];
     const quickLinks = [
         {
             label: "Account Heirarchy",
@@ -155,11 +146,12 @@ const Roles = () => {
     ]
 
     const handleDeleteAcc = () => {
-        console.log('accountData', accountData)
         if (accountData?._id) {
-            deleteAccounts([accountData._id]).then(({ data }) => {
+
+            deleteAccounts({ ids: [accountData._id] }).then((data) => {
                 if (data.status === 200) {
                     handleSnackbar(data.message, 'success', true)
+                    goBackToListing()
                 }
                 setShowConfirmBox(false)
             }).catch(err => {
@@ -173,8 +165,38 @@ const Roles = () => {
         else {
             setShowConfirmBox(false)
         }
-
     }
+    const handleUpdateAccount = (values) => {
+        setUpdating(true);
+        if (values.employees) {
+            values.employees = parseInt(values.employees)
+        }
+        const updatedData = {
+            ...values,
+            _id: accountData._id,
+        };
+
+        updateAccount(updatedData)
+            .then(({ data }) => {
+                fetchAccountData()
+                handleSnackbar("Successfully saved", 'success', true)
+                setUpdating(false);
+            })
+            .catch((err) => {
+                console.log(err);
+                let errMes = getErrorMessage(err)
+                if (errMes) {
+                    handleSnackbar(errMes, 'error', true)
+                }
+                setUpdating(false);
+            });
+    };
+    const goBackToListing = () => {
+        history.push({
+            pathname: accountPage.path
+        });
+    }
+
     return (
         <>
             <Layout>
@@ -195,6 +217,7 @@ const Roles = () => {
                 <div>
                     <CustomHeader
                         heading={headingLbl}
+                        logo={accountData?.accountLogo ? accountData.accountLogo : undefined}
                         mainPoints={mainPoints}
                         style={{ marginTop: "150px", minHeight: "200px" }}
                         showHeading={true}
@@ -216,13 +239,19 @@ const Roles = () => {
                     <Container className="detailPageContainer">
                         <Grid container spacing={3}>
                             <Grid item sm={8} md={8} lg={8}>
-                                <div className="detailPageDiv1" >
+                                <div className="detailPageDiv1"
+                                    style={{ pointerEvents: allowedToEdit ? "" : "none" }} >
                                     {
                                         loading ? <Loader text="Fetching Data" style={{ marginTop: 100 }} /> :
-                                            <DetailPage
-                                                data={data}
+                                            <DetailsPage
+                                                data={accountData}
+                                                fields={accountFields}
+                                                isUpdating={isUpdating}
+                                                canEdit={allowedToEdit}
+                                                handleUpdate={handleUpdateAccount}
                                             />
                                     }
+
                                 </div>
                             </Grid>
                             <Grid item sm={4} md={4} lg={4} className="customGrid" >
