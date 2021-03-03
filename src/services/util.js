@@ -30,4 +30,7 @@ export const getErrorMessage = (err) => {
     }
     return ''
 }
+export const capitalize = (string) => {
+    return string && typeof string === "string" ? string.charAt(0).toUpperCase() + string.slice(1) : string;
+};
 

@@ -1,6 +1,72 @@
-.footer{
-    float:right;
+.footer {
+    float: right;
     display: flex;
     justify-content: space-between;
-    width: 40%
+    width: 40%;
+}
+.detailPageContainer{
+     width: 100%;
+     max-height: 400px;
+    background-color: aliceblue;
+    padding: 1px
+}
+.detailPageDiv1{
+    background-color: white;
+    border-radius: 8px
+}
+.customGrid{
+    background-color: aliceblue
+}
+.detailPageDiv2{
+    padding: 10px;
+    background-color: white;
+    margin-bottom: 10px;
+    border-radius: 8px
+}
+.detailPageDiv2{
+    background-color: white
+}
+.customBox{
+    text-align: center;
+    min-height: 300px;
+    vertical-align: middle ;
+    margin-top:100px
+}
+.cTr{
+    width: 90%
+}
+.td1{
+    width: 150px
+}
+.td2{
+    word-wrap: break-word
+}
+.customDiv12{
+    flex-grow: 1;
+    padding: 10px
+}
+.detailPageDiv3{
+    padding: 6px;
+}
+.customLink{
+    color:darkblue;
+    text-decoration: underline;
+    font-size: 17px;
+    margin-bottom: 16px;
+}
+.customBox1{
+    min-height: 150px;
+    background-color: white;
+    border-radius: 10px;
+}
+.customDiv13{
+    display: flex;
+    justify-content: space-between;
+}
+
+.account-header {
+    padding: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
 }

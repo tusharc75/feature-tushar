@@ -2,7 +2,7 @@ import axios from "axios";
 import api from './axios'
 import { getSearchQuery } from '../services/util'
 
-const BASE_URL = "https://equipt-oms-v2.herokuapp.com";
+const BASE_URL = process?.env?.REACT_APP_API_URL || "https://equipt-oms-v2.herokuapp.com";
 
 export const UserLogin = async (inputData) => {
     const { data } = await axios.post(`${BASE_URL}/user/login`, inputData);

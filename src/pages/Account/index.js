@@ -10,42 +10,73 @@ import {
     MenuItem,
     Paper,
     Tooltip,
-    IconButton
+    IconButton,
+    Grid,
+    Divider,
+    Link
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
-import { ExpandMore, AddOutlined, EditOutlined } from "@material-ui/icons";
+import { ExpandMore, AddOutlined, EditLocationTwoTone, Visibility } from "@material-ui/icons";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { deleteAccounts, getDataToClone } from '../../axios/accounts'
 import CustomToast from '../../components/Helpers/CustomToast'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { getErrorMessage } from '../../services/util'
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
+import BlockIcon from '@material-ui/icons/Block';
+import { accountDetailPage } from '../../routes/Accounts'
+import _ from "lodash";
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CreateAccountDialog from './CreateAccount/index'
+import routes from './../../components/Helpers/Routes';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import { makeStyles } from "@material-ui/core/styles";
+
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: "100%",
+    },
+    linksContainer: {
+        display: "flex",
+    },
+    links: {
+        color: theme.palette.textDark
+    },
+    linkDivider: {
+        backgroundColor: theme.palette.darkBg,
+        margin: "0 1rem",
+    },
+}));
 
 let accountTimeout
 export default function Account() {
 
+    const classes = useStyles();
+
     const { state: { user } } = useData();
     const history = useHistory();
-
-    const [entitiesCount, setEntitiesCount] = useState(0);
-
     const [accountData, setAccountData] = useState([]);
-    const [loadingAccountData, setLoadingAccountData] = useState(false);
+    const [cloneId, setCloneId] = useState('')
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 0, limit: 5 });
+    const [query, setQuery] = useState({ page: 0, limit: 25 });
+
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
     const [showConfirmBox, setShowConfirmBox] = useState(false)
     const [alertData, setAlertData] = useState({})
+    const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
     const [searchVal, setSearchVal] = useState("");
+
+    const [singleAccountDelete, setSingleAccountDelete] = useState({ id: null, show: false, accountName: "" })
 
     useEffect(() => {
         let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
@@ -62,26 +93,25 @@ export default function Account() {
 
     useEffect(() => {
         if (renderCount > 0) {
-            if (user) {
-                fetchAccounts();
-            }
+            fetchAccounts();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [query, user]);
+        // eslint-disable-next-line
+    }, [query]);
 
     useEffect(() => {
         let rows = accountData?.map((u) => ({
             ...u,
             isChecked: false,
             id: u._id,
-            allowToDelete: u.allowToDelete
+            allowToDelete: u.allowToDelete,
+            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : ""
         }));
         setDataRows([...rows]);
     }, [accountData])
 
     const cloneAccount = async (accountId) => {
-        history.push({
-            pathname: `/account/clone/${accountId}`,
-        });
+        setCloneId(accountId)
+        setIsAccDialogVisible(true)
     }
 
     const columns = [
@@ -106,7 +136,7 @@ export default function Account() {
                 />
             ),
             renderCell: (params) => (
-                params.allowToDelete ? <Checkbox
+                params.row.allowToDelete ? <Checkbox
                     color="primary"
                     // disabled={!params.allowToDelete}
                     checked={params.value}
@@ -127,40 +157,12 @@ export default function Account() {
                             setCheckAllAccounts(false);
                         }
                         handleSelectedAccounts(params.row.id, ev.target.checked)
-
-                        // if (checkedRecords.length === 1) {
-                        //   const id = checkedRecords[0].id;
-                        //   findOneUser(id);
-                        // } else {
-                        //   setSelectedUser(null);
-                        //   if (selectedBrand) {
-                        //     accountData.forEach((u) => {
-                        //       if (u.brand !== selectedBrand.id) {
-                        //         setSelectedBrand(null);
-                        //       }
-                        //     });
-                        //   }
-                        // }
                     }}
-                /> : <Tooltip title="You must be the owener of this account to get the selection functionality">
+                /> : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the selection functionality">
                         <IconButton>
-                            <InfoOutlinedIcon />
+                            <BlockIcon fontSize="small" color="error" />
                         </IconButton>
-                    </Tooltip>
-            ),
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            width: 75
-        },
-        {
-            field: "clone", headerName: " ",
-            renderCell: (params) => (
-                <Tooltip title="Clone">
-                    <IconButton aria-label="copy" onClick={() => { cloneAccount(params.row._id) }}>
-                        <FileCopyOutlinedIcon />
-                    </IconButton>
-                </Tooltip>
+                    </Tooltip >
             ),
             disableColumnMenu: true,
             sortable: false,
@@ -204,50 +206,84 @@ export default function Account() {
                 </>
             )
         },
+        {
+            field: "masterAccount",
+            headerName: "Master Account",
+            width: 200,
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+        },
         { field: "phone", headerName: "Phone", width: 200 },
-        // {
-        //     field: "Actions",
-        //     headerName: "Actions",
-        //     width: 200,
-        //     renderCell: (params) => (
-        //         <span><EditOutlined button fontSize="small" onClick={() => handleEdit(params)} /></span>
-        //     )
-        // },
-        { field: "rootAccount", headerName: "Root Account", width: 200 },
+        {
+            field: "actions", headerName: "Actions ",
+            renderCell: (params) => (
+                <>
+                    <Tooltip title="View">
+                        <IconButton aria-label="View" onClick={() => handleRowClick(params)}>
+                            <Visibility fontSize="small" color="primary" />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Clone">
+                        <IconButton aria-label="Clone" onClick={() => { cloneAccount(params.row._id) }}>
+                            <FileCopyIcon fontSize="small" color="primary" />
+                        </IconButton>
+                    </Tooltip>
+                    {
+                        params.row.allowToDelete ?
+                            <Tooltip title="Delete">
+                                <IconButton aria-label="Delete" onClick={() => {
+                                    setSingleAccountDelete({ show: true, id: params.row._id, accountName: params.row.accountName })
+                                }}>
+                                    <DeleteIcon fontSize="small" color="error" />
+                                </IconButton>
+                            </Tooltip> :
+                            <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the delete functionality">
+                                <IconButton aria-label="Delete">
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                    }
+
+                </>
+            ),
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            width: 200
+        },
     ];
 
     const handleEdit = data => {
-        console.log("🚀 ~ file: index.js ~ line 189 ~ Account ~ data", data)
-        history.push({
-            pathname: "/account/new",
-            state: {
-                accountId: data.row.id,
-            },
-        });
-
     }
+
     const handleSearch = (e) => {
         if (query.page !== 1) {
-            setQuery((prevState) => ({ ...prevState, page: 1 }));
+            setQuery((prevState) => ({ ...prevState, page: 0 }));
         }
         setSearchVal(e.target.value);
     };
 
     const fetchAccounts = async () => {
-        if (user) {
-            setLoading(true);
-            let searchParams = { ...query }
-            searchParams = searchVal
-                ? { ...searchParams, search: searchVal }
-                : { ...searchParams };
+        setLoading(true);
+        let searchParams = { ...query }
+        searchParams = searchVal
+            ? { ...searchParams, search: searchVal }
+            : { ...searchParams };
+        try {
             let tdata = await GetAccounts(searchParams)
-
-            if (tdata?.data && tdata.data.length > 0) {
-                setRowCount(tdata.count)
-                setAccountData(tdata.data)
+            setRowCount(tdata.count)
+            setAccountData(tdata.data)
+            setLoading(false);
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
             }
             setLoading(false);
         }
+
 
     }
 
@@ -272,12 +308,7 @@ export default function Account() {
     };
 
     const clickCreateNew = () => {
-        history.push({
-            pathname: "/account/new",
-            // state: {
-            //     brand_id: selectedBrand.id,
-            // },
-        });
+        setIsAccDialogVisible(true)
     }
 
     const handleSnackbar = (msg, type, isOpen) => {
@@ -287,6 +318,7 @@ export default function Account() {
             open: isOpen
         })
     };
+
     const handlePage = (params) => {
         if (query.page !== params.page) {
             setQuery((prevState) => ({ ...prevState, page: params.page }));
@@ -335,105 +367,211 @@ export default function Account() {
         }
     }
 
-    return (
-        <Layout>
-            {
-                alertData ? <CustomToast
-                    open={alertData.open || false}
-                    close={() => handleSnackbar('', '', false)}
-                    errorMsg={alertData.errorMsg || ''}
-                    type={alertData.type || ''}
-                /> : null
+    const handleSingleDeleteAccounts = async () => {
+        try {
+            let data = await deleteAccounts({ ids: [singleAccountDelete.id] })
+            if (data.status === 200) {
+                handleSnackbar(data.message, 'success', true)
+                fetchAccounts();
             }
+            setSingleAccountDelete({ id: null, show: false, accountName: "" });
+            setSelectedRecs([])
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
+            }
+        }
+    }
 
-            <BrandHeader total={entitiesCount} heading="Accounts"
-                showHeading={false}
-            >
-                <SearchBox onSearch={handleSearch} value={searchVal} />
-                <Box component="span" marginX={1} />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={clickCreateNew}
-                >
-                    <AddOutlined /> Add
-                </Button>
-                <Box component="span" marginX={1} />
-                <Button
-                    disabled={true}
-                    variant="outlined"
-                    color="default"
-                    aria-controls="action-menu"
-                >
-                    Import
-                </Button>
-                <Box component="span" marginX={1} />
-                <Button
-                    disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                    variant="outlined"
-                    color="default"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                >
-                    Actions <ExpandMore />
-                </Button>
+    const handleRowClick = e => {
+        let tempPath = accountDetailPage.path + '/' + e.row._id
+        history.push({
+            pathname: tempPath,
+        });
+    }
+    const handleDialogClose = (params) => {
+        if (params && params.fetch) {
+            fetchAccounts()
+        }
+        setIsAccDialogVisible(false)
+        if (cloneId) {
+            setCloneId('')
+        }
+    }
 
-                <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left"
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}>
+    return (
+        <>
+            <Layout>
 
-                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length !== 1}
-                        onClick={() => setShowConfirmBox(true)}
+                <Grid container spacing={3} direction="row">
+                    <Grid item xs={12} sm={6} className="pl-3">
+                        <CustomBreadCrumbs routes={[routes.account]} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} className="pr-3">
+                        <Grid container justify="flex-end">
+                            <Link
+                                href="#"
+                                onClick={(e) => e.preventDefault()}
+                                className={classes.links}
+                            >
+                                Import from Excel
+                            </Link>
+                            <Divider
+                                orientation="vertical"
+                                flexItem
+                                className={classes.linkDivider}
+                            />
+                            <Link
+                                href="#"
+                                onClick={(e) => e.preventDefault()}
+                                className={classes.links}
+                            >
+                                Export to Excel
+                            </Link>
+                            <Divider
+                                orientation="vertical"
+                                flexItem
+                                className={classes.linkDivider}
+                            />
+                            <Link
+                                href="#"
+                                onClick={(e) => e.preventDefault()}
+                                className={classes.links}
+                            >
+                                Download Template
+                            </Link>
+                            <Divider
+                                orientation="vertical"
+                                flexItem
+                                className={classes.linkDivider}
+                            />
+                            <Link
+                                href="#"
+                                onClick={(e) => e.preventDefault()}
+                                className={classes.links}
+                            >
+                                Email a Link
+                            </Link>
+                        </Grid>
+                    </Grid>
+
+                </Grid>
+
+                {
+                    alertData ? <CustomToast
+                        open={alertData.open || false}
+                        close={() => handleSnackbar('', '', false)}
+                        errorMsg={alertData.errorMsg || ''}
+                        type={alertData.type || ''}
+                    /> : null
+                }
+
+                <BrandHeader heading=""
+                    style={{ marginTop: "150px", minHeight: "200px" }}
+                    showHeading={false}>
+
+                    <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
+                    <Box component="span" marginX={1} />
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={clickCreateNew}
+                        startIcon={<AddOutlined />}
                     >
-                        Delete
+                        Add
+                    </Button>
+                    <Box component="span" marginX={1} />
+
+                    <Button
+                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                        variant="outlined"
+                        color="default"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                    >
+                        Actions <ExpandMore />
+                    </Button>
+
+                    <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left"
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}>
+
+                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                            onClick={() => setShowConfirmBox(true)}
+                        >
+                            Delete
                     </MenuItem>
-                </Menu>
+                    </Menu>
 
-            </BrandHeader>
+                </BrandHeader>
 
-            <Paper style={{ marginTop: 15 }}>
-                <BoxWithBorder>
-                    <div style={{ width: "100%", height: "400px" }}>
-                        <DataGrid
-                            components={{
-                                Toolbar: GridToolbar,
-                            }}
-                            rows={loading ? [] : dataRows}
-                            columns={columns}
-                            loading={loading}
-                            disableSelectionOnClick
-                            disableMultipleSelection
-                            paginationMode="server"
-                            pagination
-                            onPageChange={handlePage}
-                            onPageSizeChange={handlePageSize}
-                            pageSize={query.limit}
-                            page={query.page}
-                            rowCount={rowCount}
-                            rowsPerPageOptions={[5, 10, 20]}
-                            onSortModelChange={handleSortModelChange}
-                            density="compact"
-                        />
-                    </div>
-                    {
-                        showConfirmBox ?
-                            <ConfirmationDialog
-                                open={showConfirmBox}
-                                message={`Are you sure you want to delete these entities`}
-                                onClose={() => setShowConfirmBox(false)}
-                                onOk={handleDeleteAccounts}
-                            /> : null
-                    }
-                </BoxWithBorder>
-            </Paper>
-        </Layout>
+                <Paper style={{ marginTop: 15 }}>
+                    <BoxWithBorder>
+                        <div className="account-grid-height">
+                            <DataGrid
+                                components={{
+                                    Toolbar: GridToolbar,
+                                }}
+                                rows={loading ? [] : dataRows}
+                                columns={columns}
+                                loading={loading}
+                                disableSelectionOnClick
+                                disableMultipleSelection
+                                paginationMode="server"
+                                pagination
+                                onPageChange={handlePage}
+                                onPageSizeChange={handlePageSize}
+                                pageSize={query.limit}
+                                page={query.page}
+                                rowCount={rowCount}
+                                rowsPerPageOptions={[25, 50, 75]}
+                                onSortModelChange={handleSortModelChange}
+                                // onRowClick={handleRowClick}
+                                density="compact"
+                            />
+                        </div>
+                        {
+                            showConfirmBox ?
+                                <ConfirmationDialog
+                                    open={showConfirmBox}
+                                    message={`Are you sure, you want to delete selected account(s) ?`}
+                                    onClose={() => setShowConfirmBox(false)}
+                                    onOk={handleDeleteAccounts}
+                                /> : null
+                        }
+                        {
+                            singleAccountDelete.show ?
+                                <ConfirmationDialog
+                                    open={singleAccountDelete.show}
+                                    message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ?`}
+                                    onClose={() => setSingleAccountDelete({ id: null, show: false, accountName: "" })}
+                                    onOk={handleSingleDeleteAccounts}
+                                /> : null
+                        }
+
+                    </BoxWithBorder>
+                </Paper>
+            </Layout>
+            {
+                isAccDialogVisible ?
+                    <CreateAccountDialog
+                        open={isAccDialogVisible}
+                        onClose={handleDialogClose}
+                        showSuccessMes={handleSnackbar}
+                        id={cloneId}
+                    /> : null
+            }
+        </>
     )
 }
