@@ -196,6 +196,8 @@ export default function CreateAccountMain(props) {
                 CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
 
                 handleLoading(false, saveAndNew)
+            }).catch((error) => {
+                setLoading(false);
             })
         }
         catch (err) {
