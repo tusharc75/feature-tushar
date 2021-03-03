@@ -106,6 +106,7 @@ export default function Account() {
             isChecked: false,
             id: u._id,
             allowToDelete: u.allowToDelete,
+            collaborator: u.collaborator || [],
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : ""
         }));
         setDataRows([...rows]);

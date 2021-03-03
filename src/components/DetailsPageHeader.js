@@ -1,8 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, Box } from "@material-ui/core";
+import { Grid, Typography, Box, Avatar } from "@material-ui/core";
 import Container from './Container'
+import { capitalize } from '../services/util'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -17,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const CustomHeader = (props) => {
-    const { mainPoints, heading, children, showHeading } = props;
+    const { mainPoints, heading, children, showHeading, logo } = props;
     const classes = useStyles();
     return (
         <React.Fragment>
@@ -25,10 +26,17 @@ const CustomHeader = (props) => {
                 <Grid container justify="space-between" style={{ marginBottom: '10px' }}>
                     <Grid item>
                         {
-                            showHeading ?
-                                <Typography variant="h6" component="h2" color="primary">
-                                    {heading}
+                            showHeading ? <>
+                                <Typography style={{ display: 'inline-block' }} variant="h6" component="h2" color="primary">
+                                    {
+                                        logo ? <Avatar
+                                            src={logo}
+                                            style={{ width: 20, height: 20, display: 'inline-block', marginRight: '10px' }}
+                                            alt="acc_logo" /> : null
+                                    }
+                                    <span>{capitalize(heading)}</span>
                                 </Typography>
+                            </>
                                 : null
                         }
                     </Grid>

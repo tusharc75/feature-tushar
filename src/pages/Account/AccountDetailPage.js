@@ -3,7 +3,7 @@ import {
     Box,
     Button,
     Grid,
-    Typography
+    Typography,
 } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
@@ -221,6 +221,7 @@ const Roles = () => {
                 <div>
                     <CustomHeader
                         heading={headingLbl}
+                        logo={accountData?.accountLogo ? accountData.accountLogo : undefined}
                         mainPoints={mainPoints}
                         style={{ marginTop: "150px", minHeight: "200px" }}
                         showHeading={true}

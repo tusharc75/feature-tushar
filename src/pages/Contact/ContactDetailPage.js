@@ -222,6 +222,7 @@ const Roles = () => {
                 <div>
                     <CustomHeader
                         heading={headingLbl}
+                        logo={contactData?.contactLogo ? contactData.contactLogo : undefined}
                         mainPoints={mainPoints}
                         style={{ marginTop: "150px", minHeight: "200px" }}
                         showHeading={true}
@@ -250,6 +251,7 @@ const Roles = () => {
                                         loading ? <Loader text="Fetching Data" style={{ marginTop: 100 }} /> :
                                             <DetailsPage
                                                 data={contactData}
+
                                                 fields={contactFields}
                                                 isUpdating={isUpdating}
                                                 canEdit={allowedToEdit}
