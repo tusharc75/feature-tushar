@@ -71,7 +71,6 @@ export default function CreateAccountMain(props) {
                     setLoading(false);
                 }, error => {
                     setLoading(false);
-                    debugger;
                 });
             });
         }
