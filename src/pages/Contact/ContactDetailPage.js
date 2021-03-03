@@ -7,7 +7,6 @@ import {
 } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Container from '../../components/Container'
-import { GetFields } from '../../axios/index';
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { getContactData } from '../../axios/contacts'
@@ -21,6 +20,7 @@ import { capitalize } from '../../services/util'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import '../Account/account.css'
+import axiosInstance from './../../axios/axiosInstance'
 
 const Roles = () => {
     const { state: { user } } = useData();
@@ -80,7 +80,7 @@ const Roles = () => {
 
     const getContactFields = (values) => {
 
-        GetFields('Contact').then(({ data }) => {
+        axiosInstance().get('/field?resource=Contact').then(({ data }) => {
             setData(data)
             setLoading(false)
         });

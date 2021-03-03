@@ -1,4 +1,4 @@
-import { checkEmailExist, GetFields } from '../axios/index'
+import { checkEmailExist } from '../axios/index'
 import currencies from "./currency_with_country.json";
 
 export const getObjKeys = (val = "", arr) => {

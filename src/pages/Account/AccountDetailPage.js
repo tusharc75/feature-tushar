@@ -8,7 +8,6 @@ import {
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
 import Container from "../../components/Container";
-import { GetFields } from '../../axios/index';
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { accountPage } from '../../routes/Accounts'
@@ -25,6 +24,7 @@ import "./account.css";
 import userEvent from "@testing-library/user-event";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
+import axiosInstance from './../../axios/axiosInstance'
 
 const Roles = () => {
     const history = useHistory();
@@ -49,14 +49,12 @@ const Roles = () => {
     const fetchAccountData = async () => {
         setLoading(true)
         try {
-            let data = await getAccountData(id)
-            if (data.status === 200) {
-                let initialVal = data.data
-                setCustomizedRoutes([...customizedRoutes, { title: initialVal.accountName }]);
+            axiosInstance().get(`/account/${id}`).then(({ data }) => {
+                setCustomizedRoutes([...customizedRoutes, { title: data.accountName }]);
 
-                setAccountData(initialVal)
-                getAccountFields(undefined, initialVal)
-            }
+                setAccountData(data)
+                getAccountFields(data)
+            })
         }
         catch (err) {
             setLoading(false)
@@ -67,9 +65,10 @@ const Roles = () => {
         }
     }
 
-    const getAccountFields = (brandId, values) => {
+    const getAccountFields = (values) => {
         setHeadingLbl(values.accountName || '')
-        GetFields('Account', brandId).then(({ data }) => {
+
+        axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
             const td = {}, mainPoints = {}
             data.map((_f) => {
                 let fd = _f.fieldData
