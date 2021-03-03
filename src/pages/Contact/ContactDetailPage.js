@@ -20,6 +20,8 @@ import { deleteContacts, updateContact } from '../../axios/contacts'
 import { contactPage } from '../../routes/Contacts'
 import { capitalize } from '../../services/util'
 import DetailsPage from '../../components/Shared/DetailsPage'
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import routes from '../../components/Helpers/Routes';
 import '../Account/account.css'
 
 const Roles = () => {
@@ -32,7 +34,9 @@ const Roles = () => {
     const [contactFields, setContactFields] = useState({})
     const [mainPoints, setMainPoints] = useState({})
     const [isUpdating, setUpdating] = useState(false);
+    const [customizedRoutes, setCustomizedRoutes] = useState([routes.contact]);
     let { id } = useParams();
+
     useEffect(() => {
         if (id) {
             fetchContactData()
@@ -46,6 +50,8 @@ const Roles = () => {
             if (data.status === 200) {
                 let tData = data.data
                 handleMainPoints()
+                setCustomizedRoutes([...customizedRoutes, { title: `${tData.firstName} ${tData.lastName}` }]);
+
                 let name = capitalize(tData.firstName || '') + ' '
                 name = name + capitalize(tData.middleName || '') + ' '
                 name = name + capitalize(tData.lastName || '')
@@ -194,6 +200,13 @@ const Roles = () => {
     return (
         <>
             <Layout>
+
+                <Grid container direction="row">
+                    <Grid item xs={12} className="pl-2">
+                        <CustomBreadCrumbs routes={customizedRoutes} />
+                    </Grid>
+                </Grid>
+
                 {
                     alertData ? <CustomToast
                         open={alertData.open || false}

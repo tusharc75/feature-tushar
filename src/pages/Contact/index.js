@@ -11,6 +11,9 @@ import {
     Tooltip,
     IconButton,
     Paper,
+    Grid,
+    Divider,
+    Link
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
@@ -20,14 +23,45 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import { contactDetailPage } from '../../routes/Contacts'
 import './contact.css';
+import CreateContact from './CreateContact/CreateContact';
+import { GetFields } from '../../axios/index';
+import { getObjKeys } from '../../constants/helpers';
+import { makeStyles } from "@material-ui/core/styles";
+import routes from './../../components/Helpers/Routes';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import BrandHeader from '../../components/BrandHeader';
+import SearchBox from '../../components/Helpers/SearchBox'
+import DeleteIcon from '@material-ui/icons/Delete';
+import { getErrorMessage } from '../../services/util'
+import CustomToast from '../../components/Helpers/CustomToast'
+import BlockIcon from '@material-ui/icons/Block';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: "100%",
+    },
+    linksContainer: {
+        display: "flex",
+    },
+    links: {
+        color: theme.palette.textDark
+    },
+    linkDivider: {
+        backgroundColor: theme.palette.darkBg,
+        margin: "0 1rem",
+    },
+}));
 
 let contactTimeout
 export default function Contact() {
+
+    const classes = useStyles();
 
     const { state: { user } } = useData();
     const history = useHistory();
 
     const [entitiesCount, setEntitiesCount] = useState(0);
+    const [alertData, setAlertData] = useState({})
 
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -40,6 +74,15 @@ export default function Contact() {
     const [errorMsg, setErroMsg] = useState("");
     const [msgType, setMsgType] = useState("");
     const [showConfirmBox, setShowConfirmBox] = useState(false);
+    const [searchVal, setSearchVal] = useState("");
+
+    const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
+    const [singleContactDelete, setSingleContactDelete] = useState({ id: null, show: false, contactName: "" })
+
+    const [createContactEntityDetails, setCreateContactEntityDetails] = useState({
+        fields: [],
+        initialValues: {},
+    })
 
     const columns = [
         {
@@ -53,7 +96,9 @@ export default function Contact() {
                         setCheckAllContacts(ev.target.checked);
                         const gridData = dataRows;
                         gridData.map((d) => {
-                            d.isChecked = ev.target.checked;
+                            if (d.allowToDelete) {
+                                d.isChecked = ev.target.checked;
+                            }
                             return d;
                         });
                         setDataRows([...gridData]);
@@ -61,7 +106,7 @@ export default function Contact() {
                 />
             ),
             renderCell: (params) => (
-                <Checkbox
+                params.row.allowToDelete ? <Checkbox
                     color="primary"
                     checked={params.value}
                     onChange={(ev) => {
@@ -80,22 +125,12 @@ export default function Contact() {
                         } else {
                             setCheckAllContacts(false);
                         }
-
-                        // if (checkedRecords.length === 1) {
-                        //   const id = checkedRecords[0].id;
-                        //   findOneUser(id);
-                        // } else {
-                        //   setSelectedUser(null);
-                        //   if (selectedBrand) {
-                        //     contactData.forEach((u) => {
-                        //       if (u.brand !== selectedBrand.id) {
-                        //         setSelectedBrand(null);
-                        //       }
-                        //     });
-                        //   }
-                        // }
                     }}
-                />
+                /> : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the selection functionality">
+                        <IconButton>
+                            <BlockIcon fontSize="small" color="error" />
+                        </IconButton>
+                    </Tooltip>
             ),
             disableColumnMenu: true,
             sortable: false,
@@ -116,10 +151,40 @@ export default function Contact() {
                             <Visibility fontSize="small" color="primary" />
                         </IconButton>
                     </Tooltip>
+                    {
+                        params.row.allowToDelete ?
+                            <Tooltip title="Delete">
+                                <IconButton aria-label="Delete" onClick={() => {
+                                    setSingleContactDelete({ show: true, id: params.row._id, contactName: `${params.row.firstName} ${params.row.lastName}` })
+                                }}>
+                                    <DeleteIcon fontSize="small" color="error" />
+                                </IconButton>
+                            </Tooltip> :
+                            <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the delete functionality">
+                                <IconButton aria-label="Delete">
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                    }
                 </>
-            )
+            ), width: 200
         }
     ];
+
+    useEffect(() => {
+        if (searchVal && searchVal != "") {
+
+            let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+
+            if (contactTimeout) {
+                clearTimeout(contactTimeout);
+            }
+
+            contactTimeout = setTimeout(() => {
+                getContacts();
+            }, millisec);
+        }
+    }, [searchVal]);
 
     useEffect(() => {
         if (user) {
@@ -134,9 +199,40 @@ export default function Contact() {
         }
     }, [query]);
 
+    const handleSnackbar = (msg, type, isOpen) => {
+        setAlertData({
+            errorMsg: msg,
+            type: type,
+            open: isOpen
+        })
+    };
+
+    const handleSingleDeleteContacts = async () => {
+        try {
+            setLoading(true);
+
+            let data = await RemoveContacts({ ids: [singleContactDelete.id] })
+            if (data.status === 200) {
+                handleSnackbar(data.message, 'success', true)
+                getContacts();
+                setLoading(false);
+            }
+            setSingleContactDelete({ id: null, show: false, contactName: "" });
+        }
+        catch (err) {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
+            }
+        }
+    }
+
     const getContacts = () => {
         setLoading(true);
-        let searchParams = { ...query };
+        let searchParams = { ...query }
+        searchParams = searchVal
+            ? { ...searchParams, search: searchVal }
+            : { ...searchParams };
 
         GetContacts(searchParams).then(({ data, count }) => {
             setContactData(data);
@@ -155,6 +251,11 @@ export default function Contact() {
         setDataRows([...rows]);
     }, [contactData])
 
+    useEffect(() => {
+        getContacts();
+        // eslint-disable-next-line
+    }, [query]);
+
     const handleRowClick = e => {
         let tempPath = contactDetailPage.path + '/' + e.row._id
         history.push({
@@ -172,12 +273,7 @@ export default function Contact() {
     };
 
     const clickCreateNew = () => {
-        history.push({
-            pathname: "/contact/new",
-            // state: {
-            //     brand_id: selectedBrand.id,
-            // },
-        });
+        setShowCreateContactDialog(true);
     }
 
     const handlePage = (params) => {
@@ -194,22 +290,13 @@ export default function Contact() {
             getContacts();
             setLoading(false);
         })
+    };
 
-
-        // let recLen = selectedRecs.length;
-        // if (selectedRecs && recLen > 0) {
-        //     selectedRecs.forEach(async (curId, i) => {
-        //         let data = await deleteBrand({ id: curId });
-        //         if (i === recLen - 1 && data.status === 200) {
-        //             setOpen(true);
-        //             setErroMsg(data.message);
-        //             setMsgType("success");
-        //             getContacts();
-        //         }
-        //     });
-        //     setShowConfirmBox(false);
-        //     // setSelectedRecs([]);
-        // }
+    const handleSearch = (e) => {
+        if (query.page !== 1) {
+            setQuery((prevState) => ({ ...prevState, page: 0 }));
+        }
+        setSearchVal(e.target.value);
     };
 
     const handlePageSize = (params) => {
@@ -234,7 +321,75 @@ export default function Contact() {
     return (
         <Layout>
 
-            <Paper className="contact-header">
+            <Grid container spacing={3} direction="row">
+                <Grid item xs={12} sm={6} className="pl-3">
+                    <CustomBreadCrumbs routes={[routes.contact]} />
+                </Grid>
+                <Grid item xs={12} sm={6} className="pr-3">
+                    <Grid container justify="flex-end">
+                        <Link
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className={classes.links}
+                        >
+                            Import from Excel
+                            </Link>
+                        <Divider
+                            orientation="vertical"
+                            flexItem
+                            className={classes.linkDivider}
+                        />
+                        <Link
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className={classes.links}
+                        >
+                            Export to Excel
+                            </Link>
+                        <Divider
+                            orientation="vertical"
+                            flexItem
+                            className={classes.linkDivider}
+                        />
+                        <Link
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className={classes.links}
+                        >
+                            Download Template
+                            </Link>
+                        <Divider
+                            orientation="vertical"
+                            flexItem
+                            className={classes.linkDivider}
+                        />
+                        <Link
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className={classes.links}
+                        >
+                            Email a Link
+                            </Link>
+                    </Grid>
+                </Grid>
+
+            </Grid>
+
+            {
+                alertData ? <CustomToast
+                    open={alertData.open || false}
+                    close={() => handleSnackbar('', '', false)}
+                    errorMsg={alertData.errorMsg || ''}
+                    type={alertData.type || ''}
+                /> : null
+            }
+
+            <BrandHeader heading=""
+                style={{ marginTop: "150px", minHeight: "200px" }}
+                showHeading={false}>
+
+                <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
+                <Box component="span" marginX={1} />
 
                 <Button
                     variant="contained"
@@ -244,6 +399,8 @@ export default function Contact() {
                 >
                     Add
                     </Button>
+
+                <Box component="span" marginX={1} />
 
                 <Button
                     // disabled={Boolean(!selectedBrand)}
@@ -272,7 +429,7 @@ export default function Contact() {
                         Delete
                     </MenuItem>
                 </Menu>
-            </Paper>
+            </BrandHeader>
 
             <Paper style={{ marginTop: 15 }}>
 
@@ -310,6 +467,29 @@ export default function Contact() {
                             onOk={handleDeleteContact}
                         />
                     ) : null}
+
+                    {
+                        showCreateContactDialog && <CreateContact
+                            open={showCreateContactDialog}
+                            onClose={() => setShowCreateContactDialog(false)}
+                            onSuccess={() => {
+                                setShowCreateContactDialog(false);
+                                getContacts();
+                            }}
+                            entityDetails={createContactEntityDetails}
+                        />
+                    }
+
+                    {
+                        singleContactDelete.show ?
+                            <ConfirmationDialog
+                                open={singleContactDelete.show}
+                                message={`Are you sure, you want to delete contact: ${singleContactDelete.contactName} ?`}
+                                onClose={() => setSingleContactDelete({ id: null, show: false, contactName: "" })}
+                                onOk={handleSingleDeleteContacts}
+                            /> : null
+                    }
+
 
                 </BoxWithBorder>
             </Paper>

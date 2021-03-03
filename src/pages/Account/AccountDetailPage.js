@@ -23,6 +23,8 @@ import { useData } from '../../StateProvider/Provider';
 import { deleteAccounts, updateAccount } from '../../axios/accounts'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import "./account.css";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import routes from '../../components/Helpers/Routes';
 
 const Roles = () => {
     const history = useHistory();
@@ -36,7 +38,10 @@ const Roles = () => {
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [accountFields, setAccountFields] = useState([])
     const [mainPoints, setMainPoints] = useState({})
+    const [customizedRoutes, setCustomizedRoutes] = useState([routes.account]);
+
     let { id } = useParams();
+
     useEffect(() => {
         if (id) {
             fetchAccountData()
@@ -50,6 +55,7 @@ const Roles = () => {
             if (data.status === 200) {
                 let tData = data.data
                 setHeadingLbl(tData.accountName || '')
+                setCustomizedRoutes([...customizedRoutes, { title: tData.accountName }]);
                 handleAllowToEditList(tData)
                 handleMainPonts(tData)
                 setAccountData(tData)
@@ -199,6 +205,12 @@ const Roles = () => {
     return (
         <>
             <Layout>
+                <Grid container direction="row">
+                    <Grid item xs={12} className="pl-2">
+                        <CustomBreadCrumbs routes={customizedRoutes} />
+                    </Grid>
+                </Grid>
+
                 {
                     alertData ? <CustomToast
                         open={alertData.open || false}

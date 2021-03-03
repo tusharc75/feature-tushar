@@ -4,6 +4,14 @@
   box-sizing: border-box;
 }
 
+:root {
+  --space1: 0.25rem;
+  --space2: 0.5rem;
+  --space3: 1rem;
+  --space4: 1.5rem;
+  --space5: 3rem;
+}
+
 body {
   font-family: "Roboto", sans-serif;
 }
@@ -213,23 +221,23 @@ body::-webkit-scrollbar-thumb {
 }
 
 .gap-1 {
-  gap: 0.25rem !important;
+  gap: var(--space1) !important;
 }
 
 .gap-2 {
-  gap: 0.5rem !important;
-}
-
-.gap-2 {
-  gap: 1rem !important;
+  gap: var(--space2) !important;
 }
 
 .gap-3 {
-  gap: 1.5rem !important;
+  gap: var(--space3) !important;
 }
 
 .gap-4 {
-  gap: 3rem !important;
+  gap: var(--space4) !important;
+}
+
+.gap-5 {
+  gap: var(--space5) !important;
 }
 
 .cursor-pointer:hover {
@@ -238,4 +246,48 @@ body::-webkit-scrollbar-thumb {
 
 .cursor-stop:hover {
   cursor: no-drop;
+}
+
+/* Padding Left */
+
+.pl-1 {
+  padding-left: var(--space1) !important;
+}
+
+.pl-2 {
+  padding-left: var(--space2) !important;
+}
+
+.pl-3 {
+  padding-left: var(--space3) !important;
+}
+
+.pl-4 {
+  padding-left: var(--space4) !important;
+}
+
+.pl-5 {
+  padding-left: var(--space5) !important;
+}
+
+/* Padding Right */
+
+.pr-1 {
+  padding-right: var(--space1) !important;
+}
+
+.pr-2 {
+  padding-right: var(--space2) !important;
+}
+
+.pr-3 {
+  padding-right: var(--space3) !important;
+}
+
+.pr-4 {
+  padding-right: var(--space4) !important;
+}
+
+.pr-5 {
+  padding-right: var(--space5) !important;
 }

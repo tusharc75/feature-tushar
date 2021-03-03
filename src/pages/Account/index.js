@@ -10,7 +10,10 @@ import {
     MenuItem,
     Paper,
     Tooltip,
-    IconButton
+    IconButton,
+    Grid,
+    Divider,
+    Link
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
@@ -31,9 +34,29 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CreateAccountDialog from './CreateAccount/index'
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import { makeStyles } from "@material-ui/core/styles";
+
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: "100%",
+    },
+    linksContainer: {
+        display: "flex",
+    },
+    links: {
+        color: theme.palette.textDark
+    },
+    linkDivider: {
+        backgroundColor: theme.palette.darkBg,
+        margin: "0 1rem",
+    },
+}));
 
 let accountTimeout
 export default function Account() {
+
+    const classes = useStyles();
 
     const { state: { user } } = useData();
     const history = useHistory();
@@ -381,7 +404,60 @@ export default function Account() {
     return (
         <>
             <Layout>
-                <CustomBreadCrumbs routes={[routes.account]} />
+
+                <Grid container spacing={3} direction="row">
+                    <Grid item xs={12} sm={6} className="pl-3">
+                        <CustomBreadCrumbs routes={[routes.account]} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} className="pr-3">
+                        <Grid container justify="flex-end">
+                            <Link
+                                href="#"
+                                onClick={(e) => e.preventDefault()}
+                                className={classes.links}
+                            >
+                                Import from Excel
+                            </Link>
+                            <Divider
+                                orientation="vertical"
+                                flexItem
+                                className={classes.linkDivider}
+                            />
+                            <Link
+                                href="#"
+                                onClick={(e) => e.preventDefault()}
+                                className={classes.links}
+                            >
+                                Export to Excel
+                            </Link>
+                            <Divider
+                                orientation="vertical"
+                                flexItem
+                                className={classes.linkDivider}
+                            />
+                            <Link
+                                href="#"
+                                onClick={(e) => e.preventDefault()}
+                                className={classes.links}
+                            >
+                                Download Template
+                            </Link>
+                            <Divider
+                                orientation="vertical"
+                                flexItem
+                                className={classes.linkDivider}
+                            />
+                            <Link
+                                href="#"
+                                onClick={(e) => e.preventDefault()}
+                                className={classes.links}
+                            >
+                                Email a Link
+                            </Link>
+                        </Grid>
+                    </Grid>
+
+                </Grid>
 
                 {
                     alertData ? <CustomToast
@@ -406,17 +482,7 @@ export default function Account() {
                         startIcon={<AddOutlined />}
                     >
                         Add
-                </Button>
-                    <Box component="span" marginX={1} />
-
-                    <Button
-                        disabled={true}
-                        variant="outlined"
-                        color="default"
-                        aria-controls="action-menu"
-                    >
-                        Import
-                </Button>
+                    </Button>
                     <Box component="span" marginX={1} />
 
                     <Button
