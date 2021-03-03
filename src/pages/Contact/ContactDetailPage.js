@@ -18,6 +18,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import { deleteContacts } from '../../axios/contacts'
 import { capitalize } from '../../services/util'
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import routes from '../../components/Helpers/Routes';
 import '../Account/account.css'
 
 const Roles = () => {
@@ -29,7 +31,9 @@ const Roles = () => {
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [data, setData] = useState({})
     const [mainPoints, setMainPoints] = useState({})
+    const [customizedRoutes, setCustomizedRoutes] = useState([routes.contact]);
     let { id } = useParams();
+
     useEffect(() => {
         if (id) {
             fetchContactData()
@@ -42,6 +46,8 @@ const Roles = () => {
             let data = await getContactData(id)
             if (data.status === 200) {
                 let tData = data.data
+                setCustomizedRoutes([...customizedRoutes, { title: `${tData.firstName} ${tData.lastName}` }]);
+
                 let name = capitalize(tData.firstName || '') + ' '
                 name = name + capitalize(tData.middleName || '') + ' '
                 name = name + capitalize(tData.lastName || '')
@@ -139,6 +145,13 @@ const Roles = () => {
     return (
         <>
             <Layout>
+
+                <Grid container direction="row">
+                    <Grid item xs={12} className="pl-2">
+                        <CustomBreadCrumbs routes={customizedRoutes} />
+                    </Grid>
+                </Grid>
+
                 {
                     alertData ? <CustomToast
                         open={alertData.open || false}

@@ -11,6 +11,9 @@ import {
     Tooltip,
     IconButton,
     Paper,
+    Grid,
+    Divider,
+    Link
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
@@ -23,9 +26,31 @@ import './contact.css';
 import CreateContact from './CreateContact/CreateContact';
 import { GetFields } from '../../axios/index';
 import { getObjKeys } from '../../constants/helpers';
+import { makeStyles } from "@material-ui/core/styles";
+import routes from './../../components/Helpers/Routes';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import BrandHeader from '../../components/BrandHeader';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: "100%",
+    },
+    linksContainer: {
+        display: "flex",
+    },
+    links: {
+        color: theme.palette.textDark
+    },
+    linkDivider: {
+        backgroundColor: theme.palette.darkBg,
+        margin: "0 1rem",
+    },
+}));
 
 let contactTimeout
 export default function Contact() {
+
+    const classes = useStyles();
 
     const { state: { user } } = useData();
     const history = useHistory();
@@ -257,7 +282,63 @@ export default function Contact() {
     return (
         <Layout>
 
-            <Paper className="contact-header">
+            <Grid container spacing={3} direction="row">
+                <Grid item xs={12} sm={6} className="pl-3">
+                    <CustomBreadCrumbs routes={[routes.contact]} />
+                </Grid>
+                <Grid item xs={12} sm={6} className="pr-3">
+                    <Grid container justify="flex-end">
+                        <Link
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className={classes.links}
+                        >
+                            Import from Excel
+                            </Link>
+                        <Divider
+                            orientation="vertical"
+                            flexItem
+                            className={classes.linkDivider}
+                        />
+                        <Link
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className={classes.links}
+                        >
+                            Export to Excel
+                            </Link>
+                        <Divider
+                            orientation="vertical"
+                            flexItem
+                            className={classes.linkDivider}
+                        />
+                        <Link
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className={classes.links}
+                        >
+                            Download Template
+                            </Link>
+                        <Divider
+                            orientation="vertical"
+                            flexItem
+                            className={classes.linkDivider}
+                        />
+                        <Link
+                            href="#"
+                            onClick={(e) => e.preventDefault()}
+                            className={classes.links}
+                        >
+                            Email a Link
+                            </Link>
+                    </Grid>
+                </Grid>
+
+            </Grid>
+
+            <BrandHeader heading=""
+                style={{ marginTop: "150px", minHeight: "200px" }}
+                showHeading={false}>
 
                 <Button
                     variant="contained"
@@ -267,6 +348,8 @@ export default function Contact() {
                 >
                     Add
                     </Button>
+
+                <Box component="span" marginX={1} />
 
                 <Button
                     // disabled={Boolean(!selectedBrand)}
@@ -295,7 +378,7 @@ export default function Contact() {
                         Delete
                     </MenuItem>
                 </Menu>
-            </Paper>
+            </BrandHeader>
 
             <Paper style={{ marginTop: 15 }}>
 

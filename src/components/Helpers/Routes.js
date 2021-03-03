@@ -4,9 +4,9 @@ export default {
         path: "/account",
         data: {}
     },
-    mobileDevices: {
+    contact: {
         title: "Contact",
         path: "/contact",
-        data: { id: null }
+        data: { }
     },
 };

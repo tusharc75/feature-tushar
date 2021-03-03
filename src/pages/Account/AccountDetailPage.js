@@ -23,6 +23,8 @@ import { useData } from '../../StateProvider/Provider';
 import { deleteAccounts } from '../../axios/accounts'
 import "./account.css";
 import userEvent from "@testing-library/user-event";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import routes from '../../components/Helpers/Routes';
 
 const Roles = () => {
     const history = useHistory();
@@ -34,7 +36,10 @@ const Roles = () => {
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [data, setData] = useState({})
     const [mainPoints, setMainPoints] = useState({})
+    const [customizedRoutes, setCustomizedRoutes] = useState([routes.account]);
+
     let { id } = useParams();
+
     useEffect(() => {
         if (id) {
             fetchAccountData()
@@ -47,6 +52,8 @@ const Roles = () => {
             let data = await getAccountData(id)
             if (data.status === 200) {
                 let initialVal = data.data
+                setCustomizedRoutes([...customizedRoutes, { title: initialVal.accountName }]);
+
                 setAccountData(initialVal)
                 getAccountFields(undefined, initialVal)
             }
@@ -172,6 +179,12 @@ const Roles = () => {
     return (
         <>
             <Layout>
+                <Grid container direction="row">
+                    <Grid item xs={12} className="pl-2">
+                        <CustomBreadCrumbs routes={customizedRoutes} />
+                    </Grid>
+                </Grid>
+
                 {
                     alertData ? <CustomToast
                         open={alertData.open || false}
