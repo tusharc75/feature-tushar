@@ -1,21 +1,22 @@
 import _ from "lodash";
 import { Breadcrumbs, Link as MuiLink, Typography } from "@material-ui/core";
+import { Link } from 'react-router-dom';
 import "./sidebar.css"
 
 const CustomBreadCrumbs = ({ routes = [] }) => {
 
     return (
         <Breadcrumbs separator="›" aria-label="breadcrumb">
-            <MuiLink color="inherit" to="/" className="cursor-pointer">
+            <Link color="inherit" to="/" className="cursor-pointer">
                 Home
-            </MuiLink>
+            </Link>
 
             {
                 routes.map((route, index) => {
                     return (index !== routes.length - 1) ?
-                        <MuiLink key={index} color="inherit" to={route.path}>
+                        <Link key={index} color="inherit" to={route.path} className="cursor-pointer">
                             {route.title}
-                        </MuiLink> :
+                        </Link> :
                         <Typography key={index} color="textPrimary">{route.title}</Typography>
                 })
             }
