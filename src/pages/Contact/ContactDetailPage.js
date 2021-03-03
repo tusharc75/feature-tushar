@@ -16,8 +16,10 @@ import { getErrorMessage } from '../../services/util'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { deleteContacts } from '../../axios/contacts'
+import { deleteContacts, updateContact } from '../../axios/contacts'
+import { contactPage } from '../../routes/Contacts'
 import { capitalize } from '../../services/util'
+import DetailsPage from '../../components/Shared/DetailsPage'
 import '../Account/account.css'
 
 const Roles = () => {
@@ -27,8 +29,9 @@ const Roles = () => {
     const [contactData, setContactData] = useState({})
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
-    const [data, setData] = useState({})
+    const [contactFields, setContactFields] = useState({})
     const [mainPoints, setMainPoints] = useState({})
+    const [isUpdating, setUpdating] = useState(false);
     let { id } = useParams();
     useEffect(() => {
         if (id) {
@@ -42,25 +45,19 @@ const Roles = () => {
             let data = await getContactData(id)
             if (data.status === 200) {
                 let tData = data.data
+                handleMainPoints()
                 let name = capitalize(tData.firstName || '') + ' '
                 name = name + capitalize(tData.middleName || '') + ' '
                 name = name + capitalize(tData.lastName || '')
-                let tempMp = {
-                    phone: tData.phone || '',
-                    email: tData.email || '',
-                    title: tData.title || '',
-                }
 
                 if (tData?.salutation?.optionLabel) {
                     name = tData.salutation.optionLabel + name
                 }
-                if (tData?.accountName?.optionLabel) {
-                    tempMp["Account Name"] = tData.accountName.optionLabel
-                }
+
                 setHeadingLbl(name)
-                setMainPoints(tempMp)
+                handleAllowToEditList(tData)
                 setContactData(tData)
-                getContactFields(tData)
+                getContactFields()
             }
         }
         catch (err) {
@@ -72,10 +69,21 @@ const Roles = () => {
         }
     }
 
-    const getContactFields = (values) => {
+    const handleMainPoints = (data) => {
+        let tempMp = {
+            phone: data.phone || '',
+            email: data.email || '',
+            title: data.title || '',
+        }
+        if (data?.accountName?.optionLabel) {
+            tempMp["Account Name"] = data.accountName.optionLabel
+        }
+        setMainPoints(tempMp)
+    }
+    const getContactFields = () => {
 
         GetFields('Contact').then(({ data }) => {
-            setData(data)
+            setContactFields(data)
             setLoading(false)
         });
     };
@@ -116,11 +124,11 @@ const Roles = () => {
     ]
 
     const handleDeleteContact = () => {
-        console.log('contactData', contactData)
         if (contactData?._id) {
-            deleteContacts([contactData._id]).then(({ data }) => {
+            deleteContacts({ ids: [contactData._id] }).then(({ data }) => {
                 if (data.status === 200) {
                     handleSnackbar(data.message, 'success', true)
+                    goBackToListing()
                 }
                 setShowConfirmBox(false)
             }).catch(err => {
@@ -134,8 +142,55 @@ const Roles = () => {
         else {
             setShowConfirmBox(false)
         }
-
     }
+    const goBackToListing = () => {
+        history.push({
+            pathname: contactPage.path
+        });
+    }
+
+    const handleAllowToEditList = (rec) => {
+        let userId = user?.user?._id
+        let tList = []
+        if (userId) {
+            if (rec?.collaborator && rec.collaborator.length) {
+                rec.collaborator.map(obj => {
+                    tList.push(obj.optionValue)
+                })
+            }
+            if (rec?.owner?.optionValue) {
+                tList.push(rec.owner.optionValue)
+            }
+            if (tList && tList.indexOf(userId) >= 0) {
+                setAllowedToEdit(true)
+            }
+        }
+    }
+    const handleUpdateContact = (values) => {
+        setUpdating(true);
+        if (values.employees) {
+            values.employees = parseInt(values.employees)
+        }
+        const updatedData = {
+            ...values,
+            _id: contactData._id,
+        };
+
+        updateContact(updatedData)
+            .then(({ data }) => {
+                fetchAccountData()
+                handleSnackbar("Successfully saved", 'success', true)
+                setUpdating(false);
+            })
+            .catch((err) => {
+                console.log(err);
+                let errMes = getErrorMessage(err)
+                if (errMes) {
+                    handleSnackbar(errMes, 'error', true)
+                }
+                setUpdating(false);
+            });
+    };
     return (
         <>
             <Layout>
@@ -172,13 +227,18 @@ const Roles = () => {
                     <Container className="detailPageContainer">
                         <Grid container spacing={3}>
                             <Grid item sm={8} md={8} lg={8}>
-                                <div className="detailPageDiv1" >
-                                    {/* {
+                                <div className="detailPageDiv1"
+                                    style={{ pointerEvents: allowedToEdit ? "" : "none" }} >
+                                    {
                                         loading ? <Loader text="Fetching Data" style={{ marginTop: 100 }} /> :
-                                            <DetailPage
-                                                data={data}
+                                            <DetailsPage
+                                                data={contactData}
+                                                fields={contactFields}
+                                                isUpdating={isUpdating}
+                                                canEdit={allowedToEdit}
+                                                handleUpdate={handleUpdateContact}
                                             />
-                                    } */}
+                                    }
                                 </div>
                             </Grid>
                             <Grid item sm={4} md={4} lg={4} className="customGrid" >
@@ -192,7 +252,7 @@ const Roles = () => {
                                     }
                                 </div>
                                 <div className="detailPageDiv3" >
-                                    <Typography color="primary" variant="h6">Related Contacts</Typography>
+                                    <Typography color="primary" variant="h6">Related Accounts</Typography>
                                     <Box className="customBox1">
 
                                     </Box>

@@ -27,6 +27,33 @@ export const getObjKeys = (val = "", arr) => {
     return obj;
 };
 
+export const getObjKeysWithValues = (dataObj, arr) => {
+    const obj = {}
+    for (const key of arr) {
+        if (key.type === 'switch' || key.type === 'checkbox') {
+            obj[key.fieldName] = dataObj[key.fieldName]
+                ? dataObj[key.fieldName]
+                : false
+        } else if (key.type === 'mutliSelect') {
+            obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : []
+        } else if (key.type === 'dropDown') {
+            obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : {}
+        } else if (key.type === 'currency') {
+            obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : {}
+        } else {
+            obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : ''
+        }
+    }
+    return obj
+}
+
+export const removeEmptyKeys = (obj) => {
+    Object.keys(obj).forEach(
+        (k) => !obj[k] && obj[k] !== undefined && delete obj[k]
+    )
+    return obj
+}
+
 export const capitalize = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
