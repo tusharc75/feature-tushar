@@ -35,6 +35,7 @@ import CreateAccountDialog from './CreateAccount/index'
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
+import { CustomEventEmitter } from './../../axios/events';
 import './account.css'
 
 const useStyles = makeStyles((theme) => ({
@@ -282,10 +283,10 @@ export default function Account() {
             setLoading(false);
         }
         catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
+            // let errMes = getErrorMessage(err)
+            // if (errMes) {
+            //     handleSnackbar(errMes, 'error', true)
+            // }
             setLoading(false);
         }
 
@@ -316,13 +317,13 @@ export default function Account() {
         setIsAccDialogVisible(true)
     }
 
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
+    // const handleSnackbar = (msg, type, isOpen) => {
+    //     setAlertData({
+    //         errorMsg: msg,
+    //         type: type,
+    //         open: isOpen
+    //     })
+    // };
 
     const handlePage = (params) => {
         if (query.page !== params.page) {
@@ -349,45 +350,46 @@ export default function Account() {
     }
 
     const handleDeleteAccounts = async () => {
-        try {
-            let recLen = selectedRecs.length
-            if (selectedRecs && recLen > 0) {
-                let reqs = {
-                    ids: [...selectedRecs]
-                }
-                let data = await deleteAccounts(reqs)
-                if (data.status === 200) {
-                    handleSnackbar(data.message, 'success', true)
-                    fetchAccounts();
-                }
-                setShowConfirmBox(false)
-                setSelectedRecs([])
+        // try {
+        let recLen = selectedRecs.length
+        if (selectedRecs && recLen > 0) {
+            let reqs = {
+                ids: [...selectedRecs]
             }
-        }
-        catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
+            let data = await deleteAccounts(reqs)
+            if (data.status === 200) {
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                // handleSnackbar(data.message, 'success', true)
+                fetchAccounts();
             }
+            setShowConfirmBox(false)
+            setSelectedRecs([])
         }
+        // }
+        // catch (err) {
+        //     let errMes = getErrorMessage(err)
+        //     if (errMes) {
+        //         handleSnackbar(errMes, 'error', true)
+        //     }
+        // }
     }
 
     const handleSingleDeleteAccounts = async () => {
-        try {
-            let data = await deleteAccounts({ ids: [singleAccountDelete.id] })
-            if (data.status === 200) {
-                handleSnackbar(data.message, 'success', true)
-                fetchAccounts();
-            }
-            setSingleAccountDelete({ id: null, show: false, accountName: "" });
-            setSelectedRecs([])
+        // try {
+        let data = await deleteAccounts({ ids: [singleAccountDelete.id] })
+        if (data.status === 200) {
+            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+            fetchAccounts();
         }
-        catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
-        }
+        setSingleAccountDelete({ id: null, show: false, accountName: "" });
+        setSelectedRecs([])
+        // }
+        // catch (err) {
+        //     let errMes = getErrorMessage(err)
+        //     if (errMes) {
+        //         handleSnackbar(errMes, 'error', true)
+        //     }
+        // }
     }
 
     const handleRowClick = e => {
@@ -463,15 +465,6 @@ export default function Account() {
                     </Grid>
 
                 </Grid>
-
-                {
-                    alertData ? <CustomToast
-                        open={alertData.open || false}
-                        close={() => handleSnackbar('', '', false)}
-                        errorMsg={alertData.errorMsg || ''}
-                        type={alertData.type || ''}
-                    /> : null
-                }
 
                 <BrandHeader heading=""
                     style={{ marginTop: "150px", minHeight: "200px" }}
@@ -573,7 +566,7 @@ export default function Account() {
                     <CreateAccountDialog
                         open={isAccDialogVisible}
                         onClose={handleDialogClose}
-                        showSuccessMes={handleSnackbar}
+                        // showSuccessMes={handleSnackbar}
                         id={cloneId}
                     /> : null
             }

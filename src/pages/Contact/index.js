@@ -24,7 +24,6 @@ import AddIcon from '@material-ui/icons/Add';
 import { contactDetailPage } from '../../routes/Contacts'
 import './contact.css';
 import CreateContact from './CreateContact/CreateContact';
-import { GetFields } from '../../axios/index';
 import { getObjKeys } from '../../constants/helpers';
 import { makeStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes';
