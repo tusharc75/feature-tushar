@@ -12,9 +12,9 @@ import {
     IconButton,
     Paper,
     Grid,
-    Divider,
-    Link
+    Divider
 } from "@material-ui/core";
+import { Link } from 'react-router-dom'
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
 import { ExpandMore, Visibility } from "@material-ui/icons";
@@ -35,6 +35,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { getErrorMessage } from '../../services/util'
 import CustomToast from '../../components/Helpers/CustomToast'
 import BlockIcon from '@material-ui/icons/Block';
+import { capitalize } from '../../services/util'
+import './contact.css'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -137,8 +139,13 @@ export default function Contact() {
             filterable: false,
             width: 75,
         },
-        { field: "firstName", headerName: "First Name", width: 200 },
-        { field: "lastName", headerName: "Last Name", width: 200 },
+        {
+            field: "firstName", headerName: "Name", width: 200,
+            renderCell: (params) => (
+                getFirstName(params.row)
+            )
+        },
+        // { field: "lastName", headerName: "Last Name", width: 200 },
         { field: "phone", headerName: "Phone", width: 200 },
         { field: "email", headerName: "Email", width: 200 },
         { field: "account", headerName: "Account", width: 200 },
@@ -146,11 +153,6 @@ export default function Contact() {
             field: "actions", headerName: "Actions ",
             renderCell: (params) => (
                 <>
-                    <Tooltip title="View">
-                        <IconButton aria-label="View" onClick={() => handleRowClick(params)}>
-                            <Visibility fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip>
                     {
                         params.row.allowToDelete ?
                             <Tooltip title="Delete">
@@ -238,7 +240,13 @@ export default function Contact() {
             setContactData(data);
             setRowCount(count)
             setLoading(false);
-        });
+        }).catch(err => {
+            let errMes = getErrorMessage(err)
+            if (errMes) {
+                handleSnackbar(errMes, 'error', true)
+            }
+            setLoading(false);
+        })
     }
 
     useEffect(() => {
@@ -317,10 +325,27 @@ export default function Contact() {
         }
     }
 
+    const getFirstName = tData => {
+        let name = capitalize(tData.firstName || '') + ' '
+        name = name + capitalize(tData.middleName || '') + ' '
+        name = name + capitalize(tData.lastName || '')
+        return <Link className="contactsNameLink"
+            to={`${contactDetailPage.path}/${tData._id}`}>
+            {name}
+        </Link>
+    }
 
     return (
         <Layout>
 
+            {
+                alertData ? <CustomToast
+                    open={alertData.open || false}
+                    close={() => handleSnackbar('', '', false)}
+                    errorMsg={alertData.errorMsg || ''}
+                    type={alertData.type || ''}
+                /> : null
+            }
             <Grid container spacing={3} direction="row">
                 <Grid item xs={12} sm={6} className="pl-3">
                     <CustomBreadCrumbs routes={[routes.contact]} />
@@ -375,14 +400,6 @@ export default function Contact() {
 
             </Grid>
 
-            {
-                alertData ? <CustomToast
-                    open={alertData.open || false}
-                    close={() => handleSnackbar('', '', false)}
-                    errorMsg={alertData.errorMsg || ''}
-                    type={alertData.type || ''}
-                /> : null
-            }
 
             <BrandHeader heading=""
                 style={{ marginTop: "150px", minHeight: "200px" }}
@@ -433,9 +450,9 @@ export default function Contact() {
 
             <Paper style={{ marginTop: 15 }}>
 
-                <BoxWithBorder>
+                <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
                     {/* <Box component="div" marginY={1}> */}
-                    <div className="contact-grid-height">
+                    <div className="contact-grid-height1">
                         <DataGrid
                             components={{
                                 Toolbar: GridToolbar,
@@ -491,7 +508,7 @@ export default function Contact() {
                     }
 
 
-                </BoxWithBorder>
+                </Box>
             </Paper>
         </Layout >
     )

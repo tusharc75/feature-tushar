@@ -18,3 +18,7 @@ export const getContactData = async (id) => {
         return data;
     }
 }
+export const updateContact = async (request) => {
+    const { data } = await api().put('/contact', request)
+    return data;
+}
