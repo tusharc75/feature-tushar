@@ -24,7 +24,6 @@ import {
   ExpandMore,
   ExpandLess,
 } from "@material-ui/icons";
-import SidebarList from "./SidebarList";
 
 const _ = require("lodash");
 const drawerWidth = 240;
@@ -117,8 +116,10 @@ function SideBar({ children, location }) {
         const lists = user.role.sideBar.filter(
           (list) => list.sectionName === section
         );
-        const items = lists.map((item) => item);
-        return { section, items };
+        const items = lists.filter((item) => item.isRead === true);
+        console.log(lists);
+
+        return items.length && { section, items };
       });
     }
   };
@@ -187,7 +188,10 @@ function SideBar({ children, location }) {
                   >
                     <List component="div" disablePadding>
                       {listItem.items.map((item, j) => (
-                        <Link key={j} to={`/${_.lowerCase(item.name)}`}>
+                        <Link
+                          key={j}
+                          to={`/${_.kebabCase(_.lowerCase(item.name))}`}
+                        >
                           <ListItem
                             button
                             selected={pathnames.includes(
