@@ -3,8 +3,9 @@ import {
     Box,
     Button,
     Grid,
-    Typography,
+    Typography
 } from "@material-ui/core";
+import { Skeleton } from '@material-ui/lab'
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
 import Container from "../../components/Container";
@@ -255,7 +256,6 @@ const Roles = () => {
                         }
 
                     </CustomHeader>
-
                     <Container className="detailPageContainer">
                         <Grid container spacing={3}>
                             <Grid item sm={8} md={8} lg={8}>
@@ -278,7 +278,7 @@ const Roles = () => {
                                     {
                                         quickLinks && quickLinks.length ?
                                             quickLinks.map(k => {
-                                                return <><Link className="customLink">{k.label || ''}({k.count || 0})</Link><br /></>
+                                                return <><Link to={k} className="customLink">{k.label || ''}({k.count || 0})</Link><br /></>
                                             }) :
                                             null
                                     }
