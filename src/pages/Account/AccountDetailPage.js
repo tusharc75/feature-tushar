@@ -51,6 +51,12 @@ const Roles = () => {
     }, [id]);
 
     useEffect(() => {
+        if (user && accountData) {
+            handleAllowToEditList(accountData)
+        }
+    }, [user]);
+
+    useEffect(() => {
         if (accountData._id && relatedContacts.length == 0) {
             fetchRelatedContacts()
         }
@@ -220,7 +226,6 @@ const Roles = () => {
                         <CustomBreadCrumbs routes={customizedRoutes} />
                     </Grid>
                 </Grid>
-
                 {
                     alertData ? <CustomToast
                         open={alertData.open || false}
@@ -266,7 +271,6 @@ const Roles = () => {
                                                 handleUpdate={handleUpdateAccount}
                                             />
                                     }
-
                                 </div>
                             </Grid>
                             <Grid item sm={4} md={4} lg={4} className="customGrid" >
@@ -282,9 +286,9 @@ const Roles = () => {
                                 <div className="detailPageDiv3" >
                                     <Typography color="primary" variant="h6">Related Contacts</Typography>
                                     <Box className="customBox1">
-                                        {/* <RelatedContactsBox
+                                        <RelatedContactsBox
                                             contacts={relatedContacts}
-                                        /> */}
+                                        />
                                     </Box>
                                 </div>
                             </Grid>
