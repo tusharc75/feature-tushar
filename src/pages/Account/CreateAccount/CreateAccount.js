@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Layout from "../../../components/Layout";
-import { TextField, Box, Button, CircularProgress, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
 import { formValidation } from '../../../constants/helpers';
-import InputField from '../../../components/Helpers/InputField';
 import CustomButton from '../../../components/Helpers/Button'
 import { commonStyle } from '../../Contact/CommonStyles'
 import CustomToast from '../../../components/Helpers/CustomToast'
@@ -13,8 +11,6 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import Loader from '../../../components/Loader'
 import FormTypes from "./../../../components/Helpers/FormTypes";
-import InfoLabel from "./../../../components/Helpers/FormTypes";
-import { Autocomplete } from "@material-ui/lab";
 
 import "../account.css"
 
@@ -41,6 +37,7 @@ export default function CreateAccount(props) {
     const classes = useStyles();
     const { entityData, alertData, handleSnackbar, handleSubmit, loading, onClose } = props
 
+    //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
     const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
     const [ownerDataSource, setOwnerDataSource] = useState([]);
@@ -92,12 +89,13 @@ export default function CreateAccount(props) {
     }
 
     const onCollaboratorOwnerMultiselectOpen = (selectedOwner) => {
-        if (!selectedOwner) {
-            setOwnerDataSource(ownerCollaboratorCommonDataSource);
-        } else {
+        if (selectedOwner) {
             setCollaboratorDataSource(ownerCollaboratorCommonDataSource.filter(d => d.optionValue != selectedOwner.optionValue));
+        } else {
+            setCollaboratorDataSource(ownerCollaboratorCommonDataSource);
         }
     }
+    //  Owner, Collaborator Code - End
 
     return (<>
         {
