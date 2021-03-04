@@ -20,11 +20,12 @@ import Loader from '../../components/Loader'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { deleteAccounts, updateAccount } from '../../axios/accounts'
+import { deleteAccounts, updateAccount, getRelatedContacts } from '../../axios/accounts'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import "./account.css";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
+import RelatedContactsBox from './RelatedContacts'
 
 const Roles = () => {
     const history = useHistory();
@@ -34,6 +35,7 @@ const Roles = () => {
     const [isUpdating, setUpdating] = useState(false);
     const [alertData, setAlertData] = useState({})
     const [accountData, setAccountData] = useState({})
+    const [relatedContacts, setRelatedContacts] = useState([])
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [accountFields, setAccountFields] = useState([])
@@ -47,6 +49,12 @@ const Roles = () => {
             fetchAccountData()
         }
     }, [id]);
+
+    useEffect(() => {
+        if (accountData._id && relatedContacts.length == 0) {
+            fetchRelatedContacts()
+        }
+    }, [accountData])
 
     const fetchAccountData = async () => {
         setLoading(true)
@@ -65,6 +73,7 @@ const Roles = () => {
                 else {
                     setLoading(false)
                 }
+
             }
         }
         catch (err) {
@@ -201,6 +210,13 @@ const Roles = () => {
         });
     }
 
+    const fetchRelatedContacts = () => {
+        getRelatedContacts(accountData._id)
+            .then((data) => {
+                setRelatedContacts(data.data)
+            })
+    }
+
     return (
         <>
             <Layout>
@@ -271,7 +287,9 @@ const Roles = () => {
                                 <div className="detailPageDiv3" >
                                     <Typography color="primary" variant="h6">Related Contacts</Typography>
                                     <Box className="customBox1">
-
+                                        {/* <RelatedContactsBox
+                                            contacts={relatedContacts}
+                                        /> */}
                                     </Box>
                                 </div>
                             </Grid>

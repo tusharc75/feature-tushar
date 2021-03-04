@@ -24,3 +24,7 @@ export const getDataToClone = async (accountId) => {
     const { data } = await api().get(`/account/clone/${accountId}`)
     return data;
 }
+export const getRelatedContacts = async (accountId) => {
+    const { data } = await api().get(`/contact/related-contact/${accountId}`)
+    return data;
+}
