@@ -37,6 +37,10 @@ import BlockIcon from '@material-ui/icons/Block';
 import { capitalize } from '../../services/util'
 import './contact.css'
 
+const ContactTypes = {
+    "All Contacts": 1,
+    "My Contacts": 2
+}
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
@@ -63,7 +67,7 @@ export default function Contact() {
 
     const [entitiesCount, setEntitiesCount] = useState(0);
     const [alertData, setAlertData] = useState({})
-
+    const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
@@ -198,7 +202,7 @@ export default function Contact() {
         if (user) {
             getContacts();
         }
-    }, [query]);
+    }, [query, selectedType]);
 
     const handleSnackbar = (msg, type, isOpen) => {
         setAlertData({
@@ -230,7 +234,7 @@ export default function Contact() {
 
     const getContacts = () => {
         setLoading(true);
-        let searchParams = { ...query }
+        let searchParams = { ...query, filterContacts: selectedType }
         searchParams = searchVal
             ? { ...searchParams, search: searchVal }
             : { ...searchParams };
@@ -333,6 +337,9 @@ export default function Contact() {
             {name}
         </Link>
     }
+    const handleContactSel = (e) => {
+        setselectedType(e.target.value)
+    }
 
     return (
         <Layout>
@@ -396,13 +403,17 @@ export default function Contact() {
                             </Link>
                     </Grid>
                 </Grid>
-
             </Grid>
 
 
             <BrandHeader heading=""
                 style={{ marginTop: "150px", minHeight: "200px" }}
-                showHeading={false}>
+                showHeading={false}
+                onChange={handleContactSel}
+                values={selectedType}
+                options={ContactTypes}
+                placeholder='Select Contact Type'
+            >
 
                 <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
                 <Box component="span" marginX={1} />

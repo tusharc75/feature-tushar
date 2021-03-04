@@ -39,6 +39,10 @@ import { CustomEventEmitter } from './../../axios/events';
 import axiosInstance from '../../axios/axiosInstance'
 import './account.css'
 
+const AccTypes = {
+    "All Accounts": 1,
+    "My Accounts": 2
+}
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
@@ -66,6 +70,7 @@ export default function Account() {
     const { state: { user } } = useData();
     const history = useHistory();
     const [accountData, setAccountData] = useState([]);
+    const [selectedType, setselectedType] = useState(1)
     const [cloneId, setCloneId] = useState('')
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
@@ -99,7 +104,7 @@ export default function Account() {
         if (renderCount > 0) {
             fetchAccounts();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [query]);
+    }, [query, , selectedType]);
 
     useEffect(() => {
         let rows = accountData?.map((u) => ({
@@ -272,7 +277,7 @@ export default function Account() {
 
     const fetchAccounts = async () => {
         setLoading(true);
-        let searchParams = { ...query }
+        let searchParams = { ...query, filterAccounts: selectedType }
         searchParams = searchVal
             ? { ...searchParams, search: searchVal }
             : { ...searchParams };
@@ -394,6 +399,9 @@ export default function Account() {
         }
     }
 
+    const handleAccountSel = (e) => {
+        setselectedType(e.target.value)
+    }
     return (
         <>
             <Layout>
@@ -449,12 +457,16 @@ export default function Account() {
                             </Link>
                         </Grid>
                     </Grid>
-
                 </Grid>
 
                 <BrandHeader heading=""
                     style={{ marginTop: "150px", minHeight: "200px" }}
-                    showHeading={false}>
+                    showHeading={false}
+                    showDropDown={true}
+                    onChange={handleAccountSel}
+                    values={selectedType}
+                    options={AccTypes}
+                    placeholder=''>
 
                     <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
                     <Box component="span" marginX={1} />
