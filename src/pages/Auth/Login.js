@@ -108,7 +108,7 @@ const Login = () => {
               <h2>Login</h2>
               <Formik
                 initialValues={{
-                  email: "punit@gmail.com",
+                  email: "gagan@test.com",
                   password: "soR$Tw83n92ghs2",
                 }}
                 validate={validateForm}

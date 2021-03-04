@@ -78,26 +78,19 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "normal",
     marginLeft: theme.spacing(2),
   },
-  content: {
-    flexGrow: 1,
-    width: "calc(100% - 57px)",
-    padding: theme.spacing(2),
-    background: "#eef9fd",
-  },
+
   nested: {
     paddingLeft: theme.spacing(4),
   },
 }));
 
-function SideBar({ children, location }) {
+function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
-    state: { user, userLoading },
+    state: { user },
   } = useData();
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split("/").filter((x) => x);
-
-  const [toggleDrawer, setToggleDrawer] = React.useState(false);
 
   const handleToggleDrawer = () => {
     setToggleDrawer(!toggleDrawer);
@@ -107,7 +100,7 @@ function SideBar({ children, location }) {
     if (user) {
       const sections = [];
       user.role.sideBar.forEach((item) => {
-        if (!sections.includes(item.sectionName)) {
+        if (!sections.includes(item.sectionName) && item.isRead) {
           sections.push(item.sectionName);
         }
       });
@@ -117,12 +110,12 @@ function SideBar({ children, location }) {
           (list) => list.sectionName === section
         );
         const items = lists.filter((item) => item.isRead === true);
-        console.log(lists);
-
-        return items.length && { section, items };
+        return { section, items };
       });
     }
   };
+
+  console.log(listItems());
   const handleCollapse = (section) => {
     let tempdata = { ...open };
     tempdata[section] = !tempdata[section] || false;
@@ -211,7 +204,7 @@ function SideBar({ children, location }) {
         </div>
       </Drawer>
 
-      <main className={classes.content}>
+      {/* <main className={classes.content}>
         <Toolbar />
         {userLoading ? (
           <Loader />
@@ -221,7 +214,7 @@ function SideBar({ children, location }) {
             {children}
           </Box>
         )}
-      </main>
+      </main> */}
     </div>
   );
 }

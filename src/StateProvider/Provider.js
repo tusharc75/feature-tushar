@@ -2,7 +2,7 @@ import { createContext, useContext, useReducer, useEffect } from "react";
 import reducer, { initialState } from "./reducer";
 import { SET_USER, USER_LOADING } from "./actionTypes";
 // import { UserMe } from "../axios";
-import axiosInstance from './../axios/axiosInstance'
+import axiosInstance from "./../axios/axiosInstance";
 
 const StateContext = createContext();
 
@@ -12,7 +12,9 @@ export const Provider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      axiosInstance().get("/user/me")
+      dispatch({ type: USER_LOADING, payload: true });
+      axiosInstance()
+        .get("/user/me")
         .then((res) => {
           const { data } = res;
           dispatch({ type: SET_USER, payload: data });
