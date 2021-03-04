@@ -11,6 +11,7 @@ export const Provider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
+      dispatch({ type: USER_LOADING, payload: true });
       UserMe()
         .then((res) => {
           const { data } = res;

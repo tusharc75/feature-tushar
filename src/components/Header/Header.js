@@ -11,6 +11,7 @@ import {
   Box,
   Badge,
   InputBase,
+  CircularProgress,
 } from "@material-ui/core";
 import {
   Search,
@@ -80,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   servicesButton: {
-    display: "block",
+    display: "flex",
     [theme.breakpoints.down("sm")]: {
       display: "none",
     },
@@ -92,12 +93,14 @@ const Header = () => {
   const history = useHistory();
   const [supportAnchorEl, setSupportAnchorEl] = React.useState(null);
   const [arcelorAnchorEl, setArcelorAnchorEl] = React.useState(null);
+  const [entitiesEl, setEntitiesEl] = React.useState(null);
 
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef(null);
 
   const isSupportMenuOpen = Boolean(supportAnchorEl);
   const isArcelorMenuOpen = Boolean(arcelorAnchorEl);
+  const isEntitiesMenuOpen = Boolean(entitiesEl);
 
   const openSupportMenu = (event) => {
     setSupportAnchorEl(event.currentTarget);
@@ -115,10 +118,17 @@ const Header = () => {
     setArcelorAnchorEl(null);
   };
 
+  const openEntitiesMenu = (event) => {
+    setEntitiesEl(event.currentTarget);
+  };
+
+  const closeEntitiesMenu = () => {
+    setEntitiesEl(null);
+  };
+
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
-
 
   const handleClose = (event, option) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
@@ -182,6 +192,38 @@ const Header = () => {
     </Menu>
   );
 
+  const entitiesMenuId = "entities-menu";
+
+  const entitiesMenu = (
+    <Menu
+      anchorEl={entitiesEl}
+      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      keepMounted
+      id={entitiesMenuId}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      open={isEntitiesMenuOpen}
+      onClose={closeEntitiesMenu}
+      PaperProps={{
+        style: {
+          maxHeight: 48 * 4.5,
+          width: "20ch",
+        },
+      }}
+    >
+      <MenuItem>Entities 1</MenuItem>
+      <MenuItem>Entities 2</MenuItem>
+      <MenuItem>Entities 3</MenuItem>
+      <MenuItem>Entities 4</MenuItem>
+      <MenuItem>Entities 5</MenuItem>
+      <MenuItem>Entities 6</MenuItem>
+      <MenuItem>Entities 7</MenuItem>
+      <MenuItem>Entities 8</MenuItem>
+      {/* <Box display="flex" alignItems="center" justifyContent="center">
+        <CircularProgress size={20} />
+      </Box> */}
+    </Menu>
+  );
+
   return (
     <div>
       <AppBar position="fixed" className={classes.appBar} color="primary">
@@ -195,6 +237,13 @@ const Header = () => {
                 onClick={openArcelorMenu}
               >
                 Services <ExpandMore />
+              </Button>
+              <Button
+                aria-controls={entitiesMenuId}
+                color="inherit"
+                onClick={openEntitiesMenu}
+              >
+                Entities <ExpandMore />
               </Button>
             </Box>
             <div className={classes.search}>
@@ -243,6 +292,7 @@ const Header = () => {
       </AppBar>
       {supportMenu}
       {arcelorMenu}
+      {entitiesMenu}
     </div>
   );
 };
