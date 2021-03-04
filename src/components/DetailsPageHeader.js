@@ -24,7 +24,7 @@ const CustomHeader = (props) => {
         <React.Fragment>
             <Container className={classes.root} style={{ minHeight: "100%", marginTop: 0 }}>
                 <Grid container justify="space-between" style={{ marginBottom: '10px' }}>
-                    <Grid item>
+                    <Grid item key="custom-header-heading">
                         {
                             showHeading ? <>
                                 <Typography style={{ display: 'inline-block' }} variant="h6" component="h2" color="primary">
@@ -40,24 +40,24 @@ const CustomHeader = (props) => {
                                 : null
                         }
                     </Grid>
-                    <Grid item>{children}</Grid>
+                    <Grid item key="custom-header-children">{children}</Grid>
                 </Grid>
                 <Box display="flex" id="tapleen2">
                     {
                         mainPoints && Object.keys(mainPoints).length ?
-                            Object.keys(mainPoints).map(key => {
+                            Object.keys(mainPoints).map((key, i) => {
                                 return <>
                                     {
                                         mainPoints[key] ? (
-                                            <>
-                                                <Box className={classes.box}>
+                                            <React.Fragment key={key + i}>
+                                                <Box className={classes.box} >
                                                     <Typography align="center" color="primary">
                                                         <strong>{mainPoints[key] || ''}</strong>
                                                     </Typography>
                                                     <Typography align="center" color="primary">
-                                                        <strong>{key}</strong></Typography>
+                                                        <strong>{capitalize(key)}</strong></Typography>
                                                 </Box>
-                                                <Box component="span" marginX={1} /></>
+                                                <Box component="span" marginX={1} /></React.Fragment>
                                         ) : null
                                     }
                                 </>

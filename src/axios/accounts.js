@@ -20,6 +20,14 @@ export const updateAccount = async (request) => {
     const { data } = await api().put('/account', request)
     return data;
 }
+export const getDataToClone = async (accountId) => {
+    const { data } = await api().get(`/account/clone/${accountId}`)
+    return data;
+}
+export const getRelatedContacts = async (accountId) => {
+    const { data } = await api().get(`/contact/related-contact/${accountId}`)
+    return data;
+}
 // export const getDataToClone = async (accountId) => {
 //     const { data } = await api().get(`/account/clone/${accountId}`)
 //     return data;
