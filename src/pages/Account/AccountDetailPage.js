@@ -8,7 +8,6 @@ import {
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
 import Container from "../../components/Container";
-import { GetFields } from '../../axios/index';
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { accountPage } from '../../routes/Accounts'
@@ -26,6 +25,7 @@ import "./account.css";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import RelatedContactsBox from './RelatedContacts'
+import axiosInstance from './../../axios/axiosInstance'
 
 const Roles = () => {
     const history = useHistory();
@@ -58,30 +58,25 @@ const Roles = () => {
 
     const fetchAccountData = async () => {
         setLoading(true)
+
         try {
-            let data = await getAccountData(id)
-            if (data.status === 200) {
-                let tData = data.data
-                setHeadingLbl(tData.accountName || '')
-                setCustomizedRoutes([...customizedRoutes, { title: tData.accountName }]);
-                handleAllowToEditList(tData)
-                handleMainPonts(tData)
-                setAccountData(tData)
+            axiosInstance().get(`/account/${id}`).then(({ data }) => {
+                setCustomizedRoutes([...customizedRoutes, { title: data.accountName }]);
+
+                setHeadingLbl(data.accountName || '')
+                handleAllowToEditList(data)
+                handleMainPonts(data)
+                setAccountData(data)
                 if (accountFields.length == 0) {
                     getAccountFields()
                 }
                 else {
                     setLoading(false)
                 }
-
-            }
+            })
         }
         catch (err) {
             setLoading(false)
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
         }
     }
 
@@ -116,7 +111,7 @@ const Roles = () => {
     }
 
     const getAccountFields = () => {
-        GetFields('Account').then(({ data }) => {
+        axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
 
             setAccountFields(data)
             setLoading(false)

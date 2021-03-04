@@ -5,17 +5,17 @@ export const deleteAccounts = async (req) => {
     return data;
 }
 
-export const getAccountData = async (id) => {
-    if (id) {
-        const { data } = await api().get(`/account/${id}`)
-        return data;
-    }
-}
+// export const getAccountData = async (id) => {
+//     if (id) {
+//         const { data } = await api().get(`/account/${id}`)
+//         return data;
+//     }
+// }
 
-export const createAccount = async (request) => {
-    const { data } = await api().post('/account', request)
-    return data;
-}
+// export const createAccount = async (request) => {
+//     const { data } = await api().post('/account', request)
+//     return data;
+// }
 export const updateAccount = async (request) => {
     const { data } = await api().put('/account', request)
     return data;
@@ -28,3 +28,7 @@ export const getRelatedContacts = async (accountId) => {
     const { data } = await api().get(`/contact/related-contact/${accountId}`)
     return data;
 }
+// export const getDataToClone = async (accountId) => {
+//     const { data } = await api().get(`/account/clone/${accountId}`)
+//     return data;
+// }

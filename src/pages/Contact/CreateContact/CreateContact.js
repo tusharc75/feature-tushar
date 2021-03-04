@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../../components/Layout";
-import { GetFields, CreateNewContact } from '../../../axios/index';
+import { CreateNewContact } from '../../../axios/index';
 import { useData } from '../../../StateProvider/Provider';
 import { Box, Button, IconButton, Typography } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
@@ -18,7 +18,7 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import Loader from '../../../components/Loader'
 import { commonStyle } from './../CommonStyles'
 import { formValidation } from '../../../constants/helpers';
-
+import axiosInstance from './../../../axios/axiosInstance'
 
 // const useStyles = makeStyles((theme) => ({
 //     ...commonStyle(theme)
@@ -67,7 +67,7 @@ export default function CreateContact({ open, onClose, onSuccess }) {
     }, []);
 
     const getContactFields = () => {
-        GetFields('Contact').then(({ data }) => {
+        axiosInstance().get('/field?resource=Contact').then(({ data }) => {
 
             const newFields = [];
             data.map((_f) => newFields.push(_f.fieldData));

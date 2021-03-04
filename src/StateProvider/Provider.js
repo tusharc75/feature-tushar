@@ -1,7 +1,8 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 import reducer, { initialState } from "./reducer";
 import { SET_USER, USER_LOADING } from "./actionTypes";
-import { UserMe } from "../axios";
+// import { UserMe } from "../axios";
+import axiosInstance from './../axios/axiosInstance'
 
 const StateContext = createContext();
 
@@ -11,7 +12,7 @@ export const Provider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      UserMe()
+      axiosInstance().get("/user/me")
         .then((res) => {
           const { data } = res;
           dispatch({ type: SET_USER, payload: data });

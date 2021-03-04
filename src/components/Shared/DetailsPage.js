@@ -52,10 +52,15 @@ const Details = (props) => {
   const normalizeValues = (values, input) => {
     let text = "";
     if (input.type === "multiSelect") {
-      const onlyValues = values[input.fieldName]?.map(
-        (item) => item.optionLabel
-      );
-      text = onlyValues ? onlyValues.join(", ") : "_ _ _";
+      if (Array.isArray(values[input.fieldName])) {
+        const onlyValues = values[input.fieldName]?.map(
+          (item) => item.optionLabel
+        );
+        text = onlyValues ? onlyValues.join(", ") : "_ _ _";
+      }
+      else {
+        text = "_ _ _";
+      }
     } else if (input.type === "dropDown") {
       text = values[input.fieldName]
         ? values[input.fieldName].optionLabel
