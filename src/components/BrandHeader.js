@@ -21,8 +21,6 @@ const BrandHeader = (props) => {
   const { total, totalHeading, active, activeHeading, inActive,
     inActiveHeading, heading, children, showHeading, showDropDown, onChange, values, options, placeholder } = props;
   const classes = useStyles();
-  console.log("🚀 ~ file: BrandHeader.js ~ line 23 ~ BrandHeader ~ options", options)
-  console.log("🚀 ~ file: BrandHeader.js ~ line 41 ~ BrandHeader ~ values", values)
 
   return (
     <React.Fragment>

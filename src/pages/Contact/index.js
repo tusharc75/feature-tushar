@@ -409,6 +409,7 @@ export default function Contact() {
             <BrandHeader heading=""
                 style={{ marginTop: "150px", minHeight: "200px" }}
                 showHeading={false}
+                showDropDown={true}
                 onChange={handleContactSel}
                 values={selectedType}
                 options={ContactTypes}
