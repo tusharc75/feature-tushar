@@ -281,7 +281,7 @@ const Roles = () => {
                         {showConfirmBox ? (
                             <ConfirmationDialog
                                 open={showConfirmBox}
-                                message={`Are you sure you want to delete this Account ${contactData.accountName || ''}`}
+                                message={`Are you sure you want to delete this Contact`}
                                 onClose={() => setShowConfirmBox(false)}
                                 onOk={handleDeleteContact}
                             />
