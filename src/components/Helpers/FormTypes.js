@@ -29,7 +29,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { red, green } from '@material-ui/core/colors';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 
-const InfoLabel = ({ children, info, isTooltip }) =>
+export const InfoLabel = ({ children, info, isTooltip }) =>
   isTooltip ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
@@ -479,10 +479,12 @@ const FormTypes = (props) => {
         includeInputInList
         filterSelectedOptions
         value={values[name]}
-        onChange={(event, newValue) => {
-          setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-          setValue(newValue);
-        }}
+        onChange={
+          onChange ? onChange : (event, newValue) => {
+            setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+            setValue(newValue);
+          }
+        }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
         }}
