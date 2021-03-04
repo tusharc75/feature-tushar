@@ -159,23 +159,22 @@ const Roles = () => {
         });
     }
 
-    const handleAllowToEditList = (rec) => {
-        let userId = user?.user?._id
-        let tList = []
+    const handleAllowToEditList = (contactDetails) => {
+        const userId = user?.user?._id;
+        let allowToEdit = false;
+        
         if (userId) {
-            if (rec?.collaborator && rec.collaborator.length) {
-                rec.collaborator.map(obj => {
-                    tList.push(obj.user)
-                })
+            allowToEdit = (contactDetails.owner?.optionValue && contactDetails.owner.optionValue == userId)
+
+            if (!allowToEdit && contactDetails.collaborator && contactDetails.collaborator.length > 0) {
+                allowToEdit = contactDetails.collaborator.findIndex(d => d.optionValue == userId) > -1;
             }
-            if (rec?.owner?.optionValue) {
-                tList.push(rec.owner.optionValue)
-            }
-            if (tList && tList.indexOf(userId) >= 0) {
-                setAllowedToEdit(true)
-            }
+
+            if (allowToEdit)
+                setAllowedToEdit(allowToEdit);
         }
     }
+
     const handleUpdateContact = (values) => {
         setUpdating(true);
         if (values.employees) {
