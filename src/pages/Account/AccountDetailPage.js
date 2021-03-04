@@ -3,8 +3,9 @@ import {
     Box,
     Button,
     Grid,
-    Typography,
+    Typography
 } from "@material-ui/core";
+import { Skeleton } from '@material-ui/lab'
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
 import Container from "../../components/Container";
@@ -19,11 +20,12 @@ import Loader from '../../components/Loader'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { deleteAccounts, updateAccount } from '../../axios/accounts'
+import { deleteAccounts, updateAccount, getRelatedContacts } from '../../axios/accounts'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import "./account.css";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
+import RelatedContactsBox from './RelatedContacts'
 import axiosInstance from './../../axios/axiosInstance'
 
 const Roles = () => {
@@ -34,6 +36,7 @@ const Roles = () => {
     const [isUpdating, setUpdating] = useState(false);
     const [alertData, setAlertData] = useState({})
     const [accountData, setAccountData] = useState({})
+    const [relatedContacts, setRelatedContacts] = useState([])
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [accountFields, setAccountFields] = useState([])
@@ -47,6 +50,18 @@ const Roles = () => {
             fetchAccountData()
         }
     }, [id]);
+
+    useEffect(() => {
+        if (user && accountData) {
+            handleAllowToEditList(accountData)
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (accountData._id && relatedContacts.length == 0) {
+            fetchRelatedContacts()
+        }
+    }, [accountData])
 
     const fetchAccountData = async () => {
         setLoading(true)
@@ -197,6 +212,13 @@ const Roles = () => {
         });
     }
 
+    const fetchRelatedContacts = () => {
+        getRelatedContacts(accountData._id)
+            .then((data) => {
+                setRelatedContacts(data.data)
+            })
+    }
+
     return (
         <>
             <Layout>
@@ -205,7 +227,6 @@ const Roles = () => {
                         <CustomBreadCrumbs routes={customizedRoutes} />
                     </Grid>
                 </Grid>
-
                 {
                     alertData ? <CustomToast
                         open={alertData.open || false}
@@ -235,7 +256,6 @@ const Roles = () => {
                         }
 
                     </CustomHeader>
-
                     <Container className="detailPageContainer">
                         <Grid container spacing={3}>
                             <Grid item sm={8} md={8} lg={8}>
@@ -251,7 +271,6 @@ const Roles = () => {
                                                 handleUpdate={handleUpdateAccount}
                                             />
                                     }
-
                                 </div>
                             </Grid>
                             <Grid item sm={4} md={4} lg={4} className="customGrid" >
@@ -259,7 +278,7 @@ const Roles = () => {
                                     {
                                         quickLinks && quickLinks.length ?
                                             quickLinks.map(k => {
-                                                return <><Link className="customLink">{k.label || ''}({k.count || 0})</Link><br /></>
+                                                return <><Link to={k} className="customLink">{k.label || ''}({k.count || 0})</Link><br /></>
                                             }) :
                                             null
                                     }
@@ -267,7 +286,9 @@ const Roles = () => {
                                 <div className="detailPageDiv3" >
                                     <Typography color="primary" variant="h6">Related Contacts</Typography>
                                     <Box className="customBox1">
-
+                                        <RelatedContactsBox
+                                            contacts={relatedContacts}
+                                        />
                                     </Box>
                                 </div>
                             </Grid>

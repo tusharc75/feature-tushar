@@ -36,6 +36,7 @@ import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
 import { CustomEventEmitter } from './../../axios/events';
+import axiosInstance from '../../axios/axiosInstance'
 import './account.css'
 
 const useStyles = makeStyles((theme) => ({
@@ -98,7 +99,6 @@ export default function Account() {
         if (renderCount > 0) {
             fetchAccounts();
         } else setRenderCount((preCount) => preCount + 1);
-        // eslint-disable-next-line
     }, [query]);
 
     useEffect(() => {
@@ -283,14 +283,8 @@ export default function Account() {
             setLoading(false);
         }
         catch (err) {
-            // let errMes = getErrorMessage(err)
-            // if (errMes) {
-            //     handleSnackbar(errMes, 'error', true)
-            // }
             setLoading(false);
         }
-
-
     }
 
     const handleSelectedAccounts = (id, isChecked) => {
@@ -350,28 +344,20 @@ export default function Account() {
     }
 
     const handleDeleteAccounts = async () => {
-        // try {
         let recLen = selectedRecs.length
         if (selectedRecs && recLen > 0) {
             let reqs = {
                 ids: [...selectedRecs]
             }
-            let data = await deleteAccounts(reqs)
-            if (data.status === 200) {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
-                // handleSnackbar(data.message, 'success', true)
-                fetchAccounts();
-            }
+            axiosInstance().put(`/account/remove`, reqs).then((data) => {
+                if (data.status === 200) {
+                    CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                    fetchAccounts();
+                }
+            })
             setShowConfirmBox(false)
             setSelectedRecs([])
         }
-        // }
-        // catch (err) {
-        //     let errMes = getErrorMessage(err)
-        //     if (errMes) {
-        //         handleSnackbar(errMes, 'error', true)
-        //     }
-        // }
     }
 
     const handleSingleDeleteAccounts = async () => {

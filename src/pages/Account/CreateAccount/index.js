@@ -79,24 +79,6 @@ export default function CreateAccountMain(props) {
         }
     }, [user]);
 
-    // const fetchAccountData = async () => {
-    //     setLoading(true)
-    //     try {
-    //         let data = await getAccountData(id)
-    //         if (data.status === 200 && Object.keys(data.data)) {
-    //             let initialVal = data.data
-    //             setUpdateFieldValues(initialVal)
-    //             getAccountFields(undefined, initialVal)
-    //         }
-    //     }
-    //     catch (err) {
-    //         let errMes = getErrorMessage(err)
-    //         if (errMes) {
-    //             handleSnackbar(errMes, 'error', true)
-    //         }
-    //     }
-    // }
-
     const getAccountFields = (brandId, values) => {
         axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
             const newFields = [];
@@ -108,23 +90,6 @@ export default function CreateAccountMain(props) {
             setLoading(false)
         });
     };
-
-    const goToBackPage = (id) => {
-        let state = {}
-        let tempPath = accountDetailPage.path
-        if (id && typeof id === 'string') {
-            tempPath = tempPath + "/" + id
-        }
-        history.push({
-            pathname: tempPath
-        })
-    }
-
-    const goToBackPageListing = (e) => {
-        history.push({
-            pathname: accountPage.path,
-        })
-    }
 
     const handleLoading = (action, isSaveAndNew = false) => {
         if (isSaveAndNew) {
