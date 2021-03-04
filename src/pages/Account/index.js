@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetAccounts, RemoveAccounts } from '../../axios/index';
+import { GetAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
@@ -12,24 +12,19 @@ import {
     Tooltip,
     IconButton,
     Grid,
-    Divider
+    Divider,
+    Select
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
 import { useHistory } from "react-router-dom";
-import BrandHeader from '../../components/BrandHeader';
-import { ExpandMore, AddOutlined, EditLocationTwoTone, Visibility } from "@material-ui/icons";
-import BoxWithBorder from "../../components/BoxWithBorder";
+import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { deleteAccounts, getDataToClone } from '../../axios/accounts'
-import CustomToast from '../../components/Helpers/CustomToast'
+import { deleteAccounts } from '../../axios/accounts'
 import SearchBox from '../../components/Helpers/SearchBox'
-import { getErrorMessage } from '../../services/util'
 import BlockIcon from '@material-ui/icons/Block';
 import { accountDetailPage } from '../../routes/Accounts'
-import _ from "lodash";
 import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CreateAccountDialog from './CreateAccount/index'
 import routes from './../../components/Helpers/Routes';
@@ -37,6 +32,8 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
 import { CustomEventEmitter } from './../../axios/events';
 import axiosInstance from '../../axios/axiosInstance'
+import CustomContainer from "./../../components/Container";
+
 import './account.css'
 
 const AccTypes = {
@@ -67,7 +64,7 @@ export default function Account() {
 
     const classes = useStyles();
 
-    const { state: { user } } = useData();
+    const { } = useData();
     const history = useHistory();
     const [accountData, setAccountData] = useState([]);
     const [selectedType, setselectedType] = useState(1)
@@ -81,7 +78,7 @@ export default function Account() {
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
     const [showConfirmBox, setShowConfirmBox] = useState(false)
-    const [alertData, setAlertData] = useState({})
+    const [] = useState({})
     const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
     const [searchVal, setSearchVal] = useState("");
 
@@ -265,8 +262,6 @@ export default function Account() {
         },
     ];
 
-    const handleEdit = data => {
-    }
 
     const handleSearch = (e) => {
         if (query.page !== 1) {
@@ -383,12 +378,6 @@ export default function Account() {
         // }
     }
 
-    const handleRowClick = e => {
-        let tempPath = accountDetailPage.path + '/' + e.row._id
-        history.push({
-            pathname: tempPath,
-        });
-    }
     const handleDialogClose = (params) => {
         if (params && params.fetch) {
             fetchAccounts()
@@ -459,58 +448,82 @@ export default function Account() {
                     </Grid>
                 </Grid>
 
-                <BrandHeader heading=""
-                    style={{ marginTop: "150px", minHeight: "200px" }}
-                    showHeading={false}
-                    showDropDown={true}
-                    onChange={handleAccountSel}
-                    values={selectedType}
-                    options={AccTypes}
-                    placeholder=''>
+                <CustomContainer>
+                    <Grid container justify="space-between">
+                        <Grid item>
+                            {
+                                Object.keys(AccTypes).length ? <Select
+                                    style={{ width: '160px' }}
+                                    labelId="demo-simple-select-outlined-label"
+                                    id="demo-simple-select-outlined"
+                                    MenuProps={{
+                                        anchorOrigin: {
+                                            vertical: "bottom",
+                                            horizontal: "left"
+                                        },
+                                        getContentAnchorEl: null
+                                    }}
+                                    value={selectedType}
+                                    onChange={handleAccountSel}
+                                    label="Select Type"
+                                >
+                                    {
+                                        Object.keys(AccTypes).map((k, index) => {
+                                            return <MenuItem key={index} value={AccTypes[k]}>{k}</MenuItem>
+                                        })
+                                    }
+                                </Select>
+                                    : null
+                            }
+                        </Grid>
 
-                    <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
-                    <Box component="span" marginX={1} />
+                        <Grid item>
 
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={clickCreateNew}
-                        startIcon={<AddOutlined />}
-                    >
-                        Add
-                    </Button>
-                    <Box component="span" marginX={1} />
+                            <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
+                            <Box component="span" marginX={1} />
 
-                    <Button
-                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                        variant="outlined"
-                        color="default"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                    >
-                        Actions <ExpandMore />
-                    </Button>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={clickCreateNew}
+                                startIcon={<AddOutlined />}
+                            >
+                                Add
+                            </Button>
+                            <Box component="span" marginX={1} />
 
-                    <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "left"
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}>
+                            <Button
+                                disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                variant="outlined"
+                                color="default"
+                                onClick={openActions}
+                                aria-controls="action-menu"
+                            >
+                                Actions <ExpandMore />
+                            </Button>
 
-                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                            onClick={() => setShowConfirmBox(true)}
-                        >
-                            Delete
-                    </MenuItem>
-                    </Menu>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left"
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}>
 
-                </BrandHeader>
+                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                    onClick={() => setShowConfirmBox(true)}
+                                >
+                                    Delete
+                                </MenuItem>
+                            </Menu>
+
+                        </Grid>
+                    </Grid>
+                </CustomContainer>
 
                 <Paper style={{ marginTop: 15 }}>
                     <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
