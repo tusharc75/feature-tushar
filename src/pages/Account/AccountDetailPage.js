@@ -87,23 +87,22 @@ const Roles = () => {
         }
     }
 
-    const handleAllowToEditList = (rec) => {
-        let userId = user?.user?._id
-        let tList = []
+    const handleAllowToEditList = (accountDetails) => {
+        const userId = user?.user?._id;
+        let allowToEdit = false;
+
         if (userId) {
-            if (rec?.collaborator && rec.collaborator.length) {
-                rec.collaborator.map(obj => {
-                    tList.push(obj.optionValue)
-                })
+            allowToEdit = (accountDetails.owner?.optionValue && accountDetails.owner.optionValue == userId)
+
+            if (!allowToEdit && accountDetails.collaborator && accountDetails.collaborator.length > 0) {
+                allowToEdit = accountDetails.collaborator.findIndex(d => d.optionValue == userId) > -1;
             }
-            if (rec?.owner?.optionValue) {
-                tList.push(rec.owner.optionValue)
-            }
-            if (tList && tList.indexOf(userId) >= 0) {
-                setAllowedToEdit(true)
-            }
+
+            if (allowToEdit)
+                setAllowedToEdit(allowToEdit);
         }
     }
+
     const handleMainPonts = (data) => {
         let mainPoints = {
             Phone: data.phone || ''
