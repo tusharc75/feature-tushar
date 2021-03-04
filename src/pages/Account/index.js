@@ -12,10 +12,10 @@ import {
     Tooltip,
     IconButton,
     Grid,
-    Divider,
-    Link
+    Divider
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { Link } from 'react-router-dom'
 import { useHistory } from "react-router-dom";
 import BrandHeader from '../../components/BrandHeader';
 import { ExpandMore, AddOutlined, EditLocationTwoTone, Visibility } from "@material-ui/icons";
@@ -35,11 +35,20 @@ import CreateAccountDialog from './CreateAccount/index'
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
+import { CustomEventEmitter } from './../../axios/events';
+import axiosInstance from '../../axios/axiosInstance'
+import './account.css'
 
-
+const AccTypes = {
+    "All Accounts": 1,
+    "My Accounts": 2
+}
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
+        border: "1px solid #D4D6D7",
+        borderRadius: 8,
+        padding: theme.spacing(3, 2),
     },
     linksContainer: {
         display: "flex",
@@ -50,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
     linkDivider: {
         backgroundColor: theme.palette.darkBg,
         margin: "0 1rem",
-    },
+    }
 }));
 
 let accountTimeout
@@ -61,13 +70,13 @@ export default function Account() {
     const { state: { user } } = useData();
     const history = useHistory();
     const [accountData, setAccountData] = useState([]);
+    const [selectedType, setselectedType] = useState(1)
     const [cloneId, setCloneId] = useState('')
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
     const [query, setQuery] = useState({ page: 0, limit: 25 });
-
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
@@ -95,8 +104,7 @@ export default function Account() {
         if (renderCount > 0) {
             fetchAccounts();
         } else setRenderCount((preCount) => preCount + 1);
-        // eslint-disable-next-line
-    }, [query]);
+    }, [query, , selectedType]);
 
     useEffect(() => {
         let rows = accountData?.map((u) => ({
@@ -104,6 +112,7 @@ export default function Account() {
             isChecked: false,
             id: u._id,
             allowToDelete: u.allowToDelete,
+            collaborator: u.collaborator || [],
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : ""
         }));
         setDataRows([...rows]);
@@ -169,7 +178,14 @@ export default function Account() {
             filterable: false,
             width: 75
         },
-        { field: "accountName", headerName: "Account Name", width: 200 },
+        {
+            field: "accountName", headerName: "Account Name", width: 200,
+            renderCell: (params) => (
+                <Link className="accountNameLink" to={`${accountDetailPage.path}/${params.row._id}`}>
+                    {params?.row?.accountName ? params.row.accountName : ''}
+                </Link>
+            )
+        },
         {
             field: "typeOfAccount",
             headerName: "Type",
@@ -219,11 +235,6 @@ export default function Account() {
             field: "actions", headerName: "Actions ",
             renderCell: (params) => (
                 <>
-                    <Tooltip title="View">
-                        <IconButton aria-label="View" onClick={() => handleRowClick(params)}>
-                            <Visibility fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip>
                     <Tooltip title="Clone">
                         <IconButton aria-label="Clone" onClick={() => { cloneAccount(params.row._id) }}>
                             <FileCopyIcon fontSize="small" color="primary" />
@@ -266,7 +277,7 @@ export default function Account() {
 
     const fetchAccounts = async () => {
         setLoading(true);
-        let searchParams = { ...query }
+        let searchParams = { ...query, filterAccounts: selectedType }
         searchParams = searchVal
             ? { ...searchParams, search: searchVal }
             : { ...searchParams };
@@ -277,14 +288,8 @@ export default function Account() {
             setLoading(false);
         }
         catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
             setLoading(false);
         }
-
-
     }
 
     const handleSelectedAccounts = (id, isChecked) => {
@@ -311,13 +316,13 @@ export default function Account() {
         setIsAccDialogVisible(true)
     }
 
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
+    // const handleSnackbar = (msg, type, isOpen) => {
+    //     setAlertData({
+    //         errorMsg: msg,
+    //         type: type,
+    //         open: isOpen
+    //     })
+    // };
 
     const handlePage = (params) => {
         if (query.page !== params.page) {
@@ -344,45 +349,38 @@ export default function Account() {
     }
 
     const handleDeleteAccounts = async () => {
-        try {
-            let recLen = selectedRecs.length
-            if (selectedRecs && recLen > 0) {
-                let reqs = {
-                    ids: [...selectedRecs]
-                }
-                let data = await deleteAccounts(reqs)
+        let recLen = selectedRecs.length
+        if (selectedRecs && recLen > 0) {
+            let reqs = {
+                ids: [...selectedRecs]
+            }
+            axiosInstance().put(`/account/remove`, reqs).then((data) => {
                 if (data.status === 200) {
-                    handleSnackbar(data.message, 'success', true)
+                    CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
                     fetchAccounts();
                 }
-                setShowConfirmBox(false)
-                setSelectedRecs([])
-            }
-        }
-        catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
+            })
+            setShowConfirmBox(false)
+            setSelectedRecs([])
         }
     }
 
     const handleSingleDeleteAccounts = async () => {
-        try {
-            let data = await deleteAccounts({ ids: [singleAccountDelete.id] })
-            if (data.status === 200) {
-                handleSnackbar(data.message, 'success', true)
-                fetchAccounts();
-            }
-            setSingleAccountDelete({ id: null, show: false, accountName: "" });
-            setSelectedRecs([])
+        // try {
+        let data = await deleteAccounts({ ids: [singleAccountDelete.id] })
+        if (data.status === 200) {
+            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+            fetchAccounts();
         }
-        catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
-        }
+        setSingleAccountDelete({ id: null, show: false, accountName: "" });
+        setSelectedRecs([])
+        // }
+        // catch (err) {
+        //     let errMes = getErrorMessage(err)
+        //     if (errMes) {
+        //         handleSnackbar(errMes, 'error', true)
+        //     }
+        // }
     }
 
     const handleRowClick = e => {
@@ -401,6 +399,9 @@ export default function Account() {
         }
     }
 
+    const handleAccountSel = (e) => {
+        setselectedType(e.target.value)
+    }
     return (
         <>
             <Layout>
@@ -456,21 +457,16 @@ export default function Account() {
                             </Link>
                         </Grid>
                     </Grid>
-
                 </Grid>
-
-                {
-                    alertData ? <CustomToast
-                        open={alertData.open || false}
-                        close={() => handleSnackbar('', '', false)}
-                        errorMsg={alertData.errorMsg || ''}
-                        type={alertData.type || ''}
-                    /> : null
-                }
 
                 <BrandHeader heading=""
                     style={{ marginTop: "150px", minHeight: "200px" }}
-                    showHeading={false}>
+                    showHeading={false}
+                    showDropDown={true}
+                    onChange={handleAccountSel}
+                    values={selectedType}
+                    options={AccTypes}
+                    placeholder=''>
 
                     <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
                     <Box component="span" marginX={1} />
@@ -517,8 +513,8 @@ export default function Account() {
                 </BrandHeader>
 
                 <Paper style={{ marginTop: 15 }}>
-                    <BoxWithBorder>
-                        <div className="account-grid-height">
+                    <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
+                        <div className="account-grid-height1">
                             <DataGrid
                                 components={{
                                     Toolbar: GridToolbar,
@@ -554,13 +550,13 @@ export default function Account() {
                             singleAccountDelete.show ?
                                 <ConfirmationDialog
                                     open={singleAccountDelete.show}
-                                    message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ?`}
+                                    message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
                                     onClose={() => setSingleAccountDelete({ id: null, show: false, accountName: "" })}
                                     onOk={handleSingleDeleteAccounts}
                                 /> : null
                         }
 
-                    </BoxWithBorder>
+                    </Box>
                 </Paper>
             </Layout>
             {
@@ -568,7 +564,7 @@ export default function Account() {
                     <CreateAccountDialog
                         open={isAccDialogVisible}
                         onClose={handleDialogClose}
-                        showSuccessMes={handleSnackbar}
+                        // showSuccessMes={handleSnackbar}
                         id={cloneId}
                     /> : null
             }

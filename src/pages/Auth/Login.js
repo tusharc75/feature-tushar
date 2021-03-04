@@ -16,6 +16,7 @@ import { useData } from "../../StateProvider/Provider";
 import { SET_USER } from "../../StateProvider/actionTypes";
 
 import { UserLogin } from "../../axios/index";
+import axiosInstance from './../../axios/axiosInstance'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -66,8 +67,8 @@ const Login = () => {
       email: values.email,
       password: values.password,
     };
-
-    UserLogin(data)
+    
+    axiosInstance().post("/user/login", data)
       .then((res) => {
         setSubmitting(false);
         const { data } = res;

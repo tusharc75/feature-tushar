@@ -220,6 +220,11 @@ body::-webkit-scrollbar-thumb {
   height: calc(100vh - 290px);
 }
 
+.account-grid-height1,
+.contact-grid-height1 {
+  height: calc(100vh - 240px);
+}
+
 .gap-1 {
   gap: var(--space1) !important;
 }
