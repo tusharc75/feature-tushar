@@ -50,8 +50,8 @@ const BrandHeader = (props) => {
                 label="Select Type"
               >
                 {
-                  Object.keys(options).map(k => {
-                    return <MenuItem value={options[k]}>{k}</MenuItem>
+                  Object.keys(options).map((k, index) => {
+                    return <MenuItem key={index} value={options[k]}>{k}</MenuItem>
                   })
                 }
               </Select>

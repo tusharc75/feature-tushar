@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
 import { GetContacts, RemoveContacts } from '../../axios/index';
-import { useData } from '../../StateProvider/Provider';
 import {
     Box,
     Button,
@@ -12,35 +11,35 @@ import {
     IconButton,
     Paper,
     Grid,
-    Divider
+    Divider,
+    Select
 } from "@material-ui/core";
 import { Link } from 'react-router-dom'
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
-import { ExpandMore, Visibility } from "@material-ui/icons";
-import BoxWithBorder from "../../components/BoxWithBorder";
+import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import { contactDetailPage } from '../../routes/Contacts'
-import './contact.css';
 import CreateContact from './CreateContact/CreateContact';
-import { getObjKeys } from '../../constants/helpers';
 import { makeStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import BrandHeader from '../../components/BrandHeader';
 import SearchBox from '../../components/Helpers/SearchBox'
 import DeleteIcon from '@material-ui/icons/Delete';
 import { getErrorMessage } from '../../services/util'
 import CustomToast from '../../components/Helpers/CustomToast'
 import BlockIcon from '@material-ui/icons/Block';
 import { capitalize } from '../../services/util'
+import CustomContainer from "./../../components/Container";
+
 import './contact.css'
 
 const ContactTypes = {
     "All Contacts": 1,
     "My Contacts": 2
 }
+
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
@@ -57,15 +56,12 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-let contactTimeout
 export default function Contact() {
 
     const classes = useStyles();
 
-    const { state: { user } } = useData();
     const history = useHistory();
 
-    const [entitiesCount, setEntitiesCount] = useState(0);
     const [alertData, setAlertData] = useState({})
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
@@ -73,18 +69,15 @@ export default function Contact() {
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllContacts, setCheckAllContacts] = useState(false);
-    const [query, setQuery] = useState({ page: 0, limit: 5 });
+    const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [anchorEl, setAnchorEl] = useState(null);
-    const [open, setOpen] = useState(false);
-    const [errorMsg, setErroMsg] = useState("");
-    const [msgType, setMsgType] = useState("");
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [searchVal, setSearchVal] = useState("");
 
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
     const [singleContactDelete, setSingleContactDelete] = useState({ id: null, show: false, contactName: "" })
 
-    const [createContactEntityDetails, setCreateContactEntityDetails] = useState({
+    const [createContactEntityDetails] = useState({
         fields: [],
         initialValues: {},
     })
@@ -177,32 +170,9 @@ export default function Contact() {
     ];
 
     useEffect(() => {
-        if (searchVal && searchVal != "") {
-
-            let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
-
-            if (contactTimeout) {
-                clearTimeout(contactTimeout);
-            }
-
-            contactTimeout = setTimeout(() => {
-                getContacts();
-            }, millisec);
-        }
-    }, [searchVal]);
-
-    useEffect(() => {
-        if (user) {
-            getContacts();
-        }
+        getContacts();
         // eslint-disable-next-line
-    }, [user]);
-
-    useEffect(() => {
-        if (user) {
-            getContacts();
-        }
-    }, [query, selectedType]);
+    }, [query, searchVal, selectedType]);
 
     const handleSnackbar = (msg, type, isOpen) => {
         setAlertData({
@@ -262,17 +232,6 @@ export default function Contact() {
         setDataRows([...rows]);
     }, [contactData])
 
-    useEffect(() => {
-        getContacts();
-        // eslint-disable-next-line
-    }, [query]);
-
-    const handleRowClick = e => {
-        let tempPath = contactDetailPage.path + '/' + e.row._id
-        history.push({
-            pathname: tempPath,
-        });
-    }
 
     // ****** ACTIONS BUTTON STUFF *********
     const openActions = (event) => {
@@ -312,7 +271,7 @@ export default function Contact() {
 
     const handlePageSize = (params) => {
         if (params.pageSize !== query.limit) {
-            setQuery({ page: 1, limit: params.pageSize });
+            setQuery({ page: 0, limit: params.pageSize });
         }
     };
 
@@ -321,7 +280,7 @@ export default function Contact() {
             let temp = { ...params.sortModel[0] };
             setQuery((prevState) => ({
                 ...prevState,
-                page: 1,
+                page: 0,
                 sortBy: temp.field,
                 orderBy: temp.sort,
             }));
@@ -337,13 +296,13 @@ export default function Contact() {
             {name}
         </Link>
     }
+
     const handleContactSel = (e) => {
         setselectedType(e.target.value)
     }
 
     return (
         <Layout>
-
             {
                 alertData ? <CustomToast
                     open={alertData.open || false}
@@ -403,64 +362,87 @@ export default function Contact() {
                             </Link>
                     </Grid>
                 </Grid>
+
             </Grid>
 
+            <CustomContainer>
+                <Grid container justify="space-between">
+                    <Grid item>
+                        {
+                            Object.keys(ContactTypes).length ? <Select
+                                style={{ width: '160px' }}
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                MenuProps={{
+                                    anchorOrigin: {
+                                        vertical: "bottom",
+                                        horizontal: "left"
+                                    },
+                                    getContentAnchorEl: null
+                                }}
+                                value={selectedType}
+                                onChange={handleContactSel}
+                                label="Select Type"
+                            >
+                                {
+                                    Object.keys(ContactTypes).map((k, index) => {
+                                        return <MenuItem key={index} value={ContactTypes[k]}>{k}</MenuItem>
+                                    })
+                                }
+                            </Select>
+                                : null
+                        }
+                    </Grid>
 
-            <BrandHeader heading=""
-                style={{ marginTop: "150px", minHeight: "200px" }}
-                showHeading={false}
-                showDropDown={true}
-                onChange={handleContactSel}
-                values={selectedType}
-                options={ContactTypes}
-                placeholder='Select Contact Type'
-            >
+                    <Grid item>
 
-                <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
-                <Box component="span" marginX={1} />
+                        <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
+                        <Box component="span" marginX={1} />
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={clickCreateNew}
-                    startIcon={<AddIcon />}
-                >
-                    Add
-                    </Button>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={clickCreateNew}
+                            startIcon={<AddIcon />}
+                        >
+                            Add
+                        </Button>
 
-                <Box component="span" marginX={1} />
+                        <Box component="span" marginX={1} />
 
-                <Button
-                    // disabled={Boolean(!selectedBrand)}
-                    disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                    variant="outlined"
-                    color="default"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                >
-                    Actions <ExpandMore />
-                </Button>
-                <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left"
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}>
+                        <Button
+                            // disabled={Boolean(!selectedBrand)}
+                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                            variant="outlined"
+                            color="default"
+                            onClick={openActions}
+                            aria-controls="action-menu"
+                        >
+                            Actions <ExpandMore />
+                        </Button>
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "left"
+                            }}
+                            id="action-menu"
+                            open={Boolean(anchorEl)}
+                            onClose={closeActions}>
 
-                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                        onClick={() => setShowConfirmBox(true)}>
-                        Delete
-                    </MenuItem>
-                </Menu>
-            </BrandHeader>
+                            <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                onClick={() => setShowConfirmBox(true)}>
+                                Delete
+                            </MenuItem>
+                        </Menu>
+
+                    </Grid>
+                </Grid>
+            </CustomContainer>
 
             <Paper style={{ marginTop: 15 }}>
-
                 <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
                     {/* <Box component="div" marginY={1}> */}
                     <div className="contact-grid-height1">
@@ -521,6 +503,6 @@ export default function Contact() {
 
                 </Box>
             </Paper>
-        </Layout >
+        </Layout>
     )
 }
