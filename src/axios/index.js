@@ -1,23 +1,5 @@
-import axios from "axios";
 import api from './axios'
 import { getSearchQuery } from '../services/util'
-
-const BASE_URL = process?.env?.REACT_APP_API_URL || "https://equipt-oms-v2.herokuapp.com";
-
-export const UserLogin = async (inputData) => {
-    const { data } = await axios.post(`${BASE_URL}/user/login`, inputData);
-    return data;
-};
-
-export const UserMe = async () => {
-    const { data } = await api().get(`${BASE_URL}/user/me`);
-    return data;
-};
-
-export const GetFields = async (resource) => {
-    const { data } = await api().get(`/field?resource=${resource}`);
-    return data;
-};
 
 export const GetAccounts = async (params) => {
     let url = "/account";
@@ -38,11 +20,6 @@ export const GetContacts = async (params) => {
     const { data } = await api().get(url);
     return data;
 };
-
-// export const GetFields = async (resource, id) => {
-//     const { data } = await api().get(`/field?resource=${resource}`);
-//     return data;
-// };
 
 export const checkEmailExist = async (email) => {
     const { data } = await api().get(`/user/emailExist/${email}`);

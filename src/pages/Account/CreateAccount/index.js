@@ -9,11 +9,12 @@ import CreateAccount from './CreateAccount'
 import { getErrorMessage } from '../../../services/util'
 import { getObjKeys, formValidation } from '../../../constants/helpers';
 import { accountPage, accountDetailPage } from '../../../routes/Accounts'
-import { createAccount, getAccountData, updateAccount, getDataToClone } from '../../../axios/accounts'
-import { GetFields } from '../../../axios/index';
+// import { createAccount, getAccountData, updateAccount, getDataToClone } from '../../../axios/accounts'
 import { useHistory, useParams } from 'react-router-dom'
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
+import axiosInstance from './../../../axios/axiosInstance'
+import { CustomEventEmitter } from './../../../axios/events';
 
 const styles = (theme) => ({
     root: {
@@ -44,7 +45,7 @@ const DialogTitle = withStyles(styles)((props) => {
 
 export default function CreateAccountMain(props) {
 
-    const { open, onClose, id, showSuccessMes } = props
+    const { open, onClose, id } = props
     const { state: { user } } = useData();
     const history = useHistory();
     const [entityData, setEntityData] = useState({
@@ -58,11 +59,11 @@ export default function CreateAccountMain(props) {
 
     useEffect(async () => {
         if (id) {
-            GetFields('Account').then(({ data }) => {
+            axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
                 const newFields = [];
                 data.map((_f) => newFields.push(_f.fieldData));
 
-                getDataToClone(id).then((dataToClone) => {
+                axiosInstance().get(`/account/clone/${id}`).then((dataToClone) => {
                     setEntityData({
                         fields: newFields,
                         initialValues: dataToClone.data ? dataToClone.data : getObjKeys("", newFields),
@@ -78,26 +79,8 @@ export default function CreateAccountMain(props) {
         }
     }, [user]);
 
-    const fetchAccountData = async () => {
-        setLoading(true)
-        try {
-            let data = await getAccountData(id)
-            if (data.status === 200 && Object.keys(data.data)) {
-                let initialVal = data.data
-                setUpdateFieldValues(initialVal)
-                getAccountFields(undefined, initialVal)
-            }
-        }
-        catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
-        }
-
-    }
     const getAccountFields = (brandId, values) => {
-        GetFields('Account', brandId).then(({ data }) => {
+        axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
             const newFields = [];
             data.map((_f) => newFields.push(_f.fieldData));
             setEntityData({
@@ -107,23 +90,6 @@ export default function CreateAccountMain(props) {
             setLoading(false)
         });
     };
-
-    const goToBackPage = (id) => {
-        let state = {}
-        let tempPath = accountDetailPage.path
-        if (id && typeof id === 'string') {
-            tempPath = tempPath + "/" + id
-        }
-        history.push({
-            pathname: tempPath
-        })
-    }
-
-    const goToBackPageListing = (e) => {
-        history.push({
-            pathname: accountPage.path,
-        })
-    }
 
     const handleLoading = (action, isSaveAndNew = false) => {
         if (isSaveAndNew) {
@@ -185,17 +151,19 @@ export default function CreateAccountMain(props) {
         }
         handleLoading(false, saveAndNew)
     }
+
     const handleCreateAccount = async (values, saveAndNew, setValues) => {
         try {
-            let data = await createAccount(values)
-            
-            if (data.status === 200) {
+            axiosInstance().post('/account', values).then((data) => {
                 onClose({ fetch: true })
                 setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
-                showSuccessMes(data.message, 'success', true)
-                // handleSnackbar(data.message, 'success', true)
+
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+
                 handleLoading(false, saveAndNew)
-            }
+            }).catch((error) => {
+                setLoading(false);
+            })
         }
         catch (err) {
             showErroeMes(err, saveAndNew)

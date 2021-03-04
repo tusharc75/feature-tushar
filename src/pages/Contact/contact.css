@@ -4,3 +4,13 @@
     justify-content: flex-end;
     gap: 15px;
 }
+.custom-height {
+    height: calc(100vh - 230px);
+  }
+.contactsNameLink{
+    color: #0645AD;
+    cursor: pointer;
+}
+.contactsNameLink:hover{
+    text-decoration: underline;
+}

@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { ThemeProvider } from '@material-ui/core'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { theme } from './constants/AppConfig'
@@ -14,6 +15,8 @@ import Account from './pages/Account/index'
 // import CreateContact from './pages/Contact/CreateContact'
 import AccountDetailPage from "./pages/Account/AccountDetailPage"
 import ContactDetailPage from './pages/Contact/ContactDetailPage'
+import CustomToaster from './components/Helpers/CustomToast'
+import { CustomEventEmitter } from './axios/events';
 
 function App() {
     const {
@@ -27,6 +30,16 @@ function App() {
                 <Redirect to={{ pathname: '/', state: { from: location } }} />
             )
     }
+
+    const [toastConfig, setToastConfig] = useState(null);
+
+    CustomEventEmitter.subscribe("show-toast", (toastConfig) => {
+        setToastConfig({
+            ...toastConfig, open: true, close: () => {
+                setToastConfig(null);
+            }
+        });
+    });
 
     return (
         <ThemeProvider theme={theme}>
@@ -74,6 +87,11 @@ function App() {
                 </PrivateRoute>
                 {/* <Route exact path="/crm/account" component={Account} /> */}
             </Switch>
+
+            {
+                toastConfig && <CustomToaster type={toastConfig.type} errorMsg={toastConfig.errorMsg} open={toastConfig.open} close={toastConfig.close} />
+            }
+
         </ThemeProvider>
     )
 }

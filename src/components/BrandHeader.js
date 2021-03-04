@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, Box } from "@material-ui/core";
+import { Grid, Typography, Box, Select, Menu, MenuItem } from "@material-ui/core";
+import { Autocomplete } from '@material-ui/lab'
 import Container from "./Container";
 
 const useStyles = makeStyles((theme) => ({
@@ -17,7 +18,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BrandHeader = (props) => {
-  const { total, totalHeading, active, activeHeading, inActive, inActiveHeading, heading, children, showHeading } = props;
+  const { total, totalHeading, active, activeHeading, inActive,
+    inActiveHeading, heading, children, showHeading, showDropDown, onChange, values, options, placeholder } = props;
   const classes = useStyles();
 
   return (
@@ -30,6 +32,30 @@ const BrandHeader = (props) => {
                 <Typography variant="h6" component="h2">
                   {heading}
                 </Typography> : null
+            }
+            {
+              showDropDown && Object.keys(options).length ? <Select
+                style={{ width: '160px' }}
+                labelId="demo-simple-select-outlined-label"
+                id="demo-simple-select-outlined"
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left"
+                  },
+                  getContentAnchorEl: null
+                }}
+                value={values}
+                onChange={onChange}
+                label="Select Type"
+              >
+                {
+                  Object.keys(options).map((k, index) => {
+                    return <MenuItem key={index} value={options[k]}>{k}</MenuItem>
+                  })
+                }
+              </Select>
+                : null
             }
           </Grid>
           <Grid item>{children}</Grid>

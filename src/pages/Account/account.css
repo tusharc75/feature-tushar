@@ -70,3 +70,14 @@
     justify-content: flex-end;
     gap: 15px;
 }
+.custom-height {
+    height: calc(100vh - 230px);
+  }
+  .accountNameLink{
+      color: #0645AD;
+      cursor: pointer;
+  }
+
+  .accountNameLink:hover{
+    text-decoration: underline;
+}
