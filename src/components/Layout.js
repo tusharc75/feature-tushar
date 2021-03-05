@@ -40,9 +40,8 @@ const Layout = ({ children }) => {
           <Box display="flex">
             <Toolbar style={{ width: "55px" }} />
             <main className={classes.content}>
-              <Box marginY={2} />
               {children}
-              {/* <Footer /> */}
+              <Footer />
             </main>
           </Box>
         </div>

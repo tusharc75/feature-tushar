@@ -1,16 +1,13 @@
 import React, { useState } from "react";
-import { makeStyles, withStyles, useTheme } from "@material-ui/core/styles";
-import {
-  Typography,
-  TableCell,
-  TableRow,
-} from "@material-ui/core";
-import Header from './Header'
+import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { Typography, TableCell, TableRow } from "@material-ui/core";
+import Header from "./Header";
 import "./style.css";
-import LeadTable from './Table'
+import LeadTable from "./Table";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import NavLinks from "../../components/NavLinks";
+import SearchBox from "../../components/Helpers/SearchBox";
+import "./style.css";
 
 const useStyles = makeStyles((theme) => ({
   footerText: {
@@ -20,19 +17,22 @@ const useStyles = makeStyles((theme) => ({
 
 const LeadTypes = {
   "All Accounts": 1,
-  "My Accounts": 2
-}
+  "My Accounts": 2,
+};
 const Leads = () => {
-  const theme = useTheme();
-
   const classes = useStyles();
   const [age, setAge] = useState("All");
   const [searchVal, setSearchVal] = useState("");
-  const [selectedType, setselectedType] = useState(1)
+  const [selectedType, setselectedType] = useState(1);
   const [query, setQuery] = useState({ page: 0, limit: 25 });
 
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  // ****** ACTIONS BUTTON STUFF *********
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
   };
 
   const buttonProps = [
@@ -41,8 +41,8 @@ const Leads = () => {
   ];
 
   const handleLeadTypeSel = (e) => {
-    setselectedType(e.target.value)
-  }
+    setselectedType(e.target.value);
+  };
   const handleSearch = (e) => {
     if (query.page !== 1) {
       setQuery((prevState) => ({ ...prevState, page: 0 }));
@@ -52,8 +52,56 @@ const Leads = () => {
 
   return (
     <Layout>
-      {/* Links Section */}
-      <NavLinks ButtonProps={buttonProps} />
+      <Grid container spacing={3} direction="row">
+        <Grid item xs={12} sm={6} className="pl-3"></Grid>
+        <Grid item xs={12} sm={6} className="pr-3">
+          <Grid container justify="flex-end">
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Import from Excel
+            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Export to Excel
+            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Download Template
+            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Email a Link
+            </Link>
+          </Grid>
+        </Grid>
+      </Grid>
 
       {/* Tables Begins Here */}
       <Container>
@@ -66,15 +114,11 @@ const Leads = () => {
         />
         <LeadTable />
       </Container>
-
-      <Typography
-        component="div"
-        className={classes.footerText}
-        variant="subtitle1"
-        color="textSecondary"
-      >
-        &copy; 2020, equipt.com, Inc, or its affiliates
-      </Typography>
+      <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+        <div className="contact-grid-height1">
+          <DataGrid columns={[]} rows={[]} />
+        </div>
+      </Container>
     </Layout>
   );
 };
