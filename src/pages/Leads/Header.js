@@ -1,7 +1,7 @@
 import React from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { makeStyles } from "@material-ui/core/styles";
-import { FilterList, SortByAlpha, Search } from "@material-ui/icons";
+import { FilterList, SortByAlpha, Search, AddOutlined } from "@material-ui/icons";
 import {
     Box,
     Grid,
@@ -9,8 +9,8 @@ import {
     MenuItem,
     FormControl,
     IconButton,
-    TextField,
-    InputAdornment,
+    Button,
+
 } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 
 function LeadsHeader(props) {
     const classes = useStyles();
-    const { selectedType, onTypeChange, options, onSearch, searchVal } = props
+    const { selectedType, onTypeChange, options, onSearch, searchVal, onCreate } = props
     return <Grid container>
         <Grid item xs={6}>
             <FormControl style={{ minWidth: "170px" }}>
@@ -56,19 +56,32 @@ function LeadsHeader(props) {
         </Grid>
         <Grid item xs={6} className={classes.filterSide}>
             <Box component="div">
+                <Box component="span" marginX={1} />
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={onCreate}
+                    startIcon={<AddOutlined />}
+                >
+                    Add
+                </Button>
                 <IconButton>
                     <FilterList />
                 </IconButton>
                 <IconButton>
                     <SortByAlpha />
                 </IconButton>
+
+                <Box component="span" marginX={1} />
                 <SearchBox
                     onSearch={onSearch}
                     value={searchVal}
-                    size="sm"
+                    style={{ paddingTop: '5px' }}
+                    size="small"
                     placeholder="Search Leads"
                     width='242px'
                 />
+
             </Box>
         </Grid>
     </Grid>
