@@ -1,5 +1,7 @@
 import { checkEmailExist } from '../axios/index'
 import currencies from "./currency_with_country.json";
+import * as yup from "yup";
+import { validateEmail } from "../services/util";
 
 export const getObjKeys = (val = "", arr) => {
     const obj = {};
@@ -107,5 +109,90 @@ const isEmailExist = async (email) => {
     } else {
         return false;
     }
+};
+
+
+/**
+ * @param {Array} fields
+ */
+export const yupSchema = (fields, validEmail = true) => {
+    const schema = {};
+    fields.forEach((input) => {
+        if (input.type === "singleLine") {
+            schema[input.fieldName] = input.required
+                ? yup.string().required(`${input.fieldLabel} is required`)
+                : yup.string();
+        } else if (input.type === "name") {
+            schema[input.fieldName] = input.required
+                ? yup
+                    .string()
+                    .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+                    .required(`${input.fieldLabel} is required`)
+                : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
+        } else if (input.type === "mobileNumber") {
+            schema[input.fieldName] = input.required
+                ? yup
+                    .string()
+                    .min(10, "Mobile number is too short")
+                    .required(`${input.fieldLabel} is required`)
+                : yup.string().min(10, "Mobile number is too short");
+        } else if (input.type === "number") {
+            schema[input.fieldName] = input.required
+                ? yup
+                    .number()
+                    .required(`${input.fieldLabel} is required`)
+                    .positive()
+                    .integer()
+                : yup.number().positive().integer();
+        } else if (input.type === "multiSelect") {
+            schema[input.fieldName] = input.required
+                ? yup
+                    .array()
+                    .required(`${input.fieldLabel} is required`)
+                    .length(1, "Select at least one service access")
+                : yup.array();
+        } else if (input.type === "dropDown") {
+            schema[input.fieldName] = input.required
+                ? yup.object().required(`${input.fieldLabel} is required`)
+                : yup.object();
+        } else if (input.type === "currency") {
+            schema[input.fieldName] = input.required
+                ? yup.object().required(`${input.fieldLabel} is required`)
+                : yup.object();
+        } else if (input.type === "email") {
+            schema[input.fieldName] =
+                input.required && validEmail
+                    ? yup
+                        .string()
+                        .email()
+                        .required(`${input.fieldLabel} is required`)
+                        .test("email", "Email already exist", async function (value) {
+                            let isvalidEmail = validateEmail(value);
+
+                            if (isvalidEmail) {
+                                const { path, createError, resolve } = this;
+                                let { data } = await checkEmailExist(value);
+                                if (data) {
+                                    return createError({
+                                        path,
+                                        message: "Email alreday exist",
+                                    });
+                                }
+                                return resolve(true);
+                            }
+                        })
+                    : yup.string().email();
+        } else if (input.type === "switch" || input.type === "checkBox") {
+            schema[input.fieldName] = input.required
+                ? yup.boolean().required(`${input.fieldLabel} is required`)
+                : yup.boolean();
+        } else {
+            schema[input.fieldName] = input.required
+                ? yup.string().required(`${input.fieldLabel} is required`)
+                : yup.string();
+        }
+    });
+
+    return yup.object().shape(schema);
 };
 

@@ -42,8 +42,8 @@ const InfoLabel = ({ children, info, isTooltip }) =>
             </Grid>
         </Grid>
     ) : (
-            <>{children}</>
-        )
+        <>{children}</>
+    )
 
 const autocompleteService = { current: null }
 
@@ -131,7 +131,7 @@ const FormTypes = (props) => {
                 return undefined
             }
 
-            fetch({ input: values[name] }, (results) => {
+            fetch({ input: values[name] ? values[name] : "" }, (results) => {
                 if (active) {
                     let newOptions = []
                     if (value) {
