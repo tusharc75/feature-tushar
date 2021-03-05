@@ -5,22 +5,17 @@ import {
     Grid,
     Typography
 } from "@material-ui/core";
-import { Skeleton } from '@material-ui/lab'
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { accountPage } from '../../routes/Accounts'
-import { getAccountData } from '../../axios/accounts'
 import { Link } from "react-router-dom";
-import { getErrorMessage } from '../../services/util'
-import DetailPage from './DetailPage'
 import Loader from '../../components/Loader'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { deleteAccounts, updateAccount, getRelatedContacts } from '../../axios/accounts'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import "./account.css";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -66,25 +61,22 @@ const Roles = () => {
     const fetchAccountData = async () => {
         setLoading(true)
 
-        try {
-            axiosInstance().get(`/account/${id}`).then(({ data }) => {
-                setCustomizedRoutes([...customizedRoutes, { title: data.accountName }]);
+        axiosInstance().get(`/account/${id}`).then(({ data: { data } }) => {
+            setCustomizedRoutes([...customizedRoutes, { title: data.accountName }]);
 
-                setHeadingLbl(data.accountName || '')
-                handleAllowToEditList(data)
-                handleMainPonts(data)
-                setAccountData(data)
-                if (accountFields.length == 0) {
-                    getAccountFields()
-                }
-                else {
-                    setLoading(false)
-                }
-            })
-        }
-        catch (err) {
+            setHeadingLbl(data.accountName || '')
+            handleAllowToEditList(data)
+            handleMainPonts(data)
+            setAccountData(data)
+            if (accountFields.length == 0) {
+                getAccountFields()
+            }
+            else {
+                setLoading(false)
+            }
+        }).catch(() => {
             setLoading(false)
-        }
+        })
     }
 
     const handleAllowToEditList = (accountDetails) => {
@@ -117,8 +109,7 @@ const Roles = () => {
     }
 
     const getAccountFields = () => {
-        axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
-
+        axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
             setAccountFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });
@@ -161,18 +152,11 @@ const Roles = () => {
 
     const handleDeleteAcc = () => {
         if (accountData?._id) {
-
-            deleteAccounts({ ids: [accountData._id] }).then((data) => {
-                if (data.status === 200) {
-                    handleSnackbar(data.message, 'success', true)
-                    goBackToListing()
-                }
+            axiosInstance().put(`/account/remove`, { ids: [accountData._id] }).then(({ data }) => {
+                handleSnackbar(data.message, 'success', true)
+                goBackToListing()
                 setShowConfirmBox(false)
             }).catch(err => {
-                let errMes = getErrorMessage(err)
-                if (errMes) {
-                    handleSnackbar(errMes, 'error', true)
-                }
                 setShowConfirmBox(false)
             })
         }
@@ -190,18 +174,13 @@ const Roles = () => {
             _id: accountData._id,
         };
 
-        updateAccount(updatedData)
-            .then(({ data }) => {
+        axiosInstance().put('/account', updatedData)
+            .then(() => {
                 fetchAccountData()
                 handleSnackbar("Successfully saved", 'success', true)
                 setUpdating(false);
             })
             .catch((err) => {
-                console.log(err);
-                let errMes = getErrorMessage(err)
-                if (errMes) {
-                    handleSnackbar(errMes, 'error', true)
-                }
                 setUpdating(false);
             });
     };
@@ -212,9 +191,9 @@ const Roles = () => {
     }
 
     const fetchRelatedContacts = () => {
-        getRelatedContacts(accountData._id)
-            .then((data) => {
-                setRelatedContacts(data.data)
+        axiosInstance().get(`/contact/related-contact/${accountData._id}`)
+            .then(({ data: { data } }) => {
+                setRelatedContacts(data)
             })
     }
 

@@ -20,9 +20,8 @@ import { Link } from 'react-router-dom'
 import { useHistory } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import { deleteAccounts } from '../../axios/accounts'
+import MessageDialog from '../../components/Helpers/MessageDialog'
 import SearchBox from '../../components/Helpers/SearchBox'
-import BlockIcon from '@material-ui/icons/Block';
 import { accountDetailPage } from '../../routes/Accounts'
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -64,7 +63,7 @@ export default function Account() {
 
     const classes = useStyles();
 
-    const { } = useData();
+    const { state: { user } } = useData();
     const history = useHistory();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
@@ -75,7 +74,8 @@ export default function Account() {
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
-    const [showConfirmBox, setShowConfirmBox] = useState(false)
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
     const [] = useState({})
     const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
     const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -83,6 +83,19 @@ export default function Account() {
     const [selectedType, setselectedType] = useState(1)
 
     const [singleAccountDelete, setSingleAccountDelete] = useState({ id: null, show: false, accountName: "" })
+
+    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
+
+    useEffect(() => {
+        const data = user.role?.sideBar;
+
+        if (data) {
+            const hasAccountPermission = data.find(d => d.name == "Account");
+            if (hasAccountPermission) {
+                setAccountPermissions({ isCreate: hasAccountPermission.isCreate, isRead: hasAccountPermission.isRead, isDelete: hasAccountPermission.isDelete });
+            }
+        }
+    }, [user]);
 
     useEffect(() => {
         let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
@@ -132,9 +145,9 @@ export default function Account() {
                         setCheckAllAccounts(ev.target.checked);
                         const gridData = dataRows;
                         gridData.map((d) => {
-                            if (d.allowToDelete) {
-                                d.isChecked = ev.target.checked;
-                            }
+                            // if (d.allowToDelete) {
+                            d.isChecked = ev.target.checked;
+                            // }
                             return d;
                         });
                         setDataRows([...gridData]);
@@ -142,7 +155,7 @@ export default function Account() {
                 />
             ),
             renderCell: (params) => (
-                params.row.allowToDelete ? <Checkbox
+                <Checkbox
                     color="primary"
                     // disabled={!params.allowToDelete}
                     checked={params.value}
@@ -164,11 +177,12 @@ export default function Account() {
                         }
                         handleSelectedAccounts(params.row.id, ev.target.checked)
                     }}
-                /> : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the selection functionality">
-                        <IconButton>
-                            <BlockIcon fontSize="small" color="error" />
-                        </IconButton>
-                    </Tooltip >
+                />
+                //  : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the selection functionality">
+                //     <IconButton>
+                //         <BlockIcon fontSize="small" color="error" />
+                //     </IconButton>
+                // </Tooltip >
             ),
             disableColumnMenu: true,
             sortable: false,
@@ -229,30 +243,43 @@ export default function Account() {
         },
         { field: "phone", headerName: "Phone", width: 200 },
         {
-            field: "actions", headerName: "Actions ",
+            field: "actions", headerName: "Actions",
             renderCell: (params) => (
                 <>
-                    <Tooltip title="Clone">
-                        <IconButton aria-label="Clone" onClick={() => { cloneAccount(params.row._id) }}>
-                            <FileCopyIcon fontSize="small" color="primary" />
-                        </IconButton>
-                    </Tooltip>
                     {
-                        params.row.allowToDelete ?
-                            <Tooltip title="Delete">
-                                <IconButton aria-label="Delete" onClick={() => {
-                                    setSingleAccountDelete({ show: true, id: params.row._id, accountName: params.row.accountName })
-                                }}>
-                                    <DeleteIcon fontSize="small" color="error" />
+                        accountPermissions.isCreate ? <Tooltip title="Clone">
+                            <IconButton aria-label="Clone" onClick={() => { cloneAccount(params.row._id) }}>
+                                <FileCopyIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </Tooltip> :
+                            <Tooltip className="cursor-stop" title="You do not have permission to clone/create an account">
+                                <IconButton aria-label="Clone">
+                                    <FileCopyIcon fontSize="small" />
                                 </IconButton>
-                            </Tooltip> :
-                            <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the delete functionality">
+                            </Tooltip>
+                    }
+
+                    {
+                        accountPermissions.isDelete ?
+                            params.row.allowToDelete ?
+                                <Tooltip title="Delete">
+                                    <IconButton aria-label="Delete" onClick={() => {
+                                        setSingleAccountDelete({ show: true, id: params.row._id, accountName: params.row.accountName })
+                                    }}>
+                                        <DeleteIcon fontSize="small" color="error" />
+                                    </IconButton>
+                                </Tooltip> :
+                                <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the delete functionality">
+                                    <IconButton aria-label="Delete">
+                                        <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip> :
+                            <Tooltip className="cursor-stop" title="You do not have permission to delete account">
                                 <IconButton aria-label="Delete">
                                     <DeleteIcon fontSize="small" />
                                 </IconButton>
                             </Tooltip>
                     }
-
                 </>
             ),
             disableColumnMenu: true,
@@ -349,33 +376,25 @@ export default function Account() {
             let reqs = {
                 ids: [...selectedRecs]
             }
-            axiosInstance().put(`/account/remove`, reqs).then((data) => {
-                if (data.status === 200) {
-                    CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
-                    fetchAccounts();
-                }
+            axiosInstance().put(`/account/remove`, reqs).then(({ data }) => {
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                fetchAccounts();
             })
-            setShowConfirmBox(false)
+            setShowDeleteConfirmBox(false)
             setSelectedRecs([])
         }
     }
 
     const handleSingleDeleteAccounts = async () => {
-        // try {
-        let data = await deleteAccounts({ ids: [singleAccountDelete.id] })
-        if (data.status === 200) {
-            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
-            fetchAccounts();
-        }
+
+        axiosInstance().put(`/account/remove`, { ids: [singleAccountDelete.id] })
+            .then(({ data }) => {
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                fetchAccounts();
+            });
+
         setSingleAccountDelete({ id: null, show: false, accountName: "" });
         setSelectedRecs([])
-        // }
-        // catch (err) {
-        //     let errMes = getErrorMessage(err)
-        //     if (errMes) {
-        //         handleSnackbar(errMes, 'error', true)
-        //     }
-        // }
     }
 
     const handleDialogClose = (params) => {
@@ -390,6 +409,7 @@ export default function Account() {
 
     const handleAccountSel = (e) => {
         setselectedType(e.target.value)
+        setCheckAllAccounts(false)
     }
     return (
         <>
@@ -402,7 +422,7 @@ export default function Account() {
                     <Grid item xs={12} sm={6} className="pr-3">
                         <Grid container justify="flex-end">
                             <Link
-                                href="#"
+                                to="#"
                                 onClick={(e) => e.preventDefault()}
                                 className={classes.links}
                             >
@@ -414,7 +434,7 @@ export default function Account() {
                                 className={classes.linkDivider}
                             />
                             <Link
-                                href="#"
+                                to="#"
                                 onClick={(e) => e.preventDefault()}
                                 className={classes.links}
                             >
@@ -426,7 +446,7 @@ export default function Account() {
                                 className={classes.linkDivider}
                             />
                             <Link
-                                href="#"
+                                to="#"
                                 onClick={(e) => e.preventDefault()}
                                 className={classes.links}
                             >
@@ -438,7 +458,7 @@ export default function Account() {
                                 className={classes.linkDivider}
                             />
                             <Link
-                                href="#"
+                                to="#"
                                 onClick={(e) => e.preventDefault()}
                                 className={classes.links}
                             >
@@ -479,47 +499,62 @@ export default function Account() {
 
                         <Grid item>
 
-                            <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
-                            <Box component="span" marginX={1} />
+                            <SearchBox onSearch={handleSearch} value={searchVal} size="small" />
 
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={clickCreateNew}
-                                startIcon={<AddOutlined />}
-                            >
-                                Add
-                            </Button>
-                            <Box component="span" marginX={1} />
+                            {
+                                accountPermissions.isCreate && <>
+                                    <Box component="span" marginX={1} />
 
-                            <Button
-                                disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                variant="outlined"
-                                color="default"
-                                onClick={openActions}
-                                aria-controls="action-menu"
-                            >
-                                Actions <ExpandMore />
-                            </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={clickCreateNew}
+                                        startIcon={<AddOutlined />}
+                                    >
+                                        Add
+                                    </Button>
+                                </>
+                            }
 
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left"
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}>
+                            {
+                                accountPermissions.isDelete && <>
+                                    <Box component="span" marginX={1} />
 
-                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                    onClick={() => setShowConfirmBox(true)}
-                                >
-                                    Delete
-                                </MenuItem>
-                            </Menu>
+                                    <Button
+                                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                        variant="outlined"
+                                        color="default"
+                                        onClick={openActions}
+                                        aria-controls="action-menu"
+                                    >
+                                        Actions <ExpandMore />
+                                    </Button>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left"
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}>
+
+                                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                            onClick={() => {
+                                                if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                    setShowDeleteWarningConfirmBox(true);
+                                                } else {
+                                                    setShowDeleteConfirmBox(true)
+                                                }
+                                            }}
+                                        >
+                                            Delete
+                                        </MenuItem>
+                                    </Menu>
+                                </>
+                            }
 
                         </Grid>
                     </Grid>
@@ -551,11 +586,19 @@ export default function Account() {
                             />
                         </div>
                         {
-                            showConfirmBox ?
+                            showDeleteWarningConfirmBox ?
+                                <MessageDialog
+                                    open={showDeleteWarningConfirmBox}
+                                    message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+                                    onClose={() => setShowDeleteWarningConfirmBox(false)}
+                                /> : null
+                        }
+                        {
+                            showDeleteConfirmBox ?
                                 <ConfirmationDialog
-                                    open={showConfirmBox}
+                                    open={showDeleteConfirmBox}
                                     message={`Are you sure, you want to delete selected account(s) ?`}
-                                    onClose={() => setShowConfirmBox(false)}
+                                    onClose={() => setShowDeleteConfirmBox(false)}
                                     onOk={handleDeleteAccounts}
                                 /> : null
                         }
