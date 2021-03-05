@@ -9,13 +9,11 @@ import { useHistory, useParams } from "react-router-dom";
 import Container from '../../components/Container'
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
-import { getContactData } from '../../axios/contacts'
 import { Link } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { deleteContacts, updateContact } from '../../axios/contacts'
 import { contactPage } from '../../routes/Contacts'
 import { capitalize } from '../../services/util'
 import DetailsPage from '../../components/Shared/DetailsPage'

@@ -14,6 +14,7 @@ import {
     Divider,
     Select
 } from "@material-ui/core";
+import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom'
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useHistory } from "react-router-dom";
@@ -32,6 +33,7 @@ import CustomToast from '../../components/Helpers/CustomToast'
 import BlockIcon from '@material-ui/icons/Block';
 import { capitalize } from '../../services/util'
 import CustomContainer from "./../../components/Container";
+import MessageDialog from '../../components/Helpers/MessageDialog'
 
 import './contact.css'
 
@@ -60,6 +62,7 @@ export default function Contact() {
 
     const classes = useStyles();
 
+    const { state: { user } } = useData();
     const history = useHistory();
 
     const [alertData, setAlertData] = useState({})
@@ -71,9 +74,10 @@ export default function Contact() {
     const [checkAllContacts, setCheckAllContacts] = useState(false);
     const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [anchorEl, setAnchorEl] = useState(null);
-    const [showConfirmBox, setShowConfirmBox] = useState(false);
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
     const [searchVal, setSearchVal] = useState("");
 
+    const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
     const [singleContactDelete, setSingleContactDelete] = useState({ id: null, show: false, contactName: "" })
 
@@ -81,6 +85,8 @@ export default function Contact() {
         fields: [],
         initialValues: {},
     })
+
+    const [contactPermissions, setContactPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
 
     const columns = [
         {
@@ -94,9 +100,7 @@ export default function Contact() {
                         setCheckAllContacts(ev.target.checked);
                         const gridData = dataRows;
                         gridData.map((d) => {
-                            if (d.allowToDelete) {
-                                d.isChecked = ev.target.checked;
-                            }
+                            d.isChecked = ev.target.checked;
                             return d;
                         });
                         setDataRows([...gridData]);
@@ -104,7 +108,7 @@ export default function Contact() {
                 />
             ),
             renderCell: (params) => (
-                params.row.allowToDelete ? <Checkbox
+                <Checkbox
                     color="primary"
                     checked={params.value}
                     onChange={(ev) => {
@@ -124,11 +128,12 @@ export default function Contact() {
                             setCheckAllContacts(false);
                         }
                     }}
-                /> : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the selection functionality">
-                    <IconButton>
-                        <BlockIcon fontSize="small" color="error" />
-                    </IconButton>
-                </Tooltip>
+                />
+                // : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the selection functionality">
+                //     <IconButton>
+                //         <BlockIcon fontSize="small" color="error" />
+                //     </IconButton>
+                // </Tooltip>
             ),
             disableColumnMenu: true,
             sortable: false,
@@ -150,15 +155,21 @@ export default function Contact() {
             renderCell: (params) => (
                 <>
                     {
-                        params.row.allowToDelete ?
-                            <Tooltip title="Delete">
-                                <IconButton aria-label="Delete" onClick={() => {
-                                    setSingleContactDelete({ show: true, id: params.row._id, contactName: `${params.row.firstName} ${params.row.lastName}` })
-                                }}>
-                                    <DeleteIcon fontSize="small" color="error" />
-                                </IconButton>
-                            </Tooltip> :
-                            <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the delete functionality">
+                        contactPermissions.isDelete ?
+                            params.row.allowToDelete ?
+                                <Tooltip title="Delete">
+                                    <IconButton aria-label="Delete" onClick={() => {
+                                        setSingleContactDelete({ show: true, id: params.row._id, contactName: `${params.row.firstName} ${params.row.lastName}` })
+                                    }}>
+                                        <DeleteIcon fontSize="small" color="error" />
+                                    </IconButton>
+                                </Tooltip> :
+                                <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the delete functionality">
+                                    <IconButton aria-label="Delete">
+                                        <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip> :
+                            <Tooltip className="cursor-stop" title="You do not have permission to delete contact">
                                 <IconButton aria-label="Delete">
                                     <DeleteIcon fontSize="small" />
                                 </IconButton>
@@ -168,6 +179,17 @@ export default function Contact() {
             ), width: 200
         }
     ];
+
+    useEffect(() => {
+        const data = user.role?.sideBar;
+
+        if (data) {
+            const hasContactPermission = data.find(d => d.name == "Contact");
+            if (hasContactPermission) {
+                setContactPermissions({ isCreate: hasContactPermission.isCreate, isRead: hasContactPermission.isRead, isDelete: hasContactPermission.isDelete });
+            }
+        }
+    }, [user]);
 
     useEffect(() => {
         getContacts();
@@ -433,7 +455,14 @@ export default function Contact() {
                             onClose={closeActions}>
 
                             <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                onClick={() => setShowConfirmBox(true)}>
+                                onClick={() => {
+                                    if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                        setShowDeleteWarningConfirmBox(true);
+                                    } else {
+                                        setShowDeleteConfirmBox(true)
+                                    }
+                                }}
+                            >
                                 Delete
                             </MenuItem>
                         </Menu>
@@ -469,14 +498,24 @@ export default function Contact() {
                     </div>
                     {/* </Box> */}
 
-                    {showConfirmBox ? (
-                        <ConfirmationDialog
-                            open={showConfirmBox}
-                            message={`Are you sure you want to delete selected Contacts ?`}
-                            onClose={() => setShowConfirmBox(false)}
-                            onOk={handleDeleteContact}
-                        />
-                    ) : null}
+                    {
+                        showDeleteWarningConfirmBox ?
+                            <MessageDialog
+                                open={showDeleteWarningConfirmBox}
+                                message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+                                onClose={() => setShowDeleteWarningConfirmBox(false)}
+                            /> : null
+                    }
+                    {
+                        showDeleteConfirmBox ? (
+                            <ConfirmationDialog
+                                open={showDeleteConfirmBox}
+                                message={`Are you sure you want to delete selected Contacts ?`}
+                                onClose={() => setShowDeleteConfirmBox(false)}
+                                onOk={handleDeleteContact}
+                            />
+                        ) : null
+                    }
 
                     {
                         showCreateContactDialog && <CreateContact
@@ -503,6 +542,6 @@ export default function Contact() {
 
                 </Box>
             </Paper>
-        </Layout>
+        </Layout >
     )
 }

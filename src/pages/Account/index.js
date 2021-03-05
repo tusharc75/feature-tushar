@@ -76,7 +76,6 @@ export default function Account() {
     const [selectedRecs, setSelectedRecs] = useState([])
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
-    const [] = useState({})
     const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
     const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [searchVal, setSearchVal] = useState("");
@@ -378,9 +377,9 @@ export default function Account() {
             }
             axiosInstance().put(`/account/remove`, reqs).then(({ data }) => {
                 CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                setShowDeleteConfirmBox(false)
                 fetchAccounts();
             })
-            setShowDeleteConfirmBox(false)
             setSelectedRecs([])
         }
     }
