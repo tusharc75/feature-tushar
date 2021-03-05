@@ -1,333 +1,155 @@
 import React, { useState } from "react";
-import { makeStyles, withStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Box,
-  Typography,
+  Button,
   Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Select,
-  Checkbox,
+  Link,
+  Divider,
+  Menu,
   MenuItem,
-  FormControl,
-  IconButton,
-  TextField,
-  InputAdornment,
-  Avatar,
 } from "@material-ui/core";
-import { FilterList, SortByAlpha, Search } from "@material-ui/icons";
-import "./style.css";
+import { Add, ExpandMore } from "@material-ui/icons";
+import { DataGrid } from "@material-ui/data-grid";
 
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import NavLinks from "../../components/NavLinks";
+import SearchBox from "../../components/Helpers/SearchBox";
+import "./style.css";
 
 const useStyles = makeStyles((theme) => ({
-  tableContainer: {
-    padding: "30px 20px",
-    marginTop: 20,
-    height: "88vh",
-  },
-
-  table: {
-    marginTop: 20,
-  },
-  filterSide: {
+  linksContainer: {
     display: "flex",
-    justifyContent: "flex-end",
   },
-
-  lead: {
-    display: "flex",
-    alignItems: "center",
+  links: {
+    color: theme.palette.textDark,
   },
-
-  leadAvatar: {
-    width: theme.spacing(3),
-    height: theme.spacing(3),
-    marginRight: 10,
-  },
-
-  footerText: {
-    textAlign: "center",
+  linkDivider: {
+    backgroundColor: theme.palette.darkBg,
+    margin: "0 1rem",
   },
 }));
 
-const StyledTableRow = withStyles((theme) => ({
-  root: {
-    "&:nth-of-type(odd)": {
-      backgroundColor: "#F9FAFA",
-    },
-  },
-}))(TableRow);
-
-const StyledTableCell = withStyles((theme) => ({
-  head: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  body: {
-    fontSize: 14,
-  },
-}))(TableCell);
-
 const Leads = () => {
-  const theme = useTheme();
-
   const classes = useStyles();
-  const [age, setAge] = useState("All");
+  const [searchVal, setSearchVal] = useState("");
+  const [query, setQuery] = useState({ page: 0, limit: 25 });
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  const handleSearch = (e) => {
+    if (query.page !== 1) {
+      setQuery((prevState) => ({ ...prevState, page: 0 }));
+    }
+    setSearchVal(e.target.value);
   };
 
-  const buttonProps = [
-    { title: "New Lead", bg: theme.palette.darkBg, color: "#fff" },
-    { title: "Delete Lead", bg: theme.palette.lightBg, color: "#fff" },
-  ];
+  // ****** ACTIONS BUTTON STUFF *********
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Layout>
-      {/* Links Section */}
-      <NavLinks ButtonProps={buttonProps} />
+      <Grid container spacing={3} direction="row">
+        <Grid item xs={12} sm={6} className="pl-3"></Grid>
+        <Grid item xs={12} sm={6} className="pr-3">
+          <Grid container justify="flex-end">
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Import from Excel
+            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Export to Excel
+            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Download Template
+            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Email a Link
+            </Link>
+          </Grid>
+        </Grid>
+      </Grid>
 
       {/* Tables Begins Here */}
       <Container>
-        <Grid container>
-          <Grid item xs={6}>
-            <FormControl style={{ minWidth: "170px" }}>
-              <Select
-                value={age}
-                displayEmpty
-                onChange={handleChange}
-                inputProps={{ "aria-label": "Without label" }}
-              >
-                <MenuItem value="All">All Leads</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={6} className={classes.filterSide}>
-            <Box component="div">
-              <IconButton>
-                <FilterList />
-              </IconButton>
-              <IconButton>
-                <SortByAlpha />
-              </IconButton>
-              <TextField
-                id="outlined-search"
-                type="search"
-                placeholder="Search Leads"
-                variant="outlined"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search color="disabled" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Box>
+        <Grid container justify="space-between">
+          <Grid item></Grid>
+
+          <Grid item>
+            <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
+            <Box component="span" marginX={1} />
+
+            <Button variant="contained" color="primary" startIcon={<Add />}>
+              Add
+            </Button>
+
+            <Box component="span" marginX={1} />
+
+            <Button
+              variant="outlined"
+              color="default"
+              aria-controls="action-menu"
+              onClick={openActions}
+            >
+              Actions <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem>Delete</MenuItem>
+            </Menu>
           </Grid>
         </Grid>
-        <Paper elevation={1}>
-          <TableContainer className={classes.table}>
-            <Table stickyHeader arial-lable="sticky table">
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      inputProps={{ "aria-label": "select all desserts" }}
-                    />
-                  </TableCell>
-                  {[
-                    "Lead Name",
-                    "Company",
-                    "Title",
-                    "Lead Source",
-                    "Phone Number",
-                    "Owner",
-                  ].map((item, i) => (
-                    <TableCell key={i} align="left">
-                      {item}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <StyledTableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      inputProps={{ "aria-label": "select all desserts" }}
-                    />
-                  </TableCell>
-                  <StyledTableCell>
-                    <Box component="div" className={classes.lead}>
-                      <Avatar className={classes.leadAvatar}>A</Avatar>
-                      <Box component="div">
-                        <Typography variant="subtitle2">Ava Moore</Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          ava@ppcollc.com
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </StyledTableCell>
-                  <StyledTableCell>Platinum Pipelines Co LLC</StyledTableCell>
-                  <StyledTableCell>Cast Accountant</StyledTableCell>
-                  <StyledTableCell>Web Download</StyledTableCell>
-                  <StyledTableCell>281-281-2345</StyledTableCell>
-                  <StyledTableCell>
-                    <Typography variant="subtitle2">Ava Moore</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Dec 7, 2020 11:44pm
-                    </Typography>
-                  </StyledTableCell>
-                </StyledTableRow>
-                <StyledTableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      inputProps={{ "aria-label": "select all desserts" }}
-                    />
-                  </TableCell>
-                  <StyledTableCell>
-                    <Box component="div" className={classes.lead}>
-                      <Avatar className={classes.leadAvatar}>B</Avatar>
-                      <Box component="div">
-                        <Typography variant="subtitle2">
-                          Beth Petterson
-                        </Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          beth@distribution.com
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </StyledTableCell>
-                  <StyledTableCell>Morlong Distribution</StyledTableCell>
-                  <StyledTableCell>Executive Secretary</StyledTableCell>
-                  <StyledTableCell>Seminar Partner</StyledTableCell>
-                  <StyledTableCell>555-555-5555</StyledTableCell>
-                  <StyledTableCell>
-                    <Typography variant="subtitle2">Beth Petterson</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Dec 7, 2020 11:44pm
-                    </Typography>
-                  </StyledTableCell>
-                </StyledTableRow>
-                <StyledTableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      inputProps={{ "aria-label": "select all desserts" }}
-                    />
-                  </TableCell>
-                  <StyledTableCell>
-                    <Box component="div" className={classes.lead}>
-                      <Avatar className={classes.leadAvatar}>D</Avatar>
-                      <Box component="div">
-                        <Typography variant="subtitle2">
-                          David Henderson
-                        </Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          david@chapman.com
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </StyledTableCell>
-                  <StyledTableCell>Chapmam Piping, Canada</StyledTableCell>
-                  <StyledTableCell>Computer System Analyst</StyledTableCell>
-                  <StyledTableCell>Online Store</StyledTableCell>
-                  <StyledTableCell>654-987-9876</StyledTableCell>
-                  <StyledTableCell>
-                    <Typography variant="subtitle2">David Henderson</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Dec 7, 2020 11:44pm
-                    </Typography>
-                  </StyledTableCell>
-                </StyledTableRow>
-                <StyledTableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      inputProps={{ "aria-label": "select all desserts" }}
-                    />
-                  </TableCell>
-                  <StyledTableCell>
-                    <Box component="div" className={classes.lead}>
-                      <Avatar className={classes.leadAvatar}>J</Avatar>
-                      <Box component="div">
-                        <Typography variant="subtitle2">James Smith</Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          james@pacman.com
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </StyledTableCell>
-                  <StyledTableCell>Pacman Co</StyledTableCell>
-                  <StyledTableCell>Cast Accountant</StyledTableCell>
-                  <StyledTableCell>Partner</StyledTableCell>
-                  <StyledTableCell>456-678-4567</StyledTableCell>
-                  <StyledTableCell>
-                    <Typography variant="subtitle2">James Smith</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Dec 7, 2020 11:44pm
-                    </Typography>
-                  </StyledTableCell>
-                </StyledTableRow>
-                <StyledTableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      inputProps={{ "aria-label": "select all desserts" }}
-                    />
-                  </TableCell>
-                  <StyledTableCell>
-                    <Box component="div" className={classes.lead}>
-                      <Avatar className={classes.leadAvatar}>R</Avatar>
-                      <Box component="div">
-                        <Typography variant="subtitle2">
-                          Rachel Jones
-                        </Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          rachel@grayson.com
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </StyledTableCell>
-                  <StyledTableCell>Grayson</StyledTableCell>
-                  <StyledTableCell>Office Assistant</StyledTableCell>
-                  <StyledTableCell>External Referral</StyledTableCell>
-                  <StyledTableCell>281-281-2345</StyledTableCell>
-                  <StyledTableCell>
-                    <Typography variant="subtitle2">Rachel Jones</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Dec 7, 2020 11:44pm
-                    </Typography>
-                  </StyledTableCell>
-                </StyledTableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 100]}
-          component="div"
-          count={6}
-          page={0}
-          rowsPerPage={10}
-          onChangePage={() => console.log("page changed")}
-        />
       </Container>
-
-      <Typography
-        component="div"
-        className={classes.footerText}
-        variant="subtitle1"
-        color="textSecondary"
-      >
-        &copy; 2020, equipt.com, Inc, or its affiliates
-      </Typography>
+      <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+        <div className="contact-grid-height1">
+          <DataGrid columns={[]} rows={[]} />
+        </div>
+      </Container>
     </Layout>
   );
 };
