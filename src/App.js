@@ -55,6 +55,9 @@ function App() {
         <PrivateRoute exact path="/">
           <Leads />
         </PrivateRoute>
+        <PrivateRoute exact path="/lead">
+          <Leads />
+        </PrivateRoute>
         <PrivateRoute exact path="/lead/detail/:id">
           <LeadDetailsPage />
         </PrivateRoute>

@@ -118,10 +118,10 @@ export default function CreateContact({ open, onClose, onSuccess }) {
     }, []);
 
     const getContactFields = () => {
-        axiosInstance().get('/field?resource=Contact').then(({ data }) => {
+        axiosInstance().get('/field?resource=Contact').then(({ data: { data } }) => {
 
             const newFields = [];
-            data.map((_f) => newFields.push(_f.fieldData));
+            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
             setEntityData({
                 fields: newFields,
@@ -134,14 +134,11 @@ export default function CreateContact({ open, onClose, onSuccess }) {
         setIsFormSubmitted(true);
         removeEmptyKeys(values);
 
-        CreateNewContact(values).then(() => {
+        axiosInstance().post("/contact", values).then(() => {
             onSuccess();
-            // history.push({
-            //     pathname: "/contact"
-            // });
-        }, () => {
+        }).then(() => {
             setIsFormSubmitted(false);
-        })
+        });
     }
 
 

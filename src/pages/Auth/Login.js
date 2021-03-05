@@ -67,11 +67,11 @@ const Login = () => {
       email: values.email,
       password: values.password,
     };
-    
+
     axiosInstance().post("/user/login", data)
-      .then((res) => {
+      .then(({ data: response }) => {
         setSubmitting(false);
-        const { data } = res;
+        const { data } = response;
         localStorage.setItem("token", data.token);
         dispatch({ type: SET_USER, payload: data });
       })

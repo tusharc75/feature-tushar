@@ -15,8 +15,8 @@ export const Provider = ({ children }) => {
       dispatch({ type: USER_LOADING, payload: true });
       axiosInstance()
         .get("/user/me")
-        .then((res) => {
-          const { data } = res;
+        .then(({ data: response }) => {
+          const { data } = response;
           dispatch({ type: SET_USER, payload: data });
           dispatch({ type: USER_LOADING, payload: false });
         })

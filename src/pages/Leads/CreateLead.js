@@ -114,7 +114,7 @@ export default function CreateContact({ open, onClose }) {
     }, []);
 
     const getContactFields = () => {
-        axiosInstance().get('/field?resource=Lead').then(({ data }) => {
+        axiosInstance().get('/field?resource=Lead').then(({ data: { data } }) => {
 
             const newFields = [];
             data.map((_f) => newFields.push(_f.fieldData));
