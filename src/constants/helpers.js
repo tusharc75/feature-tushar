@@ -113,6 +113,9 @@ const isEmailExist = async (email) => {
 };
 
 
+/**
+ * @param {Array} fields
+ */
 export const yupSchema = (fields, validEmail = true) => {
     const schema = {};
     fields.forEach((input) => {
@@ -193,5 +196,4 @@ export const yupSchema = (fields, validEmail = true) => {
 
     return yup.object().shape(schema);
 };
-
 
