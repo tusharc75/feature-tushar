@@ -14,6 +14,7 @@ import Loader from '../../components/Loader'
 import FormTypes from "../../components/Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
 import CustomButton from '../../components/Helpers/Button'
+import { CustomEventEmitter } from './../../axios/events';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -134,12 +135,28 @@ export default function CreateContact({ open, onClose }) {
             });
             setErrors({ ...errors });
         } else {
+            if (values.noOfEmployees) values.noOfEmployees = parseInt(values.noOfEmployees)
+
+            handleCreateLead(values)
             console.log("🚀 ~ file: CreateLead.js ~ line 149 ~ handleSubmit ~ values", values)
-            setErrors({});
         }
     }
 
-
+    const handleCreateLead = (values) => {
+        setLoading(true)
+        axiosInstance().post('/lead', values)
+            .then((data) => {
+                console.log("🚀 ~ file: CreateLead.js ~ line 148 ~ .then ~ data", data)
+                if (data.status === 200) {
+                    setLoading(false)
+                    CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                    onClose()
+                }
+            })
+            .catch(err => {
+                setLoading(false)
+            })
+    }
     return (
         <Dialog
             maxWidth="md"
@@ -257,6 +274,7 @@ export default function CreateContact({ open, onClose }) {
                                         variant="outlined"
                                         color="primary"
                                         onClick={onClose}
+
                                     >
                                         Cancel
                                         </Button>
@@ -264,6 +282,7 @@ export default function CreateContact({ open, onClose }) {
                                     <CustomButton
                                         loading={loading}
                                         disabled={loading}
+
                                         style={{ float: "right" }}
                                         variant="contained"
                                         color="primary"

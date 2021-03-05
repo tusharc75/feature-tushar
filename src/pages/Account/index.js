@@ -261,8 +261,6 @@ export default function Account() {
             width: 200
         },
     ];
-
-
     const handleSearch = (e) => {
         if (query.page !== 1) {
             setQuery((prevState) => ({ ...prevState, page: 0 }));
