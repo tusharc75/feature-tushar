@@ -1,21 +1,34 @@
-import React, { useState } from "react";
-import { makeStyles, withStyles, useTheme } from "@material-ui/core/styles";
+import React, { useEffect, useState } from "react";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Typography,
-  TableCell,
-  TableRow,
+  Grid, Divider
 } from "@material-ui/core";
 import Header from './Header'
 import "./style.css";
 import LeadTable from './Table'
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import NavLinks from "../../components/NavLinks";
+import { Link } from 'react-router-dom'
+import CreateLeadDialog from './CreateLead'
+import routes from './../../components/Helpers/Routes';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+
 
 const useStyles = makeStyles((theme) => ({
   footerText: {
     textAlign: "center",
   },
+  linksContainer: {
+    display: "flex",
+  },
+  links: {
+    color: theme.palette.textDark
+  },
+  linkDivider: {
+    backgroundColor: theme.palette.darkBg,
+    margin: "0 1rem",
+  }
 }));
 
 const LeadTypes = {
@@ -27,9 +40,12 @@ const Leads = () => {
 
   const classes = useStyles();
   const [age, setAge] = useState("All");
+  const [loading, setLoading] = useState(false);
   const [searchVal, setSearchVal] = useState("");
   const [selectedType, setselectedType] = useState(1)
+  const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState({ page: 0, limit: 25 });
+
 
   const handleChange = (event) => {
     setAge(event.target.value);
@@ -50,12 +66,68 @@ const Leads = () => {
     setSearchVal(e.target.value);
   };
 
+  const handleCreate = () => {
+    setIsOpen(true)
+  }
+  const handleClose = () => {
+    setIsOpen(false)
+  }
   return (
     <Layout>
-      {/* Links Section */}
-      <NavLinks ButtonProps={buttonProps} />
+      <Grid container spacing={3} direction="row">
+        <Grid item xs={12} sm={6} className="pl-3">
+          <CustomBreadCrumbs routes={[routes.lead]} />
+        </Grid>
+        <Grid item xs={12} sm={6} className="pr-3">
+          <Grid container justify="flex-end">
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Import from Excel
+                            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Export to Excel
+                            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Download Template
+                            </Link>
+            <Divider
+              orientation="vertical"
+              flexItem
+              className={classes.linkDivider}
+            />
+            <Link
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={classes.links}
+            >
+              Email a Link
+                            </Link>
+          </Grid>
+        </Grid>
+      </Grid>
 
-      {/* Tables Begins Here */}
+
       <Container>
         <Header
           selectedType={selectedType}
@@ -63,6 +135,12 @@ const Leads = () => {
           options={LeadTypes}
           onSearch={handleSearch}
           searchVal={searchVal}
+          onCreate={handleCreate}
+        />
+
+        <CreateLeadDialog
+          open={isOpen}
+          onClose={handleClose}
         />
         <LeadTable />
       </Container>

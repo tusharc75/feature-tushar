@@ -1,9 +1,9 @@
 import React, { memo } from 'react'
 import { TextField, InputAdornment } from '@material-ui/core'
 import { Search } from '@material-ui/icons'
-function SearchBox({ onSearch, value, size, width, placeholder }) {
+function SearchBox({ onSearch, value, size, width, placeholder, style }) {
     return <TextField
-        style={{ width: width || "200px" }}
+        style={{ width: width || "200px", ...style }}
         variant="outlined"
         placeholder={placeholder || "Search"}
         type="search"

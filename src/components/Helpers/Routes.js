@@ -7,6 +7,11 @@ export default {
     contact: {
         title: "Contact",
         path: "/contact",
-        data: { }
+        data: {}
     },
+    lead: {
+        title: "Lead",
+        path: "/",
+        data: {}
+    }
 };
