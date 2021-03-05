@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Typography, TableCell, TableRow } from "@material-ui/core";
+import { Grid, Link, Divider } from "@material-ui/core";
+import { DataGrid } from "@material-ui/data-grid";
 import Header from "./Header";
 import "./style.css";
 import LeadTable from "./Table";
@@ -21,7 +22,9 @@ const LeadTypes = {
 };
 const Leads = () => {
   const classes = useStyles();
+  const theme = useTheme();
   const [age, setAge] = useState("All");
+  const [anchorEl, setAnchorEl] = useState(null);
   const [searchVal, setSearchVal] = useState("");
   const [selectedType, setselectedType] = useState(1);
   const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -113,11 +116,6 @@ const Leads = () => {
           searchVal={searchVal}
         />
         <LeadTable />
-      </Container>
-      <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-        <div className="contact-grid-height1">
-          <DataGrid columns={[]} rows={[]} />
-        </div>
       </Container>
     </Layout>
   );
