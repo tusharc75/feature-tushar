@@ -67,20 +67,20 @@ export default function Account() {
     const { } = useData();
     const history = useHistory();
     const [accountData, setAccountData] = useState([]);
-    const [selectedType, setselectedType] = useState(1)
     const [cloneId, setCloneId] = useState('')
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
     const [selectedRecs, setSelectedRecs] = useState([])
     const [showConfirmBox, setShowConfirmBox] = useState(false)
     const [] = useState({})
     const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
+    const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [searchVal, setSearchVal] = useState("");
+    const [selectedType, setselectedType] = useState(1)
 
     const [singleAccountDelete, setSingleAccountDelete] = useState({ id: null, show: false, accountName: "" })
 
