@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 
 import {
-  Grid, Link, Divider,
   Typography,
-  Grid, Divider
+  Grid,
+  Divider
 } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import Header from "./Header";
