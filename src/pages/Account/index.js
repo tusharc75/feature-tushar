@@ -378,9 +378,9 @@ export default function Account() {
             }
             axiosInstance().put(`/account/remove`, reqs).then(({ data }) => {
                 CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                setShowDeleteConfirmBox(false)
                 fetchAccounts();
             })
-            setShowDeleteConfirmBox(false)
             setSelectedRecs([])
         }
     }
