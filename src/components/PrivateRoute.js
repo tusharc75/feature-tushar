@@ -32,7 +32,11 @@ const ProtectedRoute = ({ children, ...rest }) => {
       setChecking(false);
     }
 
-    if (!pathnames.length) {
+    if (
+      !pathnames.length ||
+      pathname === "/opportunities" ||
+      pathname === "/leads"
+    ) {
       setAccess(true);
       setChecking(false);
     }
