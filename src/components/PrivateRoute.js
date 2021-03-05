@@ -15,7 +15,6 @@ const ProtectedRoute = ({ children, ...rest }) => {
   const [checking, setChecking] = useState(true);
 
   const pathnames = pathname.split("/").filter((x) => x);
-  console.log(pathnames);
 
   useEffect(() => {
     checkAccess();
