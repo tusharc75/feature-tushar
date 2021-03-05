@@ -131,7 +131,7 @@ const FormTypes = (props) => {
                 return undefined
             }
 
-            fetch({ input: values[name] ? values[name] : "" }, (results) => {
+            fetch({ input: values[name] }, (results) => {
                 if (active) {
                     let newOptions = []
                     if (value) {
@@ -478,7 +478,7 @@ const FormTypes = (props) => {
                 includeInputInList
                 filterSelectedOptions
                 value={values[name]}
-                onChange={(event, newValue) => {
+                onChange={onChange ? onChange : (event, newValue) => {
                     setOptions(newValue ? [newValue, ...optionsList] : optionsList)
                     setValue(newValue)
                 }}

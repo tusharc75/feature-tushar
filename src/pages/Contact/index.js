@@ -125,10 +125,10 @@ export default function Contact() {
                         }
                     }}
                 /> : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the selection functionality">
-                        <IconButton>
-                            <BlockIcon fontSize="small" color="error" />
-                        </IconButton>
-                    </Tooltip>
+                    <IconButton>
+                        <BlockIcon fontSize="small" color="error" />
+                    </IconButton>
+                </Tooltip>
             ),
             disableColumnMenu: true,
             sortable: false,
@@ -318,7 +318,7 @@ export default function Contact() {
                 <Grid item xs={12} sm={6} className="pr-3">
                     <Grid container justify="flex-end">
                         <Link
-                            href="#"
+                            to="#"
                             onClick={(e) => e.preventDefault()}
                             className={classes.links}
                         >
@@ -330,7 +330,7 @@ export default function Contact() {
                             className={classes.linkDivider}
                         />
                         <Link
-                            href="#"
+                            to="#"
                             onClick={(e) => e.preventDefault()}
                             className={classes.links}
                         >
@@ -342,7 +342,7 @@ export default function Contact() {
                             className={classes.linkDivider}
                         />
                         <Link
-                            href="#"
+                            to="#"
                             onClick={(e) => e.preventDefault()}
                             className={classes.links}
                         >
@@ -354,7 +354,7 @@ export default function Contact() {
                             className={classes.linkDivider}
                         />
                         <Link
-                            href="#"
+                            to="#"
                             onClick={(e) => e.preventDefault()}
                             className={classes.links}
                         >
@@ -396,7 +396,7 @@ export default function Contact() {
 
                     <Grid item>
 
-                        <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
+                        <SearchBox onSearch={handleSearch} value={searchVal} size="small" />
                         <Box component="span" marginX={1} />
 
                         <Button

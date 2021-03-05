@@ -9,7 +9,6 @@ import CreateAccount from './CreateAccount'
 import { getErrorMessage } from '../../../services/util'
 import { getObjKeys, formValidation } from '../../../constants/helpers';
 import { accountPage, accountDetailPage } from '../../../routes/Accounts'
-// import { createAccount, getAccountData, updateAccount, getDataToClone } from '../../../axios/accounts'
 import { useHistory, useParams } from 'react-router-dom'
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
@@ -59,11 +58,11 @@ export default function CreateAccountMain(props) {
 
     useEffect(async () => {
         if (id) {
-            axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
+            axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
                 const newFields = [];
                 data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
-                axiosInstance().get(`/account/clone/${id}`).then((dataToClone) => {
+                axiosInstance().get(`/account/clone/${id}`).then(({ data: dataToClone }) => {
                     setEntityData({
                         fields: newFields,
                         initialValues: dataToClone.data ? dataToClone.data : getObjKeys("", newFields),
@@ -80,12 +79,12 @@ export default function CreateAccountMain(props) {
     }, [user]);
 
     const getAccountFields = () => {
-        axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
+        axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
             setEntityData({
                 fields: newFields,
-                initialValues: {},
+                initialValues: getObjKeys("", newFields),
             });
             setLoading(false)
         });
@@ -154,7 +153,7 @@ export default function CreateAccountMain(props) {
 
     const handleCreateAccount = async (values, saveAndNew, setValues) => {
         try {
-            axiosInstance().post('/account', values).then((data) => {
+            axiosInstance().post('/account', values).then(({ data }) => {
                 onClose({ fetch: true })
                 setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
 
