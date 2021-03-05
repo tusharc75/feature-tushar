@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { Grid, Link, Divider } from "@material-ui/core";
+
+import {
+  Grid, Link, Divider,
+  Typography,
+  Grid, Divider
+} from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import Header from "./Header";
-import "./style.css";
-import LeadTable from "./Table";
+
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
+import { Link } from 'react-router-dom'
+import CreateLeadDialog from './CreateLead'
+import routes from './../../components/Helpers/Routes';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from "../../components/Helpers/SearchBox";
 import "./style.css";
 
@@ -14,6 +22,16 @@ const useStyles = makeStyles((theme) => ({
   footerText: {
     textAlign: "center",
   },
+  linksContainer: {
+    display: "flex",
+  },
+  links: {
+    color: theme.palette.textDark
+  },
+  linkDivider: {
+    backgroundColor: theme.palette.darkBg,
+    margin: "0 1rem",
+  }
 }));
 
 const LeadTypes = {
@@ -25,17 +43,16 @@ const Leads = () => {
   const theme = useTheme();
   const [age, setAge] = useState("All");
   const [anchorEl, setAnchorEl] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const [searchVal, setSearchVal] = useState("");
-  const [selectedType, setselectedType] = useState(1);
+  const [selectedType, setselectedType] = useState(1)
+  const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState({ page: 0, limit: 25 });
 
-  // ****** ACTIONS BUTTON STUFF *********
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const closeActions = () => {
-    setAnchorEl(null);
+  const handleChange = (event) => {
+    setAge(event.target.value);
   };
 
   const buttonProps = [
@@ -53,10 +70,18 @@ const Leads = () => {
     setSearchVal(e.target.value);
   };
 
+  const handleCreate = () => {
+    setIsOpen(true)
+  }
+  const handleClose = () => {
+    setIsOpen(false)
+  }
   return (
     <Layout>
       <Grid container spacing={3} direction="row">
-        <Grid item xs={12} sm={6} className="pl-3"></Grid>
+        <Grid item xs={12} sm={6} className="pl-3">
+          <CustomBreadCrumbs routes={[routes.lead]} />
+        </Grid>
         <Grid item xs={12} sm={6} className="pr-3">
           <Grid container justify="flex-end">
             <Link
@@ -65,7 +90,7 @@ const Leads = () => {
               className={classes.links}
             >
               Import from Excel
-            </Link>
+                            </Link>
             <Divider
               orientation="vertical"
               flexItem
@@ -77,7 +102,7 @@ const Leads = () => {
               className={classes.links}
             >
               Export to Excel
-            </Link>
+                            </Link>
             <Divider
               orientation="vertical"
               flexItem
@@ -89,7 +114,7 @@ const Leads = () => {
               className={classes.links}
             >
               Download Template
-            </Link>
+                            </Link>
             <Divider
               orientation="vertical"
               flexItem
@@ -101,12 +126,11 @@ const Leads = () => {
               className={classes.links}
             >
               Email a Link
-            </Link>
+                            </Link>
           </Grid>
         </Grid>
       </Grid>
 
-      {/* Tables Begins Here */}
       <Container>
         <Header
           selectedType={selectedType}
@@ -114,8 +138,12 @@ const Leads = () => {
           options={LeadTypes}
           onSearch={handleSearch}
           searchVal={searchVal}
+          onCreate={handleCreate}
         />
-        <LeadTable />
+        <CreateLeadDialog
+          open={isOpen}
+          onClose={handleClose}
+        />
       </Container>
     </Layout>
   );
