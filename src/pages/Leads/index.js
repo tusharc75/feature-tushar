@@ -2,18 +2,17 @@ import React, { useEffect, useState } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Typography,
-  Grid, Divider
+  Grid, Divider,
 } from "@material-ui/core";
 import Header from './Header'
 import "./style.css";
-import LeadTable from "./Table";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
 import { Link } from 'react-router-dom'
+import { DataGrid } from "@material-ui/data-grid";
 import CreateLeadDialog from './CreateLead'
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-
 import SearchBox from "../../components/Helpers/SearchBox";
 import "./style.css";
 
@@ -38,7 +37,8 @@ const LeadTypes = {
   "My Accounts": 2,
 };
 const Leads = () => {
-  const classes = useStyles();
+  const theme = useTheme();
+  const classes = useStyles(theme);
   const [age, setAge] = useState("All");
   const [loading, setLoading] = useState(false);
   const [searchVal, setSearchVal] = useState("");
@@ -127,7 +127,6 @@ const Leads = () => {
         </Grid>
       </Grid>
 
-
       <Container>
         <Header
           selectedType={selectedType}
@@ -137,12 +136,10 @@ const Leads = () => {
           searchVal={searchVal}
           onCreate={handleCreate}
         />
-
         <CreateLeadDialog
           open={isOpen}
           onClose={handleClose}
         />
-        <LeadTable />
       </Container>
       <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
         <div className="contact-grid-height1">
