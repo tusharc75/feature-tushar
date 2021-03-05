@@ -61,7 +61,7 @@ export default function CreateAccountMain(props) {
         if (id) {
             axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
                 const newFields = [];
-                data.map((_f) => newFields.push(_f.fieldData));
+                data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
                 axiosInstance().get(`/account/clone/${id}`).then((dataToClone) => {
                     setEntityData({
@@ -74,18 +74,18 @@ export default function CreateAccountMain(props) {
                 });
             });
         }
-        else if (user) {
-            getAccountFields(user.user.brand);
+        else {
+            getAccountFields();
         }
     }, [user]);
 
-    const getAccountFields = (brandId, values) => {
+    const getAccountFields = () => {
         axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
             const newFields = [];
-            data.map((_f) => newFields.push(_f.fieldData));
+            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
             setEntityData({
                 fields: newFields,
-                initialValues: values ? values : getObjKeys("", newFields),
+                initialValues: {},
             });
             setLoading(false)
         });

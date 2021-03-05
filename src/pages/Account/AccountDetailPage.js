@@ -119,7 +119,7 @@ const Roles = () => {
     const getAccountFields = () => {
         axiosInstance().get(`/field?resource=Account`).then(({ data }) => {
 
-            setAccountFields(data)
+            setAccountFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });
     };
