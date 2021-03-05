@@ -115,7 +115,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     }
   };
 
-  console.log(listItems());
   const handleCollapse = (section) => {
     let tempdata = { ...open };
     tempdata[section] = !tempdata[section] || false;

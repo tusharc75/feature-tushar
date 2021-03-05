@@ -11,9 +11,9 @@ import {
   useTheme,
 } from "@material-ui/core";
 import { Check, Info } from "@material-ui/icons";
+import LockIcon from '@material-ui/icons/Lock';
 import { Formik, Form } from "formik";
-
-import { getObjKeysWithValues, removeEmptyKeys } from "../../constants/helpers";
+import { getObjKeysWithValues, removeEmptyKeys, yupSchema } from "../../constants/helpers";
 import FormTypes from "../Helpers/FormTypes";
 
 const useStyles = makeStyles(() => ({
@@ -29,6 +29,14 @@ const useStyles = makeStyles(() => ({
       backgroundColor: "#ededed",
     },
   },
+  nonEditable: {
+    width: "100%",
+    padding: 10,
+    borderRadius: 4,
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+  },
 }));
 
 const Details = (props) => {
@@ -38,11 +46,13 @@ const Details = (props) => {
   const [edit, setEdit] = useState(null);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
+  const [fieldsData, setFieldsData] = useState([]);
 
   useEffect(() => {
     sortArray();
     const fieldData = fields?.map((f) => f.fieldData);
     const vals = getObjKeysWithValues(data, fieldData);
+    setFieldsData(fieldData);
     setValues(vals);
 
     return () => setValues(null);
@@ -142,10 +152,15 @@ const Details = (props) => {
     setEdit(null);
   };
 
+  const validateEmail = initialVals && initialVals.email ? false : true;
+
   return (
-    <React.Fragment >
+    <>
       {initialVals && (
-        <Formik initialValues={initialVals} onSubmit={handleSubmit} >
+        <Formik
+          initialValues={initialVals}
+          validationSchema={yupSchema(fieldsData, validateEmail)}
+          validateOnMount onSubmit={handleSubmit} >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Form>
               {formsData?.map((form) => (
@@ -163,12 +178,21 @@ const Details = (props) => {
                           <Tooltip title={field.fieldData.fieldLabel}>
                             <Info color="disabled" />
                           </Tooltip>
+                          {
+                            field.isUpdate ? "" :
+                              <Tooltip title="Not allowed to update">
+                                <LockIcon color="disabled" />
+                              </Tooltip>
+                          }
                         </Box>
                         <Box display="flex" alignItems="flex-start">
                           {edit === field.fieldData.fieldName ? (
                             <FormTypes
                               isTooltip={false}
-                              disabled={!field.isUpdate}
+                              disabled={
+                                field.fieldData.type === "email" ||
+                                !field.isUpdate
+                              }
                               size="small"
                               fullWidth
                               values={values}
@@ -183,34 +207,44 @@ const Details = (props) => {
                           ) : field.fieldData.type === "switch" ||
                             field.fieldData.type === "checkBox" ||
                             field.fieldData.type === "imageUpload" ? (
-                                <FormTypes
-                                  isTooltip={false}
-                                  disabled={!field.isUpdate}
-                                  size="small"
-                                  fullWidth
-                                  values={values}
-                                  errors={errors}
-                                  touched={touched}
-                                  name={field.fieldData.fieldName}
-                                  options={field.fieldData.option}
-                                  type={field.fieldData.type}
-                                  setFieldValue={setFieldValue}
-                                  onChange={(e) => {
-                                    setFieldValue(
-                                      field.fieldData.fieldName,
-                                      e.target.checked
-                                    );
-                                  }}
-                                />
-                              ) : (
-                                <Typography
-                                  className={classes.fieldText}
-                                  onClick={() => setEdit(field.fieldData.fieldName)}
-                                  variant="body2"
-                                >
-                                  {normalizeValues(values, field.fieldData)}
-                                </Typography>
-                              )}
+                            <FormTypes
+                              isTooltip={false}
+                              disabled={!field.isUpdate}
+                              size="small"
+                              fullWidth
+                              values={values}
+                              errors={errors}
+                              touched={touched}
+                              name={field.fieldData.fieldName}
+                              options={field.fieldData.option}
+                              type={field.fieldData.type}
+                              setFieldValue={setFieldValue}
+                              onChange={(e) => {
+                                setFieldValue(
+                                  field.fieldData.fieldName,
+                                  e.target.checked
+                                );
+                              }}
+                            />
+                          ) : (
+                            field.isUpdate ?
+                              <Typography
+                                className={classes.fieldText}
+                                onClick={() => setEdit(field.fieldData.fieldName)}
+                                variant="body2"
+                                color={
+                                  errors[field.fieldData.fieldName]
+                                    ? "error"
+                                    : "inherit"
+                                }
+                              >
+                                {errors[field.fieldData.fieldName]
+                                  ? errors[field.fieldData.fieldName]
+                                  : normalizeValues(values, field.fieldData)}
+                              </Typography> : <Typography className={classes.nonEditable}>
+                                {normalizeValues(values, field.fieldData)}
+                              </Typography>
+                          )}
 
                           {edit === field.fieldData.fieldName ? (
                             <>
@@ -219,8 +253,8 @@ const Details = (props) => {
                               </IconButton>
                             </>
                           ) : (
-                              ""
-                            )}
+                            ""
+                          )}
                         </Box>
                       </Grid>
                     ))}
@@ -251,7 +285,7 @@ const Details = (props) => {
           )}
         </Formik>
       )}
-    </React.Fragment>
+    </>
   );
 };
 
