@@ -353,7 +353,7 @@ export default function Account() {
 
     const handlePageSize = (params) => {
         if (params.pageSize !== query.limit) {
-            setQuery({ page: 1, limit: params.pageSize });
+            setQuery({ page: 0, limit: params.pageSize });
         }
     };
 
@@ -362,7 +362,7 @@ export default function Account() {
             let temp = { ...params.sortModel[0] };
             setQuery((prevState) => ({
                 ...prevState,
-                page: 1,
+                page: 0,
                 sortBy: temp.field,
                 orderBy: temp.sort,
             }));

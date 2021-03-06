@@ -566,6 +566,23 @@ const FormTypes = (props) => {
                 }
             />
         </InfoLabel>
+    ) : type === 'date' ? (
+        <InfoLabel info={label} isTooltip={isTooltip}>
+            <TextField
+                {...rest}
+                variant="outlined"
+                type="date"
+                label={label}
+                required={required}
+                name={name}
+                value={values[name]}
+                error={touched[name] && Boolean(errors[name])}
+                helperText={touched[name] && errors[name]}
+                onChange={
+                    onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+                }
+            />
+        </InfoLabel>
     ) : null
 }
 
