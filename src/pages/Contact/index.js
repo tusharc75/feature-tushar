@@ -419,54 +419,62 @@ export default function Contact() {
                     <Grid item>
 
                         <SearchBox onSearch={handleSearch} value={searchVal} size="small" />
-                        <Box component="span" marginX={1} />
 
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={clickCreateNew}
-                            startIcon={<AddIcon />}
-                        >
-                            Add
-                        </Button>
+                        {
+                            contactPermissions.isCreate && <>
+                                <Box component="span" marginX={1} />
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={clickCreateNew}
+                                    startIcon={<AddIcon />}
+                                >
+                                    Add
+                                </Button>
+                            </>
+                        }
 
-                        <Box component="span" marginX={1} />
+                        {
+                            contactPermissions.isDelete && <>
+                                <Box component="span" marginX={1} />
 
-                        <Button
-                            // disabled={Boolean(!selectedBrand)}
-                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                            variant="outlined"
-                            color="default"
-                            onClick={openActions}
-                            aria-controls="action-menu"
-                        >
-                            Actions <ExpandMore />
-                        </Button>
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "left"
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}>
+                                <Button
+                                    // disabled={Boolean(!selectedBrand)}
+                                    disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                    variant="outlined"
+                                    color="default"
+                                    onClick={openActions}
+                                    aria-controls="action-menu"
+                                >
+                                    Actions <ExpandMore />
+                                </Button>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    getContentAnchorEl={null}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "left"
+                                    }}
+                                    id="action-menu"
+                                    open={Boolean(anchorEl)}
+                                    onClose={closeActions}>
 
-                            <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                onClick={() => {
-                                    if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
-                                        setShowDeleteWarningConfirmBox(true);
-                                    } else {
-                                        setShowDeleteConfirmBox(true)
-                                    }
-                                }}
-                            >
-                                Delete
-                            </MenuItem>
-                        </Menu>
-
+                                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                        onClick={() => {
+                                            if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                setShowDeleteWarningConfirmBox(true);
+                                            } else {
+                                                setShowDeleteConfirmBox(true)
+                                            }
+                                        }}
+                                    >
+                                        Delete
+                                    </MenuItem>
+                                </Menu>
+                            </>
+                        }
+                        
                     </Grid>
                 </Grid>
             </CustomContainer>

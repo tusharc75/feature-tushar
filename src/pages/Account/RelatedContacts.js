@@ -8,8 +8,8 @@ function RelatedContacts(props) {
     const { contacts } = props
     return <>{
         contacts && contacts.length ?
-            contacts.map(obj => {
-                return <div style={{ padding: '10px 8px' }}>
+            contacts.map((obj, index) => {
+                return <div key={index} style={{ padding: '10px 8px' }}>
                     <Link className="contactsNameLink"
                         to={`${contactDetailPage.path}/${obj._id}`}>
                         {`${obj.firstName || ''}  ${obj.lastName || ''}`}

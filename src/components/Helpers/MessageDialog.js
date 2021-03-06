@@ -50,7 +50,7 @@ export default function MessageDialog({ onClose, open, message }) {
 }
 
 MessageDialog.propTypes = {
-    open: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     message: PropTypes.string.isRequired
 };
