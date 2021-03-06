@@ -432,7 +432,7 @@ const FormTypes = (props) => {
                 control={
                     <Checkbox
                         name={name}
-                        checked={values[name]}
+                        checked={values[name] ? values[name] : false}
                         onChange={
                             onChange ? onChange : (e) => setFieldValue(name, e.target.checked)
                         }
