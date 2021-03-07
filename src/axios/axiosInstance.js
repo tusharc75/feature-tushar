@@ -36,7 +36,7 @@ export default (history = null) => {
 
     axiosInstance.interceptors.response.use((response) =>
         new Promise((resolve, reject) => {
-            resolve(response.data);
+            resolve(response);
         }), (error) => {
             if (error.message == "Network Error") {
                 return new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ export default (history = null) => {
             }
             else {
                 return new Promise((resolve, reject) => {
-                    CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.error });
+                    CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.error || error.response.data.message });
                     reject(error);
                 })
             }

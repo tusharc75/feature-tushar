@@ -4,62 +4,66 @@
     justify-content: space-between;
     width: 40%;
 }
-.detailPageContainer{
-     width: 100%;
-     max-height: 400px;
+.detailPageContainer {
+    width: 100%;
+    max-height: 400px;
     background-color: aliceblue;
-    padding: 1px
+    padding: 1px;
 }
-.detailPageDiv1{
+.detailPageDiv1 {
     background-color: white;
-    border-radius: 8px
+    border-radius: 8px;
 }
-.customGrid{
-    background-color: aliceblue
+.customGrid {
+    background-color: aliceblue;
 }
-.detailPageDiv2{
+.detailPageDiv2 {
     padding: 10px;
     background-color: white;
     margin-bottom: 10px;
-    border-radius: 8px
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
 }
-.detailPageDiv2{
-    background-color: white
+
+.detailPageDiv2 {
+    background-color: white;
 }
-.customBox{
+.customBox {
     text-align: center;
     min-height: 300px;
-    vertical-align: middle ;
-    margin-top:100px
+    vertical-align: middle;
+    margin-top: 100px;
 }
-.cTr{
-    width: 90%
+.cTr {
+    width: 90%;
 }
-.td1{
-    width: 150px
+.td1 {
+    width: 150px;
 }
-.td2{
-    word-wrap: break-word
+.td2 {
+    word-wrap: break-word;
 }
-.customDiv12{
+.customDiv12 {
     flex-grow: 1;
-    padding: 10px
+    padding: 10px;
 }
-.detailPageDiv3{
+.detailPageDiv3 {
     padding: 6px;
 }
-.customLink{
-    color:darkblue;
+.customLink {
+    color: darkblue;
     text-decoration: underline;
     font-size: 17px;
-    margin-bottom: 16px;
+    /* margin-bottom: 5px; */
 }
-.customBox1{
+.customBox1 {
     min-height: 150px;
     background-color: white;
     border-radius: 10px;
 }
-.customDiv13{
+.customDiv13 {
     display: flex;
     justify-content: space-between;
 }
@@ -72,12 +76,12 @@
 }
 .custom-height {
     height: calc(100vh - 230px);
-  }
-  .accountNameLink{
-      color: #0645AD;
-      cursor: pointer;
-  }
+}
+.accountNameLink {
+    color: #0645ad;
+    cursor: pointer;
+}
 
-  .accountNameLink:hover{
+.accountNameLink:hover {
     text-decoration: underline;
 }

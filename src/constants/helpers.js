@@ -1,7 +1,8 @@
 import { checkEmailExist } from '../axios/index'
 import currencies from "./currency_with_country.json";
+import { validateEmail } from '../services/util'
 import * as yup from "yup";
-import { validateEmail } from "../services/util";
+// import currencies from "./currency_with_country.json";
 
 export const getObjKeys = (val = "", arr) => {
     const obj = {};

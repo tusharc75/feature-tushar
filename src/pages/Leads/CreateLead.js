@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { CreateNewContact } from '../../../axios/index';
 import { Box, Button, IconButton, Typography, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, removeEmptyKeys } from '../../../constants/helpers';
+import { getObjKeys, yupSchema } from '../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import { CloseIcon } from '@material-ui/data-grid';
 import { withStyles } from '@material-ui/core/styles';
@@ -11,10 +10,10 @@ import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import Loader from '../../../components/Loader'
-import { formValidation } from '../../../constants/helpers';
-import FormTypes from "./../../../components/Helpers/FormTypes";
-import axiosInstance from './../../../axios/axiosInstance'
+import Loader from '../../components/Loader'
+import FormTypes from "../../components/Helpers/FormTypes";
+import axiosInstance from '../../axios/axiosInstance'
+import CustomButton from '../../components/Helpers/Button'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -42,7 +41,7 @@ const DialogActions = withStyles((theme) => ({
     },
 }))(MuiDialogActions);
 
-export default function CreateContact({ open, onClose, onSuccess }) {
+export default function CreateContact({ open, onClose }) {
 
     const classes = useStyles();
     const history = useHistory();
@@ -50,23 +49,21 @@ export default function CreateContact({ open, onClose, onSuccess }) {
         fields: [],
         initialValues: {},
     });
-    const [isFormSubmitted, setIsFormSubmitted] = useState(false)
 
-    //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
-    const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
-    const [ownerDataSource, setOwnerDataSource] = useState([]);
-    const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [ownerData, setOwnerData] = useState([]);
+    const [collaboratorData, setCollaboratorData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
-        if (ownerCollaboratorDropdownData.length > 0) {
-            setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-            setOwnerDataSource(ownerCollaboratorDropdownData[0].option)
-            setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
+        const ownerCollabOptions = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
+        if (ownerCollabOptions.length > 0) {
+            setOwnerCollaboratorData(ownerCollabOptions[0].option);
+            setOwnerData(ownerCollabOptions[0].option)
+            setCollaboratorData(ownerCollabOptions[0].option)
         }
         sortArray();
-        // eslint-disable-next-line
     }, [entityData.fields]);
 
     const sortArray = () => {
@@ -89,39 +86,37 @@ export default function CreateContact({ open, onClose, onSuccess }) {
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
         if (!selectedCollaborator || selectedCollaborator.length == 0) {
-            setOwnerDataSource(ownerCollaboratorCommonDataSource);
+            setOwnerData(ownerCollaboratorData);
         } else {
-            const ownerDataSource = [];
+            const ownerData = [];
 
-            ownerCollaboratorCommonDataSource.map(d => {
+            ownerCollaboratorData.map(d => {
                 const isCollaboratorSelected = selectedCollaborator.find(collaborator => collaborator.optionValue == d.optionValue);
                 if (!isCollaboratorSelected) {
-                    ownerDataSource.push(d);
+                    ownerData.push(d);
                 }
             })
-            setOwnerDataSource(ownerDataSource);
+            setOwnerData(ownerData);
         }
     }
 
-    const onCollaboratorOwnerMultiselectOpen = (selectedOwner) => {
+    const onCollabOwnerMultiselectOpen = (selectedOwner) => {
         if (selectedOwner) {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource.filter(d => d.optionValue != selectedOwner.optionValue));
+            setCollaboratorData(ownerCollaboratorData.filter(d => d.optionValue != selectedOwner.optionValue));
         } else {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource);
+            setCollaboratorData(ownerCollaboratorData);
         }
     }
-    //  Owner, Collaborator Code - End
 
     useEffect(() => {
         getContactFields();
-        // eslint-disable-next-line
     }, []);
 
     const getContactFields = () => {
-        axiosInstance().get('/field?resource=Contact').then(({ data: { data } }) => {
+        axiosInstance().get('/field?resource=Lead').then(({ data: { data } }) => {
 
             const newFields = [];
-            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
+            data.map((_f) => newFields.push(_f.fieldData));
 
             setEntityData({
                 fields: newFields,
@@ -130,15 +125,18 @@ export default function CreateContact({ open, onClose, onSuccess }) {
         });
     };
 
-    const handleSave = (values) => {
-        setIsFormSubmitted(true);
-        removeEmptyKeys(values);
-
-        axiosInstance().post("/contact", values).then(() => {
-            onSuccess();
-        }).then(() => {
-            setIsFormSubmitted(false);
-        });
+    const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
+        if (Object.keys(errors).length) {
+            entityData.fields.forEach((input) => {
+                if (input.required || values[input.fieldName]) {
+                    setTouched(input.fieldName, true);
+                }
+            });
+            setErrors({ ...errors });
+        } else {
+            console.log("🚀 ~ file: CreateLead.js ~ line 149 ~ handleSubmit ~ values", values)
+            setErrors({});
+        }
     }
 
 
@@ -148,9 +146,12 @@ export default function CreateContact({ open, onClose, onSuccess }) {
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
             open={open}
+            disableBackdropClick={true}
+
         >
-            <MuiDialogTitle disableTypography className={classes.root}>
-                <Typography variant="h6">Create Contact</Typography>
+            <MuiDialogTitle disableTypography className={classes.root}
+                style={{ paddingBottom: "1px", paddingLeft: "24px" }}>
+                <Typography variant="h6">Create Lead</Typography>
                 {onClose ? (
                     <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
                         <CloseIcon />
@@ -166,19 +167,25 @@ export default function CreateContact({ open, onClose, onSuccess }) {
             {
                 entityData.fields.length > 0 && <Formik
                     initialValues={entityData.initialValues}
-                    validate={(values) => formValidation(values, entityData.fields)}
+                    // validate={(values) => formValidation(values, entityData.fields)}
+
+                    validationSchema={yupSchema(entityData.fields)}
+                    validateOnMount
                 >
                     {({
                         values,
                         errors,
                         touched,
                         setFieldValue,
+                        setFieldTouched,
+                        setErrors,
+                        setValues
                     }) => (
                         <Form>
                             <>
-
-                                <DialogContent dividers style={{ padding: '10px', marginLeft: "15px", marginRight: '15px', minWidth: '943px', minHeight: '500px' }}>
-
+                                <DialogContent dividers
+                                    style={{ padding: '10px', marginLeft: "15px", marginRight: '15px', minWidth: '943px', minHeight: '500px' }}
+                                >
                                     {
                                         formsData &&
                                         formsData.map((form, i) => (
@@ -196,7 +203,7 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                                                             label={field.fieldLabel}
                                                                             name={field.fieldName}
                                                                             type={field.type}
-                                                                            options={ownerDataSource}
+                                                                            options={ownerData}
                                                                             setFieldValue={setFieldValue}
                                                                             required={field.required}
                                                                             fullWidth
@@ -211,13 +218,13 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
-                                                                                options={collaboratorDataSource}
+                                                                                options={collaboratorData}
                                                                                 setFieldValue={setFieldValue}
                                                                                 required={field.required}
                                                                                 fullWidth
                                                                                 isTooltip={true}
                                                                                 size="small"
-                                                                                onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
+                                                                                onOpen={() => { onCollabOwnerMultiselectOpen(values.owner) }}
                                                                             /> : <FormTypes
                                                                                 // {...rest}
                                                                                 values={values}
@@ -242,16 +249,6 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                             </div>
                                         ))
                                     }
-
-                                    {/* <InputField
-                                        errors={errors}
-                                        values={values}
-                                        setFieldValue={setFieldValue}
-                                        touched={touched}
-                                        fieldsData={entityData.fields}
-                                        size="small"
-                                        fullWidth
-                                    /> */}
                                 </DialogContent>
 
                                 <DialogActions>
@@ -263,15 +260,21 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                     >
                                         Cancel
                                         </Button>
-                                    <Button
-                                        disabled={isFormSubmitted}
-                                        type="submit"
+
+                                    <CustomButton
+                                        loading={loading}
+                                        disabled={loading}
+                                        style={{ float: "right" }}
                                         variant="contained"
                                         color="primary"
-                                        onClick={() => { handleSave(values) }}
+                                        // disabled={Object.keys(errors).length > 0 ? true : false}
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            handleSubmit(errors, setFieldTouched, values, setValues, setErrors)
+                                        }}
                                     >
-                                        Create Contact
-                                        </Button>
+                                        Create Lead
+                                    </CustomButton>
                                 </DialogActions>
                             </>
                         </Form>

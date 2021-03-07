@@ -131,7 +131,7 @@ const FormTypes = (props) => {
                 return undefined
             }
 
-            fetch({ input: values[name] ? values[name] : "" }, (results) => {
+            fetch({ input: values[name] }, (results) => {
                 if (active) {
                     let newOptions = []
                     if (value) {
@@ -432,7 +432,7 @@ const FormTypes = (props) => {
                 control={
                     <Checkbox
                         name={name}
-                        checked={values[name]}
+                        checked={values[name] ? values[name] : false}
                         onChange={
                             onChange ? onChange : (e) => setFieldValue(name, e.target.checked)
                         }
@@ -478,7 +478,7 @@ const FormTypes = (props) => {
                 includeInputInList
                 filterSelectedOptions
                 value={values[name]}
-                onChange={(event, newValue) => {
+                onChange={onChange ? onChange : (event, newValue) => {
                     setOptions(newValue ? [newValue, ...optionsList] : optionsList)
                     setValue(newValue)
                 }}
@@ -555,6 +555,23 @@ const FormTypes = (props) => {
                 {...rest}
                 variant="outlined"
                 type="url"
+                label={label}
+                required={required}
+                name={name}
+                value={values[name]}
+                error={touched[name] && Boolean(errors[name])}
+                helperText={touched[name] && errors[name]}
+                onChange={
+                    onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+                }
+            />
+        </InfoLabel>
+    ) : type === 'date' ? (
+        <InfoLabel info={label} isTooltip={isTooltip}>
+            <TextField
+                {...rest}
+                variant="outlined"
+                type="date"
                 label={label}
                 required={required}
                 name={name}

@@ -9,13 +9,11 @@ import { useHistory, useParams } from "react-router-dom";
 import Container from '../../components/Container'
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
-import { getContactData } from '../../axios/contacts'
 import { Link } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { deleteContacts, updateContact } from '../../axios/contacts'
 import { contactPage } from '../../routes/Contacts'
 import { capitalize } from '../../services/util'
 import DetailsPage from '../../components/Shared/DetailsPage'
@@ -48,34 +46,26 @@ const Roles = () => {
 
     const fetchContactData = async () => {
         setLoading(true)
-        try {
-            let data = await getContactData(id)
-            if (data.status === 200) {
-                let tData = data.data
-                handleMainPoints(tData)
+        axiosInstance().get(`/contact/${id}`).then(({ data: { data } }) => {
 
-                let name = capitalize(tData.firstName || '') + ' '
-                name = name + capitalize(tData.middleName || '') + ' '
-                name = name + capitalize(tData.lastName || '')
+            handleMainPoints(data)
 
-                if (tData?.salutation?.optionLabel) {
-                    name = tData.salutation.optionLabel + name
-                }
+            let name = capitalize(data.firstName || '') + ' '
+            name = name + capitalize(data.middleName || '') + ' '
+            name = name + capitalize(data.lastName || '')
 
-                setHeadingLbl(name)
-                handleAllowToEditList(tData)
-                setContactData(tData)
-                getContactFields()
-                setCustomizedRoutes([...customizedRoutes, { title: `${tData.firstName} ${tData.lastName}` }]);
+            if (data?.salutation?.optionLabel) {
+                name = data.salutation.optionLabel + name
             }
-        }
-        catch (err) {
+
+            setHeadingLbl(name)
+            handleAllowToEditList(data)
+            setContactData(data)
+            getContactFields()
+            setCustomizedRoutes([...customizedRoutes, { title: `${data.firstName} ${data.lastName}` }]);
+        }).catch(err => {
             setLoading(false)
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
-        }
+        })
     }
 
     const handleMainPoints = (data) => {
@@ -90,10 +80,10 @@ const Roles = () => {
         console.log("🚀 ~ file: ContactDetailPage.js ~ line 96 ~ handleMainPoints ~ tempMp", tempMp)
         setMainPoints(tempMp)
     }
-    const getContactFields = () => {
 
-        axiosInstance().get('/field?resource=Contact').then(({ data }) => {
-            setContactFields(data)
+    const getContactFields = () => {
+        axiosInstance().get('/field?resource=Contact').then(({ data: { data } }) => {
+            setContactFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });
     };
@@ -120,7 +110,7 @@ const Roles = () => {
             count: 0
         },
         {
-            label: "Qoutes",
+            label: "Quotes",
             count: 0
         },
         {
@@ -135,17 +125,12 @@ const Roles = () => {
 
     const handleDeleteContact = () => {
         if (contactData?._id) {
-            deleteContacts({ ids: [contactData._id] }).then((data) => {
-                if (data.status === 200) {
-                    handleSnackbar(data.message, 'success', true)
-                    goBackToListing()
-                }
+
+            axiosInstance().put(`/contact/remove`, { ids: [contactData._id] }).then(({ data }) => {
+                handleSnackbar(data.message, 'success', true)
+                goBackToListing()
                 setShowConfirmBox(false)
             }).catch(err => {
-                let errMes = getErrorMessage(err)
-                if (errMes) {
-                    handleSnackbar(errMes, 'error', true)
-                }
                 setShowConfirmBox(false)
             })
         }
@@ -162,7 +147,7 @@ const Roles = () => {
     const handleAllowToEditList = (contactDetails) => {
         const userId = user?.user?._id;
         let allowToEdit = false;
-        
+
         if (userId) {
             allowToEdit = (contactDetails.owner?.optionValue && contactDetails.owner.optionValue == userId)
 
@@ -185,20 +170,13 @@ const Roles = () => {
             _id: contactData._id,
         };
 
-        updateContact(updatedData)
-            .then(({ data }) => {
-                fetchContactData()
-                handleSnackbar("Successfully saved", 'success', true)
-                setUpdating(false);
-            })
-            .catch((err) => {
-                console.log(err);
-                let errMes = getErrorMessage(err)
-                if (errMes) {
-                    handleSnackbar(errMes, 'error', true)
-                }
-                setUpdating(false);
-            });
+        axiosInstance().put('/contact', updatedData).then(({ data }) => {
+            fetchContactData()
+            handleSnackbar("Successfully saved", 'success', true)
+            setUpdating(false);
+        }).catch((err) => {
+            setUpdating(false);
+        });
     };
     return (
         <>
@@ -263,8 +241,8 @@ const Roles = () => {
                                 <div className="detailPageDiv2">
                                     {
                                         quickLinks && quickLinks.length ?
-                                            quickLinks.map(k => {
-                                                return <><Link className="customLink">{k.label || ''}({k.count || 0})</Link><br /></>
+                                            quickLinks.map((k, index) => {
+                                                return <Link key={index} className="customLink">{k.label || ''}({k.count || 0})</Link>
                                             }) :
                                             null
                                     }
