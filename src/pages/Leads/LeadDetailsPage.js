@@ -8,9 +8,11 @@ import {
   ListItemText,
   ListItemIcon,
   ListSubheader,
+  IconButton,
+  Tooltip,
 } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
-import { Send } from "@material-ui/icons";
+import { EditRounded, ExpandMore, Send } from "@material-ui/icons";
 
 import { getErrorMessage } from "../../services/util";
 import CustomToast from "../../components/Helpers/CustomToast";
@@ -197,15 +199,25 @@ const LeadDetailsPage = () => {
                 {loading ? (
                   <Loader style={{ height: "100%" }} text="Loading Data..." />
                 ) : !leadFields.length ? (
-                  <Box
-                    height="100%"
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <img src={SVG("Contacts Placeholder")} alt="No Data" />
-                  </Box>
+                  <>
+                    <Box display="flex" justifyContent="space-between">
+                      <h3>Lead Details Page</h3>
+                      <Tooltip title="Edit Lead Information">
+                        <IconButton color="primary">
+                          <EditRounded style={{ width: 20, height: 20 }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                    <Box
+                      height="100%"
+                      display="flex"
+                      flexDirection="column"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <img src={SVG("Contacts Placeholder")} alt="No Data" />
+                    </Box>
+                  </>
                 ) : (
                   <DetailsPage
                     data={leadData}
@@ -236,6 +248,7 @@ const LeadDetailsPage = () => {
                         <ListItemText
                           primary={`${item.label} (${item.count})`}
                         />
+                        <ExpandMore />
                       </ListItem>
                     </Link>
                   ))}
