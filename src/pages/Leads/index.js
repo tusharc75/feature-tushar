@@ -114,7 +114,7 @@ const Leads = () => {
 
   const fetchLeads = async () => {
     setLoading(true);
-    let searchParams = { ...query, filterAccounts: selectedType }
+    let searchParams = { ...query, filterLeads: selectedType }
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
@@ -218,17 +218,20 @@ const Leads = () => {
       field: "actions", headerName: "Actions ",
       renderCell: (params) => (
         <>
-          <Tooltip
-            title={params.row.allowToDelete ? "Delete" : notAllowedMes} >
-            <IconButton
-              aria-label="Delete"
-              onClick={() => showConfirmBox(params.row)}
-              style={{ pointerEvents: params.row.allowToDelete ? "" : "none" }}
-            >
-              <DeleteIcon
-                fontSize="small" color="error" />
-            </IconButton>
-          </Tooltip >
+          {
+            params.row.allowToDelete ?
+              <Tooltip
+                title="Delete" >
+                <IconButton
+                  aria-label="Delete"
+                  onClick={() => showConfirmBox(params.row)}
+                >
+                  <DeleteIcon
+                    fontSize="small" color="error" />
+                </IconButton>
+              </Tooltip > : null
+          }
+
         </>
       ), width: 200
     }
