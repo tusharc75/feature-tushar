@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import { CircularProgress } from '@material-ui/core'
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -22,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ConfirmationDialogRaw(props) {
     const classes = useStyles();
-    const { onClose, onOk, open, message } = props;
+    const { onClose, onOk, open, message, okBtnLoading } = props;
 
     return (
         <Dialog
@@ -45,7 +46,12 @@ export default function ConfirmationDialogRaw(props) {
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={onClose} color="primary">Cancel</Button>
-                <Button onClick={onOk} color="primary">Ok</Button>
+                <Button onClick={onOk}
+                    disabled={okBtnLoading} color="primary">
+                    {okBtnLoading ? <CircularProgress
+                        style={{ marginRight: "8px" }}
+                        size={20} color="inherit" /> : null}
+                        Ok</Button>
             </DialogActions>
         </Dialog>
     );
