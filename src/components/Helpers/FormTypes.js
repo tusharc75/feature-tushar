@@ -384,7 +384,7 @@ const FormTypes = (props) => {
                 multiple
                 options={options}
                 getOptionLabel={(option) => (option ? option.optionLabel : '')}
-                value={values[name]}
+                value={values[name] ? values[name] : []}
                 getOptionSelected={(option, val) =>
                     option.optionValue === val.optionValue
                 }
