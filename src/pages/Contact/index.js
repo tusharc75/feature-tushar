@@ -164,7 +164,7 @@ export default function Contact() {
                                         <DeleteIcon fontSize="small" color="error" />
                                     </IconButton>
                                 </Tooltip> :
-                                <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the delete functionality">
+                                <Tooltip className="cursor-stop" title="You must be the owner of this contact to get the delete functionality">
                                     <IconButton aria-label="Delete">
                                         <DeleteIcon fontSize="small" />
                                     </IconButton>
