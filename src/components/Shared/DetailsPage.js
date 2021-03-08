@@ -95,7 +95,7 @@ const Details = (props) => {
 
     if (obj) {
       for (const { fieldData } of fields) {
-        if (fieldData.type === "multiselect") {
+        if (fieldData.type === "multiSelect") {
           newObj[fieldData.fieldName] = obj[fieldData.fieldName].length
             ? obj[fieldData.fieldName].map((item) => item.fieldLabel).join(", ")
             : "";
