@@ -14,4 +14,9 @@ export default {
     path: "/lead",
     data: {},
   },
+  opportunity: {
+    title: "Opportunity",
+    path: "/opportunity",
+    data: {},
+  },
 };
