@@ -18,6 +18,7 @@ import AccountDetailPage from "./pages/Account/AccountDetailPage";
 import ContactDetailPage from "./pages/Contact/ContactDetailPage";
 import CustomToaster from "./components/Helpers/CustomToast";
 import { CustomEventEmitter } from "./axios/events";
+import OpportunityDetailsPage from "./pages/Opportunities/OpportunityDetailsPage";
 
 function App() {
   const {
@@ -64,8 +65,11 @@ function App() {
         <PrivateRoute exact path="/new-lead">
           <NewLead />
         </PrivateRoute>
-        <PrivateRoute exact path="/opportunities">
+        <PrivateRoute exact path="/opportunity">
           <Opportunities />
+        </PrivateRoute>
+        <PrivateRoute exact path="/opportunity/detail/:id">
+          <OpportunityDetailsPage />
         </PrivateRoute>
         <PrivateRoute exact path="/add-doa">
           <AddDoa />
