@@ -137,7 +137,7 @@ const Roles = () => {
             count: 0
         },
         {
-            label: "Qoutes",
+            label: "Quotes",
             count: 0
         },
         {
@@ -255,8 +255,8 @@ const Roles = () => {
                                 <div className="detailPageDiv2">
                                     {
                                         quickLinks && quickLinks.length ?
-                                            quickLinks.map(k => {
-                                                return <><Link to={k} className="customLink">{k.label || ''}({k.count || 0})</Link><br /></>
+                                            quickLinks.map((k, index) => {
+                                                return <Link key={index} to={k} className="customLink">{k.label || ''}({k.count || 0})</Link>
                                             }) :
                                             null
                                     }

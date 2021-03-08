@@ -179,7 +179,11 @@ const Details = (props) => {
                             <Info color="disabled" />
                           </Tooltip>
                           {
-                            field.isUpdate ? "" :
+                            field.isUpdate ?
+                              canEdit ? "" :
+                                <Tooltip title="You must be the owner or collaborator of this account to get update functionality">
+                                  <LockIcon color="disabled" />
+                                </Tooltip> :
                               <Tooltip title="Not allowed to update">
                                 <LockIcon color="disabled" />
                               </Tooltip>
