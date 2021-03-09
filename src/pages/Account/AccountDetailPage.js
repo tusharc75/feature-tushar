@@ -22,6 +22,8 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import RelatedContactsBox from './RelatedContacts'
 import axiosInstance from './../../axios/axiosInstance'
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 const Roles = () => {
     const history = useHistory();
@@ -37,6 +39,7 @@ const Roles = () => {
     const [accountFields, setAccountFields] = useState([])
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState([routes.account]);
+    const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
     let { id } = useParams();
 
@@ -234,6 +237,7 @@ const Roles = () => {
                         }
 
                     </CustomHeader>
+
                     <Container className="detailPageContainer">
                         <Grid container spacing={3}>
                             <Grid item sm={8} md={8} lg={8}>
@@ -241,13 +245,35 @@ const Roles = () => {
                                     style={{ pointerEvents: allowedToEdit ? "" : "none" }} >
                                     {
                                         loading ? <Loader text="Fetching Data" style={{ marginTop: 100 }} /> :
-                                            <DetailsPage
-                                                data={accountData}
-                                                fields={accountFields}
-                                                isUpdating={isUpdating}
-                                                canEdit={allowedToEdit}
-                                                handleUpdate={handleUpdateAccount}
-                                            />
+                                            <>
+                                                <Tabs
+                                                    className="mb-4"
+                                                    value={currentTabIndex}
+                                                    onChange={(index, newValue) => { setCurrentTabIndex(newValue) }}
+                                                    indicatorColor="primary"
+                                                    textColor="primary"
+                                                    aria-label="icon tabs example"
+                                                >
+                                                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+                                                    <Tab label="Account Hierarchy" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                                                </Tabs>
+                                                <Box index={0} hidden={currentTabIndex !== 0}>
+                                                    <DetailsPage
+                                                        data={accountData}
+                                                        fields={accountFields}
+                                                        isUpdating={isUpdating}
+                                                        canEdit={allowedToEdit}
+                                                        handleUpdate={handleUpdateAccount}
+                                                    />
+                                                </Box>
+                                                <Box index={1} hidden={currentTabIndex !== 1}>
+                                                    
+                                                    
+
+
+                                                    
+                                                </Box>
+                                            </>
                                     }
                                 </div>
                             </Grid>

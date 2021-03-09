@@ -27,6 +27,7 @@ import { getSearchQuery } from '../../services/util'
 import { CustomEventEmitter } from './../../axios/events';
 import Header from "./Header";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import CreateOpportunity from './CreateOpportunity'
 import "./style.css";
 
 let opportunityTimeout
@@ -66,6 +67,7 @@ const Opportunities = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
   const [deleteRec, setDeleteRec] = useState({})
   const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
+  const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -294,7 +296,9 @@ const Opportunities = () => {
       }));
     }
   }
-
+  const clickCreateNew = () => {
+    setShowCreateOpportunityDialog(true);
+  }
   const handleDeleteOpportunity = async () => {
     setDeleteLoading(true)
     let recs = []
@@ -322,110 +326,122 @@ const Opportunities = () => {
   }
 
   return (
-    <Layout>
-      <Grid container spacing={3} direction="row">
-        <Grid item xs={12} sm={6} className="pl-3"></Grid>
-        <Grid item xs={12} sm={6} className="pr-3">
-          <Grid container justify="flex-end">
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Import from Excel
+    <>
+      <Layout>
+        <Grid container spacing={3} direction="row">
+          <Grid item xs={12} sm={6} className="pl-3"></Grid>
+          <Grid item xs={12} sm={6} className="pr-3">
+            <Grid container justify="flex-end">
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Import from Excel
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Export to Excel
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Export to Excel
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Download Template
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Download Template
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Email a Link
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Email a Link
             </Link>
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
 
-      {/* Tables Begins Here */}
-      <Container>
-        <Header
-          selectedType={selectedType}
-          onTypeChange={handleOpportunityTypeSel}
-          options={OpportunityTypes}
-          onSearch={handleSearch}
-          searchVal={searchVal}
-          opportunityPermissions={opportunityPermissions}
-          onCreate={handleCreate}
-          showConfirmBox={showConfirmBox}
-          canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-        />
-      </Container>
-      <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-        <div className="contact-grid-height1">
-          <DataGrid
-            components={{
-              Toolbar: GridToolbar,
-            }}
-            rows={loading ? [] : dataRows}
-            columns={columns}
-            loading={loading}
-            disableSelectionOnClick
-            disableMultipleSelection
-            paginationMode="server"
-            pagination
-            onPageChange={handlePage}
-            onPageSizeChange={handlePageSize}
-            pageSize={query.limit}
-            page={query.page}
-            rowCount={rowCount}
-            rowsPerPageOptions={[25, 50, 75]}
-            onSortModelChange={handleSortModelChange}
-            density="compact"
+        {/* Tables Begins Here */}
+        <Container>
+          <Header
+            selectedType={selectedType}
+            onTypeChange={handleOpportunityTypeSel}
+            options={OpportunityTypes}
+            onSearch={handleSearch}
+            searchVal={searchVal}
+            opportunityPermissions={opportunityPermissions}
+            onCreate={clickCreateNew}
+            showConfirmBox={showConfirmBox}
+            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
           />
-        </div>
-        {
-          isConfirmDialogVisible ?
-            <ConfirmationDialog
-              open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete Opportunity ${deleteRec.name || ''}?`}
-              onClose={() => {
-                if (deleteRec) setDeleteRec({})
-                setIsConformDialogVisible(false)
+        </Container>
+        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+          <div className="contact-grid-height1">
+            <DataGrid
+              components={{
+                Toolbar: GridToolbar,
               }}
-              okBtnLoading={deleteLoading}
-              onOk={handleDeleteOpportunity}
-            /> : null
-        }
-      </Container>
-    </Layout>
+              rows={loading ? [] : dataRows}
+              columns={columns}
+              loading={loading}
+              disableSelectionOnClick
+              disableMultipleSelection
+              paginationMode="server"
+              pagination
+              onPageChange={handlePage}
+              onPageSizeChange={handlePageSize}
+              pageSize={query.limit}
+              page={query.page}
+              rowCount={rowCount}
+              rowsPerPageOptions={[25, 50, 75]}
+              onSortModelChange={handleSortModelChange}
+              density="compact"
+            />
+          </div>
+          {
+            isConfirmDialogVisible ?
+              <ConfirmationDialog
+                open={isConfirmDialogVisible}
+                message={`Are you sure, you want to delete Opportunity ${deleteRec.name || ''}?`}
+                onClose={() => {
+                  if (deleteRec) setDeleteRec({})
+                  setIsConformDialogVisible(false)
+                }}
+                okBtnLoading={deleteLoading}
+                onOk={handleDeleteOpportunity}
+              /> : null
+          }
+          {
+            showCreateOpportunityDialog && <CreateOpportunity
+              open={showCreateOpportunityDialog}
+              onClose={() => setShowCreateOpportunityDialog(false)}
+              onSuccess={() => {
+                setShowCreateOpportunityDialog(false);
+                //  Get All Opportunity Api Call
+              }}
+            />
+          }
+        </Container>
+      </Layout>
+    </>
   );
 };
 
