@@ -1,29 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
-  Box,
-  Button,
   Grid,
-  Link,
   Divider,
-  Menu,
-  MenuItem,
   IconButton,
   Tooltip,
   Checkbox,
-
 } from "@material-ui/core";
+import { Link } from 'react-router-dom'
+import { accountDetailPage } from '../../routes/Accounts'
 import DeleteIcon from '@material-ui/icons/Delete';
 import BlockIcon from '@material-ui/icons/Block';
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
-import { Add, ExpandMore } from "@material-ui/icons";
 import { useData } from '../../StateProvider/Provider';
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import SearchBox from "../../components/Helpers/SearchBox";
 import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
-import { getSearchQuery } from '../../services/util'
+import { getSearchQuery, displayDate } from '../../services/util'
 import { CustomEventEmitter } from './../../axios/events';
 import Header from "./Header";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
@@ -100,16 +94,14 @@ const Opportunities = () => {
 
   useEffect(() => {
     let rows = opportunityData?.map((u) => {
-      let name = capitalize(u.firstName || '') + ' '
-      name = name + capitalize(u.middleName || '') + ' '
-      name = name + capitalize(u.lastName || '')
-
       let res = {
         ...u,
         isChecked: false,
         id: u._id,
-        name: name,
         owner: u.owner?.optionLabel ? u.owner.optionLabel : '',
+        stage: u?.stage?.optionLabel,
+        closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
+        // accountName: u?.accountName?.optionLabel || ''
       }
       return res
     });
@@ -118,7 +110,7 @@ const Opportunities = () => {
 
   const fetchOpportunities = async () => {
     setLoading(true);
-    let searchParams = { ...query, filterOpportunites: selectedType }
+    let searchParams = { ...query, filterOpportunities: selectedType }
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
@@ -206,18 +198,23 @@ const Opportunities = () => {
       width: 75,
     },
     {
-      field: "firstName", headerName: "Name", width: 200,
+      field: "opportunityName", headerName: "Opportunity Name", width: 200,
       renderCell: (params) => (
         getFirstName(params.row)
       )
     },
-    { field: "title", headerName: "Title", width: 200 },
-    { field: "company", headerName: "Company", width: 200 },
-    { field: "phone", headerName: "Phone", width: 200 },
-    { field: "mobile", headerName: "Mobile", width: 200 },
-    { field: "email", headerName: "Email", width: 200 },
+    {
+      field: "accountName", headerName: "Account Name", width: 200,
+      renderCell: (params) => (
+        <Link className="accountNameLink" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
+          {params?.row?.accountName?.optionLabel ? params.row.accountName.optionLabel : ''}
+        </Link>
+      )
+    },
+    { field: "stage", headerName: "Stage", width: 200 },
+    { field: "closeDate", headerName: "Close Date", width: 200 },
     // { field: "status", headerName: "Lead Status", width: 200 },
-    { field: "owner", headerName: "Owner Alies", width: 200 },
+    { field: "owner", headerName: "Opportunity Owner", width: 200 },
     {
       field: "actions", headerName: "Actions ",
       renderCell: (params) => (
@@ -251,7 +248,7 @@ const Opportunities = () => {
     return <Link className="nameLink"
       to={`/opportunity/detail/${tData._id}`}
     >
-      {tData.name || ''}
+      {capitalize(tData.opportunityName) || ''}
     </Link>
   }
 
@@ -391,6 +388,7 @@ const Opportunities = () => {
             onCreate={clickCreateNew}
             showConfirmBox={showConfirmBox}
             canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+
           />
         </Container>
         <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
@@ -420,7 +418,7 @@ const Opportunities = () => {
             isConfirmDialogVisible ?
               <ConfirmationDialog
                 open={isConfirmDialogVisible}
-                message={`Are you sure, you want to delete Opportunity ${deleteRec.name || ''}?`}
+                message={`Are you sure, you want to delete ${deleteRec?.opportunityName ? "Opportunity" : "Opportunities"}   ${deleteRec.opportunityName || ''}?`}
                 onClose={() => {
                   if (deleteRec) setDeleteRec({})
                   setIsConformDialogVisible(false)
@@ -435,7 +433,7 @@ const Opportunities = () => {
               onClose={() => setShowCreateOpportunityDialog(false)}
               onSuccess={() => {
                 setShowCreateOpportunityDialog(false);
-                //  Get All Opportunity Api Call
+                fetchOpportunities()
               }}
             />
           }

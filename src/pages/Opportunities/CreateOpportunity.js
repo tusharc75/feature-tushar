@@ -14,6 +14,7 @@ import Loader from '../../components/Loader'
 import { formValidation } from '../../constants/helpers';
 import FormTypes from "./../../components/Helpers/FormTypes";
 import axiosInstance from './../../axios/axiosInstance'
+import { CustomEventEmitter } from './../../axios/events';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -132,12 +133,22 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
     const handleSave = (values) => {
         setIsFormSubmitted(true);
         removeEmptyKeys(values);
-
-        axiosInstance().post("/opportunity", values).then(() => {
-            onSuccess();
-        }).then(() => {
-            setIsFormSubmitted(false);
-        });
+        ["amount", "probability"].forEach(k => {
+            if (values[k]) {
+                values[k] = parseInt(values[k])
+            } else if (values.hasOwnProperty(k)) {
+                delete values[k]
+            }
+        })
+        axiosInstance().post("/opportunity", values)
+            .then(() => {
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Opportunity created Succesfully" });
+                setIsFormSubmitted(false)
+                onSuccess()
+            })
+            .then(() => {
+                setIsFormSubmitted(false);
+            });
     }
 
 

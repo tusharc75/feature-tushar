@@ -1,9 +1,9 @@
 
 
 .nameLink{
-    color: #0645AD;
+    color: #0645ad;
     cursor: pointer;
   }
-  .nameLink:hover{
+.nameLink:hover{
     text-decoration: underline;
   }
