@@ -51,6 +51,8 @@ const InputField = (props) => {
                       options={field.option}
                       setFieldValue={setFieldValue}
                       required={field.required}
+                      isTooltip={field.isTooltip}
+                      tooltipMessage={field.tooltipMessage}
                     />
                   </Grid>
                 ))}

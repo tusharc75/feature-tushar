@@ -41,7 +41,14 @@ const InfoLabel = ({ children, info, isTooltip }) =>
       </Grid>
     </Grid>
   ) : (
-    <>{children}</>
+    <Grid container spacing={1} alignItems="center">
+      <Grid item xs={11} sm={11} md={11}>
+        {children}
+      </Grid>
+      <Grid item xs={1} sm={1} md={1}>
+        <InfoIcon style={{ opacity: 0 }} color="disabled" />
+      </Grid>
+    </Grid>
   );
 
 const autocompleteService = { current: null };
@@ -88,6 +95,7 @@ const FormTypes = (props) => {
     onChange,
     required,
     isTooltip,
+    tooltipMessage,
     ...rest
   } = props;
   const [optionsList, setOptions] = React.useState([]);
@@ -165,7 +173,7 @@ const FormTypes = (props) => {
   };
 
   return type === "singleLine" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
@@ -182,7 +190,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "url" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
@@ -199,7 +207,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "name" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
@@ -219,7 +227,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "multiLine" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
@@ -237,7 +245,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "number" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
@@ -254,7 +262,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "email" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
@@ -279,7 +287,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "password" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
@@ -296,7 +304,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "mobileNumber" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <MuiPhoneInput
         {...rest}
         defaultCountry={"us"}
@@ -313,7 +321,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "dropDown" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
         options={options}
@@ -339,7 +347,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "currency" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
         fullWidth
@@ -385,7 +393,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "multiSelect" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
         multiple
@@ -412,7 +420,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "switch" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <FormControlLabel
         control={
           values[name] ? (
@@ -441,7 +449,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "checkBox" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <FormControlLabel
         control={
           <Checkbox
@@ -457,7 +465,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "radio" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <FormControl component="fieldset">
         <FormLabel component="legend">{label}</FormLabel>
         <RadioGroup
@@ -480,7 +488,7 @@ const FormTypes = (props) => {
       </FormControl>
     </InfoLabel>
   ) : type === "location" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
         getOptionLabel={(option) =>
@@ -583,7 +591,7 @@ const FormTypes = (props) => {
       </Box>
     </Fragment>
   ) : type === "url" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
@@ -600,7 +608,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "date" ? (
-    <InfoLabel info={label} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"

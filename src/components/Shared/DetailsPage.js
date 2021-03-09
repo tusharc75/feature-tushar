@@ -182,9 +182,14 @@ const Details = (props) => {
                             {field.fieldData.fieldLabel}
                           </h4>
                           <Box marginX={1} />
-                          <Tooltip title={field.fieldData.fieldLabel}>
-                            <Info color="disabled" />
-                          </Tooltip>
+                          {field.fieldData.isTooltip && (
+                            <Tooltip title={field.fieldData.tooltipMessage}>
+                              <Info
+                                style={{ width: 20, height: 20 }}
+                                color="disabled"
+                              />
+                            </Tooltip>
+                          )}
                           {field.isUpdate ? (
                             canEdit ? (
                               ""
