@@ -35,7 +35,7 @@ const Roles = () => {
     const [mainPoints, setMainPoints] = useState({})
     const [isUpdating, setUpdating] = useState(false);
     const [allowedToEdit, setAllowedToEdit] = useState(false)
-    const [customizedRoutes, setCustomizedRoutes] = useState([routes.contact]);
+    const [customizedRoutes, setCustomizedRoutes] = useState([]);
     let { id } = useParams();
 
     useEffect(() => {
@@ -62,7 +62,7 @@ const Roles = () => {
             handleAllowToEditList(data)
             setContactData(data)
             getContactFields()
-            setCustomizedRoutes([...customizedRoutes, { title: `${data.firstName} ${data.lastName}` }]);
+            setCustomizedRoutes([routes.contact, { title: `${data.firstName} ${data.lastName}` }]);
         }).catch(err => {
             setLoading(false)
         })

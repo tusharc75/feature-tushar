@@ -114,8 +114,7 @@ function LeadsHeader(props) {
                             open={Boolean(anchorEl)}
                             onClose={closeActions}>
 
-                            <MenuItem disabled={canDelete}
-                                onClick={showConfirmBox}
+                            <MenuItem onClick={() => { showConfirmBox(null) }}
                             >Delete</MenuItem>
                         </Menu>
                     </>

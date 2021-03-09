@@ -4,6 +4,11 @@ export default {
     path: "/account",
     data: {},
   },
+  accountDetails: {
+    title: "Account",
+    path: "/account/detail",
+    data: {},
+  },
   contact: {
     title: "Contact",
     path: "/contact",
