@@ -27,9 +27,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from '../../components/Helpers/SearchBox'
-import DeleteIcon from '@material-ui/icons/Delete';
 import { getErrorMessage } from '../../services/util'
 import CustomToast from '../../components/Helpers/CustomToast'
+import DeleteIcon from '@material-ui/icons/Delete';
 import BlockIcon from '@material-ui/icons/Block';
 import { capitalize } from '../../services/util'
 import CustomContainer from "./../../components/Container";
@@ -164,7 +164,7 @@ export default function Contact() {
                                         <DeleteIcon fontSize="small" color="error" />
                                     </IconButton>
                                 </Tooltip> :
-                                <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the delete functionality">
+                                <Tooltip className="cursor-stop" title="You must be the owner of this contact to get the delete functionality">
                                     <IconButton aria-label="Delete">
                                         <DeleteIcon fontSize="small" />
                                     </IconButton>
@@ -474,7 +474,7 @@ export default function Contact() {
                                 </Menu>
                             </>
                         }
-                        
+
                     </Grid>
                 </Grid>
             </CustomContainer>
@@ -546,8 +546,6 @@ export default function Contact() {
                                 onOk={handleSingleDeleteContacts}
                             /> : null
                     }
-
-
                 </Box>
             </Paper>
         </Layout >

@@ -268,7 +268,7 @@ export default function Account() {
                                         <DeleteIcon fontSize="small" color="error" />
                                     </IconButton>
                                 </Tooltip> :
-                                <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the delete functionality">
+                                <Tooltip className="cursor-stop" title="You must be the owner of this account to get the delete functionality">
                                     <IconButton aria-label="Delete">
                                         <DeleteIcon fontSize="small" />
                                     </IconButton>
@@ -287,8 +287,6 @@ export default function Account() {
             width: 200
         },
     ];
-
-
     const handleSearch = (e) => {
         if (query.page !== 1) {
             setQuery((prevState) => ({ ...prevState, page: 0 }));

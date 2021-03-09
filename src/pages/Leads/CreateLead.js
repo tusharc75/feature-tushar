@@ -14,6 +14,7 @@ import Loader from '../../components/Loader'
 import FormTypes from "../../components/Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
 import CustomButton from '../../components/Helpers/Button'
+import { CustomEventEmitter } from './../../axios/events';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -26,6 +27,15 @@ const useStyles = makeStyles((theme) => ({
         top: theme.spacing(1),
         color: theme.palette.grey[500],
     },
+    modal: {
+        padding: '10px',
+    },
+    content: {
+        marginLeft: "6px",
+        marginRight: '6px',
+        minWidth: '943px',
+        minHeight: '500px'
+    }
 }));
 
 const DialogContent = withStyles((theme) => ({
@@ -41,7 +51,7 @@ const DialogActions = withStyles((theme) => ({
     },
 }))(MuiDialogActions);
 
-export default function CreateContact({ open, onClose }) {
+export default function CreateContact({ open, onClose, fetchData }) {
 
     const classes = useStyles();
     const history = useHistory();
@@ -134,12 +144,32 @@ export default function CreateContact({ open, onClose }) {
             });
             setErrors({ ...errors });
         } else {
-            console.log("🚀 ~ file: CreateLead.js ~ line 149 ~ handleSubmit ~ values", values)
-            setErrors({});
+            if (values.noOfEmployees) {
+                values.noOfEmployees = parseInt(values.noOfEmployees)
+            } else if (values.hasOwnProperty('noOfEmployees')) {
+                delete values.noOfEmployees
+            }
+            handleCreateLead(values)
         }
     }
 
-
+    const handleCreateLead = (values) => {
+        setLoading(true)
+        try {
+            axiosInstance().post('/lead', values)
+                .then(({ data }) => {
+                    if (data.status === 200) {
+                        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                        setLoading(false)
+                        onClose()
+                        fetchData()
+                    }
+                })
+        }
+        catch (err) {
+            setLoading(false)
+        }
+    }
     return (
         <Dialog
             maxWidth="md"
@@ -147,7 +177,6 @@ export default function CreateContact({ open, onClose }) {
             onClose={onClose}
             open={open}
             disableBackdropClick={true}
-
         >
             <MuiDialogTitle disableTypography className={classes.root}
                 style={{ paddingBottom: "1px", paddingLeft: "24px" }}>
@@ -158,9 +187,8 @@ export default function CreateContact({ open, onClose }) {
                     </IconButton>
                 ) : null}
             </MuiDialogTitle>
-
             {
-                entityData.fields.length == 0 && <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
+                entityData.fields.length == 0 && <DialogContent dividers className={classes.content}>
                     <Loader text="Fetching Data" style={{ marginTop: 100 }} />
                 </DialogContent>
             }
@@ -184,7 +212,7 @@ export default function CreateContact({ open, onClose }) {
                         <Form>
                             <>
                                 <DialogContent dividers
-                                    style={{ padding: '10px', marginLeft: "15px", marginRight: '15px', minWidth: '943px', minHeight: '500px' }}
+                                    className={classes.content}
                                 >
                                     {
                                         formsData &&
@@ -257,6 +285,7 @@ export default function CreateContact({ open, onClose }) {
                                         variant="outlined"
                                         color="primary"
                                         onClick={onClose}
+
                                     >
                                         Cancel
                                         </Button>
@@ -264,6 +293,7 @@ export default function CreateContact({ open, onClose }) {
                                     <CustomButton
                                         loading={loading}
                                         disabled={loading}
+
                                         style={{ float: "right" }}
                                         variant="contained"
                                         color="primary"
