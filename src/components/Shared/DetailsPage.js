@@ -11,9 +11,13 @@ import {
   useTheme,
 } from "@material-ui/core";
 import { Check, Info } from "@material-ui/icons";
-import LockIcon from '@material-ui/icons/Lock';
+import LockIcon from "@material-ui/icons/Lock";
 import { Formik, Form } from "formik";
-import { getObjKeysWithValues, removeEmptyKeys, yupSchema } from "../../constants/helpers";
+import {
+  getObjKeysWithValues,
+  removeEmptyKeys,
+  yupSchema,
+} from "../../constants/helpers";
 import FormTypes from "../Helpers/FormTypes";
 
 const bill_Ship_address = ["isShippingAddressSameAsBillingAddress", "billingAddress"]
@@ -69,12 +73,11 @@ const Details = (props) => {
           (item) => item.optionLabel
         );
         text = onlyValues ? onlyValues.join(", ") : "_ _ _";
-      }
-      else {
+      } else {
         text = "_ _ _";
       }
     } else if (input.type === "dropDown") {
-      text = values[input.fieldName]
+      text = Object.keys(values[input.fieldName]).length
         ? values[input.fieldName].optionLabel
         : "_ _ _";
     } else if (input.type === "currency") {
@@ -187,7 +190,7 @@ const Details = (props) => {
         <Formik
           initialValues={initialVals}
           validationSchema={yupSchema(fieldsData, validateEmail)}
-          validateOnMount onSubmit={handleSubmit}
+          onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm, setFieldTouched, setTouched }) => (
             <Form>
@@ -203,19 +206,27 @@ const Details = (props) => {
                             {field.fieldData.fieldLabel}
                           </h4>
                           <Box marginX={1} />
-                          <Tooltip title={field.fieldData.fieldLabel}>
-                            <Info color="disabled" />
-                          </Tooltip>
-                          {
-                            field.isUpdate ?
-                              canEdit ? "" :
+                          {field.fieldData.isTooltip && (
+                            <Tooltip title={field.fieldData.tooltipMessage}>
+                              <Info
+                                style={{ width: 20, height: 20 }}
+                                color="disabled"
+                              />
+                            </Tooltip>
+                          )}
+                          {field.isUpdate ? (
+                            canEdit ? (
+                              ""
+                            ) : (
                                 <Tooltip title="You must be the owner or collaborator of this account to get update functionality">
                                   <LockIcon color="disabled" />
-                                </Tooltip> :
+                                </Tooltip>
+                              )
+                          ) : (
                               <Tooltip title="Not allowed to update">
                                 <LockIcon color="disabled" />
                               </Tooltip>
-                          }
+                            )}
                         </Box>
                         <Box display="flex" alignItems="flex-start">
                           {edit === field.fieldData.fieldName ?
@@ -372,23 +383,21 @@ const Details = (props) => {
                 </React.Fragment>
               ))}
               <Box marginTop={2} display="flex" justifyContent="flex-end">
-                {
-                  canEdit ?
-                    <Button
-                      disabled={
-                        Object.values(simplifyValues(initialVals)).toString() ===
-                        Object.values(simplifyValues(values)).toString() ||
-                        isUpdating
-                      }
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      onClick={submitForm}
-                    >
-                      {isUpdating ? <CircularProgress size={20} /> : "Save"}
-                    </Button> : null
-                }
-
+                {canEdit ? (
+                  <Button
+                    disabled={
+                      Object.values(simplifyValues(initialVals)).toString() ===
+                      Object.values(simplifyValues(values)).toString() ||
+                      isUpdating
+                    }
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={submitForm}
+                  >
+                    {isUpdating ? <CircularProgress size={20} /> : "Save"}
+                  </Button>
+                ) : null}
               </Box>
             </Form>
           )}

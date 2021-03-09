@@ -20,7 +20,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
-import { leadPage } from "../../routes/Lead";
+import { opportunityPage } from "../../routes/Opportunity";
 import routes from "../../components/Helpers/Routes";
 import { capitalize } from "../../services/util";
 import Loader from "../../components/Loader";
@@ -28,44 +28,40 @@ import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
 
-const LeadDetailsPage = () => {
+const OpportunityDetailsPage = () => {
   const history = useHistory();
   const {
     state: { user },
   } = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [alertData, setAlertData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [leadData, setLeadData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [opportunityData, setOpportunityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [leadFields, setLeadFIelds] = useState([]);
+  const [opportunityFields, setOpportunityFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState([routes.lead]);
+  const [customizedRoutes, setCustomizedRoutes] = useState([
+    routes.opportunity,
+  ]);
   let { id } = useParams();
 
   useEffect(() => {
     if (id) {
-      fetchLeadData();
+      fetchOpportunityData();
     }
   }, [id]);
 
-  const fetchLeadData = async () => {
+  const fetchOpportunityData = async () => {
     try {
-      const { data } = await getLeadData(id);
+      const { data } = await axiosInstance().get(`/opportunity/${id}`);
       handleMainPoints(data);
-      let name = capitalize(data.firstName || "") + " ";
-      name = name + capitalize(data.middleName || "") + " ";
-      name = name + capitalize(data.lastName || "");
-
-      if (data?.salutation?.optionLabel) {
-        name = data.salutation.optionLabel + name;
-      }
+      let name = capitalize(data.opportunityName);
       setHeadingLbl(name);
       handleAllowToEditList(data);
-      setLeadData(data);
-      getLeadFields();
+      setOpportunityData(data);
+      getOpportunityFields();
       setCustomizedRoutes([
         ...customizedRoutes,
         { title: `${data.firstName} ${data.lastName}` },
@@ -75,50 +71,56 @@ const LeadDetailsPage = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      company: data.company || "",
-      title: data.title || "",
-      phone: data.phone || "",
-      email: data.email || "",
+      accountName: data.accountName || "",
+      closeData: data.closeData || "",
+      amount: data.amount || "",
+      opportunityOwner: data.owner || "",
     };
+    if (data?.accountName?.optionLabel) {
+      tempMp["Account Name"] = data.accountName.optionLabel;
+    }
+    console.log(tempMp);
     setMainPoints(tempMp);
   };
 
-  const getLeadFields = () => {
+  const getOpportunityFields = () => {
     axiosInstance()
-      .get("/field?resource=Lead")
+      .get("/field?resource=Opportunity")
       .then(({ data }) => {
-        setLeadFIelds(data.data);
+        setOpportunityFIelds(data);
         setLoading(false);
+        console.log(data);
       });
   };
 
-  const handleAllowToEditList = (leadDetails) => {
+  const handleAllowToEditList = (opportunityDetails) => {
     const userId = user?.user?._id;
     let allowToEdit = false;
 
     if (userId) {
       allowToEdit =
-        leadDetails.owner?.optionValue &&
-        leadDetails.owner.optionValue === userId;
+        opportunityDetails.owner?.optionValue &&
+        opportunityDetails.owner.optionValue === userId;
 
       if (
         !allowToEdit &&
-        leadDetails.collaborator &&
-        leadDetails.collaborator.length > 0
+        opportunityDetails.collaborator &&
+        opportunityDetails.collaborator.length > 0
       ) {
         allowToEdit =
-          leadDetails.collaborator.findIndex((d) => d.optionValue === userId) >
-          -1;
+          opportunityDetails.collaborator.findIndex(
+            (d) => d.optionValue === userId
+          ) > -1;
       }
 
       if (allowToEdit) setAllowedToEdit(allowToEdit);
     }
   };
 
-  const handleDeleteLead = () => {
-    if (leadData?._id) {
+  const handleDeleteOpportunity = () => {
+    if (opportunityData?._id) {
       axiosInstance()
-        .put(`/lead/remove`, { ids: [leadData._id] })
+        .put(`/opportunity/remove`, { ids: [opportunityData._id] })
         .then(({ data }) => {
           handleSnackbar(data.message, "success", true);
           goBackToListing();
@@ -133,24 +135,21 @@ const LeadDetailsPage = () => {
   };
   const goBackToListing = () => {
     history.push({
-      pathname: leadPage.path,
+      pathname: opportunityPage.path,
     });
   };
 
-  const handleUpdateLead = (values) => {
+  const handleUpdateOpportunity = (values) => {
     setUpdating(true);
-    if (values.noOfEmployees) {
-      values.noOfEmployees = parseInt(values.noOfEmployees);
-    }
     const updatedData = {
       ...values,
-      _id: leadData._id,
+      _id: opportunityData._id,
     };
 
     axiosInstance()
-      .put("/lead", updatedData)
+      .put("/opportunity", updatedData)
       .then(({ data }) => {
-        fetchLeadData();
+        //fetchOpportunityData();
         handleSnackbar("Successfully saved", "success", true);
         setUpdating(false);
       })
@@ -169,11 +168,23 @@ const LeadDetailsPage = () => {
 
   const quickLinks = [
     {
-      label: "Files",
+      label: "Contact Roles",
+      count: 0,
+    },
+    {
+      label: "Quotes",
+      count: 0,
+    },
+    {
+      label: "Products",
       count: 0,
     },
     {
       label: "Notes",
+      count: 0,
+    },
+    {
+      label: "Files",
       count: 0,
     },
   ];
@@ -195,15 +206,17 @@ const LeadDetailsPage = () => {
         </Grid>
         <CustomHeader
           heading={headingLbl}
-          logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
+          logo={
+            opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
+          }
           mainPoints={mainPoints}
           style={{ marginTop: "150px", minHeight: "200px" }}
           showHeading={true}
         >
           <Box component="span" marginX={1} />
-          {leadData?.owner?.optionValue &&
+          {opportunityData?.owner?.optionValue &&
           user?.user?._id &&
-          leadData.owner.optionValue === user.user._id ? (
+          opportunityData.owner.optionValue === user.user._id ? (
             <Button
               variant="contained"
               color="secondary"
@@ -224,7 +237,7 @@ const LeadDetailsPage = () => {
               <Container styles={{ height: "100%" }}>
                 {loading ? (
                   <Loader style={{ height: "100%" }} text="Loading Data..." />
-                ) : !leadFields.length ? (
+                ) : !opportunityFields.length ? (
                   <Box
                     height="100%"
                     display="flex"
@@ -236,11 +249,11 @@ const LeadDetailsPage = () => {
                   </Box>
                 ) : (
                   <DetailsPage
-                    data={leadData}
-                    fields={leadFields}
+                    data={opportunityData}
+                    fields={opportunityFields}
                     isUpdating={isUpdating}
                     canEdit={allowedToEdit}
-                    handleUpdate={handleUpdateLead}
+                    handleUpdate={handleUpdateOpportunity}
                   />
                 )}
               </Container>
@@ -271,9 +284,9 @@ const LeadDetailsPage = () => {
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
-              message={`Are you sure you want to delete this Lead`}
+              message={`Are you sure you want to delete this opportunity`}
               onClose={() => setShowConfirmBox(false)}
-              onOk={handleDeleteLead}
+              onOk={handleDeleteOpportunity}
             />
           ) : null}
         </div>
@@ -282,4 +295,4 @@ const LeadDetailsPage = () => {
   );
 };
 
-export default LeadDetailsPage;
+export default OpportunityDetailsPage;

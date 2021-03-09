@@ -1,157 +1,42 @@
 [
-    {
-        "countryCode": "BGR",
-        "currencyCode": "BGN",
-        "name": "Bulgarian Lev"
-    },
-    {
-        "countryCode": "NOR",
-        "currencyCode": "NOK",
-        "name": "Norwegian Krone"
-    },
-    {
-        "countryCode": "BRA",
-        "currencyCode": "BRL",
-        "name": "Brazilian Real"
-    },
-    {
-        "countryCode": "RUS",
-        "currencyCode": "RUB",
-        "name": "Russian Ruble"
-    },
-    {
-        "countryCode": "ROU",
-        "currencyCode": "RON",
-        "name": "Romanian Leu"
-    },
-    {
-        "countryCode": "JPN",
-        "currencyCode": "JPY",
-        "name": "Japanese Yen"
-    },
-    {
-        "countryCode": "GBR",
-        "currencyCode": "GBP",
-        "name": "British Pound"
-    },
-    {
-        "countryCode": "HRV",
-        "currencyCode": "HRK",
-        "name": "Croatian Kuna"
-    },
-    {
-        "countryCode": "HUN",
-        "currencyCode": "HUF",
-        "name": "Hungarian Forint"
-    },
-    {
-        "countryCode": "HKG",
-        "currencyCode": "HKD",
-        "name": "Hong Kong Dollar"
-    },
-    {
-        "countryCode": "PHL",
-        "currencyCode": "PHP",
-        "name": "Philippine Peso"
-    },
-    {
-        "countryCode": "POL",
-        "currencyCode": "PLN",
-        "name": "Polish Zloty"
-    },
-    {
-        "countryCode": "ZAF",
-        "currencyCode": "ZAR",
-        "name": "South African Rand"
-    },
-    {
-        "countryCode": "MYS",
-        "currencyCode": "MYR",
-        "name": "Malaysian Ringgit"
-    },
-    {
-        "countryCode": "MEX",
-        "currencyCode": "MXN",
-        "name": "Mexican Peso"
-    },
-    {
-        "countryCode": "ISR",
-        "currencyCode": "ILS",
-        "name": "Israeli New Shekel"
-    },
-    {
-        "countryCode": "NZL",
-        "currencyCode": "NZD",
-        "name": "New Zealand Dollar"
-    },
-    {
-        "countryCode": "CHE",
-        "currencyCode": "CHF",
-        "name": "Swiss Franc"
-    },
-    {
-        "countryCode": "CHN",
-        "currencyCode": "CNY",
-        "name": "Chinese Yuan Renminbi"
-    },
-    {
-        "countryCode": "CAN",
-        "currencyCode": "CAD",
-        "name": "Canadian Dollar"
-    },
-    {
-        "countryCode": "CZE",
-        "currencyCode": "CZK",
-        "name": "Czech Koruna"
-    },
-    {
-        "countryCode": "KOR",
-        "currencyCode": "KRW",
-        "name": "South Korean Won"
-    },
-    {
-        "countryCode": "SGP",
-        "currencyCode": "SGD",
-        "name": "Singapore Dollar"
-    },
-    {
-        "countryCode": "SWE",
-        "currencyCode": "SEK",
-        "name": "Swedish Krona"
-    },
-    {
-        "countryCode": "DNK",
-        "currencyCode": "DKK",
-        "name": "Danish Krone"
-    },
-    {
-        "countryCode": "USA",
-        "currencyCode": "USD",
-        "name": "United States Dollar"
-    },
-    {
-        "countryCode": "TUR",
-        "currencyCode": "TRY",
-        "name": "Turkish Lira "
-    },
-    {
-        "countryCode": "THA",
-        "currencyCode": "THB",
-        "name": "Thai Baht"
-    },
-    {
-        "countryCode": "AUS",
-        "currencyCode": "AUD",
-        "name": "Australian Dollar"
-    },
-    {
-        "countryCode": "IND",
-        "currencyCode": "INR",
-        "name": "Indian Rupee"
-    },
-    {
-        "countryCode": "IDN",
-        "currencyCode": "IDR",
-        "name": "Indonesian Rupiah"
-    }
+  { "countryCode": "BG", "currencyCode": "BGN", "name": "Bulgarian Lev" },
+  { "countryCode": "EU", "currencyCode": "EUR", "name": "Euro" },
+  { "countryCode": "NO", "currencyCode": "NOK", "name": "Norwegian Krone" },
+  { "countryCode": "BR", "currencyCode": "BRL", "name": "Brazilian Real" },
+  { "countryCode": "RU", "currencyCode": "RUB", "name": "Russian Ruble" },
+  { "countryCode": "RO", "currencyCode": "RON", "name": "Romanian Leu" },
+  { "countryCode": "JP", "currencyCode": "JPY", "name": "Japanese Yen" },
+  { "countryCode": "GB", "currencyCode": "GBP", "name": "Pound Sterling" },
+  { "countryCode": "HR", "currencyCode": "HRK", "name": "Croatian Kuna" },
+  { "countryCode": "HU", "currencyCode": "HUF", "name": "Hungarian Forint" },
+  { "countryCode": "HK", "currencyCode": "HKD", "name": "Hong Kong Dollar" },
+  { "countryCode": "PH", "currencyCode": "PHP", "name": "Philippine Peso" },
+  { "countryCode": "PL", "currencyCode": "PLN", "name": "Polish Zloty" },
+  { "countryCode": "ZA", "currencyCode": "ZAR", "name": "South African Rand" },
+  { "countryCode": "MY", "currencyCode": "MYR", "name": "Malaysian Ringgit" },
+  { "countryCode": "MX", "currencyCode": "MXN", "name": "Mexican Peso" },
+  { "countryCode": "IL", "currencyCode": "ILS", "name": "Israeli New Shekel" },
+  { "countryCode": "NZ", "currencyCode": "NZD", "name": "New Zealand Dollar" },
+  { "countryCode": "CH", "currencyCode": "CHF", "name": "Swiss Franc" },
+  {
+    "countryCode": "CN",
+    "currencyCode": "CNY",
+    "name": "Chinese Yuan Renminbi"
+  },
+  { "countryCode": "CA", "currencyCode": "CAD", "name": "Canadian Dollar" },
+  { "countryCode": "CZ", "currencyCode": "CZK", "name": "Czech Koruna" },
+  { "countryCode": "KR", "currencyCode": "KRW", "name": "South Korean Won" },
+  { "countryCode": "SG", "currencyCode": "SGD", "name": "Singapore Dollar" },
+  { "countryCode": "SE", "currencyCode": "SEK", "name": "Swedish Krona" },
+  { "countryCode": "DK", "currencyCode": "DKK", "name": "Danish Krone" },
+  {
+    "countryCode": "US",
+    "currencyCode": "USD",
+    "name": "United States Dollar"
+  },
+  { "countryCode": "TR", "currencyCode": "TRY", "name": "Turkish Lira " },
+  { "countryCode": "TH", "currencyCode": "THB", "name": "Thai Baht" },
+  { "countryCode": "AU", "currencyCode": "AUD", "name": "Australian Dollar" },
+  { "countryCode": "IN", "currencyCode": "INR", "name": "Indian Rupee" },
+  { "countryCode": "ID", "currencyCode": "IDR", "name": "Indonesian Rupiah" }
 ]
