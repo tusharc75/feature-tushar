@@ -7,7 +7,6 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListSubheader,
 } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { ExpandMore, Send } from "@material-ui/icons";
@@ -50,13 +49,13 @@ const OpportunityDetailsPage = () => {
 
   useEffect(() => {
     if (id) {
-      //        fetchLeadData()
+      fetchOpportunityData();
     }
   }, [id]);
 
   const fetchOpportunityData = async () => {
     try {
-      const { data } = await getLeadData(id);
+      const { data } = await axiosInstance().get(`/opportunity/${id}`);
       handleMainPoints(data);
       let name = capitalize(data.firstName || "") + " ";
       name = name + capitalize(data.middleName || "") + " ";
@@ -93,8 +92,8 @@ const OpportunityDetailsPage = () => {
     axiosInstance()
       .get("/field?resource=Opportunity")
       .then(({ data }) => {
-        // setContactFields(data);
-        // setLoading(false);
+        setOpportunityFIelds(data);
+        setLoading(false);
         console.log(data);
       });
   };
@@ -269,7 +268,7 @@ const OpportunityDetailsPage = () => {
                 <List component="nav" style={{ padding: 0 }}>
                   {quickLinks.map((item, i) => (
                     <div key={i}>
-                      <Link to={`!#`}>
+                      <Link to={`#`}>
                         <ListItem button style={{ background: "white" }}>
                           <ListItemIcon>
                             <Send />
