@@ -274,6 +274,10 @@ body::-webkit-scrollbar-thumb {
 
 /* Padding Left */
 
+.pl-0 {
+  padding-left: 0px !important;
+}
+
 .pl-1 {
   padding-left: var(--space1) !important;
 }
@@ -295,6 +299,9 @@ body::-webkit-scrollbar-thumb {
 }
 
 /* Padding Right */
+.pr-0 {
+  padding-right: 0px !important;
+}
 
 .pr-1 {
   padding-right: var(--space1) !important;
@@ -337,6 +344,59 @@ body::-webkit-scrollbar-thumb {
 .py-5 {
   padding: var(--space5) 0 !important;
 }
+
+
+/* Margin Left */
+
+.ml-0 {
+  margin-left: 0px !important;
+}
+
+.v-1 {
+  margin-left: var(--space1) !important;
+}
+
+.ml-2 {
+  margin-left: var(--space2) !important;
+}
+
+.ml-3 {
+  margin-left: var(--space3) !important;
+}
+
+.ml-4 {
+  margin-left: var(--space4) !important;
+}
+
+.ml-5 {
+  margin-left: var(--space5) !important;
+}
+
+/* Margin Right */
+.mr-0 {
+  margin-right: 0px !important;
+}
+
+.mr-1 {
+  margin-right: var(--space1) !important;
+}
+
+.mr-2 {
+  margin-right: var(--space2) !important;
+}
+
+.mr-3 {
+  margin-right: var(--space3) !important;
+}
+
+.mr-4 {
+  margin-right: var(--space4) !important;
+}
+
+.mr-5 {
+  margin-right: var(--space5) !important;
+}
+
 
 /* Margin Y */
 
