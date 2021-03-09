@@ -87,7 +87,7 @@ export default function CreateAccountMain(props) {
                 initialValues: getObjKeys("", newFields),
             });
             setLoading(false)
-        });
+        }).catch(err => setLoading(false))
     };
 
     const handleLoading = (action, isSaveAndNew = false) => {
