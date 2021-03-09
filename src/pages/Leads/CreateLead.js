@@ -15,6 +15,7 @@ import FormTypes from "../../components/Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
 import CustomButton from '../../components/Helpers/Button'
 import { CustomEventEmitter } from './../../axios/events';
+import { formValidation } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -142,6 +143,7 @@ export default function CreateContact({ open, onClose, fetchData }) {
                     setTouched(input.fieldName, true);
                 }
             });
+            CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: 'Please fill all required fields' });
             setErrors({ ...errors });
         } else {
             if (values.noOfEmployees) {
@@ -195,10 +197,9 @@ export default function CreateContact({ open, onClose, fetchData }) {
             {
                 entityData.fields.length > 0 && <Formik
                     initialValues={entityData.initialValues}
-                    // validate={(values) => formValidation(values, entityData.fields)}
-
                     validationSchema={yupSchema(entityData.fields)}
                     validateOnMount
+                // validate={(values) => formValidation(values, entityData.fields)}
                 >
                     {({
                         values,

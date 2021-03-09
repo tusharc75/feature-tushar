@@ -7,13 +7,15 @@ import { useHistory } from "react-router-dom";
 import { CloseIcon } from '@material-ui/data-grid';
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
+import { formValidation } from '../../constants/helpers';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import Loader from '../../components/Loader'
-import { formValidation } from '../../constants/helpers';
+import { yupSchema } from '../../constants/helpers'
 import FormTypes from "./../../components/Helpers/FormTypes";
 import axiosInstance from './../../axios/axiosInstance'
+import { CustomEventEmitter } from './../../axios/events';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -129,18 +131,36 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
         });
     };
 
-    const handleSave = (values) => {
-        setIsFormSubmitted(true);
-        removeEmptyKeys(values);
-
-        axiosInstance().post("/opportunity", values).then(() => {
-            onSuccess();
-        }).then(() => {
-            setIsFormSubmitted(false);
-        });
+    const handleSave = (values, setTouched, errors, setErrors) => {
+        if (Object.keys(errors).length) {
+            entityData.fields.forEach((input) => {
+                if (input.required || values[input.fieldName]) {
+                    setTouched(input.fieldName, true);
+                }
+            });
+            CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: 'Please fill all required fields' });
+            setErrors({ ...errors });
+        } else {
+            setIsFormSubmitted(true);
+            removeEmptyKeys(values);
+            ["amount", "probability"].forEach(k => {
+                if (values[k]) {
+                    values[k] = parseInt(values[k])
+                } else if (values.hasOwnProperty(k)) {
+                    delete values[k]
+                }
+            })
+            axiosInstance().post("/opportunity", values)
+                .then(() => {
+                    CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Opportunity created Succesfully" });
+                    setIsFormSubmitted(false)
+                    onSuccess()
+                })
+                .then(() => {
+                    setIsFormSubmitted(false);
+                });
+        }
     }
-
-
     return (
         <Dialog
             maxWidth="md"
@@ -165,13 +185,17 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
             {
                 entityData.fields.length > 0 && <Formik
                     initialValues={entityData.initialValues}
-                    validate={(values) => formValidation(values, entityData.fields)}
+                    validationSchema={yupSchema(entityData.fields)}
+                    validateOnMount
+                // validate={(values) => formValidation(values, entityData.fields)}
                 >
                     {({
                         values,
                         errors,
                         touched,
                         setFieldValue,
+                        setFieldTouched,
+                        setErrors
                     }) => (
                         <Form>
                             <>
@@ -267,7 +291,7 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
                                         type="submit"
                                         variant="contained"
                                         color="primary"
-                                        onClick={() => { handleSave(values) }}
+                                        onClick={() => { handleSave(values, setFieldTouched, errors, setErrors) }}
                                     >
                                         Create Opportunity
                                         </Button>

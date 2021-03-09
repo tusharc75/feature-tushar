@@ -41,15 +41,15 @@ const InfoLabel = ({ children, info, isTooltip }) =>
       </Grid>
     </Grid>
   ) : (
-    <Grid container spacing={1} alignItems="center">
-      <Grid item xs={11} sm={11} md={11}>
-        {children}
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={11} sm={11} md={11}>
+          {children}
+        </Grid>
+        <Grid item xs={1} sm={1} md={1}>
+          <InfoIcon style={{ opacity: 0 }} color="disabled" />
+        </Grid>
       </Grid>
-      <Grid item xs={1} sm={1} md={1}>
-        <InfoIcon style={{ opacity: 0 }} color="disabled" />
-      </Grid>
-    </Grid>
-  );
+    );
 
 const autocompleteService = { current: null };
 
@@ -115,8 +115,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -169,7 +169,7 @@ const FormTypes = (props) => {
     reader.onload = function () {
       cb(reader.result);
     };
-    reader.onerror = function (error) {};
+    reader.onerror = function (error) { };
   };
 
   return type === "singleLine" ? (
@@ -434,16 +434,16 @@ const FormTypes = (props) => {
               }
             />
           ) : (
-            <GreenSwitch
-              name={name}
-              checked={values[name]}
-              onChange={
-                onChange
-                  ? onChange
-                  : (e) => setFieldValue(name, e.target.checked)
-              }
-            />
-          )
+              <GreenSwitch
+                name={name}
+                checked={values[name]}
+                onChange={
+                  onChange
+                    ? onChange
+                    : (e) => setFieldValue(name, e.target.checked)
+                }
+              />
+            )
         }
         label={label}
       />
@@ -504,9 +504,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+              setValue(newValue);
+            }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
