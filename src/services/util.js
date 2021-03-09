@@ -1,3 +1,4 @@
+import moment from 'moment'
 export const validateEmail = (value) => {
     var reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
 
@@ -33,4 +34,7 @@ export const getErrorMessage = (err) => {
 export const capitalize = (string) => {
     return string && typeof string === "string" ? string.charAt(0).toUpperCase() + string.slice(1) : string;
 };
+export const displayDate = date => {
+    return date ? moment(date).format('MM/DD/YYYY') : ''
+}
 
