@@ -1,2 +1,9 @@
 
 
+.nameLink{
+    color: #0645AD;
+    cursor: pointer;
+  }
+  .nameLink:hover{
+    text-decoration: underline;
+  }
