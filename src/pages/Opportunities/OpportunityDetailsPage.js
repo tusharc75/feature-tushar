@@ -35,7 +35,7 @@ const OpportunityDetailsPage = () => {
   } = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [alertData, setAlertData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [opportunityFields, setOpportunityFields] = useState([]);
@@ -53,7 +53,6 @@ const OpportunityDetailsPage = () => {
 
   const fetchOpportunityData = () => {
     axiosInstance().get(`/opportunity/${id}`).then(({ data: { data } }) => {
-
       handleMainPoints(data);
       let name = capitalize(data.opportunityName);
       setHeadingLbl(name);
