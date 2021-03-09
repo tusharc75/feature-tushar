@@ -7,7 +7,6 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListSubheader,
 } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { ExpandMore, Send } from "@material-ui/icons";
@@ -261,27 +260,23 @@ const LeadDetailsPage = () => {
               </Container>
             </Grid>
             <Grid item sm={4} md={4} lg={4}>
-              <Container styles={{ padding: 0 }}>
-                <List
-                  component="nav"
-                  subheader={
-                    <ListSubheader component="div" id="nested-list-subheader">
-                      Lead Heirarchy
-                    </ListSubheader>
-                  }
-                >
-                  {quickLinks.map((item) => (
-                    <Link to={`!#`}>
-                      <ListItem button>
-                        <ListItemIcon>
-                          <Send />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={`${item.label} (${item.count})`}
-                        />
-                        <ExpandMore />
-                      </ListItem>
-                    </Link>
+              <Container styles={{ padding: 0, background: "transparent" }}>
+                <List component="nav" style={{ padding: 0 }}>
+                  {quickLinks.map((item, i) => (
+                    <div key={i}>
+                      <Link to={`#`}>
+                        <ListItem button style={{ background: "white" }}>
+                          <ListItemIcon>
+                            <Send />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={`${item.label} (${item.count})`}
+                          />
+                          <ExpandMore />
+                        </ListItem>
+                      </Link>
+                      <Box marginBottom={2} />
+                    </div>
                   ))}
                 </List>
               </Container>

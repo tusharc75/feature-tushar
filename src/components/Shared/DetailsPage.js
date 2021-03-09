@@ -11,9 +11,13 @@ import {
   useTheme,
 } from "@material-ui/core";
 import { Check, Info } from "@material-ui/icons";
-import LockIcon from '@material-ui/icons/Lock';
+import LockIcon from "@material-ui/icons/Lock";
 import { Formik, Form } from "formik";
-import { getObjKeysWithValues, removeEmptyKeys, yupSchema } from "../../constants/helpers";
+import {
+  getObjKeysWithValues,
+  removeEmptyKeys,
+  yupSchema,
+} from "../../constants/helpers";
 import FormTypes from "../Helpers/FormTypes";
 
 const useStyles = makeStyles(() => ({
@@ -67,17 +71,17 @@ const Details = (props) => {
           (item) => item.optionLabel
         );
         text = onlyValues ? onlyValues.join(", ") : "_ _ _";
-      }
-      else {
+      } else {
         text = "_ _ _";
       }
     } else if (input.type === "dropDown") {
-      text = values[input.fieldName]
+      text = Object.keys(values[input.fieldName]).length
         ? values[input.fieldName].optionLabel
         : "_ _ _";
     } else if (input.type === "currency") {
-      const _val = `${values[input.fieldName].currencyCode} - ${values[input.fieldName].name
-        }`;
+      const _val = `${values[input.fieldName].currencyCode} - ${
+        values[input.fieldName].name
+      }`;
       const isValid =
         _val.split(" ")[0] !== "undefined" ||
         _val.split(" ")[2] !== "undefined";
@@ -112,8 +116,9 @@ const Details = (props) => {
             : "";
         } else if (fieldData.type === "currency") {
           const _val = obj[fieldData.fieldName]
-            ? `${obj[fieldData.fieldName].currencyCode} - ${obj[fieldData.fieldName].name
-            }`
+            ? `${obj[fieldData.fieldName].currencyCode} - ${
+                obj[fieldData.fieldName].name
+              }`
             : "";
 
           newObj[fieldData.fieldName] = _val ? _val : "";
@@ -160,7 +165,9 @@ const Details = (props) => {
         <Formik
           initialValues={initialVals}
           validationSchema={yupSchema(fieldsData, validateEmail)}
-          validateOnMount onSubmit={handleSubmit} >
+          validateOnMount
+          onSubmit={handleSubmit}
+        >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Form>
               {formsData?.map((form) => (
@@ -178,16 +185,19 @@ const Details = (props) => {
                           <Tooltip title={field.fieldData.fieldLabel}>
                             <Info color="disabled" />
                           </Tooltip>
-                          {
-                            field.isUpdate ?
-                              canEdit ? "" :
-                                <Tooltip title="You must be the owner or collaborator of this account to get update functionality">
-                                  <LockIcon color="disabled" />
-                                </Tooltip> :
-                              <Tooltip title="Not allowed to update">
+                          {field.isUpdate ? (
+                            canEdit ? (
+                              ""
+                            ) : (
+                              <Tooltip title="You must be the owner or collaborator of this account to get update functionality">
                                 <LockIcon color="disabled" />
                               </Tooltip>
-                          }
+                            )
+                          ) : (
+                            <Tooltip title="Not allowed to update">
+                              <LockIcon color="disabled" />
+                            </Tooltip>
+                          )}
                         </Box>
                         <Box display="flex" alignItems="flex-start">
                           {edit === field.fieldData.fieldName ? (
@@ -230,24 +240,25 @@ const Details = (props) => {
                                 );
                               }}
                             />
+                          ) : field.isUpdate ? (
+                            <Typography
+                              className={classes.fieldText}
+                              onClick={() => setEdit(field.fieldData.fieldName)}
+                              variant="body2"
+                              color={
+                                errors[field.fieldData.fieldName]
+                                  ? "error"
+                                  : "inherit"
+                              }
+                            >
+                              {errors[field.fieldData.fieldName]
+                                ? errors[field.fieldData.fieldName]
+                                : normalizeValues(values, field.fieldData)}
+                            </Typography>
                           ) : (
-                            field.isUpdate ?
-                              <Typography
-                                className={classes.fieldText}
-                                onClick={() => setEdit(field.fieldData.fieldName)}
-                                variant="body2"
-                                color={
-                                  errors[field.fieldData.fieldName]
-                                    ? "error"
-                                    : "inherit"
-                                }
-                              >
-                                {errors[field.fieldData.fieldName]
-                                  ? errors[field.fieldData.fieldName]
-                                  : normalizeValues(values, field.fieldData)}
-                              </Typography> : <Typography className={classes.nonEditable}>
-                                {normalizeValues(values, field.fieldData)}
-                              </Typography>
+                            <Typography className={classes.nonEditable}>
+                              {normalizeValues(values, field.fieldData)}
+                            </Typography>
                           )}
 
                           {edit === field.fieldData.fieldName ? (
@@ -267,23 +278,21 @@ const Details = (props) => {
                 </React.Fragment>
               ))}
               <Box marginTop={2} display="flex" justifyContent="flex-end">
-                {
-                  canEdit ?
-                    <Button
-                      disabled={
-                        Object.values(simplifyValues(initialVals)).toString() ===
+                {canEdit ? (
+                  <Button
+                    disabled={
+                      Object.values(simplifyValues(initialVals)).toString() ===
                         Object.values(simplifyValues(values)).toString() ||
-                        isUpdating
-                      }
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      onClick={submitForm}
-                    >
-                      {isUpdating ? <CircularProgress size={20} /> : "Save"}
-                    </Button> : null
-                }
-
+                      isUpdating
+                    }
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={submitForm}
+                  >
+                    {isUpdating ? <CircularProgress size={20} /> : "Save"}
+                  </Button>
+                ) : null}
               </Box>
             </Form>
           )}
