@@ -75,13 +75,11 @@ const LeadDetailsPage = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
+      company: data.company || "",
+      title: data.title || "",
       phone: data.phone || "",
       email: data.email || "",
-      title: data.title || "",
     };
-    if (data?.accountName?.optionLabel) {
-      tempMp["Account Name"] = data.accountName.optionLabel;
-    }
     setMainPoints(tempMp);
   };
 
@@ -171,23 +169,11 @@ const LeadDetailsPage = () => {
 
   const quickLinks = [
     {
-      label: "Projects",
+      label: "Files",
       count: 0,
     },
     {
-      label: "Opportunity",
-      count: 0,
-    },
-    {
-      label: "Quotes",
-      count: 0,
-    },
-    {
-      label: "Accounts Teams",
-      count: 0,
-    },
-    {
-      label: "Contacts",
+      label: "Notes",
       count: 0,
     },
   ];

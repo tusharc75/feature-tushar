@@ -57,13 +57,7 @@ const OpportunityDetailsPage = () => {
     try {
       const { data } = await axiosInstance().get(`/opportunity/${id}`);
       handleMainPoints(data);
-      let name = capitalize(data.firstName || "") + " ";
-      name = name + capitalize(data.middleName || "") + " ";
-      name = name + capitalize(data.lastName || "");
-
-      if (data?.salutation?.optionLabel) {
-        name = data.salutation.optionLabel + name;
-      }
+      let name = capitalize(data.opportunityName);
       setHeadingLbl(name);
       handleAllowToEditList(data);
       setOpportunityData(data);
@@ -77,9 +71,10 @@ const OpportunityDetailsPage = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      phone: data.phone || "",
-      email: data.email || "",
-      title: data.title || "",
+      accountName: data.accountName || "",
+      closeData: data.closeData || "",
+      amount: data.amount || "",
+      opportunityOwner: data.owner || "",
     };
     if (data?.accountName?.optionLabel) {
       tempMp["Account Name"] = data.accountName.optionLabel;
@@ -173,11 +168,7 @@ const OpportunityDetailsPage = () => {
 
   const quickLinks = [
     {
-      label: "Projects",
-      count: 0,
-    },
-    {
-      label: "Leads",
+      label: "Contact Roles",
       count: 0,
     },
     {
@@ -185,11 +176,15 @@ const OpportunityDetailsPage = () => {
       count: 0,
     },
     {
-      label: "Accounts Teams",
+      label: "Products",
       count: 0,
     },
     {
-      label: "Contacts",
+      label: "Notes",
+      count: 0,
+    },
+    {
+      label: "Files",
       count: 0,
     },
   ];
