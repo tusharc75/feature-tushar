@@ -35,7 +35,7 @@ const OpportunityDetailsPage = () => {
   } = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [alertData, setAlertData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [opportunityFields, setOpportunityFIelds] = useState([]);
@@ -55,7 +55,10 @@ const OpportunityDetailsPage = () => {
 
   const fetchOpportunityData = async () => {
     try {
-      const { data } = await axiosInstance().get(`/opportunity/${id}`);
+      const {
+        data: { data },
+      } = await axiosInstance().get(`/opportunity/${id}`);
+      console.log(data);
       handleMainPoints(data);
       let name = capitalize(data.opportunityName);
       setHeadingLbl(name);
@@ -64,21 +67,18 @@ const OpportunityDetailsPage = () => {
       getOpportunityFields();
       setCustomizedRoutes([
         ...customizedRoutes,
-        { title: `${data.firstName} ${data.lastName}` },
+        { title: data.opportunityName },
       ]);
     } catch (error) {}
   };
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      accountName: data.accountName || "",
+      accountName: data.accountName.optionLabel || "",
       closeData: data.closeData || "",
       amount: data.amount || "",
-      opportunityOwner: data.owner || "",
+      opportunityOwner: data.owner.optionLabel || "",
     };
-    if (data?.accountName?.optionLabel) {
-      tempMp["Account Name"] = data.accountName.optionLabel;
-    }
     console.log(tempMp);
     setMainPoints(tempMp);
   };
@@ -86,7 +86,7 @@ const OpportunityDetailsPage = () => {
   const getOpportunityFields = () => {
     axiosInstance()
       .get("/field?resource=Opportunity")
-      .then(({ data }) => {
+      .then(({ data: { data } }) => {
         setOpportunityFIelds(data);
         setLoading(false);
         console.log(data);
