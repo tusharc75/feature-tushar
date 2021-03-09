@@ -24,6 +24,7 @@ import RelatedContactsBox from './RelatedContacts'
 import axiosInstance from './../../axios/axiosInstance'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import AccountHierarchy from './AccountHierarchy';
 
 const Roles = () => {
     const history = useHistory();
@@ -40,6 +41,7 @@ const Roles = () => {
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState([routes.account]);
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
+    const [accountHeirarchyData, setAccountHeirarchyData] = useState([]);
 
     let { id } = useParams();
 
@@ -71,6 +73,48 @@ const Roles = () => {
             handleAllowToEditList(data)
             handleMainPonts(data)
             setAccountData(data)
+
+            if (data.parentHierarchy && data.parentHierarchy.length > 0) {
+
+                let accounts = data.parentHierarchy;
+                const { parentHierarchy, ...rest } = data;
+                accounts.push({ ...rest, current: true });
+
+                var map = {}, node, roots = [], i;
+
+                for (i = 0; i < accounts.length; i += 1) {
+                    map[accounts[i]._id] = i; // initialize the map
+                    accounts[i].children = []; // initialize the children
+                }
+                
+                for (i = 0; i < accounts.length; i += 1) {
+                    node = accounts[i];
+                    if (node.parentAccount) {
+                        // if you have dangling branches check that map[node.parentId] exists
+                        accounts[map[node.parentAccount.optionValue]].children.push(node);
+                    } else {
+                        roots.push(node);
+                    }
+                }
+                setAccountHeirarchyData([...roots]);
+            } else {
+                setAccountHeirarchyData([
+                    {
+                        accountName: data.accountName,
+                        id: data._id,
+                        typeOfAccount: data.typeOfAccount,
+                        industry: data.industry,
+                        typeOfBusiness: data.typeOfBusiness,
+                        parentAccount: data.parentAccount,
+                        phone: data.phone,
+                        children: []
+                    }
+                ])
+            }
+
+
+            //  setAccountHeirarchyData
+
             if (accountFields.length == 0) {
                 getAccountFields()
             }
@@ -267,11 +311,8 @@ const Roles = () => {
                                                     />
                                                 </Box>
                                                 <Box index={1} hidden={currentTabIndex !== 1}>
-                                                    
-                                                    
+                                                    <AccountHierarchy data={accountHeirarchyData} />
 
-
-                                                    
                                                 </Box>
                                             </>
                                     }
