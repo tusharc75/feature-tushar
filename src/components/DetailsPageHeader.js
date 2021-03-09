@@ -49,8 +49,8 @@ const CustomHeader = (props) => {
                                 return <>
                                     {
                                         mainPoints[key] ? (
-                                            <React.Fragment key={key + i}>
-                                                <Box className={classes.box} >
+                                            <React.Fragment>
+                                                <Box className={classes.box} key={key + i}>
                                                     <Typography align="center" color="primary">
                                                         <strong>{mainPoints[key] || ''}</strong>
                                                     </Typography>

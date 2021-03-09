@@ -15,6 +15,7 @@ import { Add, ExpandMore } from "@material-ui/icons";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
 import SearchBox from "../../components/Helpers/SearchBox";
+import CreateOpportunity from './CreateOpportunity'
 import "./style.css";
 
 const useStyles = makeStyles((theme) => ({
@@ -35,6 +36,7 @@ const Opportunities = () => {
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
 
   const handleSearch = (e) => {
     if (query.page !== 1) {
@@ -52,105 +54,122 @@ const Opportunities = () => {
     setAnchorEl(null);
   };
 
+  const clickCreateNew = () => {
+    setShowCreateOpportunityDialog(true);
+  }
+
   return (
-    <Layout>
-      <Grid container spacing={3} direction="row">
-        <Grid item xs={12} sm={6} className="pl-3"></Grid>
-        <Grid item xs={12} sm={6} className="pr-3">
-          <Grid container justify="flex-end">
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Import from Excel
+    <>
+      <Layout>
+        <Grid container spacing={3} direction="row">
+          <Grid item xs={12} sm={6} className="pl-3"></Grid>
+          <Grid item xs={12} sm={6} className="pr-3">
+            <Grid container justify="flex-end">
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Import from Excel
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Export to Excel
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Export to Excel
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Download Template
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Download Template
             </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Email a Link
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <Link
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Email a Link
             </Link>
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
 
-      {/* Tables Begins Here */}
-      <Container>
-        <Grid container justify="space-between">
-          <Grid item></Grid>
+        {/* Tables Begins Here */}
+        <Container>
+          <Grid container justify="space-between">
+            <Grid item></Grid>
 
-          <Grid item>
-            <SearchBox onSearch={handleSearch} value={searchVal} size="sm" />
-            <Box component="span" marginX={1} />
+            <Grid item>
+              <SearchBox onSearch={handleSearch} value={searchVal} size="small" />
+              <Box component="span" marginX={1} />
 
-            <Button variant="contained" color="primary" startIcon={<Add />}>
-              Add
+              <Button variant="contained" color="primary" startIcon={<Add />} onClick={clickCreateNew}>
+                Add
             </Button>
 
-            <Box component="span" marginX={1} />
+              <Box component="span" marginX={1} />
 
-            <Button
-              variant="outlined"
-              color="default"
-              aria-controls="action-menu"
-              onClick={openActions}
-            >
-              Actions <ExpandMore />
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem>Delete</MenuItem>
-            </Menu>
+              <Button
+                variant="outlined"
+                color="default"
+                aria-controls="action-menu"
+                onClick={openActions}
+              >
+                Actions <ExpandMore />
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem>Delete</MenuItem>
+              </Menu>
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
-      <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-        <div className="contact-grid-height1">
-          <DataGrid columns={[]} rows={[]} />
-        </div>
-      </Container>
-    </Layout>
+        </Container>
+        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+          <div className="contact-grid-height1">
+            <DataGrid columns={[]} rows={[]} />
+          </div>
+        </Container>
+      </Layout>
+
+      {
+        showCreateOpportunityDialog && <CreateOpportunity
+          open={showCreateOpportunityDialog}
+          onClose={() => setShowCreateOpportunityDialog(false)}
+          onSuccess={() => {
+            setShowCreateOpportunityDialog(false);
+            //  Get All Opportunity Api Call
+          }}
+        />
+      }
+    </>
   );
 };
 

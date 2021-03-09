@@ -315,3 +315,69 @@ body::-webkit-scrollbar-thumb {
 .pr-5 {
   padding-right: var(--space5) !important;
 }
+
+/* Padding Y */
+
+.py-1 {
+  padding: var(--space1) 0 !important;
+}
+
+.py-2 {
+  padding: var(--space2) 0 !important;
+}
+
+.py-3 {
+  padding: var(--space3) 0 !important;
+}
+
+.py-4 {
+  padding: var(--space4) 0 !important;
+}
+
+.py-5 {
+  padding: var(--space5) 0 !important;
+}
+
+/* Margin Y */
+
+.my-1 {
+  margin: var(--space1) 0 !important;
+}
+
+.my-2 {
+  margin: var(--space2) 0 !important;
+}
+
+.my-3 {
+  margin: var(--space3) 0 !important;
+}
+
+.my-4 {
+  margin: var(--space4) 0 !important;
+}
+
+.my-5 {
+  margin: var(--space5) 0 !important;
+}
+
+/* Margin Bottom */
+
+.mb-1 {
+  margin-bottom: var(--space1) !important;
+}
+
+.mb-2 {
+  margin-bottom: var(--space2) !important;
+}
+
+.mb-3 {
+  margin-bottom: var(--space3) !important;
+}
+
+.mb-4 {
+  margin-bottom: var(--space4) !important;
+}
+
+.mb-5 {
+  margin-bottom: var(--space5) !important;
+}
