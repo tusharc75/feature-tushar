@@ -129,11 +129,6 @@ export default function Contact() {
                         }
                     }}
                 />
-                // : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the selection functionality">
-                //     <IconButton>
-                //         <BlockIcon fontSize="small" color="error" />
-                //     </IconButton>
-                // </Tooltip>
             ),
             disableColumnMenu: true,
             sortable: false,

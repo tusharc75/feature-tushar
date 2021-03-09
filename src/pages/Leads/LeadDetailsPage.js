@@ -67,7 +67,7 @@ const LeadDetailsPage = () => {
       setLeadData(data);
       getLeadFields();
       setCustomizedRoutes([
-        ...customizedRoutes,
+        routes.lead,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
     } catch (error) {}
