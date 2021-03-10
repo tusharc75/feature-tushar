@@ -104,7 +104,7 @@ const OpportunityDetailsPage = () => {
             (d) => d.optionValue === userId
           ) > -1;
       }
-
+      
       if (allowToEdit) setAllowedToEdit(allowToEdit);
     }
   };
@@ -225,8 +225,8 @@ const OpportunityDetailsPage = () => {
           >
             <Box component="span" marginX={1} />
             {opportunityData?.owner?.optionValue &&
-            user?.user?._id &&
-            opportunityData.owner.optionValue === user.user._id ? (
+              user?.user?._id &&
+              opportunityData.owner.optionValue === user.user._id ? (
               <Button
                 variant="contained"
                 color="secondary"
@@ -273,6 +273,7 @@ const OpportunityDetailsPage = () => {
                     isUpdating={isUpdating}
                     canEdit={allowedToEdit}
                     handleUpdate={handleUpdateOpportunity}
+                    sourceComponent="opportunity"
                   />
                 )}
               </Container>

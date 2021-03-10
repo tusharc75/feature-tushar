@@ -268,6 +268,7 @@ const LeadDetailsPage = () => {
                     isUpdating={isUpdating}
                     canEdit={allowedToEdit}
                     handleUpdate={handleUpdateLead}
+                    sourceComponent="lead"
                   />
                 )}
               </Container>
