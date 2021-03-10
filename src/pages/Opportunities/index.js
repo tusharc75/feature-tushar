@@ -227,12 +227,12 @@ const Opportunities = () => {
                 </Tooltip > :
                 <Tooltip className="cursor-stop" title="You must be the owner of this opportunity to get the delete functionality">
                   <IconButton aria-label="Delete">
-                    <DeleteIcon fontSize="small" />
+                    <DeleteIcon fontSize="small" color="error" />
                   </IconButton>
                 </Tooltip> :
               <Tooltip className="cursor-stop" title="You do not have permission to delete opportunity">
                 <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
+                  <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
               </Tooltip>
           }
