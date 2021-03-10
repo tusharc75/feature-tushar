@@ -82,7 +82,6 @@ const OpportunityDetailsPage = () => {
       .then(({ data: { data } }) => {
         setOpportunityFields(data);
         setLoading(false);
-        console.log(data);
       });
   };
 
