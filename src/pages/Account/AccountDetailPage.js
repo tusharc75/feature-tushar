@@ -39,7 +39,7 @@ const Roles = () => {
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [accountFields, setAccountFields] = useState([])
     const [mainPoints, setMainPoints] = useState({})
-    const [customizedRoutes, setCustomizedRoutes] = useState([routes.account]);
+    const [customizedRoutes, setCustomizedRoutes] = useState();
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
     const [accountHeirarchyData, setAccountHeirarchyData] = useState([]);
 
@@ -67,7 +67,7 @@ const Roles = () => {
         setLoading(true)
 
         axiosInstance().get(`/account/${id}`).then(({ data: { data } }) => {
-            setCustomizedRoutes([...customizedRoutes, { title: data.accountName }]);
+            setCustomizedRoutes([routes.account, { title: data.accountName }]);
 
             setHeadingLbl(data.accountName || '')
             handleAllowToEditList(data)
@@ -86,7 +86,7 @@ const Roles = () => {
                     map[accounts[i]._id] = i; // initialize the map
                     accounts[i].children = []; // initialize the children
                 }
-                
+
                 for (i = 0; i < accounts.length; i += 1) {
                     node = accounts[i];
                     if (node.parentAccount) {
@@ -100,8 +100,8 @@ const Roles = () => {
             } else {
                 setAccountHeirarchyData([
                     {
+                        _id: data._id,
                         accountName: data.accountName,
-                        id: data._id,
                         typeOfAccount: data.typeOfAccount,
                         industry: data.industry,
                         typeOfBusiness: data.typeOfBusiness,
@@ -312,7 +312,6 @@ const Roles = () => {
                                                 </Box>
                                                 <Box index={1} hidden={currentTabIndex !== 1}>
                                                     <AccountHierarchy data={accountHeirarchyData} />
-
                                                 </Box>
                                             </>
                                     }

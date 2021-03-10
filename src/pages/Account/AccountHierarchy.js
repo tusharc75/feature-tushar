@@ -1,5 +1,4 @@
 import React from 'react'
-import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import Table from '@material-ui/core/Table';
@@ -8,22 +7,23 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import Chip from '@material-ui/core/Chip';
+import { Link } from 'react-router-dom'
+import routes from './../../components/Helpers/Routes';
 
 export default function AccountHierarchy({ data }) {
 
     const minWidth = 200;
 
     const Row = ({ rowData, index }) => {
-
+        console.log(rowData);
         const [open, setOpen] = React.useState(true);
 
         return <React.Fragment>
-            <TableRow>
+            <TableRow index={index}>
                 <TableCell>
                     {
                         rowData.children && rowData.children.length > 0 ? <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
@@ -32,7 +32,9 @@ export default function AccountHierarchy({ data }) {
                     }
                 </TableCell>
                 <TableCell style={{ minWidth: minWidth }} component="th" scope="row">
-                    {rowData.accountName}
+                    <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData._id}`}>
+                        {rowData.accountName}
+                    </Link>
                     {
                         rowData.current ? <Chip label="Current" size="small" className="ml-2" /> : ""
                     }

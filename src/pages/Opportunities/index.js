@@ -22,6 +22,7 @@ import { CustomEventEmitter } from './../../axios/events';
 import Header from "./Header";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CreateOpportunity from './CreateOpportunity'
+import MessageDialog from '../../components/Helpers/MessageDialog'
 import "./style.css";
 
 let opportunityTimeout
@@ -62,14 +63,15 @@ const Opportunities = () => {
   const [deleteRec, setDeleteRec] = useState({})
   const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
 
   useEffect(() => {
     const data = user?.role?.sideBar;
 
     if (data) {
-      const hasAccountPermission = data.find(d => d.name == "Opportunity");
-      if (hasAccountPermission) {
-        setOpportunityPermissions({ isCreate: hasAccountPermission.isCreate, isRead: hasAccountPermission.isRead, isDelete: hasAccountPermission.isDelete });
+      const hasOpportunityPermission = data.find(d => d.name == "Opportunity");
+      if (hasOpportunityPermission) {
+        setOpportunityPermissions({ isCreate: hasOpportunityPermission.isCreate, isRead: hasOpportunityPermission.isRead, isDelete: hasOpportunityPermission.isDelete });
       }
     }
   }, [user]);
@@ -169,9 +171,7 @@ const Opportunities = () => {
             setCheckAllOpportunities(ev.target.checked);
             const gridData = dataRows;
             gridData.map((d) => {
-              if (d.allowToDelete) {
-                d.isChecked = ev.target.checked;
-              }
+              d.isChecked = ev.target.checked;
               return d;
             });
             setDataRows([...gridData]);
@@ -179,18 +179,14 @@ const Opportunities = () => {
         />
       ),
       renderCell: (params) => (
-        params.row.allowToDelete ? <Checkbox
+        <Checkbox
           color="primary"
           checked={params.value}
           onChange={(ev) => {
             updateCheckedStatus(params, ev)
 
           }}
-        /> : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this contact to get the selection functionality">
-            <IconButton>
-              <BlockIcon fontSize="small" color="error" />
-            </IconButton>
-          </Tooltip>
+        />
       ),
       disableColumnMenu: true,
       sortable: false,
@@ -220,17 +216,25 @@ const Opportunities = () => {
       renderCell: (params) => (
         <>
           {
-            params.row.allowToDelete ?
-              <Tooltip
-                title="Delete" >
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
-                >
-                  <DeleteIcon
-                    fontSize="small" color="error" />
+            opportunityPermissions.isDelete ?
+              params.row.allowToDelete ?
+                <Tooltip
+                  title="Delete" >
+                  <IconButton aria-label="Delete" onClick={() => showConfirmBox(params.row)} >
+                    <DeleteIcon
+                      fontSize="small" color="error" />
+                  </IconButton>
+                </Tooltip > :
+                <Tooltip className="cursor-stop" title="You must be the owner of this opportunity to get the delete functionality">
+                  <IconButton aria-label="Delete">
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip> :
+              <Tooltip className="cursor-stop" title="You do not have permission to delete opportunity">
+                <IconButton aria-label="Delete">
+                  <DeleteIcon fontSize="small" />
                 </IconButton>
-              </Tooltip > : null
+              </Tooltip>
           }
 
         </>
@@ -239,9 +243,18 @@ const Opportunities = () => {
   ];
 
   const showConfirmBox = (row) => {
-    setIsConformDialogVisible(true)
-    if (row && row._id) {
-      setDeleteRec(row)
+    if (row) {
+      setIsConformDialogVisible(true)
+      if (row && row._id) {
+        setDeleteRec(row)
+      }
+    }
+    else {
+      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+        setShowDeleteWarningConfirmBox(true);
+      } else {
+        setIsConformDialogVisible(true)
+      }
     }
   }
   const getFirstName = tData => {
@@ -414,6 +427,15 @@ const Opportunities = () => {
               density="compact"
             />
           </div>
+
+          {
+            showDeleteWarningConfirmBox ?
+              <MessageDialog
+                open={showDeleteWarningConfirmBox}
+                message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+                onClose={() => setShowDeleteWarningConfirmBox(false)}
+              /> : null
+          }
           {
             isConfirmDialogVisible ?
               <ConfirmationDialog

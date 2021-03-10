@@ -39,13 +39,11 @@ const OpportunityDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [opportunityFields, setOpportunityFIelds] = useState([]);
+  const [opportunityFields, setOpportunityFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState([
-    routes.opportunity,
-  ]);
+  const [customizedRoutes, setCustomizedRoutes] = useState([]);
   let { id } = useParams();
 
   useEffect(() => {
@@ -54,33 +52,27 @@ const OpportunityDetailsPage = () => {
     }
   }, [id]);
 
-  const fetchOpportunityData = async () => {
-    try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`/opportunity/${id}`);
-      console.log(data);
-      handleMainPoints(data);
-      let name = capitalize(data.opportunityName);
-      setHeadingLbl(name);
-      handleAllowToEditList(data);
-      setOpportunityData(data);
-      getOpportunityFields();
-      setCustomizedRoutes([
-        ...customizedRoutes,
-        { title: data.opportunityName },
-      ]);
-    } catch (error) {}
+  const fetchOpportunityData = () => {
+    axiosInstance()
+      .get(`/opportunity/${id}`)
+      .then(({ data: { data } }) => {
+        handleMainPoints(data);
+        let name = capitalize(data.opportunityName);
+        setHeadingLbl(name);
+        handleAllowToEditList(data);
+        setOpportunityData(data);
+        getOpportunityFields();
+        setCustomizedRoutes([routes.opportunity, { title: `${name}` }]);
+      });
   };
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      accountName: data.accountName.optionLabel || "",
-      closeData: data.closeData || "",
+      accountName: data?.accountName?.optionLabel || "",
+      closeDate: data.closeDate || "",
       amount: data.amount || "",
-      opportunityOwner: data.owner.optionLabel || "",
+      opportunityOwner: data?.owner?.optionLabel || "",
     };
-    console.log(tempMp);
     setMainPoints(tempMp);
   };
 
@@ -88,7 +80,7 @@ const OpportunityDetailsPage = () => {
     axiosInstance()
       .get("/field?resource=Opportunity")
       .then(({ data: { data } }) => {
-        setOpportunityFIelds(data);
+        setOpportunityFields(data);
         setLoading(false);
         console.log(data);
       });
