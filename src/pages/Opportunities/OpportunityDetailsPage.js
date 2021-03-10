@@ -8,8 +8,9 @@ import {
   ListItemText,
   ListItemIcon,
 } from "@material-ui/core";
-import { useHistory, useParams, Link } from "react-router-dom";
 import { ExpandMore, Send } from "@material-ui/icons";
+import { Skeleton } from "@material-ui/lab";
+import { useHistory, useParams, Link } from "react-router-dom";
 
 import { getErrorMessage } from "../../services/util";
 import CustomToast from "../../components/Helpers/CustomToast";
@@ -52,18 +53,17 @@ const OpportunityDetailsPage = () => {
   }, [id]);
 
   const fetchOpportunityData = () => {
-    axiosInstance().get(`/opportunity/${id}`).then(({ data: { data } }) => {
-      handleMainPoints(data);
-      let name = capitalize(data.opportunityName);
-      setHeadingLbl(name);
-      handleAllowToEditList(data);
-      setOpportunityData(data);
-      getOpportunityFields();
-      setCustomizedRoutes([
-        routes.opportunity,
-        { title: `${name}` },
-      ]);
-    })
+    axiosInstance()
+      .get(`/opportunity/${id}`)
+      .then(({ data: { data } }) => {
+        handleMainPoints(data);
+        let name = capitalize(data.opportunityName);
+        setHeadingLbl(name);
+        handleAllowToEditList(data);
+        setOpportunityData(data);
+        getOpportunityFields();
+        setCustomizedRoutes([routes.opportunity, { title: `${name}` }]);
+      });
   };
 
   const handleMainPoints = (data) => {
@@ -197,28 +197,47 @@ const OpportunityDetailsPage = () => {
             <CustomBreadCrumbs routes={customizedRoutes} />
           </Grid>
         </Grid>
-        <CustomHeader
-          heading={headingLbl}
-          logo={
-            opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
-          }
-          mainPoints={mainPoints}
-          style={{ marginTop: "150px", minHeight: "200px" }}
-          showHeading={true}
-        >
-          <Box component="span" marginX={1} />
-          {opportunityData?.owner?.optionValue &&
+        {!opportunityData ? (
+          <Container>
+            <Skeleton variant="text" width="150px" height="40px" />
+            <Box display="flex">
+              <Skeleton
+                style={{ borderRadius: 6 }}
+                width="120px"
+                height="80px"
+              />
+              <Box marginX={1} />
+              <Skeleton
+                style={{ borderRadius: 6 }}
+                width="120px"
+                height="80px"
+              />
+            </Box>
+          </Container>
+        ) : (
+          <CustomHeader
+            heading={headingLbl}
+            logo={
+              opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
+            }
+            mainPoints={mainPoints}
+            style={{ marginTop: "150px", minHeight: "200px" }}
+            showHeading={true}
+          >
+            <Box component="span" marginX={1} />
+            {opportunityData?.owner?.optionValue &&
             user?.user?._id &&
             opportunityData.owner.optionValue === user.user._id ? (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => setShowConfirmBox(true)}
-            >
-              Delete
-            </Button>
-          ) : null}
-        </CustomHeader>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => setShowConfirmBox(true)}
+              >
+                Delete
+              </Button>
+            ) : null}
+          </CustomHeader>
+        )}
 
         <div>
           <Grid
@@ -229,7 +248,15 @@ const OpportunityDetailsPage = () => {
             <Grid item sm={8} md={8} lg={8}>
               <Container styles={{ height: "100%" }}>
                 {loading ? (
-                  <Loader style={{ height: "100%" }} text="Loading Data..." />
+                  <Grid container spacing={2}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                      <Grid item sm={6} md={6}>
+                        <Skeleton variant="text" width="100px" height="16px" />
+                        <Box marginY={1} />
+                        <Skeleton width="100%" height="50px" />
+                      </Grid>
+                    ))}
+                  </Grid>
                 ) : !opportunityFields.length ? (
                   <Box
                     height="100%"
