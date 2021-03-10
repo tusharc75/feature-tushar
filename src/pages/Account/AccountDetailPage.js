@@ -37,6 +37,7 @@ const Roles = () => {
     const [relatedContacts, setRelatedContacts] = useState([])
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
+    const [showApproveDisapproveConfirmBox, setShowApproveDisapproveConfirmBox] = useState(false);
     const [accountFields, setAccountFields] = useState([])
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState();
@@ -44,6 +45,25 @@ const Roles = () => {
     const [accountHeirarchyData, setAccountHeirarchyData] = useState([]);
 
     let { id } = useParams();
+
+    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isDelete: false, approveAccount: false });
+
+    useEffect(() => {
+        const data = user.role?.sideBar;
+
+        if (data) {
+            const hasAccountPermission = data.find(d => d.name == "Account");
+            if (hasAccountPermission) {
+                setAccountPermissions(
+                    {
+                        isCreate: hasAccountPermission.isCreate,
+                        isRead: hasAccountPermission.isRead,
+                        isDelete: hasAccountPermission.isDelete,
+                        approveAccount: user.user?.permissions?.approveAccount
+                    });
+            }
+        }
+    }, [user]);
 
     useEffect(() => {
         if (id) {
@@ -211,6 +231,17 @@ const Roles = () => {
             setShowConfirmBox(false)
         }
     }
+
+    const handleApproveDisapprove = () => {
+        axiosInstance().post(`/account/approve`, { ids: [accountData._id], approved: !accountData.static?.approved })
+            .then(() => {
+                fetchAccountData()
+                setShowApproveDisapproveConfirmBox(false);
+            }).catch(() => {
+                setShowApproveDisapproveConfirmBox(false);
+            })
+    }
+
     const handleUpdateAccount = (values) => {
         setUpdating(true);
         if (values.employees) {
@@ -270,7 +301,18 @@ const Roles = () => {
                     >
                         <Box component="span" marginX={1} />
                         {
-                            accountData?.owner?.optionValue && user?.user?._id &&
+                            accountPermissions.approveAccount && <>
+                                <Button
+                                    variant="contained" color={accountData.static?.approved ? "secondary" : "primary"}
+                                    onClick={() => setShowApproveDisapproveConfirmBox(true)}
+                                >
+                                    {accountData.static?.approved ? "Disapprove" : "Approve"}
+                                </Button>
+                                <Box component="span" marginX={1} />
+                            </>
+                        }
+                        {
+                            accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
                                 accountData.owner.optionValue === user.user._id ?
                                 <Button
                                     variant="contained" color="secondary"
@@ -337,14 +379,26 @@ const Roles = () => {
                                 </div>
                             </Grid>
                         </Grid>
-                        {showConfirmBox ? (
-                            <ConfirmationDialog
-                                open={showConfirmBox}
-                                message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
-                                onClose={() => setShowConfirmBox(false)}
-                                onOk={handleDeleteAcc}
-                            />
-                        ) : null}
+                        {
+                            showConfirmBox ? (
+                                <ConfirmationDialog
+                                    open={showConfirmBox}
+                                    message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
+                                    onClose={() => setShowConfirmBox(false)}
+                                    onOk={handleDeleteAcc}
+                                />
+                            ) : null
+                        }
+                        {
+                            showApproveDisapproveConfirmBox ? (
+                                <ConfirmationDialog
+                                    open={showApproveDisapproveConfirmBox}
+                                    message={`Are you sure you want to ${accountData.static?.approved ? 'disapprove' : "approve"} this Account ?`}
+                                    onClose={() => setShowApproveDisapproveConfirmBox(false)}
+                                    onOk={handleApproveDisapprove}
+                                />
+                            ) : null
+                        }
                     </Container>
                 </div>
             </Layout>

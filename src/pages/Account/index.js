@@ -32,6 +32,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CustomEventEmitter } from './../../axios/events';
 import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "./../../components/Container";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 import './account.css'
 
@@ -82,8 +84,9 @@ export default function Account() {
     const [selectedType, setselectedType] = useState(1)
 
     const [singleAccountDelete, setSingleAccountDelete] = useState({ id: null, show: false, accountName: "" })
+    const [singleApproveDisapproveAccount, setSingleApproveDisapproveAccount] = useState({ show: false, approved: false, id: null, accountName: "" })
 
-    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
+    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isDelete: false, approveAccount: false });
 
     useEffect(() => {
         const data = user.role?.sideBar;
@@ -91,7 +94,12 @@ export default function Account() {
         if (data) {
             const hasAccountPermission = data.find(d => d.name == "Account");
             if (hasAccountPermission) {
-                setAccountPermissions({ isCreate: hasAccountPermission.isCreate, isRead: hasAccountPermission.isRead, isDelete: hasAccountPermission.isDelete });
+                setAccountPermissions({
+                    isCreate: hasAccountPermission.isCreate,
+                    isRead: hasAccountPermission.isRead,
+                    isDelete: hasAccountPermission.isDelete,
+                    approveAccount: user.user?.permissions?.approveAccount
+                });
             }
         }
     }, [user]);
@@ -122,7 +130,8 @@ export default function Account() {
             id: u._id,
             allowToDelete: u.allowToDelete,
             collaborator: u.collaborator || [],
-            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : ""
+            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : "",
+            approved: u.static?.approved ? u.static?.approved : false
         }));
         setDataRows([...rows]);
     }, [accountData])
@@ -259,6 +268,25 @@ export default function Account() {
                     }
 
                     {
+                        accountPermissions.approveAccount ?
+                            params.row.approved ?
+                                <Tooltip title="Disapprove">
+                                    <IconButton aria-label="Disapprove" onClick={() => {
+                                        setSingleApproveDisapproveAccount({ show: true, approved: false, id: params.row._id, accountName: params.row.accountName })
+                                    }}>
+                                        <CancelIcon fontSize="small" color="error" />
+                                    </IconButton>
+                                </Tooltip> :
+                                <Tooltip title="Approve">
+                                    <IconButton aria-label="Approve" onClick={() => {
+                                        setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
+                                    }}>
+                                        <CheckCircleIcon fontSize="small" color="primary" />
+                                    </IconButton>
+                                </Tooltip> : ""
+                    }
+
+                    {
                         accountPermissions.isDelete ?
                             params.row.allowToDelete ?
                                 <Tooltip title="Delete">
@@ -391,6 +419,18 @@ export default function Account() {
             });
 
         setSingleAccountDelete({ id: null, show: false, accountName: "" });
+        setSelectedRecs([])
+    }
+
+    const handleSingleApproveDisapproveAccount = () => {
+        axiosInstance().post(`/account/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
+            .then(({ data }) => {
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
+                fetchAccounts();
+            }).catch(() => {
+                setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
+            });
         setSelectedRecs([])
     }
 
@@ -606,6 +646,16 @@ export default function Account() {
                                     message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
                                     onClose={() => setSingleAccountDelete({ id: null, show: false, accountName: "" })}
                                     onOk={handleSingleDeleteAccounts}
+                                /> : null
+                        }
+
+                        {
+                            singleApproveDisapproveAccount.show ?
+                                <ConfirmationDialog
+                                    open={singleApproveDisapproveAccount.show}
+                                    message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved ? "approve" : "disapprove"} account: ${singleApproveDisapproveAccount.accountName} ? `}
+                                    onClose={() => setSingleApproveDisapproveAccount({ id: null, show: false, accountName: "" })}
+                                    onOk={handleSingleApproveDisapproveAccount}
                                 /> : null
                         }
 
