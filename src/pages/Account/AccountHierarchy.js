@@ -16,6 +16,8 @@ import SaveAlt from '@material-ui/icons/SaveAlt';
 import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import Chip from '@material-ui/core/Chip';
+import routes from './../../components/Helpers/Routes';
+import { Link } from 'react-router-dom'
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -47,15 +49,25 @@ export default function AccountHierarchy({ data, currentAccountId }) {
                 {
                     title: 'Account Name', field: 'accountName',
                     width: 200,
-                    render: rowData => rowData._id == currentAccountId ?
-                        <>
-                            <span>{rowData.accountName}</span> <Chip label="Current" size="small" className="ml-2" />
-                        </> : `${rowData.accountName}`
+                    render: rowData => <>
+                        <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData._id}`}>
+                            {rowData.accountName}
+                        </Link>
+                        {
+                            rowData._id == currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
+                        }
+                    </>
                 },
                 { title: 'Type', field: 'typeOfAccount' },
                 { title: 'Industry', field: 'industry' },
                 { title: 'Type Of Business', field: 'typeOfBusiness' },
-                { title: 'Parent Account', field: 'parentAccountText' },
+                {
+                    title: 'Parent Account', field: 'parentAccountText',
+                    render: rowData =>
+                        <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
+                            {rowData.parentAccountText}
+                        </Link>
+                },
                 { title: 'Phone', field: 'phone' },
             ]}
             columnResizable={true}
@@ -66,6 +78,7 @@ export default function AccountHierarchy({ data, currentAccountId }) {
                 sorting: false,
                 draggable: false,
                 padding: "dense",
+                defaultExpanded: true
             }}
         />
     );
