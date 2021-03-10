@@ -45,9 +45,10 @@ const useStyles = makeStyles(() => ({
 }));
 
 const Details = (props) => {
+
   const classes = useStyles();
   const theme = useTheme();
-  const { data, fields, handleUpdate, isUpdating, canEdit } = props;
+  const { data, fields, handleUpdate, isUpdating, canEdit, sourceComponent } = props;
   const [edit, setEdit] = useState(null);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
@@ -222,7 +223,7 @@ const Details = (props) => {
                             canEdit ? (
                               ""
                             ) : (
-                              <Tooltip title="You must be the owner or collaborator of this account to get update functionality">
+                              <Tooltip title={`You must be the owner or collaborator of this ${sourceComponent} to get update functionality`}>
                                 <LockIcon color="disabled" />
                               </Tooltip>
                             )
@@ -349,7 +350,7 @@ const Details = (props) => {
                                     );
                                   }}
                                 />
-                              ) : (field.isUpdate ?
+                              ) : (field.isUpdate && canEdit ?
                                 <Typography
                                   className={classes.fieldText}
                                   onClick={() => setEdit(field.fieldData.fieldName)}

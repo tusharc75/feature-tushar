@@ -36,6 +36,8 @@ const Roles = () => {
     const [isUpdating, setUpdating] = useState(false);
     const [allowedToEdit, setAllowedToEdit] = useState(false)
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
+    const [contactPermissions, setContactPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
+
     let { id } = useParams();
 
     useEffect(() => {
@@ -43,6 +45,22 @@ const Roles = () => {
             fetchContactData()
         }
     }, [id]);
+
+    useEffect(() => {
+        const data = user.role?.sideBar;
+
+        if (data) {
+            const hasContactPermission = data.find(d => d.name == "Contact");
+            if (hasContactPermission) {
+                setContactPermissions({
+                    isCreate: hasContactPermission.isCreate,
+                    isUpdate: hasContactPermission.isUpdate,
+                    isRead: hasContactPermission.isRead,
+                    isDelete: hasContactPermission.isDelete
+                });
+            }
+        }
+    }, [user]);
 
     const fetchContactData = async () => {
         setLoading(true)
@@ -206,7 +224,7 @@ const Roles = () => {
                     >
                         <Box component="span" marginX={1} />
                         {
-                            contactData?.owner?.optionValue && user?.user?._id &&
+                            contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id &&
                                 contactData.owner.optionValue === user.user._id ?
                                 <Button
                                     variant="contained" color="secondary"
@@ -233,6 +251,7 @@ const Roles = () => {
                                                 isUpdating={isUpdating}
                                                 canEdit={allowedToEdit}
                                                 handleUpdate={handleUpdateContact}
+                                                sourceComponent="contact"
                                             />
                                     }
                                 </div>

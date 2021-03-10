@@ -13,10 +13,23 @@ import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom'
 import routes from './../../components/Helpers/Routes';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles({
+    // root: {
+    //     width: '100%',
+    //     overflowX: 'auto'
+    // },
+    table: {
+        minWidth: "150%"
+    }
+});
+
 
 export default function AccountHierarchy({ data }) {
+    const classes = useStyles();
 
-    const minWidth = 200;
+    const minWidth = 170;
 
     const Row = ({ rowData, index }) => {
         const [open, setOpen] = React.useState(true);
@@ -30,7 +43,7 @@ export default function AccountHierarchy({ data }) {
                         </IconButton> : <IconButton></IconButton>
                     }
                 </TableCell>
-                <TableCell style={{ minWidth: minWidth }} component="th" scope="row">
+                <TableCell style={{ minWidth: rowData.children && rowData.children.length == 0 ? "" : minWidth }} component="th" scope="row">
                     <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData._id}`}>
                         {rowData.accountName}
                     </Link>
@@ -38,11 +51,11 @@ export default function AccountHierarchy({ data }) {
                         rowData.current ? <Chip label="Current" size="small" className="ml-2" /> : ""
                     }
                 </TableCell>
-                <TableCell style={{ minWidth: minWidth }} align="center">{rowData.typeOfAccount?.optionLabel}</TableCell>
-                <TableCell style={{ minWidth: minWidth }} align="center">{rowData.industry?.optionLabel}</TableCell>
-                <TableCell style={{ minWidth: minWidth }} align="center">{rowData.typeOfBusiness}</TableCell>
-                <TableCell style={{ minWidth: minWidth }} align="center">{rowData.parentAccount?.optionLabel}</TableCell>
-                <TableCell style={{ minWidth: minWidth }} align="center">{rowData.phone}</TableCell>
+                <TableCell style={{ minWidth: rowData.children && rowData.children.length == 0 ? "" : minWidth }} align="center">{rowData.typeOfAccount?.optionLabel}</TableCell>
+                <TableCell style={{ minWidth: rowData.children && rowData.children.length == 0 ? "" : minWidth }} align="center">{rowData.industry?.optionLabel}</TableCell>
+                <TableCell style={{ minWidth: rowData.children && rowData.children.length == 0 ? "" : minWidth }} align="center">{rowData.typeOfBusiness}</TableCell>
+                <TableCell style={{ minWidth: rowData.children && rowData.children.length == 0 ? "" : minWidth }} align="center">{rowData.parentAccount?.optionLabel}</TableCell>
+                <TableCell style={{ minWidth: rowData.children && rowData.children.length == 0 ? "" : minWidth }} align="center">{rowData.phone}</TableCell>
             </TableRow>
             <TableRow>
                 {
@@ -79,17 +92,17 @@ export default function AccountHierarchy({ data }) {
     }
 
     return (
-        <TableContainer component={Paper} style={{ width: "100%" }}>
-            <Table aria-label="collapsible table" size="small">
+        <TableContainer component={Paper} style={{ width: "100%", overflowX: 'auto' }}>
+            <Table aria-label="collapsible table" size="small" className={classes.table}>
                 <TableHead>
                     <TableRow>
                         <TableCell />
-                        <TableCell style={{ minWidth: minWidth }} component="th">Account Name</TableCell>
-                        <TableCell style={{ minWidth: minWidth }} align="center">Type</TableCell>
-                        <TableCell style={{ minWidth: minWidth }} align="center">Industry</TableCell>
-                        <TableCell style={{ minWidth: minWidth }} align="center">Type Of Business</TableCell>
-                        <TableCell style={{ minWidth: minWidth }} align="center">Parent Account</TableCell>
-                        <TableCell style={{ minWidth: minWidth }} align="center">Phone</TableCell>
+                        <TableCell component="th">Account Name</TableCell>
+                        <TableCell align="center">Type</TableCell>
+                        <TableCell align="center">Industry</TableCell>
+                        <TableCell align="center">Type Of Business</TableCell>
+                        <TableCell align="center">Parent Account</TableCell>
+                        <TableCell align="center">Phone</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
