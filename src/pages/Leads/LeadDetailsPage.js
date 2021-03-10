@@ -44,6 +44,8 @@ const LeadDetailsPage = () => {
   const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([routes.lead]);
+  const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
+
   let { id } = useParams();
 
   useEffect(() => {
@@ -51,6 +53,23 @@ const LeadDetailsPage = () => {
       fetchLeadData();
     }
   }, [id]);
+
+  useEffect(() => {
+    const data = user?.role?.sideBar;
+
+    if (data) {
+      const hasLeadsPermission = data.find(d => d.name == "Lead");
+      if (hasLeadsPermission) {
+        setLeadsPermissions({
+          isCreate: hasLeadsPermission.isCreate,
+          isUpdate: hasLeadsPermission.isUpdate,
+          isRead: hasLeadsPermission.isRead,
+          isDelete: hasLeadsPermission.isDelete
+        });
+      }
+    }
+  }, [user]);
+
 
   const fetchLeadData = async () => {
     try {
@@ -71,7 +90,7 @@ const LeadDetailsPage = () => {
         routes.lead,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleMainPoints = (data) => {
@@ -220,17 +239,19 @@ const LeadDetailsPage = () => {
             showHeading={true}
           >
             <Box component="span" marginX={1} />
-            {leadData?.owner?.optionValue &&
-            user?.user?._id &&
-            leadData.owner.optionValue === user.user._id ? (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => setShowConfirmBox(true)}
-              >
-                Delete
-              </Button>
-            ) : null}
+            {
+              leadsPermissions.isDelete && leadData?.owner?.optionValue &&
+                user?.user?._id &&
+                leadData.owner.optionValue === user.user._id ? (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => setShowConfirmBox(true)}
+                >
+                  Delete
+                </Button>
+              ) : null
+            }
           </CustomHeader>
         )}
         <div>

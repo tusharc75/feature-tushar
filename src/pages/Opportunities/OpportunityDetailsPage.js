@@ -46,6 +46,24 @@ const OpportunityDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   let { id } = useParams();
 
+  const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
+
+  useEffect(() => {
+    const data = user?.role?.sideBar;
+
+    if (data) {
+      const hasOpportunityPermission = data.find(d => d.name == "Opportunity");
+      if (hasOpportunityPermission) {
+        setOpportunityPermissions({
+          isCreate: hasOpportunityPermission.isCreate,
+          isUpdate: hasOpportunityPermission.isUpdate,
+          isRead: hasOpportunityPermission.isRead,
+          isDelete: hasOpportunityPermission.isDelete
+        });
+      }
+    }
+  }, [user]);
+
   useEffect(() => {
     if (id) {
       fetchOpportunityData();
@@ -104,7 +122,7 @@ const OpportunityDetailsPage = () => {
             (d) => d.optionValue === userId
           ) > -1;
       }
-      
+
       if (allowToEdit) setAllowedToEdit(allowToEdit);
     }
   };
@@ -224,17 +242,18 @@ const OpportunityDetailsPage = () => {
             showHeading={true}
           >
             <Box component="span" marginX={1} />
-            {opportunityData?.owner?.optionValue &&
-              user?.user?._id &&
-              opportunityData.owner.optionValue === user.user._id ? (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => setShowConfirmBox(true)}
-              >
-                Delete
-              </Button>
-            ) : null}
+            {
+              opportunityPermissions.isDelete && opportunityData?.owner?.optionValue &&
+                user?.user?._id &&
+                opportunityData.owner.optionValue === user.user._id ? (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => setShowConfirmBox(true)}
+                >
+                  Delete
+                </Button>
+              ) : null}
           </CustomHeader>
         )}
 

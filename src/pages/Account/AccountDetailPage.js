@@ -46,7 +46,7 @@ const Roles = () => {
 
     let { id } = useParams();
 
-    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isDelete: false, approveAccount: false });
+    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
 
     useEffect(() => {
         const data = user.role?.sideBar;
@@ -57,6 +57,7 @@ const Roles = () => {
                 setAccountPermissions(
                     {
                         isCreate: hasAccountPermission.isCreate,
+                        isUpdate: hasAccountPermission.isUpdate,
                         isRead: hasAccountPermission.isRead,
                         isDelete: hasAccountPermission.isDelete,
                         approveAccount: user.user?.permissions?.approveAccount
@@ -301,7 +302,7 @@ const Roles = () => {
                     >
                         <Box component="span" marginX={1} />
                         {
-                            accountPermissions.approveAccount && <>
+                            accountPermissions.approveAccount && accountPermissions.isUpdate && <>
                                 <Button
                                     variant="contained" color={accountData.static?.approved ? "secondary" : "primary"}
                                     onClick={() => setShowApproveDisapproveConfirmBox(true)}
