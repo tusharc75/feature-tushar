@@ -19,7 +19,6 @@ export default function AccountHierarchy({ data }) {
     const minWidth = 200;
 
     const Row = ({ rowData, index }) => {
-        console.log(rowData);
         const [open, setOpen] = React.useState(true);
 
         return <React.Fragment>
