@@ -182,8 +182,9 @@ const Details = (props) => {
     }
     return opts
   }
+
   const validateEmail = initialVals && initialVals.email ? false : true;
-  const isDisable = initialVals && initialVals.isShippingAddressSameAsBillingAddress
+  // const isDisable = initialVals && initialVals.isShippingAddressSameAsBillingAddress
   return (
     <>
       {initialVals && (
@@ -218,15 +219,15 @@ const Details = (props) => {
                             canEdit ? (
                               ""
                             ) : (
-                              <Tooltip title="You must be the owner or collaborator of this account to get update functionality">
+                                <Tooltip title="You must be the owner or collaborator of this account to get update functionality">
+                                  <LockIcon color="disabled" />
+                                </Tooltip>
+                              )
+                          ) : (
+                              <Tooltip title="Not allowed to update">
                                 <LockIcon color="disabled" />
                               </Tooltip>
-                            )
-                          ) : (
-                            <Tooltip title="Not allowed to update">
-                              <LockIcon color="disabled" />
-                            </Tooltip>
-                          )}
+                            )}
                         </Box>
                         <Box display="flex" alignItems="flex-start">
                           {edit === field.fieldData.fieldName ?
@@ -245,28 +246,6 @@ const Details = (props) => {
                                 type={field.fieldData.type}
                                 placeholder={`Enter ${field.fieldData.fieldLabel}`}
                                 setFieldValue={setFieldValue}
-                              />
-                            ) : field.fieldData.fieldName === "isShippingAddressSameAsBillingAddress" ? (
-                              <FormTypes
-                                isTooltip={false}
-                                disabled={!field.isUpdate}
-                                size="small"
-                                fullWidth
-                                values={values}
-                                errors={errors}
-                                touched={touched}
-                                name={field.fieldData.fieldName}
-                                options={field.fieldData.option}
-                                type={field.fieldData.type}
-                                placeholder={`Enter ${field.fieldData.fieldLabel}`}
-                                setFieldValue={setFieldValue}
-                                onChange={(e, newValue) => {
-                                  setFieldValue(field.fieldData.fieldName, e.target.checked)
-                                  if (e.target.checked && values.billingAddress) {
-                                    setFieldValue("shippingAddress", values.billingAddress)
-                                    // setTouched("shippingAddress", true)
-                                  }
-                                }}
                               />
                             ) : field.fieldData.fieldName === "billingAddress" ? (
                               <FormTypes
@@ -303,66 +282,88 @@ const Details = (props) => {
                                 type={field.fieldData.type}
                                 placeholder={`Enter ${field.fieldData.fieldLabel}`}
                                 setFieldValue={setFieldValue}
-                                disabled={!isUpdating || isDisable || values.isShippingAddressSameAsBillingAddress == true}
+                                disabled={!field.isUpdate ? true : values.isShippingAddressSameAsBillingAddress == true}
                               />
                             ) : (
-                              <FormTypes
-                                isTooltip={false}
-                                disabled={
-                                  field.fieldData.type === "email" ||
-                                  !field.isUpdate
-                                }
-                                size="small"
-                                fullWidth
-                                values={values}
-                                errors={errors}
-                                touched={touched}
-                                name={field.fieldData.fieldName}
-                                options={field.fieldData.option}
-                                type={field.fieldData.type}
-                                placeholder={`Enter ${field.fieldData.fieldLabel}`}
-                                setFieldValue={setFieldValue}
-                              />
-                            ) : field.fieldData.type === "switch" ||
-                              field.fieldData.type === "checkBox" ||
-                              field.fieldData.type === "imageUpload" ? (
-                              <FormTypes
-                                isTooltip={false}
-                                disabled={!field.isUpdate}
-                                size="small"
-                                fullWidth
-                                values={values}
-                                errors={errors}
-                                touched={touched}
-                                name={field.fieldData.fieldName}
-                                options={field.fieldData.option}
-                                type={field.fieldData.type}
-                                setFieldValue={setFieldValue}
-                                onChange={(e) => {
-                                  setFieldValue(
-                                    field.fieldData.fieldName,
-                                    e.target.checked
-                                  );
-                                }}
-                              />
-                            ) : (field.isUpdate ?
-                              <Typography
-                                className={classes.fieldText}
-                                onClick={() => setEdit(field.fieldData.fieldName)}
-                                variant="body2"
-                                color={
-                                  errors[field.fieldData.fieldName]
-                                    ? "error"
-                                    : "inherit"
-                                }
-                              >
-                                {errors[field.fieldData.fieldName]
-                                  ? errors[field.fieldData.fieldName]
-                                  : normalizeValues(values, field.fieldData)}
-                              </Typography> : <Typography className={classes.nonEditable}>
-                                {normalizeValues(values, field.fieldData)}
-                              </Typography>
-                            )}
+                                    <FormTypes
+                                      isTooltip={false}
+                                      disabled={
+                                        field.fieldData.type === "email" ||
+                                        !field.isUpdate
+                                      }
+                                      size="small"
+                                      fullWidth
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      name={field.fieldData.fieldName}
+                                      options={field.fieldData.option}
+                                      type={field.fieldData.type}
+                                      placeholder={`Enter ${field.fieldData.fieldLabel}`}
+                                      setFieldValue={setFieldValue}
+                                    />
+                                  ) : field.fieldData.type === "switch" ||
+                                    field.fieldData.type === "checkBox" ||
+                                    field.fieldData.type === "imageUpload" ?
+                              field.fieldData.fieldName === "isShippingAddressSameAsBillingAddress" ? (
+                                <FormTypes
+                                  isTooltip={false}
+                                  disabled={!field.isUpdate}
+                                  size="small"
+                                  fullWidth
+                                  values={values}
+                                  errors={errors}
+                                  touched={touched}
+                                  name={field.fieldData.fieldName}
+                                  options={field.fieldData.option}
+                                  type={field.fieldData.type}
+                                  placeholder={`Enter ${field.fieldData.fieldLabel}`}
+                                  setFieldValue={setFieldValue}
+                                  onChange={(e, newValue) => {
+                                    setFieldValue(field.fieldData.fieldName, e.target.checked)
+                                    if (e.target.checked && values.billingAddress) {
+                                      setFieldValue("shippingAddress", values.billingAddress)
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                  <FormTypes
+                                    isTooltip={false}
+                                    disabled={!field.isUpdate}
+                                    size="small"
+                                    fullWidth
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    name={field.fieldData.fieldName}
+                                    options={field.fieldData.option}
+                                    type={field.fieldData.type}
+                                    setFieldValue={setFieldValue}
+                                    onChange={(e) => {
+                                      setFieldValue(
+                                        field.fieldData.fieldName,
+                                        e.target.checked
+                                      );
+                                    }}
+                                  />
+                                ) : (field.isUpdate ?
+                                  <Typography
+                                    className={classes.fieldText}
+                                    onClick={() => setEdit(field.fieldData.fieldName)}
+                                    variant="body2"
+                                    color={
+                                      errors[field.fieldData.fieldName]
+                                        ? "error"
+                                        : "inherit"
+                                    }
+                                  >
+                                    {errors[field.fieldData.fieldName]
+                                      ? errors[field.fieldData.fieldName]
+                                      : normalizeValues(values, field.fieldData)}
+                                  </Typography> : <Typography className={classes.nonEditable}>
+                                    {normalizeValues(values, field.fieldData)}
+                                  </Typography>
+                              )}
                           {edit === field.fieldData.fieldName ? (
                             <>
                               <IconButton onClick={() => setEdit(null)}>
@@ -370,8 +371,8 @@ const Details = (props) => {
                               </IconButton>
                             </>
                           ) : (
-                            ""
-                          )}
+                              ""
+                            )}
                         </Box>
                       </Grid>
                     ))}
