@@ -25,6 +25,7 @@ import axiosInstance from './../../axios/axiosInstance'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
+import Chip from '@material-ui/core/Chip';
 
 const Roles = () => {
     const history = useHistory();
@@ -42,7 +43,7 @@ const Roles = () => {
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState();
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
-    const [accountHeirarchyData, setAccountHeirarchyData] = useState([]);
+    const [accountHierarchyData, setAccountHierarchyData] = useState([]);
 
     let { id } = useParams();
 
@@ -101,40 +102,68 @@ const Roles = () => {
                 const { parentHierarchy, ...rest } = data;
                 accounts.push({ ...rest, current: true });
 
-                var map = {}, node, roots = [], i;
+                let newData = [];
 
-                for (i = 0; i < accounts.length; i += 1) {
-                    map[accounts[i]._id] = i; // initialize the map
-                    accounts[i].children = []; // initialize the children
-                }
+                accounts.map(account => {
+                    const updatedAccount = {
+                        _id: account._id,
+                        accountName: `${account.accountName}`,
+                        typeOfAccount: account.typeOfAccount?.optionLabel,
+                        industry: account.industry?.optionLabel,
+                        typeOfBusiness: account.typeOfBusiness,
+                        phone: account.phone,
+                        type: "child"
+                    };
 
-                for (i = 0; i < accounts.length; i += 1) {
-                    node = accounts[i];
-                    if (node.parentAccount) {
-                        // if you have dangling branches check that map[node.parentId] exists
-                        accounts[map[node.parentAccount.optionValue]].children.push(node);
-                    } else {
-                        roots.push(node);
+                    if (account.parentAccount) {
+                        updatedAccount["parentAccountText"] = account.parentAccount.optionLabel;
+                        updatedAccount["parentAccountId"] = account.parentAccount.optionValue;
+                        updatedAccount["type"] = "parent";
                     }
-                }
-                setAccountHeirarchyData([...roots]);
+
+                    newData.push(updatedAccount);
+                })
+
+                setAccountHierarchyData([...newData]);
+
+
+                // let accounts = data.parentHierarchy;
+                // const { parentHierarchy, ...rest } = data;
+                // accounts.push({ ...rest, current: true });
+
+                // var map = {}, node, roots = [], i;
+
+                // for (i = 0; i < accounts.length; i += 1) {
+                //     map[accounts[i]._id] = i; // initialize the map
+                //     accounts[i].children = []; // initialize the children
+                // }
+
+                // for (i = 0; i < accounts.length; i += 1) {
+                //     node = accounts[i];
+                //     if (node.parentAccount) {
+                //         // if you have dangling branches check that map[node.parentId] exists
+                //         accounts[map[node.parentAccount.optionValue]].children.push(node);
+                //     } else {
+                //         roots.push(node);
+                //     }
+                // }
+                // setAccountHierarchyData([...roots]);
             } else {
-                setAccountHeirarchyData([
+                setAccountHierarchyData([
                     {
                         _id: data._id,
                         accountName: data.accountName,
-                        typeOfAccount: data.typeOfAccount,
-                        industry: data.industry,
+                        typeOfAccount: data.typeOfAccount?.optionLabel,
+                        industry: data.industry?.optionLabel,
                         typeOfBusiness: data.typeOfBusiness,
-                        parentAccount: data.parentAccount,
-                        phone: data.phone,
-                        children: []
+                        // parentAccount: data.parentAccount,
+                        phone: data.phone
                     }
                 ])
             }
 
 
-            //  setAccountHeirarchyData
+            //  setAccountHierarchyData
 
             if (accountFields.length == 0) {
                 getAccountFields()
@@ -328,8 +357,7 @@ const Roles = () => {
                     <Container className="detailPageContainer">
                         <Grid container spacing={3}>
                             <Grid item sm={8} md={8} lg={8}>
-                                <div className="detailPageDiv1"
-                                    style={{ pointerEvents: allowedToEdit ? "" : "none" }} >
+                                <div className="detailPageDiv1">
                                     {
                                         loading ? <Loader text="Fetching Data" style={{ marginTop: 100 }} /> :
                                             <>
@@ -355,7 +383,7 @@ const Roles = () => {
                                                     />
                                                 </Box>
                                                 <Box index={1} hidden={currentTabIndex !== 1}>
-                                                    <AccountHierarchy data={accountHeirarchyData} />
+                                                    <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
                                                 </Box>
                                             </>
                                     }
