@@ -308,8 +308,16 @@ const OpportunityDetailsPage = () => {
               </Container>
             </Grid>
             <Grid item sm={4} md={4} lg={4}>
-              {opportunityData && (
-                <Container>
+              <Container>
+                {!opportunityData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <Skeleton width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
                   <div>
                     <Activity
                       relatedTo={[
@@ -327,8 +335,8 @@ const OpportunityDetailsPage = () => {
                       handleActivityRefresh={() => {}}
                     />
                   </div>
-                </Container>
-              )}
+                )}
+              </Container>
             </Grid>
           </Grid>
           {showConfirmBox ? (
