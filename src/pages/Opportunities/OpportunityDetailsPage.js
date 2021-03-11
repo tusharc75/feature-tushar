@@ -30,7 +30,7 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
-import Activity from "./Activity";
+import Activity from "../../components/Activity";
 
 const OpportunityDetailsPage = () => {
   const history = useHistory();
@@ -316,13 +316,43 @@ const OpportunityDetailsPage = () => {
               </Container>
             </Grid>
             <Grid item sm={4} md={4} lg={4}>
-              <Container styles={{ padding: "10px" }}>
-                <Typography color="primary">Activities</Typography>
-                <Box marginTop={1} display="flex" flexDirection="column">
-                  {quickLinks.map((item) => (
-                    <MuiLink component={Link}>
-                      {item.label} ({item.count})
-                    </MuiLink>
+              {opportunityData && (
+                <div>
+                  <Activity
+                    relatedTo={[
+                      {
+                        type: "account",
+                        referenceId: opportunityData.accountName.optionValue,
+                        access: false,
+                      },
+                      {
+                        type: "opportunity",
+                        referenceId: opportunityData._id,
+                        access: true,
+                      },
+                    ]}
+                    handleActivityRefresh={() => {}}
+                  />
+                </div>
+              )}
+
+              <Container styles={{ padding: 0, background: "transparent" }}>
+                <List component="nav" style={{ padding: 0 }}>
+                  {quickLinks.map((item, i) => (
+                    <div key={i}>
+                      <Link to={`#`}>
+                        <ListItem button style={{ background: "white" }}>
+                          <ListItemIcon>
+                            <Send />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={`${item.label} (${item.count})`}
+                          />
+                          <ExpandMore />
+                        </ListItem>
+                      </Link>
+                      <Box marginBottom={2} />
+                    </div>
                   ))}
                 </Box>
               </Container>

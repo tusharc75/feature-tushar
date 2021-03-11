@@ -28,6 +28,7 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
+import Activity from "../../components/Activity";
 
 const LeadDetailsPage = () => {
   const history = useHistory();
@@ -299,6 +300,14 @@ const LeadDetailsPage = () => {
             </Grid>
             <Grid item sm={4} md={4} lg={4}>
               <Container styles={{ padding: 0, background: "transparent" }}>
+                {
+                  leadData && <div>
+                    <Activity relatedTo={[
+                      { type: "lead", referenceId: leadData._id, access: true }
+                    ]} handleActivityRefresh={() => { }} />
+                  </div>
+                }
+
                 <List component="nav" style={{ padding: 0 }}>
                   {quickLinks.map((item, i) => (
                     <div key={i}>
