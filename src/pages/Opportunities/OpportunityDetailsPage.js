@@ -28,6 +28,7 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
+import Activity from "../../components/Activity";
 
 const OpportunityDetailsPage = () => {
   const history = useHistory();
@@ -298,6 +299,15 @@ const OpportunityDetailsPage = () => {
               </Container>
             </Grid>
             <Grid item sm={4} md={4} lg={4}>
+              {
+                opportunityData && <div>
+                  <Activity relatedTo={[
+                    { type: "account", referenceId: opportunityData.accountName.optionValue, access: false },
+                    { type: "opportunity", referenceId: opportunityData._id, access: true }
+                  ]} handleActivityRefresh={() => { }} />
+                </div>
+              }
+
               <Container styles={{ padding: 0, background: "transparent" }}>
                 <List component="nav" style={{ padding: 0 }}>
                   {quickLinks.map((item, i) => (

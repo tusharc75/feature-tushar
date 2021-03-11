@@ -23,6 +23,8 @@ import Loader from '../../components/Loader'
 import routes from '../../components/Helpers/Routes';
 import '../Account/account.css'
 import axiosInstance from './../../axios/axiosInstance'
+import Activity from "../../components/Activity";
+import isObjectEmpty from './../../constants/helpers'
 
 const Roles = () => {
     const history = useHistory();
@@ -267,6 +269,15 @@ const Roles = () => {
                                 </div>
                             </Grid>
                             <Grid item sm={4} md={4} lg={4} className="customGrid" >
+                                {
+                                    !isObjectEmpty(contactData) && <div>
+                                        <Activity relatedTo={[
+                                            { type: "account", referenceId: contactData.accountName.optionValue, access: false },
+                                            { type: "contact", referenceId: contactData._id, access: true }
+                                        ]} handleActivityRefresh={() => { }} />
+                                    </div>
+                                }
+
                                 <div className="detailPageDiv2">
                                     {
                                         quickLinks && quickLinks.length ?

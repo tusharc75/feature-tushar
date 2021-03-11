@@ -27,6 +27,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
 import Chip from '@material-ui/core/Chip';
+import Activity from "../../components/Activity";
 
 const Roles = () => {
     const history = useHistory();
@@ -49,6 +50,13 @@ const Roles = () => {
     let { id } = useParams();
 
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
+
+    // const [refresh, setRefresh] = useState(true);
+
+    // const handleActivityRefresh = () => {
+    //     setRefresh(false)
+    //     setRefresh(true)
+    // }
 
     useEffect(() => {
         const data = user.role?.sideBar;
@@ -399,7 +407,15 @@ const Roles = () => {
                                     }
                                 </div>
                             </Grid>
-                            <Grid item sm={4} md={4} lg={4} className="customGrid" >
+                            <Grid item sm={4} md={4} lg={4} className="customGrid">
+                                {
+                                    accountData && <div>
+                                        <Activity relatedTo={[
+                                            { type: "account", referenceId: accountData._id, access: true }
+                                        ]} handleActivityRefresh={() => { }} />
+                                    </div>
+                                }
+
                                 <div className="detailPageDiv2">
                                     {
                                         quickLinks && quickLinks.length ?
@@ -409,6 +425,7 @@ const Roles = () => {
                                             null
                                     }
                                 </div>
+
                                 <div className="detailPageDiv3" >
                                     <Typography color="primary" variant="h6">Related Contacts</Typography>
                                     <Box className="customBox1">
