@@ -265,7 +265,7 @@ const Opportunities = () => {
   }
   const getFirstName = tData => {
     return <Link className="nameLink"
-      to={`/${opportunityDetailPage.path}/${tData._id}`}
+      to={`${opportunityDetailPage.path}/${tData._id}`}
     >
       {capitalize(tData.opportunityName) || ''}
     </Link>

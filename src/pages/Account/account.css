@@ -91,16 +91,20 @@
 .accountNameLink:hover {
     text-decoration: underline;
 }
-.fSize{
+.fSize {
     font-size: 16px;
 }
 .relatedContacts {
     display: flex;
-    justify-content: space-between
+    justify-content: space-between;
 }
-.viewAllBtn{
+.viewAllBtn {
     padding: 0 5px;
 }
-.btn{
+.btn {
     width: 100%;
+}
+
+.account-hierarchy-style > div > div.MuiToolbar-regular {
+    display: none;
 }
