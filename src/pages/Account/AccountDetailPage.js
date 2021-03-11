@@ -47,7 +47,7 @@ const Roles = () => {
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState();
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
-    const [accountHeirarchyData, setAccountHeirarchyData] = useState([]);
+    const [accountHierarchyData, setAccountHierarchyData] = useState([]);
     const [expanded, setExpanded] = React.useState(false);
 
     let { id } = useParams();
@@ -138,28 +138,6 @@ const Roles = () => {
 
                 setAccountHierarchyData([...newData]);
 
-
-                // let accounts = data.parentHierarchy;
-                // const { parentHierarchy, ...rest } = data;
-                // accounts.push({ ...rest, current: true });
-
-                // var map = {}, node, roots = [], i;
-
-                // for (i = 0; i < accounts.length; i += 1) {
-                //     map[accounts[i]._id] = i; // initialize the map
-                //     accounts[i].children = []; // initialize the children
-                // }
-
-                // for (i = 0; i < accounts.length; i += 1) {
-                //     node = accounts[i];
-                //     if (node.parentAccount) {
-                //         // if you have dangling branches check that map[node.parentId] exists
-                //         accounts[map[node.parentAccount.optionValue]].children.push(node);
-                //     } else {
-                //         roots.push(node);
-                //     }
-                // }
-                // setAccountHierarchyData([...roots]);
             } else {
                 setAccountHierarchyData([
                     {
@@ -173,9 +151,6 @@ const Roles = () => {
                     }
                 ])
             }
-
-
-            //  setAccountHierarchyData
 
             if (accountFields.length == 0) {
                 getAccountFields()
