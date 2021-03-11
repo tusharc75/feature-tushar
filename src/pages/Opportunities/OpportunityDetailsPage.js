@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-} from "@material-ui/core";
-import { ExpandMore, Send } from "@material-ui/icons";
+import { Box, Button, Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import { useHistory, useParams, Link } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 import { getErrorMessage } from "../../services/util";
 import CustomToast from "../../components/Helpers/CustomToast";
+import CustomTabs from "../../components/Helpers/CustomTabs";
+import BoxWithBorder from "../../components/BoxWithBorder";
+import TabPanel from "../../components/TabPanel";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
@@ -28,6 +22,7 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
+import Activity from "../../components/Activity";
 
 const OpportunityDetailsPage = () => {
   const history = useHistory();
@@ -44,21 +39,30 @@ const OpportunityDetailsPage = () => {
   const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [contactTabIndex, setContactTabIndex] = useState(0);
   let { id } = useParams();
 
-  const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
+  const [opportunityPermissions, setOpportunityPermissions] = useState({
+    isCreate: false,
+    isUpdate: false,
+    isRead: false,
+    isDelete: false,
+  });
 
   useEffect(() => {
     const data = user?.role?.sideBar;
 
     if (data) {
-      const hasOpportunityPermission = data.find(d => d.name == "Opportunity");
+      const hasOpportunityPermission = data.find(
+        (d) => d.name == "Opportunity"
+      );
       if (hasOpportunityPermission) {
         setOpportunityPermissions({
           isCreate: hasOpportunityPermission.isCreate,
           isUpdate: hasOpportunityPermission.isUpdate,
           isRead: hasOpportunityPermission.isRead,
-          isDelete: hasOpportunityPermission.isDelete
+          isDelete: hasOpportunityPermission.isDelete,
         });
       }
     }
@@ -178,23 +182,19 @@ const OpportunityDetailsPage = () => {
 
   const quickLinks = [
     {
-      label: "Contact Roles",
+      label: "Call a log",
       count: 0,
     },
     {
-      label: "Quotes",
+      label: "New Task",
       count: 0,
     },
     {
-      label: "Products",
+      label: "Email",
       count: 0,
     },
     {
-      label: "Notes",
-      count: 0,
-    },
-    {
-      label: "Files",
+      label: "New Event",
       count: 0,
     },
   ];
@@ -242,18 +242,18 @@ const OpportunityDetailsPage = () => {
             showHeading={true}
           >
             <Box component="span" marginX={1} />
-            {
-              opportunityPermissions.isDelete && opportunityData?.owner?.optionValue &&
-                user?.user?._id &&
-                opportunityData.owner.optionValue === user.user._id ? (
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => setShowConfirmBox(true)}
-                >
-                  Delete
-                </Button>
-              ) : null}
+            {opportunityPermissions.isDelete &&
+            opportunityData?.owner?.optionValue &&
+            user?.user?._id &&
+            opportunityData.owner.optionValue === user.user._id ? (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => setShowConfirmBox(true)}
+              >
+                Delete
+              </Button>
+            ) : null}
           </CustomHeader>
         )}
 
@@ -264,60 +264,71 @@ const OpportunityDetailsPage = () => {
             style={{ minHeight: "calc(100vh - 200px)" }}
           >
             <Grid item sm={8} md={8} lg={8}>
-              <Container styles={{ height: "100%" }}>
+              <Container styles={{ height: "100%", padding: 0 }}>
                 {loading ? (
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <Grid item sm={6} md={6}>
-                        <Skeleton variant="text" width="100px" height="16px" />
-                        <Box marginY={1} />
-                        <Skeleton width="100%" height="50px" />
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : !opportunityFields.length ? (
-                  <Box
-                    height="100%"
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <img src={SVG("Contacts Placeholder")} alt="No Data" />
+                  <Box padding={2}>
+                    <Grid container spacing={2}>
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                        <Grid item sm={6} md={6}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="16px"
+                          />
+                          <Box marginY={1} />
+                          <Skeleton width="100%" height="50px" />
+                        </Grid>
+                      ))}
+                    </Grid>
                   </Box>
                 ) : (
-                  <DetailsPage
-                    data={opportunityData}
-                    fields={opportunityFields}
-                    isUpdating={isUpdating}
-                    canEdit={allowedToEdit}
-                    handleUpdate={handleUpdateOpportunity}
-                    sourceComponent="opportunity"
-                  />
+                  <>
+                    <CustomTabs
+                      value={currentTabIndex}
+                      setValue={setCurrentTabIndex}
+                      tabs={["Details", "Activity"]}
+                    />
+                    <TabPanel value={currentTabIndex} index={0}>
+                      <Box padding="16px">
+                        <DetailsPage
+                          data={opportunityData}
+                          fields={opportunityFields}
+                          isUpdating={isUpdating}
+                          canEdit={allowedToEdit}
+                          handleUpdate={handleUpdateOpportunity}
+                          sourceComponent="opportunity"
+                        />
+                      </Box>
+                    </TabPanel>
+                    <TabPanel value={currentTabIndex} index={1}>
+                      <Activity />
+                    </TabPanel>
+                  </>
                 )}
               </Container>
             </Grid>
             <Grid item sm={4} md={4} lg={4}>
-              <Container styles={{ padding: 0, background: "transparent" }}>
-                <List component="nav" style={{ padding: 0 }}>
-                  {quickLinks.map((item, i) => (
-                    <div key={i}>
-                      <Link to={`#`}>
-                        <ListItem button style={{ background: "white" }}>
-                          <ListItemIcon>
-                            <Send />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={`${item.label} (${item.count})`}
-                          />
-                          <ExpandMore />
-                        </ListItem>
-                      </Link>
-                      <Box marginBottom={2} />
-                    </div>
-                  ))}
-                </List>
-              </Container>
+              {opportunityData && (
+                <Container>
+                  <div>
+                    <Activity
+                      relatedTo={[
+                        {
+                          type: "account",
+                          referenceId: opportunityData.accountName.optionValue,
+                          access: false,
+                        },
+                        {
+                          type: "opportunity",
+                          referenceId: opportunityData._id,
+                          access: true,
+                        },
+                      ]}
+                      handleActivityRefresh={() => {}}
+                    />
+                  </div>
+                </Container>
+              )}
             </Grid>
           </Grid>
           {showConfirmBox ? (

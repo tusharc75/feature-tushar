@@ -29,6 +29,7 @@ import AccountHierarchy from './AccountHierarchy';
 import OpportunityTab from './OpportunityTab'
 import { AddOutlined } from '@material-ui/icons'
 import Chip from '@material-ui/core/Chip';
+import Activity from "../../components/Activity";
 
 const Roles = () => {
     const history = useHistory();
@@ -52,6 +53,13 @@ const Roles = () => {
     let { id } = useParams();
 
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
+
+    // const [refresh, setRefresh] = useState(true);
+
+    // const handleActivityRefresh = () => {
+    //     setRefresh(false)
+    //     setRefresh(true)
+    // }
 
     useEffect(() => {
         const data = user.role?.sideBar;
@@ -415,8 +423,15 @@ const Roles = () => {
                                     />
                                 </div>
                             </Grid>
+                            <Grid item sm={4} md={4} lg={4} className="customGrid">
+                                {
+                                    accountData && <div>
+                                        <Activity relatedTo={[
+                                            { type: "account", referenceId: accountData._id, access: true }
+                                        ]} handleActivityRefresh={() => { }} />
+                                    </div>
+                                }
 
-                            <Grid item sm={4} md={4} lg={4} className="customGrid" >
                                 <div className="detailPageDiv2">
                                     {
                                         quickLinks && quickLinks.length ?
@@ -426,6 +441,7 @@ const Roles = () => {
                                             null
                                     }
                                 </div>
+
                                 <div className="detailPageDiv3" >
                                     <div className="relatedContacts">
                                         <Typography color="primary"
