@@ -23,6 +23,7 @@ import Header from "./Header";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CreateOpportunity from './CreateOpportunity'
 import MessageDialog from '../../components/Helpers/MessageDialog'
+import { opportunityDetailPage } from '../../routes/Opportunity'
 import "./style.css";
 
 let opportunityTimeout
@@ -259,7 +260,7 @@ const Opportunities = () => {
   }
   const getFirstName = tData => {
     return <Link className="nameLink"
-      to={`/opportunity/detail/${tData._id}`}
+      to={`/${opportunityDetailPage.path}/${tData._id}`}
     >
       {capitalize(tData.opportunityName) || ''}
     </Link>

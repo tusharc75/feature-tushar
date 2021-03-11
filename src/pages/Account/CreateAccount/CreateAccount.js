@@ -11,7 +11,7 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import Loader from '../../../components/Loader'
 import FormTypes from "./../../../components/Helpers/FormTypes";
-
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import "../account.css"
 
 const useStyles = makeStyles((theme) => ({
@@ -24,6 +24,7 @@ const DialogContent = withStyles((theme) => ({
     },
 }))(MuiDialogContent);
 
+const arr = [...Array(9).keys()]
 const DialogActions = withStyles((theme) => ({
     root: {
         margin: 0,
@@ -282,7 +283,9 @@ export default function CreateAccount(props) {
                     </Formik>
                 </>
                 : <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
-                    <Loader text="Fetching Data" style={{ marginTop: 100 }} />
+                    <CommonSkeleton
+                        lenArray={arr}
+                    />
                 </DialogContent>
         }
     </ >
