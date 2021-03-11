@@ -4,6 +4,7 @@ import {
     Button,
     Grid,
     Typography,
+    IconButton,
 } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
@@ -30,6 +31,9 @@ import OpportunityTab from './OpportunityTab'
 import { AddOutlined } from '@material-ui/icons'
 import Chip from '@material-ui/core/Chip';
 import Activity from "../../components/Activity";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
 
 const Roles = () => {
     const history = useHistory();
@@ -47,8 +51,10 @@ const Roles = () => {
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState();
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
-    const [accountHeirarchyData, setAccountHeirarchyData] = useState([]);
-    const [expanded, setExpanded] = React.useState(false);
+    const [accountHierarchyData, setAccountHierarchyData] = useState([]);
+    const [expanded, setExpanded] = React.useState({
+        opportunity: false
+    });
 
     let { id } = useParams();
 
@@ -317,10 +323,12 @@ const Roles = () => {
             })
     }
 
-    const handlePanelChange = (panel) => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
+    const handlePanelChange = (curActive) => {
+        let tempData = { ...expanded }
+        tempData[curActive] = tempData[curActive] ? false : true
+        setExpanded(tempData)
     };
-
+    console.log('expanded', expanded)
     return (
         <>
             <Layout>
@@ -416,12 +424,40 @@ const Roles = () => {
                                     }
                                 </div>
 
-                                <div style={{ marginTop: '10px' }}>
-                                    <OpportunityTab
-                                        onChange={handlePanelChange}
-                                        expanded={expanded}
-                                    />
-                                </div>
+                                <Box display="flex" mt={1} p={1}
+                                    bgcolor="grey.100" borderColor="grey.300"
+                                    onClick={(event) => handlePanelChange('opportunity')}
+                                    style={{ cursor: "pointer" }}>
+                                    <Grid container>
+                                        <Grid item xs={8} >
+                                            <Box display="flex">
+                                                <Box >
+                                                    <IconButton size="small">
+                                                        {expanded === 'opportunity' ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                                    </IconButton>
+                                                </Box>
+                                                <Box ml={1} mt={0.5}>
+                                                    <Typography variant="subtitle2">Opportunity</Typography>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+                                        <Grid item xs={4} container justify="flex-end" >
+                                            <IconButton color="primary" size="small" >
+                                                <ControlPointIcon />
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                                {
+                                    expanded['opportunity'] ?
+                                        <div style={{ marginTop: '10px' }}>
+                                            <OpportunityTab
+                                                onChange={handlePanelChange}
+                                                expanded={expanded['opportunity']}
+                                            />
+                                        </div> : null
+                                }
+
                             </Grid>
                             <Grid item sm={4} md={4} lg={4} className="customGrid">
                                 {

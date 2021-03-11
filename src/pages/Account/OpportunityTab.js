@@ -59,6 +59,7 @@ function DisplayData({ label, value }) {
     </span>)
 }
 export default function ControlledAccordions({ onChange, expanded }) {
+    console.log("~ expanded", expanded)
     const classes = useStyles();
 
     let obj = {
@@ -71,15 +72,15 @@ export default function ControlledAccordions({ onChange, expanded }) {
 
     return (
         <div className={classes.root} >
-            <Accordion expanded={expanded === 'opportunity'} onChange={onChange('opportunity')}>
-                <AccordionSummary
+            <Accordion expanded={expanded}>
+                {/* <AccordionSummary
                     className={classes.accSumActive}
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1bh-content"
                     id="panel1bh-header"
                 >
                     <Typography className={classes.heading}>Opportunity(0) </Typography>
-                </AccordionSummary>
+                </AccordionSummary> */}
                 <AccordionDetails className={classes.accordion}>
                     <Box className={classes.box}>
 
