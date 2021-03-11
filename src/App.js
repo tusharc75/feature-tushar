@@ -19,6 +19,10 @@ import ContactDetailPage from "./pages/Contact/ContactDetailPage";
 import CustomToaster from "./components/Helpers/CustomToast";
 import { CustomEventEmitter } from "./axios/events";
 import OpportunityDetailsPage from "./pages/Opportunities/OpportunityDetailsPage";
+import Activitydemo from "./pages/Activity/activitydemo";
+import Activity from "./pages/Activity";
+import Note from "./pages/Activity/Note";
+import Email from "./pages/Activity/Email";
 
 function App() {
   const {
@@ -29,8 +33,8 @@ function App() {
     return !user ? (
       <Comp />
     ) : (
-      <Redirect to={{ pathname: "/", state: { from: location } }} />
-    );
+        <Redirect to={{ pathname: "/", state: { from: location } }} />
+      );
   };
 
   const [toastConfig, setToastConfig] = useState(null);
@@ -97,6 +101,19 @@ function App() {
         </PrivateRoute>
         <PrivateRoute exact path="/contact/detail/:id">
           <ContactDetailPage />
+        </PrivateRoute>
+
+        <PrivateRoute exact path="/activity">
+          <Activitydemo />
+        </PrivateRoute>
+        <PrivateRoute exact path="/activity/email">
+          <Email />
+        </PrivateRoute>
+        <PrivateRoute exact path="/activity/note">
+          <Note />
+        </PrivateRoute>
+        <PrivateRoute exact path="/activity/:type">
+          <Activity />
         </PrivateRoute>
         {/* <Route exact path="/crm/account" component={Account} /> */}
       </Switch>

@@ -13,7 +13,8 @@ import {
     IconButton,
     Grid,
     Divider,
-    Select
+    Select,
+    Chip
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
@@ -32,6 +33,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CustomEventEmitter } from './../../axios/events';
 import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "./../../components/Container";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 import './account.css'
 
@@ -82,8 +85,10 @@ export default function Account() {
     const [selectedType, setselectedType] = useState(1)
 
     const [singleAccountDelete, setSingleAccountDelete] = useState({ id: null, show: false, accountName: "" })
+    const [singleApproveDisapproveAccount, setSingleApproveDisapproveAccount] = useState({ show: false, approved: false, id: null, accountName: "" })
+    const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState({ show: false, approved: false, selectedRecords: 0 })
 
-    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
+    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false, approveAccount: false });
 
     useEffect(() => {
         const data = user.role?.sideBar;
@@ -91,7 +96,13 @@ export default function Account() {
         if (data) {
             const hasAccountPermission = data.find(d => d.name == "Account");
             if (hasAccountPermission) {
-                setAccountPermissions({ isCreate: hasAccountPermission.isCreate, isRead: hasAccountPermission.isRead, isDelete: hasAccountPermission.isDelete });
+                setAccountPermissions({
+                    isCreate: hasAccountPermission.isCreate,
+                    isUpdate: hasAccountPermission.isUpdate,
+                    isRead: hasAccountPermission.isRead,
+                    isDelete: hasAccountPermission.isDelete,
+                    approveAccount: user.user?.permissions?.approveAccount
+                });
             }
         }
     }, [user]);
@@ -122,7 +133,8 @@ export default function Account() {
             id: u._id,
             allowToDelete: u.allowToDelete,
             collaborator: u.collaborator || [],
-            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : ""
+            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : "",
+            approved: u.static?.approved ? u.static?.approved : false
         }));
         setDataRows([...rows]);
     }, [accountData])
@@ -256,6 +268,25 @@ export default function Account() {
                                     <FileCopyIcon fontSize="small" />
                                 </IconButton>
                             </Tooltip>
+                    }
+
+                    {
+                        accountPermissions.isUpdate && accountPermissions.approveAccount ?
+                            params.row.approved ?
+                                <Tooltip title="Disapprove">
+                                    <IconButton aria-label="Disapprove" onClick={() => {
+                                        setSingleApproveDisapproveAccount({ show: true, approved: false, id: params.row._id, accountName: params.row.accountName })
+                                    }}>
+                                        <CancelIcon fontSize="small" color="error" />
+                                    </IconButton>
+                                </Tooltip> :
+                                <Tooltip title="Approve">
+                                    <IconButton aria-label="Approve" onClick={() => {
+                                        setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
+                                    }}>
+                                        <CheckCircleIcon fontSize="small" color="primary" />
+                                    </IconButton>
+                                </Tooltip> : ""
                     }
 
                     {
@@ -394,6 +425,19 @@ export default function Account() {
         setSelectedRecs([])
     }
 
+    const handleSingleApproveDisapproveAccount = () => {
+        axiosInstance().post(`/account/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
+            .then(({ data }) => {
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
+                fetchAccounts();
+            }).catch(() => {
+                setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
+            });
+        setCheckAllAccounts(false)
+        setSelectedRecs([])
+    }
+
     const handleDialogClose = (params) => {
         if (params && params.fetch) {
             fetchAccounts()
@@ -408,6 +452,21 @@ export default function Account() {
         setselectedType(e.target.value)
         setCheckAllAccounts(false)
     }
+
+    const approveDisapproveAccounts = () => {
+        const selectedAccountIds = dataRows.filter(d => d.approved == !multipleApproveDisapproveAccount.approved).map(m => m._id);
+
+        axiosInstance().post(`/account/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
+            .then(({ data }) => {
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
+                fetchAccounts();
+            }).catch(() => {
+                setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
+            });
+        setCheckAllAccounts(false)
+    }
+
     return (
         <>
             <Layout>
@@ -513,45 +572,72 @@ export default function Account() {
                                 </>
                             }
 
-                            {
-                                accountPermissions.isDelete && <>
-                                    <Box component="span" marginX={1} />
+                            <Box component="span" marginX={1} />
 
-                                    <Button
-                                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                        variant="outlined"
-                                        color="default"
-                                        onClick={openActions}
-                                        aria-controls="action-menu"
-                                    >
-                                        Actions <ExpandMore />
-                                    </Button>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        getContentAnchorEl={null}
-                                        anchorOrigin={{
-                                            vertical: "bottom",
-                                            horizontal: "left"
+                            <Button
+                                disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                variant="outlined"
+                                color="default"
+                                onClick={openActions}
+                                aria-controls="action-menu"
+                            >
+                                Actions <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left"
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}>
+
+                                {
+                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                        disabled={
+                                            dataRows.filter((d) => d.isChecked && !d.approved).length === 0
+                                        }
+                                        onClick={() => {
+                                            setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
                                         }}
-                                        id="action-menu"
-                                        open={Boolean(anchorEl)}
-                                        onClose={closeActions}>
+                                    >
+                                        Approve Accounts &nbsp;{" "}
+                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
+                                    </MenuItem>
+                                }
+                                {
+                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                        disabled={
+                                            dataRows.filter((d) => d.isChecked && d.approved).length === 0
+                                        }
+                                        onClick={() => {
+                                            setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
+                                        }}
+                                    >
+                                        Disapprove Accounts &nbsp;{" "}
+                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
+                                    </MenuItem>
+                                }
+                                {
+                                    accountPermissions.isDelete &&
+                                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                        onClick={() => {
+                                            if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                setShowDeleteWarningConfirmBox(true);
+                                            } else {
+                                                setShowDeleteConfirmBox(true)
+                                            }
+                                        }}
+                                    >
+                                        Delete
+                                    </MenuItem>
+                                }
 
-                                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                            onClick={() => {
-                                                if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
-                                                    setShowDeleteWarningConfirmBox(true);
-                                                } else {
-                                                    setShowDeleteConfirmBox(true)
-                                                }
-                                            }}
-                                        >
-                                            Delete
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                            }
+                            </Menu>
+
 
                         </Grid>
                     </Grid>
@@ -606,6 +692,26 @@ export default function Account() {
                                     message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
                                     onClose={() => setSingleAccountDelete({ id: null, show: false, accountName: "" })}
                                     onOk={handleSingleDeleteAccounts}
+                                /> : null
+                        }
+
+                        {
+                            singleApproveDisapproveAccount.show ?
+                                <ConfirmationDialog
+                                    open={singleApproveDisapproveAccount.show}
+                                    message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved ? "approve" : "disapprove"} account: ${singleApproveDisapproveAccount.accountName} ? `}
+                                    onClose={() => setSingleApproveDisapproveAccount({ id: null, show: false, accountName: "" })}
+                                    onOk={handleSingleApproveDisapproveAccount}
+                                /> : null
+                        }
+
+                        {
+                            multipleApproveDisapproveAccount.show ?
+                                <ConfirmationDialog
+                                    open={multipleApproveDisapproveAccount.show}
+                                    message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved ? "approve" : "disapprove"} selected ${multipleApproveDisapproveAccount.selectedRecords} account(s) ? `}
+                                    onClose={() => setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })}
+                                    onOk={approveDisapproveAccounts}
                                 /> : null
                         }
 
