@@ -13,7 +13,8 @@ import {
     IconButton,
     Grid,
     Divider,
-    Select
+    Select,
+    Chip
 } from "@material-ui/core";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
@@ -85,8 +86,9 @@ export default function Account() {
 
     const [singleAccountDelete, setSingleAccountDelete] = useState({ id: null, show: false, accountName: "" })
     const [singleApproveDisapproveAccount, setSingleApproveDisapproveAccount] = useState({ show: false, approved: false, id: null, accountName: "" })
+    const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState({ show: false, approved: false, selectedRecords: 0 })
 
-    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isDelete: false, approveAccount: false });
+    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false, approveAccount: false });
 
     useEffect(() => {
         const data = user.role?.sideBar;
@@ -96,6 +98,7 @@ export default function Account() {
             if (hasAccountPermission) {
                 setAccountPermissions({
                     isCreate: hasAccountPermission.isCreate,
+                    isUpdate: hasAccountPermission.isUpdate,
                     isRead: hasAccountPermission.isRead,
                     isDelete: hasAccountPermission.isDelete,
                     approveAccount: user.user?.permissions?.approveAccount
@@ -268,7 +271,7 @@ export default function Account() {
                     }
 
                     {
-                        accountPermissions.approveAccount ?
+                        accountPermissions.isUpdate && accountPermissions.approveAccount ?
                             params.row.approved ?
                                 <Tooltip title="Disapprove">
                                     <IconButton aria-label="Disapprove" onClick={() => {
@@ -431,6 +434,7 @@ export default function Account() {
             }).catch(() => {
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
             });
+        setCheckAllAccounts(false)
         setSelectedRecs([])
     }
 
@@ -448,6 +452,21 @@ export default function Account() {
         setselectedType(e.target.value)
         setCheckAllAccounts(false)
     }
+
+    const approveDisapproveAccounts = () => {
+        const selectedAccountIds = dataRows.filter(d => d.approved == !multipleApproveDisapproveAccount.approved).map(m => m._id);
+
+        axiosInstance().post(`/account/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
+            .then(({ data }) => {
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
+                fetchAccounts();
+            }).catch(() => {
+                setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
+            });
+        setCheckAllAccounts(false)
+    }
+
     return (
         <>
             <Layout>
@@ -553,45 +572,72 @@ export default function Account() {
                                 </>
                             }
 
-                            {
-                                accountPermissions.isDelete && <>
-                                    <Box component="span" marginX={1} />
+                            <Box component="span" marginX={1} />
 
-                                    <Button
-                                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                        variant="outlined"
-                                        color="default"
-                                        onClick={openActions}
-                                        aria-controls="action-menu"
-                                    >
-                                        Actions <ExpandMore />
-                                    </Button>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        getContentAnchorEl={null}
-                                        anchorOrigin={{
-                                            vertical: "bottom",
-                                            horizontal: "left"
+                            <Button
+                                disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                variant="outlined"
+                                color="default"
+                                onClick={openActions}
+                                aria-controls="action-menu"
+                            >
+                                Actions <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left"
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}>
+
+                                {
+                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                        disabled={
+                                            dataRows.filter((d) => d.isChecked && !d.approved).length === 0
+                                        }
+                                        onClick={() => {
+                                            setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
                                         }}
-                                        id="action-menu"
-                                        open={Boolean(anchorEl)}
-                                        onClose={closeActions}>
+                                    >
+                                        Approve Accounts &nbsp;{" "}
+                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
+                                    </MenuItem>
+                                }
+                                {
+                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                        disabled={
+                                            dataRows.filter((d) => d.isChecked && d.approved).length === 0
+                                        }
+                                        onClick={() => {
+                                            setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
+                                        }}
+                                    >
+                                        Disapprove Accounts &nbsp;{" "}
+                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
+                                    </MenuItem>
+                                }
+                                {
+                                    accountPermissions.isDelete &&
+                                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                        onClick={() => {
+                                            if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                setShowDeleteWarningConfirmBox(true);
+                                            } else {
+                                                setShowDeleteConfirmBox(true)
+                                            }
+                                        }}
+                                    >
+                                        Delete
+                                    </MenuItem>
+                                }
 
-                                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                            onClick={() => {
-                                                if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
-                                                    setShowDeleteWarningConfirmBox(true);
-                                                } else {
-                                                    setShowDeleteConfirmBox(true)
-                                                }
-                                            }}
-                                        >
-                                            Delete
-                                        </MenuItem>
-                                    </Menu>
-                                </>
-                            }
+                            </Menu>
+
 
                         </Grid>
                     </Grid>
@@ -656,6 +702,16 @@ export default function Account() {
                                     message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved ? "approve" : "disapprove"} account: ${singleApproveDisapproveAccount.accountName} ? `}
                                     onClose={() => setSingleApproveDisapproveAccount({ id: null, show: false, accountName: "" })}
                                     onOk={handleSingleApproveDisapproveAccount}
+                                /> : null
+                        }
+
+                        {
+                            multipleApproveDisapproveAccount.show ?
+                                <ConfirmationDialog
+                                    open={multipleApproveDisapproveAccount.show}
+                                    message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved ? "approve" : "disapprove"} selected ${multipleApproveDisapproveAccount.selectedRecords} account(s) ? `}
+                                    onClose={() => setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })}
+                                    onOk={approveDisapproveAccounts}
                                 /> : null
                         }
 

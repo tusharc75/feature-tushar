@@ -127,7 +127,7 @@ export default function CreateContact({ open, onClose, fetchData }) {
         axiosInstance().get('/field?resource=Lead').then(({ data: { data } }) => {
 
             const newFields = [];
-            data.map((_f) => newFields.push(_f.fieldData));
+            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
             setEntityData({
                 fields: newFields,

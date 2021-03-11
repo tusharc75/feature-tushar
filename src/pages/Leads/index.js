@@ -64,7 +64,7 @@ const Leads = () => {
   const [leadData, setLeadData] = useState([]);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
   const [deleteRec, setDeleteRec] = useState({})
-  const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
+  const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
 
   useEffect(() => {
@@ -73,7 +73,12 @@ const Leads = () => {
     if (data) {
       const hasLeadsPermission = data.find(d => d.name == "Lead");
       if (hasLeadsPermission) {
-        setLeadsPermissions({ isCreate: hasLeadsPermission.isCreate, isRead: hasLeadsPermission.isRead, isDelete: hasLeadsPermission.isDelete });
+        setLeadsPermissions({
+          isCreate: hasLeadsPermission.isCreate,
+          isUpdate: hasLeadsPermission.isUpdate,
+          isRead: hasLeadsPermission.isRead,
+          isDelete: hasLeadsPermission.isDelete
+        });
       }
     }
   }, [user]);
