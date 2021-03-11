@@ -34,7 +34,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
     if (
       !pathnames.length ||
       pathname.includes("opportunity") ||
-      pathname.includes("lead")
+      pathname.includes("lead") ||
+      pathname.includes("activity")
     ) {
       setAccess(true);
       setChecking(false);
@@ -54,11 +55,11 @@ const ProtectedRoute = ({ children, ...rest }) => {
           ) : access ? (
             children
           ) : (
-            <Unauthorized />
-          )
+                <Unauthorized />
+              )
         ) : (
-          <Redirect to={{ pathname: "/login", state: { from: location } }} />
-        )
+            <Redirect to={{ pathname: "/login", state: { from: location } }} />
+          )
       }
     />
   );

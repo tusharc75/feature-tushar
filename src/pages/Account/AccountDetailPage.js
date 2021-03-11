@@ -28,6 +28,7 @@ import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
 import OpportunityTab from './OpportunityTab'
 import { AddOutlined } from '@material-ui/icons'
+import Chip from '@material-ui/core/Chip';
 
 const Roles = () => {
     const history = useHistory();
@@ -40,6 +41,7 @@ const Roles = () => {
     const [relatedContacts, setRelatedContacts] = useState([])
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
+    const [showApproveDisapproveConfirmBox, setShowApproveDisapproveConfirmBox] = useState(false);
     const [accountFields, setAccountFields] = useState([])
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState();
@@ -47,9 +49,27 @@ const Roles = () => {
     const [accountHeirarchyData, setAccountHeirarchyData] = useState([]);
     const [expanded, setExpanded] = React.useState(false);
 
-
-
     let { id } = useParams();
+
+    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
+
+    useEffect(() => {
+        const data = user.role?.sideBar;
+
+        if (data) {
+            const hasAccountPermission = data.find(d => d.name == "Account");
+            if (hasAccountPermission) {
+                setAccountPermissions(
+                    {
+                        isCreate: hasAccountPermission.isCreate,
+                        isUpdate: hasAccountPermission.isUpdate,
+                        isRead: hasAccountPermission.isRead,
+                        isDelete: hasAccountPermission.isDelete,
+                        approveAccount: user.user?.permissions?.approveAccount
+                    });
+            }
+        }
+    }, [user]);
 
     useEffect(() => {
         if (id) {
@@ -86,40 +106,68 @@ const Roles = () => {
                 const { parentHierarchy, ...rest } = data;
                 accounts.push({ ...rest, current: true });
 
-                var map = {}, node, roots = [], i;
+                let newData = [];
 
-                for (i = 0; i < accounts.length; i += 1) {
-                    map[accounts[i]._id] = i; // initialize the map
-                    accounts[i].children = []; // initialize the children
-                }
+                accounts.map(account => {
+                    const updatedAccount = {
+                        _id: account._id,
+                        accountName: `${account.accountName}`,
+                        typeOfAccount: account.typeOfAccount?.optionLabel,
+                        industry: account.industry?.optionLabel,
+                        typeOfBusiness: account.typeOfBusiness,
+                        phone: account.phone,
+                        type: "child"
+                    };
 
-                for (i = 0; i < accounts.length; i += 1) {
-                    node = accounts[i];
-                    if (node.parentAccount) {
-                        // if you have dangling branches check that map[node.parentId] exists
-                        accounts[map[node.parentAccount.optionValue]].children.push(node);
-                    } else {
-                        roots.push(node);
+                    if (account.parentAccount) {
+                        updatedAccount["parentAccountText"] = account.parentAccount.optionLabel;
+                        updatedAccount["parentAccountId"] = account.parentAccount.optionValue;
+                        updatedAccount["type"] = "parent";
                     }
-                }
-                setAccountHeirarchyData([...roots]);
+
+                    newData.push(updatedAccount);
+                })
+
+                setAccountHierarchyData([...newData]);
+
+
+                // let accounts = data.parentHierarchy;
+                // const { parentHierarchy, ...rest } = data;
+                // accounts.push({ ...rest, current: true });
+
+                // var map = {}, node, roots = [], i;
+
+                // for (i = 0; i < accounts.length; i += 1) {
+                //     map[accounts[i]._id] = i; // initialize the map
+                //     accounts[i].children = []; // initialize the children
+                // }
+
+                // for (i = 0; i < accounts.length; i += 1) {
+                //     node = accounts[i];
+                //     if (node.parentAccount) {
+                //         // if you have dangling branches check that map[node.parentId] exists
+                //         accounts[map[node.parentAccount.optionValue]].children.push(node);
+                //     } else {
+                //         roots.push(node);
+                //     }
+                // }
+                // setAccountHierarchyData([...roots]);
             } else {
-                setAccountHeirarchyData([
+                setAccountHierarchyData([
                     {
                         _id: data._id,
                         accountName: data.accountName,
-                        typeOfAccount: data.typeOfAccount,
-                        industry: data.industry,
+                        typeOfAccount: data.typeOfAccount?.optionLabel,
+                        industry: data.industry?.optionLabel,
                         typeOfBusiness: data.typeOfBusiness,
-                        parentAccount: data.parentAccount,
-                        phone: data.phone,
-                        children: []
+                        // parentAccount: data.parentAccount,
+                        phone: data.phone
                     }
                 ])
             }
 
 
-            //  setAccountHeirarchyData
+            //  setAccountHierarchyData
 
             if (accountFields.length == 0) {
                 getAccountFields()
@@ -217,6 +265,17 @@ const Roles = () => {
             setShowConfirmBox(false)
         }
     }
+
+    const handleApproveDisapprove = () => {
+        axiosInstance().post(`/account/approve`, { ids: [accountData._id], approved: !accountData.static?.approved })
+            .then(() => {
+                fetchAccountData()
+                setShowApproveDisapproveConfirmBox(false);
+            }).catch(() => {
+                setShowApproveDisapproveConfirmBox(false);
+            })
+    }
+
     const handleUpdateAccount = (values) => {
         setUpdating(true);
         if (values.employees) {
@@ -280,7 +339,18 @@ const Roles = () => {
                     >
                         <Box component="span" marginX={1} />
                         {
-                            accountData?.owner?.optionValue && user?.user?._id &&
+                            accountPermissions.approveAccount && accountPermissions.isUpdate && <>
+                                <Button
+                                    variant="contained" color={accountData.static?.approved ? "secondary" : "primary"}
+                                    onClick={() => setShowApproveDisapproveConfirmBox(true)}
+                                >
+                                    {accountData.static?.approved ? "Disapprove" : "Approve"}
+                                </Button>
+                                <Box component="span" marginX={1} />
+                            </>
+                        }
+                        {
+                            accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
                                 accountData.owner.optionValue === user.user._id ?
                                 <Button
                                     variant="contained" color="secondary"
@@ -292,10 +362,9 @@ const Roles = () => {
                     </CustomHeader>
 
                     <Container className="detailPageContainer">
-                        <Grid container spacing={2}>
-                            <Grid item sm={8} md={8} lg={8} className="customGrid">
-                                <div className="detailPageDiv1"
-                                    style={{ pointerEvents: allowedToEdit ? "" : "none" }} >
+                        <Grid container spacing={3}>
+                            <Grid item sm={8} md={8} lg={8}>
+                                <div className="detailPageDiv1">
                                     {
                                         loading ?
                                             <Grid container spacing={2}>
@@ -326,12 +395,13 @@ const Roles = () => {
                                                         isUpdating={isUpdating}
                                                         canEdit={allowedToEdit}
                                                         handleUpdate={handleUpdateAccount}
+                                                        sourceComponent="account"
                                                     />
 
                                                 </Box>
 
                                                 <Box index={1} hidden={currentTabIndex !== 1}>
-                                                    <AccountHierarchy data={accountHeirarchyData} />
+                                                    <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
                                                 </Box>
 
                                             </>
@@ -376,14 +446,26 @@ const Roles = () => {
                                 </div>
                             </Grid>
                         </Grid>
-                        {showConfirmBox ? (
-                            <ConfirmationDialog
-                                open={showConfirmBox}
-                                message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
-                                onClose={() => setShowConfirmBox(false)}
-                                onOk={handleDeleteAcc}
-                            />
-                        ) : null}
+                        {
+                            showConfirmBox ? (
+                                <ConfirmationDialog
+                                    open={showConfirmBox}
+                                    message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
+                                    onClose={() => setShowConfirmBox(false)}
+                                    onOk={handleDeleteAcc}
+                                />
+                            ) : null
+                        }
+                        {
+                            showApproveDisapproveConfirmBox ? (
+                                <ConfirmationDialog
+                                    open={showApproveDisapproveConfirmBox}
+                                    message={`Are you sure you want to ${accountData.static?.approved ? 'disapprove' : "approve"} this Account ?`}
+                                    onClose={() => setShowApproveDisapproveConfirmBox(false)}
+                                    onOk={handleApproveDisapprove}
+                                />
+                            ) : null
+                        }
                     </Container>
                 </div>
             </Layout>

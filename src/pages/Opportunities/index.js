@@ -62,7 +62,7 @@ const Opportunities = () => {
   const [opportunityData, setOpportunityData] = useState([]);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
   const [deleteRec, setDeleteRec] = useState({})
-  const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
+  const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
 
@@ -72,7 +72,12 @@ const Opportunities = () => {
     if (data) {
       const hasOpportunityPermission = data.find(d => d.name == "Opportunity");
       if (hasOpportunityPermission) {
-        setOpportunityPermissions({ isCreate: hasOpportunityPermission.isCreate, isRead: hasOpportunityPermission.isRead, isDelete: hasOpportunityPermission.isDelete });
+        setOpportunityPermissions({
+          isCreate: hasOpportunityPermission.isCreate,
+          isUpdate: hasOpportunityPermission.isUpdate,
+          isRead: hasOpportunityPermission.isRead,
+          isDelete: hasOpportunityPermission.isDelete
+        });
       }
     }
   }, [user]);

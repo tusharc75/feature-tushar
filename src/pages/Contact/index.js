@@ -86,7 +86,7 @@ export default function Contact() {
         initialValues: {},
     })
 
-    const [contactPermissions, setContactPermissions] = useState({ isCreate: false, isRead: false, isDelete: false });
+    const [contactPermissions, setContactPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
 
     const columns = [
         {
