@@ -26,6 +26,8 @@ import axiosInstance from './../../axios/axiosInstance'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
+import OpportunityTab from './OpportunityTab'
+import { AddOutlined } from '@material-ui/icons'
 import Chip from '@material-ui/core/Chip';
 import Activity from "../../components/Activity";
 
@@ -45,7 +47,8 @@ const Roles = () => {
     const [mainPoints, setMainPoints] = useState({})
     const [customizedRoutes, setCustomizedRoutes] = useState();
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
-    const [accountHierarchyData, setAccountHierarchyData] = useState([]);
+    const [accountHeirarchyData, setAccountHeirarchyData] = useState([]);
+    const [expanded, setExpanded] = React.useState(false);
 
     let { id } = useParams();
 
@@ -314,6 +317,10 @@ const Roles = () => {
             })
     }
 
+    const handlePanelChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
+
     return (
         <>
             <Layout>
@@ -360,7 +367,6 @@ const Roles = () => {
                                     Delete
                             </Button> : null
                         }
-
                     </CustomHeader>
 
                     <Container className="detailPageContainer">
@@ -399,12 +405,22 @@ const Roles = () => {
                                                         handleUpdate={handleUpdateAccount}
                                                         sourceComponent="account"
                                                     />
+
                                                 </Box>
+
                                                 <Box index={1} hidden={currentTabIndex !== 1}>
                                                     <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
                                                 </Box>
+
                                             </>
                                     }
+                                </div>
+
+                                <div style={{ marginTop: '10px' }}>
+                                    <OpportunityTab
+                                        onChange={handlePanelChange}
+                                        expanded={expanded}
+                                    />
                                 </div>
                             </Grid>
                             <Grid item sm={4} md={4} lg={4} className="customGrid">
@@ -427,12 +443,22 @@ const Roles = () => {
                                 </div>
 
                                 <div className="detailPageDiv3" >
-                                    <Typography color="primary" variant="h6">Related Contacts</Typography>
+                                    <div className="relatedContacts">
+                                        <Typography color="primary"
+                                            variant="h6"
+                                            style={{ margin: "0 10px" }} >Related Contacts</Typography>
+                                        <span><AddOutlined fontSize="27px" /> </span>
+                                    </div>
+
                                     <Box className="customBox1">
                                         <RelatedContactsBox
                                             contacts={relatedContacts}
                                         />
                                     </Box>
+                                    <div className="viewAllBtn">
+                                        <Button
+                                            variant="outlined"
+                                            className="btn" >View All</Button></div>
                                 </div>
                             </Grid>
                         </Grid>

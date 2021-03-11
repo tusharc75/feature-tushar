@@ -16,6 +16,7 @@ import { yupSchema } from '../../constants/helpers'
 import FormTypes from "./../../components/Helpers/FormTypes";
 import axiosInstance from './../../axios/axiosInstance'
 import { CustomEventEmitter } from './../../axios/events';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.grey[500],
     },
 }));
-
+const arr = [...Array(10).keys()]
 const DialogContent = withStyles((theme) => ({
     root: {
         padding: theme.spacing(2),
@@ -179,7 +180,9 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
 
             {
                 entityData.fields.length == 0 && <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
-                    <Loader text="Fetching Data" style={{ marginTop: 100 }} />
+                    <CommonSkeleton
+                        lenArray={arr}
+                    />
                 </DialogContent>
             }
             {

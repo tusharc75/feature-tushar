@@ -24,6 +24,7 @@ import { CustomEventEmitter } from './../../axios/events';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import MessageDialog from '../../components/Helpers/MessageDialog'
+import { leadDetailPage } from '../../routes/Lead'
 
 import "./style.css";
 
@@ -261,7 +262,7 @@ const Leads = () => {
   }
   const getFirstName = tData => {
     return <Link className="LeadNameLink"
-      to={`/lead/detail/${tData._id}`}
+      to={`/${leadDetailPage.path}/${tData._id}`}
     >
       {tData.name || ''}
     </Link>

@@ -15,6 +15,7 @@ import Loader from '../../../components/Loader'
 import { formValidation } from '../../../constants/helpers';
 import FormTypes from "./../../../components/Helpers/FormTypes";
 import axiosInstance from './../../../axios/axiosInstance'
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -42,6 +43,7 @@ const DialogActions = withStyles((theme) => ({
     },
 }))(MuiDialogActions);
 
+const arr = [...Array(9).keys()]
 export default function CreateContact({ open, onClose, onSuccess }) {
 
     const classes = useStyles();
@@ -160,7 +162,9 @@ export default function CreateContact({ open, onClose, onSuccess }) {
 
             {
                 entityData.fields.length == 0 && <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
-                    <Loader text="Fetching Data" style={{ marginTop: 100 }} />
+                    <CommonSkeleton
+                        lenArray={arr}
+                    />
                 </DialogContent>
             }
             {
