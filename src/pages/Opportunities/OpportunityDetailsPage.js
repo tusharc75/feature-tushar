@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  Link as MuiLink,
-  Typography,
-} from "@material-ui/core";
-import { Add, ExpandMore, Send } from "@material-ui/icons";
+import { Box, Button, Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import { useHistory, useParams, Link } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 import { getErrorMessage } from "../../services/util";
 import CustomToast from "../../components/Helpers/CustomToast";
@@ -317,71 +309,26 @@ const OpportunityDetailsPage = () => {
             </Grid>
             <Grid item sm={4} md={4} lg={4}>
               {opportunityData && (
-                <div>
-                  <Activity
-                    relatedTo={[
-                      {
-                        type: "account",
-                        referenceId: opportunityData.accountName.optionValue,
-                        access: false,
-                      },
-                      {
-                        type: "opportunity",
-                        referenceId: opportunityData._id,
-                        access: true,
-                      },
-                    ]}
-                    handleActivityRefresh={() => {}}
-                  />
-                </div>
+                <Container>
+                  <div>
+                    <Activity
+                      relatedTo={[
+                        {
+                          type: "account",
+                          referenceId: opportunityData.accountName.optionValue,
+                          access: false,
+                        },
+                        {
+                          type: "opportunity",
+                          referenceId: opportunityData._id,
+                          access: true,
+                        },
+                      ]}
+                      handleActivityRefresh={() => {}}
+                    />
+                  </div>
+                </Container>
               )}
-
-              <Container styles={{ padding: 0, background: "transparent" }}>
-                <List component="nav" style={{ padding: 0 }}>
-                  {quickLinks.map((item, i) => (
-                    <div key={i}>
-                      <Link to={`#`}>
-                        <ListItem button style={{ background: "white" }}>
-                          <ListItemIcon>
-                            <Send />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={`${item.label} (${item.count})`}
-                          />
-                          <ExpandMore />
-                        </ListItem>
-                      </Link>
-                      <Box marginBottom={2} />
-                    </div>
-                  ))}
-                </Box>
-              </Container>
-              <Container styles={{ padding: "10px" }}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  marginBottom={1}
-                >
-                  <Typography color="primary">Contacts</Typography>
-                  <IconButton size="small">
-                    <Add color="primary" />
-                  </IconButton>
-                </Box>
-                <BoxWithBorder style={{ minHeight: "200px", padding: 0 }}>
-                  <CustomTabs
-                    value={contactTabIndex}
-                    setValue={setContactTabIndex}
-                    tabs={["Customer", "Supplier"]}
-                  />
-                  <TabPanel value={contactTabIndex} index={0}></TabPanel>
-                  <TabPanel value={contactTabIndex} index={1}></TabPanel>
-                </BoxWithBorder>
-
-                <Box textAlign="center" marginTop={1}>
-                  <MuiLink component={Link}>View All</MuiLink>
-                </Box>
-              </Container>
             </Grid>
           </Grid>
           {showConfirmBox ? (
