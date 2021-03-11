@@ -2,7 +2,7 @@ import axios from 'axios';
 import { CustomEventEmitter } from './events';
 
 export default (history = null) => {
-    const baseURL = process?.env?.REACT_APP_API_URL || "https://equipt-oms-v2.herokuapp.com";
+    const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
 
     let headers = {};
 
