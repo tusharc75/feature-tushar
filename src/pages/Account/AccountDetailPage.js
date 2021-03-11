@@ -3,10 +3,11 @@ import {
     Box,
     Button,
     Grid,
-    Typography
+    Typography,
 } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
+import { Skeleton } from "@material-ui/lab";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
@@ -359,7 +360,16 @@ const Roles = () => {
                             <Grid item sm={8} md={8} lg={8}>
                                 <div className="detailPageDiv1">
                                     {
-                                        loading ? <Loader text="Fetching Data" style={{ marginTop: 100 }} /> :
+                                        loading ?
+                                            <Grid container spacing={2}>
+                                                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                                                    <Grid item sm={6} md={6}>
+                                                        <Skeleton variant="text" width="100px" height="16px" />
+                                                        <Box marginY={1} />
+                                                        <Skeleton width="100%" height="50px" />
+                                                    </Grid>
+                                                ))}
+                                            </Grid> :
                                             <>
                                                 <Tabs
                                                     className="mb-4"
