@@ -273,7 +273,7 @@ export default function Account() {
                     {
                         accountPermissions.isUpdate && accountPermissions.approveAccount ?
                             params.row.approved ?
-                                <Tooltip title="Disapprove">
+                                <Tooltip title="Disapprove" >
                                     <IconButton aria-label="Disapprove" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: false, id: params.row._id, accountName: params.row.accountName })
                                     }}>
