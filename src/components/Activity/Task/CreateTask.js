@@ -21,6 +21,10 @@ import moment from "moment";
 import Divider from '@material-ui/core/Divider';
 import { Comment } from '../Comment';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay'
+import TableChartIcon from '@material-ui/icons/TableChart';
+import { SubTask } from './SubTask'
+
+
 
 const TaskSchema = Yup.object().shape({
     name: Yup.string()
@@ -34,16 +38,19 @@ const TaskSchema = Yup.object().shape({
 
 export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
 
+    const [id, setId] = useState(taskId);
     const [initialValues, setInitialValues] = useState(null);
+    const [openAddSub, setOpenAddSub] = React.useState(false);
 
     useEffect(() => {
         fetchTaskDetail();
-    }, []);
+    }, [id]);
 
     const fetchTaskDetail = async () => {
-        if (taskId) {
-            await GetTaskDetail(taskId)
+        if (id) {
+            await GetTaskDetail(id)
                 .then(({ data }) => {
+                    setInitialValues(null)
                     setInitialValues(data)
                 })
                 .catch((err) => {
@@ -56,8 +63,8 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
 
     const handleSave = (values) => {
         values.relatedTo = relatedTo;
-        if (taskId) {
-            UpdateTask(taskId, values)
+        if (id) {
+            UpdateTask(id, values)
                 .then(({ data }) => {
                     handleClose()
                 })
@@ -65,6 +72,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
                 });
         }
         else {
+            values.parentId = null
             CreateNewTask(values)
                 .then(({ data }) => {
                     handleClose()
@@ -77,7 +85,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
     return (initialValues && <Formik initialValues={initialValues} validationSchema={TaskSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form>
-                <DialogTitle id="customized-dialog-title" onClose={handleClose}>{taskId ? "Edit" : "New"} Task</DialogTitle>
+                <DialogTitle id="customized-dialog-title" onClose={handleClose}>{id ? "Edit" : "New"} Task</DialogTitle>
                 <DialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
@@ -105,14 +113,32 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
                                             variant="outlined"
                                         />
                                     </Box>
-                                    {taskId && <Fragment>
+                                    {id && <Fragment>
+                                        <Box mt={1}>
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                disableElevation
+                                                onClick={() => setOpenAddSub(true)}
+                                                startIcon={<TableChartIcon />}
+                                            > Add a child Task</Button>
+                                        </Box>
+                                        <Box mt={2}>
+                                            <SubTask
+                                                openAddSub={openAddSub}
+                                                setOpenAddSub={setOpenAddSub}
+                                                data={initialValues}
+                                                fetchTaskDetail={fetchTaskDetail}
+                                                setId={setId}
+                                            />
+                                        </Box>
                                         <Box mt={2}>
                                             <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                         </Box>
                                         <Box mt={2} >
                                             <Divider />
                                             <Box mt={1} >
-                                                <Comment referenceId={taskId} />
+                                                <Comment referenceId={id} />
                                             </Box>
                                         </Box>
                                     </Fragment>}
@@ -170,6 +196,8 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
                                             fullWidth
                                             margin="dense"
                                             format="yyyy/MM/DD"
+                                            minDate={initialValues.parentData && initialValues.parentData.startDate}
+                                            maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                         />
                                     </Box>
                                     <Box pt={1}>
@@ -182,10 +210,12 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
                                             inputVariant="outlined"
                                             fullWidth
                                             margin="dense"
+                                            minDate={values.startDate}
+                                            maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                             format="yyyy/MM/DD"
                                         />
                                     </Box>
-                                    {taskId && <Fragment>
+                                    {id && <Fragment>
                                         <Box mt={1} color="text.secondary">
                                             <Typography variant="body2">Created {moment(initialValues.createdAt).format("MMM DD YYYY hh:mm A")}</Typography>
                                         </Box>

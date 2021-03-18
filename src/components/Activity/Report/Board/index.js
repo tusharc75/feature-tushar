@@ -12,14 +12,14 @@ import Loader from "../../../../components/Loader";
 import { BoardList } from "./BoardList";
 
 
-const Board = ({ type, filter }) => {
+const Board = ({ type, filter, activityId }) => {
 
 
     const [activity, setActivity] = useState(null);
 
     useEffect(() => {
         fetchBoard();
-    }, [filter]);
+    }, [filter, activityId]);
 
     const fetchBoard = async () => {
         await GetBoard(type, JSON.stringify(filter))
@@ -38,7 +38,7 @@ const Board = ({ type, filter }) => {
     return (activity ? <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container>
             {statusList.map((data, index) => (
-                <Box key={index} width={300} height={window.innerHeight - 250} mr={2} display="block" border={1} borderColor="grey.300" bgcolor="grey.200">
+                <Box key={index} width={300} height={window.innerHeight - 250} mr={2} style={{ overflow: "auto" }} display="block" border={1} borderColor="grey.300" bgcolor="grey.200">
                     <Box p={2}>
                         <Typography variant="subtitle2" >{data.status.toUpperCase()}
                             {" (" + activity.filter(function (o) { return o.status === data.status }).length + ")"}

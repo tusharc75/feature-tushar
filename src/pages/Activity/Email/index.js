@@ -9,6 +9,7 @@ import queryString from 'query-string';
 import { GetReferenceName, GetEmails } from "../../../axios/activity";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import moment from "moment";
+import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 
 
 const Email = () => {
@@ -67,6 +68,11 @@ const Email = () => {
 
 
     return (<Layout>
+        <Grid container direction="row">
+            <Grid item xs={12}>
+                <CustomBreadCrumbs routes={[{ title: "Email" }]} />
+            </Grid>
+        </Grid>
         <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
             <Box mb={2}>
                 <Grid container>

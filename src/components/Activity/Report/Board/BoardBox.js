@@ -1,27 +1,15 @@
 import React, { useState } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { useDrag, useDrop } from 'react-dnd';
-import Chip from '@material-ui/core/Chip';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useHistory } from "react-router-dom";
 import { ListRelatedTo } from '../../Helpers/ListRelatedTo'
+import { DeleteEvent, DeleteCase, DeleteTask } from "../../../../axios/activity";
 
 const style = {
     cursor: 'move',
@@ -88,14 +76,34 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
     };
 
     const handleDelete = (event) => {
-        // event.stopPropagation();
-        // DeleteActivity(data._id)
-        //     .then(({ data }) => {
-        //         setAnchorEl(null);
-        //         fetchBoard()
-        //     })
-        //     .catch((err) => {
-        //     });
+        event.stopPropagation();
+        if (type === "event") {
+            DeleteEvent(data._id)
+                .then(({ data }) => {
+                    setAnchorEl(null);
+                    fetchBoard()
+                })
+                .catch((err) => {
+                });
+        }
+        if (type === "case") {
+            DeleteCase(data._id)
+                .then(({ data }) => {
+                    setAnchorEl(null);
+                    fetchBoard()
+                })
+                .catch((err) => {
+                });
+        }
+        if (type === "task") {
+            DeleteTask(data._id)
+                .then(({ data }) => {
+                    setAnchorEl(null);
+                    fetchBoard()
+                })
+                .catch((err) => {
+                });
+        }
     };
 
     const opacity = isDragging ? 0 : 1;
