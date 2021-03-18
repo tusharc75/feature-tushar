@@ -197,3 +197,6 @@ export const yupSchema = (fields, validEmail = true) => {
     return yup.object().shape(schema);
 };
 
+export default function isObjectEmpty(obj) {
+    return Object.keys(obj).length === 0;
+}

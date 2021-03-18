@@ -10,10 +10,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const BoxWithBorder = ({ children }) => {
+const BoxWithBorder = ({ children, ...rest }) => {
   const classes = useStyles();
   return (
-    <Box component="div" className={classes.root}>
+    <Box component="div" className={classes.root} {...rest}>
       {children}
     </Box>
   );

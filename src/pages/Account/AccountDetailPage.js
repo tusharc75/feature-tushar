@@ -26,7 +26,10 @@ import axiosInstance from './../../axios/axiosInstance'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
+import OpportunityTab from './OpportunityTab'
+import { AddOutlined } from '@material-ui/icons'
 import Chip from '@material-ui/core/Chip';
+import Activity from "../../components/Activity";
 
 const Roles = () => {
     const history = useHistory();
@@ -45,10 +48,18 @@ const Roles = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState();
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
     const [accountHierarchyData, setAccountHierarchyData] = useState([]);
+    const [expanded, setExpanded] = React.useState(false);
 
     let { id } = useParams();
 
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
+
+    // const [refresh, setRefresh] = useState(true);
+
+    // const handleActivityRefresh = () => {
+    //     setRefresh(false)
+    //     setRefresh(true)
+    // }
 
     useEffect(() => {
         const data = user.role?.sideBar;
@@ -127,28 +138,6 @@ const Roles = () => {
 
                 setAccountHierarchyData([...newData]);
 
-
-                // let accounts = data.parentHierarchy;
-                // const { parentHierarchy, ...rest } = data;
-                // accounts.push({ ...rest, current: true });
-
-                // var map = {}, node, roots = [], i;
-
-                // for (i = 0; i < accounts.length; i += 1) {
-                //     map[accounts[i]._id] = i; // initialize the map
-                //     accounts[i].children = []; // initialize the children
-                // }
-
-                // for (i = 0; i < accounts.length; i += 1) {
-                //     node = accounts[i];
-                //     if (node.parentAccount) {
-                //         // if you have dangling branches check that map[node.parentId] exists
-                //         accounts[map[node.parentAccount.optionValue]].children.push(node);
-                //     } else {
-                //         roots.push(node);
-                //     }
-                // }
-                // setAccountHierarchyData([...roots]);
             } else {
                 setAccountHierarchyData([
                     {
@@ -162,9 +151,6 @@ const Roles = () => {
                     }
                 ])
             }
-
-
-            //  setAccountHierarchyData
 
             if (accountFields.length == 0) {
                 getAccountFields()
@@ -306,6 +292,10 @@ const Roles = () => {
             })
     }
 
+    const handlePanelChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
+
     return (
         <>
             <Layout>
@@ -352,7 +342,6 @@ const Roles = () => {
                                     Delete
                             </Button> : null
                         }
-
                     </CustomHeader>
 
                     <Container className="detailPageContainer">
@@ -391,15 +380,33 @@ const Roles = () => {
                                                         handleUpdate={handleUpdateAccount}
                                                         sourceComponent="account"
                                                     />
+
                                                 </Box>
+
                                                 <Box index={1} hidden={currentTabIndex !== 1}>
                                                     <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
                                                 </Box>
+
                                             </>
                                     }
                                 </div>
+
+                                <div style={{ marginTop: '10px' }}>
+                                    <OpportunityTab
+                                        onChange={handlePanelChange}
+                                        expanded={expanded}
+                                    />
+                                </div>
                             </Grid>
-                            <Grid item sm={4} md={4} lg={4} className="customGrid" >
+                            <Grid item sm={4} md={4} lg={4} className="customGrid">
+                                {
+                                    accountData && <div>
+                                        <Activity relatedTo={[
+                                            { type: "account", referenceId: accountData._id, access: true }
+                                        ]} handleActivityRefresh={() => { }} />
+                                    </div>
+                                }
+
                                 <div className="detailPageDiv2">
                                     {
                                         quickLinks && quickLinks.length ?
@@ -409,13 +416,24 @@ const Roles = () => {
                                             null
                                     }
                                 </div>
+
                                 <div className="detailPageDiv3" >
-                                    <Typography color="primary" variant="h6">Related Contacts</Typography>
+                                    <div className="relatedContacts">
+                                        <Typography color="primary"
+                                            variant="h6"
+                                            style={{ margin: "0 10px" }} >Related Contacts</Typography>
+                                        <span><AddOutlined fontSize="27px" /> </span>
+                                    </div>
+
                                     <Box className="customBox1">
                                         <RelatedContactsBox
                                             contacts={relatedContacts}
                                         />
                                     </Box>
+                                    <div className="viewAllBtn">
+                                        <Button
+                                            variant="outlined"
+                                            className="btn" >View All</Button></div>
                                 </div>
                             </Grid>
                         </Grid>

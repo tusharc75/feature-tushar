@@ -23,6 +23,7 @@ import Activitydemo from "./pages/Activity/activitydemo";
 import Activity from "./pages/Activity";
 import Note from "./pages/Activity/Note";
 import Email from "./pages/Activity/Email";
+import PasswordSetup from "./pages/Auth/PasswordSetup";
 
 function App() {
   const {
@@ -33,8 +34,8 @@ function App() {
     return !user ? (
       <Comp />
     ) : (
-        <Redirect to={{ pathname: "/", state: { from: location } }} />
-      );
+      <Redirect to={{ pathname: "/", state: { from: location } }} />
+    );
   };
 
   const [toastConfig, setToastConfig] = useState(null);
@@ -56,6 +57,13 @@ function App() {
           exact
           path="/login"
           render={({ location }) => conditionalRedirect(Login, location)}
+        />
+        <Route
+          exact
+          path="/create-password"
+          render={({ location }) =>
+            conditionalRedirect(PasswordSetup, location)
+          }
         />
         <PrivateRoute exact path="/">
           <Leads />

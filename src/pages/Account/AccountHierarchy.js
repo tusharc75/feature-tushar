@@ -42,44 +42,46 @@ const tableIcons = {
 export default function AccountHierarchy({ data, currentAccountId }) {
 
     return (
-        <MaterialTable
-            icons={tableIcons}
-            data={data}
-            columns={[
-                {
-                    title: 'Account Name', field: 'accountName',
-                    width: 200,
-                    render: rowData => <>
-                        <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData._id}`}>
-                            {rowData.accountName}
-                        </Link>
-                        {
-                            rowData._id == currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
-                        }
-                    </>
-                },
-                { title: 'Type', field: 'typeOfAccount' },
-                { title: 'Industry', field: 'industry' },
-                { title: 'Type Of Business', field: 'typeOfBusiness' },
-                {
-                    title: 'Parent Account', field: 'parentAccountText',
-                    render: rowData =>
-                        <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
-                            {rowData.parentAccountText}
-                        </Link>
-                },
-                { title: 'Phone', field: 'phone' },
-            ]}
-            columnResizable={true}
-            parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
-            options={{
-                search: false,
-                paging: false,
-                sorting: false,
-                draggable: false,
-                padding: "dense",
-                defaultExpanded: true
-            }}
-        />
+        <div className="account-hierarchy-style">
+            <MaterialTable
+                icons={tableIcons}
+                data={data}
+                columns={[
+                    {
+                        title: 'Account Name', field: 'accountName',
+                        width: 200,
+                        render: rowData => <>
+                            <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData._id}`}>
+                                {rowData.accountName}
+                            </Link>
+                            {
+                                rowData._id == currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
+                            }
+                        </>
+                    },
+                    { title: 'Type', field: 'typeOfAccount' },
+                    { title: 'Industry', field: 'industry' },
+                    { title: 'Type Of Business', field: 'typeOfBusiness' },
+                    {
+                        title: 'Parent Account', field: 'parentAccountText',
+                        render: rowData =>
+                            <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
+                                {rowData.parentAccountText}
+                            </Link>
+                    },
+                    { title: 'Phone', field: 'phone' },
+                ]}
+                columnResizable={true}
+                parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
+                options={{
+                    search: false,
+                    paging: false,
+                    sorting: false,
+                    draggable: false,
+                    padding: "dense",
+                    defaultExpanded: true
+                }}
+            />
+        </div>
     );
 }

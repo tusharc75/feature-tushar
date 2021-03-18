@@ -21,10 +21,8 @@ import Dialog from '@material-ui/core/Dialog';
 const Activity = (props) => {
 
     const { relatedTo, handleActivityRefresh } = props;
-
     const [type, setType] = useState(null);
     const [open, setOpen] = useState(false);
-
 
     const tabs = ["Task", "Event", "Case", "Note", "Email"];
 

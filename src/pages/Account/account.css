@@ -13,6 +13,7 @@
 .detailPageDiv1 {
     background-color: white;
     border-radius: 8px;
+    padding: 12px;
 }
 .customGrid {
     background-color: aliceblue;
@@ -50,7 +51,9 @@
     padding: 10px;
 }
 .detailPageDiv3 {
-    padding: 6px;
+    padding: 13px;
+    background-color: white;
+    border-radius: 13px;
 }
 .customLink {
     color: darkblue;
@@ -60,8 +63,11 @@
 }
 .customBox1 {
     min-height: 150px;
-    background-color: white;
+    background-color: #d3d3d375;
     border-radius: 10px;
+    padding: 10px;
+    justify-content: center;
+    margin: 3px;
 }
 .customDiv13 {
     display: flex;
@@ -84,4 +90,21 @@
 
 .accountNameLink:hover {
     text-decoration: underline;
+}
+.fSize {
+    font-size: 16px;
+}
+.relatedContacts {
+    display: flex;
+    justify-content: space-between;
+}
+.viewAllBtn {
+    padding: 0 5px;
+}
+.btn {
+    width: 100%;
+}
+
+.account-hierarchy-style > div > div.MuiToolbar-regular {
+    display: none;
 }

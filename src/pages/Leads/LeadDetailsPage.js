@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-} from "@material-ui/core";
+import { Box, Button, Grid } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { ExpandMore, Send } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
@@ -28,6 +20,7 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
+import Activity from "../../components/Activity";
 
 const LeadDetailsPage = () => {
   const history = useHistory();
@@ -44,7 +37,12 @@ const LeadDetailsPage = () => {
   const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([routes.lead]);
-  const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
+  const [leadsPermissions, setLeadsPermissions] = useState({
+    isCreate: false,
+    isUpdate: false,
+    isRead: false,
+    isDelete: false,
+  });
 
   let { id } = useParams();
 
@@ -58,18 +56,17 @@ const LeadDetailsPage = () => {
     const data = user?.role?.sideBar;
 
     if (data) {
-      const hasLeadsPermission = data.find(d => d.name == "Lead");
+      const hasLeadsPermission = data.find((d) => d.name == "Lead");
       if (hasLeadsPermission) {
         setLeadsPermissions({
           isCreate: hasLeadsPermission.isCreate,
           isUpdate: hasLeadsPermission.isUpdate,
           isRead: hasLeadsPermission.isRead,
-          isDelete: hasLeadsPermission.isDelete
+          isDelete: hasLeadsPermission.isDelete,
         });
       }
     }
   }, [user]);
-
 
   const fetchLeadData = async () => {
     try {
@@ -90,7 +87,7 @@ const LeadDetailsPage = () => {
         routes.lead,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const handleMainPoints = (data) => {
@@ -239,19 +236,18 @@ const LeadDetailsPage = () => {
             showHeading={true}
           >
             <Box component="span" marginX={1} />
-            {
-              leadsPermissions.isDelete && leadData?.owner?.optionValue &&
-                user?.user?._id &&
-                leadData.owner.optionValue === user.user._id ? (
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => setShowConfirmBox(true)}
-                >
-                  Delete
-                </Button>
-              ) : null
-            }
+            {leadsPermissions.isDelete &&
+            leadData?.owner?.optionValue &&
+            user?.user?._id &&
+            leadData.owner.optionValue === user.user._id ? (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => setShowConfirmBox(true)}
+              >
+                Delete
+              </Button>
+            ) : null}
           </CustomHeader>
         )}
         <div>
@@ -295,25 +291,29 @@ const LeadDetailsPage = () => {
               </Container>
             </Grid>
             <Grid item sm={4} md={4} lg={4}>
-              <Container styles={{ padding: 0, background: "transparent" }}>
-                <List component="nav" style={{ padding: 0 }}>
-                  {quickLinks.map((item, i) => (
-                    <div key={i}>
-                      <Link to={`#`}>
-                        <ListItem button style={{ background: "white" }}>
-                          <ListItemIcon>
-                            <Send />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={`${item.label} (${item.count})`}
-                          />
-                          <ExpandMore />
-                        </ListItem>
-                      </Link>
-                      <Box marginBottom={2} />
-                    </div>
-                  ))}
-                </List>
+              <Container>
+                {!leadData ? (
+                  <Box>
+                    <Skeleton variant="text" width="100px" height="25px" />
+                    <Box marginY={1} />
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <Skeleton width="100%" height="50px" />
+                    ))}
+                  </Box>
+                ) : (
+                  <div>
+                    <Activity
+                      relatedTo={[
+                        {
+                          type: "lead",
+                          referenceId: leadData._id,
+                          access: true,
+                        },
+                      ]}
+                      handleActivityRefresh={() => {}}
+                    />
+                  </div>
+                )}
               </Container>
             </Grid>
           </Grid>
