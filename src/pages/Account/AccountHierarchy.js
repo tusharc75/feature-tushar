@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react'
-import MaterialTable from 'material-table';
+//import MaterialTable from 'material-table';
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import Check from '@material-ui/icons/Check';
@@ -43,7 +43,7 @@ export default function AccountHierarchy({ data, currentAccountId }) {
 
     return (
         <div className="account-hierarchy-style">
-            <MaterialTable
+            {/* <MaterialTable
                 icons={tableIcons}
                 data={data}
                 columns={[
@@ -81,7 +81,7 @@ export default function AccountHierarchy({ data, currentAccountId }) {
                     padding: "dense",
                     defaultExpanded: true
                 }}
-            />
+            /> */}
         </div>
     );
 }
