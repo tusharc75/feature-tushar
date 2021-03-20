@@ -20,6 +20,10 @@ import moment from "moment";
 import Divider from '@material-ui/core/Divider';
 import { Comment } from '../Comment';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay'
+import TableChartIcon from '@material-ui/icons/TableChart';
+import { SubCase } from './SubCase'
+
+
 
 const CaseSchema = Yup.object().shape({
     name: Yup.string()
@@ -33,16 +37,19 @@ const CaseSchema = Yup.object().shape({
 
 export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
 
+    const [id, setId] = useState(caseId);
     const [initialValues, setInitialValues] = useState(null);
+    const [openAddSub, setOpenAddSub] = React.useState(false);
 
     useEffect(() => {
-        fetchCashDetail();
-    }, []);
+        fetchCaseDetail();
+    }, [id]);
 
-    const fetchCashDetail = async () => {
-        if (caseId) {
-            await GetCaseDetail(caseId)
+    const fetchCaseDetail = async () => {
+        if (id) {
+            await GetCaseDetail(id)
                 .then(({ data }) => {
+                    setInitialValues(null)
                     setInitialValues(data)
                 })
                 .catch((err) => {
@@ -55,8 +62,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
 
     const handleSave = (values) => {
         values.relatedTo = relatedTo;
-        if (caseId) {
-            UpdateCase(caseId, values)
+        if (id) {
+            UpdateCase(id, values)
                 .then(({ data }) => {
                     handleClose()
                 })
@@ -64,6 +71,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
                 });
         }
         else {
+            values.parentId = null;
             CreateNewCase(values)
                 .then(({ data }) => {
                     handleClose()
@@ -76,7 +84,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
     return (initialValues && <Formik initialValues={initialValues} validationSchema={CaseSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form>
-                <DialogTitle id="customized-dialog-title" onClose={handleClose}>{caseId ? "Edit" : "New"} Case</DialogTitle>
+                <DialogTitle id="customized-dialog-title" onClose={handleClose}>{id ? "Edit" : "New"} Case</DialogTitle>
                 <DialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
@@ -104,14 +112,32 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
                                             variant="outlined"
                                         />
                                     </Box>
-                                    {caseId && <Fragment>
+                                    {id && <Fragment>
+                                        <Box mt={1}>
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                disableElevation
+                                                onClick={() => setOpenAddSub(true)}
+                                                startIcon={<TableChartIcon />}
+                                            > Add a child Case</Button>
+                                        </Box>
+                                        <Box mt={2}>
+                                            <SubCase
+                                                openAddSub={openAddSub}
+                                                setOpenAddSub={setOpenAddSub}
+                                                data={initialValues}
+                                                fetchCaseDetail={fetchCaseDetail}
+                                                setId={setId}
+                                            />
+                                        </Box>
                                         <Box mt={2}>
                                             <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                         </Box>
                                         <Box mt={2} >
                                             <Divider />
                                             <Box mt={1} >
-                                                <Comment referenceId={caseId} />
+                                                <Comment referenceId={id} />
                                             </Box>
                                         </Box>
                                     </Fragment>}
@@ -169,6 +195,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
                                             fullWidth
                                             margin="dense"
                                             format="yyyy/MM/DD"
+                                            minDate={initialValues.parentData && initialValues.parentData.startDate}
+                                            maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                         />
                                     </Box>
                                     <Box pt={1}>
@@ -182,9 +210,11 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
                                             fullWidth
                                             margin="dense"
                                             format="yyyy/MM/DD"
+                                            minDate={values.startDate}
+                                            maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                                         />
                                     </Box>
-                                    {caseId && <Fragment>
+                                    {id && <Fragment>
                                         <Box mt={1} color="text.secondary">
                                             <Typography variant="body2">Created {moment(initialValues.createdAt).format("MMM DD YYYY hh:mm A")}</Typography>
                                         </Box>

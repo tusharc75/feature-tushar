@@ -14,6 +14,12 @@ const capitalize = (s) => {
     return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
+const allSearch = [
+    { type: "account", name: "All", isAll: true },
+    { type: "contact", name: "All", isAll: true },
+    { type: "lead", name: "All", isAll: true },
+    { type: "opportunity", name: "All", isAll: true }
+]
 
 export const SearchFilter = ({ handleChangeFilter, filter }) => {
 
@@ -27,12 +33,17 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
     }, [filter]);
 
     useEffect(() => {
-        SearchActivity(inputValue)
-            .then(({ data }) => {
-                setOptions(data)
-            })
-            .catch((err) => {
-            });
+        if (inputValue === "") {
+            setOptions(allSearch)
+        }
+        else {
+            SearchActivity(inputValue)
+                .then(({ data }) => {
+                    setOptions(data)
+                })
+                .catch((err) => {
+                });
+        }
     }, [inputValue]);
 
 
@@ -70,12 +81,14 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
             return (
                 <Grid container alignItems="center" spacing={3}>
                     <Grid item>
-                        <Chip variant="outlined" color="primary" label={capitalize(option.type)} />
+
+                        <Chip variant="outlined" color="primary" label={option.isAll ? option.name + " " + capitalize(option.type) : capitalize(option.type)} />
                     </Grid>
                     <Grid item xs>
-                        <Typography variant="body2">
-                            {option.name}
-                        </Typography>
+                        {!option.isAll &&
+                            <Typography variant="body2">
+                                {option.name}
+                            </Typography>}
                     </Grid>
                 </Grid>
             );

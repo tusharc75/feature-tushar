@@ -37,8 +37,8 @@ export default function ActivityList({ activity, treeList, expanded, selected, h
     const getTreeNodes = (treeList) => {
         return treeList.map((data, index) => {
             let children = [];
-            if (data.subActivity && data.subActivity.length > 0) {
-                children = getTreeNodes(data.subActivity);
+            if (data.child && data.child.length > 0) {
+                children = getTreeNodes(data.child);
                 children.push(<div></div>);
             }
 

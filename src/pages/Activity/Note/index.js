@@ -10,6 +10,7 @@ import { GetReferenceName, GetNotes } from "../../../axios/activity";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import moment from "moment";
 import ActivityModelHandler from "../../../components/Activity/ActivityModelHandler";
+import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 
 const Note = () => {
 
@@ -88,6 +89,11 @@ const Note = () => {
 
 
     return (<Layout>
+        <Grid container direction="row">
+            <Grid item xs={12}>
+                <CustomBreadCrumbs routes={[{ title: "Note" }]} />
+            </Grid>
+        </Grid>
         <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
             <Box mb={2}>
                 <Grid container>

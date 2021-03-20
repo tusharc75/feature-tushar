@@ -11,7 +11,14 @@ import ActivityModelHandler from "../../components/Activity/ActivityModelHandler
 import { useParams, useHistory } from "react-router-dom";
 import queryString from 'query-string';
 import { GetReferenceName } from "../../axios/activity";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 
+
+
+const capitalize = (s) => {
+    if (typeof s !== 'string') return ''
+    return s.charAt(0).toUpperCase() + s.slice(1)
+}
 
 const Activity = () => {
 
@@ -40,6 +47,11 @@ const Activity = () => {
     }
 
     return (<Layout>
+        <Grid container direction="row">
+            <Grid item xs={12} className="pl-2">
+                <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
+            </Grid>
+        </Grid>
         <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
             <Box mb={2}>
                 <Grid container>
@@ -52,8 +64,8 @@ const Activity = () => {
                 </Grid>
             </Box>
             <Box mb={1}>
-                {viewType === 0 && <Board type={type} filter={filter} />}
-                {viewType === 1 && <Roadmap type={type} filter={filter} />}
+                {viewType === 0 && <Board type={type} filter={filter} activityId={activityId} />}
+                {viewType === 1 && <Roadmap type={type} filter={filter} activityId={activityId} />}
             </Box>
         </Box>
         {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}

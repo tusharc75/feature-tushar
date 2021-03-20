@@ -26,9 +26,10 @@ export default function CalanderList({ activity, expanded, selected, handleSelec
     const classes = useStyles();
     const getTreeNodes = (activity) => {
         return activity.map((data, index) => {
+
             let children = [];
-            if (data.subActivity && data.subActivity.length > 0) {
-                children = getTreeNodes(data.subActivity);
+            if (data.child && data.child.length) {
+                children = getTreeNodes(data.child);
                 children.push(<div></div>);
             }
 
@@ -45,7 +46,7 @@ export default function CalanderList({ activity, expanded, selected, handleSelec
                     </Box>
                 </Tooltip>
             </Box>
-            
+
             return <TreeItem
                 key={index}
                 nodeId={data._id.toString()}

@@ -19,9 +19,12 @@ const Activitydemo = () => {
     //     { type: "account", referenceId: "60464170eeecc00015d538ab", access: true },
     // ]
 
+    // const relatedTo = [
+    //     { type: "account", referenceId: "60521f6821e404257c373fb7", access: true },
+    // ]
+
     const relatedTo = [
-        { type: "account", referenceId: "60471220e1d5da0015ec5618", access: false },
-        { type: "opportunity", referenceId: "6047409937a90100156de81c", access: true }
+        { type: "account", referenceId: "605222343c58e828945d22db", access: true },
     ]
 
     const [refresh, setRefresh] = useState(true);

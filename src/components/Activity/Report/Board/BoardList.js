@@ -33,7 +33,7 @@ export const BoardList = ({ status, type, activity, fetchBoard, handleChangeStat
     });
     (drop(ref));
 
-    return (<Box height="100%" ref={ref}>
+    return (<Box ref={ref} >
         {subActivity.map((element, index) => (
             <BoardBox
                 data={element}
