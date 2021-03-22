@@ -1,0 +1,52 @@
+.MuiDialog-container .MuiDialogTitle-root,
+.MuiDialog-container .MuiDialogActions-root {
+    background: #eef9fd;
+}
+
+.MuiDataGrid-window::-webkit-scrollbar {
+    background-color: #fff;
+    width: 8px;
+    height: 8px;
+}
+
+.MuiDataGrid-window::-webkit-scrollbar-track {
+    background-color: #eee;
+    border-radius: 16px;
+    margin: 2px 0;
+}
+
+.MuiDataGrid-window::-webkit-scrollbar-thumb {
+    background-color: #babac0;
+    border-radius: 16px;
+    border: 1px solid transparent;
+}
+
+.MuiToolbar-root {
+    min-height: 55px !important;
+}
+
+.MuiButton-root {
+    text-transform: capitalize !important;
+    padding: 6px 16px !important;
+}
+
+/* .MuiOutlinedInput-input {
+    padding: 12px 14px !important;
+  } */
+
+.MuiOutlinedInput-inputMultiline {
+    padding: 0 !important;
+}
+
+.MuiButtonBase-root {
+    text-transform: capitalize !important;
+}
+
+.MuiLink-root {
+    font-size: 14px;
+}
+
+.MuiStepper-root {
+    padding: 0 !important;
+    padding-top: 20px !important;
+}
