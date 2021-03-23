@@ -201,9 +201,9 @@ const Details = (props) => {
             <Form>
               {formsData?.map((form) => (
                 <React.Fragment key={form.name}>
-                  <h3>{form.name}</h3>
+                  <h2 className="form-label-style">{form.name}</h2>
                   <Box marginY={2} />
-                  <Grid container spacing={2}>
+                  <Grid container spacing={3}>
                     {form.sectionFields.map((field, i) => (
                       <Grid key={i} item xs={12} sm={6} md={6}>
                         <Box display="flex" alignItems="center">
