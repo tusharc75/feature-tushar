@@ -1,0 +1,113 @@
+.footer {
+    float: right;
+    display: flex;
+    justify-content: space-between;
+    width: 40%;
+}
+.detailPageContainer {
+    width: 100%;
+    max-height: 400px;
+    background-color: aliceblue;
+    padding: 1px;
+}
+.detailPageDiv1 {
+    background-color: white;
+    border-radius: 8px;
+    padding: 12px;
+}
+.customGrid {
+    background-color: aliceblue;
+}
+.detailPageDiv2 {
+    padding: 10px;
+    background-color: white;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.detailPageDiv2 {
+    background-color: white;
+}
+.customBox {
+    text-align: center;
+    min-height: 300px;
+    vertical-align: middle;
+    margin-top: 100px;
+}
+.cTr {
+    width: 90%;
+}
+.td1 {
+    width: 150px;
+}
+.td2 {
+    word-wrap: break-word;
+}
+.customDiv12 {
+    flex-grow: 1;
+    padding: 10px;
+}
+.detailPageDiv3 {
+    padding: 13px;
+    background-color: white;
+    border-radius: 13px;
+}
+.customLink {
+    color: darkblue;
+    text-decoration: underline;
+    font-size: 17px;
+    /* margin-bottom: 5px; */
+}
+.customBox1 {
+    min-height: 150px;
+    background-color: #d3d3d375;
+    border-radius: 10px;
+    padding: 10px;
+    justify-content: center;
+    margin: 3px;
+}
+.customDiv13 {
+    display: flex;
+    justify-content: space-between;
+}
+
+.account-header {
+    padding: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+.custom-height {
+    height: calc(100vh - 230px);
+}
+.accountNameLink {
+    color: #0645ad;
+    cursor: pointer;
+}
+
+.accountNameLink:hover {
+    text-decoration: underline;
+}
+.fSize {
+    font-size: 16px;
+}
+.relatedContacts {
+    display: flex;
+    justify-content: space-between;
+}
+.viewAllBtn {
+    padding: 0 5px;
+}
+.btn {
+    width: 100%;
+}
+.MuiDataGrid-row.Mui-even {
+    background-color: #d3d3d333;
+  }
+
+.account-hierarchy-style > div > div.MuiToolbar-regular {
+    display: none;
+}
