@@ -2,7 +2,7 @@ import React from 'react'
 import { Typography, Box, Grid } from '@material-ui/core'
 import { EditOutlined } from '@material-ui/icons'
 import { capitalize } from '../../services/util'
-import './account.scss'
+import './account.module.scss'
 function DetailPage(props) {
     const { data } = props
     const getNode = (k, val) => {
