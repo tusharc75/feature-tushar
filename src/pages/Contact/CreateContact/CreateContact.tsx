@@ -19,16 +19,16 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
-        color: theme.palette.grey[500],
-    },
+    // root: {
+    //     margin: 0,
+    //     padding: theme.spacing(2),
+    // },
+    // closeButton: {
+    //     position: 'absolute',
+    //     right: theme.spacing(1),
+    //     top: theme.spacing(1),
+    //     color: theme.palette.grey[500],
+    // },
 }));
 
 const DialogContent = withStyles((theme) => ({
@@ -174,7 +174,7 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                         setFieldValue,
                     }) => (
                         <>
-                            <DialogContent dividers style={{ padding: '10px', marginLeft: "15px", marginRight: '15px', minWidth: '943px', minHeight: '500px' }}>
+                            <DialogContent dividers >
                                 <Form>
                                     {
                                         formsData &&
