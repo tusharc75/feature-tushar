@@ -38,7 +38,7 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import NoDataCell from '../../components/Helpers/NoDataCell'
 import './account.module.scss'
-import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
+import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 
 const AccTypes = {
     "All Accounts": 1,
@@ -66,6 +66,9 @@ const useStyles = makeStyles((theme) => ({
     linkDivider: {
         backgroundColor: theme.palette.primary.main,  //  darkBg
         margin: "0 1rem",
+    },
+    delBtn: {
+        color: 'red'
     }
 }));
 
@@ -261,7 +264,11 @@ export default function Account() {
             sortable: false,
             filterable: false,
         },
-        { field: "phone", headerName: "Phone", width: 200 },
+        {
+            field: "phone", headerName: "Phone",
+            hide: true,
+            width: 200
+        },
         {
             field: "actions", headerName: "Actions",
             renderCell: (params) => (
@@ -286,7 +293,7 @@ export default function Account() {
                                     <IconButton aria-label="Disapprove" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: false, id: params.row._id, accountName: params.row.accountName })
                                     }}>
-                                        <CancelIcon fontSize="small" color="error" />
+                                        <CancelIcon fontSize="small" color="secondary" />
                                     </IconButton>
                                 </Tooltip> :
                                 <Tooltip title="Approve">
@@ -310,12 +317,12 @@ export default function Account() {
                                 </Tooltip> :
                                 <Tooltip className="cursor-stop" title="You must be the owner of this account to get the delete functionality">
                                     <IconButton aria-label="Delete">
-                                        <DeleteIcon fontSize="small" />
+                                        <DeleteIcon fontSize="small" color="error" />
                                     </IconButton>
                                 </Tooltip> :
                             <Tooltip className="cursor-stop" title="You do not have permission to delete account">
                                 <IconButton aria-label="Delete">
-                                    <DeleteIcon fontSize="small" />
+                                    <DeleteIcon fontSize="small" color="error" />
                                 </IconButton>
                             </Tooltip>
                     }
@@ -653,9 +660,8 @@ export default function Account() {
                         <DataGrid
                             className={classes.grid}
                             components={{
-                                Toolbar: GridToolbar,
+                                Toolbar: DataGridCustomToolbar,
                             }}
-                            // autoHeight={true}
                             scrollbarSize={20}
                             rows={loading ? [] : dataRows}
                             columns={columns}
