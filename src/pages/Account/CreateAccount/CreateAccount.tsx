@@ -12,7 +12,7 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import Loader from '../../../components/Loader'
 import FormTypes from "./../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
-import "../account.module.scss"
+import "../accounts.scss"
 
 const useStyles = makeStyles((theme) => ({
     ...commonStyle(theme)

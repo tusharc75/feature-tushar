@@ -33,7 +33,7 @@ import Activity from "../../components/Activity";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import './account.module.scss'
+import accClass from "./account.module.scss"
 
 const Roles = () => {
     const history = useHistory();
@@ -351,11 +351,11 @@ const Roles = () => {
                             </Button> : null
                         }
                     </CustomHeader>
-                    <div className="detailPageContainer">
+                    <div className={`${accClass.detailPageContainer}`}>
                         <Container>
                             <Grid container spacing={3}>
                                 <Grid item sm={8} md={8} lg={8}>
-                                    <div className="detailPageDiv1">
+                                    <div className={`${accClass.detailPageDiv1}`}>
                                         {
                                             loading ?
                                                 <Grid container spacing={2}>
@@ -436,7 +436,7 @@ const Roles = () => {
                                     }
 
                                 </Grid>
-                                <Grid item sm={4} md={4} lg={4} className="customGrid">
+                                <Grid item sm={4} md={4} lg={4} className={`${accClass.customGrid}`}>
                                     {
                                         accountData && <div>
                                             <Activity relatedTo={[
@@ -445,33 +445,37 @@ const Roles = () => {
                                         </div>
                                     }
 
-                                    <div className="detailPageDiv2">
+                                    <div className={`${accClass.detailPageDiv2}`}>
                                         {
                                             quickLinks && quickLinks.length ?
                                                 quickLinks.map((k, index) => {
-                                                    return <Link key={index} to={k} className="customLink">{k.label || ''}({k.count || 0})</Link>
+                                                    return <Link key={index} to={k}
+                                                        className={`${accClass.customLink}`}>{k.label || ''}({k.count || 0})</Link>
                                                 }) :
                                                 null
                                         }
                                     </div>
 
-                                    <div className="detailPageDiv3" >
-                                        <div className="relatedContacts">
+                                    <div className={`${accClass.detailPageDiv3}`}
+                                    >
+                                        <div className={`${accClass.relatedContacts}`}
+                                        >
                                             <Typography color="primary"
                                                 variant="h6"
                                                 style={{ margin: "0 10px" }} >Related Contacts</Typography>
                                             <span><AddOutlined /> </span>
                                         </div>
 
-                                        <Box className="customBox1">
+                                        <Box className={`${accClass.customBox1}`}>
                                             <RelatedContactsBox
                                                 contacts={relatedContacts}
                                             />
                                         </Box>
-                                        <div className="viewAllBtn">
+                                        <div className={`${accClass.viewAllBtn}`}>
                                             <Button
                                                 variant="outlined"
-                                                className="btn" >View All</Button></div>
+                                                className={`${accClass.btn}`}
+                                            >View All</Button></div>
                                     </div>
                                 </Grid>
                             </Grid>

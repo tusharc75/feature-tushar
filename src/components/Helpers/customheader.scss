@@ -1,0 +1,99 @@
+.brandHeader{
+  display: flex;
+}
+.brandActiveInavtiveTab{
+  display:grid;
+  grid-template-columns: 0.55fr 1fr 1fr;
+  grid-template-areas:
+    "brand active"
+    "inactive .";
+}
+.brandHeaderBrandTab{
+  grid-area: "brand";
+  margin: 0 auto;
+}
+.brandHeaderActiveBrandTab{
+  grid-area: "active";
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+.brandHeaderInactiveBrandTab{
+  grid-area: "inactive";
+  margin: 0 auto;
+}
+
+@media only screen and (max-width: 768px) {
+  .brandHeader{
+    grid-gap: 8px;
+    flex-direction: column;
+  }
+  .brandHeaderDropdown{
+    display: block;
+  }
+  .brandActiveInavtiveTab{
+    grid-template-areas:
+      "brand active"
+      "inactive .";
+  }
+  .brandHeaderBrandTab{
+    margin: 0;
+    margin-top: 0.8rem;
+
+  }
+  .brandHeaderActiveBrandTab, .brandHeaderInactiveBrandTab{
+    margin-right: 1.5rem;
+   margin-top: 0.8rem;
+ }
+
+}
+@media only screen and (max-width: 560px) {
+  #tapleen2{
+    display: block;
+    width:100%;
+  }
+  #tapleen2 div{
+    width: 45%;
+      margin: 0.1rem;
+      margin-top: 0.5rem;
+      margin-bottom:0.5rem;
+      display: inline-block;
+  }
+}
+@media only screen and (max-width: 425px) {
+  .brandHeader{
+    width: 100%;
+  }
+  .brandHeaderDropdown div.MuiInputBase-root{
+    width: 100% !important;
+  }
+  .brandActiveInavtiveTab{
+    grid-template-areas:
+      "brand active"
+      "inactive .";
+  }
+  .brandActiveInavtiveTab{
+    margin-top: 0.4rem;
+    grid-template-columns: 0.55fr 1fr 1fr;
+    margin-bottom: 0.6rem;
+  }
+
+#demo-simple-select-outlined{
+  width:250px !important;
+}
+}
+@media only screen and (max-width: 375px) {
+  .brandHeader{
+    display: block;
+  }
+}
+@media only screen and (max-width: 361px) {
+  #tapleen2 div{
+    width: 100%;
+    margin:0.4rem auto;
+  }
+}
+@media only screen and (max-width: 320px) {
+.brandHeader div.MuiFormControl-root{
+    width: 255px !important;
+}
+}

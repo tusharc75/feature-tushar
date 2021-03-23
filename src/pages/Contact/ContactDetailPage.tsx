@@ -21,7 +21,7 @@ import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Loader from '../../components/Loader'
 import routes from '../../components/Helpers/Routes';
-import '../Account/account.module.scss'
+import '../Account/accounts.scss'
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
 import isObjectEmpty from './../../constants/helpers'

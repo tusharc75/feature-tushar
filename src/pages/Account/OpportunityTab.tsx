@@ -11,7 +11,7 @@ import { opportunityPage } from '../../routes/Opportunity'
 import { Link } from 'react-router-dom'
 import { displayDate } from '../../services/util';
 import { capitalize } from '../../services/util'
-import './account.module.scss'
+import './accounts.scss'
 
 const useStyles = makeStyles((theme) => ({
     root: {
