@@ -25,6 +25,8 @@ import '../Account/account.module.scss'
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
 import isObjectEmpty from './../../constants/helpers'
+import DeleteButton from "../../components/Helpers/DeleteButton";
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 
 const Roles = () => {
     const history = useHistory();
@@ -40,7 +42,7 @@ const Roles = () => {
     const [allowedToEdit, setAllowedToEdit] = useState(false)
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [contactPermissions, setContactPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
-
+    const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     let { id } = useParams();
 
     useEffect(() => {
@@ -181,6 +183,14 @@ const Roles = () => {
         }
     }
 
+    const handleOpneUpdateDialog = () => {
+        setOpenUpdateDialog(true);
+      };
+    
+      const closeUpdateDIalog = () => {
+        setOpenUpdateDialog(false);
+      };
+
     const handleUpdateContact = (values) => {
         setUpdating(true);
         if (values.employees) {
@@ -202,7 +212,17 @@ const Roles = () => {
     return (
         <>
             <Layout>
-
+            {openUpdateDialog && (
+          <UpdateDetailsDialog
+            title={`Editing  ${contactData.firstName}`}
+            openDialog={openUpdateDialog}
+            onClose={closeUpdateDIalog}
+            data={contactData}
+            fields={contactFields}
+            isUpdating={isUpdating}
+            handleUpdate={handleUpdateContact}
+          />
+        )}
                 <Grid container direction="row">
                     <Grid item xs={12} className="pl-2">
                         <CustomBreadCrumbs routes={customizedRoutes} />
@@ -229,12 +249,29 @@ const Roles = () => {
                         {
                             contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id &&
                                 contactData.owner.optionValue === user.user._id ?
+                                [
+                                //     <Button
+                                //     variant="contained" color="secondary"
+                                //     onClick={() => setShowConfirmBox(true)}
+                                // >
+                                //     Delete
+                                // </Button>
+                                <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleOpneUpdateDialog}
+                                >
+                                Edit
+                                </Button>,
+                                <Box component="span" marginX={1} />,
                                 <Button
                                     variant="contained" color="secondary"
                                     onClick={() => setShowConfirmBox(true)}
                                 >
                                     Delete
-                            </Button>
+                                </Button>
+
+                                ]
                                 : null
                         }
 
