@@ -1,46 +1,46 @@
-.brandHeader{
+.customHeader{
   display: flex;
 }
-.brandActiveInavtiveTab{
+.customActiveInavtiveTab{
   display:grid;
   grid-template-columns: 0.55fr 1fr 1fr;
   grid-template-areas:
-    "brand active"
+    "custom active"
     "inactive .";
 }
-.brandHeaderBrandTab{
-  grid-area: "brand";
+.customHeaderCustomTab{
+  grid-area: "custom";
   margin: 0 auto;
 }
-.brandHeaderActiveBrandTab{
+.customHeaderActiveCustomTab{
   grid-area: "active";
   margin-right: 1rem;
   margin-left: 1rem;
 }
-.brandHeaderInactiveBrandTab{
+.customHeaderInactiveCustomTab{
   grid-area: "inactive";
   margin: 0 auto;
 }
 
 @media only screen and (max-width: 768px) {
-  .brandHeader{
+  .customHeader{
     grid-gap: 8px;
     flex-direction: column;
   }
-  .brandHeaderDropdown{
+  .customHeaderDropdown{
     display: block;
   }
-  .brandActiveInavtiveTab{
+  .customActiveInavtiveTab{
     grid-template-areas:
-      "brand active"
+      "custom active"
       "inactive .";
   }
-  .brandHeaderBrandTab{
+  .customHeaderCustomTab{
     margin: 0;
     margin-top: 0.8rem;
 
   }
-  .brandHeaderActiveBrandTab, .brandHeaderInactiveBrandTab{
+  .customHeaderActiveCustomTab, .customHeaderInactiveCustomTab{
     margin-right: 1.5rem;
    margin-top: 0.8rem;
  }
@@ -60,18 +60,18 @@
   }
 }
 @media only screen and (max-width: 425px) {
-  .brandHeader{
+  .customHeader{
     width: 100%;
   }
-  .brandHeaderDropdown div.MuiInputBase-root{
+  .customHeaderDropdown div.MuiInputBase-root{
     width: 100% !important;
   }
-  .brandActiveInavtiveTab{
+  .customActiveInavtiveTab{
     grid-template-areas:
-      "brand active"
+      "custom active"
       "inactive .";
   }
-  .brandActiveInavtiveTab{
+  .customActiveInavtiveTab{
     margin-top: 0.4rem;
     grid-template-columns: 0.55fr 1fr 1fr;
     margin-bottom: 0.6rem;
@@ -82,7 +82,7 @@
 }
 }
 @media only screen and (max-width: 375px) {
-  .brandHeader{
+  .customHeader{
     display: block;
   }
 }
@@ -93,7 +93,7 @@
   }
 }
 @media only screen and (max-width: 320px) {
-.brandHeader div.MuiFormControl-root{
+.customHeader div.MuiFormControl-root{
     width: 255px !important;
 }
 }

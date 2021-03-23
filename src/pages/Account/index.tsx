@@ -543,7 +543,7 @@ export default function Account() {
 
                 <Box component="div">
                     <CustomContainer>
-                        <div className={`${accClass["brand-header-inner-container"]}`}
+                        <div className={`${accClass["account-header-inner-container"]}`}
                         >
                             <CustomHeader
                                 total={rowCount}
@@ -554,18 +554,18 @@ export default function Account() {
                                 secondHeading="Account"
                             // showHeading={false}
                             >
-                                <div className={`${accClass.brandHeader} ${accClass["brandHeader-mobile"]}`} >
+                                <div className={`${accClass.accountHeader} ${accClass["accountHeader-mobile"]}`} >
                                     <SearchBox
                                         onSearch={handleSearch}
-                                        searchbox="brandHeaderSearchBar"
+                                        searchbox="accountHeaderSearchBar"
                                         width="300px" value={searchVal}
                                     />
-                                    <div className={`${accClass.brandHeaderAddBtnActionBtnGroup}`}>
+                                    <div className={`${accClass.accountHeaderAddBtnActionBtnGroup}`}>
                                         {
                                             accountPermissions.isCreate && <Button
                                                 variant="contained"
                                                 color="primary"
-                                                className={`px-3 ${accClass.brandHeaderAddBtn}`}
+                                                className={`px-3 ${accClass.accountHeaderAddBtn}`}
                                                 onClick={clickCreateNew}
                                                 startIcon={<AddOutlined />} >Add</Button>
                                         }
@@ -574,7 +574,7 @@ export default function Account() {
                                             disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                             variant="outlined"
                                             color="default"
-                                            className={`${accClass.brandHeaderActionBtn}`}
+                                            className={`${accClass.accountHeaderActionBtn}`}
                                             onClick={openActions}
                                             aria-controls="action-menu"
                                         >
@@ -642,7 +642,7 @@ export default function Account() {
                     </CustomContainer>
                 </Box>
                 <CustomContainer>
-                    {/* <div className="brand-header-inner-container">
+                    {/* <div className="account-header-inner-container">
 
                         <Grid container justify="space-between">
                             <Grid item>
@@ -673,13 +673,13 @@ export default function Account() {
                             </Grid>
 
                             <Grid item>
-                                <div className="brandHeader brandHeader-mobile">
+                                <div className="accountHeader accountHeader-mobile">
                                     <SearchBox
                                         onSearch={handleSearch}
-                                        searchbox="brandHeaderSearchBar"
+                                        searchbox="accountHeaderSearchBar"
                                         width="300px" value={searchVal}
                                     />
-                                    <div className="brandHeaderAddBtnActionBtnGroup">
+                                    <div className="accountHeaderAddBtnActionBtnGroup">
                                         {
                                             accountPermissions.isCreate && <>
                                                 <Box component="span" marginX={1} />

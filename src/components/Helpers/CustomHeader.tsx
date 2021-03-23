@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const BrandHeader = (props) => {
+const CustomHeader = (props) => {
   const {
     total,
     active,
@@ -40,11 +40,11 @@ const BrandHeader = (props) => {
   return (
     <React.Fragment>
       <Grid container justify="space-between" alignContent="center">
-        <Box className="brandHeader">
+        <Box className="customHeader">
           {icon}
           {options && Object.keys(options).length ? (
 
-            <FormControl className="brandHeaderDropdown">
+            <FormControl className="customHeaderDropdown">
               <InputLabel id="demo-simple-select-label">{secondHeading}</InputLabel>
               <Select
                 style={{ width: "160px" }}
@@ -74,10 +74,10 @@ const BrandHeader = (props) => {
               </Select>
             </FormControl>
           ) : null}
-          <div className="brandActiveInavtiveTab">
+          <div className="customActiveInavtiveTab">
             {total ? (
               <Box
-                className="brandHeaderBrandTab"
+                className="customHeaderCustomTab"
                 style={{ display: "flex", alignItems: "flex-end" }}
               >
                 <Badge badgeContent={total} color="primary">
@@ -88,22 +88,22 @@ const BrandHeader = (props) => {
 
             {active ? (
               <Box
-                className="brandHeaderActiveBrandTab"
+                className="customHeaderActiveCustomTab"
                 style={{ display: "flex", alignItems: "flex-end" }}
               >
                 <Badge badgeContent={active} color="primary">
-                  <Chip label=" Active Brands" />
+                  <Chip label=" Active Customs" />
                 </Badge>
               </Box>
             ) : null}
 
             {inactive ? (
               <Box
-                className="brandHeaderInactiveBrandTab"
+                className="customHeaderInactiveCustomTab"
                 style={{ display: "flex", alignItems: "flex-end" }}
               >
                 <Badge badgeContent={inactive} color="secondary">
-                  <Chip label="Inactive Brands" />
+                  <Chip label="Inactive Customs" />
                 </Badge>
               </Box>
             ) : null}
@@ -163,7 +163,7 @@ const BrandHeader = (props) => {
   );
 };
 
-BrandHeader.propTypes = {
+CustomHeader.propTypes = {
   total: PropTypes.any,
   active: PropTypes.any,
   inactive: PropTypes.any,
@@ -176,4 +176,4 @@ BrandHeader.propTypes = {
   secondHeading: PropTypes.string
 };
 
-export default BrandHeader;
+export default CustomHeader;
