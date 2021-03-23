@@ -380,14 +380,16 @@ const Roles = () => {
                                                         <Tab label="Account Hierarchy" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
                                                     </Tabs>
                                                     <Box hidden={currentTabIndex !== 0}>
-                                                        <DetailsPage
+                                                        <DetailsPage data={accountData} fields={accountFields} />
+
+                                                        {/* <DetailsPage
                                                             data={accountData}
                                                             fields={accountFields}
                                                             isUpdating={isUpdating}
                                                             canEdit={allowedToEdit}
                                                             handleUpdate={handleUpdateAccount}
                                                             sourceComponent="account"
-                                                        />
+                                                        /> */}
 
                                                     </Box>
 
