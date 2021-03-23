@@ -16,6 +16,7 @@ import {
     Select,
     Chip
 } from "@material-ui/core";
+
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
 import { useHistory } from "react-router-dom";
@@ -35,7 +36,7 @@ import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
-
+import NoDataCell from '../../components/Helpers/NoDataCell'
 import './account.css'
 
 const AccTypes = {
@@ -45,9 +46,15 @@ const AccTypes = {
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
-        border: "1px solid #D4D6D7",
+        border: "none",
         borderRadius: 8,
         padding: theme.spacing(3, 2),
+    },
+    grid: {
+        border: "2px solid #D4D6D7",
+        borderRadius: 8,
+        minHeight: '500px',
+        maxHeight: '500px'
     },
     linksContainer: {
         display: "flex",
@@ -204,7 +211,7 @@ export default function Account() {
             field: "accountName", headerName: "Account Name", width: 200,
             renderCell: (params) => (
                 <Link className="accountNameLink" to={`${accountDetailPage.path}/${params.row._id}`}>
-                    {params?.row?.accountName ? params.row.accountName : ''}
+                    {params?.row?.accountName ? params.row.accountName : <NoDataCell />}
                 </Link>
             )
         },
@@ -215,7 +222,7 @@ export default function Account() {
             renderCell: (params) => (
                 <>
                     {
-                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
                     }
                 </>
             )
@@ -227,7 +234,7 @@ export default function Account() {
             renderCell: (params) => (
                 <>
                     {
-                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
                     }
                 </>
             )
@@ -239,7 +246,7 @@ export default function Account() {
             renderCell: (params) => (
                 <>
                     {
-                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
                     }
                 </>
             )
@@ -554,9 +561,7 @@ export default function Account() {
                         </Grid>
 
                         <Grid item>
-
-                            <SearchBox onSearch={handleSearch} value={searchVal} size="small" />
-
+                            <SearchBox onSearch={handleSearch} width="300px" value={searchVal} size="small" />
                             {
                                 accountPermissions.isCreate && <>
                                     <Box component="span" marginX={1} />
@@ -641,33 +646,32 @@ export default function Account() {
 
                         </Grid>
                     </Grid>
-                </CustomContainer>
-
-                <Paper style={{ marginTop: 15 }}>
-                    <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
-                        <div className="account-grid-height1">
-                            <DataGrid
-                                components={{
-                                    Toolbar: GridToolbar,
-                                }}
-                                rows={loading ? [] : dataRows}
-                                columns={columns}
-                                loading={loading}
-                                disableSelectionOnClick
-                                disableMultipleSelection
-                                paginationMode="server"
-                                pagination
-                                onPageChange={handlePage}
-                                onPageSizeChange={handlePageSize}
-                                pageSize={query.limit}
-                                page={query.page}
-                                rowCount={rowCount}
-                                rowsPerPageOptions={[25, 50, 75]}
-                                onSortModelChange={handleSortModelChange}
-                                // onRowClick={handleRowClick}
-                                density="compact"
-                            />
-                        </div>
+                    <Paper style={{ marginTop: 15 }}>
+                        {/* <Box component="div" className={classes.root}> */}
+                        <DataGrid
+                            className={classes.grid}
+                            components={{
+                                Toolbar: GridToolbar,
+                            }}
+                            // autoHeight={true}
+                            scrollbarSize={20}
+                            rows={loading ? [] : dataRows}
+                            columns={columns}
+                            loading={loading}
+                            disableSelectionOnClick
+                            disableMultipleSelection
+                            paginationMode="server"
+                            pagination
+                            onPageChange={handlePage}
+                            onPageSizeChange={handlePageSize}
+                            pageSize={query.limit}
+                            page={query.page}
+                            rowCount={rowCount}
+                            rowsPerPageOptions={[25, 50, 75]}
+                            onSortModelChange={handleSortModelChange}
+                            // onRowClick={handleRowClick}
+                            density="compact"
+                        />
                         {
                             showDeleteWarningConfirmBox ?
                                 <MessageDialog
@@ -715,8 +719,9 @@ export default function Account() {
                                 /> : null
                         }
 
-                    </Box>
-                </Paper>
+                        {/* </Box> */}
+                    </Paper>
+                </CustomContainer>
             </Layout>
             {
                 isAccDialogVisible ?

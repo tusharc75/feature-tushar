@@ -180,9 +180,6 @@ const Roles = () => {
                 ])
             }
 
-
-            //  setAccountHierarchyData
-
             if (accountFields.length == 0) {
                 getAccountFields()
             }
