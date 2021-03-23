@@ -1,0 +1,99 @@
+.customHeader{
+  display: flex;
+}
+.customActiveInavtiveTab{
+  display:grid;
+  grid-template-columns: 0.55fr 1fr 1fr;
+  grid-template-areas:
+    "custom active"
+    "inactive .";
+}
+.customHeaderCustomTab{
+  grid-area: "custom";
+  margin: 0 auto;
+}
+.customHeaderActiveCustomTab{
+  grid-area: "active";
+  margin-right: 1rem;
+  margin-left: 1rem;
+}
+.customHeaderInactiveCustomTab{
+  grid-area: "inactive";
+  margin: 0 auto;
+}
+
+@media only screen and (max-width: 768px) {
+  .customHeader{
+    grid-gap: 8px;
+    flex-direction: column;
+  }
+  .customHeaderDropdown{
+    display: block;
+  }
+  .customActiveInavtiveTab{
+    grid-template-areas:
+      "custom active"
+      "inactive .";
+  }
+  .customHeaderCustomTab{
+    margin: 0;
+    margin-top: 0.8rem;
+
+  }
+  .customHeaderActiveCustomTab, .customHeaderInactiveCustomTab{
+    margin-right: 1.5rem;
+   margin-top: 0.8rem;
+ }
+
+}
+@media only screen and (max-width: 560px) {
+  #tapleen2{
+    display: block;
+    width:100%;
+  }
+  #tapleen2 div{
+    width: 45%;
+      margin: 0.1rem;
+      margin-top: 0.5rem;
+      margin-bottom:0.5rem;
+      display: inline-block;
+  }
+}
+@media only screen and (max-width: 425px) {
+  .customHeader{
+    width: 100%;
+  }
+  .customHeaderDropdown div.MuiInputBase-root{
+    width: 100% !important;
+  }
+  .customActiveInavtiveTab{
+    grid-template-areas:
+      "custom active"
+      "inactive .";
+  }
+  .customActiveInavtiveTab{
+    margin-top: 0.4rem;
+    grid-template-columns: 0.55fr 1fr 1fr;
+    margin-bottom: 0.6rem;
+  }
+
+#demo-simple-select-outlined{
+  width:250px !important;
+}
+}
+@media only screen and (max-width: 375px) {
+  .customHeader{
+    display: block;
+  }
+}
+@media only screen and (max-width: 361px) {
+  #tapleen2 div{
+    width: 100%;
+    margin:0.4rem auto;
+  }
+}
+@media only screen and (max-width: 320px) {
+.customHeader div.MuiFormControl-root{
+    width: 255px !important;
+}
+}
