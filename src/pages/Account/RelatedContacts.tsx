@@ -4,7 +4,7 @@ import { Box } from '@material-ui/core'
 import { contactDetailPage } from '../../routes/Contacts'
 import { accountDetailPage } from '../../routes/Accounts'
 import { makeStyles } from "@material-ui/core/styles";
-import "./account.scss"
+import "./account.module.scss"
 
 const useStyles = makeStyles((theme) => ({
     root: {

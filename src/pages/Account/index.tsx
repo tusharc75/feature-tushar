@@ -37,7 +37,7 @@ import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import NoDataCell from '../../components/Helpers/NoDataCell'
-import './account.scss'
+import './account.module.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 
 const AccTypes = {
@@ -211,7 +211,8 @@ export default function Account() {
         {
             field: "accountName", headerName: "Account Name", width: 200,
             renderCell: (params) => (
-                <Link className="accountNameLink" to={`${accountDetailPage.path}/${params.row._id}`}>
+                <Link className="accountNameLink"
+                    to={`${accountDetailPage.path}/${params.row._id}`}>
                     {params?.row?.accountName ? params.row.accountName : <NoDataCell />}
                 </Link>
             )

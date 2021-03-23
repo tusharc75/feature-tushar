@@ -19,7 +19,6 @@ import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import DetailsPage from '../../components/Shared/DetailsPage'
-import "./account.scss";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import RelatedContactsBox from './RelatedContacts'
@@ -34,6 +33,7 @@ import Activity from "../../components/Activity";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import './account.module.scss'
 
 const Roles = () => {
     const history = useHistory();
@@ -351,149 +351,150 @@ const Roles = () => {
                             </Button> : null
                         }
                     </CustomHeader>
+                    <div className="detailPageContainer">
+                        <Container>
+                            <Grid container spacing={3}>
+                                <Grid item sm={8} md={8} lg={8}>
+                                    <div className="detailPageDiv1">
+                                        {
+                                            loading ?
+                                                <Grid container spacing={2}>
+                                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                                                        <Grid item sm={6} md={6}>
+                                                            <Skeleton variant="text" width="100px" height="16px" />
+                                                            <Box marginY={1} />
+                                                            <Skeleton width="100%" height="50px" />
+                                                        </Grid>
+                                                    ))}
+                                                </Grid> :
+                                                <>
+                                                    <Tabs
+                                                        className="mb-4"
+                                                        value={currentTabIndex}
+                                                        onChange={(index, newValue) => { setCurrentTabIndex(newValue) }}
+                                                        indicatorColor="primary"
+                                                        textColor="primary"
+                                                        aria-label="icon tabs example"
+                                                    >
+                                                        <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+                                                        <Tab label="Account Hierarchy" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                                                    </Tabs>
+                                                    <Box hidden={currentTabIndex !== 0}>
+                                                        <DetailsPage
+                                                            data={accountData}
+                                                            fields={accountFields}
+                                                            isUpdating={isUpdating}
+                                                            canEdit={allowedToEdit}
+                                                            handleUpdate={handleUpdateAccount}
+                                                            sourceComponent="account"
+                                                        />
 
-                    <Container className="detailPageContainer" >
-                        <Grid container spacing={3}>
-                            <Grid item sm={8} md={8} lg={8}>
-                                <div className="detailPageDiv1">
-                                    {
-                                        loading ?
-                                            <Grid container spacing={2}>
-                                                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                                                    <Grid item sm={6} md={6}>
-                                                        <Skeleton variant="text" width="100px" height="16px" />
-                                                        <Box marginY={1} />
-                                                        <Skeleton width="100%" height="50px" />
-                                                    </Grid>
-                                                ))}
-                                            </Grid> :
-                                            <>
-                                                <Tabs
-                                                    className="mb-4"
-                                                    value={currentTabIndex}
-                                                    onChange={(index, newValue) => { setCurrentTabIndex(newValue) }}
-                                                    indicatorColor="primary"
-                                                    textColor="primary"
-                                                    aria-label="icon tabs example"
-                                                >
-                                                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                                                    <Tab label="Account Hierarchy" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-                                                </Tabs>
-                                                <Box hidden={currentTabIndex !== 0}>
-                                                    <DetailsPage
-                                                        data={accountData}
-                                                        fields={accountFields}
-                                                        isUpdating={isUpdating}
-                                                        canEdit={allowedToEdit}
-                                                        handleUpdate={handleUpdateAccount}
-                                                        sourceComponent="account"
-                                                    />
+                                                    </Box>
 
-                                                </Box>
+                                                    <Box hidden={currentTabIndex !== 1}>
+                                                        <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
+                                                    </Box>
 
-                                                <Box hidden={currentTabIndex !== 1}>
-                                                    <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
-                                                </Box>
-
-                                            </>
-                                    }
-                                </div>
-
-                                <Box display="flex" mt={1} p={1}
-                                    bgcolor="grey.100" borderColor="grey.300"
-                                    onClick={(event) => handlePanelChange('opportunity')}
-                                    style={{ cursor: "pointer" }}>
-                                    <Grid container>
-                                        <Grid item xs={8} >
-                                            <Box display="flex">
-                                                <Box >
-                                                    <IconButton size="small">
-                                                        {expanded['opportunity'] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                                                    </IconButton>
-                                                </Box>
-                                                <Box ml={1} mt={0.5}>
-                                                    <Typography variant="subtitle2">Opportunity</Typography>
-                                                </Box>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={4} container justify="flex-end" >
-                                            <IconButton color="primary" size="small" >
-                                                <ControlPointIcon />
-                                            </IconButton>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                                {
-                                    expanded['opportunity'] ?
-                                        <div style={{ marginTop: '10px' }}>
-                                            <OpportunityTab
-                                                onChange={handlePanelChange}
-                                                expanded={expanded['opportunity']}
-                                            />
-                                        </div> : null
-                                }
-
-                            </Grid>
-                            <Grid item sm={4} md={4} lg={4} className="customGrid">
-                                {
-                                    accountData && <div>
-                                        <Activity relatedTo={[
-                                            { type: "account", referenceId: accountData._id, access: true }
-                                        ]} handleActivityRefresh={() => { }} />
-                                    </div>
-                                }
-
-                                <div className="detailPageDiv2">
-                                    {
-                                        quickLinks && quickLinks.length ?
-                                            quickLinks.map((k, index) => {
-                                                return <Link key={index} to={k} className="customLink">{k.label || ''}({k.count || 0})</Link>
-                                            }) :
-                                            null
-                                    }
-                                </div>
-
-                                <div className="detailPageDiv3" >
-                                    <div className="relatedContacts">
-                                        <Typography color="primary"
-                                            variant="h6"
-                                            style={{ margin: "0 10px" }} >Related Contacts</Typography>
-                                        <span><AddOutlined /> </span>
+                                                </>
+                                        }
                                     </div>
 
-                                    <Box className="customBox1">
-                                        <RelatedContactsBox
-                                            contacts={relatedContacts}
-                                        />
+                                    <Box display="flex" mt={1} p={1}
+                                        bgcolor="grey.100" borderColor="grey.300"
+                                        onClick={(event) => handlePanelChange('opportunity')}
+                                        style={{ cursor: "pointer" }}>
+                                        <Grid container>
+                                            <Grid item xs={8} >
+                                                <Box display="flex">
+                                                    <Box >
+                                                        <IconButton size="small">
+                                                            {expanded['opportunity'] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                                        </IconButton>
+                                                    </Box>
+                                                    <Box ml={1} mt={0.5}>
+                                                        <Typography variant="subtitle2">Opportunity</Typography>
+                                                    </Box>
+                                                </Box>
+                                            </Grid>
+                                            <Grid item xs={4} container justify="flex-end" >
+                                                <IconButton color="primary" size="small" >
+                                                    <ControlPointIcon />
+                                                </IconButton>
+                                            </Grid>
+                                        </Grid>
                                     </Box>
-                                    <div className="viewAllBtn">
-                                        <Button
-                                            variant="outlined"
-                                            className="btn" >View All</Button></div>
-                                </div>
+                                    {
+                                        expanded['opportunity'] ?
+                                            <div style={{ marginTop: '10px' }}>
+                                                <OpportunityTab
+                                                    onChange={handlePanelChange}
+                                                    expanded={expanded['opportunity']}
+                                                />
+                                            </div> : null
+                                    }
+
+                                </Grid>
+                                <Grid item sm={4} md={4} lg={4} className="customGrid">
+                                    {
+                                        accountData && <div>
+                                            <Activity relatedTo={[
+                                                { type: "account", referenceId: accountData._id, access: true }
+                                            ]} handleActivityRefresh={() => { }} />
+                                        </div>
+                                    }
+
+                                    <div className="detailPageDiv2">
+                                        {
+                                            quickLinks && quickLinks.length ?
+                                                quickLinks.map((k, index) => {
+                                                    return <Link key={index} to={k} className="customLink">{k.label || ''}({k.count || 0})</Link>
+                                                }) :
+                                                null
+                                        }
+                                    </div>
+
+                                    <div className="detailPageDiv3" >
+                                        <div className="relatedContacts">
+                                            <Typography color="primary"
+                                                variant="h6"
+                                                style={{ margin: "0 10px" }} >Related Contacts</Typography>
+                                            <span><AddOutlined /> </span>
+                                        </div>
+
+                                        <Box className="customBox1">
+                                            <RelatedContactsBox
+                                                contacts={relatedContacts}
+                                            />
+                                        </Box>
+                                        <div className="viewAllBtn">
+                                            <Button
+                                                variant="outlined"
+                                                className="btn" >View All</Button></div>
+                                    </div>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                        {
-                            showConfirmBox ? (
-                                <ConfirmationDialog
-                                    open={showConfirmBox}
-                                    message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
-                                    onClose={() => setShowConfirmBox(false)}
-                                    onOk={handleDeleteAcc}
-                                />
-                            ) : null
-                        }
-                        {
-                            showApproveDisapproveConfirmBox ? (
-                                <ConfirmationDialog
-                                    open={showApproveDisapproveConfirmBox}
-                                    message={`Are you sure you want to ${accountData.static?.approved ? 'disapprove' : "approve"} this Account ?`}
-                                    onClose={() => setShowApproveDisapproveConfirmBox(false)}
-                                    onOk={handleApproveDisapprove}
-                                />
-                            ) : null
-                        }
-                    </Container>
+                            {
+                                showConfirmBox ? (
+                                    <ConfirmationDialog
+                                        open={showConfirmBox}
+                                        message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
+                                        onClose={() => setShowConfirmBox(false)}
+                                        onOk={handleDeleteAcc}
+                                    />
+                                ) : null
+                            }
+                            {
+                                showApproveDisapproveConfirmBox ? (
+                                    <ConfirmationDialog
+                                        open={showApproveDisapproveConfirmBox}
+                                        message={`Are you sure you want to ${accountData.static?.approved ? 'disapprove' : "approve"} this Account ?`}
+                                        onClose={() => setShowApproveDisapproveConfirmBox(false)}
+                                        onOk={handleApproveDisapprove}
+                                    />
+                                ) : null
+                            }
+                        </Container>
+                    </div>
                 </div>
             </Layout>
         </>
