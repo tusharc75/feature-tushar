@@ -258,15 +258,17 @@ const Roles = () => {
                                                         </Grid>
                                                     ))}
                                                 </Grid> :
-                                                <DetailsPage
-                                                    data={contactData}
+                                                <DetailsPage data={contactData} fields={contactFields} />
 
-                                                    fields={contactFields}
-                                                    isUpdating={isUpdating}
-                                                    canEdit={allowedToEdit}
-                                                    handleUpdate={handleUpdateContact}
-                                                    sourceComponent="contact"
-                                                />
+                                                // <DetailsPage
+                                                //     data={contactData}
+
+                                                //     fields={contactFields}
+                                                //     isUpdating={isUpdating}
+                                                //     canEdit={allowedToEdit}
+                                                //     handleUpdate={handleUpdateContact}
+                                                //     sourceComponent="contact"
+                                                // />
                                         }
                                     </div>
                                 </Grid>
