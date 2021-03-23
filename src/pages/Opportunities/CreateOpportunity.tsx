@@ -197,7 +197,7 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
                     }) => (
 
                         <>
-                            <DialogContent dividers style={{ padding: '10px', marginLeft: "15px", marginRight: '15px', minWidth: '943px', minHeight: '500px' }}>
+                            <DialogContent dividers>
                                 <Form>
                                     {
                                         formsData &&
