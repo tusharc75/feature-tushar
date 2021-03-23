@@ -35,9 +35,9 @@ const InputField = (props) => {
       {formsData &&
         formsData.map((form, i) => (
           <div key={i}>
-            <h2>{form.name}</h2>
+            <h2 className="form-label-style">{form.name}</h2>
             <Box marginY={2}>
-              <Grid spacing={2} container>
+              <Grid spacing={3} container>
                 {form.sectionFields.map((field) => (
                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                     <FormTypes

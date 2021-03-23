@@ -4,6 +4,7 @@ import {
     Button,
     Grid,
     Typography,
+    IconButton,
 } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import _ from "lodash";
@@ -18,7 +19,6 @@ import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import DetailsPage from '../../components/Shared/DetailsPage'
-import "./account.scss";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import RelatedContactsBox from './RelatedContacts'
@@ -30,6 +30,10 @@ import OpportunityTab from './OpportunityTab'
 import { AddOutlined } from '@material-ui/icons'
 import Chip from '@material-ui/core/Chip';
 import Activity from "../../components/Activity";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import './account.module.scss'
 
 const Roles = () => {
     const history = useHistory();
@@ -48,7 +52,9 @@ const Roles = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState<any>([]);
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
     const [accountHierarchyData, setAccountHierarchyData] = useState([]);
-    const [expanded, setExpanded] = React.useState(false);
+    const [expanded, setExpanded] = React.useState({
+        opportunity: false
+    });
 
     let { id } = useParams();
 
@@ -292,10 +298,12 @@ const Roles = () => {
             })
     }
 
-    const handlePanelChange = (panel) => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
+    const handlePanelChange = (curActive) => {
+        let tempData = { ...expanded }
+        tempData[curActive] = tempData[curActive] ? false : true
+        setExpanded(tempData)
     };
-
+    console.log('expanded', expanded)
     return (
         <>
             <Layout>
@@ -343,7 +351,6 @@ const Roles = () => {
                             </Button> : null
                         }
                     </CustomHeader>
-
                     <div className="detailPageContainer">
                         <Container>
                             <Grid container spacing={3}>
@@ -372,19 +379,20 @@ const Roles = () => {
                                                         <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
                                                         <Tab label="Account Hierarchy" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
                                                     </Tabs>
-                                                    {/*  index={0} */}
                                                     <Box hidden={currentTabIndex !== 0}>
-                                                        <DetailsPage
+                                                        <DetailsPage data={accountData} fields={accountFields} />
+
+                                                        {/* <DetailsPage
                                                             data={accountData}
                                                             fields={accountFields}
                                                             isUpdating={isUpdating}
                                                             canEdit={allowedToEdit}
                                                             handleUpdate={handleUpdateAccount}
                                                             sourceComponent="account"
-                                                        />
+                                                        /> */}
 
                                                     </Box>
-                                                    {/*  index={1} */}
+
                                                     <Box hidden={currentTabIndex !== 1}>
                                                         <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
                                                     </Box>
@@ -393,12 +401,40 @@ const Roles = () => {
                                         }
                                     </div>
 
-                                    <div style={{ marginTop: '10px' }}>
-                                        <OpportunityTab
-                                            onChange={handlePanelChange}
-                                            expanded={expanded}
-                                        />
-                                    </div>
+                                    <Box display="flex" mt={1} p={1}
+                                        bgcolor="grey.100" borderColor="grey.300"
+                                        onClick={(event) => handlePanelChange('opportunity')}
+                                        style={{ cursor: "pointer" }}>
+                                        <Grid container>
+                                            <Grid item xs={8} >
+                                                <Box display="flex">
+                                                    <Box >
+                                                        <IconButton size="small">
+                                                            {expanded['opportunity'] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                                        </IconButton>
+                                                    </Box>
+                                                    <Box ml={1} mt={0.5}>
+                                                        <Typography variant="subtitle2">Opportunity</Typography>
+                                                    </Box>
+                                                </Box>
+                                            </Grid>
+                                            <Grid item xs={4} container justify="flex-end" >
+                                                <IconButton color="primary" size="small" >
+                                                    <ControlPointIcon />
+                                                </IconButton>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                    {
+                                        expanded['opportunity'] ?
+                                            <div style={{ marginTop: '10px' }}>
+                                                <OpportunityTab
+                                                    onChange={handlePanelChange}
+                                                    expanded={expanded['opportunity']}
+                                                />
+                                            </div> : null
+                                    }
+
                                 </Grid>
                                 <Grid item sm={4} md={4} lg={4} className="customGrid">
                                     {

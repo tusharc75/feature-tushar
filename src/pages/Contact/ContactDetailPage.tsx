@@ -21,7 +21,7 @@ import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Loader from '../../components/Loader'
 import routes from '../../components/Helpers/Routes';
-import '../Account/account.scss'
+import '../Account/account.module.scss'
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
 import isObjectEmpty from './../../constants/helpers'
@@ -245,8 +245,8 @@ const Roles = () => {
                             <Grid container spacing={3}>
                                 <Grid item sm={8} md={8} lg={8}>
                                     <div className="detailPageDiv1"
-                                        // style={{ pointerEvents: allowedToEdit ? "" : "none" }} 
-                                        >
+                                    // style={{ pointerEvents: allowedToEdit ? "" : "none" }} 
+                                    >
                                         {
                                             loading ?
                                                 <Grid container spacing={2}>
@@ -258,15 +258,17 @@ const Roles = () => {
                                                         </Grid>
                                                     ))}
                                                 </Grid> :
-                                                <DetailsPage
-                                                    data={contactData}
+                                                <DetailsPage data={contactData} fields={contactFields} />
 
-                                                    fields={contactFields}
-                                                    isUpdating={isUpdating}
-                                                    canEdit={allowedToEdit}
-                                                    handleUpdate={handleUpdateContact}
-                                                    sourceComponent="contact"
-                                                />
+                                                // <DetailsPage
+                                                //     data={contactData}
+
+                                                //     fields={contactFields}
+                                                //     isUpdating={isUpdating}
+                                                //     canEdit={allowedToEdit}
+                                                //     handleUpdate={handleUpdateContact}
+                                                //     sourceComponent="contact"
+                                                // />
                                         }
                                     </div>
                                 </Grid>

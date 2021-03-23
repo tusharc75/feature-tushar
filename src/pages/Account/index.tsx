@@ -16,6 +16,7 @@ import {
     Select,
     Chip
 } from "@material-ui/core";
+
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
 import { useHistory } from "react-router-dom";
@@ -35,9 +36,9 @@ import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
-
-import './account.scss'
-import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
+import NoDataCell from '../../components/Helpers/NoDataCell'
+import './account.module.scss'
+import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 
 const AccTypes = {
     "All Accounts": 1,
@@ -46,9 +47,15 @@ const AccTypes = {
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
-        border: "1px solid #D4D6D7",
+        border: "none",
         borderRadius: 8,
         padding: theme.spacing(3, 2),
+    },
+    grid: {
+        border: "2px solid #D4D6D7",
+        borderRadius: 8,
+        minHeight: '500px',
+        maxHeight: '500px'
     },
     linksContainer: {
         display: "flex",
@@ -59,6 +66,9 @@ const useStyles = makeStyles((theme) => ({
     linkDivider: {
         backgroundColor: theme.palette.primary.main,  //  darkBg
         margin: "0 1rem",
+    },
+    delBtn: {
+        color: 'red'
     }
 }));
 
@@ -204,8 +214,9 @@ export default function Account() {
         {
             field: "accountName", headerName: "Account Name", width: 200,
             renderCell: (params) => (
-                <Link className="accountNameLink" to={`${accountDetailPage.path}/${params.row._id}`}>
-                    {params?.row?.accountName ? params.row.accountName : ''}
+                <Link className="accountNameLink"
+                    to={`${accountDetailPage.path}/${params.row._id}`}>
+                    {params?.row?.accountName ? params.row.accountName : <NoDataCell />}
                 </Link>
             )
         },
@@ -216,7 +227,7 @@ export default function Account() {
             renderCell: (params) => (
                 <>
                     {
-                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
                     }
                 </>
             )
@@ -228,7 +239,7 @@ export default function Account() {
             renderCell: (params) => (
                 <>
                     {
-                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
                     }
                 </>
             )
@@ -240,7 +251,7 @@ export default function Account() {
             renderCell: (params) => (
                 <>
                     {
-                        params?.value?.optionLabel ? params.value.optionLabel : ''
+                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
                     }
                 </>
             )
@@ -253,7 +264,11 @@ export default function Account() {
             sortable: false,
             filterable: false,
         },
-        { field: "phone", headerName: "Phone", width: 200 },
+        {
+            field: "phone", headerName: "Phone",
+            hide: true,
+            width: 200
+        },
         {
             field: "actions", headerName: "Actions",
             renderCell: (params) => (
@@ -278,7 +293,7 @@ export default function Account() {
                                     <IconButton aria-label="Disapprove" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: false, id: params.row._id, accountName: params.row.accountName })
                                     }}>
-                                        <CancelIcon fontSize="small" color="error" />
+                                        <CancelIcon fontSize="small" color="secondary" />
                                     </IconButton>
                                 </Tooltip> :
                                 <Tooltip title="Approve">
@@ -302,12 +317,12 @@ export default function Account() {
                                 </Tooltip> :
                                 <Tooltip className="cursor-stop" title="You must be the owner of this account to get the delete functionality">
                                     <IconButton aria-label="Delete">
-                                        <DeleteIcon fontSize="small" />
+                                        <DeleteIcon fontSize="small" color="error" />
                                     </IconButton>
                                 </Tooltip> :
                             <Tooltip className="cursor-stop" title="You do not have permission to delete account">
                                 <IconButton aria-label="Delete">
-                                    <DeleteIcon fontSize="small" />
+                                    <DeleteIcon fontSize="small" color="error" />
                                 </IconButton>
                             </Tooltip>
                     }
@@ -555,9 +570,7 @@ export default function Account() {
                         </Grid>
 
                         <Grid item>
-
-                            <SearchBox onSearch={handleSearch} value={searchVal} size="small" />
-
+                            <SearchBox onSearch={handleSearch} width="300px" value={searchVal} size="small" />
                             {
                                 accountPermissions.isCreate && <>
                                     <Box component="span" marginX={1} />
@@ -642,33 +655,31 @@ export default function Account() {
 
                         </Grid>
                     </Grid>
-                </CustomContainer>
-
-                <Paper style={{ marginTop: 15 }}>
-                    <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
-                        <div className="account-grid-height1">
-                            <DataGrid
-                                components={{
-                                    Toolbar: DataGridCustomToolbar,
-                                }}
-                                rows={loading ? [] : dataRows}
-                                columns={columns}
-                                loading={loading}
-                                disableSelectionOnClick
-                                disableMultipleSelection
-                                paginationMode="server"
-                                pagination
-                                onPageChange={handlePage}
-                                onPageSizeChange={handlePageSize}
-                                pageSize={query.limit}
-                                page={query.page}
-                                rowCount={rowCount}
-                                rowsPerPageOptions={[25, 50, 75]}
-                                onSortModelChange={handleSortModelChange}
-                                // onRowClick={handleRowClick}
-                                density="compact"
-                            />
-                        </div>
+                    <Paper style={{ marginTop: 15 }}>
+                        {/* <Box component="div" className={classes.root}> */}
+                        <DataGrid
+                            className={classes.grid}
+                            components={{
+                                Toolbar: DataGridCustomToolbar,
+                            }}
+                            scrollbarSize={20}
+                            rows={loading ? [] : dataRows}
+                            columns={columns}
+                            loading={loading}
+                            disableSelectionOnClick
+                            disableMultipleSelection
+                            paginationMode="server"
+                            pagination
+                            onPageChange={handlePage}
+                            onPageSizeChange={handlePageSize}
+                            pageSize={query.limit}
+                            page={query.page}
+                            rowCount={rowCount}
+                            rowsPerPageOptions={[25, 50, 75]}
+                            onSortModelChange={handleSortModelChange}
+                            // onRowClick={handleRowClick}
+                            density="compact"
+                        />
                         {
                             showDeleteWarningConfirmBox ?
                                 <MessageDialog
@@ -716,8 +727,9 @@ export default function Account() {
                                 /> : null
                         }
 
-                    </Box>
-                </Paper>
+                        {/* </Box> */}
+                    </Paper>
+                </CustomContainer>
             </Layout>
             {
                 isAccDialogVisible ?

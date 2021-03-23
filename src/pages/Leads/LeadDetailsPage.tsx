@@ -279,14 +279,15 @@ const LeadDetailsPage = () => {
                     <img src={SVG("Contacts Placeholder")} alt="No Data" />
                   </Box>
                 ) : (
-                  <DetailsPage
-                    data={leadData}
-                    fields={leadFields}
-                    isUpdating={isUpdating}
-                    canEdit={allowedToEdit}
-                    handleUpdate={handleUpdateLead}
-                    sourceComponent="lead"
-                  />
+                  <DetailsPage data={leadData} fields={leadFields} />
+                  // <DetailsPage
+                  //   data={leadData}
+                  //   fields={leadFields}
+                  //   isUpdating={isUpdating}
+                  //   canEdit={allowedToEdit}
+                  //   handleUpdate={handleUpdateLead}
+                  //   sourceComponent="lead"
+                  // />
                 )}
               </Container>
             </Grid>

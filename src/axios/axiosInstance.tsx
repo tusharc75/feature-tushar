@@ -22,7 +22,7 @@ export default (history = null) => {
             history.push('/');
         }
         else {
-            history.push('/');
+            // history.push('/');
             //@ts-ignore
             window.location = "/";
         }
@@ -57,15 +57,15 @@ export default (history = null) => {
                 clearTokenAndRedirectToHome();
 
             }
-            if (error.response.status === 500) {
-                CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.message });
-                clearTokenAndRedirectToHome();
+            // if (error.response.status === 500) {
+            //     CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.message });
+            //     clearTokenAndRedirectToHome();
 
-            }
-            else if (error.response.status === 403) {
-                clearTokenAndRedirectToHome();
-                //  redirect to home screens
-            }
+            // }
+            // else if (error.response.status === 403) {
+            //     clearTokenAndRedirectToHome();
+            //     //  redirect to home screens
+            // }
             else {
                 return new Promise((resolve, reject) => {
                     CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.error || error.response.data.message });
