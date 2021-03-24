@@ -263,7 +263,7 @@ const Leads = () => {
   }
   const getFirstName = tData => {
     return <Link className="LeadNameLink"
-      to={`/${leadDetailPage.path}/${tData._id}`}
+      to={`${leadDetailPage.path}/${tData._id}`}
     >
       {tData.name || ''}
     </Link>

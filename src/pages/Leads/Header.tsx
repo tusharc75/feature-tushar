@@ -1,18 +1,17 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { makeStyles } from "@material-ui/core/styles";
-import { FilterList, SortByAlpha, Search, AddOutlined } from "@material-ui/icons";
+import { AddOutlined } from "@material-ui/icons";
 import {
     Box,
     Grid,
     Select,
     MenuItem,
     FormControl,
-    IconButton,
     Button,
     Menu
 } from "@material-ui/core";
-import { Add, ExpandMore } from "@material-ui/icons";
+import { ExpandMore } from "@material-ui/icons";
 
 const useStyles = makeStyles((theme) => ({
     filterSide: {
