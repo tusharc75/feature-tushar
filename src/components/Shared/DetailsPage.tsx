@@ -162,7 +162,7 @@
 //   };
 
 //   const getOptions = (opts, values, fieldName) => {
-//     // combine selected collaboratore and owner data 
+//     // combine selected collaboratore and owner data
 //     let tempData = []
 //     if (values.collaborator && values.collaborator.length) {
 //       tempData = [...values.collaborator]
@@ -458,7 +458,9 @@ const Details = (props) => {
     // eslint-disable-next-line
   }, []);
 
+
   const normalizeValues = (values, input) => {
+    // console.log(input);
     let text = "";
     if (input.type === "multiSelect") {
       const filterOptions = input.option?.filter((opt) =>
