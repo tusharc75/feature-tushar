@@ -16,6 +16,8 @@ import Account from "./pages/Account/index";
 // import CreateContact from './pages/Contact/CreateContact'
 import AccountDetailPage from "./pages/Account/AccountDetailPage";
 import ContactDetailPage from "./pages/Contact/ContactDetailPage";
+import Entity from "./pages/Entity123";
+import EntityDetailPage from "./pages/Entity123/SingleEntity";
 import CustomToaster from "./components/Helpers/CustomToast";
 import { CustomEventEmitter } from "./axios/events";
 import OpportunityDetailsPage from "./pages/Opportunities/OpportunityDetailsPage";
@@ -110,10 +112,18 @@ function App() {
         <PrivateRoute exact path="/contact/detail/:id">
           <ContactDetailPage />
         </PrivateRoute>
-
         <PrivateRoute exact path="/activity">
           <Activitydemo />
         </PrivateRoute>
+
+        <PrivateRoute exact path="/entity">
+          <Entity />
+        </PrivateRoute>
+
+        <PrivateRoute exact path="/entity/:id">
+          <EntityDetailPage />
+        </PrivateRoute>
+
         <PrivateRoute exact path="/activity/email">
           <Email />
         </PrivateRoute>

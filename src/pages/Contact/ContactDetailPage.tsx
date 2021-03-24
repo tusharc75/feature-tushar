@@ -264,13 +264,12 @@ const Roles = () => {
                                 Edit
                                 </Button>,
                                 <Box component="span" marginX={1} />,
-                                <Button
-                                    variant="contained" color="secondary"
-                                    onClick={() => setShowConfirmBox(true)}
-                                >
-                                    Delete
-                                </Button>
-
+                                <DeleteButton
+                                text="Delete"
+                                action={() => {
+                                setShowConfirmBox(true);
+                                }}
+                                />
                                 ]
                                 : null
                         }
@@ -339,7 +338,7 @@ const Roles = () => {
                             {showConfirmBox ? (
                                 <ConfirmationDialog
                                     open={showConfirmBox}
-                                    message={`Are you sure you want to delete this Contact`}
+                                    message={`Are you sure you want to delete this Contact ?`}
                                     onClose={() => setShowConfirmBox(false)}
                                     onOk={handleDeleteContact}
                                 />
