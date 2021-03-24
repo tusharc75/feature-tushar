@@ -7,7 +7,6 @@ import { capitalize } from "../services/util";
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        minHeight: "100%!important",
         marginTop: 0
     },
     box: {

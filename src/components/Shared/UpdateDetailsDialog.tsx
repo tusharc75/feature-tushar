@@ -24,7 +24,7 @@ import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 
-const UpdateBrandDialog = (props) => {
+const UpdateDetailsDialog = (props) => {
   const {
     openDialog,
     onClose,
@@ -184,4 +184,4 @@ const UpdateBrandDialog = (props) => {
   );
 };
 
-export default UpdateBrandDialog;
+export default UpdateDetailsDialog;
