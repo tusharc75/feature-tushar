@@ -18,8 +18,6 @@ import Account from "./pages/Account/index";
 // import CreateContact from './pages/Contact/CreateContact'
 import AccountDetailPage from "./pages/Account/AccountDetailPage";
 import ContactDetailPage from "./pages/Contact/ContactDetailPage";
-import Entity from "./pages/Entity123";
-import EntityDetailPage from "./pages/Entity123/SingleEntity";
 import CustomToaster from "./components/Helpers/CustomToast";
 import { CustomEventEmitter } from "./axios/events";
 import OpportunityDetailsPage from "./pages/Opportunities/OpportunityDetailsPage";
@@ -110,40 +108,6 @@ function App() {
                 <PrivateRoute exact path="/contact/:id">
                     <CreateContact />
                 </PrivateRoute> */}
-<<<<<<< HEAD
-        <PrivateRoute exact path="/account">
-          <Account />
-        </PrivateRoute>
-        <PrivateRoute exact path="/account/detail/:id">
-          <AccountDetailPage />
-        </PrivateRoute>
-        <PrivateRoute exact path="/contact/detail/:id">
-          <ContactDetailPage />
-        </PrivateRoute>
-        <PrivateRoute exact path="/activity">
-          <Activitydemo />
-        </PrivateRoute>
-
-        <PrivateRoute exact path="/entity">
-          <Entity />
-        </PrivateRoute>
-
-        <PrivateRoute exact path="/entity/:id">
-          <EntityDetailPage />
-        </PrivateRoute>
-
-        <PrivateRoute exact path="/activity/email">
-          <Email />
-        </PrivateRoute>
-        <PrivateRoute exact path="/activity/note">
-          <Note />
-        </PrivateRoute>
-        <PrivateRoute exact path="/activity/:type">
-          <Activity />
-        </PrivateRoute>
-        {/* <Route exact path="/crm/account" component={Account} /> */}
-      </Switch>
-=======
           <PrivateRoute exact path="/account">
             <Account />
           </PrivateRoute>
@@ -177,7 +141,6 @@ function App() {
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>
->>>>>>> 3c4c97203a4a6ed6262ca0dc544141f3f029d737
 
       {toastConfig && (
         <CustomToaster
