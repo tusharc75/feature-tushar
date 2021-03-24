@@ -187,7 +187,7 @@ const Roles = () => {
         setOpenUpdateDialog(true);
       };
     
-      const closeUpdateDIalog = () => {
+      const closeUpdateDialog = () => {
         setOpenUpdateDialog(false);
       };
 
@@ -216,7 +216,7 @@ const Roles = () => {
           <UpdateDetailsDialog
             title={`Editing  ${contactData.firstName}`}
             openDialog={openUpdateDialog}
-            onClose={closeUpdateDIalog}
+            onClose={closeUpdateDialog}
             data={contactData}
             fields={contactFields}
             isUpdating={isUpdating}
