@@ -19,6 +19,11 @@ export default {
     path: "/lead",
     data: {},
   },
+  leadDetail: {
+    title: "Lead Detail",
+    path: "/lead/detail",
+    data: {},
+  },
   opportunity: {
     title: "Opportunity",
     path: "/opportunity",
@@ -42,6 +47,25 @@ export default {
   entityDetails: {
     title: "Entity",
     path: "/entity/detail",
+  },
+  opportunityDetail: {
+    title: "Opportunity Detail",
+    path: "/opportunity/detail",
+    data: {},
+  },
+  activity: {
+    title: "Activity",
+    path: "/activity",
+    data: {},
+  },
+  activityEmail: {
+    title: "Activity Email",
+    path: "/email",
+    data: {},
+  },
+  activityNote: {
+    title: "Activity Note",
+    path: "/note",
     data: {},
   },
 };

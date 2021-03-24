@@ -21,6 +21,9 @@ import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import { removeEmptyKeys } from "../../constants/helpers";
+import DeleteButton from "../../components/Helpers/DeleteButton";
 
 const LeadDetailsPage = () => {
   const history = useHistory();
@@ -165,9 +168,8 @@ const LeadDetailsPage = () => {
       ...values,
       _id: leadData._id,
     };
-
     axiosInstance()
-      .put("/lead", updatedData)
+      .put("/lead", removeEmptyKeys(updatedData))
       .then(({ data }) => {
         fetchLeadData();
         handleSnackbar("Successfully saved", "success", true);
@@ -196,8 +198,34 @@ const LeadDetailsPage = () => {
       count: 0,
     },
   ];
+  const [showCreateUserDialog, setShowCreateUserDialog] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+
+  const handleOpneUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const closeUpdateDIalog = () => {
+    setOpenUpdateDialog(false);
+  };
+
+  const handleUpdateBrand = (values) => {
+    setUpdating(true);
+  };
+
   return (
     <>
+      {openUpdateDialog && (
+        <UpdateDetailsDialog
+          title="Lead Update"
+          openDialog={openUpdateDialog}
+          onClose={closeUpdateDIalog}
+          data={leadData}
+          fields={leadFields}
+          isUpdating={isUpdating}
+          handleUpdate={handleUpdateLead}
+        />
+      )}
       {alertData ? (
         <CustomToast
           open={alertData.open || false}
@@ -240,7 +268,7 @@ const LeadDetailsPage = () => {
             <Button
               variant="contained"
               color="primary"
-              // onClick={() => ''}
+              onClick={handleOpneUpdateDialog}
             >
               Edit
             </Button>
@@ -249,13 +277,10 @@ const LeadDetailsPage = () => {
             leadData?.owner?.optionValue &&
             user?.user?._id &&
             leadData.owner.optionValue === user.user._id ? (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => setShowConfirmBox(true)}
-              >
-                Delete
-              </Button>
+              <DeleteButton
+                text="Delete"
+                action={() => setShowConfirmBox(true)}
+              />
             ) : null}
           </CustomHeader>
         )}
@@ -322,7 +347,7 @@ const LeadDetailsPage = () => {
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
-              message={`Are you sure you want to delete this Lead`}
+              message={`Are you sure you want to delete this Lead ?`}
               onClose={() => setShowConfirmBox(false)}
               onOk={handleDeleteLead}
             />
