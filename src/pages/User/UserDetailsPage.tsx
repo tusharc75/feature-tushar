@@ -13,7 +13,9 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
+import { removeEmptyKeys } from "../../constants/helpers";
 
 const UserDetailsPage = () => {
   const { id } = useParams();
@@ -28,9 +30,10 @@ const UserDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [userFields, setUserFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.lead]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [usersPermissions, setUsersPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -49,7 +52,7 @@ const UserDetailsPage = () => {
     const data = user?.role?.sideBar;
 
     if (data) {
-      const hasUsersPermission = data.find((d) => d.name == "Lead");
+      const hasUsersPermission = data.find((d) => d.name == "User");
       if (hasUsersPermission) {
         setUsersPermissions({
           isCreate: hasUsersPermission.isCreate,
@@ -130,6 +133,20 @@ const UserDetailsPage = () => {
     }
   };
 
+  const handleUpdateUser = (values) => {
+    setUpdating(true);
+    axiosInstance()
+      .put(`/user/${id}`, removeEmptyKeys(values))
+      .then(({ data }) => {
+        fetchUserData();
+        handleSnackbar("Successfully saved", "success", true);
+        setUpdating(false);
+      })
+      .catch((err) => {
+        setUpdating(false);
+      });
+  };
+
   const handleSnackbar = (msg, type, isOpen) => {
     setAlertData({
       errorMsg: msg,
@@ -138,8 +155,27 @@ const UserDetailsPage = () => {
     });
   };
 
+  const handleOpenUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const closeUpdateDIalog = () => {
+    setOpenUpdateDialog(false);
+  };
+
   return (
     <>
+      {openUpdateDialog && (
+        <UpdateDetailsDialog
+          title="Update"
+          openDialog={openUpdateDialog}
+          onClose={closeUpdateDIalog}
+          data={userData}
+          fields={userFields}
+          isUpdating={isUpdating}
+          handleUpdate={handleUpdateUser}
+        />
+      )}
       {alertData && (
         <CustomToast
           open={alertData.open || false}
@@ -180,7 +216,11 @@ const UserDetailsPage = () => {
             showHeading={true}
           >
             {usersPermissions.isUpdate ? (
-              <Button variant="contained" color="primary">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleOpenUpdateDialog}
+              >
                 Edit
               </Button>
             ) : null}
@@ -238,6 +278,14 @@ const UserDetailsPage = () => {
           </Grid>
         </div>
       </Layout>
+      {showConfirmBox ? (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this User ?`}
+          onClose={() => setShowConfirmBox(false)}
+          onOk={handleDeleteUser}
+        />
+      ) : null}
     </>
   );
 };
