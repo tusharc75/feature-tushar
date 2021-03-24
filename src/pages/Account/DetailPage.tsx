@@ -2,22 +2,22 @@ import React from 'react'
 import { Typography, Box, Grid } from '@material-ui/core'
 import { EditOutlined } from '@material-ui/icons'
 import { capitalize } from '../../services/util'
-import './accounts.scss'
+import accClass from './account.module.scss'
 function DetailPage(props) {
     const { data } = props
     const getNode = (k, val) => {
         return <Grid item xs={6} style={{ padding: "1px" }}>
             <table cellPadding="1px" cellSpacing='1px'>
-                <tr className="cTr">
-                    <td className="td1" ><Typography style={{ fontWeight: 700 }} variant='subtitle1' color="textSecondary">{k}</Typography></td>
-                    <td className="td2"> <Typography variant='subtitle1'><b> {capitalize(val)}</b></Typography></td>
+                <tr className={accClass.cTr}>
+                    <td className={accClass.td1} ><Typography style={{ fontWeight: 700 }} variant='subtitle1' color="textSecondary">{k}</Typography></td>
+                    <td className={accClass.td2}> <Typography variant='subtitle1'><b> {capitalize(val)}</b></Typography></td>
                 </tr>
             </table>
 
         </Grid>
     }
-    return <div className="customDiv12">
-        <div className="customDiv13" >
+    return <div className={accClass.customDiv12}>
+        <div className={accClass.customDiv13} >
             <Typography variant='h5' color="primary"> <strong>Details</strong></Typography>
             <EditOutlined />
         </div>

@@ -1,58 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import Dialog from '@material-ui/core/Dialog';
 import CreateAccount from './CreateAccount'
 import { getErrorMessage } from '../../../services/util'
 import { getObjKeys, formValidation } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom'
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
+import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from './../../../axios/axiosInstance'
 import { CustomEventEmitter } from './../../../axios/events';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 
-// const styles = makeStyles((theme) => ({
-//     root: {
-//         margin: 0,
-//         padding: theme.spacing(2),
-//     },
-//     closeButton: {
-//         position: 'absolute',
-//         right: theme.spacing(1),
-//         top: theme.spacing(1),
-//         color: theme.palette.grey[500],
-//     },
-// }));
-
-// const DialogTitle = withStyles(styles)((props) => {
-//     const { children, classes, onClose, ...other }: any = props;
-//     return (
-//         <MuiDialogTitle disableTypography className={classes.root} {...other}>
-//             <Typography variant="h6">{children}</Typography>
-//             {onClose ? (
-//                 <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
-//                     <CloseIcon />
-//                 </IconButton>
-//             ) : null}
-//         </MuiDialogTitle>
-//     );
-// });
+const useStyles = makeStyles((theme) => ({
+    dialogContainer: {
+        overflow: 'hidden'
+    },
+}))
 
 export default function CreateAccountMain(props) {
 
+    const classes = useStyles();
     const { open, onClose, id } = props
     const { state: { user } }: any = useData();
-    const history = useHistory();
     const [entityData, setEntityData] = useState({
         fields: [],
         initialValues: {},
     });
     const [loading, setLoading] = useState(false)
-    const [updateFieldValues, setUpdateFieldValues] = useState({})
-    const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
     const [alertData, setAlertData] = useState({})
 
     useEffect(() => {
         if (id) {
+            setLoading(true)
             axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
                 const newFields = [];
                 data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
@@ -74,6 +50,7 @@ export default function CreateAccountMain(props) {
     }, [user]);
 
     const getAccountFields = () => {
+        setLoading(true)
         axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
@@ -86,12 +63,7 @@ export default function CreateAccountMain(props) {
     };
 
     const handleLoading = (action, isSaveAndNew = false) => {
-        if (isSaveAndNew) {
-            setSaveAndNewLoading(action)
-        }
-        else {
-            setLoading(action)
-        }
+        if (!isSaveAndNew) setLoading(action)
     }
 
     const getModiFiedValues = values => {
@@ -187,27 +159,14 @@ export default function CreateAccountMain(props) {
 
     }
 
-    return (<Dialog
-        // fullWidth={true}
-        maxWidth="md"
-        aria-labelledby="customized-dialog-title"
-        onClose={onClose}
+    return (<CreateAccount
         open={open}
-    >
-        <CustomDialogHeader onClose={onClose} title="Add Account" />
-        {/* <DialogTitle id="customized-dialog-title"
-            style={{ paddingBottom: "1px", paddingLeft: "24px" }}
-            onClose={onClose}>
-            Add Account
-        </DialogTitle> */}
-        <CreateAccount
-            alertData={alertData}
-            handleSnackbar={handleSnackbar}
-            entityData={entityData}
-            onClose={onClose}
-            loading={loading}
-            handleSubmit={handleSubmit}
-        />
-    </Dialog>
+        onClose={onClose}
+        alertData={alertData}
+        handleSnackbar={handleSnackbar}
+        entityData={entityData}
+        loading={loading}
+        handleSubmit={handleSubmit}
+    />
     );
 }

@@ -1,11 +1,12 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Box, Chip, IconButton } from '@material-ui/core'
-
-import { VisibilityOutlined, EditOutlined, Delete, SquareFoot } from '@material-ui/icons'
+import { Grid, IconButton } from '@material-ui/core'
+import { Delete } from '@material-ui/icons'
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom'
-import './account.scss'
+import accClass from "./account.module.scss"
+import { opportunityPage } from '../../routes/Opportunity'
+import { displayDate, capitalize } from '../../services/util';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -33,15 +34,15 @@ const useStyles = makeStyles((theme) => ({
 
 function DisplayData({ label, value, color = "" }) {
 
-    return <div className="cTr">
-        <div className="td1" >
+    return <div className={`${accClass.cTr}`}>
+        <div className={`${accClass.td1}`} >
             <Typography color="textSecondary" variant="subtitle1">{label}</Typography>
         </div>
-        <div className="td2"> <Typography style={{ color: color ? color : '' }}  >{value}</Typography></div>
+        <div className={`${accClass.td2}`}> <Typography style={{ color: color ? color : '' }}  >{value}</Typography></div>
     </div>
 }
 
-export default function UsersTab({ expanded, data, brand, onDeleteUser }) {
+export default function UsersTab({ data }) {
 
     const classes = useStyles();
 
@@ -56,12 +57,12 @@ export default function UsersTab({ expanded, data, brand, onDeleteUser }) {
                                     <div className={`${classes.box} p-3`}>
                                         <span className={classes.actionsItems}>
                                             {/* <VisibilityOutlined /> */}
-                                            <IconButton onClick={() => onDeleteUser(obj)} size="small">
+                                            <IconButton size="small">
                                                 <Delete color="error" />
                                             </IconButton>
                                             {/* <EditOutlined /> */}
                                         </span>
-                                        <Link className="accountNameLink" to={`${opportunityPage.path}/${obj._id}`}>
+                                        <Link className={`${accClass.accountNameLink}`} to={`${opportunityPage.path}/${obj._id}`}>
                                             <Typography className="text-capitalize">{capitalize(obj?.opportunityName ?? '')}</Typography>
                                         </Link>
                                         <DisplayData label='Stage' value={obj?.stage?.optionLabel ?? ''} />

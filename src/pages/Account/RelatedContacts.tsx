@@ -4,7 +4,7 @@ import { Box } from '@material-ui/core'
 import { contactDetailPage } from '../../routes/Contacts'
 import { accountDetailPage } from '../../routes/Accounts'
 import { makeStyles } from "@material-ui/core/styles";
-import "./accounts.scss"
+import accClass from "./account.module.scss"
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -12,6 +12,7 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
     },
     box: {
+        border: "2px solid lightGray",
         backgroundColor: 'white',
         padding: '15px',
         width: '95%',
@@ -40,7 +41,7 @@ function RelatedContacts(props) {
                     borderRadius={16}
                     boxShadow={0.5}
                 >
-                    <Link className="accountNameLink fSize"
+                    <Link className={`${accClass.accountNameLink} fSize`}
                         to={`${contactDetailPage.path}/${obj._id}`}>
                         {`${obj.firstName || ''}  ${obj.lastName || ''}`}
                     </Link>
@@ -48,7 +49,7 @@ function RelatedContacts(props) {
                     <div className={classes.div1}>
                         <span className={classes.span}>Account Name:</span>
                         <span><Link
-                            className="accountNameLink"
+                            className={`${accClass.accountNameLink}`}
                             to={`${accountDetailPage.path}/${obj?.accountName?.optionValue}`}>
                             {obj?.accountName?.optionLabel ? obj.accountName.optionLabel : ''}
                         </Link></span>

@@ -486,8 +486,8 @@ export default function Account() {
 
     return (
         <>
-            <Layout>
 
+            <Layout>
                 <Grid container spacing={3} direction="row">
                     <Grid item xs={12} sm={6} className="pl-3">
                         <CustomBreadCrumbs routes={[routes.account]} />
@@ -712,20 +712,20 @@ export default function Account() {
                                     onOk={approveDisapproveAccounts}
                                 /> : null
                         }
-
                     </Paper>
+                    {
+                        isAccDialogVisible ?
+                            <CreateAccountDialog
+                                open={isAccDialogVisible}
+                                onClose={handleDialogClose}
+                                // showSuccessMes={handleSnackbar}
+                                id={cloneId}
+                            /> : null
+                    }
                 </CustomContainer>
 
             </Layout>
-            {
-                isAccDialogVisible ?
-                    <CreateAccountDialog
-                        open={isAccDialogVisible}
-                        onClose={handleDialogClose}
-                        // showSuccessMes={handleSnackbar}
-                        id={cloneId}
-                    /> : null
-            }
+
         </>
     )
 }
