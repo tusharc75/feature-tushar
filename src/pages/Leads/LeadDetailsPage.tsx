@@ -21,6 +21,8 @@ import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import {removeEmptyKeys} from "../../constants/helpers";
 
 const LeadDetailsPage = () => {
   const history = useHistory();
@@ -163,9 +165,10 @@ const LeadDetailsPage = () => {
       ...values,
       _id: leadData._id,
     };
-
+    console.log(removeEmptyKeys(updatedData));
+    debugger;
     axiosInstance()
-      .put("/lead", updatedData)
+      .put("/lead", removeEmptyKeys(updatedData))
       .then(({ data }) => {
         fetchLeadData();
         handleSnackbar("Successfully saved", "success", true);
@@ -194,8 +197,50 @@ const LeadDetailsPage = () => {
       count: 0,
     },
   ];
+  const [showCreateUserDialog, setShowCreateUserDialog] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+
+  const handleOpneUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const closeUpdateDIalog = () => {
+    setOpenUpdateDialog(false);
+  };
+
+  const handleUpdateBrand = (values) => {
+    setUpdating(true);
+  };
+  // const handleUpdateLead = (values) => {
+  //   setUpdating(true);
+  //   const updatedData = {
+  //     ...values,
+  //     _id: leadData._id,
+  //   };
+  //   UpdateBrand(updatedData)
+  //     .then(() => {
+  //       fetchBrandData();
+  //       handleSnackbar("Successfully saved", "success", true);
+  //       setUpdating(false);
+  //       closeUpdateDIalog();
+  //     })
+  //     .catch((err) => {
+  //       setUpdating(false);
+  //     });
+  // };
   return (
     <>
+    {openUpdateDialog && (
+          <UpdateDetailsDialog
+            title="Lead Update"
+            openDialog={openUpdateDialog}
+            onClose={closeUpdateDIalog}
+            data={leadData}
+            fields={leadFields}
+            // isUpdating={isUpdating}
+            handleUpdate={handleUpdateLead}
+          />
+        )}
       {alertData ? (
         <CustomToast
           open={alertData.open || false}
@@ -238,7 +283,7 @@ const LeadDetailsPage = () => {
           <Button
             variant="contained"
             color="primary"
-            // onClick={() => ''}
+            onClick={handleOpneUpdateDialog}
           >
             Edit
           </Button>
