@@ -24,4 +24,24 @@ export default {
     path: "/opportunity",
     data: {},
   },
+  user: {
+    title: "User",
+    path: "/user",
+    data: {},
+  },
+  userDetails: {
+    title: "User",
+    path: "/user/detail",
+    data: {},
+  },
+  entity: {
+    title: "Entity",
+    path: "/entity",
+    data: {},
+  },
+  entityDetails: {
+    title: "Entity",
+    path: "/entity/detail",
+    data: {},
+  },
 };

@@ -49,7 +49,7 @@ const Layout = ({ children, width }) => {
               animate={{ opacity: 1 }}
               initial={{ opacity: 0.6 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              exit={{ opacity: 0.1 }}
+              exit={{ opacity: 0 }}
               className={classes.content}
               onClick={handleToggleState}
             >

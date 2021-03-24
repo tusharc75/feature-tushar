@@ -26,6 +26,9 @@ import Activity from "./pages/Activity";
 import Note from "./pages/Activity/Note";
 import Email from "./pages/Activity/Email";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
+import User from "./pages/User";
+import Entity from "./pages/Entity";
+import UserDetailsPage from "./pages/User/UserDetailsPage";
 
 function App() {
   const location = useLocation();
@@ -114,7 +117,15 @@ function App() {
           <PrivateRoute exact path="/contact/detail/:id">
             <ContactDetailPage />
           </PrivateRoute>
-
+          <PrivateRoute exact path="/user">
+            <User />
+          </PrivateRoute>
+          <PrivateRoute exact path="/user/detail/:id">
+            <UserDetailsPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/entity">
+            <Entity />
+          </PrivateRoute>
           <PrivateRoute exact path="/activity">
             <Activitydemo />
           </PrivateRoute>

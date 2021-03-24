@@ -87,7 +87,9 @@ const LeadDetailsPage = () => {
         routes.lead,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
-    } catch (error) { }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleMainPoints = (data) => {
@@ -235,18 +237,18 @@ const LeadDetailsPage = () => {
             // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
-          <Button
-            variant="contained"
-            color="primary"
-            // onClick={() => ''}
-          >
-            Edit
-          </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              // onClick={() => ''}
+            >
+              Edit
+            </Button>
             <Box component="span" marginX={1} />
             {leadsPermissions.isDelete &&
-              leadData?.owner?.optionValue &&
-              user?.user?._id &&
-              leadData.owner.optionValue === user.user._id ? (
+            leadData?.owner?.optionValue &&
+            user?.user?._id &&
+            leadData.owner.optionValue === user.user._id ? (
               <Button
                 variant="contained"
                 color="secondary"
@@ -287,14 +289,6 @@ const LeadDetailsPage = () => {
                   </Box>
                 ) : (
                   <DetailsPage data={leadData} fields={leadFields} />
-                  // <DetailsPage
-                  //   data={leadData}
-                  //   fields={leadFields}
-                  //   isUpdating={isUpdating}
-                  //   canEdit={allowedToEdit}
-                  //   handleUpdate={handleUpdateLead}
-                  //   sourceComponent="lead"
-                  // />
                 )}
               </Container>
             </Grid>
@@ -318,7 +312,7 @@ const LeadDetailsPage = () => {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => { }}
+                      handleActivityRefresh={() => {}}
                     />
                   </div>
                 )}
