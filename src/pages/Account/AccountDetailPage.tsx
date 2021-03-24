@@ -28,12 +28,12 @@ import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
 import OpportunityTab from './OpportunityTab'
 import { AddOutlined } from '@material-ui/icons'
-import Chip from '@material-ui/core/Chip';
 import Activity from "../../components/Activity";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import accClass from "./account.module.scss"
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 
 const Roles = () => {
     const history = useHistory();
@@ -52,6 +52,7 @@ const Roles = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState<any>([]);
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
     const [accountHierarchyData, setAccountHierarchyData] = useState([]);
+    const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [expanded, setExpanded] = React.useState({
         opportunity: false
     });
@@ -270,6 +271,9 @@ const Roles = () => {
         if (values.employees) {
             values.employees = parseInt(values.employees)
         }
+        if (values.isShippingAddressSameAsBillingAddress === '') {
+            values.isShippingAddressSameAsBillingAddress = false
+        }
         const updatedData = {
             ...values,
             _id: accountData._id,
@@ -303,7 +307,13 @@ const Roles = () => {
         tempData[curActive] = tempData[curActive] ? false : true
         setExpanded(tempData)
     };
-    console.log('expanded', expanded)
+    const handleOpneUpdateDialog = () => {
+        setOpenUpdateDialog(true);
+    };
+
+    const closeUpdateDIalog = () => {
+        setOpenUpdateDialog(false);
+    };
     return (
         <>
             <Layout>
@@ -340,6 +350,14 @@ const Roles = () => {
                                 <Box component="span" marginX={1} />
                             </>
                         }
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleOpneUpdateDialog}
+                        >
+                            Edit
+                      </Button>
+                        <Box component="span" marginX={1} />
                         {
                             accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
                                 accountData.owner.optionValue === user.user._id ?
@@ -499,6 +517,17 @@ const Roles = () => {
                                     />
                                 ) : null
                             }
+                            {openUpdateDialog && (
+                                <UpdateDetailsDialog
+                                    title={`Editing  ${accountData?.accountName ?? ''}`}
+                                    openDialog={openUpdateDialog}
+                                    onClose={closeUpdateDIalog}
+                                    data={accountData}
+                                    fields={accountFields}
+                                    isUpdating={isUpdating}
+                                    handleUpdate={handleUpdateAccount}
+                                />
+                            )}
                         </Container>
                     </div>
                 </div>
