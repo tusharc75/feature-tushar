@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Toolbar, Box, makeStyles } from "@material-ui/core";
+import { useState } from "react";
+import { Toolbar, Box, makeStyles, withWidth } from "@material-ui/core";
+import { motion } from "framer-motion";
 
 import Sidebar from "./Sidebar/Sidebar";
 import Footer from "./Footer";
@@ -15,16 +16,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Layout = ({ children }) => {
+const Layout = ({ children, width }) => {
   const {
     state: { userLoading },
   }: any = useData();
   const classes = useStyles();
   const [toggleDrawer, setToggleDrawer] = useState(false);
 
+  const mobileWidths = ["xs", "sm"];
+
+  const handleToggleState = () => toggleDrawer && setToggleDrawer(false);
+
   return (
     <>
-      {/* <SideBar>{children }</SideBar> */}
       {userLoading ? (
         <Loader
           text="Securely Loggin In"
@@ -38,11 +42,20 @@ const Layout = ({ children }) => {
           />
           <Toolbar />
           <Box display="flex">
-            <Toolbar style={{ width: "55px" }} />
-            <main className={classes.content}>
+            {!mobileWidths.includes(width) && (
+              <Toolbar style={{ width: "48px" }} />
+            )}
+            <motion.main
+              animate={{ opacity: 1 }}
+              initial={{ opacity: 0.6 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              exit={{ opacity: 0 }}
+              className={classes.content}
+              onClick={handleToggleState}
+            >
               {children}
               <Footer />
-            </main>
+            </motion.main>
           </Box>
         </div>
       )}
@@ -50,4 +63,4 @@ const Layout = ({ children }) => {
   );
 };
 
-export default Layout;
+export default withWidth()(Layout);
