@@ -109,12 +109,12 @@
 }
 
 
-.accountHeader{
+.brandHeader{
     display: flex;
     grid-gap: 20px;
     align-items: center;
   }
-  .accountHeaderSearchBar{
+  .brandHeaderSearchBar{
     display: block;
   }
   .updatedAtTime , .createdAtTime{
@@ -128,37 +128,37 @@
     line-height: 1rem;
     display: block;
   }
-  .accountHeaderAddBtnActionBtnGroup{
+  .brandHeaderAddBtnActionBtnGroup{
   display: flex;
   grid-gap: 15px;
   }
-  .accountHeaderLogo{
+  .brandHeaderLogo{
     font-size: 3rem;
     color: #09445A;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl{
+  .brandHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl{
     color: #09445A;
     font-size:24px;
   }
-  .accountHeaderDropdown .MuiFormLabel-root.MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-animated.MuiInputLabel-shrink.MuiFormLabel-filled{
+  .brandHeaderDropdown .MuiFormLabel-root.MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-animated.MuiInputLabel-shrink.MuiFormLabel-filled{
     font-size: 22px;
   color: #414c50;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl{
+  .brandHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl{
     width: 100% !important;
   }
-  .accountHeader.accountHeader-mobile .MuiFormControl-root.MuiTextField-root .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-adornedStart.MuiOutlinedInput-adornedStart.MuiInputBase-marginDense.MuiOutlinedInput-marginDense{
+  .brandHeader.brandHeader-mobile .MuiFormControl-root.MuiTextField-root .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-adornedStart.MuiOutlinedInput-adornedStart.MuiInputBase-marginDense.MuiOutlinedInput-marginDense{
     padding-left: 18px !important;
     padding-right: 18px !important;
     height: 34px !important;
   }
-  /* Button.accountHeaderAddBtn{
+  /* Button.brandHeaderAddBtn{
     padding-left: 18px;
     padding-right: 18px;
     width: 99px;
     height: 34px;
   } */
-  Button.accountHeaderActionBtn{
+  Button.brandHeaderActionBtn{
     padding-left: 18px;
       padding-right: 18px;
       height: 34px;
@@ -166,50 +166,50 @@
   .MuiButton-iconSizeMedium > *:first-child{
     font-size: 18px !important;
   }
-  .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.accountHeader{
+  .brand-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.brandHeader{
     display: flex;
       grid-gap: 5px;
   }
   @media only screen and (max-width: 1024px) {
-    .accountHeader{
+    .brandHeader{
       margin-top: 15px;
     }
   }
   @media only screen and (max-width: 768px) {
-    .accountHeader{
+    .brandHeader{
       display: block;
       grid-gap: 8px;
       flex-direction: column;
       margin-top: 0;
     }
   
-    .accountHeaderAddBtnActionBtnGroup{
+    .brandHeaderAddBtnActionBtnGroup{
       margin-top: 15px;
       width: 100%;
     }
-    .accountHeaderSearchBar{
+    .brandHeaderSearchBar{
       display: block;
     }
-    .account-header-inner-container div.accountHeader{
+    .brand-header-inner-container div.brandHeader{
       display: block;
     }
-    .MuiButton-containedPrimary.accountHeaderAddBtn , .MuiButton-outlined.Mui-disabled.accountHeaderActionBtn , .MuiButtonBase-root.MuiButton-root.MuiButton-outlined.accountHeaderActionBtn{
+    .MuiButton-containedPrimary.brandHeaderAddBtn , .MuiButton-outlined.Mui-disabled.brandHeaderActionBtn , .MuiButtonBase-root.MuiButton-root.MuiButton-outlined.brandHeaderActionBtn{
       width: 100% !important;
       /* display:inline; */
     }
-    .accountHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
+    .brandHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
       width: 100% !important;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
+  .brandHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
     width: 100% !important;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
+  .brandHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
       width: 100% !important;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl.MuiInput-formControl{
+  .brandHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl.MuiInput-formControl{
     width: 100% !important;
   }
-  .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.accountHeader{
+  .brand-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.brandHeader{
     display: block;
   }
   }
@@ -232,53 +232,53 @@
       border-radius: 12px;
   } */
   
-  .account-name-Link {
+  .brand-name-Link {
       color: #0645ad;
       cursor: pointer;
   }
   
-  .account-name-Link:hover {
+  .brand-name-Link:hover {
       text-decoration: underline;
   }
   
-  .account-grid {
+  .brand-grid {
     height: calc(100vh - 200px);
   }
   @media only screen and (max-width: 714px) {
-    .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.accountHeader{
+    .brand-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.brandHeader{
       width: 100%;
     }
-    .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiGrid-root.MuiGrid-item , .accountHeader.accountHeader-mobile{
+    .brand-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiGrid-root.MuiGrid-item , .brandHeader.brandHeader-mobile{
     width: 100%;
     }
-    .accountHeader.accountHeader-mobile .MuiFormControl-root.MuiTextField-root{
+    .brandHeader.brandHeader-mobile .MuiFormControl-root.MuiTextField-root{
       width: 100% !important;
     }
-    .accountHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense{
+    .brandHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense{
       width: 100% !important;
     }
-    .accountHeaderAccountTab  , .accountHeaderActiveAccountTab , .accountHeaderInactiveAccountTab {
+    .brandHeaderBrandTab  , .brandHeaderActiveBrandTab , .brandHeaderInactiveBrandTab {
       margin:0.6rem auto !important;
     }
-    .account-header-inner-container div.accountHeader{
+    .brand-header-inner-container div.brandHeader{
       width: 100%;
     }
-    .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
+    .brandHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
         width: 100% !important;
     }
   
-  .accountHeader.accountHeader-mobile{
+  .brandHeader.brandHeader-mobile{
     margin-top: 1rem;
   }
   }
   @media only screen and (max-width: 425px) {
-    .accountHeader.accountHeader-mobile {
+    .brandHeader.brandHeader-mobile {
         margin-top: 0;
     }
-    .account-header-inner-container .MuiGrid-root.MuiGrid-item{
+    .brand-header-inner-container .MuiGrid-root.MuiGrid-item{
       width:100%;
     }
-   .accountHeader.accountHeader-mobile .MuiFormControl-root.MuiTextField-root{
+   .brandHeader.brandHeader-mobile .MuiFormControl-root.MuiTextField-root{
       width: 100% !important;
     }
   }
