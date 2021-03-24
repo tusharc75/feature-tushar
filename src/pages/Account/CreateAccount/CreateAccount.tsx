@@ -79,7 +79,6 @@ export default function CreateAccount(props) {
             setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
         }
         sortArray();
-        // eslint-disable-next-line
     }, [entityData.fields]);
 
     const sortArray = () => {
@@ -101,7 +100,7 @@ export default function CreateAccount(props) {
     };
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
-        if (!selectedCollaborator || selectedCollaborator.length == 0) {
+        if (!selectedCollaborator || selectedCollaborator.length === 0) {
             setOwnerDataSource(ownerCollaboratorCommonDataSource);
         } else {
             const ownerDataSource = [];

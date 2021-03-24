@@ -4,19 +4,12 @@ import { getErrorMessage } from '../../../services/util'
 import { getObjKeys, formValidation } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
-import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from './../../../axios/axiosInstance'
 import { CustomEventEmitter } from './../../../axios/events';
 
-const useStyles = makeStyles((theme) => ({
-    dialogContainer: {
-        overflow: 'hidden'
-    },
-}))
 
 export default function CreateAccountMain(props) {
 
-    const classes = useStyles();
     const { open, onClose, id } = props
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
@@ -101,7 +94,7 @@ export default function CreateAccountMain(props) {
             }
         })
         Object.keys(values).forEach(key => {
-            if (!values[key] || (typeof values[key] === 'object' && Object.keys(values[key]).length == 0)) {
+            if (!values[key] || (typeof values[key] === 'object' && Object.keys(values[key]).length === 0)) {
                 delete values[key]
             }
         })

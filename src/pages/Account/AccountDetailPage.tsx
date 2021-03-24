@@ -13,8 +13,6 @@ import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { accountPage } from '../../routes/Accounts'
-import { Link } from "react-router-dom";
-import Loader from '../../components/Loader'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
@@ -29,7 +27,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
 import OpportunityTab from './OpportunityTab'
-import { AddOutlined } from '@material-ui/icons'
 import Activity from "../../components/Activity";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -155,7 +152,7 @@ const Roles = () => {
     }, [user]);
 
     useEffect(() => {
-        if (accountData._id && relatedContacts.length == 0) {
+        if (accountData._id && relatedContacts.length === 0) {
             fetchRelatedContacts()
         }
     }, [accountData])
@@ -215,7 +212,7 @@ const Roles = () => {
                 ])
             }
 
-            if (accountFields.length == 0) {
+            if (accountFields.length === 0) {
                 getAccountFields()
             }
             else {
@@ -231,10 +228,10 @@ const Roles = () => {
         let allowToEdit = false;
 
         if (userId) {
-            allowToEdit = (accountDetails.owner?.optionValue && accountDetails.owner.optionValue == userId)
+            allowToEdit = (accountDetails.owner?.optionValue && accountDetails.owner.optionValue === userId)
 
             if (!allowToEdit && accountDetails.collaborator && accountDetails.collaborator.length > 0) {
-                allowToEdit = accountDetails.collaborator.findIndex(d => d.optionValue == userId) > -1;
+                allowToEdit = accountDetails.collaborator.findIndex(d => d.optionValue === userId) > -1;
             }
 
             if (allowToEdit)
@@ -327,6 +324,9 @@ const Roles = () => {
         if (values.employees) {
             values.employees = parseInt(values.employees)
         }
+        else {
+            delete values.employees
+        }
         if (values.isShippingAddressSameAsBillingAddress === '') {
             values.isShippingAddressSameAsBillingAddress = false
         }
@@ -340,9 +340,11 @@ const Roles = () => {
                 fetchAccountData()
                 handleSnackbar("Successfully saved", 'success', true)
                 setUpdating(false);
+                setOpenUpdateDialog(false)
             })
             .catch((err) => {
                 setUpdating(false);
+                setOpenUpdateDialog(false)
             });
     };
     const goBackToListing = () => {

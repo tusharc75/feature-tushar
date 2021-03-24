@@ -8,16 +8,13 @@ import {
     Checkbox,
     Menu,
     MenuItem,
-    Paper,
     Tooltip,
     IconButton,
     Grid,
     Divider,
-    Select,
     Chip
 } from "@material-ui/core";
-
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { DataGrid } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
 import { useHistory } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
@@ -79,7 +76,6 @@ export default function Account() {
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const history = useHistory();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
     const [loading, setLoading] = useState(false);
@@ -136,7 +132,7 @@ export default function Account() {
         if (renderCount > 0) {
             fetchAccounts();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [query, , selectedType]);
+    }, [query, selectedType]);
 
     useEffect(() => {
         let rows = accountData?.map((u) => ({
@@ -620,9 +616,9 @@ export default function Account() {
                                             }
                                             {
                                                 accountPermissions.isDelete &&
-                                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                                     onClick={() => {
-                                                        if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                        if (dataRows.find((d) => d.isChecked && d.allowToDelete === false)) {
                                                             setShowDeleteWarningConfirmBox(true);
                                                         } else {
                                                             setShowDeleteConfirmBox(true)
@@ -639,33 +635,32 @@ export default function Account() {
                                 </div>
                             </CustomHeader>
                         </div>
-                    </CustomContainer>
-                </Box>
-                <CustomContainer>
-                    <Paper style={{ marginTop: 15 }}>
-                        <DataGrid
-                            className={classes.grid}
-                            components={{
-                                Toolbar: DataGridCustomToolbar,
-                            }}
-                            scrollbarSize={20}
-                            rows={loading ? [] : dataRows}
-                            columns={columns}
-                            loading={loading}
-                            disableSelectionOnClick
-                            disableMultipleSelection
-                            paginationMode="server"
-                            pagination
-                            onPageChange={handlePage}
-                            onPageSizeChange={handlePageSize}
-                            pageSize={query.limit}
-                            page={query.page}
-                            rowCount={rowCount}
-                            rowsPerPageOptions={[25, 50, 75]}
-                            onSortModelChange={handleSortModelChange}
-                            // onRowClick={handleRowClick}
-                            density="compact"
-                        />
+
+                        <div className={`mt-3 ${accClass["brand-grid"]}`}>
+                            <DataGrid
+                                className={classes.grid}
+                                components={{
+                                    Toolbar: DataGridCustomToolbar,
+                                }}
+                                scrollbarSize={20}
+                                rows={loading ? [] : dataRows}
+                                columns={columns}
+                                loading={loading}
+                                disableSelectionOnClick
+                                disableMultipleSelection
+                                paginationMode="server"
+                                pagination
+                                onPageChange={handlePage}
+                                onPageSizeChange={handlePageSize}
+                                pageSize={query.limit}
+                                page={query.page}
+                                rowCount={rowCount}
+                                rowsPerPageOptions={[25, 50, 75]}
+                                onSortModelChange={handleSortModelChange}
+                                // onRowClick={handleRowClick}
+                                density="compact"
+                            />
+                        </div>
                         {
                             showDeleteWarningConfirmBox ?
                                 <MessageDialog
@@ -712,18 +707,17 @@ export default function Account() {
                                     onOk={approveDisapproveAccounts}
                                 /> : null
                         }
-                    </Paper>
-                    {
-                        isAccDialogVisible ?
-                            <CreateAccountDialog
-                                open={isAccDialogVisible}
-                                onClose={handleDialogClose}
-                                // showSuccessMes={handleSnackbar}
-                                id={cloneId}
-                            /> : null
-                    }
-                </CustomContainer>
-
+                        {
+                            isAccDialogVisible ?
+                                <CreateAccountDialog
+                                    open={isAccDialogVisible}
+                                    onClose={handleDialogClose}
+                                    // showSuccessMes={handleSnackbar}
+                                    id={cloneId}
+                                /> : null
+                        }
+                    </CustomContainer>
+                </Box>
             </Layout>
 
         </>
