@@ -7,7 +7,6 @@ import { capitalize } from '../services/util'
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        minHeight: "100%!important",
         marginTop: 0
     },
     box: {
@@ -22,7 +21,7 @@ const CustomHeader = (props) => {
     const classes = useStyles();
     return (
         <React.Fragment>
-            <div className={classes.root} style={{ minHeight: "100%", marginTop: 0 }}>
+            <div className={classes.root} style={{  marginTop: 0 }}>
                 <Container>
                     <Grid container justify="space-between" style={{ marginBottom: '10px' }}>
                         <Grid item key="custom-header-heading">
