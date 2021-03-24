@@ -17,6 +17,7 @@ import {
   Typography,
   useTheme,
 } from "@material-ui/core";
+import _ from "lodash";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import InfoIcon from "@material-ui/icons/Info";
 import { Autocomplete } from "@material-ui/lab";
@@ -29,7 +30,7 @@ import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const InfoLabel = ({ children, info, isTooltip }) =>
-  isTooltip ? (
+  isTooltip && info != "" ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
         {children}
@@ -98,6 +99,7 @@ const FormTypes = (props) => {
     tooltipMessage,
     ...rest
   } = props;
+
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
@@ -156,11 +158,13 @@ const FormTypes = (props) => {
   }, [type, value, values[name], fetch]);
 
   const handleUploadFile = (event) => {
-    const file = event.target.files[0];
-    const size = event.target.files[0].size;
-    getBase64(file, (result) => {
-      setFieldValue(name, result);
-    });
+    if (event.target.files && event.target.files.length) {
+      const file = event.target.files[0];
+      // const size = event.target.files[0].size;
+      getBase64(file, (result) => {
+        setFieldValue(name, result);
+      });
+    }
   };
 
   const getBase64 = (file, cb) => {
@@ -346,19 +350,60 @@ const FormTypes = (props) => {
         )}
       />
     </InfoLabel>
+    // <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    //   <Autocomplete
+    //     {...rest}
+    //     options={options}
+    //     getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
+    //     getOptionSelected={(option: any, val) => option.optionValue === val}
+    //     value={
+    //       options.filter((data) => data.optionValue === values[name]).length
+    //         ? options.filter((data) => data.optionValue === values[name])[0]
+    //         : ""
+    //     }
+    //     onChange={
+    //       onChange
+    //         ? onChange
+    //         : (e, val) =>
+    //           setFieldValue(
+    //             name,
+    //             val && val.optionValue ? val.optionValue : ""
+    //           )
+    //     }
+    //     renderInput={(params) => (
+    //       <TextField
+    //         {...params}
+    //         name={name}
+    //         label={label}
+    //         variant="outlined"
+    //         error={touched[name] && Boolean(errors[name])}
+    //         helperText={touched[name] && errors[name]}
+    //         required={required}
+    //       />
+    //     )}
+    //   />
+    // </InfoLabel>
   ) : type === "currency" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
         fullWidth
-        value={values[name]}
-        options={currencyData}
-        getOptionLabel={(option: any) =>
-          Object.entries(option).length
-            ? `${option.currencyCode} - ${option.name}`
+        value={
+          currencyData.filter((data) => data.currencyCode === values[name])
+            .length
+            ? currencyData.filter(
+              (data) => data.currencyCode === values[name]
+            )[0]
             : ""
         }
-        onChange={(e, val) => setFieldValue(name, val ? val : {})}
+        options={currencyData}
+        getOptionLabel={(option: any) =>
+          option ? `${option.currencyCode} - ${option.name}` : ""
+        }
+        getOptionSelected={(option: any, val) => option.currencyCode === val}
+        onChange={(e, val) =>
+          setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
+        }
         renderInput={(params) => (
           <TextField
             {...params}
@@ -399,12 +444,23 @@ const FormTypes = (props) => {
         multiple
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-        value={values[name] ? values[name] : []}
+        value={options.filter((data: any) =>
+          values[name].includes(data.optionValue)
+        )}
         getOptionSelected={(option: any, val: any) =>
           option.optionValue === val.optionValue
         }
         onChange={
-          onChange ? onChange : (e, value) => setFieldValue(name, value)
+          onChange
+            ? onChange
+            : (e, value: any[]) =>
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+                // _.map((value: any[], _val: any) => {
+                //   return _val.optionValue;
+                // })
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -637,6 +693,7 @@ const FormTypes = (props) => {
 //   setFieldValue: PropTypes.func,
 //   isTooltip: PropTypes.bool,
 //   options: PropTypes.any
+//   tooltipMessage: PropTypes.string,
 // };
 
 export default FormTypes;

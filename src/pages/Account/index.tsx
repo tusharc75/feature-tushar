@@ -37,8 +37,9 @@ import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import NoDataCell from '../../components/Helpers/NoDataCell'
-import './account.module.scss'
+import accClass from "./account.module.scss"
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomHeader from '../../components/Helpers/CustomHeader'
 
 const AccTypes = {
     "All Accounts": 1,
@@ -214,7 +215,7 @@ export default function Account() {
         {
             field: "accountName", headerName: "Account Name", width: 200,
             renderCell: (params) => (
-                <Link className="accountNameLink"
+                <Link className={`${accClass.accountNameLink}`}
                     to={`${accountDetailPage.path}/${params.row._id}`}>
                     {params?.row?.accountName ? params.row.accountName : <NoDataCell />}
                 </Link>
@@ -540,123 +541,231 @@ export default function Account() {
                     </Grid>
                 </Grid>
 
-                <CustomContainer>
-                    <Grid container justify="space-between">
-                        <Grid item>
-                            {
-                                Object.keys(AccTypes).length ? <Select
-                                    style={{ width: '160px' }}
-                                    labelId="demo-simple-select-outlined-label"
-                                    id="demo-simple-select-outlined"
-                                    MenuProps={{
-                                        anchorOrigin: {
-                                            vertical: "bottom",
-                                            horizontal: "left"
-                                        },
-                                        getContentAnchorEl: null
-                                    }}
-                                    value={selectedType}
-                                    onChange={handleAccountSel}
-                                    label="Select Type"
-                                >
-                                    {
-                                        Object.keys(AccTypes).map((k, index) => {
-                                            return <MenuItem key={index} value={AccTypes[k]}>{k}</MenuItem>
-                                        })
-                                    }
-                                </Select>
-                                    : null
-                            }
-                        </Grid>
-
-                        <Grid item>
-                            <SearchBox onSearch={handleSearch} width="300px" value={searchVal} size="small" />
-                            {
-                                accountPermissions.isCreate && <>
-                                    <Box component="span" marginX={1} />
-
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={clickCreateNew}
-                                        startIcon={<AddOutlined />}
-                                    >
-                                        Add
-                                    </Button>
-                                </>
-                            }
-
-                            <Box component="span" marginX={1} />
-
-                            <Button
-                                disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                variant="outlined"
-                                color="default"
-                                onClick={openActions}
-                                aria-controls="action-menu"
+                <Box component="div">
+                    <CustomContainer>
+                        <div className={`${accClass["account-header-inner-container"]}`}
+                        >
+                            <CustomHeader
+                                total={rowCount}
+                                heading="Accounts"
+                                selectedType={selectedType}
+                                onTypeChange={handleAccountSel}
+                                options={AccTypes}
+                                secondHeading="Account"
+                            // showHeading={false}
                             >
-                                Actions <ExpandMore />
-                            </Button>
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left"
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}>
+                                <div className={`${accClass.accountHeader} ${accClass["accountHeader-mobile"]}`} >
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox="accountHeaderSearchBar"
+                                        width="300px" value={searchVal}
+                                    />
+                                    <div className={`${accClass.accountHeaderAddBtnActionBtnGroup}`}>
+                                        {
+                                            accountPermissions.isCreate && <Button
+                                                variant="contained"
+                                                color="primary"
+                                                className={`px-3 ${accClass.accountHeaderAddBtn}`}
+                                                onClick={clickCreateNew}
+                                                startIcon={<AddOutlined />} >Add</Button>
+                                        }
 
-                                {
-                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
-                                        disabled={
-                                            dataRows.filter((d) => d.isChecked && !d.approved).length === 0
-                                        }
-                                        onClick={() => {
-                                            setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
-                                        }}
-                                    >
-                                        Approve Accounts &nbsp;{" "}
-                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
-                                    </MenuItem>
-                                }
-                                {
-                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
-                                        disabled={
-                                            dataRows.filter((d) => d.isChecked && d.approved).length === 0
-                                        }
-                                        onClick={() => {
-                                            setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
-                                        }}
-                                    >
-                                        Disapprove Accounts &nbsp;{" "}
-                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
-                                    </MenuItem>
-                                }
-                                {
-                                    accountPermissions.isDelete &&
-                                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                        onClick={() => {
-                                            if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
-                                                setShowDeleteWarningConfirmBox(true);
-                                            } else {
-                                                setShowDeleteConfirmBox(true)
+                                        <Button
+                                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                            variant="outlined"
+                                            color="default"
+                                            className={`${accClass.accountHeaderActionBtn}`}
+                                            onClick={openActions}
+                                            aria-controls="action-menu"
+                                        >
+                                            Actions <ExpandMore />
+                                        </Button>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left"
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}>
+
+                                            {
+                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                    disabled={
+                                                        dataRows.filter((d) => d.isChecked && !d.approved).length === 0
+                                                    }
+                                                    onClick={() => {
+                                                        setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
+                                                    }}
+                                                >
+                                                    Approve Accounts &nbsp;{" "}
+                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
+                                                </MenuItem>
                                             }
-                                        }}
-                                    >
-                                        Delete
+                                            {
+                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                    disabled={
+                                                        dataRows.filter((d) => d.isChecked && d.approved).length === 0
+                                                    }
+                                                    onClick={() => {
+                                                        setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
+                                                    }}
+                                                >
+                                                    Disapprove Accounts &nbsp;{" "}
+                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
+                                                </MenuItem>
+                                            }
+                                            {
+                                                accountPermissions.isDelete &&
+                                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                                    onClick={() => {
+                                                        if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                            setShowDeleteWarningConfirmBox(true);
+                                                        } else {
+                                                            setShowDeleteConfirmBox(true)
+                                                        }
+                                                    }}
+                                                >
+                                                    Delete
                                     </MenuItem>
+                                            }
+
+                                        </Menu>
+
+                                    </div>
+                                </div>
+                            </CustomHeader>
+                        </div>
+                    </CustomContainer>
+                </Box>
+                <CustomContainer>
+                    {/* <div className="account-header-inner-container">
+
+                        <Grid container justify="space-between">
+                            <Grid item>
+                                {
+                                    Object.keys(AccTypes).length ? <Select
+                                        style={{ width: '160px' }}
+                                        labelId="demo-simple-select-outlined-label"
+                                        id="demo-simple-select-outlined"
+                                        MenuProps={{
+                                            anchorOrigin: {
+                                                vertical: "bottom",
+                                                horizontal: "left"
+                                            },
+                                            getContentAnchorEl: null
+                                        }}
+                                        value={selectedType}
+                                        onChange={handleAccountSel}
+                                        label="Select Type"
+                                    >
+                                        {
+                                            Object.keys(AccTypes).map((k, index) => {
+                                                return <MenuItem key={index} value={AccTypes[k]}>{k}</MenuItem>
+                                            })
+                                        }
+                                    </Select>
+                                        : null
                                 }
+                            </Grid>
 
-                            </Menu>
+                            <Grid item>
+                                <div className="accountHeader accountHeader-mobile">
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox="accountHeaderSearchBar"
+                                        width="300px" value={searchVal}
+                                    />
+                                    <div className="accountHeaderAddBtnActionBtnGroup">
+                                        {
+                                            accountPermissions.isCreate && <>
+                                                <Box component="span" marginX={1} />
 
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={clickCreateNew}
+                                                    startIcon={<AddOutlined />}
+                                                >
+                                                    Add
+                                    </Button>
+                                            </>
+                                        }
 
+                                        <Box component="span" marginX={1} />
+
+                                        <Button
+                                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                            variant="outlined"
+                                            color="default"
+                                            onClick={openActions}
+                                            aria-controls="action-menu"
+                                        >
+                                            Actions <ExpandMore />
+                                        </Button>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left"
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}>
+
+                                            {
+                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                    disabled={
+                                                        dataRows.filter((d) => d.isChecked && !d.approved).length === 0
+                                                    }
+                                                    onClick={() => {
+                                                        setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
+                                                    }}
+                                                >
+                                                    Approve Accounts &nbsp;{" "}
+                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
+                                                </MenuItem>
+                                            }
+                                            {
+                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                    disabled={
+                                                        dataRows.filter((d) => d.isChecked && d.approved).length === 0
+                                                    }
+                                                    onClick={() => {
+                                                        setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
+                                                    }}
+                                                >
+                                                    Disapprove Accounts &nbsp;{" "}
+                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
+                                                </MenuItem>
+                                            }
+                                            {
+                                                accountPermissions.isDelete &&
+                                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                                    onClick={() => {
+                                                        if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                            setShowDeleteWarningConfirmBox(true);
+                                                        } else {
+                                                            setShowDeleteConfirmBox(true)
+                                                        }
+                                                    }}
+                                                >
+                                                    Delete
+                                    </MenuItem>
+                                            }
+
+                                        </Menu>
+                                    </div>
+                                </div>
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    </div> */}
                     <Paper style={{ marginTop: 15 }}>
-                        {/* <Box component="div" className={classes.root}> */}
                         <DataGrid
                             className={classes.grid}
                             components={{
@@ -727,9 +836,9 @@ export default function Account() {
                                 /> : null
                         }
 
-                        {/* </Box> */}
                     </Paper>
                 </CustomContainer>
+
             </Layout>
             {
                 isAccDialogVisible ?
