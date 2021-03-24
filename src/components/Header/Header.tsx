@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef } from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
 
 import {
@@ -11,11 +11,11 @@ import {
   Box,
   Badge,
   InputBase,
-  CircularProgress,
 } from "@material-ui/core";
 import {
   Search,
-  AccountCircle,
+  Menu as MenuIcon,
+  MoreVert as MoreIcon,
   Notifications,
   HelpOutline,
   ExpandMore,
@@ -34,6 +34,14 @@ const useStyles = makeStyles((theme) => ({
   },
   menuButton: {
     marginRight: theme.spacing(2),
+  },
+
+  logo: {
+    width: "120px",
+    [theme.breakpoints.down("sm")]: {
+      width: "80px",
+      marginRight: 10,
+    },
   },
 
   search: {
@@ -88,19 +96,29 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Header = () => {
+const Header = ({ toggleDrawer }) => {
   const classes = useStyles();
   const history = useHistory();
-  const [supportAnchorEl, setSupportAnchorEl] = React.useState(null);
-  const [arcelorAnchorEl, setArcelorAnchorEl] = React.useState(null);
-  const [entitiesEl, setEntitiesEl] = React.useState(null);
+  const [supportAnchorEl, setSupportAnchorEl] = useState(null);
+  const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
+  const [entitiesEl, setEntitiesEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
 
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef(null);
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef(null);
 
   const isSupportMenuOpen = Boolean(supportAnchorEl);
-  const isArcelorMenuOpen = Boolean(arcelorAnchorEl);
+  const isArcelorMenuOpen = Boolean(servicesAnchorEl);
   const isEntitiesMenuOpen = Boolean(entitiesEl);
+  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const handleMobileMenuClose = () => {
+    setMobileMoreAnchorEl(null);
+  };
+
+  const handleMobileMenuOpen = (event) => {
+    setMobileMoreAnchorEl(event.currentTarget);
+  };
 
   const openSupportMenu = (event) => {
     setSupportAnchorEl(event.currentTarget);
@@ -110,12 +128,12 @@ const Header = () => {
     setSupportAnchorEl(null);
   };
 
-  const openArcelorMenu = (event) => {
-    setArcelorAnchorEl(event.currentTarget);
+  const openServicesMenu = (event) => {
+    setServicesAnchorEl(event.currentTarget);
   };
 
-  const arcelorMenuClose = () => {
-    setArcelorAnchorEl(null);
+  const closeServicesMenu = () => {
+    setServicesAnchorEl(null);
   };
 
   const openEntitiesMenu = (event) => {
@@ -175,17 +193,17 @@ const Header = () => {
     </Menu>
   );
 
-  const arcelorMenuId = "arcelor-menu";
+  const servicesMenuId = "arcelor-menu";
 
   const arcelorMenu = (
     <Menu
-      anchorEl={arcelorAnchorEl}
+      anchorEl={servicesAnchorEl}
       anchorOrigin={{ vertical: "top", horizontal: "right" }}
       keepMounted
-      id={arcelorMenuId}
+      id={servicesMenuId}
       transformOrigin={{ vertical: "top", horizontal: "right" }}
       open={isArcelorMenuOpen}
-      onClose={arcelorMenuClose}
+      onClose={closeServicesMenu}
     >
       <MenuItem>Option 1</MenuItem>
       <MenuItem>Option 2</MenuItem>
@@ -224,17 +242,65 @@ const Header = () => {
     </Menu>
   );
 
+  const mobileMenuId = "primary-search-account-menu-mobile";
+
+  const renderMobileMenu = (
+    <Menu
+      anchorEl={mobileMoreAnchorEl}
+      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      id={mobileMenuId}
+      keepMounted
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      open={isMobileMenuOpen}
+      onClose={handleMobileMenuClose}
+    >
+      <MenuItem onClick={openServicesMenu}>
+        <p>Services</p> <ExpandMore />
+      </MenuItem>
+      <MenuItem onClick={openEntitiesMenu}>
+        <p>Entities</p> <ExpandMore />
+      </MenuItem>
+      <MenuItem onClick={openSupportMenu}>
+        <p>Support</p> <ExpandMore />
+      </MenuItem>
+      <MenuItem>
+        <p>Help</p>
+      </MenuItem>
+      <MenuItem>
+        <Badge badgeContent={1} color="secondary">
+          <p>Notifications</p>
+        </Badge>
+      </MenuItem>
+    </Menu>
+  );
+
   return (
     <div>
       <AppBar position="fixed" className={classes.appBar} color="primary">
         <Toolbar>
           <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-            <img src={SVG("Logo")} alt="equip logo" />
+            <div className={classes.sectionMobile}>
+              <IconButton
+                aria-label="help"
+                color="inherit"
+                title="Menu"
+                onClick={toggleDrawer}
+              >
+                <MenuIcon />
+              </IconButton>
+            </div>
+            <img
+              className={classes.logo}
+              src={SVG("Logo")}
+              alt="equip logo"
+              title="eQuipt Logo"
+            />
             <Box marginLeft={2} className={classes.servicesButton}>
               <Button
-                aria-controls={arcelorMenuId}
+                aria-controls={servicesMenuId}
                 color="inherit"
-                onClick={openArcelorMenu}
+                onClick={openServicesMenu}
+                title="Services"
               >
                 Services <ExpandMore />
               </Button>
@@ -242,6 +308,7 @@ const Header = () => {
                 aria-controls={entitiesMenuId}
                 color="inherit"
                 onClick={openEntitiesMenu}
+                title="Entities"
               >
                 Entities <ExpandMore />
               </Button>
@@ -267,6 +334,7 @@ const Header = () => {
               aria-controls={supportMenuId}
               color="inherit"
               onClick={openSupportMenu}
+              title="Support"
             >
               Support <ExpandMore />
             </Button>
@@ -279,17 +347,30 @@ const Header = () => {
             <IconButton aria-label="help" color="inherit">
               <HelpOutline />
             </IconButton>
+          </div>
 
-            <UserProfile
-              anchorRef={anchorRef}
-              open={open}
-              onToggle={handleToggle}
-              onClose={handleClose}
-              onListKeyDown={handleListKeyDown}
-            />
+          <UserProfile
+            anchorRef={anchorRef}
+            open={open}
+            onToggle={handleToggle}
+            onClose={handleClose}
+            onListKeyDown={handleListKeyDown}
+          />
+          <div className={classes.sectionMobile}>
+            <IconButton
+              aria-label="show more"
+              aria-controls={mobileMenuId}
+              aria-haspopup="true"
+              onClick={handleMobileMenuOpen}
+              color="inherit"
+              title="More"
+            >
+              <MoreIcon />
+            </IconButton>
           </div>
         </Toolbar>
       </AppBar>
+      {renderMobileMenu}
       {supportMenu}
       {arcelorMenu}
       {entitiesMenu}
