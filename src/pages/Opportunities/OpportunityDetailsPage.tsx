@@ -9,6 +9,7 @@ import CustomTabs from "../../components/Helpers/CustomTabs";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import TabPanel from "../../components/TabPanel";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import CustomDialog from "../../components/Helpers/CustomDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -23,6 +24,8 @@ import { useData } from "../../StateProvider/Provider";
 import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+
 
 const OpportunityDetailsPage = () => {
   const history = useHistory();
@@ -41,6 +44,14 @@ const OpportunityDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [contactTabIndex, setContactTabIndex] = useState(0);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const handleOpenUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const closeUpdateDialog = () => {
+    setOpenUpdateDialog(false);
+  };
   let { id } = useParams();
 
   const [opportunityPermissions, setOpportunityPermissions] = useState({
@@ -164,6 +175,7 @@ const OpportunityDetailsPage = () => {
       .put("/opportunity", updatedData)
       .then(({ data }) => {
         //fetchOpportunityData();
+        console.log(data);
         handleSnackbar("Successfully saved", "success", true);
         setUpdating(false);
       })
@@ -241,6 +253,20 @@ const OpportunityDetailsPage = () => {
             // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
+            {
+              opportunityPermissions.isUpdate && 
+              opportunityData?.owner?.optionValue &&
+              user?.user?._id &&
+              opportunityData.owner.optionValue === user.user._id ? (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleOpenUpdateDialog}
+              >
+                Edit
+              </Button>
+            ) : null
+            }
             <Box component="span" marginX={1} />
             {opportunityPermissions.isDelete &&
               opportunityData?.owner?.optionValue &&
@@ -348,6 +374,18 @@ const OpportunityDetailsPage = () => {
               onOk={handleDeleteOpportunity}
             />
           ) : null}
+          {openUpdateDialog ? (
+            <UpdateDetailsDialog
+            openDialog={openUpdateDialog}
+            onClose={closeUpdateDialog}
+            fields={opportunityFields}
+            data={opportunityData}
+            isUpdating={isUpdating}
+            handleUpdate={handleUpdateOpportunity}
+            title="Edit Opportunity"
+
+            />
+          ): null}
         </div>
       </Layout>
     </>
