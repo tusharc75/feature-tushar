@@ -166,8 +166,6 @@ const LeadDetailsPage = () => {
       ...values,
       _id: leadData._id,
     };
-    console.log(removeEmptyKeys(updatedData));
-    debugger;
     axiosInstance()
       .put("/lead", removeEmptyKeys(updatedData))
       .then(({ data }) => {
@@ -212,23 +210,7 @@ const LeadDetailsPage = () => {
   const handleUpdateBrand = (values) => {
     setUpdating(true);
   };
-  // const handleUpdateLead = (values) => {
-  //   setUpdating(true);
-  //   const updatedData = {
-  //     ...values,
-  //     _id: leadData._id,
-  //   };
-  //   UpdateBrand(updatedData)
-  //     .then(() => {
-  //       fetchBrandData();
-  //       handleSnackbar("Successfully saved", "success", true);
-  //       setUpdating(false);
-  //       closeUpdateDIalog();
-  //     })
-  //     .catch((err) => {
-  //       setUpdating(false);
-  //     });
-  // };
+
   return (
     <>
     {openUpdateDialog && (
@@ -238,7 +220,7 @@ const LeadDetailsPage = () => {
             onClose={closeUpdateDIalog}
             data={leadData}
             fields={leadFields}
-            // isUpdating={isUpdating}
+            isUpdating={isUpdating}
             handleUpdate={handleUpdateLead}
           />
         )}
@@ -329,14 +311,6 @@ const LeadDetailsPage = () => {
                   </Box>
                 ) : (
                   <DetailsPage data={leadData} fields={leadFields} />
-                  // <DetailsPage
-                  //   data={leadData}
-                  //   fields={leadFields}
-                  //   isUpdating={isUpdating}
-                  //   canEdit={allowedToEdit}
-                  //   handleUpdate={handleUpdateLead}
-                  //   sourceComponent="lead"
-                  // />
                 )}
               </Container>
             </Grid>
