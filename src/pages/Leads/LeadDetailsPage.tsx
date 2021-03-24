@@ -235,6 +235,13 @@ const LeadDetailsPage = () => {
             // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
+          <Button
+            variant="contained"
+            color="primary"
+            // onClick={() => ''}
+          >
+            Edit
+          </Button>
             <Box component="span" marginX={1} />
             {leadsPermissions.isDelete &&
               leadData?.owner?.optionValue &&
