@@ -1,0 +1,42 @@
+.filterSideContainer{
+  display:flex;
+}
+.filterSide_header {
+    display: flex;
+  justify-content: flex-end;
+  grid-gap: 20px;
+}
+.filterSide {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media only screen and (max-width: 768px) {
+  .leadSearchBox{
+    width: 100% !important;
+  }
+  .filterSideContainer{
+    display:block !important;
+    max-width: 100% !important;
+  }
+  .filterSide{
+    display:block !important;
+    max-width: 100% !important;
+  }
+  .filterSide_header{
+    display: block;
+    margin-top: 0.8rem;
+    flex-direction: column;
+    grid-gap: 15px;
+  }
+  .leadAddBtn, .leadActionBtn{
+    width: 49%;
+    margin-top: 2% !important;
+  }
+  .leadAddBtn{
+    margin-right: 1% !important;
+  }
+  .leadActionBtn{
+   margin-left: 1% !important;
+ }
+}
