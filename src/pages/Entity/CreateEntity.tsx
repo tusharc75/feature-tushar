@@ -134,7 +134,6 @@ export default function CreateEntity({ open, onClose, onSuccess }) {
     const handleSave = (values) => {
         setIsFormSubmitted(true);
         const newValues = removeEmptyKeys(values);
-        alert(JSON.stringify(newValues))
         axiosInstance().post("/Entity", newValues).then(() => {
             onSuccess();
         }).then(() => {

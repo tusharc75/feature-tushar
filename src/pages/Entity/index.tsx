@@ -27,7 +27,8 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
-
+import { capitalize } from '../../services/util'
+import  entityDetails  from '../../components/Helpers/Routes'
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: "flex",
@@ -160,7 +161,7 @@ const Entity: FC = () => {
           title={params.value}
           className="text-truncate"
           component={Link}
-          to={`/${routes.entityDetails.path}/${params.row.id}`}
+          to={`${routes.entityDetails.path}/${params.row.id}`}
         >
           {params.value}
         </MuiLink>
@@ -319,6 +320,9 @@ const Entity: FC = () => {
       }));
     }
   };
+
+
+
 
   const handleCreate = () => {
     setIsOpen(true);
