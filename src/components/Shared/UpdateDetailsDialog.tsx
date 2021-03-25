@@ -1,18 +1,5 @@
-import React, { useEffect, useState } from "react";
-import {
-  IconButton,
-  Typography,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle as MuiDialogTitle,
-  makeStyles,
-  Button,
-  Box,
-  Grid,
-  CircularProgress,
-} from "@material-ui/core";
-import { Close } from "@material-ui/icons";
+import { useEffect, useState } from "react";
+import { Dialog, Button, Box, Grid, CircularProgress } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
   getObjKeysWithValues,
@@ -96,7 +83,7 @@ const UpdateDetailsDialog = (props) => {
   };
 
   const handleSubmit = (values) => {
-    handleUpdate(values);
+    handleUpdate(removeEmptyKeys(values));
   };
 
   const validateEmail = initialVals && initialVals.email ? false : true;
