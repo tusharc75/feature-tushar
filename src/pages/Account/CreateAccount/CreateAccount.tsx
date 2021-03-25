@@ -14,7 +14,6 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
-import CustomDialog from '../../../components/CustomDialog/CustomDialogComponent'
 const useStyles = makeStyles((theme) => ({
     ...commonStyle(theme),
     root: {

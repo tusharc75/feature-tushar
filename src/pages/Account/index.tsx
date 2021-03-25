@@ -379,14 +379,6 @@ export default function Account() {
         setIsAccDialogVisible(true)
     }
 
-    // const handleSnackbar = (msg, type, isOpen) => {
-    //     setAlertData({
-    //         errorMsg: msg,
-    //         type: type,
-    //         open: isOpen
-    //     })
-    // };
-
     const handlePage = (params) => {
         if (query.page !== params.page) {
             setQuery((prevState) => ({ ...prevState, page: params.page }));
@@ -712,7 +704,6 @@ export default function Account() {
                                 <CreateAccountDialog
                                     open={isAccDialogVisible}
                                     onClose={handleDialogClose}
-                                    // showSuccessMes={handleSnackbar}
                                     id={cloneId}
                                 /> : null
                         }
