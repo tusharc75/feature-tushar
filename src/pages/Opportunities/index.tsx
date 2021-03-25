@@ -221,7 +221,7 @@ const Opportunities = () => {
     // { field: "status", headerName: "Lead Status", width: 200 },
     { field: "owner", headerName: "Opportunity Owner", width: 200 },
     {
-      field: "actions", headerName: "Actions ",
+      field: "actions", headerName: "Actions ",disableColumnMenu: true,sortable: false,filterable: false,
       renderCell: (params) => (
         <>
           {
