@@ -50,10 +50,6 @@ export const getObjKeysWithValues = (dataObj, arr) => {
     return obj
 }
 
-export const removeObjKey = (obj, key) => {
-    delete obj[key];
-    return obj;
-  };
 
 export const removeEmptyKeys = (obj) => {
     Object.keys(obj).forEach(
