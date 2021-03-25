@@ -129,13 +129,13 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
         } else {
             setIsFormSubmitted(true);
             values = removeEmptyKeys(values);
-            ["amount", "probability"].forEach(k => {
-                if (values[k]) {
-                    values[k] = parseInt(values[k])
-                } else if (values.hasOwnProperty(k)) {
-                    delete values[k]
-                }
-            })
+            // ["amount", "probability"].forEach(k => {
+            //     if (values[k]) {
+            //         values[k] = parseInt(values[k])
+            //     } else if (values.hasOwnProperty(k)) {
+            //         delete values[k]
+            //     }
+            // })
             axiosInstance().post("/opportunity", values)
                 .then(() => {
                     CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Opportunity created Succesfully" });
