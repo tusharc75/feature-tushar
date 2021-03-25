@@ -70,7 +70,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://equit-oms-backend.herokuapp.com/",
   "devDependencies": {
     "@types/google.maps": "^3.44.2"
   }

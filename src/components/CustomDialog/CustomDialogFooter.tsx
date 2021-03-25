@@ -6,8 +6,8 @@ import PropTypes from 'prop-types';
 const DialogActions = withStyles((theme) => ({
     root: {
         margin: 0,
-        padding: theme.spacing(1.5, 2),
-    },
+        padding: theme.spacing(1.5, 2)
+    }
 }))(MuiDialogActions);
 
 function CustomDialogFooter({ children }) {

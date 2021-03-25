@@ -21,7 +21,7 @@ const Layout = ({ children, width }) => {
     state: { userLoading },
   }: any = useData();
   const classes = useStyles();
-  const [toggleDrawer, setToggleDrawer] = useState(false);
+  const [toggleDrawer, setToggleDrawer] = useState<Boolean>(false);
 
   const mobileWidths = ["xs", "sm"];
 

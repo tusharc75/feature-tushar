@@ -1,5 +1,4 @@
 import React, { Fragment } from "react";
-import PropTypes from "prop-types";
 import {
   Avatar,
   Box,
@@ -30,7 +29,7 @@ import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const InfoLabel = ({ children, info, isTooltip }) =>
-  isTooltip && info != "" ? (
+  isTooltip ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
         {children}
@@ -193,23 +192,6 @@ const FormTypes = (props) => {
         }
       />
     </InfoLabel>
-  ) : type === "url" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="url"
-        label={label}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
-        }
-      />
-    </InfoLabel>
   ) : type === "name" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
@@ -261,7 +243,9 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          onChange ? onChange : (e) => {
+            setFieldValue(name, e.target.value == "" ? null : parseFloat(e.target.value))
+          }
         }
       />
     </InfoLabel>
@@ -330,12 +314,20 @@ const FormTypes = (props) => {
         {...rest}
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-        getOptionSelected={(option: any, val: any) =>
-          option.optionValue === val.optionValue
+        getOptionSelected={(option: any, val) => option.optionValue === val}
+        value={
+          options.filter((data) => data.optionValue === values[name]).length
+            ? options.filter((data) => data.optionValue === values[name])[0]
+            : ""
         }
-        value={values[name]}
         onChange={
-          onChange ? onChange : (e, val) => setFieldValue(name, val ? val : {})
+          onChange
+            ? onChange
+            : (e, val) =>
+              setFieldValue(
+                name,
+                val && val.optionValue ? val.optionValue : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -350,39 +342,6 @@ const FormTypes = (props) => {
         )}
       />
     </InfoLabel>
-    // <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-    //   <Autocomplete
-    //     {...rest}
-    //     options={options}
-    //     getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-    //     getOptionSelected={(option: any, val) => option.optionValue === val}
-    //     value={
-    //       options.filter((data) => data.optionValue === values[name]).length
-    //         ? options.filter((data) => data.optionValue === values[name])[0]
-    //         : ""
-    //     }
-    //     onChange={
-    //       onChange
-    //         ? onChange
-    //         : (e, val) =>
-    //           setFieldValue(
-    //             name,
-    //             val && val.optionValue ? val.optionValue : ""
-    //           )
-    //     }
-    //     renderInput={(params) => (
-    //       <TextField
-    //         {...params}
-    //         name={name}
-    //         label={label}
-    //         variant="outlined"
-    //         error={touched[name] && Boolean(errors[name])}
-    //         helperText={touched[name] && errors[name]}
-    //         required={required}
-    //       />
-    //     )}
-    //   />
-    // </InfoLabel>
   ) : type === "currency" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
@@ -416,7 +375,7 @@ const FormTypes = (props) => {
           />
         )}
         renderOption={(option) => {
-          const { currencyCode, name, countryCode }: any = option;
+          const { currencyCode, name, countryCode } = option;
           return (
             <Grid container alignItems="center">
               <Grid item>
@@ -510,7 +469,7 @@ const FormTypes = (props) => {
         control={
           <Checkbox
             name={name}
-            checked={values[name] ? values[name] : false}
+            checked={values[name]}
             onChange={
               onChange ? onChange : (e) => setFieldValue(name, e.target.checked)
             }
@@ -556,14 +515,10 @@ const FormTypes = (props) => {
         includeInputInList
         filterSelectedOptions
         value={values[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (event, newValue) => {
-              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-              setValue(newValue);
-            }
-        }
+        onChange={(event, newValue) => {
+          setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+          setValue(newValue);
+        }}
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
         }}
@@ -682,18 +637,5 @@ const FormTypes = (props) => {
     </InfoLabel>
   ) : null;
 };
-
-// FormTypes.propTypes = {
-//   type: PropTypes.string,
-//   label: PropTypes.string,
-//   name: PropTypes.string,
-//   errors: PropTypes.object,
-//   touched: PropTypes.object,
-//   values: PropTypes.object,
-//   setFieldValue: PropTypes.func,
-//   isTooltip: PropTypes.bool,
-//   options: PropTypes.any
-//   tooltipMessage: PropTypes.string,
-// };
 
 export default FormTypes;
