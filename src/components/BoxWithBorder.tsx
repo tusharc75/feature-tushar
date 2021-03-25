@@ -7,6 +7,7 @@ const useStyles = makeStyles((theme) => ({
     border: "1px solid #D4D6D7",
     borderRadius: 8,
     padding: theme.spacing(3, 2),
+    overflow: "hidden",
   },
 }));
 
