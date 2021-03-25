@@ -3,7 +3,6 @@ import { Grid, Box, Button } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { capitalize } from "lodash";
-
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
@@ -16,6 +15,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import { removeEmptyKeys } from "../../constants/helpers";
+import { CustomEventEmitter } from './../../axios/events';
 
 const UserDetailsPage = () => {
   const { id } = useParams();
@@ -140,20 +140,12 @@ const UserDetailsPage = () => {
       .put(`/user/${id}`, values)
       .then(({ data }) => {
         fetchUserData();
-        handleSnackbar("Successfully saved", "success", true);
+        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
         setUpdating(false);
       })
       .catch((err) => {
         setUpdating(false);
       });
-  };
-
-  const handleSnackbar = (msg, type, isOpen) => {
-    setAlertData({
-      errorMsg: msg,
-      type: type,
-      open: isOpen,
-    });
   };
 
   const handleOpenUpdateDialog = () => {
@@ -175,14 +167,6 @@ const UserDetailsPage = () => {
           fields={userFields}
           isUpdating={isUpdating}
           handleUpdate={handleUpdateUser}
-        />
-      )}
-      {alertData && (
-        <CustomToast
-          open={alertData.open || false}
-          close={() => handleSnackbar("", "", false)}
-          errorMsg={alertData.errorMsg || ""}
-          type={alertData.type || ""}
         />
       )}
 

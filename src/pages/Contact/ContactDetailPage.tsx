@@ -12,7 +12,6 @@ import { Skeleton } from "@material-ui/lab";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { Link } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
-import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import { contactPage } from '../../routes/Contacts'
@@ -26,12 +25,12 @@ import Activity from "../../components/Activity";
 import { isObjectEmpty } from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import { CustomEventEmitter } from './../../axios/events';
 
 const Roles = () => {
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
-    const [alertData, setAlertData] = useState<any>({})
     const [contactData, setContactData] = useState<any>({})
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -110,14 +109,6 @@ const Roles = () => {
         });
     };
 
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
-
     const quickLinks = [
         {
             label: "Account Heirarchy",
@@ -149,7 +140,7 @@ const Roles = () => {
         if (contactData?._id) {
 
             axiosInstance().put(`/contact/remove`, { ids: [contactData._id] }).then(({ data }) => {
-                handleSnackbar(data.message, 'success', true)
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
             }).catch(err => {
@@ -202,7 +193,7 @@ const Roles = () => {
 
         axiosInstance().put('/contact', updatedData).then(({ data }) => {
             fetchContactData()
-            handleSnackbar("Successfully saved", 'success', true)
+            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
             setUpdating(false);
         }).catch((err) => {
             setUpdating(false);
@@ -228,14 +219,6 @@ const Roles = () => {
                     </Grid>
                 </Grid>
 
-                {
-                    alertData ? <CustomToast
-                        open={alertData.open || false}
-                        close={() => handleSnackbar('', '', false)}
-                        errorMsg={alertData.errorMsg || ''}
-                        type={alertData.type || ''}
-                    /> : null
-                }
                 <div>
                     <CustomHeader
                         heading={headingLbl}

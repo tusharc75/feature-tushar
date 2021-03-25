@@ -37,6 +37,7 @@ import NoDataCell from '../../components/Helpers/NoDataCell'
 import accountClass from "./account.module.scss"
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomHeader from '../../components/Helpers/CustomHeader'
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 
 const AccTypes = {
     "All Accounts": 1,
@@ -213,7 +214,7 @@ export default function Account() {
             renderCell: (params) => (
                 <Link className={`${accountClass.accountNameLink}`}
                     to={`${accountDetailPage.path}/${params.row._id}`}>
-                    {params?.row?.accountName ? params.row.accountName : <NoDataCell />}
+                    <CustomRenderCell value={params?.value} />
                 </Link>
             )
         },
@@ -221,37 +222,19 @@ export default function Account() {
             field: "typeOfAccount",
             headerName: "Type",
             width: 200,
-            renderCell: (params) => (
-                <>
-                    {
-                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
-                    }
-                </>
-            )
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "industry",
             headerName: "Industry",
             width: 200,
-            renderCell: (params) => (
-                <>
-                    {
-                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
-                    }
-                </>
-            )
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "parentAccount",
             headerName: "Parent Account",
             width: 200,
-            renderCell: (params) => (
-                <>
-                    {
-                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
-                    }
-                </>
-            )
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "masterAccount",
@@ -264,7 +247,8 @@ export default function Account() {
         {
             field: "phone", headerName: "Phone",
             hide: true,
-            width: 200
+            width: 200,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "actions", headerName: "Actions",

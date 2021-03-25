@@ -5,7 +5,6 @@ import { Formik, Form } from "formik";
 import { formValidation, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
 import { commonStyle } from '../../Contact/CommonStyles'
-import CustomToast from '../../../components/Helpers/CustomToast'
 import { withStyles } from '@material-ui/core/styles';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import FormTypes from "./../../../components/Helpers/FormTypes";
@@ -14,6 +13,8 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
+import { CustomEventEmitter } from '../../../axios/events'
+
 const useStyles = makeStyles((theme) => ({
     ...commonStyle(theme),
     root: {
@@ -40,7 +41,7 @@ const arr = [...Array(9).keys()]
 export default function CreateAccount(props) {
 
     const classes = useStyles();
-    const { entityData, alertData, handleSnackbar, handleSubmit, loading, onClose, open } = props
+    const { entityData, handleSubmit, loading, onClose, open } = props
 
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
@@ -94,14 +95,7 @@ export default function CreateAccount(props) {
             open={open}
         >
             <CustomDialogHeader onClose={onClose} title="Add Account" />
-            {
-                alertData ? <CustomToast
-                    open={alertData.open || false}
-                    close={() => handleSnackbar('', '', false)}
-                    errorMsg={alertData.errorMsg || ''}
-                    type={alertData.type || ''}
-                /> : null
-            }
+
             {
                 entityData.fields.length > 0 ?
                     <>

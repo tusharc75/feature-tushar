@@ -13,7 +13,6 @@ import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { accountPage } from '../../routes/Accounts'
-import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import DetailsPage from '../../components/Shared/DetailsPage'
@@ -43,6 +42,7 @@ import CreateContact from '../Contact/CreateContact/CreateContact';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
 import { removeEmptyKeys } from "../../constants/helpers";
+import { CustomEventEmitter } from './../../axios/events';
 
 const Accordion = withStyles({
     root: {
@@ -274,14 +274,6 @@ const Roles = () => {
         });
     };
 
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
-
     const quickLinks = [
         {
             label: "Account Heirarchy",
@@ -312,7 +304,7 @@ const Roles = () => {
     const handleDeleteAcc = () => {
         if (accountData?._id) {
             axiosInstance().put(`/account/remove`, { ids: [accountData._id] }).then(({ data }) => {
-                handleSnackbar(data.message, 'success', true)
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
             }).catch(err => {
@@ -349,7 +341,7 @@ const Roles = () => {
         axiosInstance().put('/account', updatedData)
             .then(() => {
                 fetchAccountData()
-                handleSnackbar("Successfully saved", 'success', true)
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
                 setUpdating(false);
                 setOpenUpdateDialog(false)
             })
@@ -407,14 +399,6 @@ const Roles = () => {
                 <Grid container direction="row">
                     <CustomBreadCrumbs routes={customizedRoutes} />
                 </Grid>
-                {alertData ? (
-                    <CustomToast
-                        open={alertData.open || false}
-                        close={() => handleSnackbar("", "", false)}
-                        errorMsg={alertData.errorMsg || ""}
-                        type={alertData.type || ""}
-                    />
-                ) : null}
                 <div>
                     {
                         <CustomHeader
