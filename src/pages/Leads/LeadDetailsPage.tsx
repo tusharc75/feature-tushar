@@ -274,12 +274,12 @@ const LeadDetailsPage = () => {
             </Button>
             <Box component="span" marginX={1} />
             {leadsPermissions.isDelete &&
-            leadData?.owner?.optionValue &&
-            user?.user?._id &&
-            leadData.owner.optionValue === user.user._id ? (
+              leadData?.owner?.optionValue &&
+              user?.user?._id &&
+              leadData.owner.optionValue === user.user._id ? (
               <DeleteButton
                 text="Delete"
-                action={() => setShowConfirmBox(true)}
+                onClick={() => setShowConfirmBox(true)}
               />
             ) : null}
           </CustomHeader>
@@ -337,7 +337,7 @@ const LeadDetailsPage = () => {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => {}}
+                      handleActivityRefresh={() => { }}
                     />
                   </div>
                 )}

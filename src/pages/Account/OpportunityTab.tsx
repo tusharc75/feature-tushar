@@ -4,9 +4,9 @@ import { Grid, IconButton } from '@material-ui/core'
 import { Delete } from '@material-ui/icons'
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom'
-import accClass from "./account.module.scss"
+import accountClass from "./account.module.scss"
 import { opportunityPage } from '../../routes/Opportunity'
-import { displayDate, capitalize } from '../../services/util';
+import { displayDate } from '../../services/util';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -34,11 +34,11 @@ const useStyles = makeStyles((theme) => ({
 
 function DisplayData({ label, value, color = "" }) {
 
-    return <div className={`${accClass.cTr}`}>
-        <div className={`${accClass.td1}`} >
+    return <div className={`${accountClass.cTr}`}>
+        <div className={`${accountClass.td1}`} >
             <Typography color="textSecondary" variant="subtitle1">{label}</Typography>
         </div>
-        <div className={`${accClass.td2}`}> <Typography style={{ color: color ? color : '' }}  >{value}</Typography></div>
+        <div className={`${accountClass.td2}`}> <Typography style={{ color: color ? color : '' }}  >{value}</Typography></div>
     </div>
 }
 
@@ -62,7 +62,7 @@ export default function UsersTab({ data }) {
                                             </IconButton>
                                             {/* <EditOutlined /> */}
                                         </span>
-                                        <Link className={`${accClass.accountNameLink}`} to={`${opportunityPage.path}/${obj._id}`}>
+                                        <Link className={`${accountClass.accountNameLink}`} to={`${opportunityPage.path}/${obj._id}`}>
                                             <Typography className="text-capitalize">{obj?.opportunityName ?? ''}</Typography>
                                         </Link>
                                         <DisplayData label='Stage' value={obj?.stage?.optionLabel ?? ''} />

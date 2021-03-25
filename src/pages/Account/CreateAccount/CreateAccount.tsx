@@ -8,13 +8,12 @@ import { commonStyle } from '../../Contact/CommonStyles'
 import CustomToast from '../../../components/Helpers/CustomToast'
 import { withStyles } from '@material-ui/core/styles';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import FormTypes from "./../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import Dialog from '@material-ui/core/Dialog';
-import accClass from '../account.module.scss'
-import '../accounts.scss'
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
+import Dialog from '@material-ui/core/Dialog'
 const useStyles = makeStyles((theme) => ({
     ...commonStyle(theme),
     root: {
@@ -23,26 +22,6 @@ const useStyles = makeStyles((theme) => ({
     },
     container: {
         position: "relative",
-    },
-    footer: {
-        position: "sticky",
-        bottom: 0,
-        right: 0,
-        left: 0,
-        width: "100%",
-        zIndex: 100000,
-    },
-    closeButton: {
-        position: "absolute",
-        right: theme.spacing(1),
-        top: theme.spacing(1),
-        color: theme.palette.grey[500],
-    },
-    dialogContent: {
-        padding: '10px',
-        marginLeft: "15px",
-        maxHeight: '500px',
-        overflowY: 'scroll'
     },
     accDialog1: {
         "MuiDialog-paper": {
@@ -57,8 +36,6 @@ const DialogContent = withStyles((theme) => ({
 }))(MuiDialogContent);
 
 const arr = [...Array(9).keys()]
-
-
 
 export default function CreateAccount(props) {
 
@@ -126,12 +103,11 @@ export default function CreateAccount(props) {
 
     return (<>
         <Dialog
-            // fullWidth={true}
+            disableBackdropClick={true}
             maxWidth="md"
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
             open={open}
-            className="accDialog1"
         >
             <CustomDialogHeader onClose={onClose} title="Add Account" />
             {
@@ -141,15 +117,6 @@ export default function CreateAccount(props) {
                     errorMsg={alertData.errorMsg || ''}
                     type={alertData.type || ''}
                 /> : null
-            }
-            {
-                entityData.fields.length === 0 ? <MuiDialogContent
-
-                    style={{ minWidth: '74%' }}>
-                    <CommonSkeleton
-                        lenArray={arr}
-                    />
-                </MuiDialogContent> : null
             }
             {
                 entityData.fields.length > 0 ?
@@ -172,7 +139,7 @@ export default function CreateAccount(props) {
                             }) => (
                                 <Form autoComplete="off" autoCorrect="off" noValidate>
                                     <>
-                                        <MuiDialogContent className={classes.dialogContent}>
+                                        <CustomDialogContent>
                                             {
                                                 formsData &&
                                                 formsData.map((form, i) => (
@@ -291,16 +258,15 @@ export default function CreateAccount(props) {
                                                     </div>
                                                 ))
                                             }
-                                        </MuiDialogContent>
+                                        </CustomDialogContent>
                                     </>
-                                    <MuiDialogActions className={classes.footer}>
+                                    <CustomDialogFooter>
                                         <Button onClick={onClose} variant="outlined" color="primary" >
                                             Cancel
                                              </Button>
 
                                         <CustomButton
                                             loading={loading}
-                                            style={{ float: "right" }}
                                             variant="contained"
                                             color="primary"
                                             disabled={loading || Object.keys(errors).length > 0 ? true : false}
@@ -311,12 +277,16 @@ export default function CreateAccount(props) {
                                         >
                                             Save
                                     </CustomButton>
-                                    </MuiDialogActions>
+                                    </CustomDialogFooter>
                                 </Form>
                             )}
                         </Formik>
                     </>
-                    : null
+                    : <CustomDialogContent>
+                        <CommonSkeleton
+                            lenArray={arr}
+                        />
+                    </CustomDialogContent>
             }
         </Dialog>
     </ >

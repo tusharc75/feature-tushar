@@ -135,7 +135,7 @@ export default function CreateContact({ open, onClose, onSuccess }) {
 
     const handleSave = (values) => {
         setIsFormSubmitted(true);
-        removeEmptyKeys(values);
+        values = removeEmptyKeys(values);
 
         axiosInstance().post("/contact", values).then(() => {
             onSuccess();

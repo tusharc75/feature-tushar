@@ -31,7 +31,7 @@ import Activity from "../../components/Activity";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import accClass from "./account.module.scss"
+import accountClass from "./account.module.scss"
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
@@ -40,6 +40,9 @@ import { opportunityPage } from '../../routes/Opportunity'
 import { withStyles } from "@material-ui/core/styles";
 import CreateOpportunity from '../Opportunities/CreateOpportunity'
 import CreateContact from '../Contact/CreateContact/CreateContact';
+import DeleteButton from '../../components/Helpers/DeleteButton'
+import { makeStyles } from "@material-ui/core/styles";
+import { removeEmptyKeys } from "../../constants/helpers";
 
 const Accordion = withStyles({
     root: {
@@ -84,8 +87,20 @@ const AccordionDetails = withStyles((theme) => ({
     },
 }))(MuiAccordionDetails);
 
+
+const useStyles = makeStyles((theme) => ({
+    container: {
+        padding: "0px",
+        minHeight: "auto"
+    },
+    opportunityTab: {
+        marginTop: '10px'
+    }
+}));
+
 const Roles = () => {
     const history = useHistory();
+    const classes = useStyles();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [allowedToEdit, setAllowedToEdit] = useState(false)
@@ -321,15 +336,11 @@ const Roles = () => {
 
     const handleUpdateAccount = (values) => {
         setUpdating(true);
+        values = removeEmptyKeys(values)
         if (values.employees) {
             values.employees = parseInt(values.employees)
         }
-        else {
-            delete values.employees
-        }
-        if (values.isShippingAddressSameAsBillingAddress === '') {
-            values.isShippingAddressSameAsBillingAddress = false
-        }
+
         const updatedData = {
             ...values,
             _id: accountData._id,
@@ -344,7 +355,6 @@ const Roles = () => {
             })
             .catch((err) => {
                 setUpdating(false);
-                setOpenUpdateDialog(false)
             });
     };
     const goBackToListing = () => {
@@ -408,10 +418,10 @@ const Roles = () => {
                 <div>
                     {
                         <CustomHeader
+                            loading={loading}
                             heading={headingLbl}
                             logo={accountData?.accountLogo ? accountData.accountLogo : undefined}
                             mainPoints={mainPoints}
-                            // style={{ marginTop: "150px", minHeight: "200px" }}
                             showHeading={true}
                         >
                             <Button
@@ -425,20 +435,16 @@ const Roles = () => {
                             {
                                 accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
                                     accountData.owner.optionValue === user.user._id ?
-                                    <Button
-                                        variant="outlined" color="secondary"
-                                        onClick={() => setShowConfirmBox(true)}
-                                    >
-                                        Delete
-                            </Button> : null
+                                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                                    : null
                             }
                         </CustomHeader>
                     }
 
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={12} md={8} lg={8}>
-                            <Container styles={{ padding: "8px" }}>
-                                <BoxWithBorder styles={{ padding: "8px" }}>
+                            <Container padding="8px">
+                                <BoxWithBorder padding="8px">
                                     {loading ? (
                                         <Grid container spacing={2}>
                                             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
@@ -528,7 +534,7 @@ const Roles = () => {
                                                                 < Grid container spacing={2}>
                                                                     <Grid item md={12}>
 
-                                                                        <div style={{ marginTop: '10px' }}>
+                                                                        <div className={classes.opportunityTab} >
                                                                             <OpportunityTab data={[]} />
                                                                         </div> : null
                                                         </Grid>
@@ -552,7 +558,7 @@ const Roles = () => {
                             </Container>
                         </Grid>
                         <Grid item xs={12} sm={12} md={4} lg={4}
-                            className={`${accClass.customGrid} ${accClass.accountActivitiesDiv}`} >
+                            className={`${accountClass.customGrid} ${accountClass.accountActivitiesDiv}`} >
                             <Container styles={{ padding: "8px", minHeight: "auto", width: '100%' }} >
                                 <Grid container>
                                     <Grid item xs={12}>
@@ -565,12 +571,12 @@ const Roles = () => {
                                         }
                                     </Grid>
                                     {/* <Grid item xs={12}>
-                                        <div className={`${accClass.detailPageDiv2}`}>
+                                        <div className={`${accountClass.detailPageDiv2}`}>
                                             {
                                                 quickLinks && quickLinks.length ?
                                                     quickLinks.map((k, index) => {
                                                         return <Link key={index} to={k}
-                                                            className={`${accClass.customLink}`}>{k.label || ''}({k.count || 0})</Link>
+                                                            className={`${accountClass.customLink}`}>{k.label || ''}({k.count || 0})</Link>
                                                     }) :
                                                     null
                                             }
@@ -579,8 +585,8 @@ const Roles = () => {
 
                                     <Grid item xs={12}>
                                         <BoxWithBorder style={{ marginTop: "3%", padding: '0px' }}>
-                                            <div className={`${accClass.detailPageDiv3}`}>
-                                                <div className={`${accClass.relatedContacts}`}>
+                                            <div className={`${accountClass.detailPageDiv3}`}>
+                                                <div className={`${accountClass.relatedContacts}`}>
                                                     <Typography color="primary"
                                                         variant="h6"
                                                         style={{ margin: "0 10px" }} >Related Contacts</Typography>
@@ -596,15 +602,15 @@ const Roles = () => {
                                                     relatedContactsLoading ? (
                                                         <CommonSkeleton lenArray={[...Array(4).keys()]} />
                                                     ) : <>
-                                                        <Box className={`${accClass.customBox1}`}>
+                                                        <Box className={`${accountClass.customBox1}`}>
                                                             <RelatedContactsBox
                                                                 contacts={relatedContacts}
                                                             />
                                                         </Box>
-                                                        <div className={`${accClass.viewAllBtn}`}>
+                                                        <div className={`${accountClass.viewAllBtn}`}>
                                                             <Button
                                                                 variant="outlined"
-                                                                className={`${accClass.btn}`}
+                                                                className={`${accountClass.btn}`}
                                                             >View All</Button></div>
                                                     </>
                                                 }

@@ -34,7 +34,7 @@ import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import NoDataCell from '../../components/Helpers/NoDataCell'
-import accClass from "./account.module.scss"
+import accountClass from "./account.module.scss"
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomHeader from '../../components/Helpers/CustomHeader'
 
@@ -211,7 +211,7 @@ export default function Account() {
         {
             field: "accountName", headerName: "Account Name", width: 200,
             renderCell: (params) => (
-                <Link className={`${accClass.accountNameLink}`}
+                <Link className={`${accountClass.accountNameLink}`}
                     to={`${accountDetailPage.path}/${params.row._id}`}>
                     {params?.row?.accountName ? params.row.accountName : <NoDataCell />}
                 </Link>
@@ -539,7 +539,7 @@ export default function Account() {
 
                 <Box component="div">
                     <CustomContainer>
-                        <div className={`${accClass["account-header-inner-container"]}`}
+                        <div className={`${accountClass["account-header-inner-container"]}`}
                         >
                             <CustomHeader
                                 total={rowCount}
@@ -550,18 +550,18 @@ export default function Account() {
                                 secondHeading="Account"
                             // showHeading={false}
                             >
-                                <div className={`${accClass.accountHeader} ${accClass["accountHeader-mobile"]}`} >
+                                <div className={`${accountClass.accountHeader} ${accountClass["accountHeader-mobile"]}`} >
                                     <SearchBox
                                         onSearch={handleSearch}
                                         searchbox="accountHeaderSearchBar"
                                         width="300px" value={searchVal}
                                     />
-                                    <div className={`${accClass.accountHeaderAddBtnActionBtnGroup}`}>
+                                    <div className={`${accountClass.accountHeaderAddBtnActionBtnGroup}`}>
                                         {
                                             accountPermissions.isCreate && <Button
                                                 variant="contained"
                                                 color="primary"
-                                                className={`px-3 ${accClass.accountHeaderAddBtn}`}
+                                                className={`px-3 ${accountClass.accountHeaderAddBtn}`}
                                                 onClick={clickCreateNew}
                                                 startIcon={<AddOutlined />} >Add</Button>
                                         }
@@ -570,7 +570,7 @@ export default function Account() {
                                             disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                             variant="outlined"
                                             color="default"
-                                            className={`${accClass.accountHeaderActionBtn}`}
+                                            className={`${accountClass.accountHeaderActionBtn}`}
                                             onClick={openActions}
                                             aria-controls="action-menu"
                                         >
@@ -636,7 +636,7 @@ export default function Account() {
                             </CustomHeader>
                         </div>
 
-                        <div className={`mt-3 ${accClass["brand-grid"]}`}>
+                        <div className={`mt-3 ${accountClass["brand-grid"]}`}>
                             <DataGrid
                                 className={classes.grid}
                                 components={{

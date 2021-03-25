@@ -144,7 +144,7 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
             setErrors({ ...errors });
         } else {
             setIsFormSubmitted(true);
-            removeEmptyKeys(values);
+            values = removeEmptyKeys(values);
             ["amount", "probability"].forEach(k => {
                 if (values[k]) {
                     values[k] = parseInt(values[k])

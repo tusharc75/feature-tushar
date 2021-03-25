@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import { Grid, Typography, Box, Avatar, Paper } from "@material-ui/core";
 import { Skeleton } from '@material-ui/lab';
-import { capitalize } from "../services/util";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -17,6 +16,18 @@ const useStyles = makeStyles((theme) => ({
     customHeaderPaper: {
         marginBottom: '16px',
         padding: '10px'
+    },
+    labelColor: {
+        color: '#1a91b5'
+    },
+    avatar: {
+        width: 20,
+        height: 20,
+        display: 'inline-block',
+        marginRight: '10px'
+    },
+    skeleton: {
+        marginRight: '10px'
     }
 }));
 
@@ -32,14 +43,17 @@ const CustomHeader = (props) => {
                             loading ?
                                 <Skeleton width={100} /> :
                                 showHeading ? <>
-                                    <Typography style={{ display: 'inline-block' }} variant="h6" component="h2" color="primary">
+                                    <Typography
+                                        className="text-capitalize"
+                                        style={{ display: 'inline-block' }} variant="h6" component="h2" color="primary">
                                         {
                                             logo ? <Avatar
                                                 src={logo}
-                                                style={{ width: 20, height: 20, display: 'inline-block', marginRight: '10px' }}
+                                                className={classes.avatar}
+
                                                 alt="acc_logo" /> : null
                                         }
-                                        <span>{capitalize(heading)}</span>
+                                        <span>{heading}</span>
                                     </Typography>
                                 </>
                                     : null
@@ -54,7 +68,7 @@ const CustomHeader = (props) => {
                                 {
                                     [...Array(4).keys()].map(i => (
                                         <>
-                                            <Skeleton variant="rect" style={{ marginRight: '10px' }} width={80} height={50} />
+                                            <Skeleton variant="rect" className={classes.skeleton} width={80} height={50} />
                                             <Box marginY={1} /></>
                                     ))
                                 }
@@ -65,8 +79,8 @@ const CustomHeader = (props) => {
                                             mainPoints[key] ? (
                                                 <React.Fragment>
                                                     <Box className={classes.box} key={key + i} >
-                                                        <Typography align="center" variant="subtitle1" style={{ color: '#1a91b5' }}
-                                                            className="text-capitalize">{key}</Typography>
+                                                        <Typography align="center" variant="subtitle1"
+                                                            className={`text-capitalize ${classes.labelColor}`}>{key}</Typography>
                                                         <Typography align="center" color="primary" style={{ fontWeight: 500 }}>
                                                             {mainPoints[key] || ''}
                                                         </Typography>

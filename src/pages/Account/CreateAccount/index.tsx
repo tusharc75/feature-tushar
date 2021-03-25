@@ -6,7 +6,7 @@ import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from './../../../axios/axiosInstance'
 import { CustomEventEmitter } from './../../../axios/events';
-
+import { removeEmptyKeys } from '../../../constants/helpers'
 
 export default function CreateAccountMain(props) {
 
@@ -60,12 +60,9 @@ export default function CreateAccountMain(props) {
     }
 
     const getModiFiedValues = values => {
-        values = { ...values }
+        values = removeEmptyKeys({ ...values })
 
-        if (values.employees === "") {
-            delete values.employees
-        }
-        else {
+        if (values.employees) {
             values.employees = parseInt(values.employees)
         }
 
