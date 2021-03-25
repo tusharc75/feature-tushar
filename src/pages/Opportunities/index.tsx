@@ -110,7 +110,7 @@ const Opportunities = () => {
         isChecked: false,
         id: u._id,
         owner: u.owner?.optionLabel ? u.owner.optionLabel : '',
-        stage: u?.stage?.optionLabel,
+        stage: u.stage ? u.stage:'',
         closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
         // accountName: u?.accountName?.optionLabel || ''
       }

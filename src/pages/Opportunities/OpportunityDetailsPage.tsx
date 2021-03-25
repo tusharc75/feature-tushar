@@ -173,6 +173,8 @@ const OpportunityDetailsPage = () => {
       .then(({ data }) => {
         CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
         setUpdating(false);
+        goBackToListing();
+        
       })
       .catch((err) => {
         setUpdating(false);
@@ -233,10 +235,11 @@ const OpportunityDetailsPage = () => {
             showHeading={true}
           >
             {
-              opportunityPermissions.isUpdate && 
-              opportunityData?.owner?.optionValue &&
+              opportunityPermissions.isUpdate &&
+              opportunityData?.owner &&
               user?.user?._id &&
-              opportunityData.owner.optionValue === user.user._id ? (
+              opportunityData.owner === user.user._id 
+              ? (
               <Button
                 variant="contained"
                 color="primary"
@@ -248,9 +251,9 @@ const OpportunityDetailsPage = () => {
             }
             <Box component="span" marginX={1} />
             {opportunityPermissions.isDelete &&
-              opportunityData?.owner?.optionValue &&
+              opportunityData?.owner &&
               user?.user?._id &&
-              opportunityData.owner.optionValue === user.user._id ? (
+              opportunityData.owner === user.user._id ? (
               <Button
                 variant="contained"
                 color="secondary"
@@ -295,15 +298,15 @@ const OpportunityDetailsPage = () => {
                     />
                     <TabPanel value={currentTabIndex} index={0}>
                       <Box padding="16px">
-                        <DetailsPage data={opportunityData} fields={opportunityFields} />
-                        {/* <DetailsPage
+                        {/* <DetailsPage data={opportunityData} fields={opportunityFields} /> */}
+                        <DetailsPage
                           data={opportunityData}
                           fields={opportunityFields}
                           isUpdating={isUpdating}
                           canEdit={allowedToEdit}
                           handleUpdate={handleUpdateOpportunity}
                           sourceComponent="opportunity"
-                        /> */}
+                        />
                       </Box>
                     </TabPanel>
                     <TabPanel value={currentTabIndex} index={1}>
