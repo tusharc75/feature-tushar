@@ -13,7 +13,6 @@ import { leadPage } from "../../routes/Lead";
 import routes from "../../components/Helpers/Routes";
 import { capitalize } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
-import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
@@ -68,8 +67,7 @@ const LeadDetailsPage = () => {
   }, [user]);
 
   const fetchLeadData = async () => {
-    try {
-      const { data } = await getLeadData(id);
+    axiosInstance().get(`/lead/${id}`).then(({ data: { data } }) => {
       handleMainPoints(data);
       let name = capitalize(data.firstName || "") + " ";
       name = name + capitalize(data.middleName || "") + " ";
@@ -86,9 +84,7 @@ const LeadDetailsPage = () => {
         routes.lead,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
-    } catch (error) {
-      console.log(error);
-    }
+    });
   };
 
   const handleMainPoints = (data) => {
