@@ -391,6 +391,7 @@ export default function Contact() {
                                 style={{ width: '160px' }}
                                 labelId="demo-simple-select-outlined-label"
                                 id="demo-simple-select-outlined"
+                                disableUnderline
                                 MenuProps={{
                                     anchorOrigin: {
                                         vertical: "bottom",

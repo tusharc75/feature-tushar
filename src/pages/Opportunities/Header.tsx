@@ -46,6 +46,7 @@ function LeadsHeader(props) {
                         labelId="demo-simple-select-outlined-label"
                         inputProps={{ "aria-label": "Without label" }}
                         id="demo-simple-select-outlined"
+                        disableUnderline
                         MenuProps={{
                             anchorOrigin: {
                                 vertical: "bottom",
