@@ -26,6 +26,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
+import CreateUser from "./CreateUser";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -164,7 +165,7 @@ const User: FC = () => {
         <Link
           title={params.value}
           className="text-truncate LeadNameLink"
-          to={`/${routes.userDetails.path}/${params.row.id}`}
+          to={`${routes.userDetails.path}/${params.row.id}`}
         >
           {params.value}
         </Link>
@@ -217,25 +218,14 @@ const User: FC = () => {
         ) : (
           <>
             {usersPermissions.isDelete ? (
-              params.row.allowToDelete ? (
-                <Tooltip title="Delete">
-                  <IconButton
-                    aria-label="Delete"
-                    onClick={() => showConfirmBox(params.row)}
-                  >
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                </Tooltip>
-              ) : (
-                <Tooltip
-                  className="cursor-stop"
-                  title="You must be the owner of this user to get the delete functionality"
+              <Tooltip title="Delete">
+                <IconButton
+                  aria-label="Delete"
+                  onClick={() => showConfirmBox(params.row)}
                 >
-                  <IconButton aria-label="Delete">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </Tooltip>
             ) : (
               <Tooltip
                 className="cursor-stop"
@@ -353,115 +343,120 @@ const User: FC = () => {
   };
 
   return (
-    <Layout>
-      <Grid container spacing={3} direction="row">
-        <Grid item xs={12} sm={6} className="pl-3">
-          <CustomBreadCrumbs routes={[routes.user]} />
-        </Grid>
-        <Grid item xs={12} sm={6} className="pr-3">
-          <Grid container justify="flex-end">
-            <MuiLink
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Import from Excel
-            </MuiLink>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <MuiLink
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Export to Excel
-            </MuiLink>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <MuiLink
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Download Template
-            </MuiLink>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <MuiLink
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Email a Link
-            </MuiLink>
+    <>
+      {isOpen && (
+        <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
+      )}
+      <Layout>
+        <Grid container spacing={3} direction="row">
+          <Grid item xs={12} sm={6} className="pl-3">
+            <CustomBreadCrumbs routes={[routes.user]} />
+          </Grid>
+          <Grid item xs={12} sm={6} className="pr-3">
+            <Grid container justify="flex-end">
+              <MuiLink
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Import from Excel
+              </MuiLink>
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <MuiLink
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Export to Excel
+              </MuiLink>
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <MuiLink
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Download Template
+              </MuiLink>
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <MuiLink
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Email a Link
+              </MuiLink>
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
-      <Container>
-        <Header
-          onSearch={handleSearch}
-          searchVal={searchVal}
-          userPermissions={usersPermissions}
-          onCreate={handleCreate}
-          showConfirmBox={showConfirmBox}
-          canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-        />
-      </Container>
-      <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-        <div className="contact-grid-height1">
-          <DataGrid
-            components={{
-              Toolbar: DataGridCustomToolbar,
-            }}
-            loading={loadingUsers}
-            rows={loadingUsers ? [] : dataRows}
-            columns={columns}
-            disableSelectionOnClick
-            disableMultipleSelection
-            paginationMode="server"
-            pagination
-            rowCount={rowCount}
-            onPageChange={handlePage}
-            onPageSizeChange={handlePageSize}
-            pageSize={query.limit}
-            page={query.page}
-            onSortModelChange={handleSortModelChange}
-            rowsPerPageOptions={[25, 50, 75]}
-            density="compact"
+        <Container>
+          <Header
+            onSearch={handleSearch}
+            searchVal={searchVal}
+            userPermissions={usersPermissions}
+            onCreate={handleCreate}
+            showConfirmBox={showConfirmBox}
+            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
           />
-        </div>
-      </Container>
-      {showDeleteWarningConfirmBox ? (
-        <MessageDialog
-          open={showDeleteWarningConfirmBox}
-          message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-          onClose={() => setShowDeleteWarningConfirmBox(false)}
-        />
-      ) : null}
-      {isConfirmDialogVisible ? (
-        <ConfirmationDialog
-          open={isConfirmDialogVisible}
-          message={`Are you sure, you want to delete user ${
-            deleteRec.name || ""
-          }?`}
-          onClose={() => {
-            if (deleteRec) setDeleteRec({});
-            setIsConformDialogVisible(false);
-          }}
-          okBtnLoading={deleteLoading}
-          onOk={handleDeleteLeads}
-        />
-      ) : null}
-    </Layout>
+        </Container>
+        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+          <div className="contact-grid-height1">
+            <DataGrid
+              components={{
+                Toolbar: DataGridCustomToolbar,
+              }}
+              loading={loadingUsers}
+              rows={loadingUsers ? [] : dataRows}
+              columns={columns}
+              disableSelectionOnClick
+              disableMultipleSelection
+              paginationMode="server"
+              pagination
+              rowCount={rowCount}
+              onPageChange={handlePage}
+              onPageSizeChange={handlePageSize}
+              pageSize={query.limit}
+              page={query.page}
+              onSortModelChange={handleSortModelChange}
+              rowsPerPageOptions={[25, 50, 75]}
+              density="compact"
+            />
+          </div>
+        </Container>
+        {showDeleteWarningConfirmBox ? (
+          <MessageDialog
+            open={showDeleteWarningConfirmBox}
+            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+            onClose={() => setShowDeleteWarningConfirmBox(false)}
+          />
+        ) : null}
+        {isConfirmDialogVisible ? (
+          <ConfirmationDialog
+            open={isConfirmDialogVisible}
+            message={`Are you sure, you want to delete user ${
+              deleteRec.name || ""
+            }?`}
+            onClose={() => {
+              if (deleteRec) setDeleteRec({});
+              setIsConformDialogVisible(false);
+            }}
+            okBtnLoading={deleteLoading}
+            onOk={handleDeleteLeads}
+          />
+        ) : null}
+      </Layout>
+    </>
   );
 };
 

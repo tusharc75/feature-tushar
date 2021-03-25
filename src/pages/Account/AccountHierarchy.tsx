@@ -55,7 +55,7 @@ export default function AccountHierarchy({ data, currentAccountId }) {
                                 {rowData.accountName}
                             </Link>
                             {
-                                rowData._id == currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
+                                rowData._id === currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
                             }
                         </>
                     },
