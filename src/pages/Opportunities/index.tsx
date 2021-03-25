@@ -26,6 +26,8 @@ import MessageDialog from '../../components/Helpers/MessageDialog'
 import { opportunityDetailPage } from '../../routes/Opportunity'
 import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -346,7 +348,9 @@ const Opportunities = () => {
     <>
       <Layout>
         <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3"></Grid>
+          <Grid item xs={12} sm={6} className="pl-3">
+          <CustomBreadCrumbs routes={[routes.opportunity]} />
+          </Grid>
           <Grid item xs={12} sm={6} className="pr-3">
             <Grid container justify="flex-end">
               <Link
