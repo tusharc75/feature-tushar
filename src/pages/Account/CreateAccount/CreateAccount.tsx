@@ -14,6 +14,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
+import CustomDialog from '../../../components/CustomDialog/CustomDialogComponent'
 const useStyles = makeStyles((theme) => ({
     ...commonStyle(theme),
     root: {
@@ -137,9 +138,9 @@ export default function CreateAccount(props) {
                                 validateForm,
                                 resetForm
                             }) => (
-                                <Form autoComplete="off" autoCorrect="off" noValidate>
-                                    <>
-                                        <CustomDialogContent>
+                                <>
+                                    <CustomDialogContent>
+                                        <Form autoComplete="off" autoCorrect="off" noValidate>
                                             {
                                                 formsData &&
                                                 formsData.map((form, i) => (
@@ -258,8 +259,10 @@ export default function CreateAccount(props) {
                                                     </div>
                                                 ))
                                             }
-                                        </CustomDialogContent>
-                                    </>
+
+
+                                        </Form>
+                                    </CustomDialogContent>
                                     <CustomDialogFooter>
                                         <Button onClick={onClose} variant="outlined" color="primary" >
                                             Cancel
@@ -278,7 +281,7 @@ export default function CreateAccount(props) {
                                             Save
                                     </CustomButton>
                                     </CustomDialogFooter>
-                                </Form>
+                                </>
                             )}
                         </Formik>
                     </>
