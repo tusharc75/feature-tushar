@@ -12,7 +12,6 @@ import { Skeleton } from "@material-ui/lab";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { Link } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
-import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import { contactPage } from '../../routes/Contacts'
@@ -21,18 +20,17 @@ import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Loader from '../../components/Loader'
 import routes from '../../components/Helpers/Routes';
-import '../Account/accounts.scss'
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
-import isObjectEmpty from './../../constants/helpers'
+import { isObjectEmpty } from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import { CustomEventEmitter } from './../../axios/events';
 
 const Roles = () => {
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
-    const [alertData, setAlertData] = useState<any>({})
     const [contactData, setContactData] = useState<any>({})
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -111,14 +109,6 @@ const Roles = () => {
         });
     };
 
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
-
     const quickLinks = [
         {
             label: "Account Heirarchy",
@@ -150,7 +140,7 @@ const Roles = () => {
         if (contactData?._id) {
 
             axiosInstance().put(`/contact/remove`, { ids: [contactData._id] }).then(({ data }) => {
-                handleSnackbar(data.message, 'success', true)
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
             }).catch(err => {
@@ -185,11 +175,11 @@ const Roles = () => {
 
     const handleOpneUpdateDialog = () => {
         setOpenUpdateDialog(true);
-      };
-    
-      const closeUpdateDialog = () => {
+    };
+
+    const closeUpdateDialog = () => {
         setOpenUpdateDialog(false);
-      };
+    };
 
     const handleUpdateContact = (values) => {
         setUpdating(true);
@@ -203,7 +193,7 @@ const Roles = () => {
 
         axiosInstance().put('/contact', updatedData).then(({ data }) => {
             fetchContactData()
-            handleSnackbar("Successfully saved", 'success', true)
+            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
             setUpdating(false);
         }).catch((err) => {
             setUpdating(false);
@@ -212,31 +202,23 @@ const Roles = () => {
     return (
         <>
             <Layout>
-            {openUpdateDialog && (
-          <UpdateDetailsDialog
-            title={`Editing  ${contactData.firstName}`}
-            openDialog={openUpdateDialog}
-            onClose={closeUpdateDialog}
-            data={contactData}
-            fields={contactFields}
-            isUpdating={isUpdating}
-            handleUpdate={handleUpdateContact}
-          />
-        )}
+                {openUpdateDialog && (
+                    <UpdateDetailsDialog
+                        title={`Editing  ${contactData.firstName}`}
+                        openDialog={openUpdateDialog}
+                        onClose={closeUpdateDialog}
+                        data={contactData}
+                        fields={contactFields}
+                        isUpdating={isUpdating}
+                        handleUpdate={handleUpdateContact}
+                    />
+                )}
                 <Grid container direction="row">
                     <Grid item xs={12} className="pl-2">
                         <CustomBreadCrumbs routes={customizedRoutes} />
                     </Grid>
                 </Grid>
 
-                {
-                    alertData ? <CustomToast
-                        open={alertData.open || false}
-                        close={() => handleSnackbar('', '', false)}
-                        errorMsg={alertData.errorMsg || ''}
-                        type={alertData.type || ''}
-                    /> : null
-                }
                 <div>
                     <CustomHeader
                         heading={headingLbl}
@@ -250,25 +232,25 @@ const Roles = () => {
                             contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id &&
                                 contactData.owner.optionValue === user.user._id ?
                                 [
-                                //     <Button
-                                //     variant="contained" color="secondary"
-                                //     onClick={() => setShowConfirmBox(true)}
-                                // >
-                                //     Delete
-                                // </Button>
-                                <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleOpneUpdateDialog}
-                                >
-                                Edit
+                                    //     <Button
+                                    //     variant="contained" color="secondary"
+                                    //     onClick={() => setShowConfirmBox(true)}
+                                    // >
+                                    //     Delete
+                                    // </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleOpneUpdateDialog}
+                                    >
+                                        Edit
                                 </Button>,
-                                <Box component="span" marginX={1} />,
-                                <Button
-                                    variant="contained" color="secondary"
-                                    onClick={() => setShowConfirmBox(true)}
-                                >
-                                    Delete
+                                    <Box component="span" marginX={1} />,
+                                    <Button
+                                        variant="contained" color="secondary"
+                                        onClick={() => setShowConfirmBox(true)}
+                                    >
+                                        Delete
                                 </Button>
 
                                 ]
@@ -297,15 +279,15 @@ const Roles = () => {
                                                 </Grid> :
                                                 <DetailsPage data={contactData} fields={contactFields} />
 
-                                                // <DetailsPage
-                                                //     data={contactData}
+                                            // <DetailsPage
+                                            //     data={contactData}
 
-                                                //     fields={contactFields}
-                                                //     isUpdating={isUpdating}
-                                                //     canEdit={allowedToEdit}
-                                                //     handleUpdate={handleUpdateContact}
-                                                //     sourceComponent="contact"
-                                                // />
+                                            //     fields={contactFields}
+                                            //     isUpdating={isUpdating}
+                                            //     canEdit={allowedToEdit}
+                                            //     handleUpdate={handleUpdateContact}
+                                            //     sourceComponent="contact"
+                                            // />
                                         }
                                     </div>
                                 </Grid>

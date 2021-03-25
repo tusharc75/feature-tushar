@@ -1,58 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import Dialog from '@material-ui/core/Dialog';
 import CreateAccount from './CreateAccount'
-import { getErrorMessage } from '../../../services/util'
 import { getObjKeys, formValidation } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom'
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from './../../../axios/axiosInstance'
 import { CustomEventEmitter } from './../../../axios/events';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-
-// const styles = makeStyles((theme) => ({
-//     root: {
-//         margin: 0,
-//         padding: theme.spacing(2),
-//     },
-//     closeButton: {
-//         position: 'absolute',
-//         right: theme.spacing(1),
-//         top: theme.spacing(1),
-//         color: theme.palette.grey[500],
-//     },
-// }));
-
-// const DialogTitle = withStyles(styles)((props) => {
-//     const { children, classes, onClose, ...other }: any = props;
-//     return (
-//         <MuiDialogTitle disableTypography className={classes.root} {...other}>
-//             <Typography variant="h6">{children}</Typography>
-//             {onClose ? (
-//                 <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
-//                     <CloseIcon />
-//                 </IconButton>
-//             ) : null}
-//         </MuiDialogTitle>
-//     );
-// });
+import { removeEmptyKeys } from '../../../constants/helpers'
 
 export default function CreateAccountMain(props) {
 
     const { open, onClose, id } = props
     const { state: { user } }: any = useData();
-    const history = useHistory();
     const [entityData, setEntityData] = useState({
         fields: [],
         initialValues: {},
     });
     const [loading, setLoading] = useState(false)
-    const [updateFieldValues, setUpdateFieldValues] = useState({})
-    const [saveAndNewLoading, setSaveAndNewLoading] = useState(false)
-    const [alertData, setAlertData] = useState({})
 
     useEffect(() => {
         if (id) {
+            setLoading(true)
             axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
                 const newFields = [];
                 data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
@@ -74,6 +41,7 @@ export default function CreateAccountMain(props) {
     }, [user]);
 
     const getAccountFields = () => {
+        setLoading(true)
         axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
@@ -86,90 +54,19 @@ export default function CreateAccountMain(props) {
     };
 
     const handleLoading = (action, isSaveAndNew = false) => {
-        if (isSaveAndNew) {
-            setSaveAndNewLoading(action)
-        }
-        else {
-            setLoading(action)
-        }
+        if (!isSaveAndNew) setLoading(action)
     }
 
-    const getModiFiedValues = values => {
-        values = { ...values }
+    const handleCreateAccount = (values, saveAndNew, setValues) => {
+        axiosInstance().post('/account', removeEmptyKeys(values)).then(({ data }) => {
+            onClose({ fetch: true })
+            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
 
-        if (values.employees === "") {
-            delete values.employees
-        }
-        else {
-            values.employees = parseInt(values.employees)
-        }
-
-        let tempFields = _.cloneDeep(entityData.fields)
-        tempFields.map(f => {
-            let fName = f.fieldName
-            if (f.type === "dropDown" && values[fName]) {
-                if (f?.option && f.option.length) {
-                    f.option.filter(obj => {
-                        if (obj.optionValue === values[fName]) {
-                            values[fName] = obj
-                            return true
-                        }
-                    })
-                }
-            }
-            if (f.type === "multiSelect" && values[fName] && values[fName].length > 0) {
-                if (f?.option && f.option.length) {
-                    f.option.map(obj => {
-                        let i = values[fName].indexOf(obj.optionValue)
-                        if (i >= 0) {
-                            values[fName][i] = obj
-                        }
-                    })
-                }
-            }
+            handleLoading(false, saveAndNew)
+        }).catch((error) => {
+            setLoading(false);
         })
-        Object.keys(values).forEach(key => {
-            if (!values[key] || (typeof values[key] === 'object' && Object.keys(values[key]).length == 0)) {
-                delete values[key]
-            }
-        })
-
-        // if (user?.user?.brand) values.brand = user.user.brand
-        return values
     }
-
-    const showErroeMes = (err, saveAndNew) => {
-        let errMes = getErrorMessage(err)
-        if (errMes) {
-            handleSnackbar(errMes, 'error', true)
-        }
-        handleLoading(false, saveAndNew)
-    }
-
-    const handleCreateAccount = async (values, saveAndNew, setValues) => {
-        try {
-            axiosInstance().post('/account', values).then(({ data }) => {
-                onClose({ fetch: true })
-                setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
-
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
-
-                handleLoading(false, saveAndNew)
-            }).catch((error) => {
-                setLoading(false);
-            })
-        }
-        catch (err) {
-            showErroeMes(err, saveAndNew)
-        }
-    }
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
     const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
         const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
@@ -180,34 +77,18 @@ export default function CreateAccountMain(props) {
             });
         } else {
             handleLoading(true, saveAndNew)
-            values = getModiFiedValues(values)
             handleCreateAccount(values, saveAndNew, setValues)
             setErrors({});
         }
 
     }
 
-    return (<Dialog
-        // fullWidth={true}
-        maxWidth="md"
-        aria-labelledby="customized-dialog-title"
-        onClose={onClose}
+    return (<CreateAccount
         open={open}
-    >
-        <CustomDialogHeader onClose={onClose} title="Add Account" />
-        {/* <DialogTitle id="customized-dialog-title"
-            style={{ paddingBottom: "1px", paddingLeft: "24px" }}
-            onClose={onClose}>
-            Add Account
-        </DialogTitle> */}
-        <CreateAccount
-            alertData={alertData}
-            handleSnackbar={handleSnackbar}
-            entityData={entityData}
-            onClose={onClose}
-            loading={loading}
-            handleSubmit={handleSubmit}
-        />
-    </Dialog>
+        onClose={onClose}
+        entityData={entityData}
+        loading={loading}
+        handleSubmit={handleSubmit}
+    />
     );
 }

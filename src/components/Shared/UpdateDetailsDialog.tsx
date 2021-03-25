@@ -157,7 +157,7 @@ const UpdateDetailsDialog = (props) => {
                 onClick={submitForm}
                 disabled={
                   Object.values(simplifyValues(initialVals)).toString() ===
-                    Object.values(simplifyValues(values)).toString() ||
+                  Object.values(simplifyValues(values)).toString() ||
                   isUpdating
                 }
               >

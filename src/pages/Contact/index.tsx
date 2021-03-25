@@ -16,8 +16,7 @@ import {
 } from "@material-ui/core";
 import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom'
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
-import { useHistory } from "react-router-dom";
+import { DataGrid } from "@material-ui/data-grid";
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
@@ -27,16 +26,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from '../../components/Helpers/SearchBox'
-import { getErrorMessage } from '../../services/util'
-import CustomToast from '../../components/Helpers/CustomToast'
 import DeleteIcon from '@material-ui/icons/Delete';
 import BlockIcon from '@material-ui/icons/Block';
 import { capitalize } from '../../services/util'
 import CustomContainer from "./../../components/Container";
 import MessageDialog from '../../components/Helpers/MessageDialog'
-
+import { getErrorMessage } from '../../services/util'
 import './contact.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
+import { CustomEventEmitter } from './../../axios/events';
 
 const ContactTypes = {
     "All Contacts": 1,
@@ -64,9 +62,7 @@ export default function Contact() {
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const history = useHistory();
 
-    const [alertData, setAlertData] = useState<any>({})
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -192,32 +188,18 @@ export default function Contact() {
         // eslint-disable-next-line
     }, [query, searchVal, selectedType]);
 
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
 
     const handleSingleDeleteContacts = async () => {
-        try {
-            setLoading(true);
+        setLoading(true);
 
-            let data = await RemoveContacts({ ids: [singleContactDelete.id] })
-            if (data.status === 200) {
-                handleSnackbar(data.message, 'success', true)
-                getContacts();
-                setLoading(false);
-            }
-            setSingleContactDelete({ id: null, show: false, contactName: "" });
+        let data = await RemoveContacts({ ids: [singleContactDelete.id] })
+        if (data.status === 200) {
+            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+            getContacts();
+            setLoading(false);
         }
-        catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
-        }
+        setSingleContactDelete({ id: null, show: false, contactName: "" });
+
     }
 
     const getContacts = () => {
@@ -232,10 +214,7 @@ export default function Contact() {
             setRowCount(count)
             setLoading(false);
         }).catch(err => {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
+            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: getErrorMessage(err) });
             setLoading(false);
         })
     }
@@ -321,14 +300,6 @@ export default function Contact() {
 
     return (
         <Layout>
-            {
-                alertData ? <CustomToast
-                    open={alertData.open || false}
-                    close={() => handleSnackbar('', '', false)}
-                    errorMsg={alertData.errorMsg || ''}
-                    type={alertData.type || ''}
-                /> : null
-            }
             <Grid container spacing={3} direction="row">
                 <Grid item xs={12} sm={6} className="pl-3">
                     <CustomBreadCrumbs routes={[routes.contact]} />
@@ -530,7 +501,7 @@ export default function Contact() {
                                 setShowCreateContactDialog(false);
                                 getContacts();
                             }}
-                            // entityDetails={createContactEntityDetails}
+                        // entityDetails={createContactEntityDetails}
                         />
                     }
 

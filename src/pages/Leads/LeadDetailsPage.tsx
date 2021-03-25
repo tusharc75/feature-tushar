@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
-import { ExpandMore, Send } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-
-import { getErrorMessage } from "../../services/util";
-import CustomToast from "../../components/Helpers/CustomToast";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
@@ -16,13 +12,13 @@ import axiosInstance from "./../../axios/axiosInstance";
 import { leadPage } from "../../routes/Lead";
 import routes from "../../components/Helpers/Routes";
 import { capitalize } from "../../services/util";
-import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { removeEmptyKeys } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import { CustomEventEmitter } from '../../axios/events'
 import styles from "./LeadDetailsPage.module.scss"
 
 const LeadDetailsPage = () => {
@@ -31,7 +27,6 @@ const LeadDetailsPage = () => {
     state: { user },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
-  const [alertData, setAlertData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -139,7 +134,7 @@ const LeadDetailsPage = () => {
       axiosInstance()
         .put(`/lead/remove`, { ids: [leadData._id] })
         .then(({ data }) => {
-          handleSnackbar(data.message, "success", true);
+          CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
           goBackToListing();
           setShowConfirmBox(false);
         })
@@ -169,7 +164,7 @@ const LeadDetailsPage = () => {
       .put("/lead", removeEmptyKeys(updatedData))
       .then(({ data }) => {
         fetchLeadData();
-        handleSnackbar("Successfully saved", "success", true);
+        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
         setUpdating(false);
       })
       .catch((err) => {
@@ -177,13 +172,6 @@ const LeadDetailsPage = () => {
       });
   };
 
-  const handleSnackbar = (msg, type, isOpen) => {
-    setAlertData({
-      errorMsg: msg,
-      type: type,
-      open: isOpen,
-    });
-  };
 
   const quickLinks = [
     {
@@ -223,14 +211,6 @@ const LeadDetailsPage = () => {
           handleUpdate={handleUpdateLead}
         />
       )}
-      {alertData ? (
-        <CustomToast
-          open={alertData.open || false}
-          close={() => handleSnackbar("", "", false)}
-          errorMsg={alertData.errorMsg || ""}
-          type={alertData.type || ""}
-        />
-      ) : null}
       <Layout>
         <Grid container direction="row">
           <Grid item xs={12} className="pl-2">
@@ -271,12 +251,12 @@ const LeadDetailsPage = () => {
             </Button>
             <Box component="span" marginX={1} />
             {leadsPermissions.isDelete &&
-            leadData?.owner?.optionValue &&
-            user?.user?._id &&
-            leadData.owner.optionValue === user.user._id ? (
+              leadData?.owner?.optionValue &&
+              user?.user?._id &&
+              leadData.owner.optionValue === user.user._id ? (
               <DeleteButton
                 text="Delete"
-                action={() => setShowConfirmBox(true)}
+                onClick={() => setShowConfirmBox(true)}
               />
             ) : null}
           </CustomHeader>
@@ -334,7 +314,7 @@ const LeadDetailsPage = () => {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => {}}
+                      handleActivityRefresh={() => { }}
                     />
                   </div>
                 )}

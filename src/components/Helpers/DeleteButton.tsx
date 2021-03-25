@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function DeleteButton({ text, action }) {
+function DeleteButton({ text, onClick }) {
 
     const classes = useStyles();
 
@@ -17,7 +17,7 @@ function DeleteButton({ text, action }) {
         <Button
             className={classes.deleteButton}
             variant="outlined"
-            onClick={action}
+            onClick={onClick}
         >
             {text}
         </Button>
