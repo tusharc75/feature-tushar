@@ -73,7 +73,6 @@ const LeadDetailsPage = () => {
 
   const fetchLeadData = async () => {
     axiosInstance().get(`/lead/${id}`).then(({ data: { data } }) => {
-      console.log(data);
       handleMainPoints(data);
       let name = capitalize(data.firstName || "") + " ";
       name = name + capitalize(data.middleName || "") + " ";
