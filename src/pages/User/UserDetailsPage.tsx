@@ -135,8 +135,9 @@ const UserDetailsPage = () => {
 
   const handleUpdateUser = (values) => {
     setUpdating(true);
+
     axiosInstance()
-      .put(`/user/${id}`, removeEmptyKeys(values))
+      .put(`/user/${id}`, values)
       .then(({ data }) => {
         fetchUserData();
         handleSnackbar("Successfully saved", "success", true);

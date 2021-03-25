@@ -133,12 +133,12 @@ const FormTypes = (props) => {
         return undefined;
       }
 
-      if (values.address === "") {
+      if (values[name] === "") {
         setOptions(value ? [value] : []);
         return undefined;
       }
 
-      fetch({ input: values.address }, (results) => {
+      fetch({ input: values[name] }, (results) => {
         if (active) {
           let newOptions = [];
           if (value) {
@@ -154,7 +154,7 @@ const FormTypes = (props) => {
     return () => {
       active = false;
     };
-  }, [type, value, values.address, fetch]);
+  }, [type, value, values[name], fetch]);
 
   const handleUploadFile = (event) => {
     if (event.target.files && event.target.files.length) {
