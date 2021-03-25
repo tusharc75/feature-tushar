@@ -20,6 +20,7 @@ import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { removeEmptyKeys } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomEventEmitter } from '../../axios/events'
+import styles from "./LeadDetailsPage.module.scss"
 
 const LeadDetailsPage = () => {
   const history = useHistory();
@@ -297,7 +298,7 @@ const LeadDetailsPage = () => {
                 )}
               </Container>
             </Grid>
-            <Grid item sm={4} md={4} lg={4}>
+            <Grid className={styles.activityContainer} item sm={4} md={4} lg={4}>
               <Container>
                 {!leadData ? (
                   <Box>
