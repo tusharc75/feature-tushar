@@ -20,7 +20,6 @@ import routes from "../../components/Helpers/Routes";
 import { capitalize } from "../../services/util";
 import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
-import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 
