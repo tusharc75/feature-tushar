@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { formValidation } from '../../../constants/helpers';
+import { formValidation, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
 import { commonStyle } from '../../Contact/CommonStyles'
 import CustomToast from '../../../components/Helpers/CustomToast'
@@ -78,27 +78,11 @@ export default function CreateAccount(props) {
     };
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
-        if (!selectedCollaborator || selectedCollaborator.length === 0) {
-            setOwnerDataSource(ownerCollaboratorCommonDataSource);
-        } else {
-            const ownerDataSource = [];
-
-            ownerCollaboratorCommonDataSource.map(d => {
-                const isCollaboratorSelected = selectedCollaborator.find(collaborator => collaborator.optionValue == d.optionValue);
-                if (!isCollaboratorSelected) {
-                    ownerDataSource.push(d);
-                }
-            })
-            setOwnerDataSource(ownerDataSource);
-        }
+        setOwnerDataSource(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorCommonDataSource))
     }
 
-    const onCollaboratorOwnerMultiselectOpen = (selectedOwner) => {
-        if (selectedOwner) {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource.filter(d => d.optionValue != selectedOwner.optionValue));
-        } else {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource);
-        }
+    const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource))
     }
     //  Owner, Collaborator Code - End
 

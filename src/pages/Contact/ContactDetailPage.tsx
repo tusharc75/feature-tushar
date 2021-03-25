@@ -23,7 +23,7 @@ import Loader from '../../components/Loader'
 import routes from '../../components/Helpers/Routes';
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
-import isObjectEmpty from './../../constants/helpers'
+import { isObjectEmpty } from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 

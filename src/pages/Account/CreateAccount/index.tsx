@@ -62,9 +62,9 @@ export default function CreateAccountMain(props) {
     const getModiFiedValues = values => {
         values = removeEmptyKeys({ ...values })
 
-        if (values.employees) {
-            values.employees = parseInt(values.employees)
-        }
+        // if (values.employees) {
+        //     values.employees = parseInt(values.employees)
+        // }
 
         let tempFields = _.cloneDeep(entityData.fields)
         tempFields.map(f => {
@@ -100,38 +100,38 @@ export default function CreateAccountMain(props) {
         return values
     }
 
-    const showErroeMes = (err, saveAndNew) => {
-        let errMes = getErrorMessage(err)
-        if (errMes) {
-            handleSnackbar(errMes, 'error', true)
-        }
-        handleLoading(false, saveAndNew)
-    }
+    // const showErroeMes = (err, saveAndNew) => {
+    //     let errMes = getErrorMessage(err)
+    //     if (errMes) {
+    //         handleSnackbar(errMes, 'error', true)
+    //     }
+    //     handleLoading(false, saveAndNew)
+    // }
 
-    const handleCreateAccount = async (values, saveAndNew, setValues) => {
-        try {
-            axiosInstance().post('/account', values).then(({ data }) => {
-                onClose({ fetch: true })
-                setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
+    const handleCreateAccount = (values, saveAndNew, setValues) => {
+        // try {
+        axiosInstance().post('/account', removeEmptyKeys(values)).then(({ data }) => {
+            onClose({ fetch: true })
+            // setValues(getObjKeys("", _.cloneDeep(entityData.fields)));
 
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
 
-                handleLoading(false, saveAndNew)
-            }).catch((error) => {
-                setLoading(false);
-            })
-        }
-        catch (err) {
-            showErroeMes(err, saveAndNew)
-        }
-    }
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
+            handleLoading(false, saveAndNew)
+        }).catch((error) => {
+            setLoading(false);
         })
-    };
+        // }
+        // catch (err) {
+        //     showErroeMes(err, saveAndNew)
+        // }
+    }
+    // const handleSnackbar = (msg, type, isOpen) => {
+    //     setAlertData({
+    //         errorMsg: msg,
+    //         type: type,
+    //         open: isOpen
+    //     })
+    // };
     const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
         const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
@@ -142,7 +142,7 @@ export default function CreateAccountMain(props) {
             });
         } else {
             handleLoading(true, saveAndNew)
-            values = getModiFiedValues(values)
+            // values = getModiFiedValues(values)
             handleCreateAccount(values, saveAndNew, setValues)
             setErrors({});
         }
@@ -153,7 +153,7 @@ export default function CreateAccountMain(props) {
         open={open}
         onClose={onClose}
         alertData={alertData}
-        handleSnackbar={handleSnackbar}
+        // handleSnackbar={handleSnackbar}
         entityData={entityData}
         loading={loading}
         handleSubmit={handleSubmit}
