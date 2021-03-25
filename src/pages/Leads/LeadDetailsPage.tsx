@@ -153,9 +153,9 @@ const LeadDetailsPage = () => {
 
   const handleUpdateLead = (values) => {
     setUpdating(true);
-    if (values.noOfEmployees) {
-      values.noOfEmployees = parseInt(values.noOfEmployees);
-    }
+    // if (values.noOfEmployees) {
+    //   values.noOfEmployees = parseInt(values.noOfEmployees);
+    // }
     const updatedData = {
       ...values,
       _id: leadData._id,
