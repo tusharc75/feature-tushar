@@ -42,6 +42,7 @@ function LeadsHeader(props) {
                     Object.keys(options).length ? <Select
                         style={{ width: '160px' }}
                         displayEmpty
+                        disableUnderline
                         labelId="demo-simple-select-outlined-label"
                         inputProps={{ "aria-label": "Without label" }}
                         id="demo-simple-select-outlined"
