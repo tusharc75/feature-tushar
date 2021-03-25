@@ -1,8 +1,25 @@
 import { useState, useEffect } from "react";
-import { Grid, Box, Button } from "@material-ui/core";
+import {
+  Grid,
+  Box,
+  Button,
+  Typography,
+  FormControl,
+  FormGroup,
+  FormControlLabel,
+  Switch,
+  IconButton,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from "@material-ui/core";
+import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
-import { capitalize } from "lodash";
+import { capitalize, startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
@@ -16,6 +33,9 @@ import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import { removeEmptyKeys } from "../../constants/helpers";
 import { CustomEventEmitter } from './../../axios/events';
+import BoxWithBorder from "../../components/BoxWithBorder";
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import UserRoles from "./UserRoles";
 
 const UserDetailsPage = () => {
   const { id } = useParams();
@@ -26,13 +46,16 @@ const UserDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [alertData, setAlertData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [globalRoles, setGloabalRoles] = useState([]);
+  const [rolesLoading, setRolesLoading] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [userPermissions, setUserPermissions] = useState(null);
+  const [isChangingPermission, setChangingPermission] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [userFields, setUserFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [usersPermissions, setUsersPermissions] = useState({
     isCreate: false,
@@ -45,6 +68,7 @@ const UserDetailsPage = () => {
     if (id) {
       fetchUserData();
       getUserFields();
+      fetchUserRoles();
     }
   }, [id]);
 
@@ -76,7 +100,6 @@ const UserDetailsPage = () => {
       name = name + capitalize(data.lastName || "");
 
       setHeadingLbl(name);
-      handleAllowToEditList(data);
       setUserData(data);
       setCustomizedRoutes([
         routes.user,
@@ -86,6 +109,20 @@ const UserDetailsPage = () => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const fetchUserRoles = () => {
+    setRolesLoading(true);
+    axiosInstance()
+      .get(`/role?User=${id}`)
+      .then(({ data: { data } }) => {
+        setGloabalRoles(data);
+        setRolesLoading(false);
+      })
+      .catch((err) => {
+        setRolesLoading(false);
+        console.log(err);
+      });
   };
 
   const handleMainPoints = (data) => {
@@ -102,17 +139,6 @@ const UserDetailsPage = () => {
       .then(({ data }) => {
         setUserFIelds(data.data);
       });
-  };
-
-  const handleAllowToEditList = (userDetails: any) => {
-    const userId = user?.user?._id;
-    let allowToEdit = false;
-
-    if (userId) {
-      allowToEdit = usersPermissions.isUpdate ? true : false;
-
-      if (allowToEdit) setAllowedToEdit(allowToEdit);
-    }
   };
 
   const handleDeleteUser = () => {
@@ -141,6 +167,7 @@ const UserDetailsPage = () => {
       .then(({ data }) => {
         fetchUserData();
         CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+        setUserPermissions(data.permissions);
         setUpdating(false);
       })
       .catch((err) => {
@@ -154,6 +181,34 @@ const UserDetailsPage = () => {
 
   const closeUpdateDIalog = () => {
     setOpenUpdateDialog(false);
+  };
+
+  /**
+   *  Permissions Change Handle
+   */
+  const handleChangePermissions = (e) => {
+    setUserPermissions({
+      ...userPermissions,
+      [e.target.name]: e.target.checked,
+    });
+    const newData = {
+      _id: id,
+      ...userPermissions,
+      [e.target.name]: e.target.checked,
+    };
+    setChangingPermission(true);
+    axiosInstance()
+      .post("/user/permission-setup", newData)
+      .then(({ data }) => {
+        console.log(data);
+        setChangingPermission(false);
+        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Permission changed successfully" });
+      })
+      .catch((err) => {
+        setChangingPermission(false);
+        CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: "Something went wrong" });
+        console.log(err);
+      });
   };
 
   return (
@@ -222,23 +277,13 @@ const UserDetailsPage = () => {
           </CustomHeader>
         )}
 
-        <div>
-          <Grid
-            container
-            spacing={2}
-            style={{ minHeight: "calc(100vh - 200px)" }}
-          >
-            <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Container>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8}>
+            <Container styles={{ padding: "8px" }}>
+              <BoxWithBorder style={{ padding: "8px", minHeight: "450px" }}>
                 {loading ? (
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <Grid item sm={6} md={6}>
-                        <Skeleton variant="text" width="100px" height="16px" />
-                        <Box marginY={1} />
-                        <Skeleton width="100%" height="50px" />
-                      </Grid>
-                    ))}
+                  <Grid container spacing={2} style={{ padding: "8px" }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : !userFields.length ? (
                   <Box
@@ -253,15 +298,160 @@ const UserDetailsPage = () => {
                 ) : (
                   <DetailsPage data={userData} fields={userFields} />
                 )}
-              </Container>
-            </Grid>
-            <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Container>
-                <p>Some Data</p>
-              </Container>
-            </Grid>
+              </BoxWithBorder>
+            </Container>
           </Grid>
-        </div>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
+            <Container styles={{ padding: "8px" }}>
+              <BoxWithBorder style={{ padding: "0px", minHeight: "450px" }}>
+                <Box width="100%" padding={1} bgcolor="grey.200">
+                  <Typography color="primary">Approval Process</Typography>
+                </Box>
+
+                <Box padding={1}>
+                  <FormControl component="fieldset" fullWidth>
+                    <FormGroup>
+                      {loading ? (
+                        [1, 2, 3, 4].map((i) => (
+                          <Box
+                            padding={1}
+                            marginBottom={2}
+                            display="flex"
+                            key={i}
+                          >
+                            <Skeleton
+                              style={{ borderRadius: 16 }}
+                              width="30px"
+                              height="30px"
+                            />
+                            <Box marginX={1} />
+                            <Skeleton
+                              variant="text"
+                              width="80%"
+                              height="30px"
+                            />
+                          </Box>
+                        ))
+                      ) : userPermissions ? (
+                        Object.keys(userPermissions).map((key) => (
+                          <FormControlLabel
+                            key={key}
+                            control={
+                              <Switch
+                                checked={userPermissions[key]}
+                                name={key}
+                                disabled={isChangingPermission}
+                                onChange={handleChangePermissions}
+                              />
+                            }
+                            label={startCase(key)}
+                          />
+                        ))
+                      ) : (
+                        <Typography>There are no permissions</Typography>
+                      )}
+                    </FormGroup>
+                  </FormControl>
+                </Box>
+              </BoxWithBorder>
+            </Container>
+          </Grid>
+        </Grid>
+        <Box marginY={1} />
+        <Container styles={{ padding: "8px" }}>
+          <BoxWithBorder style={{ padding: "0px", minHeight: "300px" }}>
+            <Box display="flex" padding={1} bgcolor="grey.200">
+              <Grid container>
+                <Grid item xs={8}>
+                  <Box display="flex">
+                    <Box padding="5px">
+                      <Typography variant="subtitle2">
+                        Assigned Global Roles ({globalRoles.length || "0"})
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={4} container justify="flex-end">
+                  <IconButton color="primary" size="small">
+                    <ControlPoint />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </Box>
+
+            <Grid container style={{ padding: "10px" }} spacing={1}>
+              <Grid item xs={12} sm={12} md={4}>
+                <BoxWithBorder
+                  style={{
+                    padding: "0px",
+                    height: "352px",
+                  }}
+                >
+                  {rolesLoading ? (
+                    [1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        styles={{ padding: "0px", margin: "8px 8px" }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))
+                  ) : !globalRoles.length ? (
+                    <Box textAlign="center" marginTop={2}>
+                      <Typography variant="body2">
+                        User doesn't have any roles
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {userData && (
+                        <UserRoles data={globalRoles} unassignRole={() => { }} />
+                      )}
+                    </Box>
+                  )}
+                </BoxWithBorder>
+              </Grid>
+              <Grid item xs={12} sm={12} md={8} lg={8}>
+                <BoxWithBorder
+                  style={{
+                    padding: "0px",
+                    height: "352px",
+                  }}
+                >
+                  <TableContainer>
+                    <Table stickyHeader aria-label="roles">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Names</TableCell>
+                          <TableCell>Read</TableCell>
+                          <TableCell>Create</TableCell>
+                          <TableCell>Update</TableCell>
+                          <TableCell>Delete</TableCell>
+                        </TableRow>
+                      </TableHead>
+
+                      <TableBody></TableBody>
+                    </Table>
+                  </TableContainer>
+                </BoxWithBorder>
+              </Grid>
+            </Grid>
+          </BoxWithBorder>
+        </Container>
       </Layout>
       {showConfirmBox ? (
         <ConfirmationDialog

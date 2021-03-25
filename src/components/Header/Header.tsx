@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
 
 import {
+  Slide,
   AppBar,
   Toolbar,
   IconButton,
@@ -16,13 +17,15 @@ import {
   Search,
   Menu as MenuIcon,
   MoreVert as MoreIcon,
+  Clear as ClearIcon,
   Notifications,
   HelpOutline,
   ExpandMore,
 } from "@material-ui/icons";
+import { useHistory } from "react-router-dom";
+
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
-import { useHistory } from "react-router-dom";
 import "./Header.scss";
 
 const useStyles = makeStyles((theme) => ({
@@ -53,6 +56,10 @@ const useStyles = makeStyles((theme) => ({
     },
     margin: theme.spacing(0, 2),
     width: "100%",
+    display: "none",
+    [theme.breakpoints.up("md")]: {
+      display: "block",
+    },
   },
 
   searchIcon: {
@@ -90,7 +97,7 @@ const useStyles = makeStyles((theme) => ({
   },
   servicesButton: {
     display: "flex",
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("xs")]: {
       display: "none",
     },
   },
@@ -99,6 +106,7 @@ const useStyles = makeStyles((theme) => ({
 const Header = ({ toggleDrawer }) => {
   const classes = useStyles();
   const history = useHistory();
+  const [isSearch, setSearch] = useState(false);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
   const [entitiesEl, setEntitiesEl] = useState(null);
@@ -263,19 +271,44 @@ const Header = ({ toggleDrawer }) => {
       <MenuItem onClick={openSupportMenu}>
         <p>Support</p> <ExpandMore />
       </MenuItem>
-      <MenuItem>
-        <p>Help</p>
-      </MenuItem>
-      <MenuItem>
-        <Badge badgeContent={1} color="secondary">
-          <p>Notifications</p>
-        </Badge>
-      </MenuItem>
     </Menu>
   );
 
   return (
     <div>
+      <Slide direction="down" in={isSearch}>
+        <AppBar position="fixed" style={{ zIndex: 10000 }}>
+          <Toolbar>
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="close search"
+              onClick={() => setSearch(false)}
+            >
+              <ClearIcon />
+            </IconButton>
+
+            <div
+              className={classes.search}
+              style={{ display: "block", width: "100%" }}
+            >
+              <div className={classes.searchIcon}>
+                <Search />
+              </div>
+              <InputBase
+                placeholder="Search…"
+                classes={{
+                  root: classes.inputRoot,
+                  input: classes.inputInput,
+                }}
+                style={{ width: "100%" }}
+                inputProps={{ "aria-label": "search" }}
+              />
+            </div>
+          </Toolbar>
+        </AppBar>
+      </Slide>
+
       <AppBar position="fixed" className={classes.appBar} color="primary">
         <Toolbar>
           <Box component="div" display="flex" alignItems="center" flexGrow={1}>
@@ -301,6 +334,7 @@ const Header = ({ toggleDrawer }) => {
                 color="inherit"
                 onClick={openServicesMenu}
                 title="Services"
+                className={classes.sectionDesktop}
               >
                 Services <ExpandMore />
               </Button>
@@ -329,6 +363,7 @@ const Header = ({ toggleDrawer }) => {
               />
             </div>
           </Box>
+
           <div className={classes.sectionDesktop}>
             <Button
               aria-controls={supportMenuId}
@@ -338,17 +373,28 @@ const Header = ({ toggleDrawer }) => {
             >
               Support <ExpandMore />
             </Button>
-            <IconButton aria-label="settings" color="inherit">
-              <Badge badgeContent={1} color="secondary">
-                <Notifications />
-              </Badge>
-            </IconButton>
-
-            <IconButton aria-label="help" color="inherit">
-              <HelpOutline />
-            </IconButton>
           </div>
 
+          <IconButton aria-label="settings" color="inherit">
+            <Badge badgeContent={1} color="secondary">
+              <Notifications />
+            </Badge>
+          </IconButton>
+
+          <IconButton aria-label="help" color="inherit">
+            <HelpOutline />
+          </IconButton>
+
+          <div className={classes.sectionMobile}>
+            <IconButton
+              aria-label="search"
+              onClick={() => setSearch(true)}
+              color="inherit"
+              title="Search"
+            >
+              <Search />
+            </IconButton>
+          </div>
           <UserProfile
             anchorRef={anchorRef}
             open={open}
