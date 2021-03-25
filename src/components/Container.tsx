@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CustomContainer = (props) => {
   const classes = useStyles();
-  const { children, styles, maxWidth, minHeight } = props;
+  const { children, styles, maxWidth, minHeight, className, padding } = props;
 
   return (
     <>
@@ -24,17 +24,18 @@ const CustomContainer = (props) => {
           {children}
         </Paper>
       ) : (
-          <Container
-            className={classes.root}
-            maxWidth={maxWidth}
-            style={{
-              minHeight: minHeight ? "100%" : "calc(100vh - 65px)",
-              ...styles,
-            }}
-          >
-            {children}
-          </Container>
-        )}
+        <Container
+          className={classes.root}
+          maxWidth={maxWidth}
+          style={{
+            minHeight: minHeight ? "100%" : "calc(100vh - 65px)",
+            padding: padding || '',
+            ...styles,
+          }}
+        >
+          {children}
+        </Container>
+      )}
     </>
   );
 };
@@ -44,6 +45,7 @@ CustomContainer.propTypes = {
   styles: PropTypes.object,
   maxWidth: PropTypes.string,
   minHeight: PropTypes.any,
+  padding: PropTypes.any,
 };
 
 export default CustomContainer;

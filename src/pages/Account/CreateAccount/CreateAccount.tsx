@@ -2,22 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { formValidation } from '../../../constants/helpers';
+import { formValidation, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
 import { commonStyle } from '../../Contact/CommonStyles'
-import CustomToast from '../../../components/Helpers/CustomToast'
 import { withStyles } from '@material-ui/core/styles';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import Loader from '../../../components/Loader'
 import FormTypes from "./../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
-import "../accounts.scss"
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
+import Dialog from '@material-ui/core/Dialog'
+import { CustomEventEmitter } from '../../../axios/events'
 
 const useStyles = makeStyles((theme) => ({
-    ...commonStyle(theme)
+    ...commonStyle(theme),
+    root: {
+        margin: 0,
+        padding: theme.spacing(2),
+    },
+    container: {
+        position: "relative",
+    },
+    accDialog1: {
+        "MuiDialog-paper": {
+            overflowY: "unset"
+        }
+    }
 }));
-
 const DialogContent = withStyles((theme) => ({
     root: {
         padding: theme.spacing(2),
@@ -25,18 +37,11 @@ const DialogContent = withStyles((theme) => ({
 }))(MuiDialogContent);
 
 const arr = [...Array(9).keys()]
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
 
 export default function CreateAccount(props) {
 
     const classes = useStyles();
-    const { entityData, alertData, handleSnackbar, handleSubmit, loading, onClose } = props
+    const { entityData, handleSubmit, loading, onClose, open } = props
 
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
@@ -52,7 +57,6 @@ export default function CreateAccount(props) {
             setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
         }
         sortArray();
-        // eslint-disable-next-line
     }, [entityData.fields]);
 
     const sortArray = () => {
@@ -74,101 +78,71 @@ export default function CreateAccount(props) {
     };
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
-        if (!selectedCollaborator || selectedCollaborator.length == 0) {
-            setOwnerDataSource(ownerCollaboratorCommonDataSource);
-        } else {
-            const ownerDataSource = [];
-
-            ownerCollaboratorCommonDataSource.map(d => {
-                const isCollaboratorSelected = selectedCollaborator.find(collaborator => collaborator.optionValue == d.optionValue);
-                if (!isCollaboratorSelected) {
-                    ownerDataSource.push(d);
-                }
-            })
-            setOwnerDataSource(ownerDataSource);
-        }
+        setOwnerDataSource(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorCommonDataSource))
     }
 
-    const onCollaboratorOwnerMultiselectOpen = (selectedOwner) => {
-        if (selectedOwner) {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource.filter(d => d.optionValue != selectedOwner.optionValue));
-        } else {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource);
-        }
+    const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource))
     }
     //  Owner, Collaborator Code - End
 
     return (<>
-        {
-            alertData ? <CustomToast
-                open={alertData.open || false}
-                close={() => handleSnackbar('', '', false)}
-                errorMsg={alertData.errorMsg || ''}
-                type={alertData.type || ''}
-            /> : null
-        }
-        {
-            entityData.fields.length > 0 ?
-                <>
-                    <Formik
-                        initialValues={entityData.initialValues}
-                        validate={(values) => formValidation(values, entityData.fields)}
-                        onSubmit={() => { }}
-                    >
-                        {({
-                            setValues,
-                            setErrors,
-                            values,
-                            errors,
-                            touched,
-                            setFieldValue,
-                            setFieldTouched,
-                            validateForm,
-                            resetForm
-                        }) => (
-                            <Form>
+        <Dialog
+            disableBackdropClick={true}
+            maxWidth="md"
+            aria-labelledby="customized-dialog-title"
+            onClose={onClose}
+            open={open}
+        >
+            <CustomDialogHeader onClose={onClose} title="Add Account" />
+
+            {
+                entityData.fields.length > 0 ?
+                    <>
+                        <Formik
+                            initialValues={entityData.initialValues}
+                            validate={(values) => formValidation(values, entityData.fields)}
+                            onSubmit={() => { }}
+                        >
+                            {({
+                                setValues,
+                                setErrors,
+                                values,
+                                errors,
+                                touched,
+                                setFieldValue,
+                                setFieldTouched,
+                                validateForm,
+                                resetForm
+                            }) => (
                                 <>
-                                    <DialogContent dividers style={{ padding: '10px', marginLeft: "15px", marginRight: '15px' }}>
-                                        {
-                                            formsData &&
-                                            formsData.map((form, i) => (
-                                                <div key={i}>
-                                                    <h2 className="form-label-style">{form.name}</h2>
-                                                    <Box marginY={2}>
-                                                        <Grid spacing={3} container>
-                                                            {form.sectionFields.map((field) => (
-                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    {
-                                                                        field.fieldName == "owner" ?
-                                                                            <FormTypes values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={ownerDataSource}
-                                                                                setFieldValue={setFieldValue}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={true}
-                                                                                size="small"
-                                                                                onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
-                                                                            /> : field.fieldName == "collaborator" ?
-                                                                                <FormTypes
-                                                                                    values={values}
+                                    <CustomDialogContent>
+                                        <Form autoComplete="off" autoCorrect="off" noValidate>
+                                            {
+                                                formsData &&
+                                                formsData.map((form, i) => (
+                                                    <div key={i}>
+                                                        <h2 className="form-label-style">{form.name}</h2>
+                                                        <Box marginY={2}>
+                                                            <Grid spacing={3} container>
+                                                                {form.sectionFields.map((field) => (
+                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                        {
+                                                                            field.fieldName == "owner" ?
+                                                                                <FormTypes values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
-                                                                                    options={collaboratorDataSource}
+                                                                                    options={ownerDataSource}
                                                                                     setFieldValue={setFieldValue}
                                                                                     required={field.required}
                                                                                     fullWidth
                                                                                     isTooltip={true}
                                                                                     size="small"
-                                                                                    onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
-                                                                                /> : field.fieldName == "isShippingAddressSameAsBillingAddress" ?
+                                                                                    onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
+                                                                                /> : field.fieldName == "collaborator" ?
                                                                                     <FormTypes
                                                                                         values={values}
                                                                                         errors={errors}
@@ -182,13 +156,8 @@ export default function CreateAccount(props) {
                                                                                         fullWidth
                                                                                         isTooltip={true}
                                                                                         size="small"
-                                                                                        onChange={(e) => {
-                                                                                            setFieldValue(field.fieldName, e.target.checked)
-                                                                                            if (e.target.checked && values.billingAddress) {
-                                                                                                setFieldValue("shippingAddress", values.billingAddress)
-                                                                                            }
-                                                                                        }}
-                                                                                    /> : field.fieldName == "billingAddress" ?
+                                                                                        onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
+                                                                                    /> : field.fieldName == "isShippingAddressSameAsBillingAddress" ?
                                                                                         <FormTypes
                                                                                             values={values}
                                                                                             errors={errors}
@@ -196,19 +165,19 @@ export default function CreateAccount(props) {
                                                                                             label={field.fieldLabel}
                                                                                             name={field.fieldName}
                                                                                             type={field.type}
-                                                                                            options={field.option}
+                                                                                            options={collaboratorDataSource}
                                                                                             setFieldValue={setFieldValue}
                                                                                             required={field.required}
                                                                                             fullWidth
                                                                                             isTooltip={true}
                                                                                             size="small"
-                                                                                            onChange={(event, newValue) => {
-                                                                                                setFieldValue(field.fieldName, newValue);
-                                                                                                if (values.isShippingAddressSameAsBillingAddress == true) {
-                                                                                                    setFieldValue("shippingAddress", newValue)
+                                                                                            onChange={(e) => {
+                                                                                                setFieldValue(field.fieldName, e.target.checked)
+                                                                                                if (e.target.checked && values.billingAddress) {
+                                                                                                    setFieldValue("shippingAddress", values.billingAddress)
                                                                                                 }
                                                                                             }}
-                                                                                        /> : field.fieldName == "shippingAddress" ?
+                                                                                        /> : field.fieldName == "billingAddress" ?
                                                                                             <FormTypes
                                                                                                 values={values}
                                                                                                 errors={errors}
@@ -222,72 +191,85 @@ export default function CreateAccount(props) {
                                                                                                 fullWidth
                                                                                                 isTooltip={true}
                                                                                                 size="small"
-                                                                                                disabled={values.isShippingAddressSameAsBillingAddress == true}
-                                                                                            /> : <FormTypes
-                                                                                                // {...rest}
-                                                                                                values={values}
-                                                                                                errors={errors}
-                                                                                                touched={touched}
-                                                                                                label={field.fieldLabel}
-                                                                                                name={field.fieldName}
-                                                                                                type={field.type}
-                                                                                                options={field.option}
-                                                                                                setFieldValue={setFieldValue}
-                                                                                                required={field.required}
-                                                                                                fullWidth
-                                                                                                isTooltip={true}
-                                                                                                size="small"
-                                                                                            />
-                                                                    }
+                                                                                                onChange={(event, newValue) => {
+                                                                                                    setFieldValue(field.fieldName, newValue);
+                                                                                                    if (values.isShippingAddressSameAsBillingAddress == true) {
+                                                                                                        setFieldValue("shippingAddress", newValue)
+                                                                                                    }
+                                                                                                }}
+                                                                                            /> : field.fieldName == "shippingAddress" ?
+                                                                                                <FormTypes
+                                                                                                    values={values}
+                                                                                                    errors={errors}
+                                                                                                    touched={touched}
+                                                                                                    label={field.fieldLabel}
+                                                                                                    name={field.fieldName}
+                                                                                                    type={field.type}
+                                                                                                    options={field.option}
+                                                                                                    setFieldValue={setFieldValue}
+                                                                                                    required={field.required}
+                                                                                                    fullWidth
+                                                                                                    isTooltip={true}
+                                                                                                    size="small"
+                                                                                                    disabled={values.isShippingAddressSameAsBillingAddress == true}
+                                                                                                /> : <FormTypes
+                                                                                                    // {...rest}
+                                                                                                    values={values}
+                                                                                                    errors={errors}
+                                                                                                    touched={touched}
+                                                                                                    label={field.fieldLabel}
+                                                                                                    name={field.fieldName}
+                                                                                                    type={field.type}
+                                                                                                    options={field.option}
+                                                                                                    setFieldValue={setFieldValue}
+                                                                                                    required={field.required}
+                                                                                                    fullWidth
+                                                                                                    isTooltip={true}
+                                                                                                    size="small"
+                                                                                                />
+                                                                        }
 
-                                                                </Grid>
-                                                            ))}
-                                                        </Grid>
-                                                    </Box>
-                                                </div>
-                                            ))
-                                        }
-                                        {/* <InputField
-                                            errors={errors}
-                                            values={values}
-                                            setFieldValue={setFieldValue}
-                                            touched={touched}
-                                            fieldsData={entityData.fields}
-                                            size="small"
-                                            fullWidth
-                                            isTooltip={true}
-                                        /> */}
-                                    </DialogContent>
-                                </>
-                                <DialogActions>
-                                    <Button onClick={onClose} variant="outlined" color="primary" >
-                                        Cancel
+                                                                    </Grid>
+                                                                ))}
+                                                            </Grid>
+                                                        </Box>
+                                                    </div>
+                                                ))
+                                            }
+
+
+                                        </Form>
+                                    </CustomDialogContent>
+                                    <CustomDialogFooter>
+                                        <Button onClick={onClose} variant="outlined" color="primary" >
+                                            Cancel
                                              </Button>
 
-                                    <CustomButton
-                                        loading={loading}
-                                        style={{ float: "right" }}
-                                        variant="contained"
-                                        color="primary"
-                                        disabled={loading || Object.keys(errors).length > 0 ? true : false}
-                                        onClick={(e) => {
-                                            e.preventDefault()
-                                            handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
-                                        }}
-                                    >
-                                        Save
+                                        <CustomButton
+                                            loading={loading}
+                                            variant="contained"
+                                            color="primary"
+                                            disabled={loading || Object.keys(errors).length > 0 ? true : false}
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
+                                            }}
+                                        >
+                                            Save
                                     </CustomButton>
-                                </DialogActions>
-                            </Form>
-                        )}
-                    </Formik>
-                </>
-                : <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
-                    <CommonSkeleton
-                        lenArray={arr}
-                    />
-                </DialogContent>
-        }
+                                    </CustomDialogFooter>
+                                </>
+                            )}
+                        </Formik>
+                    </>
+                    : <CustomDialogContent>
+                        <CommonSkeleton
+                            lenArray={arr}
+                        />
+                    </CustomDialogContent>
+            }
+        </Dialog>
     </ >
+
     )
 }
