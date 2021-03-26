@@ -16,7 +16,7 @@ import routes from './../../components/Helpers/Routes';
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
 import CreateLeadDialog from './CreateLead'
-import Header from "./Header";
+import Header from "./LeadsHeader";
 import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery } from '../../services/util'
