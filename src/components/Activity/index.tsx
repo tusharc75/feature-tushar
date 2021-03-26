@@ -55,8 +55,8 @@ const Activity = (props) => {
             <Typography variant="h6">Activity</Typography>
         </Box>
         {tabs.map((data, index) => (
-            <Fragment>
-                <Box display="flex" key={index} mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" onClick={(event) => handleChangeType(event, data)} style={{ cursor: "pointer" }}>
+            <Fragment key={index}>
+                <Box display="flex"  mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" onClick={(event) => handleChangeType(event, data)} style={{ cursor: "pointer" }}>
                     <Grid container>
                         <Grid item xs={8} >
                             <Box display="flex">
