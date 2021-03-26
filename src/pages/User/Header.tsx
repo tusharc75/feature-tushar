@@ -5,7 +5,7 @@ import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import SearchBox from "../../components/Helpers/SearchBox";
 
 const useStyles = makeStyles((theme) => ({
-  filterSide: {
+  filter_side: {
     display: "flex",
     justifyContent: "flex-end",
   },
@@ -36,7 +36,7 @@ const Header = (props) => {
       <Grid item xs={6}>
         <h2>Users</h2>
       </Grid>
-      <Grid item xs={6} className={classes.filterSide}>
+      <Grid item xs={6} className={classes.filter_side}>
         <Box component="div">
           <Box component="span" marginX={1} />
 
