@@ -13,30 +13,94 @@ import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { accountPage } from '../../routes/Accounts'
-import { Link } from "react-router-dom";
-import Loader from '../../components/Loader'
-import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
+import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import BoxWithBorder from "../../components/BoxWithBorder";
 import RelatedContactsBox from './RelatedContacts'
 import axiosInstance from './../../axios/axiosInstance'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
 import OpportunityTab from './OpportunityTab'
-import { AddOutlined } from '@material-ui/icons'
-import Chip from '@material-ui/core/Chip';
 import Activity from "../../components/Activity";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import accClass from "./account.module.scss"
+import accountClass from "./account.module.scss"
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
+import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
+import { opportunityPage } from '../../routes/Opportunity'
+import { withStyles } from "@material-ui/core/styles";
+import CreateOpportunity from '../Opportunities/CreateOpportunity'
+import CreateContact from '../Contact/CreateContact/CreateContact';
+import DeleteButton from '../../components/Helpers/DeleteButton'
+import { makeStyles } from "@material-ui/core/styles";
+import { removeEmptyKeys } from "../../constants/helpers";
+import { CustomEventEmitter } from './../../axios/events';
+
+const Accordion = withStyles({
+    root: {
+        border: "1px solid rgba(0, 0, 0, .125)",
+        boxShadow: "none",
+        "&:not(:last-child)": {
+            borderBottom: 0,
+        },
+        "&:before": {
+            display: "none",
+        },
+        "&$expanded": {
+            margin: "auto",
+        },
+        borderRadius: "10px",
+    },
+    expanded: {},
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+    root: {
+        backgroundColor: "rgba(0, 0, 0, .03)",
+        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        marginBottom: -1,
+        minHeight: 56,
+        "&$expanded": {
+            minHeight: 56,
+        },
+    },
+    content: {
+        "&$expanded": {
+            margin: "12px 0",
+        },
+    },
+    expanded: {},
+})(MuiAccordionSummary);
+
+const AccordionDetails = withStyles((theme) => ({
+    root: {
+        padding: theme.spacing(1),
+        display: "block",
+    },
+}))(MuiAccordionDetails);
+
+
+const useStyles = makeStyles((theme) => ({
+    container: {
+        padding: "0px",
+        minHeight: "auto"
+    },
+    opportunityTab: {
+        marginTop: '10px'
+    }
+}));
 
 const Roles = () => {
     const history = useHistory();
+    const classes = useStyles();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [allowedToEdit, setAllowedToEdit] = useState(false)
@@ -52,9 +116,14 @@ const Roles = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState<any>([]);
     const [currentTabIndex, setCurrentTabIndex] = useState(0);
     const [accountHierarchyData, setAccountHierarchyData] = useState([]);
+    const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+    const [relatedContactsLoading, setRelatedContactsLoading] = useState(false)
     const [expanded, setExpanded] = React.useState({
         opportunity: false
     });
+    const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
+    const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
+
 
     let { id } = useParams();
 
@@ -98,7 +167,7 @@ const Roles = () => {
     }, [user]);
 
     useEffect(() => {
-        if (accountData._id && relatedContacts.length == 0) {
+        if (accountData._id && relatedContacts.length === 0) {
             fetchRelatedContacts()
         }
     }, [accountData])
@@ -158,7 +227,7 @@ const Roles = () => {
                 ])
             }
 
-            if (accountFields.length == 0) {
+            if (accountFields.length === 0) {
                 getAccountFields()
             }
             else {
@@ -174,10 +243,10 @@ const Roles = () => {
         let allowToEdit = false;
 
         if (userId) {
-            allowToEdit = (accountDetails.owner?.optionValue && accountDetails.owner.optionValue == userId)
+            allowToEdit = (accountDetails.owner?.optionValue && accountDetails.owner.optionValue === userId)
 
             if (!allowToEdit && accountDetails.collaborator && accountDetails.collaborator.length > 0) {
-                allowToEdit = accountDetails.collaborator.findIndex(d => d.optionValue == userId) > -1;
+                allowToEdit = accountDetails.collaborator.findIndex(d => d.optionValue === userId) > -1;
             }
 
             if (allowToEdit)
@@ -203,14 +272,6 @@ const Roles = () => {
             setAccountFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });
-    };
-
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
     };
 
     const quickLinks = [
@@ -243,7 +304,7 @@ const Roles = () => {
     const handleDeleteAcc = () => {
         if (accountData?._id) {
             axiosInstance().put(`/account/remove`, { ids: [accountData._id] }).then(({ data }) => {
-                handleSnackbar(data.message, 'success', true)
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
             }).catch(err => {
@@ -267,9 +328,11 @@ const Roles = () => {
 
     const handleUpdateAccount = (values) => {
         setUpdating(true);
+        values = removeEmptyKeys(values)
         if (values.employees) {
             values.employees = parseInt(values.employees)
         }
+
         const updatedData = {
             ...values,
             _id: accountData._id,
@@ -278,8 +341,9 @@ const Roles = () => {
         axiosInstance().put('/account', updatedData)
             .then(() => {
                 fetchAccountData()
-                handleSnackbar("Successfully saved", 'success', true)
+                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
                 setUpdating(false);
+                setOpenUpdateDialog(false)
             })
             .catch((err) => {
                 setUpdating(false);
@@ -292,9 +356,13 @@ const Roles = () => {
     }
 
     const fetchRelatedContacts = () => {
+        setRelatedContactsLoading(true)
         axiosInstance().get(`/contact/related-contact/${accountData._id}`)
             .then(({ data: { data } }) => {
                 setRelatedContacts(data)
+                setRelatedContactsLoading(false)
+            }).catch(err => {
+                setRelatedContactsLoading(false)
             })
     }
 
@@ -303,206 +371,297 @@ const Roles = () => {
         tempData[curActive] = tempData[curActive] ? false : true
         setExpanded(tempData)
     };
-    console.log('expanded', expanded)
+    const handleOpneUpdateDialog = () => {
+        setOpenUpdateDialog(true);
+    };
+
+    const closeUpdateDIalog = () => {
+        setOpenUpdateDialog(false);
+    };
+
+    const handleViewAll = (path, state) => {
+        history.push({
+            pathname: path,
+            state: {
+                ...state
+            },
+        });
+    };
+    const handleCreateNewOpp = () => {
+        setShowCreateOpportunityDialog(true);
+    }
+    const handleCreateContact = () => {
+        setShowCreateContactDialog(true);
+    }
     return (
         <>
             <Layout>
                 <Grid container direction="row">
-                    <Grid item xs={12} className="pl-2">
-                        <CustomBreadCrumbs routes={customizedRoutes} />
-                    </Grid>
+                    <CustomBreadCrumbs routes={customizedRoutes} />
                 </Grid>
-                {
-                    alertData ? <CustomToast
-                        open={alertData.open || false}
-                        close={() => handleSnackbar('', '', false)}
-                        errorMsg={alertData.errorMsg || ''}
-                        type={alertData.type || ''}
-                    /> : null
-                }
                 <div>
-                    <CustomHeader
-                        heading={headingLbl}
-                        logo={accountData?.accountLogo ? accountData.accountLogo : undefined}
-                        mainPoints={mainPoints}
-                        // style={{ marginTop: "150px", minHeight: "200px" }}
-                        showHeading={true}
-                    >
-                        <Box component="span" marginX={1} />
-                        {
-                            accountPermissions.approveAccount && accountPermissions.isUpdate && <>
-                                <Button
-                                    variant="contained" color={accountData.static?.approved ? "secondary" : "primary"}
-                                    onClick={() => setShowApproveDisapproveConfirmBox(true)}
-                                >
-                                    {accountData.static?.approved ? "Disapprove" : "Approve"}
-                                </Button>
-                                <Box component="span" marginX={1} />
-                            </>
-                        }
-                        {
-                            accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
-                                accountData.owner.optionValue === user.user._id ?
-                                <Button
-                                    variant="contained" color="secondary"
-                                    onClick={() => setShowConfirmBox(true)}
-                                >
-                                    Delete
-                            </Button> : null
-                        }
-                    </CustomHeader>
-                    <div className={`${accClass.detailPageContainer}`}>
-                        <Container>
-                            <Grid container spacing={3}>
-                                <Grid item sm={8} md={8} lg={8}>
-                                    <div className={`${accClass.detailPageDiv1}`}>
-                                        {
-                                            loading ?
-                                                <Grid container spacing={2}>
-                                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                                                        <Grid item sm={6} md={6}>
-                                                            <Skeleton variant="text" width="100px" height="16px" />
-                                                            <Box marginY={1} />
-                                                            <Skeleton width="100%" height="50px" />
-                                                        </Grid>
-                                                    ))}
-                                                </Grid> :
-                                                <>
-                                                    <Tabs
-                                                        className="mb-4"
-                                                        value={currentTabIndex}
-                                                        onChange={(index, newValue) => { setCurrentTabIndex(newValue) }}
-                                                        indicatorColor="primary"
-                                                        textColor="primary"
-                                                        aria-label="icon tabs example"
-                                                    >
-                                                        <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                                                        <Tab label="Account Hierarchy" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-                                                    </Tabs>
-                                                    <Box hidden={currentTabIndex !== 0}>
-                                                        <DetailsPage data={accountData} fields={accountFields} />
+                    {
+                        <CustomHeader
+                            loading={loading}
+                            heading={headingLbl}
+                            logo={accountData?.accountLogo ? accountData.accountLogo : undefined}
+                            mainPoints={mainPoints}
+                            showHeading={true}
+                        >
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleOpneUpdateDialog}
+                            >
+                                Edit
+                      </Button>
+                            <Box component="span" marginX={1} />
+                            {
+                                accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
+                                    accountData.owner.optionValue === user.user._id ?
+                                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                                    : null
+                            }
+                        </CustomHeader>
+                    }
 
-                                                        {/* <DetailsPage
-                                                            data={accountData}
-                                                            fields={accountFields}
-                                                            isUpdating={isUpdating}
-                                                            canEdit={allowedToEdit}
-                                                            handleUpdate={handleUpdateAccount}
-                                                            sourceComponent="account"
-                                                        /> */}
-
-                                                    </Box>
-
-                                                    <Box hidden={currentTabIndex !== 1}>
-                                                        <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
-                                                    </Box>
-
-                                                </>
-                                        }
-                                    </div>
-
-                                    <Box display="flex" mt={1} p={1}
-                                        bgcolor="grey.100" borderColor="grey.300"
-                                        onClick={(event) => handlePanelChange('opportunity')}
-                                        style={{ cursor: "pointer" }}>
-                                        <Grid container>
-                                            <Grid item xs={8} >
-                                                <Box display="flex">
-                                                    <Box >
-                                                        <IconButton size="small">
-                                                            {expanded['opportunity'] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                                                        </IconButton>
-                                                    </Box>
-                                                    <Box ml={1} mt={0.5}>
-                                                        <Typography variant="subtitle2">Opportunity</Typography>
-                                                    </Box>
-                                                </Box>
-                                            </Grid>
-                                            <Grid item xs={4} container justify="flex-end" >
-                                                <IconButton color="primary" size="small" >
-                                                    <ControlPointIcon />
-                                                </IconButton>
-                                            </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={12} md={8} lg={8}>
+                            <Container padding="8px">
+                                <BoxWithBorder padding="8px">
+                                    {loading ? (
+                                        <Grid container spacing={2}>
+                                            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                                                <Grid item sm={6} md={6}>
+                                                    <Skeleton variant="text" width="100px" height="16px" />
+                                                    <Box marginY={1} />
+                                                    <Skeleton width="100%" height="50px" />
+                                                </Grid>
+                                            ))}
                                         </Grid>
-                                    </Box>
-                                    {
-                                        expanded['opportunity'] ?
-                                            <div style={{ marginTop: '10px' }}>
-                                                <OpportunityTab
-                                                    onChange={handlePanelChange}
-                                                    expanded={expanded['opportunity']}
-                                                />
-                                            </div> : null
-                                    }
+                                    ) : (
+                                        <Box>
+                                            <>
+                                                <Tabs
+                                                    className="mb-4"
+                                                    value={currentTabIndex}
+                                                    onChange={(index, newValue) => { setCurrentTabIndex(newValue) }}
+                                                    indicatorColor="primary"
+                                                    textColor="primary"
+                                                    aria-label="icon tabs example"
+                                                >
+                                                    <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+                                                    <Tab label="Account Hierarchy" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+                                                </Tabs>
+                                                <Box hidden={currentTabIndex !== 0}>
+                                                    <DetailsPage data={accountData} fields={accountFields} />
+                                                </Box>
 
-                                </Grid>
-                                <Grid item sm={4} md={4} lg={4} className={`${accClass.customGrid}`}>
-                                    {
-                                        accountData && <div>
-                                            <Activity relatedTo={[
-                                                { type: "account", referenceId: accountData._id, access: true }
-                                            ]} handleActivityRefresh={() => { }} />
-                                        </div>
-                                    }
+                                                <Box hidden={currentTabIndex !== 1}>
+                                                    <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
+                                                </Box>
 
-                                    <div className={`${accClass.detailPageDiv2}`}>
-                                        {
-                                            quickLinks && quickLinks.length ?
-                                                quickLinks.map((k, index) => {
-                                                    return <Link key={index} to={k}
-                                                        className={`${accClass.customLink}`}>{k.label || ''}({k.count || 0})</Link>
-                                                }) :
-                                                null
-                                        }
-                                    </div>
+                                            </>
 
-                                    <div className={`${accClass.detailPageDiv3}`}
-                                    >
-                                        <div className={`${accClass.relatedContacts}`}
-                                        >
-                                            <Typography color="primary"
-                                                variant="h6"
-                                                style={{ margin: "0 10px" }} >Related Contacts</Typography>
-                                            <span><AddOutlined /> </span>
-                                        </div>
-
-                                        <Box className={`${accClass.customBox1}`}>
-                                            <RelatedContactsBox
-                                                contacts={relatedContacts}
-                                            />
                                         </Box>
-                                        <div className={`${accClass.viewAllBtn}`}>
-                                            <Button
-                                                variant="outlined"
-                                                className={`${accClass.btn}`}
-                                            >View All</Button></div>
-                                    </div>
+                                    )}
+                                </BoxWithBorder>
+                                <Box marginY={2} />
+
+                                <Container styles={{ padding: "0px", minHeight: "auto" }}>
+                                    {/* onChange={handleChange('panel1')} */}
+                                    <Accordion square expanded={expanded["opportunity"]}>
+                                        <AccordionSummary
+                                            aria-controls="user-panel-content"
+                                            id="user-panel-header"
+                                        >
+                                            <Grid container>
+                                                <Grid item xs={8}>
+                                                    <Box display="flex">
+                                                        <Box>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={(event) => handlePanelChange('opportunity')} >
+                                                                {expanded["opportunity"] === true ? (
+                                                                    <ExpandLessIcon />
+                                                                ) : (
+                                                                    <ExpandMoreIcon />
+                                                                )}
+                                                            </IconButton>
+                                                        </Box>
+                                                        <Box padding="5px">
+                                                            <Typography variant="subtitle2">
+                                                                Opportunity ({10})
+                                                     </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item xs={4} container justify="flex-end">
+                                                    <IconButton
+                                                        color="primary"
+                                                        size="small"
+                                                        onClick={handleCreateNewOpp}
+                                                    >
+                                                        <ControlPointIcon />
+                                                    </IconButton>
+                                                </Grid>
+                                            </Grid>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            {loading ? (
+                                                <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                                            ) : (
+                                                <>
+                                                    {
+                                                        expanded['opportunity'] ?
+                                                            <>
+                                                                < Grid container spacing={2}>
+                                                                    <Grid item md={12}>
+
+                                                                        <div className={classes.opportunityTab} >
+                                                                            <OpportunityTab data={[]} />
+                                                                        </div> : null
+                                                        </Grid>
+                                                                    <Grid item md={12} sm={12} xs={12}>
+                                                                        <Button
+                                                                            variant="outlined"
+                                                                            onClick={() => handleViewAll(opportunityPage.path, {})}
+                                                                            fullWidth
+                                                                        >
+                                                                            View All
+                                  </Button>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </> : null
+                                                    }
+                                                </>
+                                            )}
+                                        </AccordionDetails>
+                                    </Accordion>
+                                </Container>
+                            </Container>
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={4} lg={4}
+                            className={`${accountClass.customGrid} ${accountClass.accountActivitiesDiv}`} >
+                            <Container styles={{ padding: "8px", minHeight: "auto", width: '100%' }} >
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        {
+                                            accountData && <div>
+                                                <Activity relatedTo={[
+                                                    { type: "account", referenceId: accountData._id, access: true }
+                                                ]} handleActivityRefresh={() => { }} />
+                                            </div>
+                                        }
+                                    </Grid>
+                                    {/* <Grid item xs={12}>
+                                        <div className={`${accountClass.detailPageDiv2}`}>
+                                            {
+                                                quickLinks && quickLinks.length ?
+                                                    quickLinks.map((k, index) => {
+                                                        return <Link key={index} to={k}
+                                                            className={`${accountClass.customLink}`}>{k.label || ''}({k.count || 0})</Link>
+                                                    }) :
+                                                    null
+                                            }
+                                        </div>
+                                    </Grid> */}
+
+                                    <Grid item xs={12}>
+                                        <BoxWithBorder style={{ marginTop: "3%", padding: '0px' }}>
+                                            <div className={`${accountClass.detailPageDiv3}`}>
+                                                <div className={`${accountClass.relatedContacts}`}>
+                                                    <Typography color="primary"
+                                                        variant="h6"
+                                                        style={{ margin: "0 10px" }} >Related Contacts</Typography>
+                                                    <span>
+                                                        <IconButton
+                                                            onClick={handleCreateContact}
+                                                            color="primary"
+                                                            size="small" >
+                                                            <ControlPointIcon />
+                                                        </IconButton> </span>
+                                                </div>
+                                                {
+                                                    relatedContactsLoading ? (
+                                                        <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                                                    ) : <>
+                                                        <Box className={`${accountClass.customBox1}`}>
+                                                            <RelatedContactsBox
+                                                                contacts={relatedContacts}
+                                                            />
+                                                        </Box>
+                                                        <div className={`${accountClass.viewAllBtn}`}>
+                                                            <Button
+                                                                variant="outlined"
+                                                                className={`${accountClass.btn}`}
+                                                            >View All</Button></div>
+                                                    </>
+                                                }
+                                            </div>
+                                        </BoxWithBorder>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                            {
-                                showConfirmBox ? (
-                                    <ConfirmationDialog
-                                        open={showConfirmBox}
-                                        message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
-                                        onClose={() => setShowConfirmBox(false)}
-                                        onOk={handleDeleteAcc}
-                                    />
-                                ) : null
-                            }
-                            {
-                                showApproveDisapproveConfirmBox ? (
-                                    <ConfirmationDialog
-                                        open={showApproveDisapproveConfirmBox}
-                                        message={`Are you sure you want to ${accountData.static?.approved ? 'disapprove' : "approve"} this Account ?`}
-                                        onClose={() => setShowApproveDisapproveConfirmBox(false)}
-                                        onOk={handleApproveDisapprove}
-                                    />
-                                ) : null
-                            }
-                        </Container>
-                    </div>
+                            </Container>
+                        </Grid>
+
+
+                    </Grid>
+                    {
+                        showConfirmBox ? (
+                            <ConfirmationDialog
+                                open={showConfirmBox}
+                                message={`Are you sure you want to delete this Account ${accountData.accountName || ''}`}
+                                onClose={() => setShowConfirmBox(false)}
+                                onOk={handleDeleteAcc}
+                            />
+                        ) : null
+                    }
+                    {
+                        showApproveDisapproveConfirmBox ? (
+                            <ConfirmationDialog
+                                open={showApproveDisapproveConfirmBox}
+                                message={`Are you sure you want to ${accountData.static?.approved ? 'disapprove' : "approve"} this Account ?`}
+                                onClose={() => setShowApproveDisapproveConfirmBox(false)}
+                                onOk={handleApproveDisapprove}
+                            />
+                        ) : null
+                    }
+                    {openUpdateDialog && (
+                        <UpdateDetailsDialog
+                            title={`Editing  ${accountData?.accountName ?? ''}`}
+                            openDialog={openUpdateDialog}
+                            onClose={closeUpdateDIalog}
+                            data={accountData}
+                            fields={accountFields}
+                            isUpdating={isUpdating}
+                            handleUpdate={handleUpdateAccount}
+                        />
+                    )}
+
+                    {
+                        showCreateOpportunityDialog && <CreateOpportunity
+                            open={showCreateOpportunityDialog}
+                            onClose={() => setShowCreateOpportunityDialog(false)}
+                            onSuccess={() => {
+                                setShowCreateOpportunityDialog(false);
+                                // fetchOpportunities()
+                            }}
+                        />
+                    }
+                    {
+                        showCreateContactDialog && <CreateContact
+                            open={showCreateContactDialog}
+                            onClose={() => setShowCreateContactDialog(false)}
+                            onSuccess={() => {
+                                setShowCreateContactDialog(false);
+                                fetchRelatedContacts()
+                            }}
+                        // entityDetails={createContactEntityDetails}
+                        />
+                    }
                 </div>
-            </Layout>
+            </Layout >
         </>
     );
 };
