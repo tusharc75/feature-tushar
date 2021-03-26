@@ -235,11 +235,8 @@ const OpportunityDetailsPage = () => {
             showHeading={true}
           >
             {
-              opportunityPermissions.isUpdate &&
-              opportunityData?.owner &&
-              user?.user?._id &&
-              opportunityData.owner === user.user._id 
-              ? (
+              handleAllowToEditList ?
+              (
               <Button
                 variant="contained"
                 color="primary"
@@ -251,9 +248,9 @@ const OpportunityDetailsPage = () => {
             }
             <Box component="span" marginX={1} />
             {opportunityPermissions.isDelete &&
-              opportunityData?.owner &&
+              opportunityData?.owner.optionValue &&
               user?.user?._id &&
-              opportunityData.owner === user.user._id ? (
+              opportunityData.owner.optionValue === user.user._id ? (
               <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
@@ -295,15 +292,15 @@ const OpportunityDetailsPage = () => {
                     />
                     <TabPanel value={currentTabIndex} index={0}>
                       <Box padding="16px">
-                        {/* <DetailsPage data={opportunityData} fields={opportunityFields} /> */}
-                        <DetailsPage
+                        <DetailsPage data={opportunityData} fields={opportunityFields} />
+                        {/* <DetailsPage
                           data={opportunityData}
                           fields={opportunityFields}
-                          isUpdating={isUpdating}
-                          canEdit={allowedToEdit}
+                          // isUpdating={isUpdating}
+                          // canEdit={allowedToEdit}
                           handleUpdate={handleUpdateOpportunity}
                           sourceComponent="opportunity"
-                        />
+                        /> */}
                       </Box>
                     </TabPanel>
                     <TabPanel value={currentTabIndex} index={1}>
