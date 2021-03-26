@@ -19,6 +19,8 @@ import Chip from '@material-ui/core/Chip';
 import routes from './../../components/Helpers/Routes';
 import { Link } from 'react-router-dom'
 
+import styles from './account.module.scss'
+
 const tableIcons: any = {
     Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
     Check: forwardRef((props: any, ref: any) => <Check {...props} ref={ref} />),
@@ -42,46 +44,45 @@ const tableIcons: any = {
 export default function AccountHierarchy({ data, currentAccountId }) {
 
     return (
-        <div className="account_hierarchy_style">
-            <MaterialTable
-                icons={tableIcons}
-                data={data}
-                columns={[
-                    {
-                        title: 'Account Name', field: 'accountName',
-                        width: 200,
-                        render: (rowData: any) => <>
-                            <Link className="account_name_link" to={`${routes.accountDetails.path}/${rowData._id}`}>
-                                {rowData.accountName}
-                            </Link>
-                            {
-                                rowData._id === currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
-                            }
-                        </>
-                    },
-                    { title: 'Type', field: 'typeOfAccount' },
-                    { title: 'Industry', field: 'industry' },
-                    { title: 'Type Of Business', field: 'typeOfBusiness' },
-                    {
-                        title: 'Parent Account', field: 'parentAccountText',
-                        render: rowData =>
-                            <Link className="account_name_link" to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
-                                {rowData.parentAccountText}
-                            </Link>
-                    },
-                    { title: 'Phone', field: 'phone' },
-                ]}
-                // columnResizable={true}
-                parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
-                options={{
-                    search: false,
-                    paging: false,
-                    sorting: false,
-                    draggable: false,
-                    padding: "dense",
-                    defaultExpanded: true
-                }}
-            />
-        </div>
+        <MaterialTable
+            icons={tableIcons}
+            data={data}
+            columns={[
+                {
+                    title: 'Account Name', field: 'accountName',
+                    width: 200,
+                    render: (rowData: any) => <>
+                        <Link className="account_name_link" to={`${routes.accountDetails.path}/${rowData._id}`}>
+                            {rowData.accountName}
+                        </Link>
+                        {
+                            rowData._id === currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
+                        }
+                    </>
+                },
+                { title: 'Type', field: 'typeOfAccount' },
+                { title: 'Industry', field: 'industry' },
+                { title: 'Type Of Business', field: 'typeOfBusiness' },
+                {
+                    title: 'Parent Account', field: 'parentAccountText',
+                    render: rowData =>
+                        <Link className="account_name_link" to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
+                            {rowData.parentAccountText}
+                        </Link>
+                },
+                { title: 'Phone', field: 'phone' },
+            ]}
+            // columnResizable={true}
+            parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
+            options={{
+                search: false,
+                paging: false,
+                sorting: false,
+                draggable: false,
+                padding: "dense",
+                defaultExpanded: true,
+                toolbar: false
+            }}
+        />
     );
 }
