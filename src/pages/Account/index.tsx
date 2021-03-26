@@ -33,7 +33,6 @@ import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
-import NoDataCell from '../../components/Helpers/NoDataCell'
 import accountClass from "./account.module.scss"
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomHeader from '../../components/Helpers/CustomHeader'

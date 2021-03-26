@@ -103,9 +103,7 @@ const Roles = () => {
     const classes = useStyles();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
-    const [allowedToEdit, setAllowedToEdit] = useState(false)
     const [isUpdating, setUpdating] = useState(false);
-    const [alertData, setAlertData] = useState<any>({})
     const [accountData, setAccountData] = useState<any>({})
     const [relatedContacts, setRelatedContacts] = useState([])
     const [loading, setLoading] = useState(false)
@@ -123,7 +121,7 @@ const Roles = () => {
     });
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
-
+    const [canEdit, setCanEdit] = useState(false)
 
     let { id } = useParams();
 
@@ -161,12 +159,6 @@ const Roles = () => {
     }, [id]);
 
     useEffect(() => {
-        if (user && accountData) {
-            handleAllowToEditList(accountData)
-        }
-    }, [user]);
-
-    useEffect(() => {
         if (accountData._id && relatedContacts.length === 0) {
             fetchRelatedContacts()
         }
@@ -179,9 +171,12 @@ const Roles = () => {
             setCustomizedRoutes([routes.account, { title: data.accountName }]);
 
             setHeadingLbl(data.accountName || '')
-            handleAllowToEditList(data)
             handleMainPonts(data)
             setAccountData(data)
+            let ans = [...data?.collaborator, data?.owner].find(obj => obj.optionValue === user.user._id)
+            if (ans) {
+                setCanEdit(true)
+            }
 
             if (data.parentHierarchy && data.parentHierarchy.length > 0) {
 
@@ -236,22 +231,6 @@ const Roles = () => {
         }).catch(() => {
             setLoading(false)
         })
-    }
-
-    const handleAllowToEditList = (accountDetails) => {
-        const userId = user?.user?._id;
-        let allowToEdit = false;
-
-        if (userId) {
-            allowToEdit = (accountDetails.owner?.optionValue && accountDetails.owner.optionValue === userId)
-
-            if (!allowToEdit && accountDetails.collaborator && accountDetails.collaborator.length > 0) {
-                allowToEdit = accountDetails.collaborator.findIndex(d => d.optionValue === userId) > -1;
-            }
-
-            if (allowToEdit)
-                setAllowedToEdit(allowToEdit);
-        }
     }
 
     const handleMainPonts = (data) => {
@@ -408,13 +387,17 @@ const Roles = () => {
                             mainPoints={mainPoints}
                             showHeading={true}
                         >
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleOpneUpdateDialog}
-                            >
-                                Edit
-                      </Button>
+                            {
+                                accountPermissions.isUpdate && canEdit ?
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleOpneUpdateDialog}
+                                    >
+                                        Edit
+                                    </Button> : null
+                            }
+
                             <Box component="span" marginX={1} />
                             {
                                 accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
