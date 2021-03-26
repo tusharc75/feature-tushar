@@ -36,26 +36,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : "";
     }
-<<<<<<< HEAD
-    return obj
-}
-
-export const removeObjKey = (obj, key) => {
-    delete obj[key];
-    return obj;
-  };
-
-export const removeEmptyKeys = (obj) => {
-    Object.keys(obj).forEach(
-        (k) => !obj[k] && obj[k] !== undefined && delete obj[k]
-    )
-    return obj
-}
-=======
   }
   return obj;
 };
->>>>>>> ebefa3f4ec928b6147abf7575e79987a41f12e2f
 
 export const removeEmptyKeys = (obj: object) => {
   Object.keys(obj).forEach(
