@@ -23,11 +23,6 @@ const useStyles = makeStyles((theme) => ({
     },
     container: {
         position: "relative",
-    },
-    accDialog1: {
-        "MuiDialog-paper": {
-            overflowY: "unset"
-        }
     }
 }));
 const DialogContent = withStyles((theme) => ({

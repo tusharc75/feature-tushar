@@ -62,7 +62,7 @@ export default function UsersTab({ data }) {
                                             </IconButton>
                                             {/* <EditOutlined /> */}
                                         </span>
-                                        <Link className={`${accountClass.accountNameLink}`} to={`${opportunityPage.path}/${obj._id}`}>
+                                        <Link className={`${accountClass.account_name_link}`} to={`${opportunityPage.path}/${obj._id}`}>
                                             <Typography className="text-capitalize">{obj?.opportunityName ?? ''}</Typography>
                                         </Link>
                                         <DisplayData label='Stage' value={obj?.stage?.optionLabel ?? ''} />

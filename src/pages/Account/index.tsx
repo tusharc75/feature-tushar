@@ -211,7 +211,7 @@ export default function Account() {
         {
             field: "accountName", headerName: "Account Name", width: 200,
             renderCell: (params) => (
-                <Link className={`${accountClass.accountNameLink}`}
+                <Link className={`${accountClass.account_name_link}`}
                     to={`${accountDetailPage.path}/${params.row._id}`}>
                     <CustomRenderCell value={params?.value} />
                 </Link>
@@ -527,18 +527,18 @@ export default function Account() {
                                 secondHeading="Account"
                             // showHeading={false}
                             >
-                                <div className={`${accountClass.accountHeader} ${accountClass["accountHeader-mobile"]}`} >
+                                <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
                                     <SearchBox
                                         onSearch={handleSearch}
-                                        searchbox="accountHeaderSearchBar"
+                                        searchbox="account_header_search_bar"
                                         width="300px" value={searchVal}
                                     />
-                                    <div className={`${accountClass.accountHeaderAddBtnActionBtnGroup}`}>
+                                    <div className={`${accountClass.account_header_add_btn_action_btn_group}`}>
                                         {
                                             accountPermissions.isCreate && <Button
                                                 variant="contained"
                                                 color="primary"
-                                                className={`px-3 ${accountClass.accountHeaderAddBtn}`}
+                                                className={`px-3 ${accountClass.account_header_add_btn}`}
                                                 onClick={clickCreateNew}
                                                 startIcon={<AddOutlined />} >Add</Button>
                                         }
@@ -547,7 +547,7 @@ export default function Account() {
                                             disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                             variant="outlined"
                                             color="default"
-                                            className={`${accountClass.accountHeaderActionBtn}`}
+                                            className={`${accountClass.account_header_action_btn}`}
                                             onClick={openActions}
                                             aria-controls="action-menu"
                                         >
