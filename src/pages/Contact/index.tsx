@@ -35,6 +35,7 @@ import { getErrorMessage } from '../../services/util'
 import './contact.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 import { CustomEventEmitter } from './../../axios/events';
+import styles from "../Leads/Header.module.scss"
 
 const ContactTypes = {
     "All Contacts": 1,
@@ -355,7 +356,7 @@ export default function Contact() {
             </Grid>
 
             <CustomContainer>
-                <Grid container justify="space-between">
+                <Grid  className={styles.filter_side_container} container justify="space-between">
                     <Grid item>
                         {
                             Object.keys(ContactTypes).length ? <Select
@@ -383,19 +384,17 @@ export default function Contact() {
                                 : null
                         }
                     </Grid>
-
-                    <Grid item>
-
-                        <SearchBox onSearch={handleSearch} value={searchVal} size="small" />
-
+                    <Grid className={styles.filter_side} item>
+                        <Box className={styles.filter_side_header} component="div">
+                        <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={searchVal} size="small" />
                         {
                             contactPermissions.isCreate && <>
-                                <Box component="span" marginX={1} />
                                 <Button
                                     variant="contained"
                                     color="primary"
                                     onClick={clickCreateNew}
                                     startIcon={<AddIcon />}
+                                    className={styles.add_submit_btn}
                                 >
                                     Add
                                 </Button>
@@ -404,14 +403,13 @@ export default function Contact() {
 
                         {
                             contactPermissions.isDelete && <>
-                                <Box component="span" marginX={1} />
-
                                 <Button
                                     // disabled={Boolean(!selectedBrand)}
                                     disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                     variant="outlined"
                                     color="default"
                                     onClick={openActions}
+                                    className={styles.action_submit_btn}
                                     aria-controls="action-menu"
                                 >
                                     Actions <ExpandMore />
@@ -442,7 +440,7 @@ export default function Contact() {
                                 </Menu>
                             </>
                         }
-
+                        </Box>
                     </Grid>
                 </Grid>
             </CustomContainer>
