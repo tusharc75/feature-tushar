@@ -22,6 +22,7 @@ import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import DeleteButton from "../../components/Helpers/DeleteButton";
 
 import { CustomEventEmitter } from './../../axios/events';
 
@@ -40,7 +41,7 @@ const OpportunityDetailsPage = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
-  const [contactTabIndex, setContactTabIndex] = useState(0);
+  
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -231,7 +232,6 @@ const OpportunityDetailsPage = () => {
               opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
             }
             mainPoints={mainPoints}
-            // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
             {
@@ -254,13 +254,10 @@ const OpportunityDetailsPage = () => {
               opportunityData?.owner &&
               user?.user?._id &&
               opportunityData.owner === user.user._id ? (
-              <Button
-                variant="contained"
-                color="secondary"
+              <DeleteButton
+                text="Delete"
                 onClick={() => setShowConfirmBox(true)}
-              >
-                Delete
-              </Button>
+              />
             ) : null}
           </CustomHeader>
         )}
