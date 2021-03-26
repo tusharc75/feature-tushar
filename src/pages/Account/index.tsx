@@ -516,7 +516,7 @@ export default function Account() {
 
                 <Box component="div">
                     <CustomContainer>
-                        <div className={`${accountClass["account-header-inner-container"]}`}
+                        <div className={`${accountClass["account_header_inner_container"]}`}
                         >
                             <CustomHeader
                                 total={rowCount}

@@ -42,7 +42,7 @@ const tableIcons: any = {
 export default function AccountHierarchy({ data, currentAccountId }) {
 
     return (
-        <div className="account-hierarchy-style">
+        <div className="account_hierarchy_style">
             <MaterialTable
                 icons={tableIcons}
                 data={data}

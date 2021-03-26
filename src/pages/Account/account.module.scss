@@ -73,13 +73,13 @@
     justify-content: space-between;
 }
 
-.account-header {
+.account_header {
     padding: 20px;
     display: flex;
     justify-content: flex-end;
     gap: 15px;
 }
-.custom-height {
+.custom_height {
     height: calc(100vh - 230px);
 }
 .account_name_link {
@@ -106,7 +106,7 @@
 .btn {
     width: 100%;
 }
-.account-hierarchy-style > div > div.MuiToolbar-regular {
+.account_hierarchy_style > div > div.MuiToolbar-regular {
     display: none;
 }
 
@@ -168,7 +168,7 @@
   .MuiButton-iconSizeMedium > *:first-child{
     font-size: 18px !important;
   }
-  .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
+  .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
     display: flex;
       grid-gap: 5px;
   }
@@ -192,7 +192,7 @@
     .account_header_search_bar{
       display: block;
     }
-    .account-header-inner-container div.account_header{
+    .account_header_inner_container div.account_header{
       display: block;
     }
     .MuiButton-containedPrimary.account_header_add_btn , .MuiButton-outlined.Mui-disabled.account_header_action_btn , .MuiButtonBase-root.MuiButton-root.MuiButton-outlined.account_header_action_btn{
@@ -211,12 +211,12 @@
   .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl.MuiInput-formControl{
     width: 100% !important;
   }
-  .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
+  .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
     display: block;
   }
   }
   
-  .custom-grid{
+  .custom_grid{
       width: 100%;
       border: 2px solid #D4D6D7;
       border-radius: 8;
@@ -234,23 +234,23 @@
       border-radius: 12px;
   } */
   
-  .account-name-Link {
+  .account_name_link {
       color: #0645ad;
       cursor: pointer;
   }
   
-  .account-name-Link:hover {
+  .account_name_link:hover {
       text-decoration: underline;
   }
   
-  .account-grid {
+  .account_grid {
     height: calc(100vh - 200px);
   }
   @media only screen and (max-width: 714px) {
-    .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
+    .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
       width: 100%;
     }
-    .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiGrid-root.MuiGrid-item , .account_header.account_header-mobile{
+    .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiGrid-root.MuiGrid-item , .account_header.account_header-mobile{
     width: 100%;
     }
     .account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root{
@@ -262,7 +262,7 @@
     .account_header_account_tab  , .account_headerActiveAccountTab , .account_headerInactiveAccountTab {
       margin:0.6rem auto !important;
     }
-    .account-header-inner-container div.account_header{
+    .account_header_inner_container div.account_header{
       width: 100%;
     }
     .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
@@ -277,7 +277,7 @@
     .account_header.account_header-mobile {
         margin-top: 0;
     }
-    .account-header-inner-container .MuiGrid-root.MuiGrid-item{
+    .account_header_inner_container .MuiGrid-root.MuiGrid-item{
       width:100%;
     }
    .account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root{
@@ -285,7 +285,7 @@
     }
   }
   @media only screen and (max-width: 375px){
-  #demo-simple-select-outlined {
+  #demo_simple_select_outlined {
       width: 230px !important;
   }
   }
