@@ -26,6 +26,7 @@ import Activity from "../../components/Activity";
 import isObjectEmpty from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import {  removeEmptyKeys } from '../../constants/helpers';
 
 const Roles = () => {
     const history = useHistory();
@@ -189,18 +190,16 @@ const Roles = () => {
 
     const handleUpdateEntity = (values) => {
         setUpdating(true);
-        if (values.employees) {
-            values.employees = parseInt(values.employees)
-        }
         const updatedData = {
             ...values,
             _id: entityData._id,
         };
-
-        axiosInstance().put('/contact', updatedData).then(({ data }) => {
+        const newValues = removeEmptyKeys(updatedData);
+        axiosInstance().put('/entity', newValues).then(({ data }) => {
             fetchEntityData()
             handleSnackbar("Successfully saved", 'success', true)
             setUpdating(false);
+            setOpenUpdateDialog(false);
         }).catch((err) => {
             setUpdating(false);
         });
@@ -210,7 +209,7 @@ const Roles = () => {
             <Layout>
             {openUpdateDialog && (
           <UpdateDetailsDialog
-            title={`Editing  ${entityData.firstName}`}
+            title={`Editing  ${entityData.entityName}`}
             openDialog={openUpdateDialog}
             onClose={closeUpdateDialog}
             data={entityData}
@@ -242,16 +241,6 @@ const Roles = () => {
                         showHeading={true}
                     >
                         <Box component="span" marginX={1} />
-                        {
-                            entityPermissions.isDelete && entityData?.owner?.optionValue && user?.user?._id &&
-                                entityData.owner.optionValue === user.user._id ?
-                                [
-                                //     <Button
-                                //     variant="contained" color="secondary"
-                                //     onClick={() => setShowConfirmBox(true)}
-                                // >
-                                //     Delete
-                                // </Button>
                                 <Button
                                 variant="contained"
                                 color="primary"
@@ -266,10 +255,6 @@ const Roles = () => {
                                 setShowConfirmBox(true);
                                 }}
                                 />
-                                ]
-                                : null
-                        }
-
                     </CustomHeader>
 
                     <div className="detailPageContainer">
