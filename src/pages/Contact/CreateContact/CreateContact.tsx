@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, IconButton, Typography, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, removeEmptyKeys } from '../../../constants/helpers';
+import { getCollaboratorDropdownDataSource, getObjKeys, getOwnerDropdownDataSource, removeEmptyKeys } from '../../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import CloseIcon from '@material-ui/icons/Close';
 import { withStyles } from '@material-ui/core/styles';
@@ -90,27 +90,11 @@ export default function CreateContact({ open, onClose, onSuccess }) {
     };
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
-        if (!selectedCollaborator || selectedCollaborator.length == 0) {
-            setOwnerDataSource(ownerCollaboratorCommonDataSource);
-        } else {
-            const ownerDataSource = [];
-
-            ownerCollaboratorCommonDataSource.map(d => {
-                const isCollaboratorSelected = selectedCollaborator.find(collaborator => collaborator.optionValue == d.optionValue);
-                if (!isCollaboratorSelected) {
-                    ownerDataSource.push(d);
-                }
-            })
-            setOwnerDataSource(ownerDataSource);
-        }
+        setOwnerDataSource(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorCommonDataSource))
     }
 
-    const onCollaboratorOwnerMultiselectOpen = (selectedOwner) => {
-        if (selectedOwner) {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource.filter(d => d.optionValue != selectedOwner.optionValue));
-        } else {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource);
-        }
+    const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource))
     }
     //  Owner, Collaborator Code - End
 
@@ -134,7 +118,7 @@ export default function CreateContact({ open, onClose, onSuccess }) {
 
     const handleSave = (values) => {
         setIsFormSubmitted(true);
-        removeEmptyKeys(values);
+        values = removeEmptyKeys(values);
 
         axiosInstance().post("/contact", values).then(() => {
             onSuccess();

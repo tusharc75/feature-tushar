@@ -20,7 +20,6 @@ import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 import { capitalize, startCase } from "lodash";
-
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
@@ -32,6 +31,8 @@ import CustomHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
+import { removeEmptyKeys } from "../../constants/helpers";
+import { CustomEventEmitter } from './../../axios/events';
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import UserRoles from "./UserRoles";
@@ -165,21 +166,13 @@ const UserDetailsPage = () => {
       .put(`/user/${id}`, values)
       .then(({ data }) => {
         fetchUserData();
+        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
         setUserPermissions(data.permissions);
-        handleSnackbar("Successfully saved", "success", true);
         setUpdating(false);
       })
       .catch((err) => {
         setUpdating(false);
       });
-  };
-
-  const handleSnackbar = (msg, type, isOpen) => {
-    setAlertData({
-      errorMsg: msg,
-      type: type,
-      open: isOpen,
-    });
   };
 
   const handleOpenUpdateDialog = () => {
@@ -209,11 +202,11 @@ const UserDetailsPage = () => {
       .then(({ data }) => {
         console.log(data);
         setChangingPermission(false);
-        handleSnackbar("Permission changed successfully", "success", true);
+        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Permission changed successfully" });
       })
       .catch((err) => {
         setChangingPermission(false);
-        handleSnackbar("Something went wrong", "error", true);
+        CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: "Something went wrong" });
         console.log(err);
       });
   };
@@ -229,14 +222,6 @@ const UserDetailsPage = () => {
           fields={userFields}
           isUpdating={isUpdating}
           handleUpdate={handleUpdateUser}
-        />
-      )}
-      {alertData && (
-        <CustomToast
-          open={alertData.open || false}
-          close={() => handleSnackbar("", "", false)}
-          errorMsg={alertData.errorMsg || ""}
-          type={alertData.type || ""}
         />
       )}
 
@@ -434,7 +419,7 @@ const UserDetailsPage = () => {
                       }}
                     >
                       {userData && (
-                        <UserRoles data={globalRoles} unassignRole={() => {}} />
+                        <UserRoles data={globalRoles} unassignRole={() => { }} />
                       )}
                     </Box>
                   )}

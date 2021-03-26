@@ -51,7 +51,7 @@
     padding: 10px;
 }
 .detailPageDiv3 {
-    padding: 13px;
+    // padding: 6px 1px;
     background-color: white;
     border-radius: 13px;
 }
@@ -63,9 +63,8 @@
 }
 .customBox1 {
     min-height: 150px;
-    background-color: #d3d3d375;
     border-radius: 10px;
-    padding: 10px;
+    padding: 10px 1px;
     justify-content: center;
     margin: 3px;
 }
@@ -95,11 +94,14 @@
     font-size: 16px;
 }
 .relatedContacts {
+    padding: 10px;
+    background-color: rgb(238, 238, 238);
     display: flex;
     justify-content: space-between;
 }
 .viewAllBtn {
-    padding: 0 5px;
+    padding: 0;
+    background-color: rgb(238, 238, 238);
 }
 .btn {
     width: 100%;
@@ -287,4 +289,13 @@
       width: 230px !important;
   }
   }
+
+@media only screen and (max-width: 599px) {
+    .accountActivitiesDiv {
+        width: 100%;
+    }
+}
+.accDialog .MuiDialog-paper {
+  overflow-y: unset;
+}
   
