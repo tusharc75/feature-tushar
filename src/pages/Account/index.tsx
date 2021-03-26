@@ -233,7 +233,7 @@ export default function Account() {
             field: "parentAccount",
             headerName: "Parent Account",
             width: 200,
-            renderCell: (params) => <CustomRenderCell value={params?.value} />
+            renderCell: (params) => <CustomRenderCell value={params?.value?.optionLabel} />
         },
         {
             field: "masterAccount",
@@ -242,7 +242,7 @@ export default function Account() {
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
-            renderCell: (params) => <CustomRenderCell value={params?.value} />
+            renderCell: (params) => <CustomRenderCell value={params?.value?.optionLabel} />
         },
         {
             field: "phone", headerName: "Phone",
