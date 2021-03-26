@@ -522,7 +522,7 @@ const Roles = () => {
                             </Container>
                         </Grid>
                         <Grid item xs={12} sm={12} md={4} lg={4}
-                            className={`${accountClass.customGrid} ${accountClass.accountActivitiesDiv}`} >
+                            className={`${accountClass.custom_grid} ${accountClass.account_activities_div}`} >
                             <Container styles={{ padding: "8px", minHeight: "auto", width: '100%' }} >
                                 <Grid container>
                                     <Grid item xs={12}>
@@ -535,12 +535,12 @@ const Roles = () => {
                                         }
                                     </Grid>
                                     {/* <Grid item xs={12}>
-                                        <div className={`${accountClass.detailPageDiv2}`}>
+                                        <div className={`${accountClass.detail_page_div2}`}>
                                             {
                                                 quickLinks && quickLinks.length ?
                                                     quickLinks.map((k, index) => {
                                                         return <Link key={index} to={k}
-                                                            className={`${accountClass.customLink}`}>{k.label || ''}({k.count || 0})</Link>
+                                                            className={`${accountClass.custom_link}`}>{k.label || ''}({k.count || 0})</Link>
                                                     }) :
                                                     null
                                             }
@@ -549,8 +549,8 @@ const Roles = () => {
 
                                     <Grid item xs={12}>
                                         <BoxWithBorder style={{ marginTop: "3%", padding: '0px' }}>
-                                            <div className={`${accountClass.detailPageDiv3}`}>
-                                                <div className={`${accountClass.relatedContacts}`}>
+                                            <div className={`${accountClass.detail_page_div3}`}>
+                                                <div className={`${accountClass.related_contacts}`}>
                                                     <Typography color="primary"
                                                         variant="h6"
                                                         style={{ margin: "0 10px" }} >Related Contacts</Typography>
@@ -566,12 +566,12 @@ const Roles = () => {
                                                     relatedContactsLoading ? (
                                                         <CommonSkeleton lenArray={[...Array(4).keys()]} />
                                                     ) : <>
-                                                        <Box className={`${accountClass.customBox1}`}>
+                                                        <Box className={`${accountClass.custom_box1}`}>
                                                             <RelatedContactsBox
                                                                 contacts={relatedContacts}
                                                             />
                                                         </Box>
-                                                        <div className={`${accountClass.viewAllBtn}`}>
+                                                        <div className={`${accountClass.view_all_btn}`}>
                                                             <Button
                                                                 variant="outlined"
                                                                 className={`${accountClass.btn}`}

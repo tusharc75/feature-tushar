@@ -1,46 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
 import { formValidation, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
 import { commonStyle } from '../../Contact/CommonStyles'
-import { withStyles } from '@material-ui/core/styles';
-import MuiDialogContent from '@material-ui/core/DialogContent';
 import FormTypes from "./../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
-import { CustomEventEmitter } from '../../../axios/events'
-
-const useStyles = makeStyles((theme) => ({
-    ...commonStyle(theme),
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    container: {
-        position: "relative",
-    },
-    accDialog1: {
-        "MuiDialog-paper": {
-            overflowY: "unset"
-        }
-    }
-}));
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
 
 const arr = [...Array(9).keys()]
 
 export default function CreateAccount(props) {
 
-    const classes = useStyles();
     const { entityData, handleSubmit, loading, onClose, open } = props
 
     //  Owner, Collaborator Code - Start

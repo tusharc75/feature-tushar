@@ -42,7 +42,7 @@ const tableIcons: any = {
 export default function AccountHierarchy({ data, currentAccountId }) {
 
     return (
-        <div className="account-hierarchy-style">
+        <div className="account_hierarchy_style">
             <MaterialTable
                 icons={tableIcons}
                 data={data}
@@ -51,7 +51,7 @@ export default function AccountHierarchy({ data, currentAccountId }) {
                         title: 'Account Name', field: 'accountName',
                         width: 200,
                         render: (rowData: any) => <>
-                            <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData._id}`}>
+                            <Link className="account_name_link" to={`${routes.accountDetails.path}/${rowData._id}`}>
                                 {rowData.accountName}
                             </Link>
                             {
@@ -65,7 +65,7 @@ export default function AccountHierarchy({ data, currentAccountId }) {
                     {
                         title: 'Parent Account', field: 'parentAccountText',
                         render: rowData =>
-                            <Link className="accountNameLink" to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
+                            <Link className="account_name_link" to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
                                 {rowData.parentAccountText}
                             </Link>
                     },

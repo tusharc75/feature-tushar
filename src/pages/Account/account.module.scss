@@ -4,21 +4,21 @@
     justify-content: space-between;
     width: 40%;
 }
-.detailPageContainer {
+.detail_page_container {
     width: 100%;
     max-height: 400px;
     background-color: aliceblue;
     padding: 1px;
 }
-.detailPageDiv1 {
+.detail_page_div1 {
     background-color: white;
     border-radius: 8px;
     padding: 12px;
 }
-.customGrid {
+.custom_grid {
     background-color: aliceblue;
 }
-.detailPageDiv2 {
+.detail_page_div2 {
     padding: 10px;
     background-color: white;
     margin-bottom: 10px;
@@ -28,10 +28,10 @@
     gap: 3px;
 }
 
-.detailPageDiv2 {
+.detail_page_div2 {
     background-color: white;
 }
-.customBox {
+.custom_box {
     text-align: center;
     min-height: 300px;
     vertical-align: middle;
@@ -46,121 +46,121 @@
 .td2 {
     word-wrap: break-word;
 }
-.customDiv12 {
+.custom_div12 {
     flex-grow: 1;
     padding: 10px;
 }
-.detailPageDiv3 {
+.detail_page_div3 {
     // padding: 6px 1px;
     background-color: white;
     border-radius: 13px;
 }
-.customLink {
+.custom_link {
     color: darkblue;
     text-decoration: underline;
     font-size: 17px;
     /* margin-bottom: 5px; */
 }
-.customBox1 {
+.custom_box1 {
     min-height: 150px;
     border-radius: 10px;
     padding: 10px 1px;
     justify-content: center;
     margin: 3px;
 }
-.customDiv13 {
+.custom_div13 {
     display: flex;
     justify-content: space-between;
 }
 
-.account-header {
+.account_header {
     padding: 20px;
     display: flex;
     justify-content: flex-end;
     gap: 15px;
 }
-.custom-height {
+.custom_height {
     height: calc(100vh - 230px);
 }
-.accountNameLink {
+.account_name_link {
     color: #0645ad;
     cursor: pointer;
 }
 
-.accountNameLink:hover {
+.account_name_link:hover {
     text-decoration: underline;
 }
-.fSize {
+.f_size {
     font-size: 16px;
 }
-.relatedContacts {
+.related_contacts {
     padding: 10px;
     background-color: rgb(238, 238, 238);
     display: flex;
     justify-content: space-between;
 }
-.viewAllBtn {
+.view_all_btn {
     padding: 0;
     background-color: rgb(238, 238, 238);
 }
 .btn {
     width: 100%;
 }
-.account-hierarchy-style > div > div.MuiToolbar-regular {
+.account_hierarchy_style > div > div.MuiToolbar-regular {
     display: none;
 }
 
 
-.accountHeader{
+.account_header{
     display: flex;
     grid-gap: 20px;
     align-items: center;
   }
-  .accountHeaderSearchBar{
+  .account_header_search_bar{
     display: block;
   }
-  .updatedAtTime , .createdAtTime{
+  .updated_at_time , .created_at_time{
     font-size: 0.6 rem;
     line-height: 1 rem;
     display: block;
     font-weight: lighter;
   }
-  .updateBy, .createBy{
+  .update_by, .create_by{
     font-size: 0.8rem;
     line-height: 1rem;
     display: block;
   }
-  .accountHeaderAddBtnActionBtnGroup{
+  .account_header_add_btn_action_btn_group{
   display: flex;
   grid-gap: 15px;
   }
-  .accountHeaderLogo{
+  .account_header_logo{
     font-size: 3rem;
     color: #09445A;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl{
+  .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl{
     color: #09445A;
     font-size:24px;
   }
-  .accountHeaderDropdown .MuiFormLabel-root.MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-animated.MuiInputLabel-shrink.MuiFormLabel-filled{
+  .account_header_dropdown .MuiFormLabel-root.MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-animated.MuiInputLabel-shrink.MuiFormLabel-filled{
     font-size: 22px;
   color: #414c50;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl{
+  .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInputBase-formControl.MuiInput-formControl{
     width: 100% !important;
   }
-  .accountHeader.accountHeader-mobile .MuiFormControl-root.MuiTextField-root .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-adornedStart.MuiOutlinedInput-adornedStart.MuiInputBase-marginDense.MuiOutlinedInput-marginDense{
+  .account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-adornedStart.MuiOutlinedInput-adornedStart.MuiInputBase-marginDense.MuiOutlinedInput-marginDense{
     padding-left: 18px !important;
     padding-right: 18px !important;
     height: 34px !important;
   }
-  /* Button.accountHeaderAddBtn{
+  /* Button.account_header_add_btn{
     padding-left: 18px;
     padding-right: 18px;
     width: 99px;
     height: 34px;
   } */
-  Button.accountHeaderActionBtn{
+  Button.account_header_action_btn{
     padding-left: 18px;
       padding-right: 18px;
       height: 34px;
@@ -168,55 +168,55 @@
   .MuiButton-iconSizeMedium > *:first-child{
     font-size: 18px !important;
   }
-  .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.accountHeader{
+  .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
     display: flex;
       grid-gap: 5px;
   }
   @media only screen and (max-width: 1024px) {
-    .accountHeader{
+    .account_header{
       margin-top: 15px;
     }
   }
   @media only screen and (max-width: 768px) {
-    .accountHeader{
+    .account_header{
       display: block;
       grid-gap: 8px;
       flex-direction: column;
       margin-top: 0;
     }
   
-    .accountHeaderAddBtnActionBtnGroup{
+    .account_header_add_btn_action_btn_group{
       margin-top: 15px;
       width: 100%;
     }
-    .accountHeaderSearchBar{
+    .account_header_search_bar{
       display: block;
     }
-    .account-header-inner-container div.accountHeader{
+    .account_header_inner_container div.account_header{
       display: block;
     }
-    .MuiButton-containedPrimary.accountHeaderAddBtn , .MuiButton-outlined.Mui-disabled.accountHeaderActionBtn , .MuiButtonBase-root.MuiButton-root.MuiButton-outlined.accountHeaderActionBtn{
+    .MuiButton-containedPrimary.account_header_add_btn , .MuiButton-outlined.Mui-disabled.account_header_action_btn , .MuiButtonBase-root.MuiButton-root.MuiButton-outlined.account_header_action_btn{
       width: 100% !important;
       /* display:inline; */
     }
-    .accountHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
+    .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
       width: 100% !important;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
+  .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense {
     width: 100% !important;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
+  .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
       width: 100% !important;
   }
-  .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl.MuiInput-formControl{
+  .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl.MuiInput-formControl{
     width: 100% !important;
   }
-  .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.accountHeader{
+  .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
     display: block;
   }
   }
   
-  .custom-grid{
+  .custom_grid{
       width: 100%;
       border: 2px solid #D4D6D7;
       border-radius: 8;
@@ -234,68 +234,65 @@
       border-radius: 12px;
   } */
   
-  .account-name-Link {
+  .account_name_link {
       color: #0645ad;
       cursor: pointer;
   }
   
-  .account-name-Link:hover {
+  .account_name_link:hover {
       text-decoration: underline;
   }
   
-  .account-grid {
+  .account_grid {
     height: calc(100vh - 200px);
   }
   @media only screen and (max-width: 714px) {
-    .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.accountHeader{
+    .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiBox-root.MuiBox-root-40.account_header{
       width: 100%;
     }
-    .account-header-inner-container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiGrid-root.MuiGrid-item , .accountHeader.accountHeader-mobile{
+    .account_header_inner_container .MuiGrid-root.MuiGrid-container.MuiGrid-align-content-xs-center.MuiGrid-justify-xs-space-between .MuiGrid-root.MuiGrid-item , .account_header.account_header-mobile{
     width: 100%;
     }
-    .accountHeader.accountHeader-mobile .MuiFormControl-root.MuiTextField-root{
+    .account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root{
       width: 100% !important;
     }
-    .accountHeaderDropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense{
+    .account_header_dropdown .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl.MuiInputBase-marginDense.MuiOutlinedInput-marginDense{
       width: 100% !important;
     }
-    .accountHeaderAccountTab  , .accountHeaderActiveAccountTab , .accountHeaderInactiveAccountTab {
+    .account_header_account_tab  , .account_headerActiveAccountTab , .account_headerInactiveAccountTab {
       margin:0.6rem auto !important;
     }
-    .account-header-inner-container div.accountHeader{
+    .account_header_inner_container div.account_header{
       width: 100%;
     }
-    .accountHeaderDropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
+    .account_header_dropdown .MuiInputBase-root.MuiInput-root.MuiInput-underline.MuiInputBase-formControl .MuiInput-formControl{
         width: 100% !important;
     }
   
-  .accountHeader.accountHeader-mobile{
+  .account_header.account_header-mobile{
     margin-top: 1rem;
   }
   }
   @media only screen and (max-width: 425px) {
-    .accountHeader.accountHeader-mobile {
+    .account_header.account_header-mobile {
         margin-top: 0;
     }
-    .account-header-inner-container .MuiGrid-root.MuiGrid-item{
+    .account_header_inner_container .MuiGrid-root.MuiGrid-item{
       width:100%;
     }
-   .accountHeader.accountHeader-mobile .MuiFormControl-root.MuiTextField-root{
+   .account_header.account_header-mobile .MuiFormControl-root.MuiTextField-root{
       width: 100% !important;
     }
   }
   @media only screen and (max-width: 375px){
-  #demo-simple-select-outlined {
+  #demo_simple_select_outlined {
       width: 230px !important;
   }
   }
 
 @media only screen and (max-width: 599px) {
-    .accountActivitiesDiv {
+    .account_activities_div {
         width: 100%;
     }
-}
-.accDialog .MuiDialog-paper {
-  overflow-y: unset;
 }
   
