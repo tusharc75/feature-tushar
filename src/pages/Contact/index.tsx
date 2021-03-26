@@ -35,6 +35,7 @@ import { getErrorMessage } from '../../services/util'
 import './contact.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 import { CustomEventEmitter } from './../../axios/events';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import styles from "../Leads/Header.module.scss"
 
 const ContactTypes = {
@@ -140,9 +141,18 @@ export default function Contact() {
             )
         },
         // { field: "lastName", headerName: "Last Name", width: 200 },
-        { field: "phone", headerName: "Phone", width: 200 },
-        { field: "email", headerName: "Email", width: 200 },
-        { field: "account", headerName: "Account", width: 200 },
+        {
+            field: "phone", headerName: "Phone", width: 200,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
+        },
+        {
+            field: "email", headerName: "Email", width: 200,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
+        },
+        {
+            field: "account", headerName: "Account", width: 200,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
+        },
         {
             field: "actions", headerName: "Actions ",
             renderCell: (params) => (

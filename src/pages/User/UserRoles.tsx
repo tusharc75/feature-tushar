@@ -42,29 +42,30 @@ const UserRoles = ({ data, unassignRole }: props) => {
       <div className={classes.demo}>
         <List style={{ padding: 0 }}>
           {data && data.length
-            ? data.map((obj) => {
-                return (
-                  <BoxWithBorder style={{ padding: "0px", margin: "8px" }}>
-                    <ListItem className={classes.list}>
-                      <ListItemText
-                        primary={<Typography> {obj.name || ""}</Typography>}
-                        secondary={obj.description || ""}
-                      />
-                      <ListItemSecondaryAction>
-                        <Tooltip title="Unassign Role">
-                          <IconButton
-                            edge="end"
-                            aria-label="delete"
-                            onClick={() => unassignRole(obj)}
-                          >
-                            <DeleteIcon color="error" />
-                          </IconButton>
-                        </Tooltip>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </BoxWithBorder>
-                );
-              })
+            ? data.map((obj: any, i: string) => (
+                <BoxWithBorder
+                  key={i}
+                  style={{ padding: "0px", margin: "8px" }}
+                >
+                  <ListItem className={classes.list}>
+                    <ListItemText
+                      primary={<Typography> {obj.name || ""}</Typography>}
+                      secondary={obj.description || ""}
+                    />
+                    <ListItemSecondaryAction>
+                      <Tooltip title="Unassign Role">
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => unassignRole(obj)}
+                        >
+                          <DeleteIcon color="error" />
+                        </IconButton>
+                      </Tooltip>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                </BoxWithBorder>
+              ))
             : null}
         </List>
       </div>
