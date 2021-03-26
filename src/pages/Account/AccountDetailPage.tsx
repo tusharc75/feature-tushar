@@ -173,10 +173,7 @@ const Roles = () => {
             setHeadingLbl(data.accountName || '')
             handleMainPonts(data)
             setAccountData(data)
-            let ans = [...data?.collaborator, data?.owner].find(obj => obj.optionValue === user.user._id)
-            if (ans) {
-                setCanEdit(true)
-            }
+            setCanEdit([...data?.collaborator, data?.owner].some(obj => obj.optionValue === user.user._id))
 
             if (data.parentHierarchy && data.parentHierarchy.length > 0) {
 
