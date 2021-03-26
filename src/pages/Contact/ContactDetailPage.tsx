@@ -245,15 +245,6 @@ const Roles = () => {
                                     >
                                         Edit
                                 </Button>,
-<<<<<<< HEAD
-                                <Box component="span" marginX={1} />,
-                                <DeleteButton
-                                text="Delete"
-                                action={() => {
-                                setShowConfirmBox(true);
-                                }}
-                                />
-=======
                                     <Box component="span" marginX={1} />,
                                     <Button
                                         variant="contained" color="secondary"
@@ -262,7 +253,6 @@ const Roles = () => {
                                         Delete
                                 </Button>
 
->>>>>>> 8ed5af254887d4f924555fa5386f82f7a7038354
                                 ]
                                 : null
                         }

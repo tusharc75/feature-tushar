@@ -11,20 +11,15 @@ import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
 import CustomHeader from '../../components/DetailsPageHeader'
 import { Link } from "react-router-dom";
-import { getErrorMessage } from '../../services/util'
 import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import { capitalize } from '../../services/util'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import Loader from '../../components/Loader'
 import routes from '../../components/Helpers/Routes';
-import '../Account/accounts.scss'
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
-import isObjectEmpty from './../../constants/helpers'
-import DeleteButton from "../../components/Helpers/DeleteButton";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import {  removeEmptyKeys } from '../../constants/helpers';
 
@@ -249,12 +244,12 @@ const Roles = () => {
                                 Edit
                                 </Button>,
                                 <Box component="span" marginX={1} />,
-                                <DeleteButton
-                                text="Delete"
-                                action={() => {
-                                setShowConfirmBox(true);
-                                }}
-                                />
+                                <Button
+                                        variant="contained" color="secondary"
+                                        onClick={() => setShowConfirmBox(true)}
+                                    >
+                                        Delete
+                                </Button>
                     </CustomHeader>
 
                     <div className="detailPageContainer">
@@ -291,7 +286,8 @@ const Roles = () => {
                                 </Grid>
                                 <Grid item sm={4} md={4} lg={4} className="customGrid" >
                                     {
-                                        !isObjectEmpty(entityData) && <div>
+                                        // !isObjectEmpty(entityData) && 
+                                        <div>
                                             <Activity relatedTo={[
                                                 { type: "account", referenceId: entityData.entityName, access: false }
                                             ]} handleActivityRefresh={() => { }} />
