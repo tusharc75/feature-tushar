@@ -4,6 +4,16 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary: #09445a;
+  --secondary: #dc004e;
+  --error: #f44336;
+  --info: #2196f3;
+  --success: #4caf50;
+  --link: #007bff;
+  --white: #ffffff;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -206,8 +216,7 @@ body::-webkit-scrollbar-thumb {
   color: #222;
 }
 
-.select-search:not(.is-loading):not(.select-search--multiple)
-  .select-search__value::after {
+.select-search:not(.is-loading):not(.select-search--multiple) .select-search__value::after {
   transform: rotate(45deg);
   border-right: 1px solid #000;
   border-bottom: 1px solid #000;
