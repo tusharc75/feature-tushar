@@ -170,6 +170,7 @@ const LeadDetailsPage = () => {
       .catch((err) => {
         setUpdating(false);
       });
+      setOpenUpdateDialog(false);
   };
 
 
