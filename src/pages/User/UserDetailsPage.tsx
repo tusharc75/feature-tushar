@@ -145,7 +145,7 @@ const UserDetailsPage = () => {
     if (id) {
       if (usersPermissions.isDelete) {
         axiosInstance()
-          .delete(`/user/${id}`)
+          .put(`/user/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
             history.goBack();

@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
-import { Dialog, Button, CircularProgress, Grid } from "@material-ui/core";
+import {
+  Dialog,
+  Button,
+  CircularProgress,
+  Grid,
+  useTheme,
+  useMediaQuery,
+} from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { Formik, Form } from "formik";
-import { useHistory } from "react-router-dom";
-
 import axiosInstance from "../../axios/axiosInstance";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
@@ -21,7 +26,8 @@ interface InitialData {
 }
 
 const CreateUser = ({ open, close, fetchData }) => {
-  const history = useHistory();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<InitialData>({
@@ -58,6 +64,7 @@ const CreateUser = ({ open, close, fetchData }) => {
       .then(({ data }) => {
         console.log(data);
         setSubmitting(false);
+        fetchData();
         close();
       })
       .catch((err) => {
@@ -67,7 +74,13 @@ const CreateUser = ({ open, close, fetchData }) => {
   };
 
   return (
-    <Dialog open={open} onClose={close} maxWidth="md" fullWidth>
+    <Dialog
+      open={open}
+      onClose={close}
+      maxWidth="md"
+      fullWidth
+      fullScreen={isMobile}
+    >
       <CustomDialogHeader title="Create New User" onClose={close} />
 
       {loading || !initialData.fields.length ? (
