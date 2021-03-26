@@ -33,7 +33,6 @@ import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
-import NoDataCell from '../../components/Helpers/NoDataCell'
 import accountClass from "./account.module.scss"
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomHeader from '../../components/Helpers/CustomHeader'
@@ -140,7 +139,7 @@ export default function Account() {
             ...u,
             isChecked: false,
             id: u._id,
-            allowToDelete: u.allowToDelete,
+            canDelete: u?.owner?.optionValue === user?.user._id,
             collaborator: u.collaborator || [],
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : "",
             approved: u.static?.approved ? u.static?.approved : false
@@ -165,7 +164,7 @@ export default function Account() {
                         setCheckAllAccounts(ev.target.checked);
                         const gridData = dataRows;
                         gridData.map((d) => {
-                            // if (d.allowToDelete) {
+                            // if (d.canDelete) {
                             d.isChecked = ev.target.checked;
                             // }
                             return d;
@@ -177,7 +176,7 @@ export default function Account() {
             renderCell: (params) => (
                 <Checkbox
                     color="primary"
-                    // disabled={!params.allowToDelete}
+                    // disabled={!params.canDelete}
                     checked={params.value}
                     onChange={(ev) => {
                         const gridData = dataRows;
@@ -243,6 +242,7 @@ export default function Account() {
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "phone", headerName: "Phone",
@@ -288,7 +288,7 @@ export default function Account() {
 
                     {
                         accountPermissions.isDelete ?
-                            params.row.allowToDelete ?
+                            params.row.canDelete ?
                                 <Tooltip title="Delete">
                                     <IconButton aria-label="Delete" onClick={() => {
                                         setSingleAccountDelete({ show: true, id: params.row._id, accountName: params.row.accountName })
@@ -315,6 +315,7 @@ export default function Account() {
             width: 200
         },
     ];
+
     const handleSearch = (e) => {
         if (query.page !== 1) {
             setQuery((prevState) => ({ ...prevState, page: 0 }));
@@ -594,7 +595,7 @@ export default function Account() {
                                                 accountPermissions.isDelete &&
                                                 <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                                     onClick={() => {
-                                                        if (dataRows.find((d) => d.isChecked && d.allowToDelete === false)) {
+                                                        if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
                                                             setShowDeleteWarningConfirmBox(true);
                                                         } else {
                                                             setShowDeleteConfirmBox(true)
