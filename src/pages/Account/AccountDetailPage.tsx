@@ -43,6 +43,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
 import { removeEmptyKeys } from "../../constants/helpers";
 import { CustomEventEmitter } from './../../axios/events';
+import { Link } from "react-router-dom";
 
 const Accordion = withStyles({
     root: {
@@ -495,13 +496,13 @@ const Roles = () => {
                                                     {
                                                         expanded['opportunity'] ?
                                                             <>
-                                                                < Grid container spacing={2}>
+                                                                <Grid container spacing={2}>
                                                                     <Grid item md={12}>
 
                                                                         <div className={classes.opportunityTab} >
                                                                             <OpportunityTab data={[]} />
-                                                                        </div> : null
-                                                        </Grid>
+                                                                        </div>
+                                                                    </Grid>
                                                                     <Grid item md={12} sm={12} xs={12}>
                                                                         <Button
                                                                             variant="outlined"
@@ -509,7 +510,7 @@ const Roles = () => {
                                                                             fullWidth
                                                                         >
                                                                             View All
-                                  </Button>
+                                                                        </Button>
                                                                     </Grid>
                                                                 </Grid>
                                                             </> : null
@@ -522,7 +523,7 @@ const Roles = () => {
                             </Container>
                         </Grid>
                         <Grid item xs={12} sm={12} md={4} lg={4}
-                            className={`${accountClass.custom_grid} ${accountClass.account_activities_div}`} >
+                            className={`${accountClass.account_activities_div}`} >
                             <Container styles={{ padding: "8px", minHeight: "auto", width: '100%' }} >
                                 <Grid container>
                                     <Grid item xs={12}>
