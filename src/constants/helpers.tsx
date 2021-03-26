@@ -132,54 +132,54 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile number is too short");
     } else if (input.type === "number") {
       schema[input.fieldName] = input.required
         ? yup
-            .number()
-            .required(`${input.fieldLabel} is required`)
-            .positive()
-            .integer()
+          .number()
+          .required(`${input.fieldLabel} is required`)
+          .positive()
+          .integer()
         : yup.number().positive().integer();
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-            .array()
-            .required(`${input.fieldLabel} is required`)
-            .length(1, "Select at least one service access")
+          .array()
+          .required(`${input.fieldLabel} is required`)
+          .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
         input.required && validEmail
           ? yup
-              .string()
-              .email()
-              .required(`${input.fieldLabel} is required`)
-              .test("email", "Email already exist", async function (value) {
-                let isvalidEmail = validateEmail(value);
+            .string()
+            .email()
+            .required(`${input.fieldLabel} is required`)
+            .test("email", "Email already exist", async function (value) {
+              let isvalidEmail = validateEmail(value);
 
-                if (isvalidEmail) {
-                  const { path, createError, resolve } = this;
-                  let { data } = await checkEmailExist(value);
-                  if (data) {
-                    return createError({
-                      path,
-                      message: "Email alreday exist",
-                    });
-                  }
-                  return resolve(true);
+              if (isvalidEmail) {
+                const { path, createError, resolve } = this;
+                let { data } = await checkEmailExist(value);
+                if (data) {
+                  return createError({
+                    path,
+                    message: "Email alreday exist",
+                  });
                 }
-              })
+                return resolve(true);
+              }
+            })
           : yup.string().email();
     } else if (input.type === "switch" || input.type === "checkBox") {
       schema[input.fieldName] = input.required
@@ -195,6 +195,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   return yup.object().shape(schema);
 };
 
-export default function isObjectEmpty(obj) {
+export const isObjectEmpty = (obj) => {
   return Object.keys(obj).length === 0;
+}
+
+
+// Function To Set Owner DataSource
+export const getOwnerDropdownDataSource = (selectedCollaborator, mainDataSource) => {
+
+  if (!selectedCollaborator || selectedCollaborator.length === 0) {
+    return mainDataSource;
+  } else {
+    const ownerDataSource = [];
+
+    mainDataSource.map(d => {
+      const isCollaboratorSelected = selectedCollaborator.find(collaboratorId => collaboratorId == d.optionValue);
+      if (!isCollaboratorSelected) {
+        ownerDataSource.push(d);
+      }
+    })
+    return ownerDataSource;
+  }
+}
+
+// Function To Set Collaborator DataSource
+export const getCollaboratorDropdownDataSource = (selectedOwnerId, mainDataSource) => {
+  return selectedOwnerId ? mainDataSource.filter(d => d.optionValue != selectedOwnerId) : mainDataSource
 }

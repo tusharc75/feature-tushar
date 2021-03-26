@@ -6,9 +6,10 @@ import PropTypes from 'prop-types';
 import { Dialog } from '@material-ui/core';
 
 // Under Construction - Don't Use It Right Now: Punit
-function CustomDialogComponent({ title, open, onClose, content }) {
+function CustomDialogComponent({ title, open, onClose, children }) {
     return (
         <Dialog
+            disableBackdropClick={true}
             maxWidth="md"
             open={open}
             onClose={onClose}
@@ -18,7 +19,7 @@ function CustomDialogComponent({ title, open, onClose, content }) {
                 title && <CustomDialogHeader title={title} onClose={onClose}></CustomDialogHeader>
             }
 
-            <CustomDialogContent>{content}</CustomDialogContent>
+            <CustomDialogContent>{children}</CustomDialogContent>
         </Dialog>
     )
 }

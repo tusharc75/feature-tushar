@@ -1,9 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, Box, Avatar } from "@material-ui/core";
-import Container from './Container'
-import { capitalize } from '../services/util'
+import { Grid, Typography, Box, Avatar, Paper } from "@material-ui/core";
+import { Skeleton } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -12,61 +11,89 @@ const useStyles = makeStyles((theme) => ({
     box: {
         backgroundColor: "#E6F4FF",
         borderRadius: 6,
-        padding: theme.spacing(0.5, 1.5),
+        padding: theme.spacing(0.6, 1.8),
     },
+    customHeaderPaper: {
+        marginBottom: '16px',
+        padding: '10px'
+    },
+    labelColor: {
+        color: '#1a91b5'
+    },
+    avatar: {
+        width: 20,
+        height: 20,
+        display: 'inline-block',
+        marginRight: '10px'
+    },
+    skeleton: {
+        marginRight: '10px'
+    }
 }));
 
 const CustomHeader = (props) => {
-    const { mainPoints, heading, children, showHeading, logo } = props;
+    const { mainPoints, heading, children, showHeading, logo, loading } = props;
     const classes = useStyles();
     return (
         <React.Fragment>
-            <div className={classes.root} style={{  marginTop: 0 }}>
-                <Container>
-                    <Grid container justify="space-between" style={{ marginBottom: '10px' }}>
-                        <Grid item key="custom-header-heading">
-                            {
+            <Paper className={classes.customHeaderPaper} elevation={0}>
+                <Grid container justify="space-between" style={{ marginBottom: '10px' }}>
+                    <Grid item key="custom-header-heading">
+                        {
+                            loading ?
+                                <Skeleton width={100} /> :
                                 showHeading ? <>
-                                    <Typography style={{ display: 'inline-block' }} variant="h6" component="h2" color="primary">
+                                    <Typography
+                                        className="text-capitalize"
+                                        style={{ display: 'inline-block' }} variant="h6" component="h2" color="primary">
                                         {
                                             logo ? <Avatar
                                                 src={logo}
-                                                style={{ width: 20, height: 20, display: 'inline-block', marginRight: '10px' }}
+                                                className={classes.avatar}
+
                                                 alt="acc_logo" /> : null
                                         }
-                                        <span>{capitalize(heading)}</span>
+                                        <span>{heading}</span>
                                     </Typography>
                                 </>
                                     : null
-                            }
-                        </Grid>
-                        <Grid item key="custom-header-children">{children}</Grid>
+                        }
                     </Grid>
-                    <Box display="flex" id="tapleen2">
-                        {
-                            mainPoints && Object.keys(mainPoints).length ?
+                    <Grid item key="custom-header-children">{children}</Grid>
+                </Grid>
+                <Box display="flex" id="tapleen2">
+                    {
+                        loading ?
+                            <Grid container wrap="nowrap">
+                                {
+                                    [...Array(4).keys()].map(i => (
+                                        <>
+                                            <Skeleton variant="rect" className={classes.skeleton} width={80} height={50} />
+                                            <Box marginY={1} /></>
+                                    ))
+                                }
+                            </Grid> : mainPoints && Object.keys(mainPoints).length ?
                                 Object.keys(mainPoints).map((key, i) => {
                                     return <>
                                         {
                                             mainPoints[key] ? (
                                                 <React.Fragment>
-                                                    <Box className={classes.box} key={key + i}>
-                                                        <Typography align="center" color="primary">
-                                                            <strong>{mainPoints[key] || ''}</strong>
+                                                    <Box className={classes.box} key={key + i} >
+                                                        <Typography align="center" variant="subtitle1"
+                                                            className={`text-capitalize ${classes.labelColor}`}>{key}</Typography>
+                                                        <Typography align="center" color="primary" style={{ fontWeight: 500 }}>
+                                                            {mainPoints[key] || ''}
                                                         </Typography>
-                                                        <Typography align="center" color="primary">
-                                                            <strong>{capitalize(key)}</strong></Typography>
                                                     </Box>
                                                     <Box component="span" marginX={1} /></React.Fragment>
                                             ) : null
                                         }
                                     </>
                                 }) : null
-                        }
-                    </Box>
-                </Container>
-            </div>
-        </React.Fragment>
+                    }
+                </Box>
+            </Paper>
+        </React.Fragment >
     );
 };
 
@@ -76,9 +103,10 @@ CustomHeader.propTypes = {
     inactive: PropTypes.any,
     heading: PropTypes.string.isRequired,
     children: PropTypes.node,
+    loading: PropTypes.any,
     logo: PropTypes.any,
     mainPoints: PropTypes.any,
-    showHeading: PropTypes.bool
+    showHeading: PropTypes.any
 };
 
 export default CustomHeader;

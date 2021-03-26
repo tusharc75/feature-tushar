@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, IconButton, Typography, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeys, getOwnerDropdownDataSource, getCollaboratorDropdownDataSource, yupSchema } from '../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import CloseIcon from '@material-ui/icons/Close';
 import { withStyles } from '@material-ui/core/styles';
@@ -99,27 +99,11 @@ export default function CreateContact({ open, onClose, fetchData }) {
     };
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
-        if (!selectedCollaborator || selectedCollaborator.length == 0) {
-            setOwnerData(ownerCollaboratorData);
-        } else {
-            const ownerData = [];
-
-            ownerCollaboratorData.map(d => {
-                const isCollaboratorSelected = selectedCollaborator.find(collaborator => collaborator.optionValue == d.optionValue);
-                if (!isCollaboratorSelected) {
-                    ownerData.push(d);
-                }
-            })
-            setOwnerData(ownerData);
-        }
+        setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData))
     }
 
-    const onCollabOwnerMultiselectOpen = (selectedOwner) => {
-        if (selectedOwner) {
-            setCollaboratorData(ownerCollaboratorData.filter(d => d.optionValue != selectedOwner.optionValue));
-        } else {
-            setCollaboratorData(ownerCollaboratorData);
-        }
+    const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData))
     }
 
     useEffect(() => {
