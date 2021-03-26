@@ -35,6 +35,13 @@ const useStyles = makeStyles((theme) => ({
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
   },
+
+  toolbar: {
+    [theme.breakpoints.down("xs")]: {
+      paddingLeft: 0,
+      paddingRight: 0,
+    },
+  },
   menuButton: {
     marginRight: theme.spacing(2),
   },
@@ -43,7 +50,6 @@ const useStyles = makeStyles((theme) => ({
     width: "120px",
     [theme.breakpoints.down("sm")]: {
       width: "80px",
-      marginRight: 10,
     },
   },
 
@@ -310,7 +316,7 @@ const Header = ({ toggleDrawer }) => {
       </Slide>
 
       <AppBar position="fixed" className={classes.appBar} color="primary">
-        <Toolbar>
+        <Toolbar className={classes.toolbar}>
           <Box component="div" display="flex" alignItems="center" flexGrow={1}>
             <div className={classes.sectionMobile}>
               <IconButton

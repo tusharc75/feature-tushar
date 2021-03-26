@@ -28,6 +28,7 @@ import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -216,12 +217,21 @@ const Opportunities = () => {
         </Link>
       )
     },
-    { field: "stage", headerName: "Stage", width: 200 },
-    { field: "closeDate", headerName: "Close Date", width: 200 },
-    // { field: "status", headerName: "Lead Status", width: 200 },
-    { field: "owner", headerName: "Opportunity Owner", width: 200 },
     {
-      field: "actions", headerName: "Actions ",disableColumnMenu: true,sortable: false,filterable: false,
+      field: "stage", headerName: "Stage", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "closeDate", headerName: "Close Date", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    // { field: "status", headerName: "Lead Status", width: 200 },
+    {
+      field: "owner", headerName: "Opportunity Owner", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "actions", headerName: "Actions ", disableColumnMenu: true, sortable: false, filterable: false,
       renderCell: (params) => (
         <>
           {
@@ -349,7 +359,7 @@ const Opportunities = () => {
       <Layout>
         <Grid container spacing={3} direction="row">
           <Grid item xs={12} sm={6} className="pl-3">
-          <CustomBreadCrumbs routes={[routes.opportunity]} />
+            <CustomBreadCrumbs routes={[routes.opportunity]} />
           </Grid>
           <Grid item xs={12} sm={6} className="pr-3">
             <Grid container justify="flex-end">
