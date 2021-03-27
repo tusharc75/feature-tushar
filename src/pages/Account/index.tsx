@@ -24,7 +24,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import { accountDetailPage } from '../../routes/Accounts'
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import CreateAccountDialog from './CreateAccount/index'
+import ManageAccountDialog from './ManageAccount/index'
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
@@ -686,7 +686,7 @@ export default function Account() {
                         }
                         {
                             isAccDialogVisible ?
-                                <CreateAccountDialog
+                                <ManageAccountDialog
                                     open={isAccDialogVisible}
                                     onClose={handleDialogClose}
                                     id={cloneId}
