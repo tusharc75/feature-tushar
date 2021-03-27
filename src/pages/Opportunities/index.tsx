@@ -19,7 +19,7 @@ import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery, displayDate } from '../../services/util'
 import { CustomEventEmitter } from './../../axios/events';
-import Header from "./Header";
+import OpportunitiesHeader from "./OpportunitiesHeader";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CreateOpportunity from './CreateOpportunity'
 import MessageDialog from '../../components/Helpers/MessageDialog'
@@ -412,7 +412,7 @@ const Opportunities = () => {
 
         {/* Tables Begins Here */}
         <Container>
-          <Header
+          <OpportunitiesHeader
             selectedType={selectedType}
             onTypeChange={handleOpportunityTypeSel}
             options={OpportunityTypes}
