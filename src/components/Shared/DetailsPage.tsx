@@ -58,7 +58,7 @@ const Details = (props: DetailProps) => {
         values[input.fieldName].includes(opt.optionValue)
       );
       const value = filterOptions.length
-        ? filterOptions.map((d) => d.optionLabel)
+        ? filterOptions.map((d) => d.optionLabel).join(", ")
         : "";
       text = value ? value : "_ _ _";
     } else if (input.type === "dropDown") {

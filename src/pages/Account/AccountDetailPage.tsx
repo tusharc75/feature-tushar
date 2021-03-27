@@ -41,9 +41,10 @@ import CreateOpportunity from '../Opportunities/CreateOpportunity'
 import CreateContact from '../Contact/CreateContact/CreateContact';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
-import { removeEmptyKeys } from "../../constants/helpers";
+import { removeEmptyKeys, getObjKeysWithValues, formValidation } from "../../constants/helpers";
 import { CustomEventEmitter } from './../../axios/events';
 import { Link } from "react-router-dom";
+import ManageAccount from "./ManageAccount/ManageAccount";
 
 const Accordion = withStyles({
     root: {
@@ -303,19 +304,50 @@ const Roles = () => {
             })
     }
 
-    const handleUpdateAccount = (values) => {
+    // const handleUpdateAccount = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
+    //     const errors = formValidation(values, _.cloneDeep(entityData.fields));
+    //     if (Object.keys(errors).length) {
+    //         entityData.fields.forEach((input) => {
+    //             if (input.required) {
+    //                 setTouched(input.fieldName, true);
+    //             }
+    //         });
+    //     } else {
+    //         // handleLoading(true, saveAndNew)
+    //         setUpdating(true);
+    //         // values = removeEmptyKeys(values)
+    //         // if (values.employees) {
+    //         //     values.employees = parseInt(values.employees)
+    //         // }
+
+    //         const updatedData = {
+    //             ...values,
+    //             _id: accountData._id,
+    //         };
+
+    //         axiosInstance().put('/account', removeEmptyKeys(updatedData))
+    //             .then(() => {
+    //                 fetchAccountData()
+    //                 CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+    //                 setUpdating(false);
+    //                 setOpenUpdateDialog(false)
+    //             })
+    //             .catch((err) => {
+    //                 setUpdating(false);
+    //             });
+    //         setErrors({});
+    //     }
+    // }
+
+    const onUpdateAccount = (values) => {
         setUpdating(true);
-        values = removeEmptyKeys(values)
-        if (values.employees) {
-            values.employees = parseInt(values.employees)
-        }
 
         const updatedData = {
             ...values,
             _id: accountData._id,
         };
 
-        axiosInstance().put('/account', updatedData)
+        axiosInstance().put('/account', removeEmptyKeys(updatedData))
             .then(() => {
                 fetchAccountData()
                 CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
@@ -326,6 +358,7 @@ const Roles = () => {
                 setUpdating(false);
             });
     };
+
     const goBackToListing = () => {
         history.push({
             pathname: accountPage.path
@@ -609,15 +642,23 @@ const Roles = () => {
                         ) : null
                     }
                     {openUpdateDialog && (
-                        <UpdateDetailsDialog
-                            title={`Editing  ${accountData?.accountName ?? ''}`}
-                            openDialog={openUpdateDialog}
+                        <ManageAccount
+                            isNew={false}
+                            open={openUpdateDialog}
                             onClose={closeUpdateDIalog}
-                            data={accountData}
-                            fields={accountFields}
-                            isUpdating={isUpdating}
-                            handleUpdate={handleUpdateAccount}
+                            entityData={{ fields: accountFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(accountData, accountFields.map((f) => { return f.fieldData })) }}
+                            loading={loading}
+                            handleSubmit={onUpdateAccount}
                         />
+                        // <UpdateDetailsDialog
+                        //     title={`Editing  ${accountData?.accountName ?? ''}`}
+                        //     openDialog={openUpdateDialog}
+                        //     onClose={closeUpdateDIalog}
+                        //     data={accountData}
+                        //     fields={accountFields}
+                        //     isUpdating={isUpdating}
+                        //     handleUpdate={handleUpdateAccount}
+                        // />
                     )}
 
                     {
