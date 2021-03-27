@@ -42,7 +42,7 @@ const tableIcons: any = {
 };
 
 export default function AccountHierarchy({ data, currentAccountId }) {
-    debugger;
+    
     const options: any = {
         search: false,
         paging: false,
