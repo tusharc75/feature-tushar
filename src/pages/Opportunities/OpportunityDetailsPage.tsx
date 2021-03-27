@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
@@ -20,9 +20,10 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import { CustomEventEmitter } from './../../axios/events';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
-const OpportunityDetailsPage = () => {
+function OpportunityDetailsPage() {
+  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user },
@@ -82,6 +83,8 @@ const OpportunityDetailsPage = () => {
         setOpportunityData(data);
         getOpportunityFields();
         setCustomizedRoutes([routes.opportunity, { title: `${name}` }]);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -101,6 +104,8 @@ const OpportunityDetailsPage = () => {
       .then(({ data: { data } }) => {
         setOpportunityFields(data);
         setLoading(false);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -133,11 +138,12 @@ const OpportunityDetailsPage = () => {
       axiosInstance()
         .put(`/opportunity/remove`, { ids: [opportunityData._id] })
         .then(({ data }) => {
-          CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
           setShowConfirmBox(false);
         });
     } else {
@@ -160,10 +166,11 @@ const OpportunityDetailsPage = () => {
     axiosInstance()
       .put("/opportunity", updatedData)
       .then(({ data }) => {
-        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         setUpdating(false);
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setUpdating(false);
       });
   };

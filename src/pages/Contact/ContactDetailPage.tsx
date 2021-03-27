@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     Box,
     Button,
@@ -25,9 +25,11 @@ import Activity from "../../components/Activity";
 import { isObjectEmpty } from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import { CustomEventEmitter } from './../../axios/events';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const Roles = () => {
+    const toastConfig = useContext(CustomToastContext);
+    
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
@@ -140,10 +142,11 @@ const Roles = () => {
         if (contactData?._id) {
 
             axiosInstance().put(`/contact/remove`, { ids: [contactData._id] }).then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
-            }).catch(err => {
+            }).catch(error => {
+                toastConfig.setToastConfig(error);
                 setShowConfirmBox(false)
             })
         }
@@ -193,9 +196,10 @@ const Roles = () => {
 
         axiosInstance().put('/contact', updatedData).then(({ data }) => {
             fetchContactData()
-            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
             setUpdating(false);
-        }).catch((err) => {
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
             setUpdating(false);
         });
     };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { Skeleton } from "@material-ui/lab";
@@ -18,10 +18,11 @@ import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { removeEmptyKeys } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import { CustomEventEmitter } from '../../axios/events'
 import styles from "./LeadDetailsPage.module.scss"
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const LeadDetailsPage = () => {
+  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user },
@@ -114,11 +115,12 @@ const LeadDetailsPage = () => {
       axiosInstance()
         .put(`/lead/remove`, { ids: [leadData._id] })
         .then(({ data }) => {
-          CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error)
           setShowConfirmBox(false);
         });
     } else {
@@ -144,13 +146,14 @@ const LeadDetailsPage = () => {
       .put("/lead", removeEmptyKeys(updatedData))
       .then(({ data }) => {
         fetchLeadData();
-        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         setUpdating(false);
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setUpdating(false);
       });
-      setOpenUpdateDialog(false);
+    setOpenUpdateDialog(false);
   };
 
 
@@ -251,7 +254,7 @@ const LeadDetailsPage = () => {
               <Container styles={{ height: "100%" }}>
                 {loading ? (
                   <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i , index) => (
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
                       <Grid key={index} item sm={6} md={6}>
                         <Skeleton variant="text" width="100px" height="16px" />
                         <Box marginY={1} />
@@ -280,7 +283,7 @@ const LeadDetailsPage = () => {
                   <Box>
                     <Skeleton variant="text" width="100px" height="25px" />
                     <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i , index) => (
+                    {[0, 1, 2, 3, 4].map((i, index) => (
                       <Skeleton key={index} width="100%" height="50px" />
                     ))}
                   </Box>
