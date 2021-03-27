@@ -34,11 +34,10 @@ const useStyles = makeStyles((theme) => ({
 const DetailsPageHeader = (props) => {
     const { mainPoints, heading, children, showHeading, logo, loading } = props;
     const classes = useStyles();
-    return (
-        <React.Fragment>
+    return  <>
             <Paper className={classes.customHeaderPaper} elevation={0}>
                 <Grid container justify="space-between" style={{ marginBottom: '10px' }}>
-                    <Grid item key="custom-header-heading">
+                    <Grid item>
                         {
                             loading ?
                                 <Skeleton width={100} /> :
@@ -59,7 +58,7 @@ const DetailsPageHeader = (props) => {
                                     : null
                         }
                     </Grid>
-                    <Grid item key="custom-header-children">{children}</Grid>
+                    <Grid item>{children}</Grid>
                 </Grid>
                 <Box display="flex" id="tapleen2">
                     {
@@ -68,7 +67,8 @@ const DetailsPageHeader = (props) => {
                                 {
                                     [...Array(4).keys()].map((i, index) => (
                                         <>
-                                            <Skeleton key={index} variant="rect" className={classes.skeleton} width={80} height={50} />
+                                            <Skeleton
+                                             variant="rect" className={classes.skeleton} width={80} height={50} />
                                             <Box marginY={1} /></>
                                     ))
                                 }
@@ -79,8 +79,8 @@ const DetailsPageHeader = (props) => {
                                     return <>
                                         {
                                             mainPoints[key] ? (
-                                                <React.Fragment key={key+i}>
-                                                    <Box className={classes.box} key={key+i}>
+                                                <React.Fragment key={i}>
+                                                    <Box className={classes.box}>
                                                         <Typography align="center" variant="subtitle1"
                                                             className={`text-capitalize ${classes.labelColor}`}>{key}</Typography>
                                                         <Typography align="center" color="primary" style={{ fontWeight: 500 }}>
@@ -95,8 +95,7 @@ const DetailsPageHeader = (props) => {
                     }
                 </Box>
             </Paper>
-        </React.Fragment >
-    );
+        </>
 };
 
 DetailsPageHeader.propTypes = {
