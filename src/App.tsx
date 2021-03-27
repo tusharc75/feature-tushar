@@ -30,7 +30,26 @@ import User from "./pages/User";
 import Entity from "./pages/Entity";
 import UserDetailsPage from "./pages/User/UserDetailsPage";
 
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from "@material-ui/lab/Alert";
+import { makeStyles } from "@material-ui/core/styles";
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: "100%",
+    "& > * + *": {
+      marginTop: theme.spacing(2),
+    },
+  },
+}));
+
 function App() {
+  const classes = useStyles();
+
   const location = useLocation();
   const {
     state: { user },
@@ -142,14 +161,26 @@ function App() {
         </Switch>
       </AnimatePresence>
 
-      {toastConfig && (
-        <CustomToaster
-          type={toastConfig.type}
-          errorMsg={toastConfig.errorMsg}
-          open={toastConfig.open}
-          close={toastConfig.close}
-        />
-      )}
+      {
+        toastConfig && <div className={classes.root}>
+          <Snackbar open={toastConfig.open} autoHideDuration={6000} onClose={toastConfig.close}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'center',
+            }}
+          >
+            <Alert onClose={toastConfig.close} severity={toastConfig.type}>
+              {toastConfig.errorMsg}
+            </Alert>
+          </Snackbar>
+        </div>
+        // <CustomToaster
+        //   type={toastConfig.type}
+        //   errorMsg={toastConfig.errorMsg}
+        //   open={toastConfig.open}
+        //   close={toastConfig.close}
+        // />
+      }
     </ThemeProvider>
   );
 }

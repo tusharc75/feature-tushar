@@ -403,9 +403,21 @@ const FormTypes = (props) => {
         multiple
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-        value={options.filter((data: any) =>
-          values[name].includes(data.optionValue)
-        )}
+        // value={options.filter((data: any) =>
+        //   values[name].includes(data.optionValue)
+        // )}
+        // value={
+        //   options.filter((data) => data.optionValue === values[name]).length
+        //     ? options.filter((data) => data.optionValue === values[name])[0]
+        //     : ""
+        // }
+        value={
+          options.filter((data: any) => {
+            return values[name].some(d => d.optionValue === data.optionValue)
+            // debugger;
+            // values[field.fieldName].includes(data.optionValue)
+          }
+          )}
         getOptionSelected={(option: any, val: any) =>
           option.optionValue === val.optionValue
         }
@@ -415,7 +427,7 @@ const FormTypes = (props) => {
             : (e, value: any[]) =>
               setFieldValue(
                 name,
-                value.map((val) => val.optionValue)
+                value
                 // _.map((value: any[], _val: any) => {
                 //   return _val.optionValue;
                 // })
