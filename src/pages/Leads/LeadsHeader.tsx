@@ -15,7 +15,7 @@ import { ExpandMore } from "@material-ui/icons";
 import styles from "./Header.module.scss"
 
 const useStyles = makeStyles((theme) => ({
-    filterSide: {
+    filter_side: {
         display: "flex",
         justifyContent: "flex-end",
     },
@@ -35,7 +35,7 @@ function LeadsHeader(props) {
 
     const { selectedType, onTypeChange, options, onSearch, searchVal, onCreate,
         leadPermissions, showConfirmBox, canDelete } = props
-    return <Grid className={styles.filterSideContainer} container>
+    return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6}>
             <FormControl style={{ minWidth: "170px" }}>
                 {
@@ -67,12 +67,12 @@ function LeadsHeader(props) {
                 }
             </FormControl>
         </Grid>
-        <Grid item xs={6} className={styles.filterSide}>
+        <Grid item xs={6} className={styles.filter_side}>
 
-            <Box className={styles.filterSide_header} component="div">
+            <Box className={styles.filter_side_header} component="div">
                 <SearchBox
                     onSearch={onSearch}
-                    searchbox={styles.leadSearchBox}
+                    searchbox={styles.search_box_input}
                     value={searchVal}
                     size="small"
                     placeholder="Search Leads"
@@ -83,7 +83,7 @@ function LeadsHeader(props) {
                     <Button
                         variant="contained"
                         color="primary"
-                        className={styles.leadAddBtn}
+                        className={styles.add_submit_btn}
                         onClick={onCreate}
                         startIcon={<AddOutlined />}
                     >
@@ -96,7 +96,7 @@ function LeadsHeader(props) {
                         <Button
                             variant="outlined"
                             color="default"
-                            className={styles.leadActionBtn}
+                            className={styles.action_submit_btn}
                             onClick={openActions}
                             aria-controls="action-menu"
                         >

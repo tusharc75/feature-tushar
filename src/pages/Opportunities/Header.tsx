@@ -17,7 +17,7 @@ import Header from "./Header";
 import styles from "../Leads/Header.module.scss"
 
 const useStyles = makeStyles((theme) => ({
-    filterSide: {
+    filter_side: {
         display: "flex",
         justifyContent: "flex-end",
     },
@@ -37,7 +37,7 @@ function LeadsHeader(props) {
 
     const { selectedType, onTypeChange, options, onSearch, searchVal, onCreate,
         opportunityPermissions, showConfirmBox, canDelete } = props
-    return <Grid className={styles.filterSideContainer}  container>
+    return <Grid className={styles.filter_side_container}  container>
         <Grid item xs={6}>
             <FormControl style={{ minWidth: "170px" }}>
                 {
@@ -69,11 +69,11 @@ function LeadsHeader(props) {
                 }
             </FormControl>
         </Grid>
-        <Grid item xs={6} className={styles.filterSide}>
-            <Box  className={styles.filterSide_header} component="div">
+        <Grid item xs={6} className={styles.filter_side}>
+            <Box  className={styles.filter_side_header} component="div">
                 <SearchBox
                     onSearch={onSearch}
-                    searchbox={styles.leadSearchBox}
+                    searchbox={styles.search_box_input}
                     value={searchVal}
                     size="small"
                     placeholder="Search Opportunity"
@@ -85,7 +85,7 @@ function LeadsHeader(props) {
                     <Button
                         variant="contained"
                         color="primary"
-                        className={styles.leadAddBtn}
+                        className={styles.add_submit_btn}
                         onClick={onCreate}
                         startIcon={<AddOutlined />}
                     >
@@ -98,7 +98,7 @@ function LeadsHeader(props) {
                             variant="outlined"
                             color="default"
                             onClick={openActions}
-                            className={styles.leadActionBtn}
+                            className={styles.action_submit_btn}
                             aria-controls="action-menu"
                         >
                             Actions <ExpandMore />
