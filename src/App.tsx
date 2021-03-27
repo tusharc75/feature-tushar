@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useContext } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -15,11 +15,9 @@ import { useData } from "./StateProvider/Provider";
 import AddDoa from "./pages/DoaSetup/AddDoa";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account/index";
-// import CreateContact from './pages/Contact/CreateContact'
 import AccountDetailPage from "./pages/Account/AccountDetailPage";
 import ContactDetailPage from "./pages/Contact/ContactDetailPage";
 import CustomToaster from "./components/Helpers/CustomToast";
-import { CustomEventEmitter } from "./axios/events";
 import OpportunityDetailsPage from "./pages/Opportunities/OpportunityDetailsPage";
 import Activitydemo from "./pages/Activity/activitydemo";
 import Activity from "./pages/Activity";
@@ -30,25 +28,11 @@ import User from "./pages/User";
 import Entity from "./pages/Entity";
 import UserDetailsPage from "./pages/User/UserDetailsPage";
 
-import Snackbar from "@material-ui/core/Snackbar";
-import MuiAlert from "@material-ui/lab/Alert";
 import { makeStyles } from "@material-ui/core/styles";
-
-function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: "100%",
-    "& > * + *": {
-      marginTop: theme.spacing(2),
-    },
-  },
-}));
+import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 
 function App() {
-  const classes = useStyles();
+  const toast = useContext(CustomToastContext);
 
   const location = useLocation();
   const {
@@ -62,18 +46,6 @@ function App() {
       <Redirect to={{ pathname: "/", state: { from: location } }} />
     );
   };
-
-  const [toastConfig, setToastConfig] = useState(null);
-
-  CustomEventEmitter.subscribe("show-toast", (toastConfig) => {
-    setToastConfig({
-      ...toastConfig,
-      open: true,
-      close: () => {
-        setToastConfig(null);
-      },
-    });
-  });
 
   return (
     <ThemeProvider theme={theme}>
@@ -162,24 +134,12 @@ function App() {
       </AnimatePresence>
 
       {
-        toastConfig && <div className={classes.root}>
-          <Snackbar open={toastConfig.open} autoHideDuration={6000} onClose={toastConfig.close}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
-            }}
-          >
-            <Alert onClose={toastConfig.close} severity={toastConfig.type}>
-              {toastConfig.errorMsg}
-            </Alert>
-          </Snackbar>
-        </div>
-        // <CustomToaster
-        //   type={toastConfig.type}
-        //   errorMsg={toastConfig.errorMsg}
-        //   open={toastConfig.open}
-        //   close={toastConfig.close}
-        // />
+        toast?.toastConfig?.open && <CustomToaster
+          type={toast.toastConfig.type}
+          message={toast.toastConfig.message}
+          open={toast.toastConfig.open}
+          close={() => { toast.setToastConfig({ open: false }) }}
+        />
       }
     </ThemeProvider>
   );

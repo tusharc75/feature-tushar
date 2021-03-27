@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
@@ -11,7 +11,7 @@ import CustomDialog from "../../components/Helpers/CustomDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import CustomHeader from "../../components/DetailsPageHeader";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import { opportunityPage } from "../../routes/Opportunity";
@@ -24,9 +24,10 @@ import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 
-import { CustomEventEmitter } from './../../axios/events';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
-const OpportunityDetailsPage = () => {
+function OpportunityDetailsPage() {
+  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user },
@@ -94,6 +95,8 @@ const OpportunityDetailsPage = () => {
         setOpportunityData(data);
         getOpportunityFields();
         setCustomizedRoutes([routes.opportunity, { title: `${name}` }]);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -113,6 +116,8 @@ const OpportunityDetailsPage = () => {
       .then(({ data: { data } }) => {
         setOpportunityFields(data);
         setLoading(false);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -145,11 +150,12 @@ const OpportunityDetailsPage = () => {
       axiosInstance()
         .put(`/opportunity/remove`, { ids: [opportunityData._id] })
         .then(({ data }) => {
-          CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
           setShowConfirmBox(false);
         });
     } else {
@@ -172,12 +178,13 @@ const OpportunityDetailsPage = () => {
     axiosInstance()
       .put("/opportunity", updatedData)
       .then(({ data }) => {
-        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         setUpdating(false);
         goBackToListing();
         
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setUpdating(false);
       });
   };
@@ -226,7 +233,7 @@ const OpportunityDetailsPage = () => {
             </Box>
           </Container>
         ) : (
-          <CustomHeader
+          <DetailsPageHeader
             heading={headingLbl}
             logo={
               opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
@@ -256,7 +263,7 @@ const OpportunityDetailsPage = () => {
                 onClick={() => setShowConfirmBox(true)}
               />
             ) : null}
-          </CustomHeader>
+          </DetailsPageHeader>
         )}
 
         <div>

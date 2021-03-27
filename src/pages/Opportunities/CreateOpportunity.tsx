@@ -1,23 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, IconButton, Typography, Grid } from '@material-ui/core';
+import { useEffect, useState, useContext } from 'react';
+import { Box, Button, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
 import { getObjKeys, removeEmptyKeys, getOwnerDropdownDataSource, getCollaboratorDropdownDataSource } from '../../constants/helpers';
 import { useHistory } from "react-router-dom";
-import CloseIcon from '@material-ui/icons/Close';
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
-import { formValidation } from '../../constants/helpers';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import Loader from '../../components/Loader'
 import { yupSchema } from '../../constants/helpers'
 import FormTypes from "./../../components/Helpers/FormTypes";
 import axiosInstance from './../../axios/axiosInstance'
-import { CustomEventEmitter } from './../../axios/events';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -46,7 +42,7 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function CreateOpportunity({ open, onClose, onSuccess }) {
-
+    const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const history = useHistory();
     const [entityData, setEntityData] = useState({
@@ -124,7 +120,7 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
                     setTouched(input.fieldName, true);
                 }
             });
-            CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: 'Please fill all required fields' });
+            toastConfig.setToastConfig({ open: true, type: "error", message: "Please fill all required fields" });
             setErrors({ ...errors });
         } else {
             setIsFormSubmitted(true);
@@ -137,12 +133,12 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
             //     }
             // })
             axiosInstance().post("/opportunity", values)
-                .then(() => {
-                    CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Opportunity created Succesfully" });
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     setIsFormSubmitted(false)
                     onSuccess()
-                })
-                .then(() => {
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error);
                     setIsFormSubmitted(false);
                 });
         }

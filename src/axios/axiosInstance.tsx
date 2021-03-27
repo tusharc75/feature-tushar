@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { CustomEventEmitter } from './events';
 
 export default (history = null) => {
     const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
@@ -40,36 +39,26 @@ export default (history = null) => {
         }), (error) => {
             if (error.message == "Network Error") {
                 return new Promise((resolve, reject) => {
-                    CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: "Api Not Working" });
-                    reject(error);
+                    reject({ open: true, type: "error", message: "Api Not Working" });
                 })
             }
 
             if (!error.response) {
                 return new Promise((resolve, reject) => {
-                    CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.error });
-                    reject(error);
+                    reject({ open: true, type: "error", message: error.response.data.error });
                 })
             }
 
             if (error.response.status === 401) {
-                CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.message });
                 clearTokenAndRedirectToHome();
+                return new Promise((resolve, reject) => {
+                    reject({ open: true, type: "error", message: error.response.data.message });
+                });
 
             }
-            // if (error.response.status === 500) {
-            //     CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.message });
-            //     clearTokenAndRedirectToHome();
-
-            // }
-            // else if (error.response.status === 403) {
-            //     clearTokenAndRedirectToHome();
-            //     //  redirect to home screens
-            // }
             else {
                 return new Promise((resolve, reject) => {
-                    CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: error.response.data.error || error.response.data.message });
-                    reject(error);
+                    reject({ open: true, type: "error", message: error.response.data.error || error.response.data.message });
                 })
             }
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Container,
@@ -16,6 +16,7 @@ import { useData } from "../../StateProvider/Provider";
 import { SET_USER } from "../../StateProvider/actionTypes";
 
 import axiosInstance from './../../axios/axiosInstance'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -56,6 +57,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Login = () => {
+  const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
   const classes = useStyles();
   const [isSubmitting, setSubmitting] = useState(false);
@@ -74,9 +76,9 @@ const Login = () => {
         localStorage.setItem("token", data.token);
         dispatch({ type: SET_USER, payload: data });
       })
-      .catch((err) => {
+      .catch((error) => {
         setSubmitting(false);
-        console.log(err);
+        toastConfig.setToastConfig(error);
       });
   };
 

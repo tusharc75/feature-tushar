@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     Box,
     Button,
@@ -11,7 +11,7 @@ import _ from "lodash";
 import { Skeleton } from "@material-ui/lab";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
-import CustomHeader from '../../components/DetailsPageHeader'
+import DetailsPageHeader from '../../components/DetailsPageHeader'
 import { accountPage } from '../../routes/Accounts'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
@@ -42,9 +42,9 @@ import CreateContact from '../Contact/CreateContact/CreateContact';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
 import { removeEmptyKeys, getObjKeysWithValues, formValidation } from "../../constants/helpers";
-import { CustomEventEmitter } from './../../axios/events';
 import { Link } from "react-router-dom";
 import ManageAccount from "./ManageAccount/ManageAccount";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const Accordion = withStyles({
     root: {
@@ -101,6 +101,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Roles = () => {
+    const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
     const classes = useStyles();
     const { state: { user } }: any = useData();
@@ -282,10 +283,11 @@ const Roles = () => {
     const handleDeleteAcc = () => {
         if (accountData?._id) {
             axiosInstance().put(`/account/remove`, { ids: [accountData._id] }).then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
-            }).catch(err => {
+            }).catch(error => {
+                toastConfig.setToastConfig(error);
                 setShowConfirmBox(false)
             })
         }
@@ -327,9 +329,7 @@ const Roles = () => {
 
     //         axiosInstance().put('/account', removeEmptyKeys(updatedData))
     //             .then(() => {
-    //                 fetchAccountData()
-    //                 CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
-    //                 setUpdating(false);
+    //                 fetchAccountData()   //                 setUpdating(false);
     //                 setOpenUpdateDialog(false)
     //             })
     //             .catch((err) => {
@@ -348,13 +348,14 @@ const Roles = () => {
         };
 
         axiosInstance().put('/account', removeEmptyKeys(updatedData))
-            .then(() => {
+            .then(({ data }) => {
                 fetchAccountData()
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setUpdating(false);
                 setOpenUpdateDialog(false)
             })
-            .catch((err) => {
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
                 setUpdating(false);
             });
     };
@@ -411,7 +412,7 @@ const Roles = () => {
                 </Grid>
                 <div>
                     {
-                        <CustomHeader
+                        <DetailsPageHeader
                             loading={loading}
                             heading={headingLbl}
                             logo={accountData?.accountLogo ? accountData.accountLogo : undefined}
@@ -436,7 +437,7 @@ const Roles = () => {
                                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                                     : null
                             }
-                        </CustomHeader>
+                        </DetailsPageHeader>
                     }
 
                     <Grid container spacing={2}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Grid,
@@ -20,7 +20,6 @@ import Header from "./LeadsHeader";
 import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery } from '../../services/util'
-import { CustomEventEmitter } from './../../axios/events';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import MessageDialog from '../../components/Helpers/MessageDialog'
@@ -29,6 +28,7 @@ import { leadDetailPage } from '../../routes/Lead'
 import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -51,6 +51,7 @@ const LeadTypes = {
 const notAllowedMes = "You must be the owner or collaborator of this contact to get the delete functionality"
 let leadTimeout
 const Leads = () => {
+  const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const { state: { user } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
@@ -350,12 +351,13 @@ const Leads = () => {
     if (recs && recs.length > 0) {
       axiosInstance()
         .put(`/lead/remove`, { ids: [...recs] }).then(({ data }) => {
-          CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
           if (deleteRec) setDeleteRec({})
           fetchLeads()
-        }).catch(err => {
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
         })

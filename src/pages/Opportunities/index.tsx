@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Grid,
@@ -18,7 +18,6 @@ import Container from "../../components/Container";
 import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery, displayDate } from '../../services/util'
-import { CustomEventEmitter } from './../../axios/events';
 import OpportunitiesHeader from "./OpportunitiesHeader";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CreateOpportunity from './CreateOpportunity'
@@ -29,6 +28,7 @@ import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolba
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -50,6 +50,7 @@ const OpportunityTypes = {
 };
 
 const Opportunities = () => {
+  const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const { state: { user } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
@@ -342,12 +343,13 @@ const Opportunities = () => {
     if (recs && recs.length > 0) {
       axiosInstance()
         .put(`/opportunity/remove`, { ids: [...recs] }).then(({ data }) => {
-          CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
           if (deleteRec) setDeleteRec({})
           fetchOpportunities()
-        }).catch(err => {
+        }).catch(error => {
+          toastConfig.setToastConfig(error);
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
         })
