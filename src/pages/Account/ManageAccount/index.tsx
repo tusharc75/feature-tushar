@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ManageAccount from './ManageAccount'
 import { getObjKeys, formValidation } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from '../../../axios/axiosInstance'
-import { CustomEventEmitter } from '../../../axios/events';
 import { removeEmptyKeys } from '../../../constants/helpers'
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
 export default function ManageAccountMain(props) {
+    const toastConfig = useContext(CustomToastContext);
 
     const { open, onClose, id } = props
     const { state: { user } }: any = useData();
@@ -60,11 +61,12 @@ export default function ManageAccountMain(props) {
     const handleCreateAccount = (values, saveAndNew, setValues) => {
         axiosInstance().post('/account', removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
-            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+            toastConfig.setToastConfig({ open: true, type: "success", errorMsg: data.message })
 
             handleLoading(false, saveAndNew)
         }).catch((error) => {
             setLoading(false);
+            toastConfig.setToastConfig(error);
         })
     }
     // const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Grid,
   Box,
@@ -32,12 +32,14 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import { removeEmptyKeys } from "../../constants/helpers";
-import { CustomEventEmitter } from "./../../axios/events";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import UserRoles from "./UserRoles";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const UserDetailsPage = () => {
+  const toastConfig = useContext(CustomToastContext)
+
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -167,14 +169,12 @@ const UserDetailsPage = () => {
       .put(`/user/${id}`, values)
       .then(({ data }) => {
         fetchUserData();
-        CustomEventEmitter.dispatch("show-toast", {
-          type: "success",
-          errorMsg: "Successfully saved",
-        });
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         setUserPermissions(data.permissions);
         setUpdating(false);
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setUpdating(false);
       });
   };
@@ -204,20 +204,11 @@ const UserDetailsPage = () => {
     axiosInstance()
       .post("/user/permission-setup", newData)
       .then(({ data }) => {
-        console.log(data);
         setChangingPermission(false);
-        CustomEventEmitter.dispatch("show-toast", {
-          type: "success",
-          errorMsg: "Permission changed successfully",
-        });
-      })
-      .catch((err) => {
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+      }).catch((err) => {
         setChangingPermission(false);
-        CustomEventEmitter.dispatch("show-toast", {
-          type: "error",
-          errorMsg: "Something went wrong",
-        });
-        console.log(err);
+        toastConfig.setToastConfig(err);
       });
   };
 
@@ -419,7 +410,7 @@ const UserDetailsPage = () => {
                       }}
                     >
                       {userData && (
-                        <UserRoles data={globalRoles} unassignRole={() => {}} />
+                        <UserRoles data={globalRoles} unassignRole={() => { }} />
                       )}
                     </Box>
                   )}
