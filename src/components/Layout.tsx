@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toolbar, Box, makeStyles, withWidth } from "@material-ui/core";
 import { motion } from "framer-motion";
 
@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Layout = ({ children, width }) => {
+  const contentRef = useRef(null);
   const {
     state: { userLoading },
   }: any = useData();
@@ -27,8 +28,17 @@ const Layout = ({ children, width }) => {
 
   const handleToggleState = () => toggleDrawer && setToggleDrawer(false);
 
+  useEffect(
+    () =>
+      contentRef.current.scrollIntoView({
+        behaviour: "smooth",
+        block: "start",
+      }),
+    [children]
+  );
+
   return (
-    <>
+    <div ref={contentRef}>
       {userLoading ? (
         <Loader
           text="Securely Loggin In"
@@ -45,7 +55,7 @@ const Layout = ({ children, width }) => {
             {!mobileWidths.includes(width) && (
               <Toolbar style={{ width: "48px" }} />
             )}
-            <motion.main
+            <motion.div
               animate={{ opacity: 1 }}
               initial={{ opacity: 0.6 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
@@ -55,11 +65,11 @@ const Layout = ({ children, width }) => {
             >
               {children}
               <Footer />
-            </motion.main>
+            </motion.div>
           </Box>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

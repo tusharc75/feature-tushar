@@ -16,7 +16,7 @@ import routes from './../../components/Helpers/Routes';
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
 import CreateLeadDialog from './CreateLead'
-import Header from "./Header";
+import Header from "./LeadsHeader";
 import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery } from '../../services/util'
@@ -28,6 +28,7 @@ import { leadDetailPage } from '../../routes/Lead'
 
 import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -209,13 +210,33 @@ const Leads = () => {
         getFirstName(params.row)
       )
     },
-    { field: "title", headerName: "Title", width: 200 },
-    { field: "company", headerName: "Company", width: 200 },
-    { field: "phone", headerName: "Phone", width: 200 },
-    { field: "mobile", headerName: "Mobile", width: 200 },
-    { field: "email", headerName: "Email", width: 200 },
+    {
+      field: "title", headerName: "Title", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "company", headerName: "Company", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "phone", headerName: "Phone", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "mobile", headerName: "Mobile", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "email", headerName: "Email", width: 200,
+      hide: true,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
     // { field: "status", headerName: "Lead Status", width: 200 },
-    { field: "owner", headerName: "Owner Alies", width: 200 },
+    {
+      field: "owner", headerName: "Owner Alies", width: 200,
+      hide: true,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
     {
       field: "actions",
       headerName: "Actions ",

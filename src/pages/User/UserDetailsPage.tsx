@@ -32,7 +32,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import { removeEmptyKeys } from "../../constants/helpers";
-import { CustomEventEmitter } from './../../axios/events';
+import { CustomEventEmitter } from "./../../axios/events";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import UserRoles from "./UserRoles";
@@ -66,8 +66,8 @@ const UserDetailsPage = () => {
 
   useEffect(() => {
     if (id) {
-      fetchUserData();
       getUserFields();
+      fetchUserData();
       fetchUserRoles();
     }
   }, [id]);
@@ -127,6 +127,7 @@ const UserDetailsPage = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
+      name: `${data.firstName} ${data.lastName}`,
       phone: data.phone || "",
       email: data.email || "",
     };
@@ -145,7 +146,7 @@ const UserDetailsPage = () => {
     if (id) {
       if (usersPermissions.isDelete) {
         axiosInstance()
-          .delete(`/user/${id}`)
+          .put(`/user/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
             history.goBack();
@@ -166,7 +167,10 @@ const UserDetailsPage = () => {
       .put(`/user/${id}`, values)
       .then(({ data }) => {
         fetchUserData();
-        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+        CustomEventEmitter.dispatch("show-toast", {
+          type: "success",
+          errorMsg: "Successfully saved",
+        });
         setUserPermissions(data.permissions);
         setUpdating(false);
       })
@@ -202,11 +206,17 @@ const UserDetailsPage = () => {
       .then(({ data }) => {
         console.log(data);
         setChangingPermission(false);
-        CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Permission changed successfully" });
+        CustomEventEmitter.dispatch("show-toast", {
+          type: "success",
+          errorMsg: "Permission changed successfully",
+        });
       })
       .catch((err) => {
         setChangingPermission(false);
-        CustomEventEmitter.dispatch("show-toast", { type: "error", errorMsg: "Something went wrong" });
+        CustomEventEmitter.dispatch("show-toast", {
+          type: "error",
+          errorMsg: "Something went wrong",
+        });
         console.log(err);
       });
   };
@@ -281,20 +291,10 @@ const UserDetailsPage = () => {
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Container styles={{ padding: "8px" }}>
               <BoxWithBorder style={{ padding: "8px", minHeight: "450px" }}>
-                {loading ? (
+                {loading || !userFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
-                ) : !userFields.length ? (
-                  <Box
-                    height="100%"
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <p>No Fields</p>
-                  </Box>
                 ) : (
                   <DetailsPage data={userData} fields={userFields} />
                 )}
@@ -419,7 +419,7 @@ const UserDetailsPage = () => {
                       }}
                     >
                       {userData && (
-                        <UserRoles data={globalRoles} unassignRole={() => { }} />
+                        <UserRoles data={globalRoles} unassignRole={() => {}} />
                       )}
                     </Box>
                   )}
