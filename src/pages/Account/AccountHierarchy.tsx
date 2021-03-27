@@ -42,7 +42,7 @@ const tableIcons: any = {
 };
 
 export default function AccountHierarchy({ data, currentAccountId }) {
-
+    
     const options: any = {
         search: false,
         paging: false,
@@ -82,19 +82,19 @@ export default function AccountHierarchy({ data, currentAccountId }) {
     return (
         <>
             {
-                data.length == 1 ? <MaterialTable
-                    icons={tableIcons}
-                    data={data}
-                    columns={columns}
-                    options={options}
-                /> :
-                    <MaterialTable
-                        icons={tableIcons}
-                        data={data}
-                        columns={columns}
-                        parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
-                        options={options}
-                    />
+                // data.length == 1 ? <MaterialTable
+                //     icons={tableIcons}
+                //     data={data}
+                //     columns={columns}
+                //     options={options}
+                // /> :
+                //     <MaterialTable
+                //         icons={tableIcons}
+                //         data={data}
+                //         columns={columns}
+                //         parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
+                //         options={options}
+                //     />
             }
         </>
     );
