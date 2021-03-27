@@ -41,7 +41,7 @@ function RelatedContacts(props) {
                     borderRadius={16}
                     boxShadow={0.5}
                 >
-                    <Link className={`${accountClass.accountNameLink} fSize`}
+                    <Link className={`${accountClass.account_name_link} f_size`}
                         to={`${contactDetailPage.path}/${obj._id}`}>
                         {`${obj.firstName || ''}  ${obj.lastName || ''}`}
                     </Link>
@@ -49,7 +49,7 @@ function RelatedContacts(props) {
                     <div className={classes.div1}>
                         <span className={classes.span}>Account Name:</span>
                         <span><Link
-                            className={`${accountClass.accountNameLink}`}
+                            className={`${accountClass.account_name_link}`}
                             to={`${accountDetailPage.path}/${obj?.accountName?.optionValue}`}>
                             {obj?.accountName?.optionLabel ? obj.accountName.optionLabel : ''}
                         </Link></span>

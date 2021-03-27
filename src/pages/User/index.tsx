@@ -261,7 +261,7 @@ const User: FC = () => {
   const showConfirmBox = (row) => {
     if (row) {
       setIsConformDialogVisible(true);
-      if (row && row._id) {
+      if (row && row.id) {
         setDeleteRec(row);
       }
     } else {
@@ -273,16 +273,17 @@ const User: FC = () => {
     }
   };
 
-  const handleDeleteLeads = async () => {
+  const handleDeleteUser = async () => {
     setDeleteLoading(true);
     let recs = [];
-    if (deleteRec?._id) {
-      recs.push(deleteRec?._id);
+    if (deleteRec?.id) {
+      recs.push(deleteRec?.id);
     } else {
       dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj._id);
+        if (obj.isChecked) recs.push(obj.id);
       });
     }
+
     if (recs && recs.length > 0) {
       axiosInstance()
         .put(`/user/remove`, { ids: [...recs] })
@@ -452,7 +453,7 @@ const User: FC = () => {
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteLeads}
+            onOk={handleDeleteUser}
           />
         ) : null}
       </Layout>

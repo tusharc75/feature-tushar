@@ -41,8 +41,10 @@ import CreateOpportunity from '../Opportunities/CreateOpportunity'
 import CreateContact from '../Contact/CreateContact/CreateContact';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
-import { removeEmptyKeys } from "../../constants/helpers";
+import { removeEmptyKeys, getObjKeysWithValues, formValidation } from "../../constants/helpers";
 import { CustomEventEmitter } from './../../axios/events';
+import { Link } from "react-router-dom";
+import ManageAccount from "./ManageAccount/ManageAccount";
 
 const Accordion = withStyles({
     root: {
@@ -103,9 +105,7 @@ const Roles = () => {
     const classes = useStyles();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
-    const [allowedToEdit, setAllowedToEdit] = useState(false)
     const [isUpdating, setUpdating] = useState(false);
-    const [alertData, setAlertData] = useState<any>({})
     const [accountData, setAccountData] = useState<any>({})
     const [relatedContacts, setRelatedContacts] = useState([])
     const [loading, setLoading] = useState(false)
@@ -123,7 +123,7 @@ const Roles = () => {
     });
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
-
+    const [canEdit, setCanEdit] = useState(false)
 
     let { id } = useParams();
 
@@ -161,12 +161,6 @@ const Roles = () => {
     }, [id]);
 
     useEffect(() => {
-        if (user && accountData) {
-            handleAllowToEditList(accountData)
-        }
-    }, [user]);
-
-    useEffect(() => {
         if (accountData._id && relatedContacts.length === 0) {
             fetchRelatedContacts()
         }
@@ -179,9 +173,9 @@ const Roles = () => {
             setCustomizedRoutes([routes.account, { title: data.accountName }]);
 
             setHeadingLbl(data.accountName || '')
-            handleAllowToEditList(data)
             handleMainPonts(data)
             setAccountData(data)
+            setCanEdit([...data?.collaborator, data?.owner].some(obj => obj.optionValue === user.user._id))
 
             if (data.parentHierarchy && data.parentHierarchy.length > 0) {
 
@@ -236,22 +230,6 @@ const Roles = () => {
         }).catch(() => {
             setLoading(false)
         })
-    }
-
-    const handleAllowToEditList = (accountDetails) => {
-        const userId = user?.user?._id;
-        let allowToEdit = false;
-
-        if (userId) {
-            allowToEdit = (accountDetails.owner?.optionValue && accountDetails.owner.optionValue === userId)
-
-            if (!allowToEdit && accountDetails.collaborator && accountDetails.collaborator.length > 0) {
-                allowToEdit = accountDetails.collaborator.findIndex(d => d.optionValue === userId) > -1;
-            }
-
-            if (allowToEdit)
-                setAllowedToEdit(allowToEdit);
-        }
     }
 
     const handleMainPonts = (data) => {
@@ -326,19 +304,50 @@ const Roles = () => {
             })
     }
 
-    const handleUpdateAccount = (values) => {
+    // const handleUpdateAccount = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
+    //     const errors = formValidation(values, _.cloneDeep(entityData.fields));
+    //     if (Object.keys(errors).length) {
+    //         entityData.fields.forEach((input) => {
+    //             if (input.required) {
+    //                 setTouched(input.fieldName, true);
+    //             }
+    //         });
+    //     } else {
+    //         // handleLoading(true, saveAndNew)
+    //         setUpdating(true);
+    //         // values = removeEmptyKeys(values)
+    //         // if (values.employees) {
+    //         //     values.employees = parseInt(values.employees)
+    //         // }
+
+    //         const updatedData = {
+    //             ...values,
+    //             _id: accountData._id,
+    //         };
+
+    //         axiosInstance().put('/account', removeEmptyKeys(updatedData))
+    //             .then(() => {
+    //                 fetchAccountData()
+    //                 CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+    //                 setUpdating(false);
+    //                 setOpenUpdateDialog(false)
+    //             })
+    //             .catch((err) => {
+    //                 setUpdating(false);
+    //             });
+    //         setErrors({});
+    //     }
+    // }
+
+    const onUpdateAccount = (values) => {
         setUpdating(true);
-        values = removeEmptyKeys(values)
-        if (values.employees) {
-            values.employees = parseInt(values.employees)
-        }
 
         const updatedData = {
             ...values,
             _id: accountData._id,
         };
 
-        axiosInstance().put('/account', updatedData)
+        axiosInstance().put('/account', removeEmptyKeys(updatedData))
             .then(() => {
                 fetchAccountData()
                 CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
@@ -349,6 +358,7 @@ const Roles = () => {
                 setUpdating(false);
             });
     };
+
     const goBackToListing = () => {
         history.push({
             pathname: accountPage.path
@@ -408,13 +418,17 @@ const Roles = () => {
                             mainPoints={mainPoints}
                             showHeading={true}
                         >
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleOpneUpdateDialog}
-                            >
-                                Edit
-                      </Button>
+                            {
+                                accountPermissions.isUpdate && canEdit ?
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleOpneUpdateDialog}
+                                    >
+                                        Edit
+                                    </Button> : null
+                            }
+
                             <Box component="span" marginX={1} />
                             {
                                 accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
@@ -515,13 +529,13 @@ const Roles = () => {
                                                     {
                                                         expanded['opportunity'] ?
                                                             <>
-                                                                < Grid container spacing={2}>
+                                                                <Grid container spacing={2}>
                                                                     <Grid item md={12}>
 
                                                                         <div className={classes.opportunityTab} >
                                                                             <OpportunityTab data={[]} />
-                                                                        </div> : null
-                                                        </Grid>
+                                                                        </div>
+                                                                    </Grid>
                                                                     <Grid item md={12} sm={12} xs={12}>
                                                                         <Button
                                                                             variant="outlined"
@@ -529,7 +543,7 @@ const Roles = () => {
                                                                             fullWidth
                                                                         >
                                                                             View All
-                                  </Button>
+                                                                        </Button>
                                                                     </Grid>
                                                                 </Grid>
                                                             </> : null
@@ -542,7 +556,7 @@ const Roles = () => {
                             </Container>
                         </Grid>
                         <Grid item xs={12} sm={12} md={4} lg={4}
-                            className={`${accountClass.customGrid} ${accountClass.accountActivitiesDiv}`} >
+                            className={`${accountClass.account_activities_div}`} >
                             <Container styles={{ padding: "8px", minHeight: "auto", width: '100%' }} >
                                 <Grid container>
                                     <Grid item xs={12}>
@@ -555,12 +569,12 @@ const Roles = () => {
                                         }
                                     </Grid>
                                     {/* <Grid item xs={12}>
-                                        <div className={`${accountClass.detailPageDiv2}`}>
+                                        <div className={`${accountClass.detail_page_div2}`}>
                                             {
                                                 quickLinks && quickLinks.length ?
                                                     quickLinks.map((k, index) => {
                                                         return <Link key={index} to={k}
-                                                            className={`${accountClass.customLink}`}>{k.label || ''}({k.count || 0})</Link>
+                                                            className={`${accountClass.custom_link}`}>{k.label || ''}({k.count || 0})</Link>
                                                     }) :
                                                     null
                                             }
@@ -569,8 +583,8 @@ const Roles = () => {
 
                                     <Grid item xs={12}>
                                         <BoxWithBorder style={{ marginTop: "3%", padding: '0px' }}>
-                                            <div className={`${accountClass.detailPageDiv3}`}>
-                                                <div className={`${accountClass.relatedContacts}`}>
+                                            <div className={`${accountClass.detail_page_div3}`}>
+                                                <div className={`${accountClass.related_contacts}`}>
                                                     <Typography color="primary"
                                                         variant="h6"
                                                         style={{ margin: "0 10px" }} >Related Contacts</Typography>
@@ -586,12 +600,12 @@ const Roles = () => {
                                                     relatedContactsLoading ? (
                                                         <CommonSkeleton lenArray={[...Array(4).keys()]} />
                                                     ) : <>
-                                                        <Box className={`${accountClass.customBox1}`}>
+                                                        <Box className={`${accountClass.custom_box1}`}>
                                                             <RelatedContactsBox
                                                                 contacts={relatedContacts}
                                                             />
                                                         </Box>
-                                                        <div className={`${accountClass.viewAllBtn}`}>
+                                                        <div className={`${accountClass.view_all_btn}`}>
                                                             <Button
                                                                 variant="outlined"
                                                                 className={`${accountClass.btn}`}
@@ -628,15 +642,23 @@ const Roles = () => {
                         ) : null
                     }
                     {openUpdateDialog && (
-                        <UpdateDetailsDialog
-                            title={`Editing  ${accountData?.accountName ?? ''}`}
-                            openDialog={openUpdateDialog}
+                        <ManageAccount
+                            isNew={false}
+                            open={openUpdateDialog}
                             onClose={closeUpdateDIalog}
-                            data={accountData}
-                            fields={accountFields}
-                            isUpdating={isUpdating}
-                            handleUpdate={handleUpdateAccount}
+                            entityData={{ fields: accountFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(accountData, accountFields.map((f) => { return f.fieldData })) }}
+                            loading={loading}
+                            handleSubmit={onUpdateAccount}
                         />
+                        // <UpdateDetailsDialog
+                        //     title={`Editing  ${accountData?.accountName ?? ''}`}
+                        //     openDialog={openUpdateDialog}
+                        //     onClose={closeUpdateDIalog}
+                        //     data={accountData}
+                        //     fields={accountFields}
+                        //     isUpdating={isUpdating}
+                        //     handleUpdate={handleUpdateAccount}
+                        // />
                     )}
 
                     {

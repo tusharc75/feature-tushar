@@ -1,53 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
 import { formValidation, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
 import { commonStyle } from '../../Contact/CommonStyles'
-import { withStyles } from '@material-ui/core/styles';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import FormTypes from "./../../../components/Helpers/FormTypes";
+import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
-import { CustomEventEmitter } from '../../../axios/events'
-
-const useStyles = makeStyles((theme) => ({
-    ...commonStyle(theme),
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    container: {
-        position: "relative",
-    },
-    accDialog1: {
-        "MuiDialog-paper": {
-            overflowY: "unset"
-        }
-    }
-}));
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
+import _ from 'lodash'
 
 const arr = [...Array(9).keys()]
 
-export default function CreateAccount(props) {
+export default function ManageAccount(props) {
 
-    const classes = useStyles();
-    const { entityData, handleSubmit, loading, onClose, open } = props
+    const { entityData, handleSubmit, onClose, open, isNew } = props
 
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
     const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
@@ -86,6 +63,22 @@ export default function CreateAccount(props) {
     }
     //  Owner, Collaborator Code - End
 
+    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
+        const errors = formValidation(values, _.cloneDeep(entityData.fields));
+        if (Object.keys(errors).length) {
+            entityData.fields.forEach((input) => {
+                if (input.required) {
+                    setTouched(input.fieldName, true);
+                }
+            });
+        } else {
+            setLoading(true)
+            handleSubmit(values, saveAndNew, setValues)
+            setErrors({});
+        }
+
+    }
+
     return (<>
         <Dialog
             disableBackdropClick={true}
@@ -94,7 +87,7 @@ export default function CreateAccount(props) {
             onClose={onClose}
             open={open}
         >
-            <CustomDialogHeader onClose={onClose} title="Add Account" />
+            <CustomDialogHeader onClose={onClose} title={isNew ? "Add Account" : `Editing ${entityData.initialValues.accountName}`} />
 
             {
                 entityData.fields.length > 0 ?
@@ -144,6 +137,7 @@ export default function CreateAccount(props) {
                                                                                     onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
                                                                                 /> : field.fieldName == "collaborator" ?
                                                                                     <FormTypes
+                                                                                        multiple
                                                                                         values={values}
                                                                                         errors={errors}
                                                                                         touched={touched}
@@ -165,7 +159,6 @@ export default function CreateAccount(props) {
                                                                                             label={field.fieldLabel}
                                                                                             name={field.fieldName}
                                                                                             type={field.type}
-                                                                                            options={collaboratorDataSource}
                                                                                             setFieldValue={setFieldValue}
                                                                                             required={field.required}
                                                                                             fullWidth
@@ -252,7 +245,7 @@ export default function CreateAccount(props) {
                                             disabled={loading || Object.keys(errors).length > 0 ? true : false}
                                             onClick={(e) => {
                                                 e.preventDefault()
-                                                handleSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
+                                                onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
                                             }}
                                         >
                                             Save

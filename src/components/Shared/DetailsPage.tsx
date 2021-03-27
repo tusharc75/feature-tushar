@@ -28,7 +28,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Details = (props) => {
+interface DetailProps {
+  data: object;
+  fields: any[];
+}
+
+const Details = (props: DetailProps) => {
   const classes = useStyles();
   const theme = useTheme();
   const { data, fields } = props;
@@ -37,14 +42,13 @@ const Details = (props) => {
 
   useEffect(() => {
     sortArray();
-    const fieldData = fields?.map((f) => f.fieldData);
+    const fieldData = fields.map((f) => f.fieldData);
     const vals = getObjKeysWithValues(data, fieldData);
     setValues(vals);
 
     return () => setValues(null);
     // eslint-disable-next-line
   }, []);
-
 
   const normalizeValues = (values, input) => {
     let text = "";
@@ -143,7 +147,7 @@ const Details = (props) => {
                     md={dynamicSize(7, field.fieldData.fieldName)}
                   >
                     {field.fieldData.fieldName === "avatar" ||
-                      field.fieldData.fieldName === "companyLogo" ? (
+                    field.fieldData.fieldName === "companyLogo" ? (
                       <Box paddingLeft={2}>
                         <Avatar src={initialVals[field.fieldData.fieldName]} />
                       </Box>

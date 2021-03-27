@@ -34,6 +34,7 @@ const LeadDetailsPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.lead]);
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
@@ -77,7 +78,9 @@ const LeadDetailsPage = () => {
         name = data.salutation.optionLabel + name;
       }
       setHeadingLbl(name);
-      handleAllowToEditList(data);
+      const userId = user?.user?._id;
+      setAllowedToEdit([...data.collaborator, data.owner].some(d => d.optionValue == userId));
+      setAllowedToDelete([data.owner].some(d => d.optionValue == userId));
       setLeadData(data);
       getLeadFields();
       setCustomizedRoutes([
@@ -104,29 +107,6 @@ const LeadDetailsPage = () => {
         setLeadFIelds(data.data);
         setLoading(false);
       });
-  };
-
-  const handleAllowToEditList = (leadDetails) => {
-    const userId = user?.user?._id;
-    let allowToEdit = false;
-
-    if (userId) {
-      allowToEdit =
-        leadDetails.owner?.optionValue &&
-        leadDetails.owner.optionValue === userId;
-
-      if (
-        !allowToEdit &&
-        leadDetails.collaborator &&
-        leadDetails.collaborator.length > 0
-      ) {
-        allowToEdit =
-          leadDetails.collaborator.findIndex((d) => d.optionValue === userId) >
-          -1;
-      }
-
-      if (allowToEdit) setAllowedToEdit(allowToEdit);
-    }
   };
 
   const handleDeleteLead = () => {
@@ -170,6 +150,7 @@ const LeadDetailsPage = () => {
       .catch((err) => {
         setUpdating(false);
       });
+      setOpenUpdateDialog(false);
   };
 
 
@@ -242,23 +223,22 @@ const LeadDetailsPage = () => {
             // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpneUpdateDialog}
-            >
-              Edit
-            </Button>
+            {
+              leadsPermissions.isUpdate && allowedToEdit && <Button
+                variant="contained"
+                color="primary"
+                onClick={handleOpneUpdateDialog}
+              >
+                Edit
+              </Button>
+            }
             <Box component="span" marginX={1} />
-            {leadsPermissions.isDelete &&
-              leadData?.owner?.optionValue &&
-              user?.user?._id &&
-              leadData.owner.optionValue === user.user._id ? (
-              <DeleteButton
+            {
+              leadsPermissions.isDelete && allowedToDelete && <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
               />
-            ) : null}
+            }
           </CustomHeader>
         )}
         <div>

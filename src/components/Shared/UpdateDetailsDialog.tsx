@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Dialog, Button, Box, Grid, CircularProgress } from "@material-ui/core";
+import {
+  Dialog,
+  Button,
+  Box,
+  Grid,
+  CircularProgress,
+  useTheme,
+  useMediaQuery,
+} from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
   getObjKeysWithValues,
@@ -12,6 +20,8 @@ import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 
 const UpdateDetailsDialog = (props) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const {
     openDialog,
     onClose,
@@ -89,7 +99,13 @@ const UpdateDetailsDialog = (props) => {
   const validateEmail = initialVals && initialVals.email ? false : true;
 
   return (
-    <Dialog open={openDialog} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog
+      open={openDialog}
+      onClose={onClose}
+      fullWidth
+      fullScreen={isMobile}
+      maxWidth="md"
+    >
       <CustomDialogHeader title={title} onClose={onClose} />
 
       <Formik

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import CreateAccount from './CreateAccount'
+import ManageAccount from './ManageAccount'
 import { getObjKeys, formValidation } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
-import axiosInstance from './../../../axios/axiosInstance'
-import { CustomEventEmitter } from './../../../axios/events';
+import axiosInstance from '../../../axios/axiosInstance'
+import { CustomEventEmitter } from '../../../axios/events';
 import { removeEmptyKeys } from '../../../constants/helpers'
 
-export default function CreateAccountMain(props) {
+export default function ManageAccountMain(props) {
 
     const { open, onClose, id } = props
     const { state: { user } }: any = useData();
@@ -67,28 +67,27 @@ export default function CreateAccountMain(props) {
             setLoading(false);
         })
     }
-    const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
-        const errors = formValidation(values, _.cloneDeep(entityData.fields));
-        if (Object.keys(errors).length) {
-            entityData.fields.forEach((input) => {
-                if (input.required) {
-                    setTouched(input.fieldName, true);
-                }
-            });
-        } else {
-            handleLoading(true, saveAndNew)
-            handleCreateAccount(values, saveAndNew, setValues)
-            setErrors({});
-        }
+    // const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
+    //     const errors = formValidation(values, _.cloneDeep(entityData.fields));
+    //     if (Object.keys(errors).length) {
+    //         entityData.fields.forEach((input) => {
+    //             if (input.required) {
+    //                 setTouched(input.fieldName, true);
+    //             }
+    //         });
+    //     } else {
+    //         handleLoading(true, saveAndNew)
+    //         handleCreateAccount(values, saveAndNew, setValues)
+    //         setErrors({});
+    //     }
 
-    }
+    // }
 
-    return (<CreateAccount
+    return <ManageAccount
         open={open}
+        isNew={true}
         onClose={onClose}
         entityData={entityData}
-        loading={loading}
-        handleSubmit={handleSubmit}
-    />
-    );
+        handleSubmit={handleCreateAccount}
+    />;
 }
