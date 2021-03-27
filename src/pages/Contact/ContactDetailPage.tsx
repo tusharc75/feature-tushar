@@ -9,7 +9,7 @@ import { useHistory, useParams } from "react-router-dom";
 import Container from '../../components/Container'
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
-import CustomHeader from '../../components/DetailsPageHeader'
+import DetailsPageHeader from '../../components/DetailsPageHeader'
 import { Link } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
@@ -220,7 +220,7 @@ const Roles = () => {
                 </Grid>
 
                 <div>
-                    <CustomHeader
+                    <DetailsPageHeader
                         heading={headingLbl}
                         logo={contactData?.contactLogo ? contactData.contactLogo : undefined}
                         mainPoints={mainPoints}
@@ -257,14 +257,14 @@ const Roles = () => {
                                 : null
                         }
 
-                    </CustomHeader>
+                    </DetailsPageHeader>
 
                     <div className="detailPageContainer">
                         <Container>
                             <Grid container spacing={3}>
                                 <Grid item sm={8} md={8} lg={8}>
                                     <div className="detailPageDiv1"
-                                    // style={{ pointerEvents: allowedToEdit ? "" : "none" }} 
+                                    // style={{ pointerEvents: allowedToEdit ? "" : "none" }}
                                     >
                                         {
                                             loading ?

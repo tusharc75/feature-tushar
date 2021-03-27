@@ -10,7 +10,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import CustomHeader from "../../components/DetailsPageHeader";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import { opportunityPage } from "../../routes/Opportunity";
@@ -212,7 +212,7 @@ const OpportunityDetailsPage = () => {
             </Box>
           </Container>
         ) : (
-          <CustomHeader
+          <DetailsPageHeader
             heading={headingLbl}
             logo={
               opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
@@ -234,7 +234,7 @@ const OpportunityDetailsPage = () => {
                 Delete
               </Button>
             ) : null}
-          </CustomHeader>
+          </DetailsPageHeader>
         )}
 
         <div>

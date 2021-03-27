@@ -6,7 +6,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import CustomHeader from "../../components/DetailsPageHeader";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import { leadPage } from "../../routes/Lead";
@@ -216,7 +216,7 @@ const LeadDetailsPage = () => {
             </Box>
           </Container>
         ) : (
-          <CustomHeader
+          <DetailsPageHeader
             heading={headingLbl}
             logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
             mainPoints={mainPoints}
@@ -239,7 +239,7 @@ const LeadDetailsPage = () => {
                 onClick={() => setShowConfirmBox(true)}
               />
             }
-          </CustomHeader>
+          </DetailsPageHeader>
         )}
         <div>
           <Grid
