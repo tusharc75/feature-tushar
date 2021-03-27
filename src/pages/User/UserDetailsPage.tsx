@@ -27,7 +27,7 @@ import routes from "../../components/Helpers/Routes";
 import CustomToast from "../../components/Helpers/CustomToast";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import CustomHeader from "../../components/DetailsPageHeader";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
@@ -259,7 +259,7 @@ const UserDetailsPage = () => {
             </Box>
           </Container>
         ) : (
-          <CustomHeader
+          <DetailsPageHeader
             heading={headingLbl}
             logo={userData?.avatar ? userData.avatar : undefined}
             mainPoints={mainPoints}
@@ -284,7 +284,7 @@ const UserDetailsPage = () => {
                 Delete
               </Button>
             ) : null}
-          </CustomHeader>
+          </DetailsPageHeader>
         )}
 
         <Grid container spacing={2}>

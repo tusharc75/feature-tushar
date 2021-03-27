@@ -6,7 +6,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import CustomHeader from "../../components/DetailsPageHeader";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import { leadPage } from "../../routes/Lead";
@@ -216,7 +216,7 @@ const LeadDetailsPage = () => {
             </Box>
           </Container>
         ) : (
-          <CustomHeader
+          <DetailsPageHeader
             heading={headingLbl}
             logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
             mainPoints={mainPoints}
@@ -239,7 +239,7 @@ const LeadDetailsPage = () => {
                 onClick={() => setShowConfirmBox(true)}
               />
             }
-          </CustomHeader>
+          </DetailsPageHeader>
         )}
         <div>
           <Grid
@@ -251,8 +251,8 @@ const LeadDetailsPage = () => {
               <Container styles={{ height: "100%" }}>
                 {loading ? (
                   <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <Grid item sm={6} md={6}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i , index) => (
+                      <Grid key={index} item sm={6} md={6}>
                         <Skeleton variant="text" width="100px" height="16px" />
                         <Box marginY={1} />
                         <Skeleton width="100%" height="50px" />
@@ -280,8 +280,8 @@ const LeadDetailsPage = () => {
                   <Box>
                     <Skeleton variant="text" width="100px" height="25px" />
                     <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <Skeleton width="100%" height="50px" />
+                    {[0, 1, 2, 3, 4].map((i , index) => (
+                      <Skeleton key={index} width="100%" height="50px" />
                     ))}
                   </Box>
                 ) : (

@@ -11,7 +11,7 @@ import _ from "lodash";
 import { Skeleton } from "@material-ui/lab";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
-import CustomHeader from '../../components/DetailsPageHeader'
+import DetailsPageHeader from '../../components/DetailsPageHeader'
 import { accountPage } from '../../routes/Accounts'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
@@ -411,7 +411,7 @@ const Roles = () => {
                 </Grid>
                 <div>
                     {
-                        <CustomHeader
+                        <DetailsPageHeader
                             loading={loading}
                             heading={headingLbl}
                             logo={accountData?.accountLogo ? accountData.accountLogo : undefined}
@@ -436,7 +436,7 @@ const Roles = () => {
                                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                                     : null
                             }
-                        </CustomHeader>
+                        </DetailsPageHeader>
                     }
 
                     <Grid container spacing={2}>
