@@ -236,6 +236,10 @@ const Roles = () => {
                         showHeading={true}
                     >
                         <Box component="span" marginX={1} />
+                        {entityPermissions.isUpdate && (entityData?.owner?.optionValue && user?.user?._id &&
+                                entityData.owner?.optionValue === user.user._id)|| (entityData?.collaborator && user?.user?._id &&
+                                    entityData.collaborator.includes(user.user._id)) ?
+                                [
                                 <Button
                                 variant="contained"
                                 color="primary"
@@ -244,12 +248,22 @@ const Roles = () => {
                                 Edit
                                 </Button>,
                                 <Box component="span" marginX={1} />,
+                            ]
+                            : null
+                            }
+                            {
+                            entityPermissions.isDelete  && entityData?.owner?.optionValue && user?.user?._id &&
+                            entityData.owner?.optionValue === user.user._id ?
+                            [
                                 <Button
                                         variant="contained" color="secondary"
                                         onClick={() => setShowConfirmBox(true)}
                                     >
                                         Delete
                                 </Button>
+                                 ]
+                                 : null
+                         }
                     </CustomHeader>
 
                     <div className="detailPageContainer">
@@ -273,7 +287,7 @@ const Roles = () => {
                                                 <DetailsPage data={entityData} fields={entityFields} />
 
                                                 // <DetailsPage
-                                                //     data={contactData}
+                                                //     data={entityData}
 
                                                 //     fields={contactFields}
                                                 //     isUpdating={isUpdating}

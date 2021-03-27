@@ -32,7 +32,7 @@ import { capitalize } from '../../services/util'
 import CustomContainer from "./../../components/Container";
 import MessageDialog from '../../components/Helpers/MessageDialog'
 import { getErrorMessage } from '../../services/util'
-import './contact.scss'
+import contactStyles from './contact.module.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 import { CustomEventEmitter } from './../../axios/events';
 
@@ -256,6 +256,7 @@ export default function Contact() {
         RemoveContacts({ ids: selectedRecords }).then(() => {
             getContacts();
             setLoading(false);
+            setShowDeleteConfirmBox(false);
         })
     };
 
@@ -288,7 +289,7 @@ export default function Contact() {
         let name = capitalize(tData.firstName || '') + ' '
         name = name + capitalize(tData.middleName || '') + ' '
         name = name + capitalize(tData.lastName || '')
-        return <Link className="contactsNameLink"
+        return <Link className={contactStyles.contacts_name_link}
             to={`${contactDetailPage.path}/${tData._id}`}>
             {name}
         </Link>
@@ -430,10 +431,11 @@ export default function Contact() {
 
                                     <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
                                         onClick={() => {
-                                            if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
-                                                setShowDeleteWarningConfirmBox(true);
-                                            } else {
+                                            if (dataRows.find((d) => d.isChecked && d.owner?.optionValue === user.user._id)) {
                                                 setShowDeleteConfirmBox(true)
+                                            } else {
+                                                setShowDeleteWarningConfirmBox(true);
+                                                
                                             }
                                         }}
                                     >

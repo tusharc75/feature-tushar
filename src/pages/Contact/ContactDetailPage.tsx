@@ -229,15 +229,10 @@ const Roles = () => {
                     >
                         <Box component="span" marginX={1} />
                         {
-                            contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id &&
-                                contactData.owner.optionValue === user.user._id ?
+                             contactPermissions.isUpdate && (contactData?.owner?.optionValue && user?.user?._id &&
+                                contactData.owner?.optionValue === user.user._id)|| (contactData?.collaborator && user?.user?._id &&
+                                    contactData.collaborator.includes(user.user._id)) ?
                                 [
-                                    //     <Button
-                                    //     variant="contained" color="secondary"
-                                    //     onClick={() => setShowConfirmBox(true)}
-                                    // >
-                                    //     Delete
-                                    // </Button>
                                     <Button
                                         variant="contained"
                                         color="primary"
@@ -245,7 +240,15 @@ const Roles = () => {
                                     >
                                         Edit
                                 </Button>,
+
                                     <Box component="span" marginX={1} />,
+                                ]
+                                : null
+                                }
+                                {
+                                contactPermissions.isDelete  && contactData?.owner?.optionValue && user?.user?._id &&
+                                contactData.owner?.optionValue === user.user._id ?
+                                [
                                     <Button
                                         variant="contained" color="secondary"
                                         onClick={() => setShowConfirmBox(true)}
