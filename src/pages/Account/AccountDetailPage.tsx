@@ -188,7 +188,7 @@ const Roles = () => {
 
                 accounts.map(account => {
                     const updatedAccount = {
-                        _id: account._id,
+                        _id: account._id ? account._id : account.parentAccount,
                         accountName: `${account.accountName}`,
                         typeOfAccount: account.typeOfAccount?.optionLabel,
                         industry: account.industry?.optionLabel,
@@ -198,14 +198,14 @@ const Roles = () => {
                     };
 
                     if (account.parentAccount) {
-                        updatedAccount["parentAccountText"] = account.parentAccount.optionLabel;
-                        updatedAccount["parentAccountId"] = account.parentAccount.optionValue;
+                        updatedAccount["parentAccountText"] = account.parentAccountName;
+                        updatedAccount["parentAccountId"] = account.parentAccount;
                         updatedAccount["type"] = "parent";
                     }
 
                     newData.push(updatedAccount);
                 })
-
+                
                 setAccountHierarchyData([...newData]);
 
             } else {
