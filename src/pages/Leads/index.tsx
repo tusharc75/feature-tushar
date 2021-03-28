@@ -248,7 +248,7 @@ const Leads = () => {
         <>
           {
             leadsPermissions.isDelete ?
-              params.row.allowToDelete ?
+              params.row.owner.optionValue == user._id ?
                 <Tooltip title="Delete" >
                   <IconButton aria-label="Delete" onClick={() => showConfirmBox(params.row)}>
                     <DeleteIcon
@@ -280,7 +280,7 @@ const Leads = () => {
       }
     }
     else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked && d.owner.optionValue != user._id)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true)
