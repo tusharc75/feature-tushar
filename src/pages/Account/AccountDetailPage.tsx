@@ -41,7 +41,7 @@ import CreateOpportunity from '../Opportunities/CreateOpportunity'
 import CreateContact from '../Contact/CreateContact/CreateContact';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
-import { removeEmptyKeys, getObjKeysWithValues, formValidation } from "../../constants/helpers";
+import { removeEmptyKeys, getObjKeysWithValues, formValidation, isObjectEmpty } from "../../constants/helpers";
 import { Link } from "react-router-dom";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -180,32 +180,48 @@ const Roles = () => {
 
             if (data.parentHierarchy && data.parentHierarchy.length > 0) {
 
-                let accounts = data.parentHierarchy;
-                const { parentHierarchy, ...rest } = data;
-                accounts.push({ ...rest, current: true });
-
+                let accounts = [...data.parentHierarchy, {
+                    _id: data._id,
+                    accountName: data.accountName,
+                    typeOfAccount: data.typeOfAccount,
+                    industry: data.industry,
+                    typeOfBusiness: data.typeOfBusiness,
+                    phone: data.phone,
+                    type: "child",
+                    current: true,
+                    parentAccount: data.parentAccount ? {
+                        _id: data.parentAccount.optionValue,
+                        accountName: data.parentAccount.optionLabel,
+                    } : null
+                    // parentAccountName: data.parentAccount?.optionLabel,
+                    // parentAccount: data.parentAccount?.optionValue
+                }];
                 let newData = [];
 
                 accounts.map(account => {
+                    if(isObjectEmpty(account)) return true;
+
                     const updatedAccount = {
                         _id: account._id,
-                        accountName: `${account.accountName}`,
-                        typeOfAccount: account.typeOfAccount?.optionLabel,
-                        industry: account.industry?.optionLabel,
+                        accountName: account.accountName,
+                        typeOfAccount: account.typeOfAccount,
+                        industry: account.industry,
                         typeOfBusiness: account.typeOfBusiness,
                         phone: account.phone,
-                        type: "child"
+                        type: "child",
+                        current: account.current
                     };
 
                     if (account.parentAccount) {
-                        updatedAccount["parentAccountText"] = account.parentAccount.optionLabel;
-                        updatedAccount["parentAccountId"] = account.parentAccount.optionValue;
+                        updatedAccount["parentAccountText"] = account.parentAccount.accountName;
+                        updatedAccount["parentAccountId"] = account.parentAccount._id;
+                    } else {
                         updatedAccount["type"] = "parent";
                     }
 
                     newData.push(updatedAccount);
                 })
-
+                console.log(newData);
                 setAccountHierarchyData([...newData]);
 
             } else {
@@ -213,11 +229,11 @@ const Roles = () => {
                     {
                         _id: data._id,
                         accountName: data.accountName,
-                        typeOfAccount: data.typeOfAccount?.optionLabel,
-                        industry: data.industry?.optionLabel,
+                        typeOfAccount: data.typeOfAccount,
+                        industry: data.industry,
                         typeOfBusiness: data.typeOfBusiness,
-                        // parentAccount: data.parentAccount,
-                        phone: data.phone
+                        phone: data.phone,
+                        current: true
                     }
                 ])
             }

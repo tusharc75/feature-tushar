@@ -43,6 +43,7 @@ const tableIcons: any = {
 
 export default function AccountHierarchy({ data, currentAccountId }) {
 
+    const commonFieldWidth = 150;
     const options: any = {
         search: false,
         paging: false,
@@ -56,27 +57,47 @@ export default function AccountHierarchy({ data, currentAccountId }) {
     const columns = [
         {
             title: 'Account Name', field: 'accountName',
-            width: 200,
-            render: (rowData: any) => <>
+            render: (rowData: any) => <div style={{ width: 250 }}>
                 <Link className={styles.account_name_link} to={`${routes.accountDetails.path}/${rowData._id}`}>
                     {rowData.accountName}
                 </Link>
                 {
                     rowData._id === currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
                 }
-            </>
+            </div>
         },
-        { title: 'Type', field: 'typeOfAccount' },
-        { title: 'Industry', field: 'industry' },
-        { title: 'Type Of Business', field: 'typeOfBusiness' },
+        {
+            title: 'Type', field: 'typeOfAccount',
+            render: (rowData: any) => <div style={{ width: commonFieldWidth }}>
+                {rowData.typeOfAccount}
+            </div>
+        },
+        {
+            title: 'Industry', field: 'industry',
+            render: (rowData: any) => <div style={{ width: commonFieldWidth }}>
+                {rowData.industry}
+            </div>
+        },
+        {
+            title: 'Type Of Business', field: 'typeOfBusiness',
+            render: (rowData: any) => <div style={{ width: commonFieldWidth }}>
+                {rowData.typeOfBusiness}
+            </div>
+        },
         {
             title: 'Parent Account', field: 'parentAccountText',
-            render: rowData =>
+            render: rowData => <div style={{ width: commonFieldWidth }}>
                 <Link className={styles.account_name_link} to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
                     {rowData.parentAccountText}
                 </Link>
+            </div>
         },
-        { title: 'Phone', field: 'phone' },
+        {
+            title: 'Phone', field: 'phone',
+            render: (rowData: any) => <div style={{ width: commonFieldWidth }}>
+                {rowData.phone}
+            </div>
+        },
     ];
 
     return (
