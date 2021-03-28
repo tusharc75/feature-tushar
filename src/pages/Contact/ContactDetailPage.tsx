@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     Box,
     Button,
@@ -9,7 +9,7 @@ import { useHistory, useParams } from "react-router-dom";
 import Container from '../../components/Container'
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
-import CustomHeader from '../../components/DetailsPageHeader'
+import DetailsPageHeader from '../../components/DetailsPageHeader'
 import { Link } from "react-router-dom";
 import { getErrorMessage } from '../../services/util'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
@@ -25,9 +25,11 @@ import Activity from "../../components/Activity";
 import { isObjectEmpty } from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import { CustomEventEmitter } from './../../axios/events';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const Roles = () => {
+    const toastConfig = useContext(CustomToastContext);
+    
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
@@ -140,10 +142,11 @@ const Roles = () => {
         if (contactData?._id) {
 
             axiosInstance().put(`/contact/remove`, { ids: [contactData._id] }).then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
-            }).catch(err => {
+            }).catch(error => {
+                toastConfig.setToastConfig(error);
                 setShowConfirmBox(false)
             })
         }
@@ -193,9 +196,10 @@ const Roles = () => {
 
         axiosInstance().put('/contact', updatedData).then(({ data }) => {
             fetchContactData()
-            CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: "Successfully saved" });
+            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
             setUpdating(false);
-        }).catch((err) => {
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
             setUpdating(false);
         });
     };
@@ -220,7 +224,7 @@ const Roles = () => {
                 </Grid>
 
                 <div>
-                    <CustomHeader
+                    <DetailsPageHeader
                         heading={headingLbl}
                         logo={contactData?.contactLogo ? contactData.contactLogo : undefined}
                         mainPoints={mainPoints}
@@ -267,14 +271,14 @@ const Roles = () => {
                                 : null
                         }
 
-                    </CustomHeader>
+                    </DetailsPageHeader>
 
                     <div className="detailPageContainer">
                         <Container>
                             <Grid container spacing={3}>
                                 <Grid item sm={8} md={8} lg={8}>
                                     <div className="detailPageDiv1"
-                                    // style={{ pointerEvents: allowedToEdit ? "" : "none" }} 
+                                    // style={{ pointerEvents: allowedToEdit ? "" : "none" }}
                                     >
                                         {
                                             loading ?

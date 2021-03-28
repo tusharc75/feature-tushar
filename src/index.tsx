@@ -7,12 +7,15 @@ import { Provider } from "./StateProvider/Provider";
 import "./styles/index.scss";
 import "./styles/common-styles.scss";
 import "./styles/material-component.scss";
+import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
       <Provider>
-        <App />
+        <CustomToastProvider>
+          <App />
+        </CustomToastProvider>
       </Provider>
     </Router>
   </React.StrictMode>,

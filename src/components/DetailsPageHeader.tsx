@@ -31,14 +31,13 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const CustomHeader = (props) => {
+const DetailsPageHeader = (props) => {
     const { mainPoints, heading, children, showHeading, logo, loading } = props;
     const classes = useStyles();
-    return (
-        <React.Fragment>
+    return  <>
             <Paper className={classes.customHeaderPaper} elevation={0}>
                 <Grid container justify="space-between" style={{ marginBottom: '10px' }}>
-                    <Grid item key="custom-header-heading">
+                    <Grid item>
                         {
                             loading ?
                                 <Skeleton width={100} /> :
@@ -59,26 +58,29 @@ const CustomHeader = (props) => {
                                     : null
                         }
                     </Grid>
-                    <Grid item key="custom-header-children">{children}</Grid>
+                    <Grid item>{children}</Grid>
                 </Grid>
                 <Box display="flex" id="tapleen2">
                     {
                         loading ?
                             <Grid container wrap="nowrap">
                                 {
-                                    [...Array(4).keys()].map(i => (
+                                    [...Array(4).keys()].map((i, index) => (
                                         <>
-                                            <Skeleton variant="rect" className={classes.skeleton} width={80} height={50} />
+                                            <Skeleton
+                                             variant="rect" className={classes.skeleton} width={80} height={50} />
                                             <Box marginY={1} /></>
                                     ))
                                 }
                             </Grid> : mainPoints && Object.keys(mainPoints).length ?
                                 Object.keys(mainPoints).map((key, i) => {
+                                  // console.log(key + i);
+                                  // console.log(i);
                                     return <>
                                         {
                                             mainPoints[key] ? (
-                                                <React.Fragment>
-                                                    <Box className={classes.box} key={key + i} >
+                                                <React.Fragment key={i}>
+                                                    <Box className={classes.box}>
                                                         <Typography align="center" variant="subtitle1"
                                                             className={`text-capitalize ${classes.labelColor}`}>{key}</Typography>
                                                         <Typography align="center" color="primary" style={{ fontWeight: 500 }}>
@@ -93,11 +95,10 @@ const CustomHeader = (props) => {
                     }
                 </Box>
             </Paper>
-        </React.Fragment >
-    );
+        </>
 };
 
-CustomHeader.propTypes = {
+DetailsPageHeader.propTypes = {
     total: PropTypes.any,
     active: PropTypes.any,
     inactive: PropTypes.any,
@@ -109,4 +110,4 @@ CustomHeader.propTypes = {
     showHeading: PropTypes.any
 };
 
-export default CustomHeader;
+export default DetailsPageHeader;
