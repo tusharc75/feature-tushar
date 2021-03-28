@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
 import { GetAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
@@ -28,7 +28,6 @@ import ManageAccountDialog from './ManageAccount/index'
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
-import { CustomEventEmitter } from './../../axios/events';
 import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -37,6 +36,7 @@ import accountClass from "./account.module.scss"
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomHeader from '../../components/Helpers/CustomHeader'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const AccTypes = {
     "All Accounts": 1,
@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
 
 let accountTimeout
 export default function Account() {
-
+    const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
@@ -395,9 +395,11 @@ export default function Account() {
                 ids: [...selectedRecs]
             }
             axiosInstance().put(`/account/remove`, reqs).then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setShowDeleteConfirmBox(false)
                 fetchAccounts();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             })
             setSelectedRecs([])
         }
@@ -407,8 +409,10 @@ export default function Account() {
 
         axiosInstance().put(`/account/remove`, { ids: [singleAccountDelete.id] })
             .then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 fetchAccounts();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             });
 
         setSingleAccountDelete({ id: null, show: false, accountName: "" });
@@ -418,10 +422,11 @@ export default function Account() {
     const handleSingleApproveDisapproveAccount = () => {
         axiosInstance().post(`/account/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
             .then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
                 fetchAccounts();
-            }).catch(() => {
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
             });
         setCheckAllAccounts(false)
@@ -448,10 +453,11 @@ export default function Account() {
 
         axiosInstance().post(`/account/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
             .then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
                 fetchAccounts();
-            }).catch(() => {
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
                 setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
             });
         setCheckAllAccounts(false)

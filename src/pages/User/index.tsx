@@ -1,4 +1,4 @@
-import { useState, FC, useCallback, useEffect } from "react";
+import { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
   Chip,
@@ -21,12 +21,12 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
 import Container from "../../components/Container";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
-import { CustomEventEmitter } from "./../../axios/events";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateUser from "./CreateUser";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const User: FC = () => {
+  const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
     state: { user },
@@ -288,16 +289,14 @@ const User: FC = () => {
       axiosInstance()
         .put(`/user/remove`, { ids: [...recs] })
         .then(({ data }) => {
-          CustomEventEmitter.dispatch("show-toast", {
-            type: "success",
-            errorMsg: data.message,
-          });
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
           fetchUsers();
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
         });
