@@ -19,7 +19,7 @@ import {
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
-import { capitalize, startCase } from "lodash";
+import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
@@ -98,8 +98,7 @@ const UserDetailsPage = () => {
       } = await axiosInstance().get(`/user/${id}`);
 
       handleMainPoints(data);
-      let name = capitalize(data.firstName || "") + " ";
-      name = name + capitalize(data.lastName || "");
+      const name = [data.firstName, data.lastName].filter(d => d).join(" ");
 
       setHeadingLbl(name);
       setUserData(data);

@@ -28,7 +28,6 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from '../../components/Helpers/SearchBox'
 import DeleteIcon from '@material-ui/icons/Delete';
 import BlockIcon from '@material-ui/icons/Block';
-import { capitalize } from '../../services/util'
 import CustomContainer from "./../../components/Container";
 import MessageDialog from '../../components/Helpers/MessageDialog'
 import { getErrorMessage } from '../../services/util'
@@ -296,9 +295,8 @@ export default function Contact() {
     }
 
     const getFirstName = tData => {
-        let name = capitalize(tData.firstName || '') + ' '
-        name = name + capitalize(tData.middleName || '') + ' '
-        name = name + capitalize(tData.lastName || '')
+        let name = [tData.firstName, tData.middleName, tData.lastName].filter(d => d).join(" ");
+        
         return <Link className="contactsNameLink"
             to={`${contactDetailPage.path}/${tData._id}`}>
             {name}
