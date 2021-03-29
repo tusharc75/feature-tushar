@@ -1,34 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
-import { ExpandMore, Send } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-
-import { getErrorMessage } from "../../services/util";
-import CustomToast from "../../components/Helpers/CustomToast";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import CustomHeader from "../../components/DetailsPageHeader";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import { leadPage } from "../../routes/Lead";
 import routes from "../../components/Helpers/Routes";
 import { capitalize } from "../../services/util";
-import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
-import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import { removeEmptyKeys } from "../../constants/helpers";
+import DeleteButton from "../../components/Helpers/DeleteButton";
+import styles from "./LeadDetailsPage.module.scss"
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const LeadDetailsPage = () => {
+  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
-  const [alertData, setAlertData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -36,6 +35,7 @@ const LeadDetailsPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.lead]);
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
@@ -69,8 +69,7 @@ const LeadDetailsPage = () => {
   }, [user]);
 
   const fetchLeadData = async () => {
-    try {
-      const { data } = await getLeadData(id);
+    axiosInstance().get(`/lead/${id}`).then(({ data: { data } }) => {
       handleMainPoints(data);
       let name = capitalize(data.firstName || "") + " ";
       name = name + capitalize(data.middleName || "") + " ";
@@ -80,14 +79,16 @@ const LeadDetailsPage = () => {
         name = data.salutation.optionLabel + name;
       }
       setHeadingLbl(name);
-      handleAllowToEditList(data);
+      const userId = user?.user?._id;
+      setAllowedToEdit([...data.collaborator, data.owner].some(d => d.optionValue == userId));
+      setAllowedToDelete([data.owner].some(d => d.optionValue == userId));
       setLeadData(data);
       getLeadFields();
       setCustomizedRoutes([
         routes.lead,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
-    } catch (error) { }
+    });
   };
 
   const handleMainPoints = (data) => {
@@ -109,39 +110,17 @@ const LeadDetailsPage = () => {
       });
   };
 
-  const handleAllowToEditList = (leadDetails) => {
-    const userId = user?.user?._id;
-    let allowToEdit = false;
-
-    if (userId) {
-      allowToEdit =
-        leadDetails.owner?.optionValue &&
-        leadDetails.owner.optionValue === userId;
-
-      if (
-        !allowToEdit &&
-        leadDetails.collaborator &&
-        leadDetails.collaborator.length > 0
-      ) {
-        allowToEdit =
-          leadDetails.collaborator.findIndex((d) => d.optionValue === userId) >
-          -1;
-      }
-
-      if (allowToEdit) setAllowedToEdit(allowToEdit);
-    }
-  };
-
   const handleDeleteLead = () => {
     if (leadData?._id) {
       axiosInstance()
         .put(`/lead/remove`, { ids: [leadData._id] })
         .then(({ data }) => {
-          handleSnackbar(data.message, "success", true);
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error)
           setShowConfirmBox(false);
         });
     } else {
@@ -156,33 +135,27 @@ const LeadDetailsPage = () => {
 
   const handleUpdateLead = (values) => {
     setUpdating(true);
-    if (values.noOfEmployees) {
-      values.noOfEmployees = parseInt(values.noOfEmployees);
-    }
+    // if (values.noOfEmployees) {
+    //   values.noOfEmployees = parseInt(values.noOfEmployees);
+    // }
     const updatedData = {
       ...values,
       _id: leadData._id,
     };
-
     axiosInstance()
-      .put("/lead", updatedData)
+      .put("/lead", removeEmptyKeys(updatedData))
       .then(({ data }) => {
         fetchLeadData();
-        handleSnackbar("Successfully saved", "success", true);
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         setUpdating(false);
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setUpdating(false);
       });
+    setOpenUpdateDialog(false);
   };
 
-  const handleSnackbar = (msg, type, isOpen) => {
-    setAlertData({
-      errorMsg: msg,
-      type: type,
-      open: isOpen,
-    });
-  };
 
   const quickLinks = [
     {
@@ -194,16 +167,34 @@ const LeadDetailsPage = () => {
       count: 0,
     },
   ];
+  const [showCreateUserDialog, setShowCreateUserDialog] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+
+  const handleOpneUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const closeUpdateDIalog = () => {
+    setOpenUpdateDialog(false);
+  };
+
+  const handleUpdateBrand = (values) => {
+    setUpdating(true);
+  };
+
   return (
     <>
-      {alertData ? (
-        <CustomToast
-          open={alertData.open || false}
-          close={() => handleSnackbar("", "", false)}
-          errorMsg={alertData.errorMsg || ""}
-          type={alertData.type || ""}
+      {openUpdateDialog && (
+        <UpdateDetailsDialog
+          title="Lead Update"
+          openDialog={openUpdateDialog}
+          onClose={closeUpdateDIalog}
+          data={leadData}
+          fields={leadFields}
+          isUpdating={isUpdating}
+          handleUpdate={handleUpdateLead}
         />
-      ) : null}
+      )}
       <Layout>
         <Grid container direction="row">
           <Grid item xs={12} className="pl-2">
@@ -228,27 +219,30 @@ const LeadDetailsPage = () => {
             </Box>
           </Container>
         ) : (
-          <CustomHeader
+          <DetailsPageHeader
             heading={headingLbl}
             logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
             mainPoints={mainPoints}
             // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
-            <Box component="span" marginX={1} />
-            {leadsPermissions.isDelete &&
-              leadData?.owner?.optionValue &&
-              user?.user?._id &&
-              leadData.owner.optionValue === user.user._id ? (
-              <Button
+            {
+              leadsPermissions.isUpdate && allowedToEdit && <Button
                 variant="contained"
-                color="secondary"
-                onClick={() => setShowConfirmBox(true)}
+                color="primary"
+                onClick={handleOpneUpdateDialog}
               >
-                Delete
+                Edit
               </Button>
-            ) : null}
-          </CustomHeader>
+            }
+            <Box component="span" marginX={1} />
+            {
+              leadsPermissions.isDelete && allowedToDelete && <DeleteButton
+                text="Delete"
+                onClick={() => setShowConfirmBox(true)}
+              />
+            }
+          </DetailsPageHeader>
         )}
         <div>
           <Grid
@@ -260,8 +254,8 @@ const LeadDetailsPage = () => {
               <Container styles={{ height: "100%" }}>
                 {loading ? (
                   <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                      <Grid item sm={6} md={6}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
+                      <Grid key={index} item sm={6} md={6}>
                         <Skeleton variant="text" width="100px" height="16px" />
                         <Box marginY={1} />
                         <Skeleton width="100%" height="50px" />
@@ -280,25 +274,17 @@ const LeadDetailsPage = () => {
                   </Box>
                 ) : (
                   <DetailsPage data={leadData} fields={leadFields} />
-                  // <DetailsPage
-                  //   data={leadData}
-                  //   fields={leadFields}
-                  //   isUpdating={isUpdating}
-                  //   canEdit={allowedToEdit}
-                  //   handleUpdate={handleUpdateLead}
-                  //   sourceComponent="lead"
-                  // />
                 )}
               </Container>
             </Grid>
-            <Grid item sm={4} md={4} lg={4}>
+            <Grid className={styles.activityContainer} item sm={4} md={4} lg={4}>
               <Container>
                 {!leadData ? (
                   <Box>
                     <Skeleton variant="text" width="100px" height="25px" />
                     <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <Skeleton width="100%" height="50px" />
+                    {[0, 1, 2, 3, 4].map((i, index) => (
+                      <Skeleton key={index} width="100%" height="50px" />
                     ))}
                   </Box>
                 ) : (
@@ -321,7 +307,7 @@ const LeadDetailsPage = () => {
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
-              message={`Are you sure you want to delete this Lead`}
+              message={`Are you sure you want to delete this Lead ?`}
               onClose={() => setShowConfirmBox(false)}
               onOk={handleDeleteLead}
             />

@@ -56,17 +56,17 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: "hidden",
-    width: theme.spacing(7) + 1,
-    // [theme.breakpoints.up("sm")]: {
-    //   width: theme.spacing(9) + 1,
-    // },
+    width: theme.spacing(6) - 1,
+    [theme.breakpoints.down("sm")]: {
+      width: 0,
+    },
   },
   toolbar: {
     background: "#dcdcdc",
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
-    padding: theme.spacing(0, 0.5),
+    padding: theme.spacing(0),
   },
   menuIcon: {
     width: 22,
@@ -124,7 +124,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <Header />
+      <Header toggleDrawer={handleToggleDrawer} />
       <Drawer
         variant="permanent"
         className={clsx(classes.drawer, {
@@ -142,18 +142,13 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         <div className={classes.toolbar}>
           <IconButton onClick={handleToggleDrawer}>
             {toggleDrawer ? <ChevronLeft /> : <ChevronRight />}
-            {/* <img
-              className={classes.menuIcon}
-              src={SVG("Menu Icon")}
-              alt="menu"
-            /> */}
           </IconButton>
         </div>
 
         <div
-          // className={clsx(classes.drawerContainer, {
-          //   [classes.hide]: !toggleDrawer,
-          // })}
+          className={clsx({
+            [classes.hide]: !toggleDrawer,
+          })}
         >
           <List>
             <ListItem button>

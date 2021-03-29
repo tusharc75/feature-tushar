@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
 import Leads from "./pages/Leads";
@@ -13,11 +15,9 @@ import { useData } from "./StateProvider/Provider";
 import AddDoa from "./pages/DoaSetup/AddDoa";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account/index";
-// import CreateContact from './pages/Contact/CreateContact'
 import AccountDetailPage from "./pages/Account/AccountDetailPage";
 import ContactDetailPage from "./pages/Contact/ContactDetailPage";
 import CustomToaster from "./components/Helpers/CustomToast";
-import { CustomEventEmitter } from "./axios/events";
 import OpportunityDetailsPage from "./pages/Opportunities/OpportunityDetailsPage";
 import Activitydemo from "./pages/Activity/activitydemo";
 import Activity from "./pages/Activity";
@@ -26,8 +26,17 @@ import Email from "./pages/Activity/Email";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
 import ProductCategory from "./pages/ProductCategory";
 import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
+import User from "./pages/User";
+import Entity from "./pages/Entity";
+import UserDetailsPage from "./pages/User/UserDetailsPage";
+
+import { makeStyles } from "@material-ui/core/styles";
+import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 
 function App() {
+  const toast = useContext(CustomToastContext);
+
+  const location = useLocation();
   const {
     state: { user },
   }: any = useData();
@@ -40,108 +49,107 @@ function App() {
     );
   };
 
-  const [toastConfig, setToastConfig] = useState(null);
-
-  CustomEventEmitter.subscribe("show-toast", (toastConfig) => {
-    setToastConfig({
-      ...toastConfig,
-      open: true,
-      close: () => {
-        setToastConfig(null);
-      },
-    });
-  });
-
   return (
     <ThemeProvider theme={theme}>
-      <Switch>
-        <Route
-          exact
-          path="/login"
-          render={({ location }) => conditionalRedirect(Login, location)}
-        />
-        <Route
-          exact
-          path="/create-password"
-          render={({ location }) =>
-            conditionalRedirect(PasswordSetup, location)
-          }
-        />
-        <PrivateRoute exact path="/">
-          <Leads />
-        </PrivateRoute>
-        <PrivateRoute exact path="/lead">
-          <Leads />
-        </PrivateRoute>
-        <PrivateRoute exact path="/lead/detail/:id">
-          <LeadDetailsPage />
-        </PrivateRoute>
-        <PrivateRoute exact path="/new-lead">
-          <NewLead />
-        </PrivateRoute>
-        <PrivateRoute exact path="/opportunity">
-          <Opportunities />
-        </PrivateRoute>
-        <PrivateRoute exact path="/opportunity/detail/:id">
-          <OpportunityDetailsPage />
-        </PrivateRoute>
-        <PrivateRoute exact path="/add-doa">
-          <AddDoa />
-        </PrivateRoute>
-        <PrivateRoute exact path="/new-opp">
-          <AddNewOpportunity />
-        </PrivateRoute>
-        {/* <PrivateRoute exact path="/">
+      <AnimatePresence initial={false} exitBeforeEnter>
+        <Switch location={location} key={location.key}>
+          <Route
+            exact
+            path="/login"
+            render={({ location }) => conditionalRedirect(Login, location)}
+          />
+          <Route
+            exact
+            path="/create-password"
+            render={({ location }) =>
+              conditionalRedirect(PasswordSetup, location)
+            }
+          />
+          <PrivateRoute exact path="/">
+            <Leads />
+          </PrivateRoute>
+          <PrivateRoute exact path="/lead">
+            <Leads />
+          </PrivateRoute>
+          <PrivateRoute exact path="/lead/detail/:id">
+            <LeadDetailsPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/new-lead">
+            <NewLead />
+          </PrivateRoute>
+          <PrivateRoute exact path="/opportunity">
+            <Opportunities />
+          </PrivateRoute>
+          <PrivateRoute exact path="/opportunity/detail/:id">
+            <OpportunityDetailsPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/add-doa">
+            <AddDoa />
+          </PrivateRoute>
+          <PrivateRoute exact path="/new-opp">
+            <AddNewOpportunity />
+          </PrivateRoute>
+          {/* <PrivateRoute exact path="/">
           <CreateBrand />
         </PrivateRoute> */}
-        <PrivateRoute exact path="/contact">
-          <Contact />
-        </PrivateRoute>
-        {/* <PrivateRoute exact path="/contact/new">
+          <PrivateRoute exact path="/contact">
+            <Contact />
+          </PrivateRoute>
+          {/* <PrivateRoute exact path="/contact/new">
                     <CreateContact />
                 </PrivateRoute>
                 <PrivateRoute exact path="/contact/:id">
                     <CreateContact />
                 </PrivateRoute> */}
-        <PrivateRoute exact path="/account">
-          <Account />
-        </PrivateRoute>
-        <PrivateRoute exact path="/account/detail/:id">
-          <AccountDetailPage />
-        </PrivateRoute>
-        <PrivateRoute exact path="/contact/detail/:id">
-          <ContactDetailPage />
-        </PrivateRoute>
+          <PrivateRoute exact path="/account">
+            <Account />
+          </PrivateRoute>
+          <PrivateRoute exact path="/account/detail/:id">
+            <AccountDetailPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/contact/detail/:id">
+            <ContactDetailPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/user">
+            <User />
+          </PrivateRoute>
+          <PrivateRoute exact path="/user/detail/:id">
+            <UserDetailsPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/entity">
+            <Entity />
+          </PrivateRoute>
+          <PrivateRoute exact path="/activity">
+            <Activitydemo />
+          </PrivateRoute>
+          <PrivateRoute exact path="/activity/email">
+            <Email />
+          </PrivateRoute>
+          <PrivateRoute exact path="/activity/note">
+            <Note />
+          </PrivateRoute>
+          <PrivateRoute exact path="/activity/:type">
+            <Activity />
+          </PrivateRoute>
 
-        <PrivateRoute exact path="/activity">
-          <Activitydemo />
-        </PrivateRoute>
-        <PrivateRoute exact path="/activity/email">
-          <Email />
-        </PrivateRoute>
-        <PrivateRoute exact path="/activity/note">
-          <Note />
-        </PrivateRoute>
-        <PrivateRoute exact path="/activity/:type">
-          <Activity />
-        </PrivateRoute>
-        <PrivateRoute exact path="/product-category">
-          <ProductCategory />
-        </PrivateRoute>
-        <PrivateRoute exact path="/product-category/:id">
-          <CreateProductCategory />
-        </PrivateRoute>
-        {/* <Route exact path="/crm/account" component={Account} /> */}
-      </Switch>
+          <PrivateRoute exact path="/product-category">
+            <ProductCategory />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product-category/:id">
+            <CreateProductCategory />
+          </PrivateRoute>
+          {/* <Route exact path="/crm/account" component={Account} /> */}
+        </Switch>
+      </AnimatePresence>
 
-      {toastConfig && (
-        <CustomToaster
-          type={toastConfig.type}
-          errorMsg={toastConfig.errorMsg}
-          open={toastConfig.open}
-          close={toastConfig.close}
+      {
+        toast?.toastConfig?.open && <CustomToaster
+          type={toast.toastConfig.type}
+          message={toast.toastConfig.message}
+          open={toast.toastConfig.open}
+          close={() => { toast.setToastConfig({ open: false }) }}
         />
-      )}
+      }
     </ThemeProvider>
   );
 }

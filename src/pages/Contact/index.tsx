@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
 import { GetContacts, RemoveContacts } from '../../axios/index';
 import {
@@ -16,8 +16,7 @@ import {
 } from "@material-ui/core";
 import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom'
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
-import { useHistory } from "react-router-dom";
+import { DataGrid } from "@material-ui/data-grid";
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
@@ -27,16 +26,17 @@ import { makeStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from '../../components/Helpers/SearchBox'
-import { getErrorMessage } from '../../services/util'
-import CustomToast from '../../components/Helpers/CustomToast'
 import DeleteIcon from '@material-ui/icons/Delete';
 import BlockIcon from '@material-ui/icons/Block';
 import { capitalize } from '../../services/util'
 import CustomContainer from "./../../components/Container";
 import MessageDialog from '../../components/Helpers/MessageDialog'
-
+import { getErrorMessage } from '../../services/util'
 import './contact.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import styles from "../Leads/Header.module.scss"
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const ContactTypes = {
     "All Contacts": 1,
@@ -60,13 +60,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Contact() {
-
+    const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const history = useHistory();
 
-    const [alertData, setAlertData] = useState<any>({})
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -143,9 +141,18 @@ export default function Contact() {
             )
         },
         // { field: "lastName", headerName: "Last Name", width: 200 },
-        { field: "phone", headerName: "Phone", width: 200 },
-        { field: "email", headerName: "Email", width: 200 },
-        { field: "account", headerName: "Account", width: 200 },
+        {
+            field: "phone", headerName: "Phone", width: 200,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
+        },
+        {
+            field: "email", headerName: "Email", width: 200,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
+        },
+        {
+            field: "account", headerName: "Account", width: 200,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
+        },
         {
             field: "actions", headerName: "Actions ",
             renderCell: (params) => (
@@ -192,32 +199,18 @@ export default function Contact() {
         // eslint-disable-next-line
     }, [query, searchVal, selectedType]);
 
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
-    };
 
     const handleSingleDeleteContacts = async () => {
-        try {
-            setLoading(true);
+        setLoading(true);
 
-            let data = await RemoveContacts({ ids: [singleContactDelete.id] })
-            if (data.status === 200) {
-                handleSnackbar(data.message, 'success', true)
-                getContacts();
-                setLoading(false);
-            }
-            setSingleContactDelete({ id: null, show: false, contactName: "" });
+        let data = await RemoveContacts({ ids: [singleContactDelete.id] })
+        if (data.status === 200) {
+            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+            getContacts();
+            setLoading(false);
         }
-        catch (err) {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
-        }
+        setSingleContactDelete({ id: null, show: false, contactName: "" });
+
     }
 
     const getContacts = () => {
@@ -231,11 +224,8 @@ export default function Contact() {
             setContactData(data);
             setRowCount(count)
             setLoading(false);
-        }).catch(err => {
-            let errMes = getErrorMessage(err)
-            if (errMes) {
-                handleSnackbar(errMes, 'error', true)
-            }
+        }).catch(error => {
+            toastConfig.setToastConfig(error);
             setLoading(false);
         })
     }
@@ -321,14 +311,6 @@ export default function Contact() {
 
     return (
         <Layout>
-            {
-                alertData ? <CustomToast
-                    open={alertData.open || false}
-                    close={() => handleSnackbar('', '', false)}
-                    errorMsg={alertData.errorMsg || ''}
-                    type={alertData.type || ''}
-                /> : null
-            }
             <Grid container spacing={3} direction="row">
                 <Grid item xs={12} sm={6} className="pl-3">
                     <CustomBreadCrumbs routes={[routes.contact]} />
@@ -384,13 +366,14 @@ export default function Contact() {
             </Grid>
 
             <CustomContainer>
-                <Grid container justify="space-between">
+                <Grid className={styles.filter_side_container} container justify="space-between">
                     <Grid item>
                         {
                             Object.keys(ContactTypes).length ? <Select
                                 style={{ width: '160px' }}
                                 labelId="demo-simple-select-outlined-label"
                                 id="demo-simple-select-outlined"
+                                disableUnderline
                                 MenuProps={{
                                     anchorOrigin: {
                                         vertical: "bottom",
@@ -411,66 +394,63 @@ export default function Contact() {
                                 : null
                         }
                     </Grid>
-
-                    <Grid item>
-
-                        <SearchBox onSearch={handleSearch} value={searchVal} size="small" />
-
-                        {
-                            contactPermissions.isCreate && <>
-                                <Box component="span" marginX={1} />
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={clickCreateNew}
-                                    startIcon={<AddIcon />}
-                                >
-                                    Add
-                                </Button>
-                            </>
-                        }
-
-                        {
-                            contactPermissions.isDelete && <>
-                                <Box component="span" marginX={1} />
-
-                                <Button
-                                    // disabled={Boolean(!selectedBrand)}
-                                    disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                    variant="outlined"
-                                    color="default"
-                                    onClick={openActions}
-                                    aria-controls="action-menu"
-                                >
-                                    Actions <ExpandMore />
-                                </Button>
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "left"
-                                    }}
-                                    id="action-menu"
-                                    open={Boolean(anchorEl)}
-                                    onClose={closeActions}>
-
-                                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                        onClick={() => {
-                                            if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
-                                                setShowDeleteWarningConfirmBox(true);
-                                            } else {
-                                                setShowDeleteConfirmBox(true)
-                                            }
-                                        }}
+                    <Grid className={styles.filter_side} item>
+                        <Box className={styles.filter_side_header} component="div">
+                            <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={searchVal} size="small" />
+                            {
+                                contactPermissions.isCreate && <>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={clickCreateNew}
+                                        startIcon={<AddIcon />}
+                                        className={styles.add_submit_btn}
                                     >
-                                        Delete
-                                    </MenuItem>
-                                </Menu>
-                            </>
-                        }
+                                        Add
+                                </Button>
+                                </>
+                            }
 
+                            {
+                                contactPermissions.isDelete && <>
+                                    <Button
+                                        // disabled={Boolean(!selectedBrand)}
+                                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                        variant="outlined"
+                                        color="default"
+                                        onClick={openActions}
+                                        className={styles.action_submit_btn}
+                                        aria-controls="action-menu"
+                                    >
+                                        Actions <ExpandMore />
+                                    </Button>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        keepMounted
+                                        getContentAnchorEl={null}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "left"
+                                        }}
+                                        id="action-menu"
+                                        open={Boolean(anchorEl)}
+                                        onClose={closeActions}>
+
+                                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                            onClick={() => {
+                                                if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                    setShowDeleteWarningConfirmBox(true);
+                                                } else {
+                                                    setShowDeleteConfirmBox(true)
+                                                }
+                                            }}
+                                        >
+                                            Delete
+                                    </MenuItem>
+                                    </Menu>
+                                </>
+                            }
+                        </Box>
                     </Grid>
                 </Grid>
             </CustomContainer>
@@ -529,7 +509,7 @@ export default function Contact() {
                                 setShowCreateContactDialog(false);
                                 getContacts();
                             }}
-                            // entityDetails={createContactEntityDetails}
+                        // entityDetails={createContactEntityDetails}
                         />
                     }
 

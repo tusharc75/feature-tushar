@@ -1,21 +1,21 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { makeStyles } from "@material-ui/core/styles";
-import { FilterList, SortByAlpha, Search, AddOutlined } from "@material-ui/icons";
+import { AddOutlined } from "@material-ui/icons";
 import {
     Box,
     Grid,
     Select,
     MenuItem,
     FormControl,
-    IconButton,
     Button,
     Menu
 } from "@material-ui/core";
-import { Add, ExpandMore } from "@material-ui/icons";
+import { ExpandMore } from "@material-ui/icons";
+import styles from "./Header.module.scss"
 
 const useStyles = makeStyles((theme) => ({
-    filterSide: {
+    filter_side: {
         display: "flex",
         justifyContent: "flex-end",
     },
@@ -35,13 +35,14 @@ function LeadsHeader(props) {
 
     const { selectedType, onTypeChange, options, onSearch, searchVal, onCreate,
         leadPermissions, showConfirmBox, canDelete } = props
-    return <Grid container>
+    return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6}>
             <FormControl style={{ minWidth: "170px" }}>
                 {
                     Object.keys(options).length ? <Select
                         style={{ width: '160px' }}
                         displayEmpty
+                        disableUnderline
                         labelId="demo-simple-select-outlined-label"
                         inputProps={{ "aria-label": "Without label" }}
                         id="demo-simple-select-outlined"
@@ -66,36 +67,36 @@ function LeadsHeader(props) {
                 }
             </FormControl>
         </Grid>
-        <Grid item xs={6} className={classes.filterSide}>
-            <Box component="div">
-                <Box component="span" marginX={1} />
+        <Grid item xs={6} className={styles.filter_side}>
 
+            <Box className={styles.filter_side_header} component="div">
+                <SearchBox
+                    onSearch={onSearch}
+                    searchbox={styles.search_box_input}
+                    value={searchVal}
+                    size="small"
+                    placeholder="Search Leads"
+                    width='242px'
+                />
                 {
                     leadPermissions.isCreate &&
                     <Button
                         variant="contained"
                         color="primary"
+                        className={styles.add_submit_btn}
                         onClick={onCreate}
                         startIcon={<AddOutlined />}
                     >
                         Add
                 </Button>
                 }
-                <Box component="span" marginX={1} />
-                <SearchBox
-                    onSearch={onSearch}
-                    value={searchVal}
-                    size="small"
-                    placeholder="Search Leads"
-                    width='242px'
-                />
 
-                <Box component="span" marginX={1} />
                 {
                     leadPermissions.isDelete && <>
                         <Button
                             variant="outlined"
                             color="default"
+                            className={styles.action_submit_btn}
                             onClick={openActions}
                             aria-controls="action-menu"
                         >
@@ -119,6 +120,7 @@ function LeadsHeader(props) {
                     </>
                 }
             </Box>
+
         </Grid>
     </Grid>
 }

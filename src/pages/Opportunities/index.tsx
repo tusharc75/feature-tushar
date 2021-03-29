@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Grid,
@@ -18,7 +18,6 @@ import Container from "../../components/Container";
 import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery, displayDate } from '../../services/util'
-import { CustomEventEmitter } from './../../axios/events';
 import Header from "./Header";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CreateOpportunity from './CreateOpportunity'
@@ -26,6 +25,10 @@ import MessageDialog from '../../components/Helpers/MessageDialog'
 import { opportunityDetailPage } from '../../routes/Opportunity'
 import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -47,6 +50,7 @@ const OpportunityTypes = {
 };
 
 const Opportunities = () => {
+  const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const { state: { user } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
@@ -214,12 +218,21 @@ const Opportunities = () => {
         </Link>
       )
     },
-    { field: "stage", headerName: "Stage", width: 200 },
-    { field: "closeDate", headerName: "Close Date", width: 200 },
-    // { field: "status", headerName: "Lead Status", width: 200 },
-    { field: "owner", headerName: "Opportunity Owner", width: 200 },
     {
-      field: "actions", headerName: "Actions ",
+      field: "stage", headerName: "Stage", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "closeDate", headerName: "Close Date", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    // { field: "status", headerName: "Lead Status", width: 200 },
+    {
+      field: "owner", headerName: "Opportunity Owner", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "actions", headerName: "Actions ", disableColumnMenu: true, sortable: false, filterable: false,
       renderCell: (params) => (
         <>
           {
@@ -330,12 +343,13 @@ const Opportunities = () => {
     if (recs && recs.length > 0) {
       axiosInstance()
         .put(`/opportunity/remove`, { ids: [...recs] }).then(({ data }) => {
-          CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
           if (deleteRec) setDeleteRec({})
           fetchOpportunities()
-        }).catch(err => {
+        }).catch(error => {
+          toastConfig.setToastConfig(error);
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
         })
@@ -346,7 +360,9 @@ const Opportunities = () => {
     <>
       <Layout>
         <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3"></Grid>
+          <Grid item xs={12} sm={6} className="pl-3">
+            <CustomBreadCrumbs routes={[routes.opportunity]} />
+          </Grid>
           <Grid item xs={12} sm={6} className="pr-3">
             <Grid container justify="flex-end">
               <Link

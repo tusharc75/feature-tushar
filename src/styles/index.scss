@@ -4,6 +4,16 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary: #09445a;
+  --secondary: #dc004e;
+  --error: #f44336;
+  --info: #2196f3;
+  --success: #4caf50;
+  --link: #007bff;
+  --white: #ffffff;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -64,6 +74,11 @@ body::-webkit-scrollbar-thumb {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* body::-webkit-scrollbar {

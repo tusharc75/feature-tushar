@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
-
 import { getErrorMessage } from "../../services/util";
-import CustomToast from "../../components/Helpers/CustomToast";
 import CustomTabs from "../../components/Helpers/CustomTabs";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import TabPanel from "../../components/TabPanel";
@@ -12,7 +10,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import CustomHeader from "../../components/DetailsPageHeader";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import { opportunityPage } from "../../routes/Opportunity";
@@ -20,17 +18,17 @@ import routes from "../../components/Helpers/Routes";
 import { capitalize } from "../../services/util";
 import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
-import { getLeadData } from "../../axios/leads";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
-const OpportunityDetailsPage = () => {
+function OpportunityDetailsPage() {
+  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
-  const [alertData, setAlertData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -85,6 +83,8 @@ const OpportunityDetailsPage = () => {
         setOpportunityData(data);
         getOpportunityFields();
         setCustomizedRoutes([routes.opportunity, { title: `${name}` }]);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -104,6 +104,8 @@ const OpportunityDetailsPage = () => {
       .then(({ data: { data } }) => {
         setOpportunityFields(data);
         setLoading(false);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -136,11 +138,12 @@ const OpportunityDetailsPage = () => {
       axiosInstance()
         .put(`/opportunity/remove`, { ids: [opportunityData._id] })
         .then(({ data }) => {
-          handleSnackbar(data.message, "success", true);
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
           setShowConfirmBox(false);
         });
     } else {
@@ -163,21 +166,13 @@ const OpportunityDetailsPage = () => {
     axiosInstance()
       .put("/opportunity", updatedData)
       .then(({ data }) => {
-        //fetchOpportunityData();
-        handleSnackbar("Successfully saved", "success", true);
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         setUpdating(false);
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setUpdating(false);
       });
-  };
-
-  const handleSnackbar = (msg, type, isOpen) => {
-    setAlertData({
-      errorMsg: msg,
-      type: type,
-      open: isOpen,
-    });
   };
 
   const quickLinks = [
@@ -200,14 +195,6 @@ const OpportunityDetailsPage = () => {
   ];
   return (
     <>
-      {alertData ? (
-        <CustomToast
-          open={alertData.open || false}
-          close={() => handleSnackbar("", "", false)}
-          errorMsg={alertData.errorMsg || ""}
-          type={alertData.type || ""}
-        />
-      ) : null}
       <Layout>
         <Grid container direction="row">
           <Grid item xs={12} className="pl-2">
@@ -232,7 +219,7 @@ const OpportunityDetailsPage = () => {
             </Box>
           </Container>
         ) : (
-          <CustomHeader
+          <DetailsPageHeader
             heading={headingLbl}
             logo={
               opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
@@ -254,7 +241,7 @@ const OpportunityDetailsPage = () => {
                 Delete
               </Button>
             ) : null}
-          </CustomHeader>
+          </DetailsPageHeader>
         )}
 
         <div>

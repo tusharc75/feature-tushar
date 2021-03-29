@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
 import { GetAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
@@ -8,16 +8,13 @@ import {
     Checkbox,
     Menu,
     MenuItem,
-    Paper,
     Tooltip,
     IconButton,
     Grid,
     Divider,
-    Select,
     Chip
 } from "@material-ui/core";
-
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { DataGrid } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
 import { useHistory } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
@@ -27,18 +24,19 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import { accountDetailPage } from '../../routes/Accounts'
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import CreateAccountDialog from './CreateAccount/index'
+import ManageAccountDialog from './ManageAccount/index'
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
-import { CustomEventEmitter } from './../../axios/events';
 import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "./../../components/Container";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
-import NoDataCell from '../../components/Helpers/NoDataCell'
-import './account.module.scss'
+import accountClass from "./account.module.scss"
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomHeader from '../../components/Helpers/CustomHeader'
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const AccTypes = {
     "All Accounts": 1,
@@ -74,11 +72,10 @@ const useStyles = makeStyles((theme) => ({
 
 let accountTimeout
 export default function Account() {
-
+    const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const history = useHistory();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
     const [loading, setLoading] = useState(false);
@@ -135,14 +132,14 @@ export default function Account() {
         if (renderCount > 0) {
             fetchAccounts();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [query, , selectedType]);
+    }, [query, selectedType]);
 
     useEffect(() => {
         let rows = accountData?.map((u) => ({
             ...u,
             isChecked: false,
             id: u._id,
-            allowToDelete: u.allowToDelete,
+            canDelete: u?.owner?.optionValue === user?.user._id,
             collaborator: u.collaborator || [],
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : "",
             approved: u.static?.approved ? u.static?.approved : false
@@ -167,7 +164,7 @@ export default function Account() {
                         setCheckAllAccounts(ev.target.checked);
                         const gridData = dataRows;
                         gridData.map((d) => {
-                            // if (d.allowToDelete) {
+                            // if (d.canDelete) {
                             d.isChecked = ev.target.checked;
                             // }
                             return d;
@@ -179,7 +176,7 @@ export default function Account() {
             renderCell: (params) => (
                 <Checkbox
                     color="primary"
-                    // disabled={!params.allowToDelete}
+                    // disabled={!params.canDelete}
                     checked={params.value}
                     onChange={(ev) => {
                         const gridData = dataRows;
@@ -214,9 +211,9 @@ export default function Account() {
         {
             field: "accountName", headerName: "Account Name", width: 200,
             renderCell: (params) => (
-                <Link className="accountNameLink"
+                <Link className={`${accountClass.account_name_link}`}
                     to={`${accountDetailPage.path}/${params.row._id}`}>
-                    {params?.row?.accountName ? params.row.accountName : <NoDataCell />}
+                    <CustomRenderCell value={params?.value} />
                 </Link>
             )
         },
@@ -224,37 +221,19 @@ export default function Account() {
             field: "typeOfAccount",
             headerName: "Type",
             width: 200,
-            renderCell: (params) => (
-                <>
-                    {
-                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
-                    }
-                </>
-            )
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "industry",
             headerName: "Industry",
             width: 200,
-            renderCell: (params) => (
-                <>
-                    {
-                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
-                    }
-                </>
-            )
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "parentAccount",
             headerName: "Parent Account",
             width: 200,
-            renderCell: (params) => (
-                <>
-                    {
-                        params?.value?.optionLabel ? params.value.optionLabel : <NoDataCell />
-                    }
-                </>
-            )
+            renderCell: (params) => <CustomRenderCell value={params?.value?.optionLabel} />
         },
         {
             field: "masterAccount",
@@ -263,11 +242,13 @@ export default function Account() {
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
+            renderCell: (params) => <CustomRenderCell value={params?.value?.optionLabel} />
         },
         {
             field: "phone", headerName: "Phone",
             hide: true,
-            width: 200
+            width: 200,
+            renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "actions", headerName: "Actions",
@@ -307,7 +288,7 @@ export default function Account() {
 
                     {
                         accountPermissions.isDelete ?
-                            params.row.allowToDelete ?
+                            params.row.canDelete ?
                                 <Tooltip title="Delete">
                                     <IconButton aria-label="Delete" onClick={() => {
                                         setSingleAccountDelete({ show: true, id: params.row._id, accountName: params.row.accountName })
@@ -334,6 +315,7 @@ export default function Account() {
             width: 200
         },
     ];
+
     const handleSearch = (e) => {
         if (query.page !== 1) {
             setQuery((prevState) => ({ ...prevState, page: 0 }));
@@ -382,14 +364,6 @@ export default function Account() {
         setIsAccDialogVisible(true)
     }
 
-    // const handleSnackbar = (msg, type, isOpen) => {
-    //     setAlertData({
-    //         errorMsg: msg,
-    //         type: type,
-    //         open: isOpen
-    //     })
-    // };
-
     const handlePage = (params) => {
         if (query.page !== params.page) {
             setQuery((prevState) => ({ ...prevState, page: params.page }));
@@ -421,9 +395,11 @@ export default function Account() {
                 ids: [...selectedRecs]
             }
             axiosInstance().put(`/account/remove`, reqs).then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setShowDeleteConfirmBox(false)
                 fetchAccounts();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             })
             setSelectedRecs([])
         }
@@ -433,8 +409,10 @@ export default function Account() {
 
         axiosInstance().put(`/account/remove`, { ids: [singleAccountDelete.id] })
             .then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 fetchAccounts();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             });
 
         setSingleAccountDelete({ id: null, show: false, accountName: "" });
@@ -444,10 +422,11 @@ export default function Account() {
     const handleSingleApproveDisapproveAccount = () => {
         axiosInstance().post(`/account/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
             .then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
                 fetchAccounts();
-            }).catch(() => {
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
             });
         setCheckAllAccounts(false)
@@ -474,10 +453,11 @@ export default function Account() {
 
         axiosInstance().post(`/account/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
             .then(({ data }) => {
-                CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
                 fetchAccounts();
-            }).catch(() => {
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
                 setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
             });
         setCheckAllAccounts(false)
@@ -485,8 +465,8 @@ export default function Account() {
 
     return (
         <>
-            <Layout>
 
+            <Layout>
                 <Grid container spacing={3} direction="row">
                     <Grid item xs={12} sm={6} className="pl-3">
                         <CustomBreadCrumbs routes={[routes.account]} />
@@ -540,146 +520,130 @@ export default function Account() {
                     </Grid>
                 </Grid>
 
-                <CustomContainer>
-                    <Grid container justify="space-between">
-                        <Grid item>
-                            {
-                                Object.keys(AccTypes).length ? <Select
-                                    style={{ width: '160px' }}
-                                    labelId="demo-simple-select-outlined-label"
-                                    id="demo-simple-select-outlined"
-                                    MenuProps={{
-                                        anchorOrigin: {
-                                            vertical: "bottom",
-                                            horizontal: "left"
-                                        },
-                                        getContentAnchorEl: null
-                                    }}
-                                    value={selectedType}
-                                    onChange={handleAccountSel}
-                                    label="Select Type"
-                                >
-                                    {
-                                        Object.keys(AccTypes).map((k, index) => {
-                                            return <MenuItem key={index} value={AccTypes[k]}>{k}</MenuItem>
-                                        })
-                                    }
-                                </Select>
-                                    : null
-                            }
-                        </Grid>
-
-                        <Grid item>
-                            <SearchBox onSearch={handleSearch} width="300px" value={searchVal} size="small" />
-                            {
-                                accountPermissions.isCreate && <>
-                                    <Box component="span" marginX={1} />
-
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={clickCreateNew}
-                                        startIcon={<AddOutlined />}
-                                    >
-                                        Add
-                                    </Button>
-                                </>
-                            }
-
-                            <Box component="span" marginX={1} />
-
-                            <Button
-                                disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                variant="outlined"
-                                color="default"
-                                onClick={openActions}
-                                aria-controls="action-menu"
+                <Box component="div">
+                    <CustomContainer>
+                        <div className={`${accountClass["account_header_inner_container"]}`}
+                        >
+                            <CustomHeader
+                                total={rowCount}
+                                heading="Accounts"
+                                selectedType={selectedType}
+                                onTypeChange={handleAccountSel}
+                                options={AccTypes}
+                                secondHeading="Account"
+                            // showHeading={false}
                             >
-                                Actions <ExpandMore />
-                            </Button>
-                            <Menu
-                                anchorEl={anchorEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "left"
-                                }}
-                                id="action-menu"
-                                open={Boolean(anchorEl)}
-                                onClose={closeActions}>
+                                <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
+                                    <SearchBox
+                                        onSearch={handleSearch}
+                                        searchbox="account_header_search_bar"
+                                        width="300px" value={searchVal}
+                                    />
+                                    <div className={`${accountClass.account_header_add_btn_action_btn_group}`}>
+                                        {
+                                            accountPermissions.isCreate && <Button
+                                                variant="contained"
+                                                color="primary"
+                                                className={`px-3 ${accountClass.account_header_add_btn}`}
+                                                onClick={clickCreateNew}
+                                                startIcon={<AddOutlined />} >Add</Button>
+                                        }
 
-                                {
-                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
-                                        disabled={
-                                            dataRows.filter((d) => d.isChecked && !d.approved).length === 0
-                                        }
-                                        onClick={() => {
-                                            setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
-                                        }}
-                                    >
-                                        Approve Accounts &nbsp;{" "}
-                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
-                                    </MenuItem>
-                                }
-                                {
-                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
-                                        disabled={
-                                            dataRows.filter((d) => d.isChecked && d.approved).length === 0
-                                        }
-                                        onClick={() => {
-                                            setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
-                                        }}
-                                    >
-                                        Disapprove Accounts &nbsp;{" "}
-                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
-                                    </MenuItem>
-                                }
-                                {
-                                    accountPermissions.isDelete &&
-                                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                        onClick={() => {
-                                            if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
-                                                setShowDeleteWarningConfirmBox(true);
-                                            } else {
-                                                setShowDeleteConfirmBox(true)
+                                        <Button
+                                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                            variant="outlined"
+                                            color="default"
+                                            className={`${accountClass.account_header_action_btn}`}
+                                            onClick={openActions}
+                                            aria-controls="action-menu"
+                                        >
+                                            Actions <ExpandMore />
+                                        </Button>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left"
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}>
+
+                                            {
+                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                    disabled={
+                                                        dataRows.filter((d) => d.isChecked && !d.approved).length === 0
+                                                    }
+                                                    onClick={() => {
+                                                        setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
+                                                    }}
+                                                >
+                                                    Approve Accounts &nbsp;{" "}
+                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
+                                                </MenuItem>
                                             }
-                                        }}
-                                    >
-                                        Delete
+                                            {
+                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                    disabled={
+                                                        dataRows.filter((d) => d.isChecked && d.approved).length === 0
+                                                    }
+                                                    onClick={() => {
+                                                        setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
+                                                    }}
+                                                >
+                                                    Disapprove Accounts &nbsp;{" "}
+                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
+                                                </MenuItem>
+                                            }
+                                            {
+                                                accountPermissions.isDelete &&
+                                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                                    onClick={() => {
+                                                        if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
+                                                            setShowDeleteWarningConfirmBox(true);
+                                                        } else {
+                                                            setShowDeleteConfirmBox(true)
+                                                        }
+                                                    }}
+                                                >
+                                                    Delete
                                     </MenuItem>
-                                }
+                                            }
 
-                            </Menu>
+                                        </Menu>
 
+                                    </div>
+                                </div>
+                            </CustomHeader>
+                        </div>
 
-                        </Grid>
-                    </Grid>
-                    <Paper style={{ marginTop: 15 }}>
-                        {/* <Box component="div" className={classes.root}> */}
-                        <DataGrid
-                            className={classes.grid}
-                            components={{
-                                Toolbar: DataGridCustomToolbar,
-                            }}
-                            scrollbarSize={20}
-                            rows={loading ? [] : dataRows}
-                            columns={columns}
-                            loading={loading}
-                            disableSelectionOnClick
-                            disableMultipleSelection
-                            paginationMode="server"
-                            pagination
-                            onPageChange={handlePage}
-                            onPageSizeChange={handlePageSize}
-                            pageSize={query.limit}
-                            page={query.page}
-                            rowCount={rowCount}
-                            rowsPerPageOptions={[25, 50, 75]}
-                            onSortModelChange={handleSortModelChange}
-                            // onRowClick={handleRowClick}
-                            density="compact"
-                        />
+                        <div className={`mt-3 ${accountClass["brand-grid"]}`}>
+                            <DataGrid
+                                className={classes.grid}
+                                components={{
+                                    Toolbar: DataGridCustomToolbar,
+                                }}
+                                scrollbarSize={20}
+                                rows={loading ? [] : dataRows}
+                                columns={columns}
+                                loading={loading}
+                                disableSelectionOnClick
+                                disableMultipleSelection
+                                paginationMode="server"
+                                pagination
+                                onPageChange={handlePage}
+                                onPageSizeChange={handlePageSize}
+                                pageSize={query.limit}
+                                page={query.page}
+                                rowCount={rowCount}
+                                rowsPerPageOptions={[25, 50, 75]}
+                                onSortModelChange={handleSortModelChange}
+                                // onRowClick={handleRowClick}
+                                density="compact"
+                            />
+                        </div>
                         {
                             showDeleteWarningConfirmBox ?
                                 <MessageDialog
@@ -726,20 +690,18 @@ export default function Account() {
                                     onOk={approveDisapproveAccounts}
                                 /> : null
                         }
-
-                        {/* </Box> */}
-                    </Paper>
-                </CustomContainer>
+                        {
+                            isAccDialogVisible ?
+                                <ManageAccountDialog
+                                    open={isAccDialogVisible}
+                                    onClose={handleDialogClose}
+                                    id={cloneId}
+                                /> : null
+                        }
+                    </CustomContainer>
+                </Box>
             </Layout>
-            {
-                isAccDialogVisible ?
-                    <CreateAccountDialog
-                        open={isAccDialogVisible}
-                        onClose={handleDialogClose}
-                        // showSuccessMes={handleSnackbar}
-                        id={cloneId}
-                    /> : null
-            }
+
         </>
     )
 }

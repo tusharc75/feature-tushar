@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {
   Grid,
@@ -16,11 +16,10 @@ import routes from './../../components/Helpers/Routes';
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
 import CreateLeadDialog from './CreateLead'
-import Header from "./Header";
+import Header from "./LeadsHeader";
 import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery } from '../../services/util'
-import { CustomEventEmitter } from './../../axios/events';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import MessageDialog from '../../components/Helpers/MessageDialog'
@@ -28,6 +27,8 @@ import { leadDetailPage } from '../../routes/Lead'
 
 import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -50,6 +51,7 @@ const LeadTypes = {
 const notAllowedMes = "You must be the owner or collaborator of this contact to get the delete functionality"
 let leadTimeout
 const Leads = () => {
+  const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const { state: { user } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
@@ -209,20 +211,44 @@ const Leads = () => {
         getFirstName(params.row)
       )
     },
-    { field: "title", headerName: "Title", width: 200 },
-    { field: "company", headerName: "Company", width: 200 },
-    { field: "phone", headerName: "Phone", width: 200 },
-    { field: "mobile", headerName: "Mobile", width: 200 },
-    { field: "email", headerName: "Email", width: 200 },
-    // { field: "status", headerName: "Lead Status", width: 200 },
-    { field: "owner", headerName: "Owner Alies", width: 200 },
     {
-      field: "actions", headerName: "Actions ",
+      field: "title", headerName: "Title", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "company", headerName: "Company", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "phone", headerName: "Phone", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "mobile", headerName: "Mobile", width: 200,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "email", headerName: "Email", width: 200,
+      hide: true,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    // { field: "status", headerName: "Lead Status", width: 200 },
+    {
+      field: "owner", headerName: "Owner Alies", width: 200,
+      hide: true,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "actions",
+      headerName: "Actions ",
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => (
         <>
           {
             leadsPermissions.isDelete ?
-              params.row.allowToDelete ?
+              params.row.owner.optionValue == user._id ?
                 <Tooltip title="Delete" >
                   <IconButton aria-label="Delete" onClick={() => showConfirmBox(params.row)}>
                     <DeleteIcon
@@ -254,7 +280,7 @@ const Leads = () => {
       }
     }
     else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked && d.owner.optionValue != user._id)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true)
@@ -263,7 +289,7 @@ const Leads = () => {
   }
   const getFirstName = tData => {
     return <Link className="LeadNameLink"
-      to={`/${leadDetailPage.path}/${tData._id}`}
+      to={`${leadDetailPage.path}/${tData._id}`}
     >
       {tData.name || ''}
     </Link>
@@ -325,12 +351,13 @@ const Leads = () => {
     if (recs && recs.length > 0) {
       axiosInstance()
         .put(`/lead/remove`, { ids: [...recs] }).then(({ data }) => {
-          CustomEventEmitter.dispatch("show-toast", { type: "success", errorMsg: data.message });
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
           if (deleteRec) setDeleteRec({})
           fetchLeads()
-        }).catch(err => {
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
         })

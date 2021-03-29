@@ -1,5 +1,4 @@
 import React, { Fragment } from "react";
-import PropTypes from "prop-types";
 import {
   Avatar,
   Box,
@@ -17,6 +16,7 @@ import {
   Typography,
   useTheme,
 } from "@material-ui/core";
+import _ from "lodash";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import InfoIcon from "@material-ui/icons/Info";
 import { Autocomplete } from "@material-ui/lab";
@@ -98,6 +98,7 @@ const FormTypes = (props) => {
     tooltipMessage,
     ...rest
   } = props;
+
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
@@ -115,8 +116,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-          ? 1
-          : 0
+        ? 1
+        : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -156,11 +157,13 @@ const FormTypes = (props) => {
   }, [type, value, values[name], fetch]);
 
   const handleUploadFile = (event) => {
-    const file = event.target.files[0];
-    const size = event.target.files[0].size;
-    getBase64(file, (result) => {
-      setFieldValue(name, result);
-    });
+    if (event.target.files && event.target.files.length) {
+      const file = event.target.files[0];
+      // const size = event.target.files[0].size;
+      getBase64(file, (result) => {
+        setFieldValue(name, result);
+      });
+    }
   };
 
   const getBase64 = (file, cb) => {
@@ -169,7 +172,7 @@ const FormTypes = (props) => {
     reader.onload = function () {
       cb(reader.result);
     };
-    reader.onerror = function (error) { };
+    reader.onerror = function (error) {};
   };
 
   return type === "singleLine" ? (
@@ -178,23 +181,6 @@ const FormTypes = (props) => {
         {...rest}
         variant="outlined"
         type="text"
-        label={label}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
-        }
-      />
-    </InfoLabel>
-  ) : type === "url" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="url"
         label={label}
         required={required}
         name={name}
@@ -257,7 +243,14 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          onChange
+            ? onChange
+            : (e) => {
+                setFieldValue(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -326,12 +319,20 @@ const FormTypes = (props) => {
         {...rest}
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-        getOptionSelected={(option: any, val: any) =>
-          option.optionValue === val.optionValue
+        getOptionSelected={(option: any, val) => option.optionValue === val}
+        value={
+          options.filter((data) => data.optionValue === values[name]).length
+            ? options.filter((data) => data.optionValue === values[name])[0]
+            : ""
         }
-        value={values[name]}
         onChange={
-          onChange ? onChange : (e, val) => setFieldValue(name, val ? val : {})
+          onChange
+            ? onChange
+            : (e, val) =>
+                setFieldValue(
+                  name,
+                  val && val.optionValue ? val.optionValue : ""
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -351,14 +352,22 @@ const FormTypes = (props) => {
       <Autocomplete
         {...rest}
         fullWidth
-        value={values[name]}
-        options={currencyData}
-        getOptionLabel={(option: any) =>
-          Object.entries(option).length
-            ? `${option.currencyCode} - ${option.name}`
+        value={
+          currencyData.filter((data) => data.currencyCode === values[name])
+            .length
+            ? currencyData.filter(
+                (data) => data.currencyCode === values[name]
+              )[0]
             : ""
         }
-        onChange={(e, val) => setFieldValue(name, val ? val : {})}
+        options={currencyData}
+        getOptionLabel={(option: any) =>
+          option ? `${option.currencyCode} - ${option.name}` : ""
+        }
+        getOptionSelected={(option: any, val) => option.currencyCode === val}
+        onChange={(e, val) =>
+          setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
+        }
         renderInput={(params) => (
           <TextField
             {...params}
@@ -371,7 +380,7 @@ const FormTypes = (props) => {
           />
         )}
         renderOption={(option) => {
-          const { currencyCode, name, countryCode }: any = option;
+          const { currencyCode, name, countryCode } = option;
           return (
             <Grid container alignItems="center">
               <Grid item>
@@ -399,12 +408,20 @@ const FormTypes = (props) => {
         multiple
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-        value={values[name] ? values[name] : []}
+        value={options.filter((data: any) =>
+          values[name].includes(data.optionValue)
+        )}
         getOptionSelected={(option: any, val: any) =>
           option.optionValue === val.optionValue
         }
         onChange={
-          onChange ? onChange : (e, value) => setFieldValue(name, value)
+          onChange
+            ? onChange
+            : (e, value: any[]) =>
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -454,7 +471,7 @@ const FormTypes = (props) => {
         control={
           <Checkbox
             name={name}
-            checked={values[name] ? values[name] : false}
+            checked={values[name]}
             onChange={
               onChange ? onChange : (e) => setFieldValue(name, e.target.checked)
             }
@@ -500,14 +517,10 @@ const FormTypes = (props) => {
         includeInputInList
         filterSelectedOptions
         value={values[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (event, newValue) => {
-              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-              setValue(newValue);
-            }
-        }
+        onChange={(event, newValue) => {
+          setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+          setValue(newValue);
+        }}
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
         }}
@@ -626,17 +639,5 @@ const FormTypes = (props) => {
     </InfoLabel>
   ) : null;
 };
-
-// FormTypes.propTypes = {
-//   type: PropTypes.string,
-//   label: PropTypes.string,
-//   name: PropTypes.string,
-//   errors: PropTypes.object,
-//   touched: PropTypes.object,
-//   values: PropTypes.object,
-//   setFieldValue: PropTypes.func,
-//   isTooltip: PropTypes.bool,
-//   options: PropTypes.any
-// };
 
 export default FormTypes;
