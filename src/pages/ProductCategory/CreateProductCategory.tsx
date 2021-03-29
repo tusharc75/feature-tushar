@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
@@ -10,11 +10,12 @@ import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { TextField } from "formik-material-ui";
-import { GetOneProductCategory, CreateProductCategory, UpdateProductCategory } from "../../axios/productCategory";
 import Loader from "../../components/Loader";
 import { camelCase } from "../../constants/helpers";
 import { productCategoryPage } from '../../routes/ProductCategory'
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../axios/axiosInstance";
 
 const ProductCategorySchema = Yup.object().shape({
     name: Yup.string()
@@ -26,6 +27,7 @@ const ProductCategorySchema = Yup.object().shape({
 
 const ProductCategory = () => {
 
+    const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
 
@@ -38,18 +40,17 @@ const ProductCategory = () => {
         fetchOneProductCategory();
     }, [id]);
 
-    const fetchOneProductCategory = async () => {
+    const fetchOneProductCategory = () => {
         if (id === "0") {
             setInitialValues({ name: "" });
         }
         else {
-            await GetOneProductCategory(id)
-                .then(({ data }) => {
-                    setInitialValues(data);
-                    setSection(data.section);
-                })
-                .catch((err) => {
-                });
+            axiosInstance().get(`/productcategory/` + id).then(({ data: { data } }) => {
+                setInitialValues(data);
+                setSection(data.section);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
         }
     };
 
@@ -74,24 +75,40 @@ const ProductCategory = () => {
         data.fields = fields;
         setIsUpdating(true)
         if (id === "0") {
-            CreateProductCategory(data)
-                .then(({ data }) => {
-                    setIsUpdating(false)
-                    history.push({ pathname: productCategoryPage.path });
-                })
-                .catch((err) => {
-                });
+
+            axiosInstance().post("/productcategory", data).then(({ data: { data } }) => {
+                setIsUpdating(false)
+                history.push({ pathname: productCategoryPage.path });
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+
+            // CreateProductCategory(data)
+            //     .then(({ data }) => {
+            //         setIsUpdating(false)
+            //         history.push({ pathname: productCategoryPage.path });
+            //     })
+            //     .catch((err) => {
+            //     });
         }
         else {
             data.categoryId = id;
             data.deleteField = deleteField;
-            UpdateProductCategory(data)
-                .then(({ data }) => {
-                    setIsUpdating(false)
-                    history.push({ pathname: productCategoryPage.path });
-                })
-                .catch((err) => {
-                });
+
+            axiosInstance().put("/productcategory", data).then(({ data: { data } }) => {
+                setIsUpdating(false)
+                history.push({ pathname: productCategoryPage.path });
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+
+            // UpdateProductCategory(data)
+            //     .then(({ data }) => {
+            //         setIsUpdating(false)
+            //         history.push({ pathname: productCategoryPage.path });
+            //     })
+            //     .catch((err) => {
+            //     });
         }
     }
 

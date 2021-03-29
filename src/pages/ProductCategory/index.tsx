@@ -1,15 +1,11 @@
-import React, { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
-import { SearchFilter } from "../../components/Activity/Report/SearchFilter";
-import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
-import { useParams, useHistory } from "react-router-dom";
-import queryString from 'query-string';
-import { GetProductCategory, DeleteProductCategory } from "../../axios/productCategory";
+import { useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { DataGrid } from "@material-ui/data-grid";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -18,10 +14,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { productCategoryPage } from '../../routes/ProductCategory'
 
 import { Link } from 'react-router-dom'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../axios/axiosInstance";
 
 
 const ProductCategory = () => {
 
+    const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const [loading, setLoading] = useState(true);
     const [productCategory, setProductCategory] = useState([]);
@@ -30,25 +29,35 @@ const ProductCategory = () => {
         fetchProductCategory();
     }, []);
 
-    const fetchProductCategory = async () => {
+    const fetchProductCategory = () => {
         setLoading(true)
-        await GetProductCategory()
-            .then(({ data }) => {
-                setProductCategory(data);
-                setLoading(false)
-            })
-            .catch((err) => {
-            });
+
+        axiosInstance().get(`/productcategory`).then(({ data: { data } }) => {
+            setProductCategory(data);
+            setLoading(false)
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+
+
+        // await GetProductCategory()
+        //     .then(({ data }) => {
+        //         setProductCategory(data);
+        //         setLoading(false)
+        //     })
+        //     .catch((err) => {
+        //     });
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = (id) => {
         setLoading(true)
-        await DeleteProductCategory(id)
-            .then(({ data }) => {
-                fetchProductCategory();
-            })
-            .catch((err) => {
-            });
+
+        axiosInstance().delete(`/productcategory/` + id).then(() => {
+            fetchProductCategory();
+        }).catch((error) => {
+            toastConfig.setToastConfig(error)
+        });
+
     }
 
 
