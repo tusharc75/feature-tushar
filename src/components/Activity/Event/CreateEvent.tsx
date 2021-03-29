@@ -2,7 +2,6 @@ import React, { useState, useEffect, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { DialogTitle, DialogContent, DialogActions } from '../Helpers/Dialog'
 import { UserDropdown } from '../Helpers/userDropdown';
 import statusList from '../Helpers/statusList';
 import Typography from '@material-ui/core/Typography';
@@ -21,7 +20,9 @@ import Divider from '@material-ui/core/Divider';
 import { Comment } from '../Comment';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay'
 import PropTypes from 'prop-types'
-import CustomDialogHeader from "../../CustomDialog/CustomDialogHeader";
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
 const EventSchema = Yup.object().shape({
     name: Yup.string()
@@ -100,9 +101,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     return (initialValues && <Formik initialValues={initialValues} validationSchema={EventSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form>
-                <DialogTitle title={`${eventId ? "Edit" : "New"} Event`} onClose={handleClose}></DialogTitle>
-
-                <DialogContent>
+                <CustomDialogHeader title={`${eventId ? "Edit" : "New"} Event`} onClose={handleClose}></CustomDialogHeader>
+                <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
                             <Grid container spacing={3}>
@@ -265,11 +265,11 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                             </Grid>
                         </Box>
                     </MuiPickersUtilsProvider>
-                </DialogContent>
-                <DialogActions>
+                </CustomDialogContent>
+                <CustomDialogFooter>
                     <Button color="primary" onClick={handleClose}>Cancel</Button>
                     <Button type="submit" color="primary" variant="contained">Save </Button>
-                </DialogActions>
+                </CustomDialogFooter>
             </Form>)}
     </Formik>
     );

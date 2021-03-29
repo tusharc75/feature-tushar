@@ -193,6 +193,23 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   return yup.object().shape(schema);
 };
 
+export const camelCase = (str) => {
+    return str
+      .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+        return index == 0 ? word.toLowerCase() : word.toUpperCase();
+      })
+      .replace(/\s+/g, "");
+  };
+  
+  export const UnCamelCase = (str) => {
+    return str
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/\b([A-Z]+)([A-Z])([a-z])/, "$1 $2$3")
+      .replace(/^./, function (str) {
+        return str.toUpperCase();
+      });
+  };
+  
 export const isObjectEmpty = (obj) => {
   return Object.keys(obj).length === 0;
 };

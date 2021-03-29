@@ -2,7 +2,6 @@ import React, { useState, useEffect, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { DialogTitle, DialogContent, DialogActions } from '../Helpers/Dialog'
 import Typography from '@material-ui/core/Typography';
 import { TextField as TextFieldFormik, Select } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
@@ -22,7 +21,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
 import PropTypes from 'prop-types'
-import CustomDialogHeader from "../../CustomDialog/CustomDialogHeader";
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
 const EmailSchema = Yup.object().shape({
     name: Yup.string()
@@ -96,9 +97,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
     return (initialValues && <Formik initialValues={initialValues} validationSchema={EmailSchema} onSubmit={handleSave} onKeyPress={onKeyPress}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form>
-                <DialogTitle title={`${emailId ? "View" : "New"} Case`} onClose={handleClose}></DialogTitle>
-
-                <DialogContent>
+                <CustomDialogHeader title={`${emailId ? "View" : "New"} Case`} onClose={handleClose}></CustomDialogHeader>
+                <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
                             {emailId ?
@@ -185,12 +185,12 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                 </Grid>}
                         </Box>
                     </MuiPickersUtilsProvider>
-                </DialogContent>
-                <DialogActions>
+                </CustomDialogContent>
+                <CustomDialogFooter>
                     <Button color="primary" onClick={handleClose}>Cancel</Button>
                     {!emailId &&
                         <Button type="submit" color="primary" variant="contained">Send </Button>}
-                </DialogActions>
+                </CustomDialogFooter>
             </Form>)
         }
     </Formik >

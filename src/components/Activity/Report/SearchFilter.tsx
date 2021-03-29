@@ -7,12 +7,8 @@ import parse from 'autosuggest-highlight/parse';
 import Grid from '@material-ui/core/Grid';
 import LocationOnIcon from '@material-ui/icons/LocationOn';
 import Typography from '@material-ui/core/Typography';
+import { capitalize } from '../../../services/util'
 
-
-const capitalize = (s) => {
-    if (typeof s !== 'string') return ''
-    return s.charAt(0).toUpperCase() + s.slice(1)
-}
 
 const allSearch = [
     { type: "account", name: "All", isAll: true },

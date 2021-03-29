@@ -49,8 +49,10 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
         },
     });
 
+
     const [{ isDragging }, drag] = useDrag({
         item: { type: "move", id, index },
+        type: "move",
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
         }),

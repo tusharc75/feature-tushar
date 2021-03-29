@@ -2,26 +2,23 @@ import React, { useState, useEffect, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { DialogTitle, DialogContent, DialogActions } from '../Helpers/Dialog'
 import Typography from '@material-ui/core/Typography';
 import { TextField as TextFieldFormik, Select } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
-import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
-import { KeyboardDatePicker } from 'formik-material-ui-pickers';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import TextField from '@material-ui/core/TextField';
 import * as Yup from "yup";
 import { GetNote, CreateNewNote, UpdateNote, GetNoteDetail } from "../../../axios/activity";
 import moment from "moment";
-import Divider from '@material-ui/core/Divider';
-import { Comment } from '../Comment';
 import RichTextEditor from 'react-rte';
 import { makeStyles } from '@material-ui/core/styles';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay'
 import PropTypes from 'prop-types'
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+
 
 const NoteSchema = Yup.object().shape({
     name: Yup.string()
@@ -86,8 +83,8 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form>
-                <DialogTitle onClose={handleClose} title={`${noteId ? "Edit" : "New"} Note`}></DialogTitle>
-                <DialogContent>
+                <CustomDialogHeader onClose={handleClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
+                <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
                             <Grid container spacing={3}>
@@ -123,11 +120,11 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                             </Grid>
                         </Box>
                     </MuiPickersUtilsProvider>
-                </DialogContent>
-                <DialogActions>
+                </CustomDialogContent>
+                <CustomDialogFooter>
                     <Button color="primary" onClick={handleClose}>Cancel</Button>
                     <Button type="submit" color="primary" variant="contained">Save </Button>
-                </DialogActions>
+                </CustomDialogFooter>
             </Form>)}
     </Formik>
     );
