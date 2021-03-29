@@ -159,7 +159,7 @@ export default function Contact() {
                 <>
                     {
                         contactPermissions.isDelete ?
-                            params.row.allowToDelete ?
+                            params.row.canDelete ?
                                 <Tooltip title="Delete">
                                     <IconButton aria-label="Delete" onClick={() => {
                                         setSingleContactDelete({ show: true, id: params.row._id, contactName: `${params.row.firstName} ${params.row.lastName}` })
@@ -235,6 +235,8 @@ export default function Contact() {
             ...u,
             isChecked: false,
             id: u._id,
+            canDelete: u?.owner?.optionValue === user?.user._id,
+            collaborator: u.collaborator || [],
             account: u.accountName.optionLabel
         }));
         setDataRows([...rows]);
@@ -439,7 +441,7 @@ export default function Contact() {
 
                                         <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
                                             onClick={() => {
-                                                if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
                                                     setShowDeleteWarningConfirmBox(true);
                                                 } else {
                                                     setShowDeleteConfirmBox(true)

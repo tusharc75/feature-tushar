@@ -43,6 +43,7 @@ const Roles = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [contactPermissions, setContactPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+    const [canEdit, setCanEdit] = useState(false)
     let { id } = useParams();
 
     useEffect(() => {
@@ -85,6 +86,9 @@ const Roles = () => {
             handleAllowToEditList(data)
             setContactData(data)
             getContactFields()
+
+            setCanEdit([...data?.collaborator, data?.owner].some(obj => obj.optionValue === user.user._id))
+
             setCustomizedRoutes([routes.contact, { title: `${data.firstName} ${data.lastName}` }]);
         }).catch(err => {
             setLoading(false)
@@ -231,38 +235,24 @@ const Roles = () => {
                         // style={{ marginTop: "150px", minHeight: "200px" }}
                         showHeading={true}
                     >
-                        <Box component="span" marginX={1} />
-                        {
-                             contactPermissions.isUpdate && (contactData?.owner?.optionValue && user?.user?._id &&
-                                contactData.owner?.optionValue === user.user._id)|| (contactData?.collaborator && user?.user?._id &&
-                                    contactData.collaborator.includes(user.user._id)) ?
-                                [
+                       {
+                                contactPermissions.isUpdate && canEdit ?
                                     <Button
                                         variant="contained"
                                         color="primary"
                                         onClick={handleOpneUpdateDialog}
                                     >
                                         Edit
-                                </Button>,
+                                    </Button> : null
+                            }
 
-                                    <Box component="span" marginX={1} />,
-                                ]
-                                : null
-                                }
-                                {
-                                contactPermissions.isDelete  && contactData?.owner?.optionValue && user?.user?._id &&
-                                contactData.owner?.optionValue === user.user._id ?
-                                [
-                                    <Button
-                                        variant="contained" color="secondary"
-                                        onClick={() => setShowConfirmBox(true)}
-                                    >
-                                        Delete
-                                </Button>
-
-                                ]
-                                : null
-                        }
+                            <Box component="span" marginX={1} />
+                            {
+                                contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id &&
+                                    contactData.owner.optionValue === user.user._id ?
+                                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                                    : null
+                            }
 
                     </DetailsPageHeader>
 
