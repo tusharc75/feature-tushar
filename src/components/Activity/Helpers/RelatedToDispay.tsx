@@ -6,11 +6,8 @@ import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { purple } from '@material-ui/core/colors';
+import { capitalize } from '../../../services/util'
 
-const capitalize = (s) => {
-    if (typeof s !== 'string') return ''
-    return s.charAt(0).toUpperCase() + s.slice(1)
-}
 
 const useStyles = makeStyles((theme) => ({
     boldFont: {

@@ -24,6 +24,8 @@ import Activity from "./pages/Activity";
 import Note from "./pages/Activity/Note";
 import Email from "./pages/Activity/Email";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
+import ProductCategory from "./pages/ProductCategory";
+import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
 
 function App() {
   const {
@@ -122,6 +124,12 @@ function App() {
         </PrivateRoute>
         <PrivateRoute exact path="/activity/:type">
           <Activity />
+        </PrivateRoute>
+        <PrivateRoute exact path="/product-category">
+          <ProductCategory />
+        </PrivateRoute>
+        <PrivateRoute exact path="/product-category/:id">
+          <CreateProductCategory />
         </PrivateRoute>
         {/* <Route exact path="/crm/account" component={Account} /> */}
       </Switch>

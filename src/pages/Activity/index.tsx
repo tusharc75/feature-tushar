@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import CustomTabs from "../../components/Helpers/CustomTabs";
 import Board from "../../components/Activity/Report/Board";
 import Roadmap from "../../components/Activity/Report/Roadmap";
+import Calendar from "../../components/Activity/Report/Calendar";
 import { SearchFilter } from "../../components/Activity/Report/SearchFilter";
 import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
 import { useParams, useHistory } from "react-router-dom";
@@ -41,7 +42,7 @@ const Activity = () => {
         }
     }, [referenceId]);
 
-    const tabs = ["Board", "Roadmap"];
+    const tabs = ["Board", "Roadmap", "Calendar"];
     const handleChangeFilter = (value) => {
         setFilter(value)
     }
@@ -66,6 +67,7 @@ const Activity = () => {
             <Box mb={1}>
                 {viewType === 0 && <Board type={type} filter={filter} activityId={activityId} />}
                 {viewType === 1 && <Roadmap type={type} filter={filter} activityId={activityId} />}
+                {viewType === 2 && <Calendar type={type} filter={filter} activityId={activityId} />}
             </Box>
         </Box>
         {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}

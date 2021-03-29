@@ -1,0 +1,150 @@
+import React, { useState, useEffect, Fragment } from "react";
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Layout from "../../components/Layout";
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { useParams, useHistory } from "react-router-dom";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import { FormBuilder } from "../../components/FormBuilder";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { TextField } from "formik-material-ui";
+import { GetOneProductCategory, CreateProductCategory, UpdateProductCategory } from "../../axios/productCategory";
+import Loader from "../../components/Loader";
+import { camelCase } from "../../constants/helpers";
+import { productCategoryPage } from '../../routes/ProductCategory'
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+
+const ProductCategorySchema = Yup.object().shape({
+    name: Yup.string()
+        .min(3, "Too Short!")
+        .max(50, "Too Long")
+        .required("category name is required"),
+});
+
+
+const ProductCategory = () => {
+
+    const history = useHistory();
+    const { id } = useParams();
+
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [initialValues, setInitialValues] = useState(null);
+    const [section, setSection] = useState([]);
+    const [deleteField, setDeleteField] = useState([]);
+
+    useEffect(() => {
+        fetchOneProductCategory();
+    }, [id]);
+
+    const fetchOneProductCategory = async () => {
+        if (id === "0") {
+            setInitialValues({ name: "" });
+        }
+        else {
+            await GetOneProductCategory(id)
+                .then(({ data }) => {
+                    setInitialValues(data);
+                    setSection(data.section);
+                })
+                .catch((err) => {
+                });
+        }
+    };
+
+    const handleSave = (values) => {
+        let data: any = {}
+        data.name = values.name;
+
+        let fields: any = []
+        let order = 0;
+        section.forEach(_section => {
+            _section.field.forEach(_field => {
+                let _field_data = _field
+                _field_data.fieldId = _field_data.fieldId.toString();
+                _field_data.sectionName = _section.sectionName
+                if (!isNaN(_field.fieldId)) {
+                    _field_data.fieldName = camelCase(_field.fieldLabel)
+                }
+                _field_data.order = ++order
+                fields.push(_field_data)
+            })
+        })
+        data.fields = fields;
+        setIsUpdating(true)
+        if (id === "0") {
+            CreateProductCategory(data)
+                .then(({ data }) => {
+                    setIsUpdating(false)
+                    history.push({ pathname: productCategoryPage.path });
+                })
+                .catch((err) => {
+                });
+        }
+        else {
+            data.categoryId = id;
+            data.deleteField = deleteField;
+            UpdateProductCategory(data)
+                .then(({ data }) => {
+                    setIsUpdating(false)
+                    history.push({ pathname: productCategoryPage.path });
+                })
+                .catch((err) => {
+                });
+        }
+    }
+
+    return (<Layout>
+        {initialValues ?
+            <Fragment>
+                <Grid container direction="row">
+                    <Grid item xs={12} className="pl-2">
+                        <CustomBreadCrumbs routes={[{ title: "Product Category", path: productCategoryPage.path }, { title: id === "0" ? "New" : initialValues.name }]} />
+                    </Grid>
+                </Grid>
+                <Formik initialValues={initialValues} validationSchema={ProductCategorySchema} onSubmit={handleSave}>
+                    {({ submitForm }) => (
+                        <Form>
+                            <Box mt={1} p={2} bgcolor="white">
+                                <Grid container spacing={1}>
+                                    <Grid item xs={12} sm={3}  >
+                                        <Field
+                                            component={TextField}
+                                            fullWidth
+                                            margin="dense"
+                                            type="text"
+                                            label="Category Name"
+                                            name="name"
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}  >
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} container justify="flex-end">
+                                        <Box>
+                                            <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
+                                                Save{isUpdating && <CircularProgress size={24} />}
+                                            </Button>
+                                        </Box>
+                                        <Box ml={1} >
+                                            <Button color="primary" variant="contained" onClick={() => history.push({ pathname: "/product-category" })} >Close</Button>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                            <Box >
+                                <FormBuilder
+                                    section={section}
+                                    setSection={setSection}
+                                    deleteField={deleteField}
+                                    setDeleteField={setDeleteField} />
+                            </Box>
+                        </Form>)}
+                </Formik>
+            </Fragment> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+    </Layout>
+    );
+}
+
+export default ProductCategory;
