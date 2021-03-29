@@ -298,16 +298,9 @@ export default function Contact() {
     }
 
     const getFirstName = tData => {
-<<<<<<< HEAD
-        let name = capitalize(tData.firstName || '') + ' '
-        name = name + capitalize(tData.middleName || '') + ' '
-        name = name + capitalize(tData.lastName || '')
-        return <Link className={contactStyles.contacts_name_link}
-=======
         let name = [tData.firstName, tData.middleName, tData.lastName].filter(d => d).join(" ");
         
         return <Link className="contactsNameLink"
->>>>>>> master
             to={`${contactDetailPage.path}/${tData._id}`}>
             {name}
         </Link>

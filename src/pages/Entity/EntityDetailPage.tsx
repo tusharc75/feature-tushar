@@ -14,7 +14,6 @@ import { Link } from "react-router-dom";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import { entityPage } from '../../routes/Entities'
-import { capitalize } from '../../services/util'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
@@ -72,7 +71,7 @@ const Roles = () => {
 
             handleMainPoints(data)
 
-            let name = capitalize(data.entityName || '') 
+            let name = data.entityName
             if (data?.salutation?.optionLabel) {
                 name = data.salutation.optionLabel + name
             }
