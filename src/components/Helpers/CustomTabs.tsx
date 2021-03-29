@@ -1,5 +1,5 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { makeStyles, withStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { Typography, Tabs, Tab } from "@material-ui/core";
 
 const AntTabs = withStyles((theme) => ({
@@ -11,27 +11,35 @@ const AntTabs = withStyles((theme) => ({
   },
 }))(Tabs);
 
-const AntTab = withStyles((theme) => ({
-  root: {
-    textTransform: "none",
-    minWidth: 72,
-    fontWeight: theme.typography.fontWeightRegular,
-    marginRight: theme.spacing(4),
 
-    "&:hover": {
-      color: theme.palette.primary.main,  //  dargBg
-      opacity: 1,
+const AntTab = withStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      textTransform: "none",
+      minWidth: 72,
+      fontWeight: theme.typography.fontWeightRegular,
+      marginRight: theme.spacing(4),
+
+      "&:hover": {
+        color: theme.palette.primary.main,  //  dargBg
+        opacity: 1,
+      },
+      "&$selected": {
+        color: theme.palette.primary.main,  //  dargBg
+        fontWeight: theme.typography.fontWeightMedium,
+      },
+      "&:focus": {
+        color: theme.palette.primary.main,  //  darkBg
+      },
     },
-    "&$selected": {
-      color: theme.palette.primary.main,  //  dargBg
-      fontWeight: theme.typography.fontWeightMedium,
-    },
-    "&:focus": {
-      color: theme.palette.primary.main,  //  darkBg
-    },
-  },
-  selected: {},
-}))((props) => <Tab disableRipple {...props} />);
+    selected: {},
+  }),
+)((props: StyledTabProps) => <Tab disableRipple {...props} />);
+
+
+interface StyledTabProps {
+  label: string;
+}
 
 const CustomTabs = ({ value, setValue, tabs }) => {
   const handleTabChange = (event, newValue) => {
@@ -45,7 +53,7 @@ const CustomTabs = ({ value, setValue, tabs }) => {
         aria-label="ant example"
       >
         {tabs.map((tab, i) => (
-          <AntTab key={i} />
+          <AntTab key={i} label={tab} />
         ))}
       </AntTabs>
       <Typography />

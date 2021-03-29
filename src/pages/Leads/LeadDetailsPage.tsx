@@ -11,7 +11,6 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import { leadPage } from "../../routes/Lead";
 import routes from "../../components/Helpers/Routes";
-import { capitalize } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
@@ -71,9 +70,7 @@ const LeadDetailsPage = () => {
   const fetchLeadData = async () => {
     axiosInstance().get(`/lead/${id}`).then(({ data: { data } }) => {
       handleMainPoints(data);
-      let name = capitalize(data.firstName || "") + " ";
-      name = name + capitalize(data.middleName || "") + " ";
-      name = name + capitalize(data.lastName || "");
+      let name = [data.firstName, data.middleName, data.lastName].filter(d => d).join(" ");
 
       if (data?.salutation?.optionLabel) {
         name = data.salutation.optionLabel + name;

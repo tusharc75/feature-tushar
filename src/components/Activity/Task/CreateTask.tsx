@@ -2,7 +2,6 @@ import React, { useState, useEffect, Fragment } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { DialogTitle, DialogContent, DialogActions } from '../Helpers/Dialog'
 import { UserDropdown } from '../Helpers/userDropdown';
 import statusList from '../Helpers/statusList';
 import Typography from '@material-ui/core/Typography';
@@ -24,7 +23,9 @@ import { RelatedToDispay } from '../Helpers/RelatedToDispay'
 import TableChartIcon from '@material-ui/icons/TableChart';
 import { SubTask } from './SubTask'
 import PropTypes from 'prop-types'
-import CustomDialogHeader from "../../CustomDialog/CustomDialogHeader";
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
 const TaskSchema = Yup.object().shape({
     name: Yup.string()
@@ -85,11 +86,10 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
     return (initialValues && <Formik initialValues={initialValues} validationSchema={TaskSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form>
-                <DialogTitle title={`${id ? "Edit" : "New"} Task`} onClose={handleClose}></DialogTitle>
-
-                <DialogContent>
-                    <MuiPickersUtilsProvider utils={MomentUtils}>
-                        <Box padding={1}>
+                <CustomDialogHeader title={`${id ? "Edit" : "New"} Task`} onClose={handleClose}></CustomDialogHeader>
+                <CustomDialogContent>
+                    <Box padding={1}>
+                        <MuiPickersUtilsProvider utils={MomentUtils}>
                             <Grid container spacing={3}>
                                 <Grid item xs={7}>
                                     <Field
@@ -224,13 +224,13 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
                                     </Fragment>}
                                 </Grid>
                             </Grid>
-                        </Box>
-                    </MuiPickersUtilsProvider>
-                </DialogContent>
-                <DialogActions>
+                        </MuiPickersUtilsProvider>
+                    </Box>
+                </CustomDialogContent>
+                <CustomDialogFooter>
                     <Button color="primary" onClick={handleClose}>Cancel</Button>
                     <Button type="submit" color="primary" variant="contained">Save </Button>
-                </DialogActions>
+                </CustomDialogFooter>
             </Form>)}
     </Formik>
     );

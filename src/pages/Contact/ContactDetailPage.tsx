@@ -15,7 +15,6 @@ import { getErrorMessage } from '../../services/util'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import { contactPage } from '../../routes/Contacts'
-import { capitalize } from '../../services/util'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Loader from '../../components/Loader'
@@ -29,7 +28,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 
 const Roles = () => {
     const toastConfig = useContext(CustomToastContext);
-    
+
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
@@ -72,10 +71,7 @@ const Roles = () => {
         axiosInstance().get(`/contact/${id}`).then(({ data: { data } }) => {
 
             handleMainPoints(data)
-
-            let name = capitalize(data.firstName || '') + ' '
-            name = name + capitalize(data.middleName || '') + ' '
-            name = name + capitalize(data.lastName || '')
+            let name = [data.firstName, data.middleName, data.lastName].filter(d => d).join(" ");
 
             if (data?.salutation?.optionLabel) {
                 name = data.salutation.optionLabel + name
