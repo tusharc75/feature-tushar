@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
     Box,
     Button,
@@ -9,25 +9,28 @@ import { useHistory, useParams } from "react-router-dom";
 import Container from '../../components/Container'
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
-import CustomHeader from '../../components/DetailsPageHeader'
+import DetailsPageHeader from '../../components/DetailsPageHeader'
 import { Link } from "react-router-dom";
-import CustomToast from '../../components/Helpers/CustomToast'
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
+import { entityPage } from '../../routes/Entities'
 import { capitalize } from '../../services/util'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
+import { isObjectEmpty } from './../../constants/helpers'
+import DeleteButton from "../../components/Helpers/DeleteButton";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import {  removeEmptyKeys } from '../../constants/helpers';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const Roles = () => {
+    const toastConfig = useContext(CustomToastContext);
+    
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
-    const [alertData, setAlertData] = useState<any>({})
     const [entityData, setEntityData] = useState<any>({})
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -38,6 +41,7 @@ const Roles = () => {
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [entityPermissions, setEntityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+    const [canEdit, setCanEdit] = useState(false)
     let { id } = useParams();
 
     useEffect(() => {
@@ -68,7 +72,7 @@ const Roles = () => {
 
             handleMainPoints(data)
 
-            let name = capitalize(data.entityName || '') + ' '
+            let name = capitalize(data.entityName || '') 
             if (data?.salutation?.optionLabel) {
                 name = data.salutation.optionLabel + name
             }
@@ -77,6 +81,9 @@ const Roles = () => {
             handleAllowToEditList(data)
             setEntityData(data)
             getEntityFields()
+
+            setCanEdit([...data?.collaborator, data?.owner].some(obj => obj.optionValue === user.user._id))
+
             setCustomizedRoutes([routes.entity, { title: `${data.entityName} ` }]);
         }).catch(err => {
             setLoading(false)
@@ -101,14 +108,6 @@ const Roles = () => {
             setEntityFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });
-    };
-
-    const handleSnackbar = (msg, type, isOpen) => {
-        setAlertData({
-            errorMsg: msg,
-            type: type,
-            open: isOpen
-        })
     };
 
     const quickLinks = [
@@ -142,10 +141,11 @@ const Roles = () => {
         if (entityData?._id) {
 
             axiosInstance().put(`/entity/remove`, { ids: [entityData._id] }).then(({ data }) => {
-                handleSnackbar(data.message, 'success', true)
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
-            }).catch(err => {
+            }).catch(error => {
+                toastConfig.setToastConfig(error);
                 setShowConfirmBox(false)
             })
         }
@@ -155,7 +155,7 @@ const Roles = () => {
     }
     const goBackToListing = () => {
         history.push({
-            pathname: "/entity"//hardcoded ask Punit
+            pathname: entityPage.path
         });
     }
 
@@ -177,101 +177,86 @@ const Roles = () => {
 
     const handleOpneUpdateDialog = () => {
         setOpenUpdateDialog(true);
-      };
-    
-      const closeUpdateDialog = () => {
+    };
+
+    const closeUpdateDialog = () => {
         setOpenUpdateDialog(false);
-      };
+    };
 
     const handleUpdateEntity = (values) => {
         setUpdating(true);
+        if (values.employees) {
+            values.employees = parseInt(values.employees)
+        }
         const updatedData = {
             ...values,
             _id: entityData._id,
         };
-        const newValues = removeEmptyKeys(updatedData);
-        axiosInstance().put('/entity', newValues).then(({ data }) => {
+
+        axiosInstance().put('/entity', updatedData).then(({ data }) => {
             fetchEntityData()
-            handleSnackbar("Successfully saved", 'success', true)
+            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
             setUpdating(false);
-            setOpenUpdateDialog(false);
-        }).catch((err) => {
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
             setUpdating(false);
         });
     };
     return (
         <>
             <Layout>
-            {openUpdateDialog && (
-          <UpdateDetailsDialog
-            title={`Editing  ${entityData.entityName}`}
-            openDialog={openUpdateDialog}
-            onClose={closeUpdateDialog}
-            data={entityData}
-            fields={entityFields}
-            isUpdating={isUpdating}
-            handleUpdate={handleUpdateEntity}
-          />
-        )}
+                {openUpdateDialog && (
+                    <UpdateDetailsDialog
+                        title={`Editing  ${entityData.firstName}`}
+                        openDialog={openUpdateDialog}
+                        onClose={closeUpdateDialog}
+                        data={entityData}
+                        fields={entityFields}
+                        isUpdating={isUpdating}
+                        handleUpdate={handleUpdateEntity}
+                    />
+                )}
                 <Grid container direction="row">
                     <Grid item xs={12} className="pl-2">
                         <CustomBreadCrumbs routes={customizedRoutes} />
                     </Grid>
                 </Grid>
 
-                {
-                    alertData ? <CustomToast
-                        open={alertData.open || false}
-                        close={() => handleSnackbar('', '', false)}
-                        errorMsg={alertData.errorMsg || ''}
-                        type={alertData.type || ''}
-                    /> : null
-                }
                 <div>
-                    <CustomHeader
+                    <DetailsPageHeader
                         heading={headingLbl}
-                        logo={entityData?.contactLogo ? entityData.contactLogo : undefined}
+                        logo={entityData?.entityLogo ? entityData.entityLogo : undefined}
                         mainPoints={mainPoints}
                         // style={{ marginTop: "150px", minHeight: "200px" }}
                         showHeading={true}
                     >
-                        <Box component="span" marginX={1} />
-                        {entityPermissions.isUpdate && (entityData?.owner?.optionValue && user?.user?._id &&
-                                entityData.owner?.optionValue === user.user._id)|| (entityData?.collaborator && user?.user?._id &&
-                                    entityData.collaborator.includes(user.user._id)) ?
-                                [
-                                <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleOpneUpdateDialog}
-                                >
-                                Edit
-                                </Button>,
-                                <Box component="span" marginX={1} />,
-                            ]
-                            : null
-                            }
-                            {
-                            entityPermissions.isDelete  && entityData?.owner?.optionValue && user?.user?._id &&
-                            entityData.owner?.optionValue === user.user._id ?
-                            [
-                                <Button
-                                        variant="contained" color="secondary"
-                                        onClick={() => setShowConfirmBox(true)}
+                       {
+                                entityPermissions.isUpdate && canEdit ?
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleOpneUpdateDialog}
                                     >
-                                        Delete
-                                </Button>
-                                 ]
-                                 : null
-                         }
-                    </CustomHeader>
+                                        Edit
+                                    </Button> : null
+                            }
+
+                            <Box component="span" marginX={1} />
+                            {
+                                entityPermissions.isDelete && entityData?.owner?.optionValue && user?.user?._id &&
+                                    entityData.owner.optionValue === user.user._id ?
+                                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                                    : null
+                            }
+
+                    </DetailsPageHeader>
 
                     <div className="detailPageContainer">
                         <Container>
                             <Grid container spacing={3}>
                                 <Grid item sm={8} md={8} lg={8}>
                                     <div className="detailPageDiv1"
-                                    // style={{ pointerEvents: allowedToEdit ? "" : "none" }} 
+                                    // style={{ pointerEvents: allowedToEdit ? "" : "none" }}
                                     >
                                         {
                                             loading ?
@@ -286,24 +271,23 @@ const Roles = () => {
                                                 </Grid> :
                                                 <DetailsPage data={entityData} fields={entityFields} />
 
-                                                // <DetailsPage
-                                                //     data={entityData}
+                                            // <DetailsPage
+                                            //     data={contactData}
 
-                                                //     fields={contactFields}
-                                                //     isUpdating={isUpdating}
-                                                //     canEdit={allowedToEdit}
-                                                //     handleUpdate={handleUpdateContact}
-                                                //     sourceComponent="contact"
-                                                // />
+                                            //     fields={contactFields}
+                                            //     isUpdating={isUpdating}
+                                            //     canEdit={allowedToEdit}
+                                            //     handleUpdate={handleUpdateContact}
+                                            //     sourceComponent="contact"
+                                            // />
                                         }
                                     </div>
                                 </Grid>
                                 <Grid item sm={4} md={4} lg={4} className="customGrid" >
                                     {
-                                        // !isObjectEmpty(entityData) && 
-                                        <div>
+                                        !isObjectEmpty(entityData) && <div>
                                             <Activity relatedTo={[
-                                                { type: "account", referenceId: entityData.entityName, access: false }
+                                                { type: "account", referenceId: entityData.accountName.optionValue, access: false }
                                             ]} handleActivityRefresh={() => { }} />
                                         </div>
                                     }
