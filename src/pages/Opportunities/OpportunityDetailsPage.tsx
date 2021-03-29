@@ -22,9 +22,11 @@ import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import ManageOpportunity from './ManageOpportunities/ManageOpportunities'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { getObjKeysWithValues, removeEmptyKeys } from "../../constants/helpers";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -176,7 +178,7 @@ function OpportunityDetailsPage() {
     };
 
     axiosInstance()
-      .put("/opportunity", updatedData)
+      .put("/opportunity", removeEmptyKeys(updatedData))
       .then(({ data }) => {
         toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         setUpdating(false);
@@ -292,22 +294,14 @@ function OpportunityDetailsPage() {
                   </Box>
                 ) : (
                   <>
-                    <CustomTabs
-                      value={currentTabIndex}
-                      setValue={setCurrentTabIndex}
-                      tabs={["Details", "Activity"]}
-                    />
+                    
                     <TabPanel value={currentTabIndex} index={0}>
                       <Box padding="16px">
-                        <DetailsPage data={opportunityData} fields={opportunityFields} />
-                        {/* <DetailsPage
-                          data={opportunityData}
-                          fields={opportunityFields}
-                          // isUpdating={isUpdating}
-                          // canEdit={allowedToEdit}
-                          handleUpdate={handleUpdateOpportunity}
-                          sourceComponent="opportunity"
-                        /> */}
+                        <DetailsPage 
+                          data={opportunityData} 
+                          fields={opportunityFields} 
+                        />
+                        
                       </Box>
                     </TabPanel>
                     <TabPanel value={currentTabIndex} index={1}>
@@ -358,15 +352,12 @@ function OpportunityDetailsPage() {
             />
           ) : null}
           {openUpdateDialog ? (
-            <UpdateDetailsDialog
-            openDialog={openUpdateDialog}
-            onClose={closeUpdateDialog}
-            fields={opportunityFields}
-            data={opportunityData}
-            isUpdating={isUpdating}
-            handleUpdate={handleUpdateOpportunity}
-            title="Edit Opportunity"
-
+            <ManageOpportunity
+              isNew={false}
+              open={openUpdateDialog}
+              onClose={closeUpdateDialog}     
+              entityData={{ fields: opportunityFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })) }}
+              handleSubmit={handleUpdateOpportunity}
             />
           ): null}
         </div>

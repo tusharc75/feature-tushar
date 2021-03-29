@@ -20,7 +20,6 @@ import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery, displayDate } from '../../services/util'
 import OpportunitiesHeader from "./OpportunitiesHeader";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import CreateOpportunity from './CreateOpportunity'
 import MessageDialog from '../../components/Helpers/MessageDialog'
 import { opportunityDetailPage } from '../../routes/Opportunity'
 import "./style.scss";
@@ -29,6 +28,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageOpportunityMain from "./ManageOpportunities";
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -473,7 +473,7 @@ const Opportunities = () => {
               /> : null
           }
           {
-            showCreateOpportunityDialog && <CreateOpportunity
+            showCreateOpportunityDialog && <ManageOpportunityMain
               open={showCreateOpportunityDialog}
               onClose={() => setShowCreateOpportunityDialog(false)}
               onSuccess={() => {

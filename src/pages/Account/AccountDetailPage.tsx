@@ -37,7 +37,6 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { opportunityPage } from '../../routes/Opportunity'
 import { withStyles } from "@material-ui/core/styles";
-import CreateOpportunity from '../Opportunities/CreateOpportunity'
 import CreateContact from '../Contact/CreateContact/CreateContact';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
@@ -45,6 +44,7 @@ import { removeEmptyKeys, getObjKeysWithValues, formValidation, isObjectEmpty } 
 import { Link } from "react-router-dom";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageOpportunityMain from "../Opportunities/ManageOpportunities";
 
 const Accordion = withStyles({
     root: {
@@ -679,7 +679,7 @@ const Roles = () => {
                     )}
 
                     {
-                        showCreateOpportunityDialog && <CreateOpportunity
+                        showCreateOpportunityDialog && <ManageOpportunityMain
                             open={showCreateOpportunityDialog}
                             onClose={() => setShowCreateOpportunityDialog(false)}
                             onSuccess={() => {
