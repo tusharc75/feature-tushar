@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ManageAccount from './ManageAccount'
-import { getObjKeys, formValidation } from '../../../constants/helpers';
+import { getObjKeys } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from '../../../axios/axiosInstance'
@@ -65,21 +65,6 @@ export default function ManageAccountMain(props) {
             toastConfig.setToastConfig(error);
         })
     }
-    // const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
-    //     const errors = formValidation(values, _.cloneDeep(entityData.fields));
-    //     if (Object.keys(errors).length) {
-    //         entityData.fields.forEach((input) => {
-    //             if (input.required) {
-    //                 setTouched(input.fieldName, true);
-    //             }
-    //         });
-    //     } else {
-    //         handleLoading(true, saveAndNew)
-    //         handleCreateAccount(values, saveAndNew, setValues)
-    //         setErrors({});
-    //     }
-
-    // }
 
     return <ManageAccount
         open={open}
