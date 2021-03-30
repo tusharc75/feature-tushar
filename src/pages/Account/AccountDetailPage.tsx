@@ -38,7 +38,7 @@ import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { opportunityPage } from '../../routes/Opportunity'
 import { withStyles } from "@material-ui/core/styles";
 import CreateOpportunity from '../Opportunities/CreateOpportunity'
-import CreateContact from '../Contact/CreateContact/CreateContact';
+import ManageContactDialog from '../Contact/ManageContact/index';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
 import { removeEmptyKeys, getObjKeysWithValues, formValidation, isObjectEmpty } from "../../constants/helpers";
@@ -356,6 +356,7 @@ const Roles = () => {
     // }
 
     const onUpdateAccount = (values) => {
+
         setUpdating(true);
 
         const updatedData = {
@@ -689,14 +690,19 @@ const Roles = () => {
                         />
                     }
                     {
-                        showCreateContactDialog && <CreateContact
-                            open={showCreateContactDialog}
-                            onClose={() => setShowCreateContactDialog(false)}
-                            onSuccess={() => {
-                                setShowCreateContactDialog(false);
-                                fetchRelatedContacts()
-                            }}
+                        showCreateContactDialog && <ManageContactDialog
+                            // open={showCreateContactDialog}
+                            // onClose={() => setShowCreateContactDialog(false)}
+                            // onSuccess={() => {
+                            //     setShowCreateContactDialog(false);
+                            //     fetchRelatedContacts()
+                            // }}
                         // entityDetails={createContactEntityDetails}
+                        open={showCreateContactDialog}
+                        onClose={() => {
+                                setShowCreateContactDialog(false);
+                                fetchRelatedContacts();
+                            }}
                         />
                     }
                 </div>
