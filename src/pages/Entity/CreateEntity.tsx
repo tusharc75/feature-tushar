@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, IconButton, Typography, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getCollaboratorDropdownDataSource, getObjKeys, getOwnerDropdownDataSource, removeEmptyKeys } from '../../../constants/helpers';
+import { getObjKeys, removeEmptyKeys } from '../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import CloseIcon from '@material-ui/icons/Close';
 import { withStyles } from '@material-ui/core/styles';
@@ -10,12 +10,11 @@ import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import Loader from '../../../components/Loader'
-import { formValidation } from '../../../constants/helpers';
-import FormTypes from "./../../../components/Helpers/FormTypes";
-import axiosInstance from './../../../axios/axiosInstance'
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { formValidation } from '../../constants/helpers';
+import FormTypes from "./../../components/Helpers/FormTypes";
+import axiosInstance from './../../axios/axiosInstance'
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 
 const useStyles = makeStyles((theme) => ({
     // root: {
@@ -44,7 +43,7 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 const arr = [...Array(9).keys()]
-export default function CreateContact({ open, onClose, onSuccess }) {
+export default function CreateEntity({ open, onClose, onSuccess }) {
 
     const classes = useStyles();
     const history = useHistory();
@@ -90,21 +89,37 @@ export default function CreateContact({ open, onClose, onSuccess }) {
     };
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
-        setOwnerDataSource(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorCommonDataSource))
+        if (!selectedCollaborator || selectedCollaborator.length == 0) {
+            setOwnerDataSource(ownerCollaboratorCommonDataSource);
+        } else {
+            const ownerDataSource = [];
+
+            ownerCollaboratorCommonDataSource.map(d => {
+                const isCollaboratorSelected = selectedCollaborator.find(collaborator => collaborator.optionValue == d.optionValue);
+                if (!isCollaboratorSelected) {
+                    ownerDataSource.push(d);
+                }
+            })
+            setOwnerDataSource(ownerDataSource);
+        }
     }
 
-    const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId) => {
-        setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource))
+    const onCollaboratorOwnerMultiselectOpen = (selectedOwner) => {
+        if (selectedOwner) {
+            setCollaboratorDataSource(ownerCollaboratorCommonDataSource.filter(d => d.optionValue != selectedOwner.optionValue));
+        } else {
+            setCollaboratorDataSource(ownerCollaboratorCommonDataSource);
+        }
     }
     //  Owner, Collaborator Code - End
 
     useEffect(() => {
-        getContactFields();
+        getEntityFields();
         // eslint-disable-next-line
     }, []);
 
-    const getContactFields = () => {
-        axiosInstance().get('/field?resource=Contact').then(({ data: { data } }) => {
+    const getEntityFields = () => {
+        axiosInstance().get('/field?resource=Entity').then(({ data: { data } }) => {
 
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
@@ -118,9 +133,8 @@ export default function CreateContact({ open, onClose, onSuccess }) {
 
     const handleSave = (values) => {
         setIsFormSubmitted(true);
-        values = removeEmptyKeys(values);
-
-        axiosInstance().post("/contact", values).then(() => {
+        const newValues = removeEmptyKeys(values);
+        axiosInstance().post("/Entity", newValues).then(() => {
             onSuccess();
         }).then(() => {
             setIsFormSubmitted(false);
@@ -135,7 +149,7 @@ export default function CreateContact({ open, onClose, onSuccess }) {
             onClose={onClose}
             open={open}
         >
-            <CustomDialogHeader title="Create Contact" onClose={onClose} />
+            <CustomDialogHeader title="Create Entity" onClose={onClose} />
 
             {
                 entityData.fields.length == 0 && <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
@@ -251,7 +265,7 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                     color="primary"
                                     onClick={() => { handleSave(values) }}
                                 >
-                                    Create Contact
+                                    Create Entity
                                         </Button>
                             </DialogActions>
                         </>
