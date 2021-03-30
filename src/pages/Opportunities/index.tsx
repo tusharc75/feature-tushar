@@ -15,7 +15,6 @@ import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import { useData } from '../../StateProvider/Provider';
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery, displayDate } from '../../services/util'
 import OpportunitiesHeader from "./OpportunitiesHeader";
@@ -281,7 +280,7 @@ const Opportunities = () => {
     return <Link className="nameLink"
       to={`${opportunityDetailPage.path}/${tData._id}`}
     >
-      {capitalize(tData.opportunityName) || ''}
+      <span className="text-capitalize">{tData.opportunityName}</span>
     </Link>
   }
 

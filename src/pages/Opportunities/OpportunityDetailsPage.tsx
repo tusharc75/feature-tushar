@@ -16,7 +16,6 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import { opportunityPage } from "../../routes/Opportunity";
 import routes from "../../components/Helpers/Routes";
-import { capitalize } from "../../services/util";
 import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
@@ -91,12 +90,11 @@ function OpportunityDetailsPage() {
       .get(`/opportunity/${id}`)
       .then(({ data: { data } }) => {
         handleMainPoints(data);
-        let name = capitalize(data.opportunityName);
-        setHeadingLbl(name);
+        setHeadingLbl(data.opportunityName);
         handleAllowToEditList(data);
         setOpportunityData(data);
         getOpportunityFields();
-        setCustomizedRoutes([routes.opportunity, { title: `${name}` }]);
+        setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });

@@ -63,10 +63,6 @@ export const removeEmptyKeys = (obj: object) => {
   return obj;
 };
 
-export const capitalize = (string: string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
 export const formValidation = (values, fields) => {
   const emailRegx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const phoneRegex = /^(\+{0,})(\d{0,})([(]{1}\d{1,3}[)]{0,}){0,}(\s?\d+|\+\d{2,3}\s{1}\d+|\d+){1}[\s|-]?\d+([\s|-]?\d+){1,2}(\s){0,}$/gm;
@@ -193,6 +189,23 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   return yup.object().shape(schema);
 };
 
+export const camelCase = (str) => {
+    return str
+      .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+        return index == 0 ? word.toLowerCase() : word.toUpperCase();
+      })
+      .replace(/\s+/g, "");
+  };
+  
+  export const UnCamelCase = (str) => {
+    return str
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/\b([A-Z]+)([A-Z])([a-z])/, "$1 $2$3")
+      .replace(/^./, function (str) {
+        return str.toUpperCase();
+      });
+  };
+  
 export const isObjectEmpty = (obj) => {
   return Object.keys(obj).length === 0;
 };

@@ -17,7 +17,6 @@ import Layout from "../../components/Layout";
 import Container from "../../components/Container";
 import CreateLeadDialog from './CreateLead'
 import Header from "./LeadsHeader";
-import { capitalize } from '../../services/util'
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery } from '../../services/util'
 import { useData } from '../../StateProvider/Provider';
@@ -107,9 +106,7 @@ const Leads = () => {
 
   useEffect(() => {
     let rows = leadData?.map((u) => {
-      let name = capitalize(u.firstName || '') + ' '
-      name = name + capitalize(u.middleName || '') + ' '
-      name = name + capitalize(u.lastName || '')
+      let name = [u.firstName, u.middleName, u.lastName].filter(d => d).join(" ");
 
       let res = {
         ...u,
