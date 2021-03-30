@@ -6,7 +6,7 @@ import { Paper, Container, CssBaseline } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   root: {
     padding: theme.spacing(2),
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(1),
     // minHeight: "calc(100vh - 65px)",
   },
 }));

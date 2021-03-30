@@ -16,7 +16,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 
 const arr = [...Array(9).keys()]
 
-export default function ManageLead({ open, onClose, isNew, dataToUpdate }) {
+export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, dataToUpdate }) {
     const toastConfig = useContext(CustomToastContext);
 
     const [entityData, setEntityData] = useState({
@@ -112,7 +112,7 @@ export default function ManageLead({ open, onClose, isNew, dataToUpdate }) {
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
-                onClose()
+                onSuccess();
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 setLoading(false);
@@ -127,7 +127,7 @@ export default function ManageLead({ open, onClose, isNew, dataToUpdate }) {
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
-                onClose()
+                onSuccess()
                 // fetchData()
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -143,7 +143,7 @@ export default function ManageLead({ open, onClose, isNew, dataToUpdate }) {
             open={open}
             disableBackdropClick={true}
         >
-            <CustomDialogHeader title={isNew ? "Create Lead" : `Editing ${dataToUpdate.firstName} ${dataToUpdate.lastName}`} onClose={onClose} />
+            <CustomDialogHeader title={isNew ? "Create Lead" : `Editing ${dataToUpdate.firstName || ''} ${dataToUpdate.lastName}`} onClose={onClose} />
 
             {
                 entityData.fields.length == 0 && <CustomDialogContent>
@@ -249,17 +249,15 @@ export default function ManageLead({ open, onClose, isNew, dataToUpdate }) {
 
                                 <CustomButton
                                     loading={loading}
-                                    disabled={loading}
-                                    style={{ float: "right" }}
                                     variant="contained"
                                     color="primary"
-                                    // disabled={Object.keys(errors).length > 0 ? true : false}
+                                    disabled={loading || Object.keys(errors).length > 0 ? true : false}
                                     onClick={(e) => {
                                         e.preventDefault()
                                         handleSubmit(errors, setFieldTouched, values, setValues, setErrors)
                                     }}
                                 >
-                                    {isNew ? "Create Lead" : "Update Lead"}
+                                    Save
                                 </CustomButton>
                             </CustomDialogFooter>
                         </>

@@ -28,7 +28,7 @@ import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolba
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { getObjKeys } from "../../constants/helpers";
-import ManageLead from "./ManageLead/ManageLead";
+import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -447,10 +447,10 @@ const Leads = () => {
           canDelete={dataRows.filter((d) => d.isChecked).length == 0}
         />
         {
-          isOpen && <ManageLead
+          isOpen && <ManageLeadDialog
             open={isOpen}
-            onClose={handleClose}
-            // fetchData={fetchLeads}
+            onSuccess={handleClose}
+            onClose={() => { setIsOpen(false) }}
             isNew={true}
             dataToUpdate={null}
           />
