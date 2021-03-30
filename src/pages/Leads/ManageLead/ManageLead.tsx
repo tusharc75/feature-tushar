@@ -1,60 +1,24 @@
 import { useEffect, useState, useContext } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, getOwnerDropdownDataSource, getCollaboratorDropdownDataSource, yupSchema } from '../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import FormTypes from "../../components/Helpers/FormTypes";
-import axiosInstance from '../../axios/axiosInstance'
-import CustomButton from '../../components/Helpers/Button'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-
-const useStyles = makeStyles((theme) => ({
-    // root: {
-    //     margin: 0,
-    //     padding: theme.spacing(2),
-    // },
-    // closeButton: {
-    //     position: 'absolute',
-    //     right: theme.spacing(1),
-    //     top: theme.spacing(1),
-    //     color: theme.palette.grey[500],
-    // },
-    // modal: {
-    //     padding: '10px',
-    // },
-    // content: {
-    //     marginLeft: "6px",
-    //     marginRight: '6px',
-    //     minWidth: '943px',
-    //     minHeight: '500px'
-    // }
-}));
-
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
-
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+import axiosInstance from '../../../axios/axiosInstance';
+import { getOwnerDropdownDataSource, getCollaboratorDropdownDataSource, getObjKeys, yupSchema, removeEmptyKeys, getObjKeysWithValues } from '../../../constants/helpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import FormTypes from '../../../components/Helpers/FormTypes';
+import CustomButton from '../../../components/Helpers/Button';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
 const arr = [...Array(9).keys()]
-export default function CreateContact({ open, onClose, fetchData }) {
+
+export default function ManageLead({ open, onClose, isNew, dataToUpdate }) {
     const toastConfig = useContext(CustomToastContext);
-    const classes = useStyles();
-    const history = useHistory();
+
     const [entityData, setEntityData] = useState({
         fields: [],
         initialValues: {},
@@ -112,10 +76,18 @@ export default function CreateContact({ open, onClose, fetchData }) {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
-            setEntityData({
-                fields: newFields,
-                initialValues: getObjKeys("", newFields),
-            });
+            if (isNew) {
+                setEntityData({
+                    fields: newFields,
+                    initialValues: getObjKeys("", newFields),
+                });
+            }
+            else {
+                setEntityData({
+                    fields: newFields,
+                    initialValues: getObjKeysWithValues(dataToUpdate, newFields),
+                });
+            }
         });
     };
 
@@ -129,30 +101,40 @@ export default function CreateContact({ open, onClose, fetchData }) {
             toastConfig.setToastConfig({ open: true, type: "error", message: 'Please fill all required fields' });
             setErrors({ ...errors });
         } else {
-            if (values.noOfEmployees) {
-                values.noOfEmployees = parseInt(values.noOfEmployees)
-            } else if (values.hasOwnProperty('noOfEmployees')) {
-                delete values.noOfEmployees
-            }
-            handleCreateLead(values)
+            isNew ? handleCreateLead(values) : handleUpdateLead(values);
         }
     }
 
     const handleCreateLead = (values) => {
         setLoading(true)
 
-        axiosInstance().post('/lead', values)
+        axiosInstance().post('/lead', removeEmptyKeys(values))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
                 onClose()
-                fetchData()
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 setLoading(false);
             });
     }
-    
+
+    const handleUpdateLead = (values) => {
+        values = { ...values, _id: dataToUpdate._id };
+        setLoading(true)
+
+        axiosInstance().put('/lead', removeEmptyKeys(values))
+            .then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setLoading(false)
+                onClose()
+                // fetchData()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoading(false);
+            });
+    }
+
     return (
         <Dialog
             maxWidth="md"
@@ -161,14 +143,14 @@ export default function CreateContact({ open, onClose, fetchData }) {
             open={open}
             disableBackdropClick={true}
         >
-            <CustomDialogHeader title="Create Lead" onClose={onClose} />
+            <CustomDialogHeader title={isNew ? "Create Lead" : `Editing ${dataToUpdate.firstName} ${dataToUpdate.lastName}`} onClose={onClose} />
 
             {
-                entityData.fields.length == 0 && <DialogContent dividers>
+                entityData.fields.length == 0 && <CustomDialogContent>
                     <CommonSkeleton
                         lenArray={arr}
                     />
-                </DialogContent>
+                </CustomDialogContent>
             }
             {
                 entityData.fields.length > 0 && <Formik
@@ -187,7 +169,7 @@ export default function CreateContact({ open, onClose, fetchData }) {
                         setValues
                     }) => (
                         <>
-                            <DialogContent dividers>
+                            <CustomDialogContent>
                                 <Form>
                                     {
                                         formsData &&
@@ -253,23 +235,21 @@ export default function CreateContact({ open, onClose, fetchData }) {
                                         ))
                                     }
                                 </Form>
-                            </DialogContent>
+                            </CustomDialogContent>
 
-                            <DialogActions>
+                            <CustomDialogFooter>
                                 <Button
                                     type="button"
                                     variant="outlined"
                                     color="primary"
                                     onClick={onClose}
-
                                 >
                                     Cancel
-                                        </Button>
+                                </Button>
 
                                 <CustomButton
                                     loading={loading}
                                     disabled={loading}
-
                                     style={{ float: "right" }}
                                     variant="contained"
                                     color="primary"
@@ -279,16 +259,13 @@ export default function CreateContact({ open, onClose, fetchData }) {
                                         handleSubmit(errors, setFieldTouched, values, setValues, setErrors)
                                     }}
                                 >
-                                    Create Lead
-                                    </CustomButton>
-                            </DialogActions>
+                                    {isNew ? "Create Lead" : "Update Lead"}
+                                </CustomButton>
+                            </CustomDialogFooter>
                         </>
                     )}
-
                 </Formik>
             }
-
         </Dialog>
-
     )
 }
