@@ -165,7 +165,6 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
                     validationSchema={yupSchema(entityData.fields)}
                     validateOnMount
                     onSubmit={() => { }}
-                // validate={(values) => formValidation(values, entityData.fields)}
                 >
                     {({
                         values,

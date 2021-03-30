@@ -41,7 +41,7 @@ import CreateOpportunity from '../Opportunities/CreateOpportunity'
 import CreateContact from '../Contact/CreateContact/CreateContact';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
-import { removeEmptyKeys, getObjKeysWithValues, formValidation, isObjectEmpty } from "../../constants/helpers";
+import { removeEmptyKeys, getObjKeysWithValues, isObjectEmpty } from "../../constants/helpers";
 import { Link } from "react-router-dom";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -321,39 +321,6 @@ const Roles = () => {
                 setShowApproveDisapproveConfirmBox(false);
             })
     }
-
-    // const handleUpdateAccount = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
-    //     const errors = formValidation(values, _.cloneDeep(entityData.fields));
-    //     if (Object.keys(errors).length) {
-    //         entityData.fields.forEach((input) => {
-    //             if (input.required) {
-    //                 setTouched(input.fieldName, true);
-    //             }
-    //         });
-    //     } else {
-    //         // handleLoading(true, saveAndNew)
-    //         setUpdating(true);
-    //         // values = removeEmptyKeys(values)
-    //         // if (values.employees) {
-    //         //     values.employees = parseInt(values.employees)
-    //         // }
-
-    //         const updatedData = {
-    //             ...values,
-    //             _id: accountData._id,
-    //         };
-
-    //         axiosInstance().put('/account', removeEmptyKeys(updatedData))
-    //             .then(() => {
-    //                 fetchAccountData()   //                 setUpdating(false);
-    //                 setOpenUpdateDialog(false)
-    //             })
-    //             .catch((err) => {
-    //                 setUpdating(false);
-    //             });
-    //         setErrors({});
-    //     }
-    // }
 
     const onUpdateAccount = (values) => {
         setUpdating(true);
