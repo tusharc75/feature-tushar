@@ -11,20 +11,19 @@ import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
 import DetailsPageHeader from '../../components/DetailsPageHeader'
 import { Link } from "react-router-dom";
-import { getErrorMessage } from '../../services/util'
+import contactClass from "./contact.module.scss"
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
 import { contactPage } from '../../routes/Contacts'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import Loader from '../../components/Loader'
 import routes from '../../components/Helpers/Routes';
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
-import { isObjectEmpty } from './../../constants/helpers'
+import { getObjKeysWithValues, isObjectEmpty, removeEmptyKeys } from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import EditContact from "./ManageContact/ManageContact";
 
 const Roles = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -185,6 +184,7 @@ const Roles = () => {
     };
 
     const handleUpdateContact = (values) => {
+        
         setUpdating(true);
         if (values.employees) {
             values.employees = parseInt(values.employees)
@@ -194,28 +194,39 @@ const Roles = () => {
             _id: contactData._id,
         };
 
-        axiosInstance().put('/contact', updatedData).then(({ data }) => {
-            fetchContactData()
-            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-            setUpdating(false);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-            setUpdating(false);
-        });
+        axiosInstance().put('/contact', removeEmptyKeys(updatedData))
+            .then(({ data }) => {
+                fetchContactData()
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setUpdating(false);
+                setOpenUpdateDialog(false)
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+                setUpdating(false);
+            });
     };
     return (
         <>
             <Layout>
                 {openUpdateDialog && (
-                    <UpdateDetailsDialog
-                        title={`Editing  ${contactData.firstName}`}
-                        openDialog={openUpdateDialog}
-                        onClose={closeUpdateDialog}
-                        data={contactData}
-                        fields={contactFields}
-                        isUpdating={isUpdating}
-                        handleUpdate={handleUpdateContact}
-                    />
+                    // <UpdateDetailsDialog
+                    //     title={`Editing  ${contactData.firstName}`}
+                    //     openDialog={openUpdateDialog}
+                    //     onClose={closeUpdateDialog}
+                    //     data={contactData}
+                    //     fields={contactFields}
+                    //     isUpdating={isUpdating}
+                    //     handleUpdate={handleUpdateContact}
+                    // />
+                    <EditContact
+                    isNew={false}
+                    open={openUpdateDialog}
+                    onClose={closeUpdateDialog}
+                    entityData={{ fields: contactFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(contactData, contactFields.map((f) => { return f.fieldData })) }}
+                    loading={loading}
+                    handleSubmit={handleUpdateContact}
+                />
                 )}
                 <Grid container direction="row">
                     <Grid item xs={12} className="pl-2">
@@ -252,11 +263,11 @@ const Roles = () => {
 
                     </DetailsPageHeader>
 
-                    <div className="detailPageContainer">
+                    <div className={`${contactClass.detail_page_container}`}>
                         <Container>
                             <Grid container spacing={3}>
                                 <Grid item sm={8} md={8} lg={8}>
-                                    <div className="detailPageDiv1"
+                                    <div className={`${contactClass.detail_page_div1}`}
                                     // style={{ pointerEvents: allowedToEdit ? "" : "none" }}
                                     >
                                         {
@@ -284,7 +295,7 @@ const Roles = () => {
                                         }
                                     </div>
                                 </Grid>
-                                <Grid item sm={4} md={4} lg={4} className="customGrid" >
+                                <Grid item sm={4} md={4} lg={4} className={`${contactClass.custom_grid}`} >
                                     {
                                         !isObjectEmpty(contactData) && <div>
                                             <Activity relatedTo={[
@@ -294,18 +305,18 @@ const Roles = () => {
                                         </div>
                                     }
 
-                                    <div className="detailPageDiv2">
+                                    <div className={`${contactClass.detail_page_div2}`}>
                                         {
                                             quickLinks && quickLinks.length ?
                                                 quickLinks.map((k, index) => {
-                                                    return <Link key={index} className="customLink">{k.label || ''}({k.count || 0})</Link>
+                                                    return <Link key={index} className={`${contactClass.custom_link}`}>{k.label || ''}({k.count || 0})</Link>
                                                 }) :
                                                 null
                                         }
                                     </div>
-                                    <div className="detailPageDiv3" >
+                                    <div className={`${contactClass.detail_page_div3}`} >
                                         <Typography color="primary" variant="h6">Related Accounts</Typography>
-                                        <Box className="customBox1">
+                                        <Box className={`${contactClass.custom_box1}`}>
 
                                         </Box>
                                     </div>
