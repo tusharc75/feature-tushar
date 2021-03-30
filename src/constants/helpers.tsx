@@ -63,46 +63,6 @@ export const removeEmptyKeys = (obj: object) => {
   return obj;
 };
 
-export const formValidation = (values, fields) => {
-  const emailRegx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  const phoneRegex = /^(\+{0,})(\d{0,})([(]{1}\d{1,3}[)]{0,}){0,}(\s?\d+|\+\d{2,3}\s{1}\d+|\d+){1}[\s|-]?\d+([\s|-]?\d+){1,2}(\s){0,}$/gm;
-
-  const errors = {};
-  fields.forEach(async (input) => {
-    if (input.required && !values[input.fieldName]) {
-      errors[input.fieldName] = `${input.fieldLabel} is required`;
-    }
-
-    if (input.type === "multiSelect") {
-      if (input.required && !values[input.fieldName].length) {
-        errors[input.fieldName] = `${input.fieldLabel} are required`;
-      }
-    }
-
-    if (input.type === "email") {
-      if (input.required && !values[input.fieldName]) {
-        errors[input.fieldName] = `${input.fieldLabel} is required`;
-      } else if (
-        !emailRegx.test(String(values[input.fieldName]).toLowerCase())
-      ) {
-        errors[input.fieldName] = "Email is not valid";
-      } else if (isEmailExist(values[input.fieldName])) {
-        errors[input.fieldName] = "Email already exists!";
-      }
-    }
-
-    if (input.type === "mobileNo") {
-      if (input.required && !values[input.fieldName]) {
-        errors[input.fieldName] = `${input.fieldLabel} is required`;
-      } else if (!phoneRegex.test(values[input.fieldName])) {
-        errors[input.fieldName] = "Phone number is not valid";
-      }
-    }
-  });
-
-  return errors;
-};
-
 const isEmailExist = async (email) => {
   const { data } = await checkEmailExist(email);
 
@@ -159,21 +119,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
               .string()
               .email()
               .required(`${input.fieldLabel} is required`)
-              .test("email", "Email already exist", async function (value) {
-                let isvalidEmail = validateEmail(value);
+              // .test("email", "Email already exist", async function (value) {
+              //   let isvalidEmail = validateEmail(value);
 
-                if (isvalidEmail) {
-                  const { path, createError, resolve } = this;
-                  let { data } = await checkEmailExist(value);
-                  if (data) {
-                    return createError({
-                      path,
-                      message: "Email alreday exist",
-                    });
-                  }
-                  return resolve(true);
-                }
-              })
+              //   if (isvalidEmail) {
+              //     const { path, createError, resolve } = this;
+              //     let { data } = await checkEmailExist(value);
+              //     if (data) {
+              //       return createError({
+              //         path,
+              //         message: "Email alreday exist",
+              //       });
+              //     }
+              //     return resolve(true);
+              //   }
+              // })
           : yup.string().email();
     } else if (input.type === "switch" || input.type === "checkBox") {
       schema[input.fieldName] = input.required

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { Formik, Form } from "formik";
-import { formValidation, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource } from '../../../constants/helpers';
+import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
 import { commonStyle } from '../../Contact/CommonStyles'
 import FormTypes from "../../../components/Helpers/FormTypes";
@@ -63,8 +63,7 @@ export default function ManageAccount(props) {
     }
     //  Owner, Collaborator Code - End
 
-    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
-        const errors = formValidation(values, _.cloneDeep(entityData.fields));
+    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
                 if (input.required) {
@@ -94,7 +93,8 @@ export default function ManageAccount(props) {
                     <>
                         <Formik
                             initialValues={entityData.initialValues}
-                            validate={(values) => formValidation(values, entityData.fields)}
+                            validationSchema={yupSchema(entityData.fields)}
+                            validateOnMount
                             onSubmit={() => { }}
                         >
                             {({
@@ -245,7 +245,7 @@ export default function ManageAccount(props) {
                                             disabled={loading || Object.keys(errors).length > 0 ? true : false}
                                             onClick={(e) => {
                                                 e.preventDefault()
-                                                onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
+                                                onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm, errors)
                                             }}
                                         >
                                             Save
