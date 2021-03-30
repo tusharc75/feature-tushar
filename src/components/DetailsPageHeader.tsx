@@ -35,8 +35,8 @@ const DetailsPageHeader = (props) => {
     const { mainPoints, heading, children, showHeading, logo, loading } = props;
     const classes = useStyles();
     return  <>
-            <Paper className={classes.customHeaderPaper} elevation={0}>
-                <Grid container justify="space-between" style={{ marginBottom: '10px' }}>
+            <Paper className={`${classes.customHeaderPaper} my-2`} elevation={0}>
+                <Grid container justify="space-between">
                     <Grid item>
                         {
                             loading ?
@@ -60,7 +60,7 @@ const DetailsPageHeader = (props) => {
                     </Grid>
                     <Grid item>{children}</Grid>
                 </Grid>
-                <Box display="flex" id="tapleen2">
+                <Box display="flex">
                     {
                         loading ?
                             <Grid container wrap="nowrap">
@@ -74,8 +74,6 @@ const DetailsPageHeader = (props) => {
                                 }
                             </Grid> : mainPoints && Object.keys(mainPoints).length ?
                                 Object.keys(mainPoints).map((key, i) => {
-                                  // console.log(key + i);
-                                  // console.log(i);
                                     return <>
                                         {
                                             mainPoints[key] ? (
