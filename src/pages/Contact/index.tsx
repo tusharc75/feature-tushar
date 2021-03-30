@@ -21,7 +21,7 @@ import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import { contactDetailPage } from '../../routes/Contacts'
-import CreateContact from './CreateContact/CreateContact';
+import ManageContactDialog from './ManageContact/index';
 import { makeStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -503,14 +503,19 @@ export default function Contact() {
                     }
 
                     {
-                        showCreateContactDialog && <CreateContact
-                            open={showCreateContactDialog}
-                            onClose={() => setShowCreateContactDialog(false)}
-                            onSuccess={() => {
+                        showCreateContactDialog && <ManageContactDialog
+                            // open={showCreateContactDialog}
+                            // onClose={() => setShowCreateContactDialog(false)}
+                            // onSuccess={() => {
+                            //     setShowCreateContactDialog(false);
+                            //     getContacts();
+                            // }}
+                        // entityDetails={createContactEntityDetails}
+                        open={showCreateContactDialog}
+                        onClose={() => {
                                 setShowCreateContactDialog(false);
                                 getContacts();
                             }}
-                        // entityDetails={createContactEntityDetails}
                         />
                     }
 
