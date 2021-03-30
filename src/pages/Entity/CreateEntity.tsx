@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, IconButton, Typography, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, removeEmptyKeys } from '../../constants/helpers';
+import { getObjKeys, removeEmptyKeys, yupSchema } from '../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import CloseIcon from '@material-ui/icons/Close';
 import { withStyles } from '@material-ui/core/styles';
@@ -10,7 +10,6 @@ import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import { formValidation } from '../../constants/helpers';
 import FormTypes from "./../../components/Helpers/FormTypes";
 import axiosInstance from './../../axios/axiosInstance'
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
@@ -161,7 +160,8 @@ export default function CreateEntity({ open, onClose, onSuccess }) {
             {
                 entityData.fields.length > 0 && <Formik
                     initialValues={entityData.initialValues}
-                    validate={(values: any) => formValidation(values, entityData.fields)}
+                    validationSchema={yupSchema(entityData.fields)}
+                    validateOnMount
                     onSubmit={() => { }}
                 >
                     {({
@@ -196,7 +196,7 @@ export default function CreateEntity({ open, onClose, onSuccess }) {
                                                                             fullWidth
                                                                             isTooltip={true}
                                                                             size="small"
-                                                                            onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
+                                                                            onOpen={() => { onOwnerDropdownOpen(values["collaborator"]) }}
                                                                         /> : field.fieldName == "collaborator" ?
                                                                             <FormTypes
                                                                                 values={values}
@@ -211,7 +211,7 @@ export default function CreateEntity({ open, onClose, onSuccess }) {
                                                                                 fullWidth
                                                                                 isTooltip={true}
                                                                                 size="small"
-                                                                                onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
+                                                                                onOpen={() => { onCollaboratorOwnerMultiselectOpen(values["owner"]) }}
                                                                             /> : <FormTypes
                                                                                 // {...rest}
                                                                                 values={values}
