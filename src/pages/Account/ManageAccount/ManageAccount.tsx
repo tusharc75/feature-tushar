@@ -16,7 +16,7 @@ const arr = [...Array(9).keys()]
 
 export default function ManageAccount(props) {
 
-    const { entityData, handleSubmit, onClose, open, isNew } = props
+    const { entityData, handleSubmit, onClose, open, isNew, loading } = props
 
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
@@ -24,7 +24,7 @@ export default function ManageAccount(props) {
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
 
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
@@ -71,7 +71,6 @@ export default function ManageAccount(props) {
                 }
             });
         } else {
-            setLoading(true)
             handleSubmit(values, saveAndNew, setValues)
             setErrors({});
         }

@@ -54,16 +54,12 @@ export default function ManageAccountMain(props) {
         }).catch(err => setLoading(false))
     };
 
-    const handleLoading = (action, isSaveAndNew = false) => {
-        if (!isSaveAndNew) setLoading(action)
-    }
-
     const handleCreateAccount = (values, saveAndNew, setValues) => {
+        setLoading(false);
         axiosInstance().post('/account', removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", errorMsg: data.message })
-
-            handleLoading(false, saveAndNew)
+            setLoading(false);
         }).catch((error) => {
             setLoading(false);
             toastConfig.setToastConfig(error);
