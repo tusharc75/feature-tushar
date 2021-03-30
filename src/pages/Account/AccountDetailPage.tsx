@@ -199,7 +199,7 @@ const Roles = () => {
                 let newData = [];
 
                 accounts.map(account => {
-                    if(isObjectEmpty(account)) return true;
+                    if (isObjectEmpty(account)) return true;
 
                     const updatedAccount = {
                         _id: account._id,
@@ -522,7 +522,7 @@ const Roles = () => {
                                                         </Box>
                                                         <Box padding="5px">
                                                             <Typography variant="subtitle2">
-                                                                Opportunity ({10})
+                                                                Opportunity ()
                                                      </Typography>
                                                         </Box>
                                                     </Box>
