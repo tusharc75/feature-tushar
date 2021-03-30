@@ -47,6 +47,7 @@ export default {
   entityDetails: {
     title: "Entity",
     path: "/entity/detail",
+    data: {},
   },
   opportunityDetail: {
     title: "Opportunity Detail",
