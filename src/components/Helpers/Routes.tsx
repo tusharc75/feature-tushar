@@ -49,6 +49,16 @@ export default {
     path: "/entity/detail",
     data: {},
   },
+  role: {
+    title: "Role",
+    path: "/role",
+    data: {},
+  },
+  roleDetails: {
+    title: "Role",
+    path: "/role/detail",
+    data: {},
+  },
   opportunityDetail: {
     title: "Opportunity Detail",
     path: "/opportunity/detail",

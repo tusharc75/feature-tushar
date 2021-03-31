@@ -52,7 +52,6 @@ const CreateUser = ({ open, close, fetchData }) => {
         setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
         setLoading(false);
       });
   };
@@ -140,7 +139,7 @@ const CreateUser = ({ open, close, fetchData }) => {
                   onClick={submitForm}
                   disabled={isSubmitting || loading}
                 >
-                  {isSubmitting ? <CircularProgress size={20} /> : "Submit"}
+                  {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
             </>
