@@ -23,7 +23,6 @@ export const Provider = ({ children }) => {
         .catch((err) => {
           localStorage.setItem("token", "");
           dispatch({ type: USER_LOADING, payload: false });
-          console.log(err);
         });
     }
   }, []);

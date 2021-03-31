@@ -37,7 +37,8 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { opportunityPage } from '../../routes/Opportunity'
 import { withStyles } from "@material-ui/core/styles";
-import CreateOpportunity from '../Opportunities/CreateOpportunity'
+
+
 import ManageContactDialog from '../Contact/ManageContact/index';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
@@ -45,6 +46,7 @@ import { removeEmptyKeys, getObjKeysWithValues, isObjectEmpty } from "../../cons
 import { Link } from "react-router-dom";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageOpportunityMain from "../Opportunities/ManageOpportunities";
 
 const Accordion = withStyles({
     root: {
@@ -221,7 +223,7 @@ const Roles = () => {
 
                     newData.push(updatedAccount);
                 })
-                console.log(newData);
+
                 setAccountHierarchyData([...newData]);
 
             } else {
@@ -404,17 +406,31 @@ const Roles = () => {
                             showHeading={true}
                         >
                             {
-                                accountPermissions.isUpdate && canEdit ?
+                                accountPermissions.approveAccount && <>
+                                    <Button
+                                        variant="contained"
+                                        color={accountData.static?.approved ? "secondary" : "primary"}
+                                        onClick={() => { setShowApproveDisapproveConfirmBox(true) }}
+                                    >
+                                        {accountData.static?.approved ? 'Disapprove' : "Approve"}
+                                    </Button>
+                                    <Box component="span" marginX={1} />
+                                </>
+                            }
+
+                            {
+                                accountPermissions.isUpdate && canEdit && <>
                                     <Button
                                         variant="contained"
                                         color="primary"
                                         onClick={handleOpneUpdateDialog}
                                     >
                                         Edit
-                                    </Button> : null
+                                    </Button>
+                                    <Box component="span" marginX={1} />
+                                </>
                             }
 
-                            <Box component="span" marginX={1} />
                             {
                                 accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
                                     accountData.owner.optionValue === user.user._id ?
@@ -647,7 +663,7 @@ const Roles = () => {
                     )}
 
                     {
-                        showCreateOpportunityDialog && <CreateOpportunity
+                        showCreateOpportunityDialog && <ManageOpportunityMain
                             open={showCreateOpportunityDialog}
                             onClose={() => setShowCreateOpportunityDialog(false)}
                             onSuccess={() => {
@@ -664,9 +680,9 @@ const Roles = () => {
                             //     setShowCreateContactDialog(false);
                             //     fetchRelatedContacts()
                             // }}
-                        // entityDetails={createContactEntityDetails}
-                        open={showCreateContactDialog}
-                        onClose={() => {
+                            // entityDetails={createContactEntityDetails}
+                            open={showCreateContactDialog}
+                            onClose={() => {
                                 setShowCreateContactDialog(false);
                                 fetchRelatedContacts();
                             }}

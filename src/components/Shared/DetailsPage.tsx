@@ -37,6 +37,7 @@ const Details = (props: DetailProps) => {
   const classes = useStyles();
   const theme = useTheme();
   const { data, fields } = props;
+
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
 
@@ -71,8 +72,10 @@ const Details = (props: DetailProps) => {
         (c) => c.currencyCode === values[input.fieldName]
       );
       text = opt ? `${opt.currencyCode} - ${opt.name}` : "_ _ _";
-    } else if (input.type === "checkBox" || input.type === "switch") {
+    } else if (input.type === "switch") {
       text = values[input.fieldName] ? "Inactive" : "Active";
+    } else if (input.type === "checkBox") {
+      text = values[input.fieldName] ? (values[input.fieldName] == true ? "Yes" : "No") : "_ _ _";
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : "_ _ _";
     }
@@ -147,7 +150,7 @@ const Details = (props: DetailProps) => {
                     md={dynamicSize(7, field.fieldData.fieldName)}
                   >
                     {field.fieldData.fieldName === "avatar" ||
-                    field.fieldData.fieldName === "companyLogo" ? (
+                      field.fieldData.fieldName === "companyLogo" ? (
                       <Box paddingLeft={2}>
                         <Avatar src={initialVals[field.fieldData.fieldName]} />
                       </Box>

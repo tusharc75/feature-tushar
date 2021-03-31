@@ -43,7 +43,7 @@ export default function ManageContactMain(props) {
     const handleCreateContact = (values, saveAndNew, setValues) => {
         axiosInstance().post('/contact', removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
-            toastConfig.setToastConfig({ open: true, type: "success", errorMsg: data.message })
+            toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
 
             handleLoading(false, saveAndNew)
         }).catch((error) => {

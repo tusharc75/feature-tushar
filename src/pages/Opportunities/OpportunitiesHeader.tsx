@@ -13,7 +13,7 @@ import {
     Menu
 } from "@material-ui/core";
 import { Add, ExpandMore } from "@material-ui/icons";
-import Header from "./Header";
+
 import styles from "../Leads/Header.module.scss"
 
 const useStyles = makeStyles((theme) => ({
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function LeadsHeader(props) {
+function OpportunitiesHeader(props) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
 
@@ -124,4 +124,4 @@ function LeadsHeader(props) {
         </Grid>
     </Grid>
 }
-export default LeadsHeader
+export default OpportunitiesHeader;
