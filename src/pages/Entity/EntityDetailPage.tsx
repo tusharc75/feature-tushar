@@ -3,7 +3,7 @@ import { Grid, Box, Button, Typography, IconButton } from "@material-ui/core";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
-import { startCase } from "lodash";
+
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
@@ -18,7 +18,7 @@ import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
-const UserDetailsPage = () => {
+const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -30,9 +30,9 @@ const UserDetailsPage = () => {
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesLoading, setRolesLoading] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const [entityData, setEntityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [userFields, setUserFIelds] = useState([]);
+  const [entityFields, setEntityFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -79,7 +79,7 @@ const UserDetailsPage = () => {
 
       handleMainPoints(data);
       setHeadingLbl(data.entityName);
-      setUserData(data);
+      setEntityData(data);
       setCustomizedRoutes([routes.entity, { title: data.entityName }]);
       setLoading(false);
     } catch (error) {
@@ -113,7 +113,7 @@ const UserDetailsPage = () => {
     axiosInstance()
       .get("/field?resource=Entity")
       .then(({ data }) => {
-        setUserFIelds(data.data);
+        setEntityFIelds(data.data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -174,8 +174,8 @@ const UserDetailsPage = () => {
           title="Update"
           openDialog={openUpdateDialog}
           onClose={closeUpdateDIalog}
-          data={userData}
-          fields={userFields}
+          data={entityData}
+          fields={entityFields}
           isUpdating={isUpdating}
           handleUpdate={handleUpdateEntity}
         />
@@ -187,7 +187,7 @@ const UserDetailsPage = () => {
             <CustomBreadCrumbs routes={customizedRoutes} />
           </Grid>
         </Grid>
-        {!userData ? (
+        {!entityData ? (
           <Container>
             <Skeleton variant="text" width="150px" height="40px" />
             <Box display="flex">
@@ -236,12 +236,12 @@ const UserDetailsPage = () => {
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Container styles={{ padding: "8px" }}>
               <BoxWithBorder style={{ padding: "8px", minHeight: "450px" }}>
-                {loading || !userFields.length ? (
+                {loading || !entityFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
-                  <DetailsPage data={userData} fields={userFields} />
+                  <DetailsPage data={entityData} fields={entityFields} />
                 )}
               </BoxWithBorder>
             </Container>
@@ -292,4 +292,4 @@ const UserDetailsPage = () => {
   );
 };
 
-export default UserDetailsPage;
+export default EntityDetailsPage;

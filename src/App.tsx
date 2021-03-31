@@ -33,6 +33,8 @@ import UserDetailsPage from "./pages/User/UserDetailsPage";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
+import Roles from "./pages/Role";
+import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -122,6 +124,12 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/entity/detail/:id">
             <EntityDetailPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/role">
+            <Roles />
+          </PrivateRoute>
+          <PrivateRoute exact path="/role/detail/:id">
+            <RoleDetailsPage />
           </PrivateRoute>
           <PrivateRoute exact path="/activity">
             <Activitydemo />

@@ -71,9 +71,14 @@ const Entity: FC = () => {
   ] = useState(false);
 
   const fetchEntities = useCallback(() => {
+    let searchParams: any = { ...query };
+    searchParams = searchVal
+      ? { ...searchParams, search: searchVal }
+      : { ...searchParams };
+    let api = getSearchQuery("/entity", searchParams);
     setLoadingEntities(true);
     axiosInstance()
-      .get(`/entity`)
+      .get(api)
       .then(({ data: { data, count } }) => {
         setEntities(data);
         getRows(data);
@@ -81,10 +86,10 @@ const Entity: FC = () => {
         setLoadingEntities(false);
       })
       .catch((err) => {
-        console.log(err);
+        toastConfig.setToastConfig(err);
         setLoadingEntities(false);
       });
-  }, []);
+  }, [searchVal, query]);
 
   useEffect(() => {
     fetchEntities();
