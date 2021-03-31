@@ -264,16 +264,8 @@ const FormTypes = (props) => {
         required={required}
         name={name}
         value={values[name]}
-        error={
-          errors[name] === "Email already exists"
-            ? touched[name] || errors[name]
-            : touched[name] && errors[name]
-        }
-        helperText={
-          errors[name] === "Email already exists"
-            ? touched[name] || errors[name]
-            : touched[name] && errors[name]
-        }
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
         onChange={
           onChange ? onChange : (e) => setFieldValue(name, e.target.value)
         }
