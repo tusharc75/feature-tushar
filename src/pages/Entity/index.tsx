@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Entity: FC = () => {
-  const toastConfig = useContext(CustomToastContext)
+  const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
     state: { user },
@@ -193,25 +193,14 @@ const Entity: FC = () => {
       renderCell: (params: any) => (
         <>
           {entitiesPermissions.isDelete ? (
-            params.row.allowToDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You must be the owner of this entity to get the delete functionality"
+            <Tooltip title="Delete">
+              <IconButton
+                aria-label="Delete"
+                onClick={() => showConfirmBox(params.row)}
               >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </Tooltip>
           ) : (
             <Tooltip
               className="cursor-stop"
@@ -247,11 +236,11 @@ const Entity: FC = () => {
   const showConfirmBox = (row) => {
     if (row) {
       setIsConformDialogVisible(true);
-      if (row && row._id) {
+      if (row && row.id) {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -262,18 +251,22 @@ const Entity: FC = () => {
   const handleDeleteEntities = async () => {
     setDeleteLoading(true);
     let recs = [];
-    if (deleteRec?._id) {
-      recs.push(deleteRec?._id);
+    if (deleteRec?.id) {
+      recs.push(deleteRec?.id);
     } else {
       dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj._id);
+        if (obj.isChecked) recs.push(obj.id);
       });
     }
     if (recs && recs.length > 0) {
       axiosInstance()
         .put(`/entity/remove`, { ids: [...recs] })
         .then(({ data }) => {
-          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
@@ -318,9 +311,6 @@ const Entity: FC = () => {
     }
   };
 
-
-
-
   const handleCreate = () => {
     setIsOpen(true);
     setShowCreateEntityDialog(true);
@@ -331,127 +321,125 @@ const Entity: FC = () => {
   };
 
   return (
-    <Layout>
-      <Grid container spacing={3} direction="row">
-        <Grid item xs={12} sm={6} className="pl-3">
-          <CustomBreadCrumbs routes={[routes.entity]} />
-        </Grid>
-        <Grid item xs={12} sm={6} className="pr-3">
-          <Grid container justify="flex-end">
-            <MuiLink
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Import from Excel
-            </MuiLink>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <MuiLink
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Export to Excel
-            </MuiLink>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <MuiLink
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Download Template
-            </MuiLink>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <MuiLink
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Email a Link
-            </MuiLink>
+    <>
+      {isOpen && (
+        <CreateEntity
+          open={isOpen}
+          close={handleClose}
+          fetchData={fetchEntities}
+        />
+      )}
+      <Layout>
+        <Grid container spacing={3} direction="row">
+          <Grid item xs={12} sm={6} className="pl-3">
+            <CustomBreadCrumbs routes={[routes.entity]} />
+          </Grid>
+          <Grid item xs={12} sm={6} className="pr-3">
+            <Grid container justify="flex-end">
+              <MuiLink
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Import from Excel
+              </MuiLink>
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <MuiLink
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Export to Excel
+              </MuiLink>
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <MuiLink
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Download Template
+              </MuiLink>
+              <Divider
+                orientation="vertical"
+                flexItem
+                className={classes.linkDivider}
+              />
+              <MuiLink
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className={classes.links}
+              >
+                Email a Link
+              </MuiLink>
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
-      <Container>
-        <Header
-          onSearch={handleSearch}
-          searchVal={searchVal}
-          entityPermissions={entitiesPermissions}
-          onCreate={handleCreate}
-          showConfirmBox={showConfirmBox}
-          canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-        />
-      </Container>
-      <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-        <div className="contact-grid-height1">
-          <DataGrid
-            components={{
-              Toolbar: DataGridCustomToolbar,
-            }}
-            loading={loadingEntities}
-            rows={loadingEntities ? [] : dataRows}
-            columns={columns}
-            disableSelectionOnClick
-            disableMultipleSelection
-            paginationMode="server"
-            pagination
-            rowCount={rowCount}
-            onPageChange={handlePage}
-            onPageSizeChange={handlePageSize}
-            pageSize={query.limit}
-            page={query.page}
-            onSortModelChange={handleSortModelChange}
-            rowsPerPageOptions={[25, 50, 75]}
-            density="compact"
+        <Container>
+          <Header
+            onSearch={handleSearch}
+            searchVal={searchVal}
+            entityPermissions={entitiesPermissions}
+            onCreate={handleCreate}
+            showConfirmBox={showConfirmBox}
+            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
           />
-        </div>
-      </Container>
-      {showDeleteWarningConfirmBox ? (
-        <MessageDialog
-          open={showDeleteWarningConfirmBox}
-          message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-          onClose={() => setShowDeleteWarningConfirmBox(false)}
-        />
-      ) : null}
+        </Container>
+        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+          <div className="contact-grid-height1">
+            <DataGrid
+              components={{
+                Toolbar: DataGridCustomToolbar,
+              }}
+              loading={loadingEntities}
+              rows={loadingEntities ? [] : dataRows}
+              columns={columns}
+              disableSelectionOnClick
+              disableMultipleSelection
+              paginationMode="server"
+              pagination
+              rowCount={rowCount}
+              onPageChange={handlePage}
+              onPageSizeChange={handlePageSize}
+              pageSize={query.limit}
+              page={query.page}
+              onSortModelChange={handleSortModelChange}
+              rowsPerPageOptions={[25, 50, 75]}
+              density="compact"
+            />
+          </div>
+        </Container>
+        {showDeleteWarningConfirmBox ? (
+          <MessageDialog
+            open={showDeleteWarningConfirmBox}
+            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+            onClose={() => setShowDeleteWarningConfirmBox(false)}
+          />
+        ) : null}
 
-        {
-            showCreateEntityDialog && <CreateEntity
-            open={showCreateEntityDialog}
-            onClose={() => setShowCreateEntityDialog(false)}
-            onSuccess={() => {
-          setShowCreateEntityDialog(false);
-          fetchEntities();
-        }}
-       />
-       }
-
-      {isConfirmDialogVisible ? (
-        <ConfirmationDialog
-          open={isConfirmDialogVisible}
-          message={`Are you sure, you want to delete entity ${
-            deleteRec.name || ""
-          }?`}
-          onClose={() => {
-            if (deleteRec) setDeleteRec({});
-            setIsConformDialogVisible(false);
-          }}
-          okBtnLoading={deleteLoading}
-          onOk={handleDeleteEntities}
-        />
-      ) : null}
-    </Layout>
+        {isConfirmDialogVisible ? (
+          <ConfirmationDialog
+            open={isConfirmDialogVisible}
+            message={`Are you sure, you want to delete entity ${
+              deleteRec.name || ""
+            }?`}
+            onClose={() => {
+              if (deleteRec) setDeleteRec({});
+              setIsConformDialogVisible(false);
+            }}
+            okBtnLoading={deleteLoading}
+            onOk={handleDeleteEntities}
+          />
+        ) : null}
+      </Layout>
+    </>
   );
 };
 

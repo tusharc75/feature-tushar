@@ -1,278 +1,153 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, IconButton, Typography, Grid } from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  Button,
+  CircularProgress,
+  Grid,
+  useTheme,
+  useMediaQuery,
+} from "@material-ui/core";
+import { Skeleton } from "@material-ui/lab";
 import { Formik, Form } from "formik";
-import { getObjKeys, removeEmptyKeys, yupSchema } from '../../constants/helpers';
-import { useHistory } from "react-router-dom";
-import CloseIcon from '@material-ui/icons/Close';
-import { withStyles } from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import FormTypes from "./../../components/Helpers/FormTypes";
-import axiosInstance from './../../axios/axiosInstance'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import axiosInstance from "../../axios/axiosInstance";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import InputField from "../../components/Helpers/InputField";
+import {
+  getObjKeys,
+  removeEmptyKeys,
+  yupSchema,
+} from "../../constants/helpers";
 
-const useStyles = makeStyles((theme) => ({
-    // root: {
-    //     margin: 0,
-    //     padding: theme.spacing(2),
-    // },
-    // closeButton: {
-    //     position: 'absolute',
-    //     right: theme.spacing(1),
-    //     top: theme.spacing(1),
-    //     color: theme.palette.grey[500],
-    // },
-}));
-
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
-
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
-const arr = [...Array(9).keys()]
-export default function CreateEntity({ open, onClose, onSuccess }) {
-
-    const classes = useStyles();
-    const history = useHistory();
-    const [entityData, setEntityData] = useState({
-        fields: [],
-        initialValues: {},
-    });
-    const [isFormSubmitted, setIsFormSubmitted] = useState(false)
-
-    //  Owner, Collaborator Code - Start
-    const [formsData, setFormsData] = useState([]);
-    const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
-    const [ownerDataSource, setOwnerDataSource] = useState([]);
-    const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
-
-    useEffect(() => {
-        const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
-        if (ownerCollaboratorDropdownData.length > 0) {
-            setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-            setOwnerDataSource(ownerCollaboratorDropdownData[0].option)
-            setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
-        }
-        sortArray();
-        // eslint-disable-next-line
-    }, [entityData.fields]);
-
-    const sortArray = () => {
-        const sections = [];
-        entityData.fields.forEach((field) => {
-            if (!sections.includes(field.sectionName)) {
-                sections.push(field.sectionName);
-            }
-        });
-
-        const customData = sections.map((name) => {
-            let fields = entityData.fields.filter((field) => field.sectionName === name);
-
-            const sectionFields = fields.map((formData) => formData);
-            return { name, sectionFields };
-        });
-
-        setFormsData(customData);
-    };
-
-    const onOwnerDropdownOpen = (selectedCollaborator) => {
-        if (!selectedCollaborator || selectedCollaborator.length == 0) {
-            setOwnerDataSource(ownerCollaboratorCommonDataSource);
-        } else {
-            const ownerDataSource = [];
-
-            ownerCollaboratorCommonDataSource.map(d => {
-                const isCollaboratorSelected = selectedCollaborator.find(collaborator => collaborator.optionValue == d.optionValue);
-                if (!isCollaboratorSelected) {
-                    ownerDataSource.push(d);
-                }
-            })
-            setOwnerDataSource(ownerDataSource);
-        }
-    }
-
-    const onCollaboratorOwnerMultiselectOpen = (selectedOwner) => {
-        if (selectedOwner) {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource.filter(d => d.optionValue != selectedOwner.optionValue));
-        } else {
-            setCollaboratorDataSource(ownerCollaboratorCommonDataSource);
-        }
-    }
-    //  Owner, Collaborator Code - End
-
-    useEffect(() => {
-        getEntityFields();
-        // eslint-disable-next-line
-    }, []);
-
-    const getEntityFields = () => {
-        axiosInstance().get('/field?resource=Entity').then(({ data: { data } }) => {
-
-            const newFields = [];
-            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
-
-            setEntityData({
-                fields: newFields,
-                initialValues: getObjKeys("", newFields),
-            });
-        });
-    };
-
-    const handleSave = (values) => {
-        setIsFormSubmitted(true);
-        const newValues = removeEmptyKeys(values);
-        axiosInstance().post("/Entity", newValues).then(() => {
-            onSuccess();
-        }).then(() => {
-            setIsFormSubmitted(false);
-        });
-    }
-
-
-    return (
-        <Dialog
-            maxWidth="md"
-            aria-labelledby="customized-dialog-title"
-            onClose={onClose}
-            open={open}
-        >
-            <CustomDialogHeader title="Create Entity" onClose={onClose} />
-
-            {
-                entityData.fields.length == 0 && <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
-                    <CommonSkeleton
-                        lenArray={arr}
-                    />
-                </DialogContent>
-            }
-            {
-                entityData.fields.length > 0 && <Formik
-                    initialValues={entityData.initialValues}
-                    validationSchema={yupSchema(entityData.fields)}
-                    validateOnMount
-                    onSubmit={() => { }}
-                >
-                    {({
-                        values,
-                        errors,
-                        touched,
-                        setFieldValue,
-                    }) => (
-                        <>
-                            <DialogContent dividers >
-                                <Form>
-                                    {
-                                        formsData &&
-                                        formsData.map((form, i) => (
-                                            <div key={i}>
-                                                <h2 className="form-label-style">{form.name}</h2>
-                                                <Box marginY={2}>
-                                                    <Grid spacing={3} container>
-                                                        {form.sectionFields.map((field) => (
-                                                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                {
-                                                                    field.fieldName == "owner" ?
-                                                                        <FormTypes values={values}
-                                                                            errors={errors}
-                                                                            touched={touched}
-                                                                            label={field.fieldLabel}
-                                                                            name={field.fieldName}
-                                                                            type={field.type}
-                                                                            options={ownerDataSource}
-                                                                            setFieldValue={setFieldValue}
-                                                                            required={field.required}
-                                                                            fullWidth
-                                                                            isTooltip={true}
-                                                                            size="small"
-                                                                            onOpen={() => { onOwnerDropdownOpen(values["collaborator"]) }}
-                                                                        /> : field.fieldName == "collaborator" ?
-                                                                            <FormTypes
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={collaboratorDataSource}
-                                                                                setFieldValue={setFieldValue}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={true}
-                                                                                size="small"
-                                                                                onOpen={() => { onCollaboratorOwnerMultiselectOpen(values["owner"]) }}
-                                                                            /> : <FormTypes
-                                                                                // {...rest}
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={field.option}
-                                                                                setFieldValue={setFieldValue}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={true}
-                                                                                size="small"
-                                                                            />
-                                                                }
-
-                                                            </Grid>
-                                                        ))}
-                                                    </Grid>
-                                                </Box>
-                                            </div>
-                                        ))
-                                    }
-
-                                    {/* <InputField
-                                        errors={errors}
-                                        values={values}
-                                        setFieldValue={setFieldValue}
-                                        touched={touched}
-                                        fieldsData={entityData.fields}
-                                        size="small"
-                                        fullWidth
-                                    /> */}
-                                </Form>
-                            </DialogContent>
-
-                            <DialogActions>
-                                <Button
-                                    type="button"
-                                    variant="outlined"
-                                    color="primary"
-                                    onClick={onClose}
-                                >
-                                    Cancel
-                                        </Button>
-                                <Button
-                                    disabled={isFormSubmitted}
-                                    type="submit"
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => { handleSave(values) }}
-                                >
-                                    Create Entity
-                                        </Button>
-                            </DialogActions>
-                        </>
-                    )}
-                </Formik>
-            }
-        </Dialog>
-
-    )
+interface InitialData {
+  fields: any[];
+  values: object;
 }
+
+const CreateEntity = ({ open, close, fetchData }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [initialData, setInitialData] = useState<InitialData>({
+    fields: [],
+    values: {},
+  });
+
+  useEffect(() => {
+    getInitialData();
+  }, []);
+
+  const getInitialData = () => {
+    setLoading(true);
+    axiosInstance()
+      .get("/field?resource=Entity")
+      .then(({ data: { data } }) => {
+        const fieldsData = data.map((d: any) => d.fieldData);
+        setInitialData({
+          fields: fieldsData,
+          values: getObjKeys("", fieldsData),
+        });
+        setLoading(false);
+        console.log(data);
+      })
+      .catch((err) => {
+        setLoading(false);
+      });
+  };
+
+  const handleSubmit = (values) => {
+    setSubmitting(true);
+    axiosInstance()
+      .post("/entity", removeEmptyKeys(values))
+      .then(({ data }) => {
+        console.log(data);
+        setSubmitting(false);
+        fetchData();
+        close();
+      })
+      .catch((err) => {
+        setSubmitting(false);
+      });
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={close}
+      maxWidth="md"
+      fullWidth
+      fullScreen={isMobile}
+    >
+      <CustomDialogHeader title="Create New Entity" onClose={close} />
+
+      {loading || !initialData.fields.length ? (
+        <>
+          <CustomDialogContent>
+            <Skeleton width="100%" height="70px" />
+            <Grid container spacing={2}>
+              {[1, 2, 3].map((i) => (
+                <Grid key={i} item xs={12} sm={6} md={6}>
+                  <Skeleton width="100%" height="60px" />
+                </Grid>
+              ))}
+            </Grid>
+          </CustomDialogContent>
+          <CustomDialogFooter>
+            <Button variant="outlined" color="primary" disabled>
+              Cancel
+            </Button>
+            <Button variant="contained" color="primary" disabled>
+              Submit
+            </Button>
+          </CustomDialogFooter>
+        </>
+      ) : (
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, setFieldValue, touched, submitForm }) => (
+            <>
+              <CustomDialogContent>
+                <Form noValidate>
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  disabled={isSubmitting || loading}
+                  onClick={close}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={submitForm}
+                  disabled={isSubmitting || loading}
+                >
+                  {isSubmitting ? <CircularProgress size={20} /> : "Submit"}
+                </Button>
+              </CustomDialogFooter>
+            </>
+          )}
+        </Formik>
+      )}
+    </Dialog>
+  );
+};
+
+export default CreateEntity;
