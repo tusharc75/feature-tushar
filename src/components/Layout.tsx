@@ -35,7 +35,6 @@ const Layout = ({ children, width }) => {
       behaviour: "smooth",
       block: "start",
     });
-    console.log(key);
   }, [key]);
 
   return (

@@ -31,13 +31,15 @@ export default function ManageContact(props) {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
-        if (ownerCollaboratorDropdownData.length > 0) {
-            setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-            setOwnerDataSource(ownerCollaboratorDropdownData[0].option)
-            setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
+        if (entityData.fields.length > 0) {
+            const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
+            if (ownerCollaboratorDropdownData.length > 0) {
+                setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
+                setOwnerDataSource(ownerCollaboratorDropdownData[0].option)
+                setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
+            }
+            sortArray();
         }
-        sortArray();
     }, [entityData.fields]);
 
     const sortArray = () => {
@@ -160,20 +162,20 @@ export default function ManageContact(props) {
                                                                                         size="small"
                                                                                         onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
                                                                                     /> : <FormTypes
-                                                                                                    // {...rest}
-                                                                                                    values={values}
-                                                                                                    errors={errors}
-                                                                                                    touched={touched}
-                                                                                                    label={field.fieldLabel}
-                                                                                                    name={field.fieldName}
-                                                                                                    type={field.type}
-                                                                                                    options={field.option}
-                                                                                                    setFieldValue={setFieldValue}
-                                                                                                    required={field.required}
-                                                                                                    fullWidth
-                                                                                                    isTooltip={true}
-                                                                                                    size="small"
-                                                                                                />
+                                                                                        // {...rest}
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={field.option}
+                                                                                        setFieldValue={setFieldValue}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={true}
+                                                                                        size="small"
+                                                                                    />
                                                                         }
 
                                                                     </Grid>

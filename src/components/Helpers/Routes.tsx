@@ -14,6 +14,11 @@ export default {
     path: "/contact",
     data: {},
   },
+  contactDetail: {
+    title: "Contact",
+    path: "/contact/detail",
+    data: {},
+  },
   lead: {
     title: "Lead",
     path: "/lead",

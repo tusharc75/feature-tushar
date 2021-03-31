@@ -111,6 +111,7 @@ const Roles = () => {
     const [isUpdating, setUpdating] = useState(false);
     const [accountData, setAccountData] = useState<any>({})
     const [relatedContacts, setRelatedContacts] = useState([])
+    const [opportunities, setOpportunities] = useState([])
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [showApproveDisapproveConfirmBox, setShowApproveDisapproveConfirmBox] = useState(false);
@@ -122,7 +123,7 @@ const Roles = () => {
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [relatedContactsLoading, setRelatedContactsLoading] = useState(false)
     const [expanded, setExpanded] = React.useState({
-        opportunity: false
+        opportunity: true
     });
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
@@ -131,13 +132,6 @@ const Roles = () => {
     let { id } = useParams();
 
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
-
-    // const [refresh, setRefresh] = useState(true);
-
-    // const handleActivityRefresh = () => {
-    //     setRefresh(false)
-    //     setRefresh(true)
-    // }
 
     useEffect(() => {
         const data = user.role?.sideBar;
@@ -159,21 +153,18 @@ const Roles = () => {
 
     useEffect(() => {
         if (id) {
-            fetchAccountData()
+            fetchAccountData();
+            fetchRelatedData();
         }
     }, [id]);
 
-    useEffect(() => {
-        if (accountData._id && relatedContacts.length === 0) {
-            fetchRelatedContacts()
-        }
-    }, [accountData])
-
-    // const fetchOpportunities = () => {
-    //     axiosInstance().get(`/account/${id}`).then(({ data: { data } }) => {
-
-    //     });
-    // }
+    const fetchRelatedData = async () => {
+        axiosInstance().get(`/account/related/${id}`).then(({ data: { data } }) => {
+            setRelatedContacts(data.Contact && data.Contact["Account_Name"]);
+            setOpportunities(data.Opportunity && data.Opportunity["Account_Name"]);
+            setRelatedContactsLoading(false)
+        });
+    }
 
     const fetchAccountData = async () => {
         setLoading(true)
@@ -358,16 +349,16 @@ const Roles = () => {
         });
     }
 
-    const fetchRelatedContacts = () => {
-        setRelatedContactsLoading(true)
-        axiosInstance().get(`/contact/related-contact/${accountData._id}`)
-            .then(({ data: { data } }) => {
-                setRelatedContacts(data)
-                setRelatedContactsLoading(false)
-            }).catch(err => {
-                setRelatedContactsLoading(false)
-            })
-    }
+    // const fetchRelatedContacts = () => {
+    //     setRelatedContactsLoading(true)
+    //     axiosInstance().get(`/contact/related-contact/${accountData._id}`)
+    //         .then(({ data: { data } }) => {
+    //             setRelatedContacts(data)
+    //             setRelatedContactsLoading(false)
+    //         }).catch(err => {
+    //             setRelatedContactsLoading(false)
+    //         })
+    // }
 
     const handlePanelChange = (curActive) => {
         let tempData = { ...expanded }
@@ -512,7 +503,7 @@ const Roles = () => {
                                                         </Box>
                                                         <Box padding="5px">
                                                             <Typography variant="subtitle2">
-                                                                Opportunity ()
+                                                                Opportunity ({opportunities.length})
                                                      </Typography>
                                                         </Box>
                                                     </Box>
@@ -540,10 +531,10 @@ const Roles = () => {
                                                                     <Grid item md={12}>
 
                                                                         <div className={classes.opportunityTab} >
-                                                                            <OpportunityTab data={[]} />
+                                                                            <OpportunityTab data={opportunities} />
                                                                         </div>
                                                                     </Grid>
-                                                                    <Grid item md={12} sm={12} xs={12}>
+                                                                    {/* <Grid item md={12} sm={12} xs={12}>
                                                                         <Button
                                                                             variant="outlined"
                                                                             onClick={() => handleViewAll(opportunityPage.path, {})}
@@ -551,7 +542,7 @@ const Roles = () => {
                                                                         >
                                                                             View All
                                                                         </Button>
-                                                                    </Grid>
+                                                                    </Grid> */}
                                                                 </Grid>
                                                             </> : null
                                                     }
@@ -610,13 +601,14 @@ const Roles = () => {
                                                         <Box className={`${accountClass.custom_box1}`}>
                                                             <RelatedContactsBox
                                                                 contacts={relatedContacts}
+                                                                accountName={accountData.accountName}
                                                             />
                                                         </Box>
-                                                        <div className={`${accountClass.view_all_btn}`}>
+                                                        {/* <div className={`${accountClass.view_all_btn}`}>
                                                             <Button
                                                                 variant="outlined"
                                                                 className={`${accountClass.btn}`}
-                                                            >View All</Button></div>
+                                                            >View All</Button></div> */}
                                                     </>
                                                 }
                                             </div>
@@ -676,6 +668,7 @@ const Roles = () => {
                                 setShowCreateOpportunityDialog(false);
                                 // fetchOpportunities()
                             }}
+                            accountId={accountData._id}
                         />
                     }
                     {
@@ -690,8 +683,9 @@ const Roles = () => {
                             open={showCreateContactDialog}
                             onClose={() => {
                                 setShowCreateContactDialog(false);
-                                fetchRelatedContacts();
+                                // fetchRelatedContacts();
                             }}
+                            accountId={accountData._id}
                         />
                     }
                 </div>

@@ -279,3 +279,8 @@ body::-webkit-scrollbar-thumb {
   text-decoration: underline !important;
   cursor: pointer !important;
 }
+
+.roles-table > tbody > tr > td {
+  padding: 0px 15px;
+  border-bottom: 0px;
+}

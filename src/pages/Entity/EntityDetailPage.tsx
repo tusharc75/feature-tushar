@@ -17,6 +17,7 @@ import { useData } from "../../StateProvider/Provider";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import DeleteButton from "../../components/Helpers/DeleteButton";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -221,13 +222,10 @@ const EntityDetailsPage = () => {
             ) : null}
             <Box component="span" marginX={1} />
             {entitiesPermissions.isDelete ? (
-              <Button
-                variant="contained"
-                color="secondary"
+              <DeleteButton
+                text="Delete"
                 onClick={() => setShowConfirmBox(true)}
-              >
-                Delete
-              </Button>
+              />
             ) : null}
           </DetailsPageHeader>
         )}

@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 import accountClass from "./account.module.scss"
 import { opportunityPage } from '../../routes/Opportunity'
 import { displayDate } from '../../services/util';
+import routes from './../../components/Helpers/Routes'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -57,13 +58,13 @@ export default function OpportunityTab({ data }) {
                                     <div className={`${classes.box} p-3`}>
                                         <span className={classes.actionsItems}>
                                             {/* <VisibilityOutlined /> */}
-                                            <IconButton size="small">
+                                            {/* <IconButton size="small">
                                                 <Delete color="error" />
-                                            </IconButton>
+                                            </IconButton> */}
                                             {/* <EditOutlined /> */}
                                         </span>
-                                        <Link className={`${accountClass.account_name_link}`} to={`${opportunityPage.path}/${obj._id}`}>
-                                            <Typography className="text-capitalize">{obj?.opportunityName ?? ''}</Typography>
+                                        <Link className={`${accountClass.account_name_link}`} to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                            <Typography>{obj?.opportunityName}</Typography>
                                         </Link>
                                         <DisplayData label='Stage' value={obj?.stage?.optionLabel ?? ''} />
                                         <DisplayData label='Amount' value={obj?.amount ?? ''} />

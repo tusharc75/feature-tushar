@@ -236,7 +236,7 @@ export default function Contact() {
             id: u._id,
             canDelete: u?.owner?.optionValue === user?.user._id,
             collaborator: u.collaborator || [],
-            account: u.accountName.optionLabel
+            account: u.accountName?.optionLabel
         }));
         setDataRows([...rows]);
     }, [contactData])
