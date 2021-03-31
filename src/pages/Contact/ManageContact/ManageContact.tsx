@@ -66,7 +66,6 @@ export default function ManageContact(props) {
     const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
 
         // const errors = formValidation(values, _.cloneDeep(entityData.fields));
-        debugger
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
                 if (input.required) {
