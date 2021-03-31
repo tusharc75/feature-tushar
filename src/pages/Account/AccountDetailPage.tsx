@@ -46,6 +46,7 @@ import { Link } from "react-router-dom";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityMain from "../Opportunities/ManageOpportunities";
+import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 
 const Accordion = withStyles({
     root: {
@@ -127,6 +128,8 @@ const Roles = () => {
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
     const [canEdit, setCanEdit] = useState(false)
+
+    const [showAccountHierarchyInFullScreenDialog, setShowAccountHierarchyInFullScreenDialog] = useState(false)
 
     let { id } = useParams();
 
@@ -270,6 +273,10 @@ const Roles = () => {
     const quickLinks = [
         {
             label: "Account Heirarchy",
+            redirect: false,
+            onClick: () => {
+                setShowAccountHierarchyInFullScreenDialog(true);
+            }
         },
         {
             label: "Projects",
@@ -550,6 +557,9 @@ const Roles = () => {
                                             {
                                                 quickLinks && quickLinks.length ?
                                                     quickLinks.map((k, index) => {
+                                                        if (k.redirect == false) {
+                                                            return <Typography className={`${accountClass.custom_link} link`} onClick={k.onClick}>{k.label}</Typography>
+                                                        }
                                                         return <Link key={index} to={k}
                                                             className={`${accountClass.custom_link} link`}>{k.label} {k.count != null ? `(${k.count})` : null}</Link>
                                                     }) :
@@ -667,8 +677,16 @@ const Roles = () => {
                             accountId={accountData._id}
                         />
                     }
+                    {
+                        showAccountHierarchyInFullScreenDialog && <FullScreenDialog
+                            heading="Account Hierarchy"
+                            open={showAccountHierarchyInFullScreenDialog}
+                            close={() => { setShowAccountHierarchyInFullScreenDialog(false) }}>
+                            <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
+                        </FullScreenDialog>
+                    }
                 </div>
-            </Layout >
+            </Layout>
         </>
     );
 };
