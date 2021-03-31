@@ -19,7 +19,6 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import ManageOpportunity from './ManageOpportunities/ManageOpportunities'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 
@@ -85,6 +84,7 @@ function OpportunityDetailsPage() {
   }, [id]);
 
   const fetchOpportunityData = () => {
+    setLoading(true)
     axiosInstance()
       .get(`/opportunity/${id}`)
       .then(({ data: { data } }) => {
