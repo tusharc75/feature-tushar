@@ -223,7 +223,7 @@ const Roles = () => {
 
                     newData.push(updatedAccount);
                 })
-                console.log(newData);
+
                 setAccountHierarchyData([...newData]);
 
             } else {
@@ -406,17 +406,31 @@ const Roles = () => {
                             showHeading={true}
                         >
                             {
-                                accountPermissions.isUpdate && canEdit ?
+                                accountPermissions.approveAccount && <>
+                                    <Button
+                                        variant="contained"
+                                        color={accountData.static?.approved ? "secondary" : "primary"}
+                                        onClick={() => { setShowApproveDisapproveConfirmBox(true) }}
+                                    >
+                                        {accountData.static?.approved ? 'Disapprove' : "Approve"}
+                                    </Button>
+                                    <Box component="span" marginX={1} />
+                                </>
+                            }
+
+                            {
+                                accountPermissions.isUpdate && canEdit && <>
                                     <Button
                                         variant="contained"
                                         color="primary"
                                         onClick={handleOpneUpdateDialog}
                                     >
                                         Edit
-                                    </Button> : null
+                                    </Button>
+                                    <Box component="span" marginX={1} />
+                                </>
                             }
 
-                            <Box component="span" marginX={1} />
                             {
                                 accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
                                     accountData.owner.optionValue === user.user._id ?
@@ -666,9 +680,9 @@ const Roles = () => {
                             //     setShowCreateContactDialog(false);
                             //     fetchRelatedContacts()
                             // }}
-                        // entityDetails={createContactEntityDetails}
-                        open={showCreateContactDialog}
-                        onClose={() => {
+                            // entityDetails={createContactEntityDetails}
+                            open={showCreateContactDialog}
+                            onClose={() => {
                                 setShowCreateContactDialog(false);
                                 fetchRelatedContacts();
                             }}
