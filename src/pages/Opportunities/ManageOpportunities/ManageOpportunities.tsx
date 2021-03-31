@@ -2,19 +2,22 @@ import { useEffect, useState, useContext } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, removeEmptyKeys, getOwnerDropdownDataSource, getCollaboratorDropdownDataSource } from '../../constants/helpers';
+import { getObjKeys, removeEmptyKeys, getOwnerDropdownDataSource, getCollaboratorDropdownDataSource } from '../../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import { yupSchema } from '../../constants/helpers'
-import FormTypes from "./../../components/Helpers/FormTypes";
-import axiosInstance from './../../axios/axiosInstance'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { yupSchema } from '../../../constants/helpers'
+import FormTypes from "./../../../components/Helpers/FormTypes";
+import axiosInstance from './../../../axios/axiosInstance'
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import CustomButton from '../../../components/Helpers/Button'
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import _ from 'lodash'
 const useStyles = makeStyles((theme) => ({
     root: {
         margin: 0,
@@ -41,21 +44,18 @@ const DialogActions = withStyles((theme) => ({
     },
 }))(MuiDialogActions);
 
-export default function CreateOpportunity({ open, onClose, onSuccess }) {
+export default function ManageOpportunity({ open,isNew,onClose,entityData,handleSubmit}) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const history = useHistory();
-    const [entityData, setEntityData] = useState({
-        fields: [],
-        initialValues: {},
-    });
-    const [isFormSubmitted, setIsFormSubmitted] = useState(false)
+    
 
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
     const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
@@ -95,53 +95,21 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
     }
     //  Owner, Collaborator Code - End
 
-    useEffect(() => {
-        getOpportunityFields();
-        // eslint-disable-next-line
-    }, []);
-
-    const getOpportunityFields = () => {
-        axiosInstance().get('/field?resource=Opportunity').then(({ data: { data } }) => {
-
-            const newFields = [];
-            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
-
-            setEntityData({
-                fields: newFields,
-                initialValues: getObjKeys("", newFields),
-            });
-        });
-    };
-
-    const handleSave = (values, setTouched, errors, setErrors) => {
+   
+    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false,errors, resetForm) => {
+        // const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
-                if (input.required || values[input.fieldName]) {
+                if (input.required) {
                     setTouched(input.fieldName, true);
                 }
             });
-            toastConfig.setToastConfig({ open: true, type: "error", message: "Please fill all required fields" });
-            setErrors({ ...errors });
         } else {
-            setIsFormSubmitted(true);
-            values = removeEmptyKeys(values);
-            ["amount", "probability"].forEach(k => {
-                if (values[k]) {
-                    values[k] = parseInt(values[k])
-                } else if (values.hasOwnProperty(k)) {
-                    delete values[k]
-                }
-            })
-            axiosInstance().post("/opportunity", values)
-                .then(({ data }) => {
-                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-                    setIsFormSubmitted(false)
-                    onSuccess()
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error);
-                    setIsFormSubmitted(false);
-                });
+            setLoading(true)
+            handleSubmit(values, saveAndNew, setValues)
+            setErrors({});
         }
+
     }
     return (
         <Dialog
@@ -150,7 +118,7 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
             onClose={onClose}
             open={open}
         >
-            <CustomDialogHeader title="Create Opportunity" onClose={onClose} />
+            <CustomDialogHeader onClose={onClose} title={isNew ? "Create Opportunity" : `Editing ${entityData.initialValues.opportunityName}`} />
 
             {
                 entityData.fields.length == 0 && <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
@@ -168,11 +136,13 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
                 >
                     {({
                         values,
+                        setValues,
                         errors,
                         touched,
                         setFieldValue,
                         setFieldTouched,
-                        setErrors
+                        setErrors,
+                        resetForm
                     }) => (
 
                         <>
@@ -254,25 +224,26 @@ export default function CreateOpportunity({ open, onClose, onSuccess }) {
                                 </Form>
                             </DialogContent>
 
-                            <DialogActions>
-                                <Button
-                                    type="button"
-                                    variant="outlined"
-                                    color="primary"
-                                    onClick={onClose}
-                                >
-                                    Cancel
-                                        </Button>
-                                <Button
-                                    disabled={isFormSubmitted}
-                                    type="submit"
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => { handleSave(values, setFieldTouched, errors, setErrors) }}
-                                >
-                                    Create Opportunity
-                                        </Button>
-                            </DialogActions>
+                            
+
+                                    <CustomDialogFooter>
+                                        <Button onClick={onClose} variant="outlined" color="primary" >
+                                            Cancel
+                                             </Button>
+
+                                        <CustomButton
+                                            loading={loading}
+                                            variant="contained"
+                                            color="primary"
+                                            disabled={loading || Object.keys(errors).length > 0 ? true : false}
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                onSubmit(setFieldTouched, values, setValues, setErrors, false,errors, resetForm)
+                                            }}
+                                        >
+                                            Save
+                                        </CustomButton>
+                                    </CustomDialogFooter>
                         </>
                     )}
                 </Formik>
