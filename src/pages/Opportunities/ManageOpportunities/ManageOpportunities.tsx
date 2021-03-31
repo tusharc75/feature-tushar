@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys,formValidation, removeEmptyKeys, getOwnerDropdownDataSource, getCollaboratorDropdownDataSource } from '../../../constants/helpers';
+import { getObjKeys, removeEmptyKeys, getOwnerDropdownDataSource, getCollaboratorDropdownDataSource } from '../../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -96,8 +96,8 @@ export default function ManageOpportunity({ open,isNew,onClose,entityData,handle
     //  Owner, Collaborator Code - End
 
    
-    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
-        const errors = formValidation(values, _.cloneDeep(entityData.fields));
+    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false,errors, resetForm) => {
+        // const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
                 if (input.required) {
@@ -239,7 +239,7 @@ export default function ManageOpportunity({ open,isNew,onClose,entityData,handle
                                             disabled={loading || Object.keys(errors).length > 0 ? true : false}
                                             onClick={(e) => {
                                                 e.preventDefault()
-                                                onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm)
+                                                onSubmit(setFieldTouched, values, setValues, setErrors, false,errors, resetForm)
                                             }}
                                         >
                                             Save
