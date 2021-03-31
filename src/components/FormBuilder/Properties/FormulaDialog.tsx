@@ -117,8 +117,8 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
   const handleCheckSyntax = () => {
     if (state.formula !== "") {
       //let values = { owner: 5, rate: 5, amount: 10 }
-      //let values = { ft: 100 }
-      //getFormulaValue(state.formula, values)
+      //let values = { rate: 100 }
+      //getFormulaValue(state.formula, values, "decimal", 2)
       if (checkFormula(state.formula)) {
         setFormulaError("Valid Formula")
       }

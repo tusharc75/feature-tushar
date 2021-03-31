@@ -14,6 +14,11 @@ import queryString from 'query-string';
 import { GetReferenceName } from "../../axios/activity";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 
+const capitalize = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+
 const Activity = () => {
 
     const history = useHistory();
@@ -43,7 +48,7 @@ const Activity = () => {
     return (<Layout>
         <Grid container direction="row">
             <Grid item xs={12} className="pl-2">
-                <CustomBreadCrumbs routes={[{ title: type }]} />
+                <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
             </Grid>
         </Grid>
         <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >

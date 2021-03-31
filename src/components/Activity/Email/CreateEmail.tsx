@@ -97,7 +97,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
     return (initialValues && <Formik initialValues={initialValues} validationSchema={EmailSchema} onSubmit={handleSave} onKeyPress={onKeyPress}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form>
-                <CustomDialogHeader title={`${emailId ? "View" : "New"} Case`} onClose={handleClose}></CustomDialogHeader>
+                <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
                 <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>

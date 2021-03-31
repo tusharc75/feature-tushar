@@ -34,16 +34,19 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
   const onChangeValue = (index, value) => {
     let data = [...option]
     data[index].optionLabel = value
+    data[index].optionValue = value
     setOption(data)
   };
 
   const AddRemoveValue = (type, index) => {
     let data = [...option]
     if (type === "add") {
-      data.splice((index + 1), 0, { optionLabel: "" });
+      data.splice((index + 1), 0, { optionLabel: "", optionValue: "" });
     }
     else {
-      data.splice(index, 1);
+      if (data.length !== 1) {
+        data.splice(index, 1);
+      }
     }
     setOption(data)
   };
@@ -67,6 +70,13 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
             ele.required = state.required
             ele.isTooltip = state.isTooltip
             ele.tooltipMessage = state.tooltipMessage
+            option.forEach((ele, index) => {
+              ele.order = index + 1
+              ele.default = false
+              if (index === 0) {
+                ele.default = true
+              }
+            })
             ele.option = option
             if (fieldData.type === "decimal") {
               ele.decimalPlaces = state.decimalPlaces
@@ -96,7 +106,7 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
               onChange={handleChange}
             />
             {fieldData.type === "decimal" &&
-              <FormControl fullWidth margin="dense" variant="outlined" >
+              <FormControl fullWidth margin="dense" variant="outlined">
                 <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"

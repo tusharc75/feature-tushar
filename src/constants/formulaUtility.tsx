@@ -55,7 +55,7 @@ export const checkFormula = (formula) => {
     return isValid
 }
 
-export const getFormulaValue = (formula, values) => {
+export const getFormulaValue = (formula, values, returnType, decimalPlaces) => {
 
     let value = 0
     const IfFunction = matchIf(formula)
@@ -90,6 +90,9 @@ export const getFormulaValue = (formula, values) => {
     let result = parser.parse(removeBracket(formula))
     if (!result.error) {
         value = result.result
+    }
+    if (returnType === "decimal") {
+        value = parseFloat(value.toFixed(decimalPlaces))
     }
     return value
 }
