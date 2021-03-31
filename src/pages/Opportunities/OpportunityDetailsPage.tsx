@@ -14,7 +14,6 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
-import { opportunityPage } from "../../routes/Opportunity";
 import routes from "../../components/Helpers/Routes";
 import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
@@ -164,7 +163,7 @@ function OpportunityDetailsPage() {
   };
   const goBackToListing = () => {
     history.push({
-      pathname: opportunityPage.path,
+      pathname: routes.opportunity.path,
     });
   };
 

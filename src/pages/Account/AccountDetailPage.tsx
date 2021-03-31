@@ -35,7 +35,6 @@ import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import { opportunityPage } from '../../routes/Opportunity'
 import { withStyles } from "@material-ui/core/styles";
 
 
@@ -271,7 +270,6 @@ const Roles = () => {
     const quickLinks = [
         {
             label: "Account Heirarchy",
-            count: 0
         },
         {
             label: "Projects",
@@ -279,7 +277,7 @@ const Roles = () => {
         },
         {
             label: "Opportunity",
-            count: 0
+            count: opportunities.length
         },
         {
             label: "Quotes",
@@ -525,26 +523,7 @@ const Roles = () => {
                                             ) : (
                                                 <>
                                                     {
-                                                        expanded['opportunity'] ?
-                                                            <>
-                                                                <Grid container spacing={2}>
-                                                                    <Grid item md={12}>
-
-                                                                        <div className={classes.opportunityTab} >
-                                                                            <OpportunityTab data={opportunities} />
-                                                                        </div>
-                                                                    </Grid>
-                                                                    {/* <Grid item md={12} sm={12} xs={12}>
-                                                                        <Button
-                                                                            variant="outlined"
-                                                                            onClick={() => handleViewAll(opportunityPage.path, {})}
-                                                                            fullWidth
-                                                                        >
-                                                                            View All
-                                                                        </Button>
-                                                                    </Grid> */}
-                                                                </Grid>
-                                                            </> : null
+                                                        expanded['opportunity'] && <OpportunityTab data={opportunities} />
                                                     }
                                                 </>
                                             )}
@@ -566,18 +545,18 @@ const Roles = () => {
                                             </div>
                                         }
                                     </Grid>
-                                    {/* <Grid item xs={12}>
+                                    <Grid item xs={12}>
                                         <div className={`${accountClass.detail_page_div2}`}>
                                             {
                                                 quickLinks && quickLinks.length ?
                                                     quickLinks.map((k, index) => {
                                                         return <Link key={index} to={k}
-                                                            className={`${accountClass.custom_link}`}>{k.label || ''}({k.count || 0})</Link>
+                                                            className={`${accountClass.custom_link} link`}>{k.label} {k.count != null ? `(${k.count})` : null}</Link>
                                                     }) :
                                                     null
                                             }
                                         </div>
-                                    </Grid> */}
+                                    </Grid>
 
                                     <Grid item xs={12}>
                                         <BoxWithBorder style={{ marginTop: "3%", padding: '0px' }}>
