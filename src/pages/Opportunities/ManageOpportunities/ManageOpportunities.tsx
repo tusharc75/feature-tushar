@@ -133,7 +133,6 @@ export default function ManageOpportunity({ open,isNew,onClose,entityData,handle
                     validationSchema={yupSchema(entityData.fields)}
                     validateOnMount
                     onSubmit={() => { }}
-                    // validate={(values) => formValidation(values, entityData.fields)}
                 >
                     {({
                         values,

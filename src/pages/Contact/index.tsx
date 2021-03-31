@@ -21,7 +21,7 @@ import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import { contactDetailPage } from '../../routes/Contacts'
-import CreateContact from './CreateContact/CreateContact';
+import ManageContactDialog from './ManageContact/index';
 import { makeStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -31,7 +31,7 @@ import BlockIcon from '@material-ui/icons/Block';
 import CustomContainer from "./../../components/Container";
 import MessageDialog from '../../components/Helpers/MessageDialog'
 import { getErrorMessage } from '../../services/util'
-import './contact.scss'
+import contactStyles from './contact.module.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import styles from "../Leads/Header.module.scss"
@@ -158,7 +158,7 @@ export default function Contact() {
                 <>
                     {
                         contactPermissions.isDelete ?
-                            params.row.allowToDelete ?
+                            params.row.canDelete ?
                                 <Tooltip title="Delete">
                                     <IconButton aria-label="Delete" onClick={() => {
                                         setSingleContactDelete({ show: true, id: params.row._id, contactName: `${params.row.firstName} ${params.row.lastName}` })
@@ -234,6 +234,8 @@ export default function Contact() {
             ...u,
             isChecked: false,
             id: u._id,
+            canDelete: u?.owner?.optionValue === user?.user._id,
+            collaborator: u.collaborator || [],
             account: u.accountName.optionLabel
         }));
         setDataRows([...rows]);
@@ -266,6 +268,7 @@ export default function Contact() {
         RemoveContacts({ ids: selectedRecords }).then(() => {
             getContacts();
             setLoading(false);
+            setShowDeleteConfirmBox(false);
         })
     };
 
@@ -297,7 +300,7 @@ export default function Contact() {
     const getFirstName = tData => {
         let name = [tData.firstName, tData.middleName, tData.lastName].filter(d => d).join(" ");
         
-        return <Link className="contactsNameLink"
+        return <Link className={`${contactStyles.contacts_name_link}`}
             to={`${contactDetailPage.path}/${tData._id}`}>
             {name}
         </Link>
@@ -436,7 +439,7 @@ export default function Contact() {
 
                                         <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
                                             onClick={() => {
-                                                if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+                                                if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
                                                     setShowDeleteWarningConfirmBox(true);
                                                 } else {
                                                     setShowDeleteConfirmBox(true)
@@ -500,14 +503,19 @@ export default function Contact() {
                     }
 
                     {
-                        showCreateContactDialog && <CreateContact
-                            open={showCreateContactDialog}
-                            onClose={() => setShowCreateContactDialog(false)}
-                            onSuccess={() => {
+                        showCreateContactDialog && <ManageContactDialog
+                            // open={showCreateContactDialog}
+                            // onClose={() => setShowCreateContactDialog(false)}
+                            // onSuccess={() => {
+                            //     setShowCreateContactDialog(false);
+                            //     getContacts();
+                            // }}
+                        // entityDetails={createContactEntityDetails}
+                        open={showCreateContactDialog}
+                        onClose={() => {
                                 setShowCreateContactDialog(false);
                                 getContacts();
                             }}
-                        // entityDetails={createContactEntityDetails}
                         />
                     }
 

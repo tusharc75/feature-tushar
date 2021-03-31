@@ -15,7 +15,6 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import CreateLeadDialog from './CreateLead'
 import Header from "./LeadsHeader";
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery } from '../../services/util'
@@ -28,6 +27,8 @@ import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { getObjKeys } from "../../constants/helpers";
+import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -69,6 +70,10 @@ const Leads = () => {
   const [deleteRec, setDeleteRec] = useState<any>({})
   const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+  const [entityData, setEntityData] = useState({
+    fields: [],
+    initialValues: {},
+  });
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -162,11 +167,25 @@ const Leads = () => {
   };
 
   const handleCreate = () => {
-    setIsOpen(true)
+
+    axiosInstance().get('/field?resource=Lead').then(({ data: { data } }) => {
+
+      const newFields = [];
+      data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
+
+      setEntityData({
+        fields: newFields,
+        initialValues: getObjKeys("", newFields),
+      });
+
+      setIsOpen(true)
+
+    });
   }
 
   const handleClose = () => {
-    setIsOpen(false)
+    setIsOpen(false);
+    fetchLeads();
   }
 
   const columns = [
@@ -428,12 +447,13 @@ const Leads = () => {
           canDelete={dataRows.filter((d) => d.isChecked).length == 0}
         />
         {
-          isOpen ?
-            <CreateLeadDialog
-              open={isOpen}
-              onClose={handleClose}
-              fetchData={fetchLeads}
-            /> : null
+          isOpen && <ManageLeadDialog
+            open={isOpen}
+            onSuccess={handleClose}
+            onClose={() => { setIsOpen(false) }}
+            isNew={true}
+            dataToUpdate={null}
+          />
         }
       </Container>
       <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>

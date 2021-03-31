@@ -11,42 +11,41 @@ import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
 import DetailsPageHeader from '../../components/DetailsPageHeader'
 import { Link } from "react-router-dom";
-import contactClass from "./contact.module.scss"
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import { useData } from '../../StateProvider/Provider';
-import { contactPage } from '../../routes/Contacts'
+import { entityPage } from '../../routes/Entities'
 import DetailsPage from '../../components/Shared/DetailsPage'
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
-import { getObjKeysWithValues, isObjectEmpty, removeEmptyKeys } from './../../constants/helpers'
+import { isObjectEmpty } from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import EditContact from "./ManageContact/ManageContact";
 
 const Roles = () => {
     const toastConfig = useContext(CustomToastContext);
-
+    
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
-    const [contactData, setContactData] = useState<any>({})
+    const [entityData, setEntityData] = useState<any>({})
     const [loading, setLoading] = useState(false)
     const [showConfirmBox, setShowConfirmBox] = useState(false);
-    const [contactFields, setContactFields] = useState([])
+    const [entityFields, setEntityFields] = useState([])
     const [mainPoints, setMainPoints] = useState({})
     const [isUpdating, setUpdating] = useState(false);
     const [allowedToEdit, setAllowedToEdit] = useState(false)
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
-    const [contactPermissions, setContactPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
+    const [entityPermissions, setEntityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [canEdit, setCanEdit] = useState(false)
     let { id } = useParams();
 
     useEffect(() => {
         if (id) {
-            fetchContactData()
+            fetchEntityData()
         }
     }, [id]);
 
@@ -54,37 +53,37 @@ const Roles = () => {
         const data = user.role?.sideBar;
 
         if (data) {
-            const hasContactPermission = data.find(d => d.name == "Contact");
-            if (hasContactPermission) {
-                setContactPermissions({
-                    isCreate: hasContactPermission.isCreate,
-                    isUpdate: hasContactPermission.isUpdate,
-                    isRead: hasContactPermission.isRead,
-                    isDelete: hasContactPermission.isDelete
+            const hasEntityPermission = data.find(d => d.name == "Entity");
+            if (hasEntityPermission) {
+                setEntityPermissions({
+                    isCreate: hasEntityPermission.isCreate,
+                    isUpdate: hasEntityPermission.isUpdate,
+                    isRead: hasEntityPermission.isRead,
+                    isDelete: hasEntityPermission.isDelete
                 });
             }
         }
     }, [user]);
 
-    const fetchContactData = async () => {
+    const fetchEntityData = async () => {
         setLoading(true)
-        axiosInstance().get(`/contact/${id}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/entity/${id}`).then(({ data: { data } }) => {
 
             handleMainPoints(data)
-            let name = [data.firstName, data.middleName, data.lastName].filter(d => d).join(" ");
 
+            let name = data.entityName
             if (data?.salutation?.optionLabel) {
                 name = data.salutation.optionLabel + name
             }
 
             setHeadingLbl(name)
             handleAllowToEditList(data)
-            setContactData(data)
-            getContactFields()
+            setEntityData(data)
+            getEntityFields()
 
             setCanEdit([...data?.collaborator, data?.owner].some(obj => obj.optionValue === user.user._id))
 
-            setCustomizedRoutes([routes.contact, { title: `${data.firstName} ${data.lastName}` }]);
+            setCustomizedRoutes([routes.entity, { title: `${data.entityName} ` }]);
         }).catch(err => {
             setLoading(false)
         })
@@ -99,13 +98,13 @@ const Roles = () => {
         if (data?.accountName?.optionLabel) {
             tempMp["Account Name"] = data.accountName.optionLabel
         }
-        console.log("🚀 ~ file: ContactDetailPage.js ~ line 96 ~ handleMainPoints ~ tempMp", tempMp)
+        console.log("🚀 ~ file: EntityDetailPage.js ~ line 96 ~ handleMainPoints ~ tempMp", tempMp)
         setMainPoints(tempMp)
     }
 
-    const getContactFields = () => {
-        axiosInstance().get('/field?resource=Contact').then(({ data: { data } }) => {
-            setContactFields(data.filter(d => d.isUpdate || d.isRead))
+    const getEntityFields = () => {
+        axiosInstance().get('/field?resource=Entity').then(({ data: { data } }) => {
+            setEntityFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });
     };
@@ -137,10 +136,10 @@ const Roles = () => {
         },
     ]
 
-    const handleDeleteContact = () => {
-        if (contactData?._id) {
+    const handleDeleteEntity = () => {
+        if (entityData?._id) {
 
-            axiosInstance().put(`/contact/remove`, { ids: [contactData._id] }).then(({ data }) => {
+            axiosInstance().put(`/entity/remove`, { ids: [entityData._id] }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
@@ -155,19 +154,19 @@ const Roles = () => {
     }
     const goBackToListing = () => {
         history.push({
-            pathname: contactPage.path
+            pathname: entityPage.path
         });
     }
 
-    const handleAllowToEditList = (contactDetails) => {
+    const handleAllowToEditList = (entityDetails) => {
         const userId = user?.user?._id;
         let allowToEdit = false;
 
         if (userId) {
-            allowToEdit = (contactDetails.owner?.optionValue && contactDetails.owner.optionValue == userId)
+            allowToEdit = (entityDetails.owner?.optionValue && entityDetails.owner.optionValue == userId)
 
-            if (!allowToEdit && contactDetails.collaborator && contactDetails.collaborator.length > 0) {
-                allowToEdit = contactDetails.collaborator.findIndex(d => d.optionValue == userId) > -1;
+            if (!allowToEdit && entityDetails.collaborator && entityDetails.collaborator.length > 0) {
+                allowToEdit = entityDetails.collaborator.findIndex(d => d.optionValue == userId) > -1;
             }
 
             if (allowToEdit)
@@ -183,50 +182,38 @@ const Roles = () => {
         setOpenUpdateDialog(false);
     };
 
-    const handleUpdateContact = (values) => {
-        
+    const handleUpdateEntity = (values) => {
         setUpdating(true);
         if (values.employees) {
             values.employees = parseInt(values.employees)
         }
         const updatedData = {
             ...values,
-            _id: contactData._id,
+            _id: entityData._id,
         };
 
-        axiosInstance().put('/contact', removeEmptyKeys(updatedData))
-            .then(({ data }) => {
-                fetchContactData()
-                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-                setUpdating(false);
-                setOpenUpdateDialog(false)
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-                setUpdating(false);
-            });
+        axiosInstance().put('/entity', updatedData).then(({ data }) => {
+            fetchEntityData()
+            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+            setUpdating(false);
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+            setUpdating(false);
+        });
     };
     return (
         <>
             <Layout>
                 {openUpdateDialog && (
-                    // <UpdateDetailsDialog
-                    //     title={`Editing  ${contactData.firstName}`}
-                    //     openDialog={openUpdateDialog}
-                    //     onClose={closeUpdateDialog}
-                    //     data={contactData}
-                    //     fields={contactFields}
-                    //     isUpdating={isUpdating}
-                    //     handleUpdate={handleUpdateContact}
-                    // />
-                    <EditContact
-                    isNew={false}
-                    open={openUpdateDialog}
-                    onClose={closeUpdateDialog}
-                    entityData={{ fields: contactFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(contactData, contactFields.map((f) => { return f.fieldData })) }}
-                    loading={loading}
-                    handleSubmit={handleUpdateContact}
-                />
+                    <UpdateDetailsDialog
+                        title={`Editing  ${entityData.firstName}`}
+                        openDialog={openUpdateDialog}
+                        onClose={closeUpdateDialog}
+                        data={entityData}
+                        fields={entityFields}
+                        isUpdating={isUpdating}
+                        handleUpdate={handleUpdateEntity}
+                    />
                 )}
                 <Grid container direction="row">
                     <Grid item xs={12} className="pl-2">
@@ -237,13 +224,13 @@ const Roles = () => {
                 <div>
                     <DetailsPageHeader
                         heading={headingLbl}
-                        logo={contactData?.contactLogo ? contactData.contactLogo : undefined}
+                        logo={entityData?.entityLogo ? entityData.entityLogo : undefined}
                         mainPoints={mainPoints}
                         // style={{ marginTop: "150px", minHeight: "200px" }}
                         showHeading={true}
                     >
                        {
-                                contactPermissions.isUpdate && canEdit ?
+                                entityPermissions.isUpdate && canEdit ?
                                     <Button
                                         variant="contained"
                                         color="primary"
@@ -255,19 +242,19 @@ const Roles = () => {
 
                             <Box component="span" marginX={1} />
                             {
-                                contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id &&
-                                    contactData.owner.optionValue === user.user._id ?
+                                entityPermissions.isDelete && entityData?.owner?.optionValue && user?.user?._id &&
+                                    entityData.owner.optionValue === user.user._id ?
                                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                                     : null
                             }
 
                     </DetailsPageHeader>
 
-                    <div className={`${contactClass.detail_page_container}`}>
+                    <div className="detailPageContainer">
                         <Container>
                             <Grid container spacing={3}>
                                 <Grid item sm={8} md={8} lg={8}>
-                                    <div className={`${contactClass.detail_page_div1}`}
+                                    <div className="detailPageDiv1"
                                     // style={{ pointerEvents: allowedToEdit ? "" : "none" }}
                                     >
                                         {
@@ -281,7 +268,7 @@ const Roles = () => {
                                                         </Grid>
                                                     ))}
                                                 </Grid> :
-                                                <DetailsPage data={contactData} fields={contactFields} />
+                                                <DetailsPage data={entityData} fields={entityFields} />
 
                                             // <DetailsPage
                                             //     data={contactData}
@@ -295,28 +282,27 @@ const Roles = () => {
                                         }
                                     </div>
                                 </Grid>
-                                <Grid item sm={4} md={4} lg={4} className={`${contactClass.custom_grid}`} >
+                                <Grid item sm={4} md={4} lg={4} className="customGrid" >
                                     {
-                                        !isObjectEmpty(contactData) && <div>
+                                        !isObjectEmpty(entityData) && <div>
                                             <Activity relatedTo={[
-                                                { type: "account", referenceId: contactData.accountName.optionValue, access: false },
-                                                { type: "contact", referenceId: contactData._id, access: true }
+                                                { type: "account", referenceId: entityData.accountName.optionValue, access: false }
                                             ]} handleActivityRefresh={() => { }} />
                                         </div>
                                     }
 
-                                    <div className={`${contactClass.detail_page_div2}`}>
+                                    <div className="detailPageDiv2">
                                         {
                                             quickLinks && quickLinks.length ?
                                                 quickLinks.map((k, index) => {
-                                                    return <Link key={index} className={`${contactClass.custom_link}`}>{k.label || ''}({k.count || 0})</Link>
+                                                    return <Link key={index} className="customLink">{k.label || ''}({k.count || 0})</Link>
                                                 }) :
                                                 null
                                         }
                                     </div>
-                                    <div className={`${contactClass.detail_page_div3}`} >
+                                    <div className="detailPageDiv3" >
                                         <Typography color="primary" variant="h6">Related Accounts</Typography>
-                                        <Box className={`${contactClass.custom_box1}`}>
+                                        <Box className="customBox1">
 
                                         </Box>
                                     </div>
@@ -325,9 +311,9 @@ const Roles = () => {
                             {showConfirmBox ? (
                                 <ConfirmationDialog
                                     open={showConfirmBox}
-                                    message={`Are you sure you want to delete this Contact ?`}
+                                    message={`Are you sure you want to delete this Entity ?`}
                                     onClose={() => setShowConfirmBox(false)}
-                                    onOk={handleDeleteContact}
+                                    onOk={handleDeleteEntity}
                                 />
                             ) : null}
                         </Container>
