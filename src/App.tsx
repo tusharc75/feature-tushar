@@ -28,6 +28,7 @@ import ProductCategory from "./pages/ProductCategory";
 import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
 import User from "./pages/User";
 import Entity from "./pages/Entity";
+import EntityDetailPage from "./pages/Entity/EntityDetailPage";
 import UserDetailsPage from "./pages/User/UserDetailsPage";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -119,6 +120,9 @@ function App() {
           <PrivateRoute exact path="/entity">
             <Entity />
           </PrivateRoute>
+          <PrivateRoute exact path="/entity/detail/:id">
+            <EntityDetailPage />
+          </PrivateRoute>
           <PrivateRoute exact path="/activity">
             <Activitydemo />
           </PrivateRoute>
@@ -142,14 +146,16 @@ function App() {
         </Switch>
       </AnimatePresence>
 
-      {
-        toast?.toastConfig?.open && <CustomToaster
+      {toast?.toastConfig?.open && (
+        <CustomToaster
           type={toast.toastConfig.type}
           message={toast.toastConfig.message}
           open={toast.toastConfig.open}
-          close={() => { toast.setToastConfig({ open: false }) }}
+          close={() => {
+            toast.setToastConfig({ open: false });
+          }}
         />
-      }
+      )}
     </ThemeProvider>
   );
 }
