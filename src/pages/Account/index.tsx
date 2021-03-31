@@ -298,12 +298,12 @@ export default function Account() {
                                 </Tooltip> :
                                 <Tooltip className="cursor-stop" title="You must be the owner of this account to get the delete functionality">
                                     <IconButton aria-label="Delete">
-                                        <DeleteIcon fontSize="small" color="error" />
+                                        <DeleteIcon fontSize="small" color="disabled" />
                                     </IconButton>
                                 </Tooltip> :
                             <Tooltip className="cursor-stop" title="You do not have permission to delete account">
                                 <IconButton aria-label="Delete">
-                                    <DeleteIcon fontSize="small" color="error" />
+                                    <DeleteIcon fontSize="small" color="disabled" />
                                 </IconButton>
                             </Tooltip>
                     }

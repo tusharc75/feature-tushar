@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { Formik, Form } from "formik";
-import {  getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
+import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
 import { commonStyle } from '../CommonStyles'
 import FormTypes from "../../../components/Helpers/FormTypes";
@@ -11,12 +11,16 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
 import _ from 'lodash'
+import { useData } from '../../../StateProvider/Provider';
 
 const arr = [...Array(9).keys()]
 
 export default function ManageContact(props) {
 
     const { entityData, handleSubmit, onClose, open, isNew } = props
+
+    const { state: { user } }: any = useData();
+    const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
 
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
@@ -138,6 +142,7 @@ export default function ManageContact(props) {
                                                                                     fullWidth
                                                                                     isTooltip={true}
                                                                                     size="small"
+                                                                                    disabled={disableOwnerSelection}
                                                                                     onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
                                                                                 /> : field.fieldName == "collaborator" ?
                                                                                     <FormTypes

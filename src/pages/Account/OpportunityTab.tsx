@@ -42,7 +42,7 @@ function DisplayData({ label, value, color = "" }) {
     </div>
 }
 
-export default function UsersTab({ data }) {
+export default function OpportunityTab({ data }) {
 
     const classes = useStyles();
 

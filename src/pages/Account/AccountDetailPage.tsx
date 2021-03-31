@@ -169,6 +169,12 @@ const Roles = () => {
         }
     }, [accountData])
 
+    // const fetchOpportunities = () => {
+    //     axiosInstance().get(`/account/${id}`).then(({ data: { data } }) => {
+
+    //     });
+    // }
+
     const fetchAccountData = async () => {
         setLoading(true)
 

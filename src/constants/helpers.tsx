@@ -40,7 +40,6 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
         ? dataObj[key.fieldName]
         : false;
     } else if (key.type === "multiSelect") {
-      console.log(dataObj[key.fieldName]);
       const values = dataObj[key.fieldName].length
         ? dataObj[key.fieldName].map((val: any) => filterValues(val))
         : [];
