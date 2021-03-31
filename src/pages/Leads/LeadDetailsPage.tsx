@@ -15,10 +15,11 @@ import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import { removeEmptyKeys } from "../../constants/helpers";
+import { getObjKeysWithValues, removeEmptyKeys } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import styles from "./LeadDetailsPage.module.scss"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,11 +46,11 @@ const LeadDetailsPage = () => {
 
   let { id } = useParams();
 
-  useEffect(() => {
-    if (id) {
-      fetchLeadData();
-    }
-  }, [id]);
+  // useEffect(() => {
+  //   if (id && user) {
+  //     fetchLeadData();
+  //   }
+  // }, [id]);
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -65,6 +66,8 @@ const LeadDetailsPage = () => {
         });
       }
     }
+
+    fetchLeadData();
   }, [user]);
 
   const fetchLeadData = async () => {
@@ -77,13 +80,14 @@ const LeadDetailsPage = () => {
       }
       setHeadingLbl(name);
       const userId = user?.user?._id;
+
       setAllowedToEdit([...data.collaborator, data.owner].some(d => d.optionValue == userId));
       setAllowedToDelete([data.owner].some(d => d.optionValue == userId));
       setLeadData(data);
       getLeadFields();
       setCustomizedRoutes([
         routes.lead,
-        { title: `${data.firstName} ${data.lastName}` },
+        { title: name },
       ]);
     });
   };
@@ -131,25 +135,7 @@ const LeadDetailsPage = () => {
   };
 
   const handleUpdateLead = (values) => {
-    setUpdating(true);
-    // if (values.noOfEmployees) {
-    //   values.noOfEmployees = parseInt(values.noOfEmployees);
-    // }
-    const updatedData = {
-      ...values,
-      _id: leadData._id,
-    };
-    axiosInstance()
-      .put("/lead", removeEmptyKeys(updatedData))
-      .then(({ data }) => {
-        fetchLeadData();
-        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-        setUpdating(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setUpdating(false);
-      });
+    fetchLeadData();
     setOpenUpdateDialog(false);
   };
 
@@ -181,7 +167,16 @@ const LeadDetailsPage = () => {
 
   return (
     <>
-      {openUpdateDialog && (
+      {
+        openUpdateDialog && <ManageLeadDialog
+          open={openUpdateDialog}
+          onSuccess={handleUpdateLead}
+          onClose={() => { setOpenUpdateDialog(false) }}
+          isNew={false}
+          dataToUpdate={leadData}
+        />
+      }
+      {/* {openUpdateDialog && (
         <UpdateDetailsDialog
           title="Lead Update"
           openDialog={openUpdateDialog}
@@ -191,13 +186,10 @@ const LeadDetailsPage = () => {
           isUpdating={isUpdating}
           handleUpdate={handleUpdateLead}
         />
-      )}
+      )} */}
       <Layout>
-        <Grid container direction="row">
-          <Grid item xs={12} className="pl-2">
-            <CustomBreadCrumbs routes={customizedRoutes} />
-          </Grid>
-        </Grid>
+        <CustomBreadCrumbs routes={customizedRoutes} />
+
         {!leadData ? (
           <Container>
             <Skeleton variant="text" width="150px" height="40px" />
