@@ -150,7 +150,7 @@ export default function BigCalander({ type, activity }) {
                                             <Typography className={_day.month == month ? classes.fontBold : ""}>{_day.day}</Typography>
                                         </Box>
                                         {(activity.filter((data) => moment(data.dueDate).format("YYYY-MM-DD") === (year + "-" + (_day.month.toString()).padStart(2, "0") + "-" + (_day.day.toString()).padStart(2, "0")))).map((_data, key) => (
-                                            <Box style={{ cursor: "pointer" }} key={key} p={0.5} m={1} border={1} bgcolor="grey.100" borderColor="grey.300" onClick={() => handleActivityOpen(_data._id)}>
+                                            key === 0 && <Box style={{ cursor: "pointer" }} key={key} p={0.5} m={1} border={1} bgcolor="grey.100" borderColor="grey.300" onClick={() => handleActivityOpen(_data._id)}>
                                                 <Typography >{_data.name}</Typography>
                                             </Box>
                                         ))}

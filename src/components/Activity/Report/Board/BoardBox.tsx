@@ -22,7 +22,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
     const ref = React.useRef(null);
 
     const [{ }, drop] = useDrop({
-        accept: ["move"],
+        accept: "move",
         drop: () => {
         },
         hover: (item: any, monitor) => {
@@ -51,7 +51,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
 
 
     const [{ isDragging }, drag] = useDrag({
-        item: { type: "move", id, index },
+        item: { id, index },
         type: "move",
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),

@@ -3,6 +3,7 @@ import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { purple } from '@material-ui/core/colors';
+import { capitalize } from './ListRelatedTo';
 
 const useStyles = makeStyles((theme) => ({
     boldFont: {
@@ -17,6 +18,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
+
 export const RelatedToDispay = ({ relatedTo }) => {
 
 
@@ -27,7 +29,7 @@ export const RelatedToDispay = ({ relatedTo }) => {
         </Box>
         {relatedTo && relatedTo.map((_element, index) => (
             <Box mr={1} component="div" display="inline">
-                <Chip key={index} className="text-capitalize" label={_element.type + " - " + _element.name} size="medium" color={classes[_element.type]} />
+                <Chip key={index} label={capitalize(_element.type) + " - " + _element.name} size="medium" color={classes[_element.type]} />
             </Box>
         ))}
     </Box>
