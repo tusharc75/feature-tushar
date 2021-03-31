@@ -58,7 +58,7 @@ export default function ManageAccountMain(props) {
         setLoading(false);
         axiosInstance().post('/account', removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
-            toastConfig.setToastConfig({ open: true, type: "success", errorMsg: data.message })
+            toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
             setLoading(false);
         }).catch((error) => {
             setLoading(false);
