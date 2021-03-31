@@ -7,6 +7,7 @@ import CustomTabs from "../../components/Helpers/CustomTabs";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import TabPanel from "../../components/TabPanel";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import CustomDialog from "../../components/Helpers/CustomDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -19,7 +20,12 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
+import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
+import ManageOpportunity from './ManageOpportunities/ManageOpportunities'
+import DeleteButton from "../../components/Helpers/DeleteButton";
+
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { getObjKeysWithValues, removeEmptyKeys } from "../../constants/helpers";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -37,7 +43,15 @@ function OpportunityDetailsPage() {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
-  const [contactTabIndex, setContactTabIndex] = useState(0);
+  
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const handleOpenUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const closeUpdateDialog = () => {
+    setOpenUpdateDialog(false);
+  };
   let { id } = useParams();
 
   const [opportunityPermissions, setOpportunityPermissions] = useState({
@@ -162,10 +176,12 @@ function OpportunityDetailsPage() {
     };
 
     axiosInstance()
-      .put("/opportunity", updatedData)
+      .put("/opportunity", removeEmptyKeys(updatedData))
       .then(({ data }) => {
         toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         setUpdating(false);
+        goBackToListing();
+        
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -223,21 +239,29 @@ function OpportunityDetailsPage() {
               opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
             }
             mainPoints={mainPoints}
-            // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
-            <Box component="span" marginX={1} />
-            {opportunityPermissions.isDelete &&
-              opportunityData?.owner?.optionValue &&
-              user?.user?._id &&
-              opportunityData.owner.optionValue === user.user._id ? (
+            {
+              handleAllowToEditList ?
+              (
               <Button
                 variant="contained"
-                color="secondary"
-                onClick={() => setShowConfirmBox(true)}
+                color="primary"
+                onClick={handleOpenUpdateDialog}
               >
-                Delete
+                Edit
               </Button>
+            ) : null
+            }
+            <Box component="span" marginX={1} />
+            {opportunityPermissions.isDelete &&
+              opportunityData?.owner.optionValue &&
+              user?.user?._id &&
+              opportunityData.owner.optionValue === user.user._id ? (
+              <DeleteButton
+                text="Delete"
+                onClick={() => setShowConfirmBox(true)}
+              />
             ) : null}
           </DetailsPageHeader>
         )}
@@ -268,22 +292,14 @@ function OpportunityDetailsPage() {
                   </Box>
                 ) : (
                   <>
-                    <CustomTabs
-                      value={currentTabIndex}
-                      setValue={setCurrentTabIndex}
-                      tabs={["Details", "Activity"]}
-                    />
+                    
                     <TabPanel value={currentTabIndex} index={0}>
                       <Box padding="16px">
-                        <DetailsPage data={opportunityData} fields={opportunityFields} />
-                        {/* <DetailsPage
-                          data={opportunityData}
-                          fields={opportunityFields}
-                          isUpdating={isUpdating}
-                          canEdit={allowedToEdit}
-                          handleUpdate={handleUpdateOpportunity}
-                          sourceComponent="opportunity"
-                        /> */}
+                        <DetailsPage 
+                          data={opportunityData} 
+                          fields={opportunityFields} 
+                        />
+                        
                       </Box>
                     </TabPanel>
                     <TabPanel value={currentTabIndex} index={1}>
@@ -333,6 +349,15 @@ function OpportunityDetailsPage() {
               onOk={handleDeleteOpportunity}
             />
           ) : null}
+          {openUpdateDialog ? (
+            <ManageOpportunity
+              isNew={false}
+              open={openUpdateDialog}
+              onClose={closeUpdateDialog}     
+              entityData={{ fields: opportunityFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })) }}
+              handleSubmit={handleUpdateOpportunity}
+            />
+          ): null}
         </div>
       </Layout>
     </>

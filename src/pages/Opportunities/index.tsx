@@ -17,9 +17,8 @@ import Layout from "../../components/Layout";
 import Container from "../../components/Container";
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery, displayDate } from '../../services/util'
-import Header from "./Header";
+import OpportunitiesHeader from "./OpportunitiesHeader";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import CreateOpportunity from './CreateOpportunity'
 import MessageDialog from '../../components/Helpers/MessageDialog'
 import { opportunityDetailPage } from '../../routes/Opportunity'
 import "./style.scss";
@@ -28,6 +27,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageOpportunityMain from "./ManageOpportunities";
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -111,7 +111,7 @@ const Opportunities = () => {
         isChecked: false,
         id: u._id,
         owner: u.owner?.optionLabel ? u.owner.optionLabel : '',
-        stage: u?.stage?.optionLabel,
+        stage: u.stage ? u.stage:'',
         closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
         // accountName: u?.accountName?.optionLabel || ''
       }
@@ -413,7 +413,7 @@ const Opportunities = () => {
 
         {/* Tables Begins Here */}
         <Container>
-          <Header
+          <OpportunitiesHeader
             selectedType={selectedType}
             onTypeChange={handleOpportunityTypeSel}
             options={OpportunityTypes}
@@ -472,7 +472,7 @@ const Opportunities = () => {
               /> : null
           }
           {
-            showCreateOpportunityDialog && <CreateOpportunity
+            showCreateOpportunityDialog && <ManageOpportunityMain
               open={showCreateOpportunityDialog}
               onClose={() => setShowCreateOpportunityDialog(false)}
               onSuccess={() => {
