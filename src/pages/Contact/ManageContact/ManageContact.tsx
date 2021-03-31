@@ -66,7 +66,6 @@ export default function ManageContact(props) {
     const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
 
         // const errors = formValidation(values, _.cloneDeep(entityData.fields));
-        debugger
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
                 if (input.required) {
@@ -155,61 +154,7 @@ export default function ManageContact(props) {
                                                                                         isTooltip={true}
                                                                                         size="small"
                                                                                         onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
-                                                                                    /> : field.fieldName == "isShippingAddressSameAsBillingAddress" ?
-                                                                                        <FormTypes
-                                                                                            values={values}
-                                                                                            errors={errors}
-                                                                                            touched={touched}
-                                                                                            label={field.fieldLabel}
-                                                                                            name={field.fieldName}
-                                                                                            type={field.type}
-                                                                                            setFieldValue={setFieldValue}
-                                                                                            required={field.required}
-                                                                                            fullWidth
-                                                                                            isTooltip={true}
-                                                                                            size="small"
-                                                                                            onChange={(e) => {
-                                                                                                setFieldValue(field.fieldName, e.target.checked)
-                                                                                                if (e.target.checked && values.billingAddress) {
-                                                                                                    setFieldValue("shippingAddress", values.billingAddress)
-                                                                                                }
-                                                                                            }}
-                                                                                        /> : field.fieldName == "billingAddress" ?
-                                                                                            <FormTypes
-                                                                                                values={values}
-                                                                                                errors={errors}
-                                                                                                touched={touched}
-                                                                                                label={field.fieldLabel}
-                                                                                                name={field.fieldName}
-                                                                                                type={field.type}
-                                                                                                options={field.option}
-                                                                                                setFieldValue={setFieldValue}
-                                                                                                required={field.required}
-                                                                                                fullWidth
-                                                                                                isTooltip={true}
-                                                                                                size="small"
-                                                                                                onChange={(event, newValue) => {
-                                                                                                    setFieldValue(field.fieldName, newValue);
-                                                                                                    if (values.isShippingAddressSameAsBillingAddress == true) {
-                                                                                                        setFieldValue("shippingAddress", newValue)
-                                                                                                    }
-                                                                                                }}
-                                                                                            /> : field.fieldName == "shippingAddress" ?
-                                                                                                <FormTypes
-                                                                                                    values={values}
-                                                                                                    errors={errors}
-                                                                                                    touched={touched}
-                                                                                                    label={field.fieldLabel}
-                                                                                                    name={field.fieldName}
-                                                                                                    type={field.type}
-                                                                                                    options={field.option}
-                                                                                                    setFieldValue={setFieldValue}
-                                                                                                    required={field.required}
-                                                                                                    fullWidth
-                                                                                                    isTooltip={true}
-                                                                                                    size="small"
-                                                                                                    disabled={values.isShippingAddressSameAsBillingAddress == true}
-                                                                                                /> : <FormTypes
+                                                                                    /> : <FormTypes
                                                                                                     // {...rest}
                                                                                                     values={values}
                                                                                                     errors={errors}
