@@ -512,10 +512,11 @@ export default function Contact() {
                             // }}
                         // entityDetails={createContactEntityDetails}
                         open={showCreateContactDialog}
-                        onClose={() => {
-                                setShowCreateContactDialog(false);
-                                getContacts();
-                            }}
+                        onClose={() => setShowCreateContactDialog(false)}
+                            onSuccess={() => {
+                                    setShowCreateContactDialog(false);
+                                    getContacts();
+                                }}
                         />
                     }
 
