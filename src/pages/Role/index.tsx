@@ -25,8 +25,9 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
-import CreateUser from "./CreateUser";
+
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import CreateRole from "./CreateRole";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -41,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const User: FC = () => {
+const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
@@ -49,16 +50,16 @@ const User: FC = () => {
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [users, setUsers] = useState<any[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [renderCount, setRenderCount] = useState(0);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingRoles, setLoadingRoles] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllUsers, setCheckAllUsers] = useState(false);
+  const [checkAllRoles, setCheckAllRoles] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [usersPermissions, setUsersPermissions] = useState({
+  const [rolesPermissions, setRolesPermissions] = useState({
     isCreate: false,
     isUpdate: false,
     isRead: false,
@@ -70,41 +71,41 @@ const User: FC = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
 
-  const fetchUsers = useCallback(() => {
+  const fetchRoles = useCallback(() => {
     let searchParams: any = { ...query };
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
-    let api = getSearchQuery("/user", searchParams);
-    setLoadingUsers(true);
+    let api = getSearchQuery("/role", searchParams);
+    setLoadingRoles(true);
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
-        setUsers(data);
+        setRoles(data);
         getRows(data);
         setRowCount(count);
-        setLoadingUsers(false);
+        setLoadingRoles(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setLoadingUsers(false);
+        setLoadingRoles(false);
       });
   }, [searchVal, query]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchRoles();
+  }, [fetchRoles]);
 
   useEffect(() => {
     const data = user?.role?.sideBar;
     if (data) {
-      const hasUsersPermission = data.find((d: any) => d.name === "User");
-      if (hasUsersPermission) {
-        setUsersPermissions({
-          isCreate: hasUsersPermission.isCreate,
-          isUpdate: hasUsersPermission.isUpdate,
-          isRead: hasUsersPermission.isRead,
-          isDelete: hasUsersPermission.isDelete,
+      const hasRolePermission = data.find((d: any) => d.name === "Role");
+      if (hasRolePermission) {
+        setRolesPermissions({
+          isCreate: hasRolePermission.isCreate,
+          isUpdate: hasRolePermission.isUpdate,
+          isRead: hasRolePermission.isRead,
+          isDelete: hasRolePermission.isDelete,
         });
       }
     }
@@ -112,13 +113,12 @@ const User: FC = () => {
 
   const getRows = (data: []) => {
     const rows = data.length
-      ? data.map((user: any) => ({
-          id: user._id,
+      ? data.map((role: any) => ({
+          id: role._id,
           isChecked: false,
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-          status: user.blocked ? user.blocked : false,
+          name: role.name,
+          description: role.description,
+          createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
         }))
       : [];
 
@@ -132,9 +132,9 @@ const User: FC = () => {
       renderHeader: () => (
         <Checkbox
           color="primary"
-          checked={checkAllUsers}
+          checked={checkAllRoles}
           onChange={(ev) => {
-            setCheckAllUsers(ev.target.checked);
+            setCheckAllRoles(ev.target.checked);
             const gridData = dataRows;
             gridData.map((d) => {
               d.isChecked = ev.target.checked;
@@ -166,30 +166,15 @@ const User: FC = () => {
         <Link
           title={params.value}
           className="text-truncate LeadNameLink"
-          to={`${routes.userDetails.path}/${params.row.id}`}
+          to={`${routes.roleDetails.path}/${params.row.id}`}
         >
           {params.value}
         </Link>
       ),
     },
     {
-      field: "status",
-      headerName: "Status",
-      width: 100,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: any) => (
-        <Chip
-          size="small"
-          label={params.value ? "Inactive" : "Active"}
-          className={params.value ? "bg-primary" : "bg-danger"}
-        />
-      ),
-    },
-
-    {
-      field: "email",
-      headerName: "Email",
+      field: "description",
+      headerName: "Description",
       width: 200,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
@@ -211,34 +196,30 @@ const User: FC = () => {
     {
       field: "actions",
       headerName: "Actions ",
-      renderCell: (params: any) =>
-        user?.user._id === params.row.id ? (
-          <p title="There is no action for currently logged in user">
-            No Actions
-          </p>
-        ) : (
-          <>
-            {usersPermissions.isDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You do not have permission to delete user"
+      renderCell: (params: any) => (
+        <>
+          {rolesPermissions.isDelete ? (
+            <Tooltip title="Delete">
+              <IconButton
+                aria-label="Delete"
+                onClick={() => showConfirmBox(params.row)}
               >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </>
-        ),
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip
+              className="cursor-stop"
+              title="You do not have permission to delete role"
+            >
+              <IconButton aria-label="Delete">
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </>
+      ),
+
       width: 200,
     },
   ];
@@ -253,9 +234,9 @@ const User: FC = () => {
     const checkedRecords = gridData.filter((d) => d.isChecked === true);
 
     if (checkedRecords.length === gridData.length) {
-      setCheckAllUsers(true);
+      setCheckAllRoles(true);
     } else {
-      setCheckAllUsers(false);
+      setCheckAllRoles(false);
     }
   };
 
@@ -274,7 +255,7 @@ const User: FC = () => {
     }
   };
 
-  const handleDeleteUser = async () => {
+  const handleDeleteRole = async () => {
     setDeleteLoading(true);
     let recs = [];
     if (deleteRec?.id) {
@@ -287,7 +268,7 @@ const User: FC = () => {
 
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/user/remove`, { ids: [...recs] })
+        .put(`/role/remove`, { ids: [...recs] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -297,7 +278,7 @@ const User: FC = () => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
-          fetchUsers();
+          fetchRoles();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -349,12 +330,12 @@ const User: FC = () => {
   return (
     <>
       {isOpen && (
-        <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
+        <CreateRole open={isOpen} close={handleClose} fetchData={fetchRoles} />
       )}
       <Layout>
         <Grid container spacing={3} direction="row">
           <Grid item xs={12} sm={6} className="pl-3">
-            <CustomBreadCrumbs routes={[routes.user]} />
+            <CustomBreadCrumbs routes={[routes.role]} />
           </Grid>
           <Grid item xs={12} sm={6} className="pr-3">
             <Grid container justify="flex-end">
@@ -408,7 +389,7 @@ const User: FC = () => {
           <Header
             onSearch={handleSearch}
             searchVal={searchVal}
-            userPermissions={usersPermissions}
+            rolePermissions={rolesPermissions}
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
             canDelete={dataRows.filter((d) => d.isChecked).length == 0}
@@ -420,8 +401,8 @@ const User: FC = () => {
               components={{
                 Toolbar: DataGridCustomToolbar,
               }}
-              loading={loadingUsers}
-              rows={loadingUsers ? [] : dataRows}
+              loading={loadingRoles}
+              rows={loadingRoles ? [] : dataRows}
               columns={columns}
               disableSelectionOnClick
               disableMultipleSelection
@@ -448,7 +429,7 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${
+            message={`Are you sure, you want to delete role ${
               deleteRec.name || ""
             }?`}
             onClose={() => {
@@ -456,7 +437,7 @@ const User: FC = () => {
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteUser}
+            onOk={handleDeleteRole}
           />
         ) : null}
       </Layout>
@@ -464,4 +445,4 @@ const User: FC = () => {
   );
 };
 
-export default User;
+export default Roles;

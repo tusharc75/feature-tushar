@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Toolbar, Box, makeStyles, withWidth } from "@material-ui/core";
 import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
 import Sidebar from "./Sidebar/Sidebar";
 import Footer from "./Footer";
@@ -18,6 +19,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Layout = ({ children, width }) => {
   const contentRef = useRef(null);
+  const { key } = useLocation();
   const {
     state: { userLoading },
   }: any = useData();
@@ -28,14 +30,13 @@ const Layout = ({ children, width }) => {
 
   const handleToggleState = () => toggleDrawer && setToggleDrawer(false);
 
-  useEffect(
-    () =>
-      contentRef.current.scrollIntoView({
-        behaviour: "smooth",
-        block: "start",
-      }),
-    [children]
-  );
+  useEffect(() => {
+    contentRef.current.scrollIntoView({
+      behaviour: "smooth",
+      block: "start",
+    });
+    console.log(key);
+  }, [key]);
 
   return (
     <div ref={contentRef}>
