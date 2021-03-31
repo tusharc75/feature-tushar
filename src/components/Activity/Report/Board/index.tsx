@@ -10,6 +10,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { GetBoard } from "../../../../axios/activity";
 import Loader from "../../../../components/Loader";
 import { BoardList } from "./BoardList";
+import _ from 'lodash';
 
 
 const Board = ({ type, filter, activityId }) => {
@@ -30,9 +31,19 @@ const Board = ({ type, filter, activityId }) => {
             });
     };
 
-
-    const handleChangeStatus = () => {
-
+    const handleChangeStatus = (activityId, status) => {
+        const updatedState = _.map(activity, stateItem => {
+            if (stateItem._id === activityId) {
+                stateItem.status = status;
+            }
+            return stateItem;
+        });
+        setActivity(updatedState)
+        // UpdateActivity(activityId, { field: "status", content: status })
+        //     .then(({ data }) => {
+        //     })
+        //     .catch((err) => {
+        //     });
     }
 
     return (activity ? <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>

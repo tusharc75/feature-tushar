@@ -1,4 +1,5 @@
-import api from './axios'
+//import api from './axios'
+import api from './axiosInstance'
 
 export const GetUsers = async () => {
     const { data } = await api().get(`/activity/user`);

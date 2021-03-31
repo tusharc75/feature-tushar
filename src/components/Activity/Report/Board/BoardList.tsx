@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
 import { BoardBox } from './BoardBox';
-//import update from 'immutability-helper';
+import update from 'immutability-helper';
 import { useDrag, useDrop } from 'react-dnd';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
@@ -16,25 +16,25 @@ export const BoardList = ({ status, type, activity, fetchBoard, handleChangeStat
     }, [activity])
 
     const moveCard = useCallback((dragIndex, hoverIndex) => {
-        // const dragCard = subActivity[dragIndex];
-        // setSubActivity(update(subActivity, {
-        //     $splice: [
-        //         [dragIndex, 1],
-        //         [hoverIndex, 0, dragCard],
-        //     ],
-        // }));
+        const dragCard = subActivity[dragIndex];
+        setSubActivity(update(subActivity, {
+            $splice: [
+                [dragIndex, 1],
+                [hoverIndex, 0, dragCard],
+            ],
+        }));
     }, [subActivity]);
 
     const [{ }, drop] = useDrop({
-        accept: ["move"],
+        accept: "move",
         drop: (data: any) => {
-            handleChangeStatus(data.id, status)
+            handleChangeStatus(data._id, status)
         },
     });
     (drop(ref));
 
-    return <div ref={ref}>
-        <Box>
+    return <div ref={ref} >
+        <Box minHeight="100%" >
             {subActivity.map((element, index) => (
                 <BoardBox
                     data={element}

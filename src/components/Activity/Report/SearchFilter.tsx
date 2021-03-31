@@ -11,6 +11,10 @@ const allSearch = [
     { type: "opportunity", name: "All", isAll: true }
 ]
 
+export const capitalize = (string) => {
+    return string && typeof string === "string" ? string.charAt(0).toUpperCase() + string.slice(1) : string;
+};
+
 export const SearchFilter = ({ handleChangeFilter, filter }) => {
 
 
@@ -53,7 +57,7 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
         }}
         renderTags={(value, getTagProps) =>
             value.map((option, index) => (
-                <Chip variant="outlined" className="text-capitalize" label={option && (option.type + " - " + option.name)} {...getTagProps({ index })} />
+                <Chip variant="outlined" label={option && (capitalize(option.type) + " - " + option.name)} {...getTagProps({ index })} />
             ))
         }
         renderInput={(params) => (
@@ -70,11 +74,11 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
             return (
                 <Grid container alignItems="center" spacing={3}>
                     <Grid item>
-                        <Chip variant="outlined" className="text-capitalize" color="primary" label={option.isAll ? option.name + " " + option.type : option.type} />
+                        <Chip variant="outlined" color="primary" label={option.isAll ? option.name + " " + capitalize(option.type) : capitalize(option.type)} />
                     </Grid>
                     <Grid item xs>
                         {!option.isAll &&
-                            <Typography variant="body2">
+                            <Typography variant="body2" >
                                 {option.name}
                             </Typography>}
                     </Grid>
