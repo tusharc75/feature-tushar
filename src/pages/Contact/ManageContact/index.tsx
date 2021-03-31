@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ManageContact from './ManageContact'
-import { getObjKeys } from '../../../constants/helpers';
+import { getObjKeys, initializeDropdownById } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from '../../../axios/axiosInstance'
@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 export default function ManageContactMain(props) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { open, onClose, onSuccess } = props
+    const { open, onClose, onSuccess, accountId } = props
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -27,7 +27,16 @@ export default function ManageContactMain(props) {
         setLoading(true)
         axiosInstance().get(`/field?resource=Contact`).then(({ data: { data } }) => {
             const newFields = [];
-            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
+            data.filter(d => d.isCreate).map((_f) => {
+
+                //  If this dialog opens from account details screen, make that account preselected
+                if (accountId) {
+                    _f = initializeDropdownById(_f, "accountName", accountId);
+                }
+
+                newFields.push(_f.fieldData)
+            });
+
             setEntityData({
                 fields: newFields,
                 initialValues: getObjKeys("", newFields),

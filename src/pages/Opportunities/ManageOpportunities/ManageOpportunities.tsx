@@ -18,6 +18,8 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import _ from 'lodash'
+import { useData } from '../../../StateProvider/Provider';
+
 const useStyles = makeStyles((theme) => ({
     root: {
         margin: 0,
@@ -44,11 +46,14 @@ const DialogActions = withStyles((theme) => ({
     },
 }))(MuiDialogActions);
 
-export default function ManageOpportunity({ open,isNew,onClose,entityData,handleSubmit}) {
+export default function ManageOpportunity({ open, isNew, onClose, entityData, handleSubmit }) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const history = useHistory();
-    
+
+    const { state: { user } }: any = useData();
+    const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
+
 
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
@@ -95,8 +100,8 @@ export default function ManageOpportunity({ open,isNew,onClose,entityData,handle
     }
     //  Owner, Collaborator Code - End
 
-   
-    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false,errors, resetForm) => {
+
+    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, errors, resetForm) => {
         // const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
@@ -171,6 +176,7 @@ export default function ManageOpportunity({ open,isNew,onClose,entityData,handle
                                                                             fullWidth
                                                                             isTooltip={true}
                                                                             size="small"
+                                                                            disabled={disableOwnerSelection}
                                                                             onOpen={() => { onOwnerDropdownOpen(values["collaborator"]) }}
                                                                         /> : field.fieldName == "collaborator" ?
                                                                             <FormTypes
@@ -224,26 +230,26 @@ export default function ManageOpportunity({ open,isNew,onClose,entityData,handle
                                 </Form>
                             </DialogContent>
 
-                            
 
-                                    <CustomDialogFooter>
-                                        <Button onClick={onClose} variant="outlined" color="primary" >
-                                            Cancel
+
+                            <CustomDialogFooter>
+                                <Button onClick={onClose} variant="outlined" color="primary" >
+                                    Cancel
                                              </Button>
 
-                                        <CustomButton
-                                            loading={loading}
-                                            variant="contained"
-                                            color="primary"
-                                            disabled={loading || Object.keys(errors).length > 0 ? true : false}
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                onSubmit(setFieldTouched, values, setValues, setErrors, false,errors, resetForm)
-                                            }}
-                                        >
-                                            Save
+                                <CustomButton
+                                    loading={loading}
+                                    variant="contained"
+                                    color="primary"
+                                    disabled={loading || Object.keys(errors).length > 0 ? true : false}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        onSubmit(setFieldTouched, values, setValues, setErrors, false, errors, resetForm)
+                                    }}
+                                >
+                                    Save
                                         </CustomButton>
-                                    </CustomDialogFooter>
+                            </CustomDialogFooter>
                         </>
                     )}
                 </Formik>

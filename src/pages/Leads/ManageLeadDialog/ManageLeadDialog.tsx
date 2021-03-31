@@ -13,11 +13,15 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/Button';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import { useData } from '../../../StateProvider/Provider';
 
 const arr = [...Array(9).keys()]
 
 export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, dataToUpdate }) {
     const toastConfig = useContext(CustomToastContext);
+
+    const { state: { user } }: any = useData();
+    const [disableOwnerSelection] = useState(!isNew && user.user._id !== dataToUpdate.initialValues.owner);
 
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -194,6 +198,7 @@ export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, data
                                                                             fullWidth
                                                                             isTooltip={true}
                                                                             size="small"
+                                                                            disabled={disableOwnerSelection}
                                                                             onOpen={() => { onOwnerDropdownOpen(values["collaborator"]) }}
                                                                         /> : field.fieldName == "collaborator" ?
                                                                             <FormTypes

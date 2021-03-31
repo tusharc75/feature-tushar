@@ -26,6 +26,7 @@ import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import RoleEngine from "../../components/Shared/RoleEngine";
 import Loader from "../../components/Loader";
+import DeleteButton from "../../components/Helpers/DeleteButton";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -191,13 +192,10 @@ const RoleDetailsPage = () => {
             )}
             <Box marginX={1} component="span" />
             {rolePermissions.isDelete ? (
-              <Button
-                variant="contained"
-                color="secondary"
+              <DeleteButton
+                text="Delete"
                 onClick={() => setShowConfirmBox(true)}
-              >
-                Delete
-              </Button>
+              />
             ) : null}
           </DetailsPageHeader>
         )}

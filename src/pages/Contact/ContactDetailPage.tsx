@@ -76,7 +76,7 @@ const Roles = () => {
             if (data?.salutation?.optionLabel) {
                 name = data.salutation.optionLabel + name
             }
-
+            debugger;
             setHeadingLbl(name)
             handleAllowToEditList(data)
             setContactData(data)
@@ -99,7 +99,7 @@ const Roles = () => {
         if (data?.accountName?.optionLabel) {
             tempMp["Account Name"] = data.accountName.optionLabel
         }
-        console.log("🚀 ~ file: ContactDetailPage.js ~ line 96 ~ handleMainPoints ~ tempMp", tempMp)
+        
         setMainPoints(tempMp)
     }
 
@@ -184,7 +184,7 @@ const Roles = () => {
     };
 
     const handleUpdateContact = (values) => {
-        
+
         setUpdating(true);
         if (values.employees) {
             values.employees = parseInt(values.employees)
@@ -220,13 +220,13 @@ const Roles = () => {
                     //     handleUpdate={handleUpdateContact}
                     // />
                     <EditContact
-                    isNew={false}
-                    open={openUpdateDialog}
-                    onClose={closeUpdateDialog}
-                    entityData={{ fields: contactFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(contactData, contactFields.map((f) => { return f.fieldData })) }}
-                    loading={loading}
-                    handleSubmit={handleUpdateContact}
-                />
+                        isNew={false}
+                        open={openUpdateDialog}
+                        onClose={closeUpdateDialog}
+                        entityData={{ fields: contactFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(contactData, contactFields.map((f) => { return f.fieldData })) }}
+                        loading={loading}
+                        handleSubmit={handleUpdateContact}
+                    />
                 )}
                 <Grid container direction="row">
                     <Grid item xs={12} className="pl-2">
@@ -242,24 +242,24 @@ const Roles = () => {
                         // style={{ marginTop: "150px", minHeight: "200px" }}
                         showHeading={true}
                     >
-                       {
-                                contactPermissions.isUpdate && canEdit ?
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleOpneUpdateDialog}
-                                    >
-                                        Edit
+                        {
+                            contactPermissions.isUpdate && canEdit ?
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleOpneUpdateDialog}
+                                >
+                                    Edit
                                     </Button> : null
-                            }
+                        }
 
-                            <Box component="span" marginX={1} />
-                            {
-                                contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id &&
-                                    contactData.owner.optionValue === user.user._id ?
-                                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                                    : null
-                            }
+                        <Box component="span" marginX={1} />
+                        {
+                            contactPermissions.isDelete && contactData?.owner?.optionValue && user?.user?._id &&
+                                contactData.owner.optionValue === user.user._id ?
+                                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                                : null
+                        }
 
                     </DetailsPageHeader>
 

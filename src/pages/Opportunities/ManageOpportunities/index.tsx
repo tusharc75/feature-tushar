@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ManageOpportunity from './ManageOpportunities';
-import { getObjKeys } from '../../../constants/helpers';
+import { getObjKeys, initializeDropdownById } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from '../../../axios/axiosInstance'
@@ -8,15 +8,15 @@ import { removeEmptyKeys } from '../../../constants/helpers'
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
 
-export default function ManageOpportunityMain(props){
-    const toastConfig=useContext(CustomToastContext);
-    const {open, onClose,id}=props;
-    const {state:{user}}:any=useData();
-    const [entityData,setEntityData]=useState({
-        fields:[],
-        initialValues:{},
+export default function ManageOpportunityMain(props) {
+    const toastConfig = useContext(CustomToastContext);
+    const { open, onClose, id, accountId } = props;
+    const { state: { user } }: any = useData();
+    const [entityData, setEntityData] = useState({
+        fields: [],
+        initialValues: {},
     });
-    const [loading, setLoading]=useState(false);
+    const [loading, setLoading] = useState(false);
     useEffect(() => {
         getOpportunityFields();
         // eslint-disable-next-line
@@ -26,7 +26,15 @@ export default function ManageOpportunityMain(props){
         axiosInstance().get('/field?resource=Opportunity').then(({ data: { data } }) => {
 
             const newFields = [];
-            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
+            data.filter(d => d.isCreate).map((_f) => {
+
+                //  If this dialog opens from account details screen, make that account preselected
+                if (accountId) {
+                    _f = initializeDropdownById(_f, "accountName", accountId);
+                }
+
+                newFields.push(_f.fieldData)
+            });
 
             setEntityData({
                 fields: newFields,

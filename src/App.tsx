@@ -144,7 +144,7 @@ function App() {
             <Activity />
           </PrivateRoute>
 
-          <PrivateRoute exact path="/product-category">
+          <PrivateRoute exact path="/product">
             <ProductCategory />
           </PrivateRoute>
           <PrivateRoute exact path="/product-category/:id">

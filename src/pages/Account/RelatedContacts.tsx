@@ -4,6 +4,7 @@ import { Box } from '@material-ui/core'
 import { contactDetailPage } from '../../routes/Contacts'
 import { accountDetailPage } from '../../routes/Accounts'
 import { makeStyles } from "@material-ui/core/styles";
+import routes from './../../components/Helpers/Routes'
 import accountClass from "./account.module.scss"
 
 const useStyles = makeStyles((theme) => ({
@@ -30,39 +31,42 @@ const useStyles = makeStyles((theme) => ({
         width: '50%'
     }
 }));
-function RelatedContacts(props) {
+function RelatedContacts({ contacts, accountName }) {
     const classes = useStyles();
-    const { contacts } = props
-    return <>{
-        contacts && contacts.length ?
-            contacts.map((obj, index) => {
-                return <Box key={index}
-                    className={classes.box}
-                    borderRadius={16}
-                    boxShadow={0.5}
-                >
-                    <Link className={`${accountClass.account_name_link} f_size`}
-                        to={`${contactDetailPage.path}/${obj._id}`}>
-                        {`${obj.firstName || ''}  ${obj.lastName || ''}`}
-                    </Link>
 
-                    <div className={classes.div1}>
-                        <span className={classes.span}>Account Name:</span>
-                        <span><Link
-                            className={`${accountClass.account_name_link}`}
-                            to={`${accountDetailPage.path}/${obj?.accountName?.optionValue}`}>
-                            {obj?.accountName?.optionLabel ? obj.accountName.optionLabel : ''}
-                        </Link></span>
-                    </div>
-                    <div className={classes.div1}>
-                        <span className={classes.span}> Title:</span>
-                        <span>{obj.title || ''}</span>
-                    </div>
-                </Box>
-            })
-            : null
-    }
+    return <>
+        {
+            contacts && contacts.length ?
+                contacts.map((obj, index) => {
+                    return <Box key={index}
+                        className={classes.box}
+                        borderRadius={16}
+                        boxShadow={0.5}
+                    >
+                        <Link className={`${accountClass.account_name_link} f_size`}
+                            to={`${routes.contactDetail.path}/${obj._id}`}>
+                            {`${obj.firstName || ''}  ${obj.lastName || ''}`}
+                        </Link>
 
-    </ >
+                        <div className={classes.div1}>
+                            <span className={classes.span}>Account Name:</span>
+                            <span>
+                                {accountName}
+                                {/* <Link
+                                    className={`${accountClass.account_name_link}`}
+                                    to={`${routes.accountDetails.path}/${obj?.accountName?.optionValue}`}>
+                                    {accountName}
+                                </Link> */}
+                            </span>
+                        </div>
+                        <div className={classes.div1}>
+                            <span className={classes.span}> Title:</span>
+                            <span>{obj.title || ''}</span>
+                        </div>
+                    </Box>
+                })
+                : null
+        }
+    </>
 }
 export default RelatedContacts

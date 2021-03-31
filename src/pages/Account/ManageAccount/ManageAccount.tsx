@@ -10,19 +10,24 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
+import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 
 const arr = [...Array(9).keys()]
 
 export default function ManageAccount(props) {
+    const { entityData, handleSubmit, onClose, open, isNew, loading } = props;
 
-    const { entityData, handleSubmit, onClose, open, isNew, loading } = props
-
+    const { state: { user } }: any = useData();
+    const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
+    
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
     const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+
+    
 
     // const [loading, setLoading] = useState(false);
 
@@ -74,7 +79,6 @@ export default function ManageAccount(props) {
             handleSubmit(values, saveAndNew, setValues)
             setErrors({});
         }
-
     }
 
     return (<>
@@ -133,8 +137,10 @@ export default function ManageAccount(props) {
                                                                                     fullWidth
                                                                                     isTooltip={true}
                                                                                     size="small"
+                                                                                    disabled={disableOwnerSelection}
                                                                                     onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
-                                                                                /> : field.fieldName == "collaborator" ?
+                                                                                />
+                                                                                : field.fieldName == "collaborator" ?
                                                                                     <FormTypes
                                                                                         multiple
                                                                                         values={values}

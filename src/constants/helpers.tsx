@@ -31,8 +31,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-      ? data.optionValue
-      : "";
+        ? data.optionValue
+        : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkbox") {
@@ -40,7 +40,6 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
         ? dataObj[key.fieldName]
         : false;
     } else if (key.type === "multiSelect") {
-      console.log(dataObj[key.fieldName]);
       const values = dataObj[key.fieldName].length
         ? dataObj[key.fieldName].map((val: any) => filterValues(val))
         : [];
@@ -86,54 +85,54 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile number is too short");
     } else if (input.type === "number") {
       schema[input.fieldName] = input.required
         ? yup
-            .number()
-            .required(`${input.fieldLabel} is required`)
-            .positive()
-            .integer()
+          .number()
+          .required(`${input.fieldLabel} is required`)
+          .positive()
+          .integer()
         : yup.number().positive().integer();
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-            .array()
-            .required(`${input.fieldLabel} is required`)
-            .length(1, "Select at least one service access")
+          .array()
+          .required(`${input.fieldLabel} is required`)
+          .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
         input.required && validEmail
           ? yup
-              .string()
-              .email()
-              .required(`${input.fieldLabel} is required`)
-              // .test("email", "Email already exist", async function (value) {
-              //   let isvalidEmail = validateEmail(value);
+            .string()
+            .email()
+            .required(`${input.fieldLabel} is required`)
+          // .test("email", "Email already exist", async function (value) {
+          //   let isvalidEmail = validateEmail(value);
 
-              //   if (isvalidEmail) {
-              //     const { path, createError, resolve } = this;
-              //     let { data } = await checkEmailExist(value);
-              //     if (data) {
-              //       return createError({
-              //         path,
-              //         message: "Email alreday exist",
-              //       });
-              //     }
-              //     return resolve(true);
-              //   }
-              // })
+          //   if (isvalidEmail) {
+          //     const { path, createError, resolve } = this;
+          //     let { data } = await checkEmailExist(value);
+          //     if (data) {
+          //       return createError({
+          //         path,
+          //         message: "Email alreday exist",
+          //       });
+          //     }
+          //     return resolve(true);
+          //   }
+          // })
           : yup.string().email();
     } else if (input.type === "switch" || input.type === "checkBox") {
       schema[input.fieldName] = input.required
@@ -150,22 +149,22 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 };
 
 export const camelCase = (str) => {
-    return str
-      .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-        return index == 0 ? word.toLowerCase() : word.toUpperCase();
-      })
-      .replace(/\s+/g, "");
-  };
-  
-  export const UnCamelCase = (str) => {
-    return str
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .replace(/\b([A-Z]+)([A-Z])([a-z])/, "$1 $2$3")
-      .replace(/^./, function (str) {
-        return str.toUpperCase();
-      });
-  };
-  
+  return str
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+      return index == 0 ? word.toLowerCase() : word.toUpperCase();
+    })
+    .replace(/\s+/g, "");
+};
+
+export const UnCamelCase = (str) => {
+  return str
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\b([A-Z]+)([A-Z])([a-z])/, "$1 $2$3")
+    .replace(/^./, function (str) {
+      return str.toUpperCase();
+    });
+};
+
 export const isObjectEmpty = (obj) => {
   return Object.keys(obj).length === 0;
 };
@@ -201,3 +200,18 @@ export const getCollaboratorDropdownDataSource = (
     ? mainDataSource.filter((d) => d.optionValue != selectedOwnerId)
     : mainDataSource;
 };
+
+export const initializeDropdownById = (field, fieldName, id) => {
+
+  if (field.fieldData.fieldName === fieldName && field.fieldData.option && field.fieldData.option.length > 0) {
+    let options = field.fieldData.option;
+
+    options.map(d => {
+      d.default = d.optionValue === id;
+    })
+
+    field.fieldData.option = options;
+  }
+
+  return field;
+}

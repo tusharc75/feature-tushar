@@ -20,7 +20,6 @@ import { getSearchQuery, displayDate } from '../../services/util'
 import OpportunitiesHeader from "./OpportunitiesHeader";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import MessageDialog from '../../components/Helpers/MessageDialog'
-import { opportunityDetailPage } from '../../routes/Opportunity'
 import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -278,7 +277,7 @@ const Opportunities = () => {
   }
   const getFirstName = tData => {
     return <Link className="nameLink"
-      to={`${opportunityDetailPage.path}/${tData._id}`}
+      to={`${routes.opportunityDetail.path}/${tData._id}`}
     >
       <span className="text-capitalize">{tData.opportunityName}</span>
     </Link>
