@@ -513,7 +513,7 @@ export default function Contact() {
                         // entityDetails={createContactEntityDetails}
                         open={showCreateContactDialog}
                         onClose={() => setShowCreateContactDialog(false)}
-                            onSuccess={() => {
+                        onSuccess={() => {
                                     setShowCreateContactDialog(false);
                                     getContacts();
                                 }}
