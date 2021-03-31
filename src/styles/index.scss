@@ -269,3 +269,12 @@ body::-webkit-scrollbar-thumb {
   /* margin-bottom: 1.5rem; */
   border-radius: 5px;
 }
+
+.link {
+  color: var(--link) !important;
+}
+
+.link:hover {
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}

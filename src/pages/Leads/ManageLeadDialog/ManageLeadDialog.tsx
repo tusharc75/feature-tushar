@@ -1,75 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { CreateNewContact } from '../../../axios/index';
-import { Box, Button, IconButton, Typography, Grid } from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
+import { useEffect, useState, useContext } from 'react';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Formik, Form } from "formik";
-import { getCollaboratorDropdownDataSource, getObjKeys, getOwnerDropdownDataSource, removeEmptyKeys } from '../../../constants/helpers';
 import { useHistory } from "react-router-dom";
-import CloseIcon from '@material-ui/icons/Close';
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import Loader from '../../../components/Loader'
-import { formValidation } from '../../../constants/helpers';
-import FormTypes from "./../../../components/Helpers/FormTypes";
-import axiosInstance from './../../../axios/axiosInstance'
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import axiosInstance from '../../../axios/axiosInstance';
+import { getOwnerDropdownDataSource, getCollaboratorDropdownDataSource, getObjKeys, yupSchema, removeEmptyKeys, getObjKeysWithValues } from '../../../constants/helpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-
-const useStyles = makeStyles((theme) => ({
-    // root: {
-    //     margin: 0,
-    //     padding: theme.spacing(2),
-    // },
-    // closeButton: {
-    //     position: 'absolute',
-    //     right: theme.spacing(1),
-    //     top: theme.spacing(1),
-    //     color: theme.palette.grey[500],
-    // },
-}));
-
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
-
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import FormTypes from '../../../components/Helpers/FormTypes';
+import CustomButton from '../../../components/Helpers/Button';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
 const arr = [...Array(9).keys()]
-export default function CreateContact({ open, onClose, onSuccess }) {
 
-    const classes = useStyles();
-    const history = useHistory();
+export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, dataToUpdate }) {
+    const toastConfig = useContext(CustomToastContext);
+
     const [entityData, setEntityData] = useState({
         fields: [],
         initialValues: {},
     });
-    const [isFormSubmitted, setIsFormSubmitted] = useState(false)
 
-    //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
-    const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
-    const [ownerDataSource, setOwnerDataSource] = useState([]);
-    const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [ownerData, setOwnerData] = useState([]);
+    const [collaboratorData, setCollaboratorData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
-        if (ownerCollaboratorDropdownData.length > 0) {
-            setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-            setOwnerDataSource(ownerCollaboratorDropdownData[0].option)
-            setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
+        const ownerCollabOptions = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
+        if (ownerCollabOptions.length > 0) {
+            setOwnerCollaboratorData(ownerCollabOptions[0].option);
+            setOwnerData(ownerCollabOptions[0].option)
+            setCollaboratorData(ownerCollabOptions[0].option)
         }
         sortArray();
-        // eslint-disable-next-line
     }, [entityData.fields]);
 
     const sortArray = () => {
@@ -91,43 +59,81 @@ export default function CreateContact({ open, onClose, onSuccess }) {
     };
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
-        setOwnerDataSource(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorCommonDataSource))
+        setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData))
     }
 
-    const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId) => {
-        setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource))
+    const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData))
     }
-    //  Owner, Collaborator Code - End
 
     useEffect(() => {
         getContactFields();
-        // eslint-disable-next-line
     }, []);
 
     const getContactFields = () => {
-        axiosInstance().get('/field?resource=Contact').then(({ data: { data } }) => {
+        axiosInstance().get('/field?resource=Lead').then(({ data: { data } }) => {
 
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
-            setEntityData({
-                fields: newFields,
-                initialValues: getObjKeys("", newFields),
-            });
+            if (isNew) {
+                setEntityData({
+                    fields: newFields,
+                    initialValues: getObjKeys("", newFields),
+                });
+            }
+            else {
+                setEntityData({
+                    fields: newFields,
+                    initialValues: getObjKeysWithValues(dataToUpdate, newFields),
+                });
+            }
         });
     };
 
-    const handleSave = (values) => {
-        setIsFormSubmitted(true);
-        values = removeEmptyKeys(values);
-
-        axiosInstance().post("/contact", values).then(() => {
-            onSuccess();
-        }).then(() => {
-            setIsFormSubmitted(false);
-        });
+    const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
+        if (Object.keys(errors).length) {
+            entityData.fields.forEach((input) => {
+                if (input.required || values[input.fieldName]) {
+                    setTouched(input.fieldName, true);
+                }
+            });
+            toastConfig.setToastConfig({ open: true, type: "error", message: 'Please fill all required fields' });
+            setErrors({ ...errors });
+        } else {
+            isNew ? handleCreateLead(values) : handleUpdateLead(values);
+        }
     }
 
+    const handleCreateLead = (values) => {
+        setLoading(true)
+
+        axiosInstance().post('/lead', removeEmptyKeys(values))
+            .then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setLoading(false)
+                onSuccess();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoading(false);
+            });
+    }
+
+    const handleUpdateLead = (values) => {
+        values = { ...values, _id: dataToUpdate._id };
+        setLoading(true)
+
+        axiosInstance().put('/lead', removeEmptyKeys(values))
+            .then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setLoading(false)
+                onSuccess()
+                // fetchData()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoading(false);
+            });
+    }
 
     return (
         <Dialog
@@ -135,20 +141,22 @@ export default function CreateContact({ open, onClose, onSuccess }) {
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
             open={open}
+            disableBackdropClick={true}
         >
-            <CustomDialogHeader title="Create Contact" onClose={onClose} />
+            <CustomDialogHeader title={isNew ? "Create Lead" : `Editing ${dataToUpdate.firstName || ''} ${dataToUpdate.lastName}`} onClose={onClose} />
 
             {
-                entityData.fields.length == 0 && <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
+                entityData.fields.length == 0 && <CustomDialogContent>
                     <CommonSkeleton
                         lenArray={arr}
                     />
-                </DialogContent>
+                </CustomDialogContent>
             }
             {
                 entityData.fields.length > 0 && <Formik
                     initialValues={entityData.initialValues}
-                    validate={(values: any) => formValidation(values, entityData.fields)}
+                    validationSchema={yupSchema(entityData.fields)}
+                    validateOnMount
                     onSubmit={() => { }}
                 >
                     {({
@@ -156,9 +164,12 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                         errors,
                         touched,
                         setFieldValue,
+                        setFieldTouched,
+                        setErrors,
+                        setValues
                     }) => (
                         <>
-                            <DialogContent dividers >
+                            <CustomDialogContent>
                                 <Form>
                                     {
                                         formsData &&
@@ -177,13 +188,13 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                                                             label={field.fieldLabel}
                                                                             name={field.fieldName}
                                                                             type={field.type}
-                                                                            options={ownerDataSource}
+                                                                            options={ownerData}
                                                                             setFieldValue={setFieldValue}
                                                                             required={field.required}
                                                                             fullWidth
                                                                             isTooltip={true}
                                                                             size="small"
-                                                                            onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
+                                                                            onOpen={() => { onOwnerDropdownOpen(values["collaborator"]) }}
                                                                         /> : field.fieldName == "collaborator" ?
                                                                             <FormTypes
                                                                                 values={values}
@@ -192,13 +203,13 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
-                                                                                options={collaboratorDataSource}
+                                                                                options={collaboratorData}
                                                                                 setFieldValue={setFieldValue}
                                                                                 required={field.required}
                                                                                 fullWidth
                                                                                 isTooltip={true}
                                                                                 size="small"
-                                                                                onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
+                                                                                onOpen={() => { onCollabOwnerMultiselectOpen(values["owner"]) }}
                                                                             /> : <FormTypes
                                                                                 // {...rest}
                                                                                 values={values}
@@ -223,20 +234,10 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                             </div>
                                         ))
                                     }
-
-                                    {/* <InputField
-                                        errors={errors}
-                                        values={values}
-                                        setFieldValue={setFieldValue}
-                                        touched={touched}
-                                        fieldsData={entityData.fields}
-                                        size="small"
-                                        fullWidth
-                                    /> */}
                                 </Form>
-                            </DialogContent>
+                            </CustomDialogContent>
 
-                            <DialogActions>
+                            <CustomDialogFooter>
                                 <Button
                                     type="button"
                                     variant="outlined"
@@ -244,22 +245,25 @@ export default function CreateContact({ open, onClose, onSuccess }) {
                                     onClick={onClose}
                                 >
                                     Cancel
-                                        </Button>
-                                <Button
-                                    disabled={isFormSubmitted}
-                                    type="submit"
+                                </Button>
+
+                                <CustomButton
+                                    loading={loading}
                                     variant="contained"
                                     color="primary"
-                                    onClick={() => { handleSave(values) }}
+                                    disabled={loading || Object.keys(errors).length > 0 ? true : false}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        handleSubmit(errors, setFieldTouched, values, setValues, setErrors)
+                                    }}
                                 >
-                                    Create Contact
-                                        </Button>
-                            </DialogActions>
+                                    Save
+                                </CustomButton>
+                            </CustomDialogFooter>
                         </>
                     )}
                 </Formik>
             }
         </Dialog>
-
     )
 }

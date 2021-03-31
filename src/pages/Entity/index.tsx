@@ -25,8 +25,8 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
+import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: "flex",
@@ -55,6 +55,7 @@ const Entity: FC = () => {
   const [loadingEntities, setLoadingEntities] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllEntities, setCheckAllEntities] = useState(false);
+  const [showCreateEntityDialog, setShowCreateEntityDialog] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [entitiesPermissions, setEntitiesPermissions] = useState({
@@ -109,12 +110,11 @@ const Entity: FC = () => {
       ? data.map((entity: any) => ({
           id: entity._id,
           isChecked: false,
-          name: entity.name,
+          name: entity.entityName,
           address: entity.address,
           createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
         }))
       : [];
-
     setDataRows(rows);
   };
 
@@ -160,7 +160,7 @@ const Entity: FC = () => {
           title={params.value}
           className="text-truncate"
           component={Link}
-          to={`/${routes.entityDetails.path}/${params.row.id}`}
+          to={`${routes.entityDetails.path}/${params.row.id}`}
         >
           {params.value}
         </MuiLink>
@@ -318,8 +318,12 @@ const Entity: FC = () => {
     }
   };
 
+
+
+
   const handleCreate = () => {
     setIsOpen(true);
+    setShowCreateEntityDialog(true);
   };
 
   const handleClose = () => {
@@ -421,6 +425,18 @@ const Entity: FC = () => {
           onClose={() => setShowDeleteWarningConfirmBox(false)}
         />
       ) : null}
+
+        {
+            showCreateEntityDialog && <CreateEntity
+            open={showCreateEntityDialog}
+            onClose={() => setShowCreateEntityDialog(false)}
+            onSuccess={() => {
+          setShowCreateEntityDialog(false);
+          fetchEntities();
+        }}
+       />
+       }
+
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}

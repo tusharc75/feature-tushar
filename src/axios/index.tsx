@@ -8,11 +8,7 @@ export const GetAccounts = async (params) => {
     return data;
 };
 
-export const RemoveAccounts = async (obj) => {
-    let url = "/account/remove";
-    const { data } = await api().put(url, obj);
-    return data;
-};
+
 
 export const GetContacts = async (params) => {
     let url = "/contact";
@@ -31,9 +27,5 @@ export const RemoveContacts = async (obj) => {
     return data;
 };
 
-export const CreateNewContact = async (obj) => {
-    let url = "/contact";
-    const { data } = await api().post(url, obj);
-    return data;
-};
+
 

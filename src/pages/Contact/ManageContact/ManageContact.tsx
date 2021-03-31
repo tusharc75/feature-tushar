@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { Formik, Form } from "formik";
-import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
+import {  getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
-import { commonStyle } from '../../Contact/CommonStyles'
+import { commonStyle } from '../CommonStyles'
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -14,9 +14,9 @@ import _ from 'lodash'
 
 const arr = [...Array(9).keys()]
 
-export default function ManageAccount(props) {
+export default function ManageContact(props) {
 
-    const { entityData, handleSubmit, onClose, open, isNew, loading } = props
+    const { entityData, handleSubmit, onClose, open, isNew } = props
 
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
@@ -24,7 +24,7 @@ export default function ManageAccount(props) {
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
 
-    // const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
@@ -64,6 +64,9 @@ export default function ManageAccount(props) {
     //  Owner, Collaborator Code - End
 
     const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
+
+        // const errors = formValidation(values, _.cloneDeep(entityData.fields));
+        debugger
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
                 if (input.required) {
@@ -71,6 +74,7 @@ export default function ManageAccount(props) {
                 }
             });
         } else {
+            setLoading(true)
             handleSubmit(values, saveAndNew, setValues)
             setErrors({});
         }
@@ -85,7 +89,7 @@ export default function ManageAccount(props) {
             onClose={onClose}
             open={open}
         >
-            <CustomDialogHeader onClose={onClose} title={isNew ? "Add Account" : `Editing ${entityData.initialValues.accountName}`} />
+            <CustomDialogHeader onClose={onClose} title={isNew ? "Add Contact" : `Editing ${entityData.initialValues.firstName}`} />
 
             {
                 entityData.fields.length > 0 ?
@@ -93,6 +97,7 @@ export default function ManageAccount(props) {
                         <Formik
                             initialValues={entityData.initialValues}
                             validationSchema={yupSchema(entityData.fields)}
+                            // validate={(values) => formValidation(values, entityData.fields)}
                             validateOnMount
                             onSubmit={() => { }}
                         >

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import ManageAccount from './ManageAccount'
+import ManageContact from './ManageContact'
 import { getObjKeys } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
@@ -7,10 +7,10 @@ import axiosInstance from '../../../axios/axiosInstance'
 import { removeEmptyKeys } from '../../../constants/helpers'
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
-export default function ManageAccountMain(props) {
+export default function ManageContactMain(props) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { open, onClose, id } = props
+    const { open, onClose } = props
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -19,31 +19,13 @@ export default function ManageAccountMain(props) {
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if (id) {
-            setLoading(true)
-            axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
-                const newFields = [];
-                data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
-
-                axiosInstance().get(`/account/clone/${id}`).then(({ data: dataToClone }) => {
-                    setEntityData({
-                        fields: newFields,
-                        initialValues: dataToClone.data ? dataToClone.data : getObjKeys("", newFields),
-                    });
-                    setLoading(false);
-                }, error => {
-                    setLoading(false);
-                });
-            });
-        }
-        else {
-            getAccountFields();
-        }
+            getContactFields();
+        
     }, [user]);
 
-    const getAccountFields = () => {
+    const getContactFields = () => {
         setLoading(true)
-        axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=Contact`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
             setEntityData({
@@ -54,23 +36,42 @@ export default function ManageAccountMain(props) {
         }).catch(err => setLoading(false))
     };
 
-    const handleCreateAccount = (values, saveAndNew, setValues) => {
-        setLoading(false);
-        axiosInstance().post('/account', removeEmptyKeys(values)).then(({ data }) => {
+    const handleLoading = (action, isSaveAndNew = false) => {
+        if (!isSaveAndNew) setLoading(action)
+    }
+
+    const handleCreateContact = (values, saveAndNew, setValues) => {
+        axiosInstance().post('/contact', removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", errorMsg: data.message })
-            setLoading(false);
+
+            handleLoading(false, saveAndNew)
         }).catch((error) => {
             setLoading(false);
             toastConfig.setToastConfig(error);
         })
     }
+    // const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
+    //     const errors = formValidation(values, _.cloneDeep(entityData.fields));
+    //     if (Object.keys(errors).length) {
+    //         entityData.fields.forEach((input) => {
+    //             if (input.required) {
+    //                 setTouched(input.fieldName, true);
+    //             }
+    //         });
+    //     } else {
+    //         handleLoading(true, saveAndNew)
+    //         handleCreateContact(values, saveAndNew, setValues)
+    //         setErrors({});
+    //     }
 
-    return <ManageAccount
+    // }
+
+    return <ManageContact
         open={open}
         isNew={true}
         onClose={onClose}
         entityData={entityData}
-        handleSubmit={handleCreateAccount}
+        handleSubmit={handleCreateContact}
     />;
 }
