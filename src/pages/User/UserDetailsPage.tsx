@@ -24,21 +24,19 @@ import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
 import routes from "../../components/Helpers/Routes";
-import CustomToast from "../../components/Helpers/CustomToast";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
-import { removeEmptyKeys } from "../../constants/helpers";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import UserRoles from "./UserRoles";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const UserDetailsPage = () => {
-  const toastConfig = useContext(CustomToastContext)
+  const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
   const history = useHistory();
@@ -46,7 +44,6 @@ const UserDetailsPage = () => {
     state: { user },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
-  const [alertData, setAlertData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesLoading, setRolesLoading] = useState(false);
@@ -98,7 +95,7 @@ const UserDetailsPage = () => {
       } = await axiosInstance().get(`/user/${id}`);
 
       handleMainPoints(data);
-      const name = [data.firstName, data.lastName].filter(d => d).join(" ");
+      const name = [data.firstName, data.lastName].filter((d) => d).join(" ");
 
       setHeadingLbl(name);
       setUserData(data);
@@ -140,6 +137,9 @@ const UserDetailsPage = () => {
       .get("/field?resource=User")
       .then(({ data }) => {
         setUserFIelds(data.data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -168,9 +168,14 @@ const UserDetailsPage = () => {
       .put(`/user/${id}`, values)
       .then(({ data }) => {
         fetchUserData();
-        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
         setUserPermissions(data.permissions);
         setUpdating(false);
+        closeUpdateDIalog();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -204,8 +209,13 @@ const UserDetailsPage = () => {
       .post("/user/permission-setup", newData)
       .then(({ data }) => {
         setChangingPermission(false);
-        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-      }).catch((err) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+      })
+      .catch((err) => {
         setChangingPermission(false);
         toastConfig.setToastConfig(err);
       });
@@ -409,7 +419,7 @@ const UserDetailsPage = () => {
                       }}
                     >
                       {userData && (
-                        <UserRoles data={globalRoles} unassignRole={() => { }} />
+                        <UserRoles data={globalRoles} unassignRole={() => {}} />
                       )}
                     </Box>
                   )}

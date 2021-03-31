@@ -37,6 +37,7 @@ const Details = (props: DetailProps) => {
   const classes = useStyles();
   const theme = useTheme();
   const { data, fields } = props;
+  console.log(data);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
 
