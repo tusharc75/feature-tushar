@@ -309,7 +309,7 @@ const Roles = () => {
                                         {
                                             quickLinks && quickLinks.length ?
                                                 quickLinks.map((k, index) => {
-                                                    return <Link key={index} className={`${contactClass.custom_link}`}>{k.label || ''}({k.count || 0})</Link>
+                                                    return <Link key={index} className="link">{k.label || ''}({k.count || 0})</Link>
                                                 }) :
                                                 null
                                         }

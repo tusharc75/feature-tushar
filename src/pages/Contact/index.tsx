@@ -300,7 +300,7 @@ export default function Contact() {
     const getFirstName = tData => {
         let name = [tData.firstName, tData.middleName, tData.lastName].filter(d => d).join(" ");
         
-        return <Link className={`${contactStyles.contacts_name_link}`}
+        return <Link className="link"
             to={`${contactDetailPage.path}/${tData._id}`}>
             {name}
         </Link>
