@@ -68,6 +68,7 @@ const Opportunities = () => {
   const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+  const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({ id: null, show: false, opportunityName: "" })
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -118,7 +119,17 @@ const Opportunities = () => {
     });
     setDataRows([...rows]);
   }, [opportunityData])
+  const handleSingleDeleteOpportunity = async () => {
+    setLoading(true);
 
+    axiosInstance()
+        .put(`/opportunity/remove`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+          fetchOpportunities();
+          setLoading(false);
+        })
+        setSingleOpportunityDelete({id: null, show: false, opportunityName:""})
+}
   const fetchOpportunities = async () => {
     setLoading(true);
     let searchParams: any = { ...query, filterOpportunities: selectedType }
@@ -235,10 +246,10 @@ const Opportunities = () => {
         <>
           {
             opportunityPermissions.isDelete ?
-              params.row.allowToDelete ?
+              params.row.canDelete ?
                 <Tooltip
                   title="Delete" >
-                  <IconButton aria-label="Delete" onClick={() => showConfirmBox(params.row)} >
+                  <IconButton aria-label="Delete" onClick={() => setSingleOpportunityDelete({show: true, id: params.row._id,opportunityName: `${params.row.opportunityName}` })} >
                     <DeleteIcon
                       fontSize="small" color="error" />
                   </IconButton>
@@ -480,6 +491,15 @@ const Opportunities = () => {
               }}
             />
           }
+                      {
+                        singleOpportunityDelete.show ?
+                            <ConfirmationDialog
+                                open={singleOpportunityDelete.show}
+                                message={`Are you sure, you want to delete contact: ${singleOpportunityDelete.opportunityName} ?`}
+                                onClose={() => setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" })}
+                                onOk={handleSingleDeleteOpportunity}
+                            /> : null
+                      }
         </Container>
       </Layout>
     </>
