@@ -229,9 +229,13 @@ const Leads = () => {
       width: 75,
     },
     {
-      field: "firstName", headerName: "Name", width: 400,
+      field: "name", headerName: "Name", width: 400,
       renderCell: (params) => (
-        getFirstName(params.row)
+        <Link className="LeadNameLink"
+          to={`${leadDetailPage.path}/${params.row._id}`}
+        >
+          {params?.value ?? ''}
+        </Link>
       )
     },
     {
@@ -310,13 +314,7 @@ const Leads = () => {
       }
     }
   }
-  const getFirstName = tData => {
-    return <Link className="LeadNameLink"
-      to={`${leadDetailPage.path}/${tData._id}`}
-    >
-      {tData.name || ''}
-    </Link>
-  }
+
 
   const updateCheckedStatus = (params, ev) => {
     const gridData = [...dataRows];

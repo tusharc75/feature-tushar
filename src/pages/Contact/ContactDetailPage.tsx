@@ -98,7 +98,7 @@ const Roles = () => {
         if (data?.accountName?.optionLabel) {
             tempMp["Account Name"] = data.accountName.optionLabel
         }
-        
+
         setMainPoints(tempMp)
     }
 
@@ -298,7 +298,7 @@ const Roles = () => {
                                     {
                                         !isObjectEmpty(contactData) && <div>
                                             <Activity relatedTo={[
-                                                { type: "account", referenceId: contactData.accountName.optionValue, access: false },
+                                                { type: "account", referenceId: contactData?.accountName?.optionValue, access: false },
                                                 { type: "contact", referenceId: contactData._id, access: true }
                                             ]} handleActivityRefresh={() => { }} />
                                         </div>
