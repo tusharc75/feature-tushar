@@ -134,9 +134,12 @@ export default function Contact() {
             width: 75,
         },
         {
-            field: "firstName", headerName: "Name", width: 200,
+            field: "name", headerName: "Name", width: 200,
             renderCell: (params) => (
-                getFirstName(params.row)
+                <Link className="link"
+                    to={`${contactDetailPage.path}/${params.row._id}`}>
+                    {params.value || ''}
+                </Link>
             )
         },
         // { field: "lastName", headerName: "Last Name", width: 200 },
@@ -236,7 +239,8 @@ export default function Contact() {
             id: u._id,
             canDelete: u?.owner?.optionValue === user?.user._id,
             collaborator: u.collaborator || [],
-            account: u.accountName?.optionLabel
+            account: u.accountName?.optionLabel,
+            name: `${u.firstName || ''} ${u.middleName || ''} ${u.lastName || ''}`
         }));
         setDataRows([...rows]);
     }, [contactData])
@@ -297,14 +301,6 @@ export default function Contact() {
         }
     }
 
-    const getFirstName = tData => {
-        let name = [tData.firstName, tData.middleName, tData.lastName].filter(d => d).join(" ");
-        
-        return <Link className="link"
-            to={`${contactDetailPage.path}/${tData._id}`}>
-            {name}
-        </Link>
-    }
 
     const handleContactSel = (e) => {
         setselectedType(e.target.value)
@@ -510,13 +506,13 @@ export default function Contact() {
                             //     setShowCreateContactDialog(false);
                             //     getContacts();
                             // }}
-                        // entityDetails={createContactEntityDetails}
-                        open={showCreateContactDialog}
-                        onClose={() => setShowCreateContactDialog(false)}
-                        onSuccess={() => {
-                                    setShowCreateContactDialog(false);
-                                    getContacts();
-                                }}
+                            // entityDetails={createContactEntityDetails}
+                            open={showCreateContactDialog}
+                            onClose={() => setShowCreateContactDialog(false)}
+                            onSuccess={() => {
+                                setShowCreateContactDialog(false);
+                                getContacts();
+                            }}
                         />
                     }
 
