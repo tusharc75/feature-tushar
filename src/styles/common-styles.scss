@@ -1,9 +1,9 @@
 :root {
-    --space1: 0.25rem;
-    --space2: 0.5rem;
-    --space3: 1rem;
-    --space4: 1.5rem;
-    --space5: 3rem;
+    --size1: 0.25rem;
+    --size2: 0.5rem;
+    --size3: 1rem;
+    --size4: 1.5rem;
+    --size5: 3rem;
 }
 
 .cursor-pointer:hover {
@@ -47,23 +47,23 @@
 }
 
 .gap-1 {
-    gap: var(--space1) !important;
+    gap: var(--size1) !important;
 }
 
 .gap-2 {
-    gap: var(--space2) !important;
+    gap: var(--size2) !important;
 }
 
 .gap-3 {
-    gap: var(--space3) !important;
+    gap: var(--size3) !important;
 }
 
 .gap-4 {
-    gap: var(--space4) !important;
+    gap: var(--size4) !important;
 }
 
 .gap-5 {
-    gap: var(--space5) !important;
+    gap: var(--size5) !important;
 }
 
 /* Padding */
@@ -73,23 +73,23 @@
 }
 
 .p-1 {
-    padding: var(--space1) !important;
+    padding: var(--size1) !important;
 }
 
 .p-2 {
-    padding: var(--space2) !important;
+    padding: var(--size2) !important;
 }
 
 .p-3 {
-    padding: var(--space3) !important;
+    padding: var(--size3) !important;
 }
 
 .p-4 {
-    padding: var(--space4) !important;
+    padding: var(--size4) !important;
 }
 
 .p-5 {
-    padding: var(--space5) !important;
+    padding: var(--size5) !important;
 }
 
 /* Padding Top */
@@ -99,23 +99,23 @@
 }
 
 .pt-1 {
-    padding-top: var(--space1) !important;
+    padding-top: var(--size1) !important;
 }
 
 .pt-2 {
-    padding-top: var(--space2) !important;
+    padding-top: var(--size2) !important;
 }
 
 .pt-3 {
-    padding-top: var(--space3) !important;
+    padding-top: var(--size3) !important;
 }
 
 .pt-4 {
-    padding-top: var(--space4) !important;
+    padding-top: var(--size4) !important;
 }
 
 .pt-5 {
-    padding-top: var(--space5) !important;
+    padding-top: var(--size5) !important;
 }
 
 /* Padding Right */
@@ -125,23 +125,23 @@
 }
 
 .pr-1 {
-    padding-right: var(--space1) !important;
+    padding-right: var(--size1) !important;
 }
 
 .pr-2 {
-    padding-right: var(--space2) !important;
+    padding-right: var(--size2) !important;
 }
 
 .pr-3 {
-    padding-right: var(--space3) !important;
+    padding-right: var(--size3) !important;
 }
 
 .pr-4 {
-    padding-right: var(--space4) !important;
+    padding-right: var(--size4) !important;
 }
 
 .pr-5 {
-    padding-right: var(--space5) !important;
+    padding-right: var(--size5) !important;
 }
 
 /* Padding bottom */
@@ -151,23 +151,23 @@
 }
 
 .pb-1 {
-    padding-bottom: var(--space1) !important;
+    padding-bottom: var(--size1) !important;
 }
 
 .pb-2 {
-    padding-bottom: var(--space2) !important;
+    padding-bottom: var(--size2) !important;
 }
 
 .pb-3 {
-    padding-bottom: var(--space3) !important;
+    padding-bottom: var(--size3) !important;
 }
 
 .pb-4 {
-    padding-bottom: var(--space4) !important;
+    padding-bottom: var(--size4) !important;
 }
 
 .pb-5 {
-    padding-bottom: var(--space5) !important;
+    padding-bottom: var(--size5) !important;
 }
 
 /* Padding Left */
@@ -177,77 +177,77 @@
 }
 
 .pl-1 {
-    padding-left: var(--space1) !important;
+    padding-left: var(--size1) !important;
 }
 
 .pl-2 {
-    padding-left: var(--space2) !important;
+    padding-left: var(--size2) !important;
 }
 
 .pl-3 {
-    padding-left: var(--space3) !important;
+    padding-left: var(--size3) !important;
 }
 
 .pl-4 {
-    padding-left: var(--space4) !important;
+    padding-left: var(--size4) !important;
 }
 
 .pl-5 {
-    padding-left: var(--space5) !important;
+    padding-left: var(--size5) !important;
 }
 
 /* Padding X */
 
 .px-1 {
-    padding-left: var(--space1) !important;
-    padding-right: var(--space1) !important;
+    padding-left: var(--size1) !important;
+    padding-right: var(--size1) !important;
 }
 
 .px-2 {
-    padding-left: var(--space2) !important;
-    padding-right: var(--space2) !important;
+    padding-left: var(--size2) !important;
+    padding-right: var(--size2) !important;
 }
 
 .px-3 {
-    padding-left: var(--space3) !important;
-    padding-right: var(--space3) !important;
+    padding-left: var(--size3) !important;
+    padding-right: var(--size3) !important;
 }
 
 .px-4 {
-    padding-left: var(--space4) !important;
-    padding-right: var(--space4) !important;
+    padding-left: var(--size4) !important;
+    padding-right: var(--size4) !important;
 }
 
 .px-5 {
-    padding-left: var(--space5) !important;
-    padding-right: var(--space5) !important;
+    padding-left: var(--size5) !important;
+    padding-right: var(--size5) !important;
 }
 
 /* Padding Y */
 
 .py-1 {
-    padding-top: var(--space1) !important;
-    padding-bottom: var(--space1) !important;
+    padding-top: var(--size1) !important;
+    padding-bottom: var(--size1) !important;
 }
 
 .py-2 {
-    padding-top: var(--space2) !important;
-    padding-bottom: var(--space2) !important;
+    padding-top: var(--size2) !important;
+    padding-bottom: var(--size2) !important;
 }
 
 .py-3 {
-    padding-top: var(--space3) !important;
-    padding-bottom: var(--space3) !important;
+    padding-top: var(--size3) !important;
+    padding-bottom: var(--size3) !important;
 }
 
 .py-4 {
-    padding-top: var(--space4) !important;
-    padding-bottom: var(--space4) !important;
+    padding-top: var(--size4) !important;
+    padding-bottom: var(--size4) !important;
 }
 
 .py-5 {
-    padding-top: var(--space5) !important;
-    padding-bottom: var(--space5) !important;
+    padding-top: var(--size5) !important;
+    padding-bottom: var(--size5) !important;
 }
 
 /* Margin */
@@ -257,45 +257,45 @@
 }
 
 .m-1 {
-    margin: var(--space1) !important;
+    margin: var(--size1) !important;
 }
 
 .m-2 {
-    margin: var(--space2) !important;
+    margin: var(--size2) !important;
 }
 
 .m-3 {
-    margin: var(--space3) !important;
+    margin: var(--size3) !important;
 }
 
 .m-4 {
-    margin: var(--space4) !important;
+    margin: var(--size4) !important;
 }
 
 .m-5 {
-    margin: var(--space5) !important;
+    margin: var(--size5) !important;
 }
 
 /* Margin Top */
 
 .mt-1 {
-    margin-top: var(--space1) !important;
+    margin-top: var(--size1) !important;
 }
 
 .mt-2 {
-    margin-top: var(--space2) !important;
+    margin-top: var(--size2) !important;
 }
 
 .mt-3 {
-    margin-top: var(--space3) !important;
+    margin-top: var(--size3) !important;
 }
 
 .mt-4 {
-    margin-top: var(--space4) !important;
+    margin-top: var(--size4) !important;
 }
 
 .mt-5 {
-    margin-top: var(--space5) !important;
+    margin-top: var(--size5) !important;
 }
 
 /* Margin Right */
@@ -304,45 +304,45 @@
 }
 
 .mr-1 {
-    margin-right: var(--space1) !important;
+    margin-right: var(--size1) !important;
 }
 
 .mr-2 {
-    margin-right: var(--space2) !important;
+    margin-right: var(--size2) !important;
 }
 
 .mr-3 {
-    margin-right: var(--space3) !important;
+    margin-right: var(--size3) !important;
 }
 
 .mr-4 {
-    margin-right: var(--space4) !important;
+    margin-right: var(--size4) !important;
 }
 
 .mr-5 {
-    margin-right: var(--space5) !important;
+    margin-right: var(--size5) !important;
 }
 
 /* Margin Bottom */
 
 .mb-1 {
-    margin-bottom: var(--space1) !important;
+    margin-bottom: var(--size1) !important;
 }
 
 .mb-2 {
-    margin-bottom: var(--space2) !important;
+    margin-bottom: var(--size2) !important;
 }
 
 .mb-3 {
-    margin-bottom: var(--space3) !important;
+    margin-bottom: var(--size3) !important;
 }
 
 .mb-4 {
-    margin-bottom: var(--space4) !important;
+    margin-bottom: var(--size4) !important;
 }
 
 .mb-5 {
-    margin-bottom: var(--space5) !important;
+    margin-bottom: var(--size5) !important;
 }
 
 /* Margin Left */
@@ -352,75 +352,95 @@
 }
 
 .ml-1 {
-    margin-left: var(--space1) !important;
+    margin-left: var(--size1) !important;
 }
 
 .ml-2 {
-    margin-left: var(--space2) !important;
+    margin-left: var(--size2) !important;
 }
 
 .ml-3 {
-    margin-left: var(--space3) !important;
+    margin-left: var(--size3) !important;
 }
 
 .ml-4 {
-    margin-left: var(--space4) !important;
+    margin-left: var(--size4) !important;
 }
 
 .ml-5 {
-    margin-left: var(--space5) !important;
+    margin-left: var(--size5) !important;
 }
 
 /* Margin X */
 
 .mx-1 {
-    margin-left: var(--space1) !important;
-    margin-right: var(--space1) !important;
+    margin-left: var(--size1) !important;
+    margin-right: var(--size1) !important;
 }
 
 .mx-2 {
-    margin-left: var(--space2) !important;
-    margin-right: var(--space2) !important;
+    margin-left: var(--size2) !important;
+    margin-right: var(--size2) !important;
 }
 
 .mx-3 {
-    margin-left: var(--space3) !important;
-    margin-right: var(--space3) !important;
+    margin-left: var(--size3) !important;
+    margin-right: var(--size3) !important;
 }
 
 .mx-4 {
-    margin-left: var(--space4) !important;
-    margin-right: var(--space4) !important;
+    margin-left: var(--size4) !important;
+    margin-right: var(--size4) !important;
 }
 
 .mx-5 {
-    margin-left: var(--space5) !important;
-    margin-right: var(--space5) !important;
+    margin-left: var(--size5) !important;
+    margin-right: var(--size5) !important;
 }
 
 /* Margin Y */
 
 .my-1 {
-    margin-top: var(--space1) !important;
-    margin-bottom: var(--space1) !important;
+    margin-top: var(--size1) !important;
+    margin-bottom: var(--size1) !important;
 }
 
 .my-2 {
-    margin-top: var(--space2) !important;
-    margin-bottom: var(--space2) !important;
+    margin-top: var(--size2) !important;
+    margin-bottom: var(--size2) !important;
 }
 
 .my-3 {
-    margin-top: var(--space3) !important;
-    margin-bottom: var(--space3) !important;
+    margin-top: var(--size3) !important;
+    margin-bottom: var(--size3) !important;
 }
 
 .my-4 {
-    margin-top: var(--space4) !important;
-    margin-bottom: var(--space4) !important;
+    margin-top: var(--size4) !important;
+    margin-bottom: var(--size4) !important;
 }
 
 .my-5 {
-    margin-top: var(--space5) !important;
-    margin-bottom: var(--space5) !important;
+    margin-top: var(--size5) !important;
+    margin-bottom: var(--size5) !important;
+}
+
+.font-size-1 {
+    font-size: var(--size1) !important;
+}
+
+.font-size-2 {
+    font-size: var(--size2) !important;
+}
+
+.font-size-3 {
+    font-size: var(--size3) !important;
+}
+
+.font-size-4 {
+    font-size: var(--size4) !important;
+}
+
+.font-size-5 {
+    font-size: var(--size5) !important;
 }

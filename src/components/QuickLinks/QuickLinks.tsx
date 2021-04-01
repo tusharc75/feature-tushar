@@ -11,18 +11,18 @@ export interface IQuickLinks {
     icon?: any,
 }
 
-export default function QuickLinks({ quickLinks }) {
+export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
 
-    return quickLinks && quickLinks.length && <div className="d-flex flex-column">
-        <Typography variant="h6" className="mb-1">Quick Links</Typography>
+    return quickLinks && Array.isArray(quickLinks) ? <div className="d-flex flex-column gap-2">
+        <Typography variant="h6" className="mb-1">{title}</Typography>
         {
             quickLinks.map((k, index) => {
-                return <div className={`link d-flex justify-content-center`}>
+                return <div className="font-size-3 link d-flex justify-content-center gap-1">
                     {
                         k.redirect == false ?
                             <>
                                 {k.icon}
-                                <Typography key={index} onClick={k.onClick} className="pl-1">{k.label}</Typography>
+                                <Typography key={index} onClick={k.onClick}>{k.label}</Typography>
                             </> :
                             <>
                                 <Link key={index} to={k.to}
@@ -32,6 +32,6 @@ export default function QuickLinks({ quickLinks }) {
                 </div>
             })
         }
-    </div>
+    </div> : <Typography color="error">Quick Links are passed in incorrect format</Typography>
 }
 
