@@ -11,6 +11,8 @@ import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
 import { CircularProgress } from "@material-ui/core";
 import { TransitionProps } from "@material-ui/core/transitions";
+import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -39,22 +41,12 @@ const FullScreenDialog = (props) => {
     onClose={close}
     TransitionComponent={Transition}
   >
-    <AppBar className={classes.appBar}>
-      <Toolbar>
-        <IconButton
-          edge="start"
-          color="inherit"
-          onClick={close}
-          aria-label="close"
-        >
-          <CloseIcon />
-        </IconButton>
-        <Typography variant="h6" className={classes.title}>
-          {heading}
-        </Typography>
-      </Toolbar>
-    </AppBar>
-    <Box width="100%">{children}</Box>
+    <CustomDialogHeader title={heading} onClose={close} />
+
+    <CustomDialogContent>
+      {children}
+    </CustomDialogContent>
+    
   </Dialog>
 };
 
