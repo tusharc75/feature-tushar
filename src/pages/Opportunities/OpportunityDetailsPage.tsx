@@ -60,7 +60,7 @@ function OpportunityDetailsPage() {
   });
 
   useEffect(() => {
-    const data = user?.role?.sideBar;
+    const data = user.role?.sideBar;
 
     if (data) {
       const hasOpportunityPermission = data.find(
@@ -153,7 +153,7 @@ function OpportunityDetailsPage() {
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch((error) => {
+        .catch(error => {
           toastConfig.setToastConfig(error);
           setShowConfirmBox(false);
         });

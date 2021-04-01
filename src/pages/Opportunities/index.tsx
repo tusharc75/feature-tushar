@@ -110,6 +110,7 @@ const Opportunities = () => {
         ...u,
         isChecked: false,
         id: u._id,
+        canDelete: u.owner?.optionValue === user?.user._id,
         owner: u.owner?.optionLabel ? u.owner.optionLabel : '',
         stage: u.stage ? u.stage:'',
         closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
@@ -241,7 +242,7 @@ const Opportunities = () => {
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "actions", headerName: "Actions ", disableColumnMenu: true, sortable: false, filterable: false,
+      field: "actions", headerName: "Actions ", disableColumnMenu: false, sortable: false, filterable: false,
       renderCell: (params) => (
         <>
           {
@@ -279,7 +280,7 @@ const Opportunities = () => {
       }
     }
     else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true)
