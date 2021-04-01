@@ -163,7 +163,7 @@ const Roles = () => {
         }
     }, [id]);
 
-    const fetchRelatedData = async () => {
+    const fetchRelatedData = () => {
         axiosInstance().get(`/account/related/${id}`).then(({ data: { data } }) => {
             setRelatedContacts(data.Contact && data.Contact["Account_Name"]);
             setOpportunities(data.Opportunity && data.Opportunity["Account_Name"]);
@@ -491,9 +491,9 @@ const Roles = () => {
                                 <Box marginY={2} />
 
                                 <Container styles={{ padding: "0px", minHeight: "auto" }}>
-                                    <OpportunityInAccordian opportunities={opportunities} onNewOpportunityAdd={fetchRelatedData} accountId={accountData._id} recordsPerLine={2} />
+                                    <OpportunityInAccordian opportunities={opportunities} onNewOpportunityAdd={() => { fetchRelatedData() }} accountId={accountData._id} recordsPerLine={2} />
                                     {/* onChange={handleChange('panel1')} */}
-                                    </Container>
+                                </Container>
                             </Container>
                         </Grid>
                         <Grid item xs={12} sm={12} md={4} lg={4}
