@@ -1,17 +1,9 @@
-:root {
-    --size1: 0.25rem;
-    --size2: 0.5rem;
-    --size3: 1rem;
-    --size4: 1.5rem;
-    --size5: 3rem;
-}
-
 .cursor-pointer:hover {
-    cursor: pointer;
+    cursor: pointer !important;
 }
 
 .cursor-stop:hover {
-    cursor: no-drop;
+    cursor: no-drop !important;
 }
 
 .text-capitalize {
@@ -19,76 +11,98 @@
 }
 
 .d-flex {
-    display: flex;
+    display: flex !important;
 }
 
 .justify-content-space-between {
-    justify-content: space-between;
+    justify-content: space-between !important;
 }
 
 .align-items-center {
-    align-items: center;
+    align-items: center !important;
 }
 
 .flex-column {
-    flex-direction: column;
+    flex-direction: column !important;
 }
 
 .vertical-align-top {
-    vertical-align: top;
+    vertical-align: top !important;
 }
 
 .text-wrap {
-    white-space: normal;
+    white-space: normal !important;
 }
 
 .word-break {
-    word-break: break-word;
+    word-break: break-word !important;
 }
-
-.gap-1 {
-    gap: var(--size1) !important;
-}
-
-.gap-2 {
-    gap: var(--size2) !important;
-}
-
-.gap-3 {
-    gap: var(--size3) !important;
-}
-
-.gap-4 {
-    gap: var(--size4) !important;
-}
-
-.gap-5 {
-    gap: var(--size5) !important;
-}
-
 
 $max: 50;
 $offset: 1;
-$unit: 'px'; // Feel free to change the unit.
-@mixin list-loop($className, $styleName) {
-  $i: 0;
-  @while $i <= $max {
-    #{$className + $i} { 
-      #{$styleName}: #{$i + $unit};
+
+@mixin list-loop($className, $styleName, $unit) {
+    $i: 0;
+    @while $i <= $max {
+        #{$className + $i} {
+            #{$styleName}: #{$i + $unit};
+        }
+        $i: $i + $offset;
     }
-    $i: $i + $offset;
-  }
 }
 
 // Margins
-@include list-loop('.mt-', 'margin-top');
-@include list-loop('.mr-', 'margin-right');
-@include list-loop('.mb-', 'margin-bottom');
-@include list-loop('.ml-', 'margin-left');
-@include list-loop('.mx-', 'margin');
+@include list-loop(".mt-", "margin-top", "px");
+@include list-loop(".mr-", "margin-right", "px");
+@include list-loop(".mb-", "margin-bottom", "px");
+@include list-loop(".ml-", "margin-left", "px");
+@include list-loop(".m-", "margin", "px");
+
 // Paddings
-@include list-loop('.pt-', 'padding-top');
-@include list-loop('.pr-', 'padding-right');
-@include list-loop('.pb-', 'padding-bottom');
-@include list-loop('.pl-', 'padding-left');
-@include list-loop('.px-', 'padding');
+@include list-loop(".pt-", "padding-top", "px");
+@include list-loop(".pr-", "padding-right", "px");
+@include list-loop(".pb-", "padding-bottom", "px");
+@include list-loop(".pl-", "padding-left", "px");
+@include list-loop(".p-", "padding", "px");
+
+// Used below mixin to generate some fixed sized size
+
+$offset: 1;
+$sizes: 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
+@mixin fixed-list-loop($className, $styleName, $unit) {
+    $i: 1;
+    @each $size in $sizes {
+        #{$className + $i} {
+            #{$styleName}: #{$size};
+        }
+        $i: $i + $offset;
+    }
+}
+
+// Margins
+@include fixed-list-loop(".mt-", "margin-top", "rem");
+@include fixed-list-loop(".mr-", "margin-right", "rem");
+@include fixed-list-loop(".mb-", "margin-bottom", "rem");
+@include fixed-list-loop(".ml-", "margin-left", "rem");
+@include fixed-list-loop(".m-", "margin", "rem");
+
+// Paddings
+@include fixed-list-loop(".pt-", "padding-top", "rem");
+@include fixed-list-loop(".pr-", "padding-right", "rem");
+@include fixed-list-loop(".pb-", "padding-bottom", "rem");
+@include fixed-list-loop(".pl-", "padding-left", "rem");
+@include fixed-list-loop(".p-", "padding", "rem");
+
+// Font size
+@include fixed-list-loop(".font-size-", "font-size", "rem");
+@include fixed-list-loop(".font-size-", "font-size", "rem");
+@include fixed-list-loop(".font-size-", "font-size", "rem");
+@include fixed-list-loop(".font-size-", "font-size", "rem");
+@include fixed-list-loop(".font-size-", "font-size", "rem");
+
+// Gap
+@include fixed-list-loop(".gap-", "gap", "rem");
+@include fixed-list-loop(".gap-", "gap", "rem");
+@include fixed-list-loop(".gap-", "gap", "rem");
+@include fixed-list-loop(".gap-", "gap", "rem");
+@include fixed-list-loop(".gap-", "gap", "rem");
