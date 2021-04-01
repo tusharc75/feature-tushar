@@ -29,6 +29,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { getObjKeys } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
+import { HiUserGroup } from 'react-icons/hi';
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -43,10 +44,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const LeadTypes = {
-  "All Leads": 1,
-  "My Leads": 2,
-};
+const LeadTypes = [
+  {
+    key:"All Leads",
+    value: 1
+  },
+  {
+    key:"My Leads",
+    value: 2
+  }
+]
 
 const notAllowedMes = "You must be the owner or collaborator of this contact to get the delete functionality"
 let leadTimeout
@@ -162,8 +169,8 @@ const Leads = () => {
     setAnchorEl(null);
   };
 
-  const handleLeadTypeSel = (e) => {
-    setSelectedType(e.target.value);
+  const handleLeadTypeSel = (filteredValue) => {
+    setSelectedType(filteredValue);
   };
 
   const handleCreate = () => {
@@ -222,35 +229,35 @@ const Leads = () => {
       width: 75,
     },
     {
-      field: "firstName", headerName: "Name", width: 200,
+      field: "firstName", headerName: "Name", width: 400,
       renderCell: (params) => (
         getFirstName(params.row)
       )
     },
     {
-      field: "title", headerName: "Title", width: 200,
+      field: "title", headerName: "Title", width: 300,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "company", headerName: "Company", width: 200,
+      field: "company", headerName: "Company", width: 300,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "phone", headerName: "Phone", width: 200,
+      field: "phone", headerName: "Phone", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "mobile", headerName: "Mobile", width: 200,
+      field: "mobile", headerName: "Mobile", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "email", headerName: "Email", width: 200,
+      field: "email", headerName: "Email", width: 250,
       hide: true,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     // { field: "status", headerName: "Lead Status", width: 200 },
     {
-      field: "owner", headerName: "Owner Alies", width: 200,
+      field: "owner", headerName: "Owner Alies", width: 250,
       hide: true,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
@@ -381,11 +388,9 @@ const Leads = () => {
   }
   return (
     <Layout>
-      <Grid container spacing={3} direction="row">
-        <Grid item xs={12} sm={6} className="pl-3">
-          <CustomBreadCrumbs routes={[routes.lead]} />
-        </Grid>
-        <Grid item xs={12} sm={6} className="pr-3">
+      <CustomBreadCrumbs routes={[routes.lead]} />
+      <Grid container direction="row" className="header-links">
+        <Grid item xs={12} sm={12} className="pr-3">
           <Grid container justify="flex-end">
             <Link
               href="#"
@@ -433,8 +438,8 @@ const Leads = () => {
           </Grid>
         </Grid>
       </Grid>
-
       <Container>
+      <div className="header-panel">
         <Header
           selectedType={selectedType}
           onTypeChange={handleLeadTypeSel}
@@ -445,7 +450,10 @@ const Leads = () => {
           onCreate={handleCreate}
           showConfirmBox={showConfirmBox}
           canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+          icon={<HiUserGroup className="headerLogo" />}
+          heading="Leads"
         />
+      </div>
         {
           isOpen && <ManageLeadDialog
             open={isOpen}
@@ -455,9 +463,10 @@ const Leads = () => {
             dataToUpdate={null}
           />
         }
+     
       </Container>
-      <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-        <div className="contact-grid-height1">
+      <Container>
+        <div className="listing-grid">
           <DataGrid
             components={{
               Toolbar: DataGridCustomToolbar,

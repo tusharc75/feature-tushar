@@ -76,7 +76,6 @@ const Roles = () => {
             if (data?.salutation?.optionLabel) {
                 name = data.salutation.optionLabel + name
             }
-            debugger;
             setHeadingLbl(name)
             handleAllowToEditList(data)
             setContactData(data)
