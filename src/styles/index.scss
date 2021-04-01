@@ -1,13 +1,8 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 :root {
-  --primary: #09445a;
+  --primary : #003f57 ;
+  --primary-light : #003f57 ;
   --secondary: #dc004e;
-  --error: #f44336;
+  --error: #df2e18;
   --info: #2196f3;
   --success: #4caf50;
   --link: #007bff;
@@ -15,60 +10,64 @@
   --aliceblue: aliceblue;
 }
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: Nunito Sans,sans-serif!important;
 }
 
-/* MAC like scrollbar - Start */
-/* Customize website's scrollbar like Mac OS
-Not supports in Firefox and IE */
+/* Let's get this party started */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  background: #ddd; 
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+::-webkit-scrollbar-thumb:window-inactive {
+background:#ada7a7cc; 
+}
 
 /* total width */
 body::-webkit-scrollbar {
   background-color: #fff;
-  /* width: 16px; */
 }
-
-/* background of the scrollbar except button or resizer */
-/* body::-webkit-scrollbar-track {
-  background-color: #fff;
-} */
-/* body::-webkit-scrollbar-track:hover {
-  background-color: #f4f4f4;
-} */
 
 /* scrollbar itself */
 body::-webkit-scrollbar-thumb {
-  background-color: #babac0;
-  border-radius: 16px;
-  border: 5px solid #fff;
+    background-color: #9e9ea5;
+    box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+    -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
 body::-webkit-scrollbar-thumb:hover {
-  background-color: #a0a0a5;
-  border: 4px solid #f4f4f4;
+    background-color: #969696;
+    border-color: #f4f4f4;
 }
 
 /* set button(top and bottom of the scrollbar) */
 body::-webkit-scrollbar-button {
-  display: none;
+    display: none;
 }
 
-/* body::-webkit-scrollbar {
-  background-color: #fff;
-  width: 12px;
-}
-body::-webkit-scrollbar-track {
-  background-color: #fff;
-}
-body::-webkit-scrollbar-thumb {
-  background-color: #babac0;
-  border-radius: 16px;
-  border: 2px solid #fff;
-} */
 
 /* MAC like scrollbar - End */
 
@@ -246,14 +245,9 @@ body::-webkit-scrollbar-thumb {
   color: #888;
 }
 
-.account-grid-height,
-.contact-grid-height {
-  height: calc(100vh - 290px);
-}
-
-.account-grid-height1,
-.contact-grid-height1 {
-  height: calc(100vh - 240px);
+.listing-grid{
+  height: calc(100vh - 10rem);
+  padding: 0.3rem;
 }
 
 .form-label-style:nth-child(1) {
@@ -283,4 +277,45 @@ body::-webkit-scrollbar-thumb {
 .roles-table > tbody > tr > td {
   padding: 0px 15px;
   border-bottom: 0px;
+}
+
+.header-links{
+  position: absolute;
+  top: 4.3rem;
+  right: 0
+}
+.header-panel{
+  color:var(--primary);
+  background-color: #f7f7f7 !important;
+  border-bottom: 1px solid #ecf1f3 !important;
+  border-top: 1px solid #ecf1f3 !important;
+  padding: 8px 10px;
+}
+.listingHeader{
+  font-size: 1.35rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+.headerLogo{
+    font-size: 1.35rem;
+    color: var(--primary);
+    margin-left: 4px
+}
+
+
+.text-primary{
+  color: var(--primary);
+}
+
+
+.text-error{
+  color: var(--error);
+}
+
+.text-success{
+  color: var(--success);
+}
+
+.text-center{
+  text-align: center !important;
 }

@@ -20,9 +20,6 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
 
     const useStyles = makeStyles((theme) => ({
-        backgroundBlue: {
-            background: "#EEF9FD"
-        },
         btnPadding: {
             padding: theme.spacing(0, 2)
         },
@@ -225,7 +222,7 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
 
                         </DialogContent>
 
-                        <DialogActions className={classes.backgroundBlue}>
+                        <DialogActions>
                             <Grid
                                 container
                                 direction="row"

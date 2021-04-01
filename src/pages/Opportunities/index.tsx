@@ -27,6 +27,7 @@ import routes from './../../components/Helpers/Routes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityMain from "./ManageOpportunities";
+import { GiHiveMind } from 'react-icons/gi';
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -42,10 +43,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const OpportunityTypes = {
-  "All Opportunities": 1,
-  "My Opportunities": 2,
-};
+const OpportunityTypes = [
+  {
+    key:"All Opportunities",
+    value: 1
+  },
+  {
+    key:"My Opportunities",
+    value: 2
+  }
+]
 
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -156,8 +163,8 @@ const Opportunities = () => {
     setAnchorEl(null);
   };
 
-  const handleOpportunityTypeSel = (e) => {
-    setSelectedType(e.target.value);
+  const handleOpportunityTypeSel = (filterValues) => {
+    setSelectedType(filterValues);
   };
 
   const handleCreate = () => {
@@ -203,13 +210,13 @@ const Opportunities = () => {
       width: 75,
     },
     {
-      field: "opportunityName", headerName: "Opportunity Name", width: 200,
+      field: "opportunityName", headerName: "Opportunity Name", width: 400,
       renderCell: (params) => (
         getFirstName(params.row)
       )
     },
     {
-      field: "accountName", headerName: "Account Name", width: 200,
+      field: "accountName", headerName: "Account Name", width: 300,
       renderCell: (params) => (
         <Link className="accountNameLink" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
           {params?.row?.accountName?.optionLabel ? params.row.accountName.optionLabel : ''}
@@ -217,16 +224,16 @@ const Opportunities = () => {
       )
     },
     {
-      field: "stage", headerName: "Stage", width: 200,
+      field: "stage", headerName: "Stage", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "closeDate", headerName: "Close Date", width: 200,
+      field: "closeDate", headerName: "Close Date", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     // { field: "status", headerName: "Lead Status", width: 200 },
     {
-      field: "owner", headerName: "Opportunity Owner", width: 200,
+      field: "owner", headerName: "Opportunity Owner", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
@@ -357,12 +364,10 @@ const Opportunities = () => {
   return (
     <>
       <Layout>
-        <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3">
             <CustomBreadCrumbs routes={[routes.opportunity]} />
-          </Grid>
-          <Grid item xs={12} sm={6} className="pr-3">
-            <Grid container justify="flex-end">
+            <Grid container direction="row" className="header-links">
+              <Grid item xs={12} sm={12} className="pr-3">
+                 <Grid container justify="flex-end">
               <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
@@ -412,6 +417,7 @@ const Opportunities = () => {
 
         {/* Tables Begins Here */}
         <Container>
+        <div className="header-panel">
           <OpportunitiesHeader
             selectedType={selectedType}
             onTypeChange={handleOpportunityTypeSel}
@@ -422,11 +428,13 @@ const Opportunities = () => {
             onCreate={clickCreateNew}
             showConfirmBox={showConfirmBox}
             canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-
+            icon={<GiHiveMind className="headerLogo"  />}
+            heading="Opportunities"
           />
+          </div>
         </Container>
-        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-          <div className="contact-grid-height1">
+        <Container >
+          <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,

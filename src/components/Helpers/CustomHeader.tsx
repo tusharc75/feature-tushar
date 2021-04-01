@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -10,17 +10,11 @@ import {
   Chip,
   Badge,
 } from "@material-ui/core";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
-import "./customheader.scss";
 
-const useStyles = makeStyles((theme) => ({
-  box: {
-    backgroundColor: "#E6F4FF",
-    borderRadius: 6,
-    padding: theme.spacing(0.5, 1.5),
-  },
-}));
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+
+import "./customheader.scss";
 
 const CustomHeader = (props) => {
   const {
@@ -35,14 +29,38 @@ const CustomHeader = (props) => {
     icon,
     secondHeading
   } = props;
-  const classes = useStyles();
+
+
+  const [filter, setFilter] = useState("All Accounts");
+
+  const handleFilter = (event, newFilter) => {
+        setFilter(newFilter);
+        onTypeChange(options.find((d) => d.key === newFilter).value);
+    };
 
   return (
     <React.Fragment>
-      <Grid container justify="space-between" alignContent="center">
-        <Box className="customHeader">
-          {icon}
-          {options && Object.keys(options).length ? (
+      <Grid container className="header-panel" justify="space-between" alignContent="center">
+       <Grid item  className="d-flex align-items-center gap-1">
+         {icon} <span className="listingHeader">{heading}
+             </span>
+           {
+             options &&  <ToggleButtonGroup size="small"  className="ml-8"
+                value={filter}
+                exclusive
+                onChange={handleFilter}>
+                  {options.map((k, index) => {
+                  return (
+                      <ToggleButton value={k.key} key={index}>{k.key} 
+                      </ToggleButton>
+                    );
+                })}
+                </ToggleButtonGroup> 
+           }
+        </Grid>
+        {/* <Box className="ml-2">
+          {icon} */}
+          {/* {options && Object.keys(options).length ? (
 
             <FormControl className="customHeaderDropdown">
               <InputLabel id="demo-simple-select-label">{secondHeading}</InputLabel>
@@ -73,8 +91,8 @@ const CustomHeader = (props) => {
                 })}
               </Select>
             </FormControl>
-          ) : null}
-          <div className="customActiveInavtiveTab">
+          ) : null} */}
+          {/* <div className="customActiveInavtiveTab">
             {total ? (
               <Box
                 className="customHeaderCustomTab"
@@ -108,51 +126,8 @@ const CustomHeader = (props) => {
               </Box>
             ) : null}
             <Box component="span" marginX={1} />
-          </div>
-
-          {/* {total ? (
-            <Box className={classes.box}>
-              <Typography>{`Total ${heading}`}
-                <Typography style={{ color: "#0068AB", fontWeight: "bold" }}>
-                  {total}
-                </Typography>
-              </Typography>
-            </Box>
-          ) : (
-              ""
-            )}
-          <Box component="span" marginX={1} /> */}
-          {/* {active ? (
-            <Box className={classes.box}>
-              <Typography>{`Active ${heading}`}</Typography>
-              <Typography style={{ color: "#1A7C1B", fontWeight: "bold" }}>
-                {active}
-              </Typography>
-            </Box>
-          ) : (
-              ""
-            )}
-          <Box component="span" marginX={1} /> */}
-          {/* {inactive ? (
-            <Box className={classes.box}>
-              <Typography>{`Inactive ${heading}`}</Typography>
-              <Typography style={{ color: "#D63F19", fontWeight: "bold" }}>
-                {inactive}
-              </Typography>
-            </Box>
-          ) : (
-              ""
-            )} */}
-        </Box>
-        {/*<Grid item>*/}
-        {/*  {*/}
-        {/*    showHeading ?*/}
-        {/*      <Typography variant="h6" component="h2">*/}
-        {/*        {heading}*/}
-        {/*      </Typography> : null*/}
-        {/*  }*/}
-
-        {/*</Grid>*/}
+          </div> */}
+        {/* </Box> */}
         <Grid item>
           <Grid container alignItems="center" style={{ height: "100%" }}>
             {children}
