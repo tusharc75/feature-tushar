@@ -45,6 +45,9 @@ import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityMain from "../Opportunities/ManageOpportunities";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
+import PhoneIcon from '@material-ui/icons/Phone';
+import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
+import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 
 const Accordion = withStyles({
     root: {
@@ -158,7 +161,7 @@ const Roles = () => {
         }
     }, [id]);
 
-    const fetchRelatedData = async () => {
+    const fetchRelatedData = () => {
         axiosInstance().get(`/account/related/${id}`).then(({ data: { data } }) => {
             setRelatedContacts(data.Contact && data.Contact["Account_Name"]);
             setOpportunities(data.Opportunity && data.Opportunity["Account_Name"]);
@@ -268,13 +271,14 @@ const Roles = () => {
         });
     };
 
-    const quickLinks = [
+    const quickLinks: IQuickLinks[] = [
         {
             label: "Account Heirarchy",
             redirect: false,
             onClick: () => {
                 setShowAccountHierarchyInFullScreenDialog(true);
-            }
+            },
+            icon: <PhoneIcon />
         },
         {
             label: "Projects",
@@ -294,7 +298,8 @@ const Roles = () => {
         },
         {
             label: "Contacts",
-            count: 0
+            count: relatedContacts.length,
+            to: "/contact"
         },
     ]
 
@@ -484,56 +489,8 @@ const Roles = () => {
                                 <Box marginY={2} />
 
                                 <Container styles={{ padding: "0px", minHeight: "auto" }}>
+                                    <OpportunityInAccordian opportunities={opportunities} onNewOpportunityAdd={() => { fetchRelatedData() }} accountId={accountData._id} recordsPerLine={2} />
                                     {/* onChange={handleChange('panel1')} */}
-                                    <Accordion square expanded={expanded["opportunity"]}>
-                                        <AccordionSummary
-                                            aria-controls="user-panel-content"
-                                            id="user-panel-header"
-                                        >
-                                            <Grid container>
-                                                <Grid item xs={8}>
-                                                    <Box display="flex">
-                                                        <Box>
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={(event) => handlePanelChange('opportunity')} >
-                                                                {expanded["opportunity"] === true ? (
-                                                                    <ExpandLessIcon />
-                                                                ) : (
-                                                                    <ExpandMoreIcon />
-                                                                )}
-                                                            </IconButton>
-                                                        </Box>
-                                                        <Box padding="5px">
-                                                            <Typography variant="subtitle2">
-                                                                Opportunity ({opportunities==null?0:opportunities.length})
-                                                     </Typography>
-                                                        </Box>
-                                                    </Box>
-                                                </Grid>
-                                                <Grid item xs={4} container justify="flex-end">
-                                                    <IconButton
-                                                        color="primary"
-                                                        size="small"
-                                                        onClick={handleCreateNewOpp}
-                                                    >
-                                                        <ControlPointIcon />
-                                                    </IconButton>
-                                                </Grid>
-                                            </Grid>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            {loading ? (
-                                                <CommonSkeleton lenArray={[...Array(4).keys()]} />
-                                            ) : (
-                                                <>
-                                                    {
-                                                        expanded['opportunity'] && <OpportunityTab data={opportunities} />
-                                                    }
-                                                </>
-                                            )}
-                                        </AccordionDetails>
-                                    </Accordion>
                                 </Container>
                             </Container>
                         </Grid>
@@ -551,18 +508,8 @@ const Roles = () => {
                                         }
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <div className={`${accountClass.detail_page_div2}`}>
-                                            {
-                                                quickLinks && quickLinks.length ?
-                                                    quickLinks.map((k, index) => {
-                                                        if (k.redirect == false) {
-                                                            return <Typography className={`${accountClass.custom_link} link`} onClick={k.onClick}>{k.label}</Typography>
-                                                        }
-                                                        return <Link key={index} to={k}
-                                                            className={`${accountClass.custom_link} link`}>{k.label} {k.count != null ? `(${k.count})` : null}</Link>
-                                                    }) :
-                                                    null
-                                            }
+                                        <div className="m-3">
+                                            <QuickLinks quickLinks={quickLinks} />
                                         </div>
                                     </Grid>
 
