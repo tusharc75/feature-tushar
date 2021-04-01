@@ -47,6 +47,8 @@ import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityMain from "../Opportunities/ManageOpportunities";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
+import PhoneIcon from '@material-ui/icons/Phone';
+import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
 
 const Accordion = withStyles({
     root: {
@@ -270,13 +272,14 @@ const Roles = () => {
         });
     };
 
-    const quickLinks = [
+    const quickLinks: IQuickLinks[] = [
         {
             label: "Account Heirarchy",
             redirect: false,
             onClick: () => {
                 setShowAccountHierarchyInFullScreenDialog(true);
-            }
+            },
+            icon: <PhoneIcon />
         },
         {
             label: "Projects",
@@ -296,7 +299,8 @@ const Roles = () => {
         },
         {
             label: "Contacts",
-            count: 0
+            count: relatedContacts.length,
+            to: "/contact"
         },
     ]
 
@@ -553,18 +557,8 @@ const Roles = () => {
                                         }
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <div className={`${accountClass.detail_page_div2}`}>
-                                            {
-                                                quickLinks && quickLinks.length ?
-                                                    quickLinks.map((k, index) => {
-                                                        if (k.redirect == false) {
-                                                            return <Typography className={`${accountClass.custom_link} link`} onClick={k.onClick}>{k.label}</Typography>
-                                                        }
-                                                        return <Link key={index} to={k}
-                                                            className={`${accountClass.custom_link} link`}>{k.label} {k.count != null ? `(${k.count})` : null}</Link>
-                                                    }) :
-                                                    null
-                                            }
+                                        <div className="m-3">
+                                            <QuickLinks quickLinks={quickLinks} />
                                         </div>
                                     </Grid>
 
