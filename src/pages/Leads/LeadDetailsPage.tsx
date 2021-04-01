@@ -81,8 +81,8 @@ const LeadDetailsPage = () => {
       setHeadingLbl(name);
       const userId = user?.user?._id;
 
-      setAllowedToEdit([...data.collaborator, data.owner].some(d => d.optionValue == userId));
-      setAllowedToDelete([data.owner].some(d => d.optionValue == userId));
+      setAllowedToEdit([...data.collaborator, data.owner].some(d => d?.optionValue == userId));
+      setAllowedToDelete([data.owner].some(d => d?.optionValue == userId));
       setLeadData(data);
       getLeadFields();
       setCustomizedRoutes([

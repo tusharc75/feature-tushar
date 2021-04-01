@@ -163,8 +163,8 @@ const Roles = () => {
 
     const fetchRelatedData = () => {
         axiosInstance().get(`/account/related/${id}`).then(({ data: { data } }) => {
-            setRelatedContacts(data.Contact && data.Contact["Account_Name"]);
-            setOpportunities(data.Opportunity && data.Opportunity["Account_Name"]);
+            setRelatedContacts(data.Contact && data.Contact["Account_Name"] ? data.Contact["Account_Name"] : []);
+            setOpportunities(data.Opportunity && data.Opportunity["Account_Name"] ? data.Opportunity["Account_Name"] : []);
             setRelatedContactsLoading(false)
         });
     }
@@ -286,7 +286,7 @@ const Roles = () => {
         },
         {
             label: "Opportunity",
-            count: opportunities==null?0:opportunities.length
+            count: opportunities ? opportunities.length : 0
         },
         {
             label: "Quotes",
@@ -298,7 +298,7 @@ const Roles = () => {
         },
         {
             label: "Contacts",
-            count: relatedContacts.length,
+            count: relatedContacts ? relatedContacts.length : 0,
             to: "/contact"
         },
     ]
