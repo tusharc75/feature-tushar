@@ -36,8 +36,6 @@ import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { withStyles } from "@material-ui/core/styles";
-
-
 import ManageContactDialog from '../Contact/ManageContact/index';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
@@ -284,7 +282,7 @@ const Roles = () => {
         },
         {
             label: "Opportunity",
-            count: opportunities.length
+            count: opportunities==null?0:opportunities.length
         },
         {
             label: "Quotes",
@@ -508,7 +506,7 @@ const Roles = () => {
                                                         </Box>
                                                         <Box padding="5px">
                                                             <Typography variant="subtitle2">
-                                                                Opportunity ({opportunities.length})
+                                                                Opportunity ({opportunities==null?0:opportunities.length})
                                                      </Typography>
                                                         </Box>
                                                     </Box>

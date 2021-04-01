@@ -28,12 +28,6 @@ export default function ManageContactMain(props) {
         axiosInstance().get(`/field?resource=Contact`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => {
-
-                //  If this dialog opens from account details screen, make that account preselected
-                if (accountId) {
-                    _f = initializeDropdownById(_f, "accountName", accountId);
-                }
-
                 newFields.push(_f.fieldData)
             });
 
