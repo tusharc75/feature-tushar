@@ -23,3 +23,8 @@ Launches the test runner in the interactive watch mode.
 ### `yarn build`
 
 ## Project Structure
+
+
+## Branch Delete Code
+Delete Locally - git branch -d branch-name
+Delete Remotely - git push origin --delete branch-name

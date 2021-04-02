@@ -204,7 +204,7 @@ function OpportunityDetailsPage() {
     {
       label: "New Event",
       count: 0,
-    },
+    }
   ];
   return (
     <>
