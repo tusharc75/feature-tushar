@@ -46,26 +46,26 @@ function OpportunitiesHeader(props) {
 
     const { selectedType, onTypeChange, options, onSearch, searchVal, onCreate,
         opportunityPermissions, showConfirmBox, canDelete, icon, heading } = props
-    return <Grid className={styles.filter_side_container}  container>
-       <Grid item xs={6}  className="d-flex align-items-center gap-1">
-           {icon} <span className="listingHeader">{heading}
-             </span>
-           {
-             options &&  <ToggleButtonGroup size="small"  className="ml-8"
-                value={filter}
-                exclusive
-                onChange={handleFilter}>
-                  {options.map((k, index) => {
-                  return (
-                      <ToggleButton value={k.key} key={index}>{k.key} 
-                      </ToggleButton>
-                    );
-                })}
-                </ToggleButtonGroup> 
-           }
+    return <Grid className={styles.filter_side_container} container>
+        <Grid item xs={6} className="d-flex align-items-center gap-1">
+            {icon} <span className="listingHeader">{heading}
+            </span>
+            {
+                options && <ToggleButtonGroup size="small" className="ml-8"
+                    value={filter}
+                    exclusive
+                    onChange={handleFilter}>
+                    {options.map((k, index) => {
+                        return (
+                            <ToggleButton value={k.key} key={index}>{k.key}
+                            </ToggleButton>
+                        );
+                    })}
+                </ToggleButtonGroup>
+            }
         </Grid>
         <Grid item xs={6} className={styles.filter_side}>
-            <Box  className={styles.filter_side_header} component="div">
+            <Box className={styles.filter_side_header} component="div">
                 <SearchBox
                     onSearch={onSearch}
                     searchbox={styles.search_box_input}
@@ -90,6 +90,7 @@ function OpportunitiesHeader(props) {
                 {
                     opportunityPermissions.isDelete && <>
                         <Button
+                            disabled={canDelete}
                             variant="outlined"
                             color="default"
                             onClick={openActions}
@@ -110,7 +111,10 @@ function OpportunitiesHeader(props) {
                             open={Boolean(anchorEl)}
                             onClose={closeActions}>
 
-                            <MenuItem onClick={() => { showConfirmBox(null) }}
+                            <MenuItem onClick={() => {
+                                closeActions();
+                                showConfirmBox(null);
+                            }}
                             >Delete</MenuItem>
                         </Menu>
                     </>

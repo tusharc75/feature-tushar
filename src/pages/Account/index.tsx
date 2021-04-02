@@ -41,14 +41,14 @@ import { FcApproval } from 'react-icons/fc';
 import { MdAccountCircle } from 'react-icons/md';
 const AccTypes = [
     {
-      key:"All Accounts",
-      value: 1
+        key: "All Accounts",
+        value: 1
     },
     {
-      key:"My Accounts",
-      value: 2
+        key: "My Accounts",
+        value: 2
     }
-  ]
+]
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
@@ -195,7 +195,6 @@ export default function Account() {
                         } else {
                             setCheckAllAccounts(false);
                         }
-                        handleSelectedAccounts(params.row.id, ev.target.checked)
                     }}
                 />
                 //  : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the selection functionality">
@@ -275,14 +274,14 @@ export default function Account() {
                                     <IconButton aria-label="Disapprove" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: false, id: params.row._id, accountName: params.row.accountName })
                                     }}>
-                                       <CancelIcon fontSize="inherit" color="error" />
+                                        <CancelIcon fontSize="inherit" color="error" />
                                     </IconButton>
                                 </Tooltip> :
                                 <Tooltip title="Approve">
                                     <IconButton aria-label="Approve" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
                                     }}>
-                                       <FcApproval />
+                                        <FcApproval />
                                     </IconButton>
                                 </Tooltip> : ""
                     }
@@ -341,17 +340,6 @@ export default function Account() {
         }
     }
 
-    const handleSelectedAccounts = (id, isChecked) => {
-        let tempSelectedRecs = [...selectedRecs], curRecIndex = selectedRecs.indexOf(id)
-        if (isChecked && curRecIndex < 0) {
-            tempSelectedRecs = [...selectedRecs, id]
-        }
-        else if (!isChecked && curRecIndex >= 0) {
-            tempSelectedRecs.splice(curRecIndex, 1)
-        }
-        setSelectedRecs(tempSelectedRecs)
-    }
-
     // ****** ACTIONS BUTTON STUFF *********
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -390,19 +378,17 @@ export default function Account() {
     }
 
     const handleDeleteAccounts = async () => {
-        let recLen = selectedRecs.length
-        if (selectedRecs && recLen > 0) {
-            let reqs = {
+        let selectedRecs = dataRows.filter(obj => obj.isChecked).map(cr => cr._id)
+        if (selectedRecs && selectedRecs.length > 0) {
+            axiosInstance().put(`/account/remove`, {
                 ids: [...selectedRecs]
-            }
-            axiosInstance().put(`/account/remove`, reqs).then(({ data }) => {
+            }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setShowDeleteConfirmBox(false)
                 fetchAccounts();
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             })
-            setSelectedRecs([])
         }
     }
 
@@ -417,7 +403,6 @@ export default function Account() {
             });
 
         setSingleAccountDelete({ id: null, show: false, accountName: "" });
-        setSelectedRecs([])
     }
 
     const handleSingleApproveDisapproveAccount = () => {
@@ -431,7 +416,6 @@ export default function Account() {
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
             });
         setCheckAllAccounts(false)
-        setSelectedRecs([])
     }
 
     const handleDialogClose = (params) => {
@@ -468,10 +452,10 @@ export default function Account() {
         <>
 
             <Layout>
-                        <CustomBreadCrumbs routes={[routes.account]} />
-                        <Grid container direction="row" className="header-links">
-                     <Grid item xs={12} sm={12} className="pr-3">
-                         <Grid container justify="flex-end">
+                <CustomBreadCrumbs routes={[routes.account]} />
+                <Grid container direction="row" className="header-links">
+                    <Grid item xs={12} sm={12} className="pr-3">
+                        <Grid container justify="flex-end">
                             <Link
                                 to="#"
                                 onClick={(e) => e.preventDefault()}
@@ -528,8 +512,8 @@ export default function Account() {
                                 selectedType={selectedType}
                                 onTypeChange={handleAccountSel}
                                 options={AccTypes}
-                                secondHeading="Account" 
-                                icon={<MdAccountCircle className="headerLogo"  />} >
+                                secondHeading="Account"
+                                icon={<MdAccountCircle className="headerLogo" />} >
                                 <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
                                     <SearchBox
                                         onSearch={handleSearch}
@@ -574,6 +558,7 @@ export default function Account() {
                                                         dataRows.filter((d) => d.isChecked && !d.approved).length === 0
                                                     }
                                                     onClick={() => {
+                                                        closeActions()
                                                         setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
                                                     }}
                                                 >
@@ -587,6 +572,7 @@ export default function Account() {
                                                         dataRows.filter((d) => d.isChecked && d.approved).length === 0
                                                     }
                                                     onClick={() => {
+                                                        closeActions()
                                                         setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
                                                     }}
                                                 >
@@ -599,8 +585,10 @@ export default function Account() {
                                                 <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                                     onClick={() => {
                                                         if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
+                                                            closeActions()
                                                             setShowDeleteWarningConfirmBox(true);
                                                         } else {
+                                                            closeActions()
                                                             setShowDeleteConfirmBox(true)
                                                         }
                                                     }}

@@ -26,8 +26,8 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageOpportunityMain from "./ManageOpportunities";
 import { GiHiveMind } from 'react-icons/gi';
+import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -45,11 +45,11 @@ const useStyles = makeStyles((theme) => ({
 
 const OpportunityTypes = [
   {
-    key:"All Opportunities",
+    key: "All Opportunities",
     value: 1
   },
   {
-    key:"My Opportunities",
+    key: "My Opportunities",
     value: 2
   }
 ]
@@ -75,6 +75,7 @@ const Opportunities = () => {
   const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+  const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({ id: null, show: false, opportunityName: "" })
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -116,8 +117,9 @@ const Opportunities = () => {
         ...u,
         isChecked: false,
         id: u._id,
+        canDelete: u.owner?.optionValue === user?.user._id,
         owner: u.owner?.optionLabel ? u.owner.optionLabel : '',
-        stage: u.stage ? u.stage:'',
+        stage: u.stage ? u.stage : '',
         closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
         // accountName: u?.accountName?.optionLabel || ''
       }
@@ -125,7 +127,17 @@ const Opportunities = () => {
     });
     setDataRows([...rows]);
   }, [opportunityData])
+  const handleSingleDeleteOpportunity = async () => {
+    setLoading(true);
 
+    axiosInstance()
+      .put(`/opportunity/remove`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+        fetchOpportunities();
+        setLoading(false);
+      })
+    setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" })
+  }
   const fetchOpportunities = async () => {
     setLoading(true);
     let searchParams: any = { ...query, filterOpportunities: selectedType }
@@ -154,6 +166,8 @@ const Opportunities = () => {
     setSearchVal(e.target.value);
   };
 
+
+
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -167,12 +181,9 @@ const Opportunities = () => {
     setSelectedType(filterValues);
   };
 
-  const handleCreate = () => {
-    setIsOpen(true)
-  }
-
-  const handleClose = () => {
-    setIsOpen(false)
+  const onSuccess = () => {
+    setShowCreateOpportunityDialog(false)
+    fetchOpportunities();
   }
 
   const columns = [
@@ -196,11 +207,32 @@ const Opportunities = () => {
       ),
       renderCell: (params) => (
         <Checkbox
+          // color="primary"
+          // checked={params.value}
+          // onChange={(ev) => {
+          //   updateCheckedStatus(params, ev)
+
+          // }}
+
           color="primary"
+          // disabled={!params.canDelete}
           checked={params.value}
           onChange={(ev) => {
-            updateCheckedStatus(params, ev)
+            const gridData = dataRows;
+            const indexOfRecord = gridData.findIndex(
+              (d) => d.id === params.row.id
+            );
+            gridData[indexOfRecord].isChecked = ev.target.checked;
 
+            setDataRows([...gridData]);
+
+            const checkedRecords = gridData.filter((d) => d.isChecked === true);
+
+            if (checkedRecords.length === gridData.length) {
+              setCheckAllOpportunities(true);
+            } else {
+              setCheckAllOpportunities(false);
+            }
           }}
         />
       ),
@@ -237,15 +269,15 @@ const Opportunities = () => {
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "actions", headerName: "Actions ", disableColumnMenu: true, sortable: false, filterable: false,
+      field: "actions", headerName: "Actions ",
       renderCell: (params) => (
         <>
           {
             opportunityPermissions.isDelete ?
-              params.row.allowToDelete ?
+              params.row.canDelete ?
                 <Tooltip
                   title="Delete" >
-                  <IconButton aria-label="Delete" onClick={() => showConfirmBox(params.row)} >
+                  <IconButton aria-label="Delete" onClick={() => setSingleOpportunityDelete({ show: true, id: params.row._id, opportunityName: `${params.row.opportunityName}` })} >
                     <DeleteIcon
                       fontSize="small" color="error" />
                   </IconButton>
@@ -263,8 +295,12 @@ const Opportunities = () => {
           }
 
         </>
-      ), width: 200
-    }
+      ),
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      width: 200
+    },
   ];
 
   const showConfirmBox = (row) => {
@@ -275,7 +311,7 @@ const Opportunities = () => {
       }
     }
     else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true)
@@ -331,9 +367,11 @@ const Opportunities = () => {
       }));
     }
   }
+
   const clickCreateNew = () => {
     setShowCreateOpportunityDialog(true);
   }
+
   const handleDeleteOpportunity = async () => {
     setDeleteLoading(true)
     let recs = []
@@ -341,9 +379,7 @@ const Opportunities = () => {
       recs.push(deleteRec?._id)
     }
     else {
-      dataRows.forEach(obj => {
-        if (obj.isChecked) recs.push(obj._id)
-      })
+      recs = dataRows.filter(obj => obj.isChecked).map(o => o._id)
     }
     if (recs && recs.length > 0) {
       axiosInstance()
@@ -364,10 +400,10 @@ const Opportunities = () => {
   return (
     <>
       <Layout>
-            <CustomBreadCrumbs routes={[routes.opportunity]} />
-            <Grid container direction="row" className="header-links">
-              <Grid item xs={12} sm={12} className="pr-3">
-                 <Grid container justify="flex-end">
+        <CustomBreadCrumbs routes={[routes.opportunity]} />
+        <Grid container direction="row" className="header-links">
+          <Grid item xs={12} sm={12} className="pr-3">
+            <Grid container justify="flex-end">
               <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
@@ -417,20 +453,20 @@ const Opportunities = () => {
 
         {/* Tables Begins Here */}
         <Container>
-        <div className="header-panel">
-          <OpportunitiesHeader
-            selectedType={selectedType}
-            onTypeChange={handleOpportunityTypeSel}
-            options={OpportunityTypes}
-            onSearch={handleSearch}
-            searchVal={searchVal}
-            opportunityPermissions={opportunityPermissions}
-            onCreate={clickCreateNew}
-            showConfirmBox={showConfirmBox}
-            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-            icon={<GiHiveMind className="headerLogo"  />}
-            heading="Opportunities"
-          />
+          <div className="header-panel">
+            <OpportunitiesHeader
+              selectedType={selectedType}
+              onTypeChange={handleOpportunityTypeSel}
+              options={OpportunityTypes}
+              onSearch={handleSearch}
+              searchVal={searchVal}
+              opportunityPermissions={opportunityPermissions}
+              onCreate={clickCreateNew}
+              showConfirmBox={showConfirmBox}
+              canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+              icon={<GiHiveMind className="headerLogo" />}
+              heading="Opportunities"
+            />
           </div>
         </Container>
         <Container >
@@ -478,7 +514,7 @@ const Opportunities = () => {
                 onOk={handleDeleteOpportunity}
               /> : null
           }
-          {
+          {/* {
             showCreateOpportunityDialog && <ManageOpportunityMain
               open={showCreateOpportunityDialog}
               onClose={() => setShowCreateOpportunityDialog(false)}
@@ -487,9 +523,28 @@ const Opportunities = () => {
                 fetchOpportunities()
               }}
             />
+          } */}
+          {
+            singleOpportunityDelete.show ?
+              <ConfirmationDialog
+                open={singleOpportunityDelete.show}
+                message={`Are you sure, you want to delete contact: ${singleOpportunityDelete.opportunityName} ?`}
+                onClose={() => setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" })}
+                onOk={handleSingleDeleteOpportunity}
+              /> : null
           }
         </Container>
       </Layout>
+
+      {
+        showCreateOpportunityDialog && <ManageOpportunityDialog
+          open={showCreateOpportunityDialog}
+          onSuccess={onSuccess}
+          onClose={() => { setShowCreateOpportunityDialog(false) }}
+          isNew={true}
+          dataToUpdate={null}
+        />
+      }
     </>
   );
 };

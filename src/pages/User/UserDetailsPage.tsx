@@ -16,6 +16,7 @@ import {
   TableCell,
   TableBody,
 } from "@material-ui/core";
+import DeleteButton from '../../components/Helpers/DeleteButton'
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
