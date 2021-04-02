@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 function LeadsHeader(props) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
-   
+
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -45,34 +45,34 @@ function LeadsHeader(props) {
     };
 
     const { selectedType,
-         onTypeChange,
-         options,
-         onSearch,
-         searchVal,
-         onCreate,
-         leadPermissions,
-         showConfirmBox,
-         canDelete,
-         icon,
-         heading
-         } = props
+        onTypeChange,
+        options,
+        onSearch,
+        searchVal,
+        onCreate,
+        leadPermissions,
+        showConfirmBox,
+        canDelete,
+        icon,
+        heading
+    } = props
     return <Grid className={styles.filter_side_container} container>
-        <Grid item xs={6}  className="d-flex align-items-center gap-1">
-                {icon} <span className="listingHeader">{heading}
-             </span>
-           {
-             options &&  <ToggleButtonGroup size="small"  className="ml-8"
-                value={filter}
-                exclusive
-                onChange={handleFilter}>
-                  {options.map((k, index) => {
-                  return (
-                      <ToggleButton value={k.key} key={index}>{k.key} 
-                      </ToggleButton>
-                    );
-                })}
-                </ToggleButtonGroup> 
-           }
+        <Grid item xs={6} className="d-flex align-items-center gap-1">
+            {icon} <span className="listingHeader">{heading}
+            </span>
+            {
+                options && <ToggleButtonGroup size="small" className="ml-8"
+                    value={filter}
+                    exclusive
+                    onChange={handleFilter}>
+                    {options.map((k, index) => {
+                        return (
+                            <ToggleButton value={k.key} key={index}>{k.key}
+                            </ToggleButton>
+                        );
+                    })}
+                </ToggleButtonGroup>
+            }
         </Grid>
         <Grid item xs={6} className={styles.filter_side}>
             <Box className={styles.filter_side_header} component="div">
@@ -120,7 +120,10 @@ function LeadsHeader(props) {
                             open={Boolean(anchorEl)}
                             onClose={closeActions}>
 
-                            <MenuItem onClick={() => { showConfirmBox(null) }}
+                            <MenuItem onClick={() => {
+                                closeActions();
+                                showConfirmBox(null)
+                            }}
                             >Delete</MenuItem>
                         </Menu>
                     </>

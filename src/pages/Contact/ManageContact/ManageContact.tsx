@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
@@ -12,6 +12,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import Dialog from '@material-ui/core/Dialog'
 import _ from 'lodash'
 import { useData } from '../../../StateProvider/Provider';
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
 const arr = [...Array(9).keys()]
 
@@ -19,6 +20,7 @@ export default function ManageContact(props) {
 
     const { entityData, handleSubmit, onClose, open, isNew } = props
 
+    const toastConfig = useContext(CustomToastContext);
     const { state: { user } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
 
@@ -73,6 +75,7 @@ export default function ManageContact(props) {
 
         // const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
+            toastConfig.setToastConfig({ open: true, type: "error", message: "Please fill all required fields" });
             entityData.fields.forEach((input) => {
                 if (input.required) {
                     setTouched(input.fieldName, true);
