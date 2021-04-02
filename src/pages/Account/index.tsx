@@ -37,23 +37,24 @@ import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolba
 import CustomHeader from '../../components/Helpers/CustomHeader'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-
-const AccTypes = {
-    "All Accounts": 1,
-    "My Accounts": 2
-}
+import { FcApproval } from 'react-icons/fc';
+import { MdAccountCircle } from 'react-icons/md';
+const AccTypes = [
+    {
+      key:"All Accounts",
+      value: 1
+    },
+    {
+      key:"My Accounts",
+      value: 2
+    }
+  ]
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
         border: "none",
         borderRadius: 8,
         padding: theme.spacing(3, 2),
-    },
-    grid: {
-        border: "2px solid #D4D6D7",
-        borderRadius: 8,
-        minHeight: '500px',
-        maxHeight: '500px'
     },
     linksContainer: {
         display: "flex",
@@ -209,7 +210,7 @@ export default function Account() {
             width: 75
         },
         {
-            field: "accountName", headerName: "Account Name", width: 200,
+            field: "accountName", headerName: "Account Name", width: 300,
             renderCell: (params) => (
                 <Link className={`${accountClass.account_name_link}`}
                     to={`${accountDetailPage.path}/${params.row._id}`}>
@@ -220,25 +221,25 @@ export default function Account() {
         {
             field: "typeOfAccount",
             headerName: "Type",
-            width: 200,
+            width: 250,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "industry",
             headerName: "Industry",
-            width: 200,
+            width: 250,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "parentAccount",
             headerName: "Parent Account",
-            width: 200,
+            width: 250,
             renderCell: (params) => <CustomRenderCell value={params?.value?.optionLabel} />
         },
         {
             field: "masterAccount",
             headerName: "Master Account",
-            width: 200,
+            width: 250,
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
@@ -247,7 +248,7 @@ export default function Account() {
         {
             field: "phone", headerName: "Phone",
             hide: true,
-            width: 200,
+            width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
@@ -274,14 +275,14 @@ export default function Account() {
                                     <IconButton aria-label="Disapprove" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: false, id: params.row._id, accountName: params.row.accountName })
                                     }}>
-                                        <CancelIcon fontSize="small" color="secondary" />
+                                       <CancelIcon fontSize="inherit" color="error" />
                                     </IconButton>
                                 </Tooltip> :
                                 <Tooltip title="Approve">
                                     <IconButton aria-label="Approve" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
                                     }}>
-                                        <CheckCircleIcon fontSize="small" color="primary" />
+                                       <FcApproval />
                                     </IconButton>
                                 </Tooltip> : ""
                     }
@@ -443,8 +444,8 @@ export default function Account() {
         }
     }
 
-    const handleAccountSel = (e) => {
-        setselectedType(e.target.value)
+    const handleAccountSel = (filterValues) => {
+        setselectedType(filterValues)
         setCheckAllAccounts(false)
     }
 
@@ -467,12 +468,10 @@ export default function Account() {
         <>
 
             <Layout>
-                <Grid container spacing={3} direction="row">
-                    <Grid item xs={12} sm={6} className="pl-3">
                         <CustomBreadCrumbs routes={[routes.account]} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} className="pr-3">
-                        <Grid container justify="flex-end">
+                        <Grid container direction="row" className="header-links">
+                     <Grid item xs={12} sm={12} className="pr-3">
+                         <Grid container justify="flex-end">
                             <Link
                                 to="#"
                                 onClick={(e) => e.preventDefault()}
@@ -522,17 +521,15 @@ export default function Account() {
 
                 <Box component="div">
                     <CustomContainer>
-                        <div className={`${accountClass["account_header_inner_container"]}`}
-                        >
+                        <div className={`${accountClass["account_header_inner_container"]}`} >
                             <CustomHeader
                                 total={rowCount}
                                 heading="Accounts"
                                 selectedType={selectedType}
                                 onTypeChange={handleAccountSel}
                                 options={AccTypes}
-                                secondHeading="Account"
-                            // showHeading={false}
-                            >
+                                secondHeading="Account" 
+                                icon={<MdAccountCircle className="headerLogo"  />} >
                                 <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
                                     <SearchBox
                                         onSearch={handleSearch}
@@ -619,9 +616,8 @@ export default function Account() {
                             </CustomHeader>
                         </div>
 
-                        <div className={`mt-3 ${accountClass["brand-grid"]}`}>
+                        <div className="listing-grid">
                             <DataGrid
-                                className={classes.grid}
                                 components={{
                                     Toolbar: DataGridCustomToolbar,
                                 }}

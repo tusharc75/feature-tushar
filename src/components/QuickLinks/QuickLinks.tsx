@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from '@material-ui/core'
+import { Icon, Typography } from '@material-ui/core'
 import { Link } from "react-router-dom";
 
 export interface IQuickLinks {
@@ -13,15 +13,15 @@ export interface IQuickLinks {
 
 export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
 
-    return quickLinks && Array.isArray(quickLinks) ? <div className="d-flex flex-column gap-2">
+    return quickLinks && Array.isArray(quickLinks) ? <div className="d-flex flex-column gap-2 m-1">
         <Typography variant="h6" className="mb-1">{title}</Typography>
         {
             quickLinks.map((k, index) => {
-                return <div className="font-size-3 link d-flex justify-content-center gap-1">
+                return <div className="font-size-3 link d-flex justify-content-center align-items-center gap-1">
                     {
                         k.redirect == false ?
                             <>
-                                {k.icon}
+                                <Icon>{k.icon}</Icon>
                                 <Typography key={index} onClick={k.onClick}>{k.label}</Typography>
                             </> :
                             <>

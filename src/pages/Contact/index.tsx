@@ -36,8 +36,24 @@ import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolba
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import styles from "../Leads/Header.module.scss"
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import { MdContacts } from 'react-icons/md';
 
-const ContactTypes = {
+
+const ContactTypes = [
+    {
+      key:"All Contacts",
+      value: 1
+    },
+    {
+      key:"My Contacts",
+      value: 2
+    }     
+  ]
+
+
+const ContactTypes1 = {
     "All Contacts": 1,
     "My Contacts": 2
 }
@@ -57,6 +73,7 @@ const useStyles = makeStyles((theme) => ({
         margin: "0 1rem",
     },
 }));
+
 
 export default function Contact() {
     const toastConfig = useContext(CustomToastContext);
@@ -85,6 +102,12 @@ export default function Contact() {
     })
 
     const [contactPermissions, setContactPermissions] = useState<any>({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
+
+    const [filter, setFilter] = useState("All Contacts");
+    const handleFilter = (event, newFilter) => {
+        setFilter(newFilter);
+        handleContactSel(ContactTypes.find((d) => d.key === newFilter).value);
+    };
 
     const columns = [
         {
@@ -134,7 +157,7 @@ export default function Contact() {
             width: 75,
         },
         {
-            field: "name", headerName: "Name", width: 200,
+            field: "name", headerName: "Name", width: 400,
             renderCell: (params) => (
                 <Link className="link"
                     to={`${contactDetailPage.path}/${params.row._id}`}>
@@ -144,15 +167,15 @@ export default function Contact() {
         },
         // { field: "lastName", headerName: "Last Name", width: 200 },
         {
-            field: "phone", headerName: "Phone", width: 200,
+            field: "phone", headerName: "Phone", width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
-            field: "email", headerName: "Email", width: 200,
+            field: "email", headerName: "Email", width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
-            field: "account", headerName: "Account", width: 200,
+            field: "account", headerName: "Account", width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
@@ -302,18 +325,16 @@ export default function Contact() {
     }
 
 
-    const handleContactSel = (e) => {
-        setselectedType(e.target.value)
+    const handleContactSel = (filterValues) => {
+        setselectedType(filterValues)
     }
 
     return (
         <Layout>
-            <Grid container spacing={3} direction="row">
-                <Grid item xs={12} sm={6} className="pl-3">
-                    <CustomBreadCrumbs routes={[routes.contact]} />
-                </Grid>
-                <Grid item xs={12} sm={6} className="pr-3">
-                    <Grid container justify="flex-end">
+        <CustomBreadCrumbs routes={[routes.contact]} />
+             <Grid container direction="row" className="header-links">
+                     <Grid item xs={12} sm={12} className="pr-3">
+                         <Grid container justify="flex-end">
                         <Link
                             to="#"
                             onClick={(e) => e.preventDefault()}
@@ -359,37 +380,27 @@ export default function Contact() {
                             </Link>
                     </Grid>
                 </Grid>
-
             </Grid>
 
             <CustomContainer>
+            <div className="header-panel">
                 <Grid className={styles.filter_side_container} container justify="space-between">
-                    <Grid item>
+                    <Grid item className="d-flex align-items-center gap-1">
+                         <MdContacts className="headerLogo" /> <span className="listingHeader">Contacts </span>
                         {
-                            Object.keys(ContactTypes).length ? <Select
-                                style={{ width: '160px' }}
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                disableUnderline
-                                MenuProps={{
-                                    anchorOrigin: {
-                                        vertical: "bottom",
-                                        horizontal: "left"
-                                    },
-                                    getContentAnchorEl: null
-                                }}
-                                value={selectedType}
-                                onChange={handleContactSel}
-                                label="Select Type"
-                            >
-                                {
-                                    Object.keys(ContactTypes).map((k, index) => {
-                                        return <MenuItem key={index} value={ContactTypes[k]}>{k}</MenuItem>
-                                    })
+                                ContactTypes && <ToggleButtonGroup size="small"  className="ml-8"
+                                   value={filter}
+                                   exclusive
+                                   onChange={handleFilter}>
+                                     {ContactTypes.map((k, index) => {
+                                     return (
+                                         <ToggleButton value={k.key} key={index}>{k.key} 
+                                         </ToggleButton>
+                                       );
+                                   })}
+                                   </ToggleButtonGroup> 
                                 }
-                            </Select>
-                                : null
-                        }
+                        
                     </Grid>
                     <Grid className={styles.filter_side} item>
                         <Box className={styles.filter_side_header} component="div">
@@ -401,8 +412,7 @@ export default function Contact() {
                                         color="primary"
                                         onClick={clickCreateNew}
                                         startIcon={<AddIcon />}
-                                        className={styles.add_submit_btn}
-                                    >
+                                        className={styles.add_submit_btn}>
                                         Add
                                 </Button>
                                 </>
@@ -450,12 +460,13 @@ export default function Contact() {
                         </Box>
                     </Grid>
                 </Grid>
+           </div>
             </CustomContainer>
 
-            <Paper style={{ marginTop: 15 }}>
-                <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
+            <Paper>
+                <Box component="div" >
                     {/* <Box component="div" marginY={1}> */}
-                    <div className="contact-grid-height1">
+                    <div className="listing-grid">
                         <DataGrid
                             components={{
                                 Toolbar: DataGridCustomToolbar,

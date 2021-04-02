@@ -5,9 +5,7 @@ import { Paper, Container, CssBaseline } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    padding: theme.spacing(2),
-    marginTop: theme.spacing(1),
-    // minHeight: "calc(100vh - 65px)",
+  
   },
 }));
 
@@ -18,14 +16,12 @@ const CustomContainer = (props) => {
   return (
     <>
       <CssBaseline />
-
       {!maxWidth ? (
-        <Paper elevation={0} className={classes.root} style={{ ...styles }}>
+        <Paper elevation={0} style={{ ...styles }}>
           {children}
         </Paper>
       ) : (
         <Container
-          className={classes.root}
           maxWidth={maxWidth}
           style={{
             minHeight: minHeight ? "100%" : "calc(100vh - 65px)",

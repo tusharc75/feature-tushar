@@ -27,6 +27,7 @@ import routes from './../../components/Helpers/Routes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityMain from "./ManageOpportunities";
+import { GiHiveMind } from 'react-icons/gi';
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -42,10 +43,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const OpportunityTypes = {
-  "All Opportunities": 1,
-  "My Opportunities": 2,
-};
+const OpportunityTypes = [
+  {
+    key:"All Opportunities",
+    value: 1
+  },
+  {
+    key:"My Opportunities",
+    value: 2
+  }
+]
 
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -65,9 +72,11 @@ const Opportunities = () => {
   const [opportunityData, setOpportunityData] = useState([]);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
   const [deleteRec, setDeleteRec] = useState<any>({})
+  const [selectedRecs, setSelectedRecs] = useState([])
   const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+  const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({ id: null, show: false, opportunityName: "" })
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -109,6 +118,7 @@ const Opportunities = () => {
         ...u,
         isChecked: false,
         id: u._id,
+        canDelete: u.owner?.optionValue === user?.user._id,
         owner: u.owner?.optionLabel ? u.owner.optionLabel : '',
         stage: u.stage ? u.stage:'',
         closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
@@ -118,7 +128,17 @@ const Opportunities = () => {
     });
     setDataRows([...rows]);
   }, [opportunityData])
+  const handleSingleDeleteOpportunity = async () => {
+    setLoading(true);
 
+    axiosInstance()
+        .put(`/opportunity/remove`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+          fetchOpportunities();
+          setLoading(false);
+        })
+        setSingleOpportunityDelete({id: null, show: false, opportunityName:""})
+}
   const fetchOpportunities = async () => {
     setLoading(true);
     let searchParams: any = { ...query, filterOpportunities: selectedType }
@@ -147,6 +167,17 @@ const Opportunities = () => {
     setSearchVal(e.target.value);
   };
 
+  const handelSelectedOpportunity = (id, isChecked) => {
+    let tempSelectedRecs = [...selectedRecs], curRecIndex = selectedRecs.indexOf(id)
+    if (isChecked && curRecIndex < 0) {
+        tempSelectedRecs = [...selectedRecs, id]
+    }
+    else if (!isChecked && curRecIndex >= 0) {
+        tempSelectedRecs.splice(curRecIndex, 1)
+    }
+    setSelectedRecs(tempSelectedRecs)
+}
+
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -156,8 +187,8 @@ const Opportunities = () => {
     setAnchorEl(null);
   };
 
-  const handleOpportunityTypeSel = (e) => {
-    setSelectedType(e.target.value);
+  const handleOpportunityTypeSel = (filterValues) => {
+    setSelectedType(filterValues);
   };
 
   const handleCreate = () => {
@@ -189,12 +220,34 @@ const Opportunities = () => {
       ),
       renderCell: (params) => (
         <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev)
+          // color="primary"
+          // checked={params.value}
+          // onChange={(ev) => {
+          //   updateCheckedStatus(params, ev)
 
-          }}
+          // }}
+
+          color="primary"
+                    // disabled={!params.canDelete}
+                    checked={params.value}
+                    onChange={(ev) => {
+                        const gridData = dataRows;
+                        const indexOfRecord = gridData.findIndex(
+                            (d) => d.id === params.row.id
+                        );
+                        gridData[indexOfRecord].isChecked = ev.target.checked;
+
+                        setDataRows([...gridData]);
+
+                        const checkedRecords = gridData.filter((d) => d.isChecked === true);
+
+                        if (checkedRecords.length === gridData.length) {
+                            setCheckAllOpportunities(true);
+                        } else {
+                            setCheckAllOpportunities(false);
+                        }
+                        handelSelectedOpportunity(params.row.id, ev.target.checked)
+                    }}
         />
       ),
       disableColumnMenu: true,
@@ -203,13 +256,13 @@ const Opportunities = () => {
       width: 75,
     },
     {
-      field: "opportunityName", headerName: "Opportunity Name", width: 200,
+      field: "opportunityName", headerName: "Opportunity Name", width: 400,
       renderCell: (params) => (
         getFirstName(params.row)
       )
     },
     {
-      field: "accountName", headerName: "Account Name", width: 200,
+      field: "accountName", headerName: "Account Name", width: 300,
       renderCell: (params) => (
         <Link className="accountNameLink" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
           {params?.row?.accountName?.optionLabel ? params.row.accountName.optionLabel : ''}
@@ -217,28 +270,28 @@ const Opportunities = () => {
       )
     },
     {
-      field: "stage", headerName: "Stage", width: 200,
+      field: "stage", headerName: "Stage", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "closeDate", headerName: "Close Date", width: 200,
+      field: "closeDate", headerName: "Close Date", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     // { field: "status", headerName: "Lead Status", width: 200 },
     {
-      field: "owner", headerName: "Opportunity Owner", width: 200,
+      field: "owner", headerName: "Opportunity Owner", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "actions", headerName: "Actions ", disableColumnMenu: true, sortable: false, filterable: false,
+      field: "actions", headerName: "Actions ", 
       renderCell: (params) => (
         <>
-          {
+          { 
             opportunityPermissions.isDelete ?
-              params.row.allowToDelete ?
+              params.row.canDelete ?
                 <Tooltip
                   title="Delete" >
-                  <IconButton aria-label="Delete" onClick={() => showConfirmBox(params.row)} >
+                  <IconButton aria-label="Delete" onClick={() => setSingleOpportunityDelete({show: true, id: params.row._id,opportunityName: `${params.row.opportunityName}` })} >
                     <DeleteIcon
                       fontSize="small" color="error" />
                   </IconButton>
@@ -256,8 +309,12 @@ const Opportunities = () => {
           }
 
         </>
-      ), width: 200
-    }
+      ), 
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      width: 200
+    },
   ];
 
   const showConfirmBox = (row) => {
@@ -268,7 +325,7 @@ const Opportunities = () => {
       }
     }
     else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true)
@@ -357,12 +414,10 @@ const Opportunities = () => {
   return (
     <>
       <Layout>
-        <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3">
             <CustomBreadCrumbs routes={[routes.opportunity]} />
-          </Grid>
-          <Grid item xs={12} sm={6} className="pr-3">
-            <Grid container justify="flex-end">
+            <Grid container direction="row" className="header-links">
+              <Grid item xs={12} sm={12} className="pr-3">
+                 <Grid container justify="flex-end">
               <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
@@ -412,6 +467,7 @@ const Opportunities = () => {
 
         {/* Tables Begins Here */}
         <Container>
+        <div className="header-panel">
           <OpportunitiesHeader
             selectedType={selectedType}
             onTypeChange={handleOpportunityTypeSel}
@@ -422,11 +478,13 @@ const Opportunities = () => {
             onCreate={clickCreateNew}
             showConfirmBox={showConfirmBox}
             canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-
+            icon={<GiHiveMind className="headerLogo"  />}
+            heading="Opportunities"
           />
+          </div>
         </Container>
-        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-          <div className="contact-grid-height1">
+        <Container >
+          <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
@@ -480,6 +538,15 @@ const Opportunities = () => {
               }}
             />
           }
+                      {
+                        singleOpportunityDelete.show ?
+                            <ConfirmationDialog
+                                open={singleOpportunityDelete.show}
+                                message={`Are you sure, you want to delete contact: ${singleOpportunityDelete.opportunityName} ?`}
+                                onClose={() => setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" })}
+                                onOk={handleSingleDeleteOpportunity}
+                            /> : null
+                      }
         </Container>
       </Layout>
     </>

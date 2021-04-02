@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 
 export default function ManageOpportunityMain(props) {
     const toastConfig = useContext(CustomToastContext);
-    const { open, onClose, id, accountId } = props;
+    const { open, onClose, id,onSuccess, accountId } = props;
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -40,7 +40,9 @@ export default function ManageOpportunityMain(props) {
                 fields: newFields,
                 initialValues: getObjKeys("", newFields),
             });
-        });
+            setLoading(false)
+
+        }).catch(err=>setLoading(false))
     };
     const handleLoading = (action, isSaveAndNew = false) => {
         if (!isSaveAndNew) setLoading(action)
@@ -48,6 +50,7 @@ export default function ManageOpportunityMain(props) {
     const handleCreateOpportunity = (values, saveAndNew, setValues) => {
         axiosInstance().post('/opportunity', removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
+            onSuccess({fetch:true})
             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
 
             handleLoading(false, saveAndNew)
