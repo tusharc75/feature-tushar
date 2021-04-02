@@ -65,6 +65,7 @@ const Opportunities = () => {
   const [opportunityData, setOpportunityData] = useState([]);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
   const [deleteRec, setDeleteRec] = useState<any>({})
+  const [selectedRecs, setSelectedRecs] = useState([])
   const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
@@ -159,6 +160,17 @@ const Opportunities = () => {
     setSearchVal(e.target.value);
   };
 
+  const handelSelectedOpportunity = (id, isChecked) => {
+    let tempSelectedRecs = [...selectedRecs], curRecIndex = selectedRecs.indexOf(id)
+    if (isChecked && curRecIndex < 0) {
+        tempSelectedRecs = [...selectedRecs, id]
+    }
+    else if (!isChecked && curRecIndex >= 0) {
+        tempSelectedRecs.splice(curRecIndex, 1)
+    }
+    setSelectedRecs(tempSelectedRecs)
+}
+
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -201,12 +213,34 @@ const Opportunities = () => {
       ),
       renderCell: (params) => (
         <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev)
+          // color="primary"
+          // checked={params.value}
+          // onChange={(ev) => {
+          //   updateCheckedStatus(params, ev)
 
-          }}
+          // }}
+
+          color="primary"
+                    // disabled={!params.canDelete}
+                    checked={params.value}
+                    onChange={(ev) => {
+                        const gridData = dataRows;
+                        const indexOfRecord = gridData.findIndex(
+                            (d) => d.id === params.row.id
+                        );
+                        gridData[indexOfRecord].isChecked = ev.target.checked;
+
+                        setDataRows([...gridData]);
+
+                        const checkedRecords = gridData.filter((d) => d.isChecked === true);
+
+                        if (checkedRecords.length === gridData.length) {
+                            setCheckAllOpportunities(true);
+                        } else {
+                            setCheckAllOpportunities(false);
+                        }
+                        handelSelectedOpportunity(params.row.id, ev.target.checked)
+                    }}
         />
       ),
       disableColumnMenu: true,
@@ -221,6 +255,7 @@ const Opportunities = () => {
       )
     },
     {
+      
       field: "accountName", headerName: "Account Name", width: 200,
       renderCell: (params) => (
         <Link className="accountNameLink" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
@@ -242,10 +277,10 @@ const Opportunities = () => {
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "actions", headerName: "Actions ", disableColumnMenu: false, sortable: false, filterable: false,
+      field: "actions", headerName: "Actions ", 
       renderCell: (params) => (
         <>
-          {
+          { 
             opportunityPermissions.isDelete ?
               params.row.canDelete ?
                 <Tooltip
@@ -268,8 +303,12 @@ const Opportunities = () => {
           }
 
         </>
-      ), width: 200
-    }
+      ), 
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      width: 200
+    },
   ];
 
   const showConfirmBox = (row) => {
@@ -433,7 +472,7 @@ const Opportunities = () => {
             opportunityPermissions={opportunityPermissions}
             onCreate={clickCreateNew}
             showConfirmBox={showConfirmBox}
-            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+            canDelete={dataRows.filter((d) => d.isChecked).length === 0}
 
           />
         </Container>

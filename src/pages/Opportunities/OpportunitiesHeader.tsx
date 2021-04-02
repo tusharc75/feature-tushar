@@ -95,6 +95,7 @@ function OpportunitiesHeader(props) {
                 {
                     opportunityPermissions.isDelete && <>
                         <Button
+                            disabled={canDelete}
                             variant="outlined"
                             color="default"
                             onClick={openActions}
