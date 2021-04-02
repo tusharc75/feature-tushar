@@ -389,7 +389,9 @@ const Header = ({ toggleDrawer }) => {
               Support <ExpandMore />
             </Button>
           </div>
-          <img src={user?.brandLogo} alt="brand" className={classes.brandLogo} ></img>
+          {
+            user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} ></img> : null
+          }
 
           <IconButton aria-label="settings" color="inherit">
             <Badge badgeContent={1} color="secondary">
