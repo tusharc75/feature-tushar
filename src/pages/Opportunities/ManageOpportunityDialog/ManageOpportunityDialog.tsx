@@ -1,76 +1,48 @@
 import { useEffect, useState, useContext } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
 import { Formik, Form } from "formik";
-import { getObjKeys, removeEmptyKeys, getOwnerDropdownDataSource, getCollaboratorDropdownDataSource } from '../../../constants/helpers';
 import { useHistory } from "react-router-dom";
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import { yupSchema } from '../../../constants/helpers'
-import FormTypes from "./../../../components/Helpers/FormTypes";
-import axiosInstance from './../../../axios/axiosInstance'
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
-import CustomButton from '../../../components/Helpers/Button'
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
-
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import axiosInstance from '../../../axios/axiosInstance';
+import { getOwnerDropdownDataSource, getCollaboratorDropdownDataSource, getObjKeys, yupSchema, removeEmptyKeys, getObjKeysWithValues, initializeDropdownById } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import _ from 'lodash'
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
+import FormTypes from '../../../components/Helpers/FormTypes';
+import CustomButton from '../../../components/Helpers/Button';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
+import PropTypes from "prop-types";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(2),
-    },
-    closeButton: {
-        position: 'absolute',
-        right: theme.spacing(1),
-        top: theme.spacing(1),
-        color: theme.palette.grey[500],
-    },
-}));
-const arr = [...Array(10).keys()]
-const DialogContent = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}))(MuiDialogContent);
+const arr = [...Array(9).keys()]
 
-const DialogActions = withStyles((theme) => ({
-    root: {
-        margin: 0,
-        padding: theme.spacing(1),
-    },
-}))(MuiDialogActions);
-
-export default function ManageOpportunity({ open, isNew, onClose, entityData, handleSubmit }) {
+export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNew, dataToUpdate, accountId }) {
     const toastConfig = useContext(CustomToastContext);
-    const classes = useStyles();
-    const history = useHistory();
 
     const { state: { user } }: any = useData();
-    const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
+    const [disableOwnerSelection] = useState(!isNew && user.user._id !== dataToUpdate.owner);
 
+    const [entityData, setEntityData] = useState({
+        fields: [],
+        initialValues: {},
+    });
 
-    //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
-    const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
-    const [ownerDataSource, setOwnerDataSource] = useState([]);
-    const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+    const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
+    const [ownerData, setOwnerData] = useState([]);
+    const [collaboratorData, setCollaboratorData] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
-        if (ownerCollaboratorDropdownData.length > 0) {
-            setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-            setOwnerDataSource(ownerCollaboratorDropdownData[0].option)
-            setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
+        const ownerCollabOptions = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
+        if (ownerCollabOptions.length > 0) {
+            setOwnerCollaboratorData(ownerCollabOptions[0].option);
+            setOwnerData(ownerCollabOptions[0].option)
+            setCollaboratorData(ownerCollabOptions[0].option)
         }
         sortArray();
-        // eslint-disable-next-line
     }, [entityData.fields]);
 
     const sortArray = () => {
@@ -92,46 +64,116 @@ export default function ManageOpportunity({ open, isNew, onClose, entityData, ha
     };
 
     const onOwnerDropdownOpen = (selectedCollaborator) => {
-        setOwnerDataSource(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorCommonDataSource))
+        setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData))
     }
 
-    const onCollaboratorOwnerMultiselectOpen = (selectedOwnerId) => {
-        setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource))
+    const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
+        setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData))
     }
-    //  Owner, Collaborator Code - End
 
+    useEffect(() => {
+        getOpportunityFields();
+    }, []);
 
-    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, errors, resetForm) => {
-        // const errors = formValidation(values, _.cloneDeep(entityData.fields));
+    const getOpportunityFields = () => {
+        axiosInstance().get('/field?resource=Opportunity').then(({ data: { data } }) => {
+
+            const newFields = [];
+
+            if (isNew) {
+                data.filter(d => d.isCreate).map((_f) => {
+
+                    //  If this dialog opens from account details screen, make that account preselected
+                    if (accountId) {
+                        _f = initializeDropdownById(_f, "accountName", accountId);
+                    }
+
+                    newFields.push(_f.fieldData)
+                });
+
+                setEntityData({
+                    fields: newFields,
+                    initialValues: getObjKeys("", newFields),
+                });
+            }
+            else {
+                data.filter(d => d.isUpdate).map((_f) => {
+
+                    //  If this dialog opens from account details screen, make that account preselected
+                    if (accountId) {
+                        _f = initializeDropdownById(_f, "accountName", accountId);
+                    }
+
+                    newFields.push(_f.fieldData)
+                });
+                setEntityData({
+                    fields: newFields,
+                    initialValues: getObjKeysWithValues(dataToUpdate, newFields),
+                });
+            }
+        });
+    };
+
+    const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
         if (Object.keys(errors).length) {
-            toastConfig.setToastConfig({ open: true, type: "error", message: "Please fill all required fields" });
             entityData.fields.forEach((input) => {
-                if (input.required) {
+                if (input.required || values[input.fieldName]) {
                     setTouched(input.fieldName, true);
                 }
             });
+            toastConfig.setToastConfig({ open: true, type: "error", message: 'Please fill all required fields' });
+            setErrors({ ...errors });
         } else {
-            setLoading(true)
-            handleSubmit(values, saveAndNew, setValues)
-            setErrors({});
+            isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
         }
-
     }
+
+    const handleCreateOpportunity = (values) => {
+        setLoading(true)
+
+        axiosInstance().post('/opportunity', removeEmptyKeys(values))
+            .then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setLoading(false)
+                onSuccess();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoading(false);
+            });
+    }
+
+    const handleUpdateOpportunity = (values) => {
+        values = { ...values, _id: dataToUpdate._id };
+        setLoading(true)
+
+        axiosInstance().put('/opportunity', removeEmptyKeys(values))
+            .then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setLoading(false)
+                onSuccess()
+                // fetchData()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoading(false);
+            });
+    }
+
     return (
         <Dialog
             maxWidth="md"
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
             open={open}
+            disableBackdropClick={true}
         >
-            <CustomDialogHeader onClose={onClose} title={isNew ? "Create Opportunity" : `Editing ${entityData.initialValues.opportunityName}`} />
+            <CustomDialogHeader title={isNew ? "Create Opportunity" : `Editing ${dataToUpdate.opportunityName}`} onClose={onClose} />
 
             {
-                entityData.fields.length == 0 && <DialogContent dividers style={{ minWidth: '943px', minHeight: '500px' }}>
+                entityData.fields.length == 0 && <CustomDialogContent>
                     <CommonSkeleton
                         lenArray={arr}
                     />
-                </DialogContent>
+                </CustomDialogContent>
             }
             {
                 entityData.fields.length > 0 && <Formik
@@ -142,17 +184,15 @@ export default function ManageOpportunity({ open, isNew, onClose, entityData, ha
                 >
                     {({
                         values,
-                        setValues,
                         errors,
                         touched,
                         setFieldValue,
                         setFieldTouched,
                         setErrors,
-                        resetForm
+                        setValues
                     }) => (
-
                         <>
-                            <DialogContent dividers>
+                            <CustomDialogContent>
                                 <Form>
                                     {
                                         formsData &&
@@ -171,7 +211,7 @@ export default function ManageOpportunity({ open, isNew, onClose, entityData, ha
                                                                             label={field.fieldLabel}
                                                                             name={field.fieldName}
                                                                             type={field.type}
-                                                                            options={ownerDataSource}
+                                                                            options={ownerData}
                                                                             setFieldValue={setFieldValue}
                                                                             required={field.required}
                                                                             fullWidth
@@ -187,13 +227,13 @@ export default function ManageOpportunity({ open, isNew, onClose, entityData, ha
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
-                                                                                options={collaboratorDataSource}
+                                                                                options={collaboratorData}
                                                                                 setFieldValue={setFieldValue}
                                                                                 required={field.required}
                                                                                 fullWidth
                                                                                 isTooltip={true}
                                                                                 size="small"
-                                                                                onOpen={() => { onCollaboratorOwnerMultiselectOpen(values["owner"]) }}
+                                                                                onOpen={() => { onCollabOwnerMultiselectOpen(values["owner"]) }}
                                                                             /> : <FormTypes
                                                                                 // {...rest}
                                                                                 values={values}
@@ -218,25 +258,18 @@ export default function ManageOpportunity({ open, isNew, onClose, entityData, ha
                                             </div>
                                         ))
                                     }
-
-                                    {/* <InputField
-                                        errors={errors}
-                                        values={values}
-                                        setFieldValue={setFieldValue}
-                                        touched={touched}
-                                        fieldsData={entityData.fields}
-                                        size="small"
-                                        fullWidth
-                                    /> */}
                                 </Form>
-                            </DialogContent>
-
-
+                            </CustomDialogContent>
 
                             <CustomDialogFooter>
-                                <Button onClick={onClose} variant="outlined" color="primary" >
+                                <Button
+                                    type="button"
+                                    variant="outlined"
+                                    color="primary"
+                                    onClick={onClose}
+                                >
                                     Cancel
-                                             </Button>
+                                </Button>
 
                                 <CustomButton
                                     loading={loading}
@@ -245,17 +278,25 @@ export default function ManageOpportunity({ open, isNew, onClose, entityData, ha
                                     disabled={loading || Object.keys(errors).length > 0 ? true : false}
                                     onClick={(e) => {
                                         e.preventDefault()
-                                        onSubmit(setFieldTouched, values, setValues, setErrors, false, errors, resetForm)
+                                        handleSubmit(errors, setFieldTouched, values, setValues, setErrors)
                                     }}
                                 >
                                     Save
-                                        </CustomButton>
+                                </CustomButton>
                             </CustomDialogFooter>
                         </>
                     )}
                 </Formik>
             }
         </Dialog>
-
     )
+}
+
+ManageOpportunityDialog.propTypes = {
+    open: PropTypes.bool,
+    onSuccess: PropTypes.func,
+    onClose: PropTypes.any,
+    isNew: PropTypes.bool,
+    dataToUpdate: PropTypes.any,
+    accountId: PropTypes.string
 }

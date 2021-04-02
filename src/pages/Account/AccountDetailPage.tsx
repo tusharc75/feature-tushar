@@ -25,74 +25,20 @@ import axiosInstance from './../../axios/axiosInstance'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
-import OpportunityTab from './OpportunityTab'
 import Activity from "../../components/Activity";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import accountClass from "./account.module.scss"
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import MuiAccordion from "@material-ui/core/Accordion";
-import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
-import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import { withStyles } from "@material-ui/core/styles";
 import ManageContactDialog from '../Contact/ManageContact/index';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
 import { removeEmptyKeys, getObjKeysWithValues, isObjectEmpty } from "../../constants/helpers";
-import { Link } from "react-router-dom";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageOpportunityMain from "../Opportunities/ManageOpportunities";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
-import PhoneIcon from '@material-ui/icons/Phone';
 import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import { TiFlowChildren } from 'react-icons/ti';
-
-const Accordion = withStyles({
-    root: {
-        border: "1px solid rgba(0, 0, 0, .125)",
-        boxShadow: "none",
-        "&:not(:last-child)": {
-            borderBottom: 0,
-        },
-        "&:before": {
-            display: "none",
-        },
-        "&$expanded": {
-            margin: "auto",
-        },
-        borderRadius: "10px",
-    },
-    expanded: {},
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-    root: {
-        backgroundColor: "rgba(0, 0, 0, .03)",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
-        marginBottom: -1,
-        minHeight: 56,
-        "&$expanded": {
-            minHeight: 56,
-        },
-    },
-    content: {
-        "&$expanded": {
-            margin: "12px 0",
-        },
-    },
-    expanded: {},
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-    root: {
-        padding: theme.spacing(1),
-        display: "block",
-    },
-}))(MuiAccordionDetails);
-
+import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -124,9 +70,6 @@ const Roles = () => {
     const [accountHierarchyData, setAccountHierarchyData] = useState([]);
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [relatedContactsLoading, setRelatedContactsLoading] = useState(false)
-    const [expanded, setExpanded] = React.useState({
-        opportunity: true
-    });
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
     const [canEdit, setCanEdit] = useState(false)
@@ -175,7 +118,7 @@ const Roles = () => {
 
         axiosInstance().get(`/account/${id}`).then(({ data: { data } }) => {
             setCustomizedRoutes([routes.account, { title: data.accountName }]);
-
+            
             setHeadingLbl(data.accountName || '')
             handleMainPonts(data)
             setAccountData(data)
@@ -358,22 +301,6 @@ const Roles = () => {
         });
     }
 
-    // const fetchRelatedContacts = () => {
-    //     setRelatedContactsLoading(true)
-    //     axiosInstance().get(`/contact/related-contact/${accountData._id}`)
-    //         .then(({ data: { data } }) => {
-    //             setRelatedContacts(data)
-    //             setRelatedContactsLoading(false)
-    //         }).catch(err => {
-    //             setRelatedContactsLoading(false)
-    //         })
-    // }
-
-    const handlePanelChange = (curActive) => {
-        let tempData = { ...expanded }
-        tempData[curActive] = tempData[curActive] ? false : true
-        setExpanded(tempData)
-    };
     const handleOpneUpdateDialog = () => {
         setOpenUpdateDialog(true);
     };
@@ -390,9 +317,7 @@ const Roles = () => {
             },
         });
     };
-    const handleCreateNewOpp = () => {
-        setShowCreateOpportunityDialog(true);
-    }
+
     const handleCreateContact = () => {
         setShowCreateContactDialog(true);
     }
@@ -584,19 +509,10 @@ const Roles = () => {
                             loading={loading}
                             handleSubmit={onUpdateAccount}
                         />
-                        // <UpdateDetailsDialog
-                        //     title={`Editing  ${accountData?.accountName ?? ''}`}
-                        //     openDialog={openUpdateDialog}
-                        //     onClose={closeUpdateDIalog}
-                        //     data={accountData}
-                        //     fields={accountFields}
-                        //     isUpdating={isUpdating}
-                        //     handleUpdate={handleUpdateAccount}
-                        // />
                     )}
 
                     {
-                        showCreateOpportunityDialog && <ManageOpportunityMain
+                        showCreateOpportunityDialog && <ManageOpportunityDialog
                             open={showCreateOpportunityDialog}
                             onClose={() => setShowCreateOpportunityDialog(false)}
                             onSuccess={() => {
@@ -608,13 +524,6 @@ const Roles = () => {
                     }
                     {
                         showCreateContactDialog && <ManageContactDialog
-                            // open={showCreateContactDialog}
-                            // onClose={() => setShowCreateContactDialog(false)}
-                            // onSuccess={() => {
-                            //     setShowCreateContactDialog(false);
-                            //     fetchRelatedContacts()
-                            // }}
-                            // entityDetails={createContactEntityDetails}
                             open={showCreateContactDialog}
                             onClose={() => {
                                 setShowCreateContactDialog(false);

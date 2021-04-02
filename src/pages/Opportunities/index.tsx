@@ -26,8 +26,8 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageOpportunityMain from "./ManageOpportunities";
 import { GiHiveMind } from 'react-icons/gi';
+import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -181,12 +181,9 @@ const Opportunities = () => {
     setSelectedType(filterValues);
   };
 
-  const handleCreate = () => {
-    setIsOpen(true)
-  }
-
-  const handleClose = () => {
-    setIsOpen(false)
+  const onSuccess = () => {
+    setShowCreateOpportunityDialog(false)
+    fetchOpportunities();
   }
 
   const columns = [
@@ -370,9 +367,11 @@ const Opportunities = () => {
       }));
     }
   }
+
   const clickCreateNew = () => {
     setShowCreateOpportunityDialog(true);
   }
+
   const handleDeleteOpportunity = async () => {
     setDeleteLoading(true)
     let recs = []
@@ -515,7 +514,7 @@ const Opportunities = () => {
                 onOk={handleDeleteOpportunity}
               /> : null
           }
-          {
+          {/* {
             showCreateOpportunityDialog && <ManageOpportunityMain
               open={showCreateOpportunityDialog}
               onClose={() => setShowCreateOpportunityDialog(false)}
@@ -524,7 +523,7 @@ const Opportunities = () => {
                 fetchOpportunities()
               }}
             />
-          }
+          } */}
           {
             singleOpportunityDelete.show ?
               <ConfirmationDialog
@@ -536,6 +535,16 @@ const Opportunities = () => {
           }
         </Container>
       </Layout>
+
+      {
+        showCreateOpportunityDialog && <ManageOpportunityDialog
+          open={showCreateOpportunityDialog}
+          onSuccess={onSuccess}
+          onClose={() => { setShowCreateOpportunityDialog(false) }}
+          isNew={true}
+          dataToUpdate={null}
+        />
+      }
     </>
   );
 };
