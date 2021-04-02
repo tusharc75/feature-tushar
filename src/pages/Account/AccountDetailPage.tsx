@@ -48,6 +48,7 @@ import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import PhoneIcon from '@material-ui/icons/Phone';
 import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
+import { TiFlowChildren } from 'react-icons/ti';
 
 const Accordion = withStyles({
     root: {
@@ -278,7 +279,7 @@ const Roles = () => {
             onClick: () => {
                 setShowAccountHierarchyInFullScreenDialog(true);
             },
-            icon: <PhoneIcon />
+            icon: <TiFlowChildren />
         },
         {
             label: "Projects",

@@ -27,6 +27,7 @@ import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateUser from "./CreateUser";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { FaUserCheck , FaUserAltSlash } from "react-icons/fa";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -161,7 +162,7 @@ const User: FC = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 200,
+      width: 400,
       renderCell: (params: any) => (
         <Link
           title={params.value}
@@ -175,22 +176,21 @@ const User: FC = () => {
     {
       field: "status",
       headerName: "Status",
-      width: 100,
+      width: 150,
       sortable: false,
       filterable: false,
+      align: "center",
+      headerAlign:'center',
+      disableColumnMenu: true,
       renderCell: (params: any) => (
-        <Chip
-          size="small"
-          label={params.value ? "Inactive" : "Active"}
-          className={params.value ? "bg-primary" : "bg-danger"}
-        />
+      <div style={{width:150}}>{ params.value ?  <FaUserCheck className="text-success"/> : <FaUserAltSlash className="text-error"/>  } </div>
       ),
     },
 
     {
       field: "email",
       headerName: "Email",
-      width: 200,
+      width:300,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
           {params.value}
@@ -200,7 +200,7 @@ const User: FC = () => {
     {
       field: "createdAt",
       headerName: "Created At",
-      width: 150,
+      width: 200,
       renderCell: (params: any) => (
         <p title={`Created At • ${params.value}`} className="text-truncate">
           {params.value}
@@ -222,8 +222,7 @@ const User: FC = () => {
               <Tooltip title="Delete">
                 <IconButton
                   aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
-                >
+                  onClick={() => showConfirmBox(params.row)} >
                   <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
               </Tooltip>
@@ -233,7 +232,7 @@ const User: FC = () => {
                 title="You do not have permission to delete user"
               >
                 <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
+                  <DeleteIcon fontSize="small"/>
                 </IconButton>
               </Tooltip>
             )}
@@ -241,7 +240,7 @@ const User: FC = () => {
         ),
       width: 200,
     },
-  ];
+  ] as Array<any>;
 
   const updateCheckedStatus = (params, ev) => {
     const gridData = [...dataRows];
@@ -352,12 +351,10 @@ const User: FC = () => {
         <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
       )}
       <Layout>
-        <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3">
             <CustomBreadCrumbs routes={[routes.user]} />
-          </Grid>
-          <Grid item xs={12} sm={6} className="pr-3">
-            <Grid container justify="flex-end">
+            <Grid container direction="row" className="header-links">
+                     <Grid item xs={12} sm={12} className="pr-3">
+                         <Grid container justify="flex-end">
               <MuiLink
                 href="#"
                 onClick={(e) => e.preventDefault()}
@@ -405,6 +402,7 @@ const User: FC = () => {
           </Grid>
         </Grid>
         <Container>
+        <div className="header-panel">
           <Header
             onSearch={handleSearch}
             searchVal={searchVal}
@@ -412,10 +410,12 @@ const User: FC = () => {
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
             canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+            
           />
+          </div>
         </Container>
-        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-          <div className="contact-grid-height1">
+        <Container>
+        <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
