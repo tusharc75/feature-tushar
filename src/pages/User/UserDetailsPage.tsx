@@ -16,6 +16,7 @@ import {
   TableCell,
   TableBody,
 } from "@material-ui/core";
+import DeleteButton from '../../components/Helpers/DeleteButton'
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -276,13 +277,7 @@ const UserDetailsPage = () => {
             ) : null}
             <Box component="span" marginX={1} />
             {usersPermissions.isDelete ? (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => setShowConfirmBox(true)}
-              >
-                Delete
-              </Button>
+              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             ) : null}
           </DetailsPageHeader>
         )}
@@ -419,7 +414,7 @@ const UserDetailsPage = () => {
                       }}
                     >
                       {userData && (
-                        <UserRoles data={globalRoles} unassignRole={() => {}} />
+                        <UserRoles data={globalRoles} unassignRole={() => { }} />
                       )}
                     </Box>
                   )}
