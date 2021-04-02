@@ -43,14 +43,14 @@ import { MdContacts } from 'react-icons/md';
 
 const ContactTypes = [
     {
-      key:"All Contacts",
-      value: 1
+        key: "All Contacts",
+        value: 1
     },
     {
-      key:"My Contacts",
-      value: 2
-    }     
-  ]
+        key: "My Contacts",
+        value: 2
+    }
+]
 
 
 const ContactTypes1 = {
@@ -331,10 +331,10 @@ export default function Contact() {
 
     return (
         <Layout>
-        <CustomBreadCrumbs routes={[routes.contact]} />
-             <Grid container direction="row" className="header-links">
-                     <Grid item xs={12} sm={12} className="pr-3">
-                         <Grid container justify="flex-end">
+            <CustomBreadCrumbs routes={[routes.contact]} />
+            <Grid container direction="row" className="header-links">
+                <Grid item xs={12} sm={12} className="pr-3">
+                    <Grid container justify="flex-end">
                         <Link
                             to="#"
                             onClick={(e) => e.preventDefault()}
@@ -383,84 +383,86 @@ export default function Contact() {
             </Grid>
 
             <CustomContainer>
-            <div className="header-panel">
-                <Grid className={styles.filter_side_container} container justify="space-between">
-                    <Grid item className="d-flex align-items-center gap-1">
-                         <MdContacts className="headerLogo" /> <span className="listingHeader">Contacts </span>
-                        {
-                                ContactTypes && <ToggleButtonGroup size="small"  className="ml-8"
-                                   value={filter}
-                                   exclusive
-                                   onChange={handleFilter}>
-                                     {ContactTypes.map((k, index) => {
-                                     return (
-                                         <ToggleButton value={k.key} key={index}>{k.key} 
-                                         </ToggleButton>
-                                       );
-                                   })}
-                                   </ToggleButtonGroup> 
-                                }
-                        
-                    </Grid>
-                    <Grid className={styles.filter_side} item>
-                        <Box className={styles.filter_side_header} component="div">
-                            <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={searchVal} size="small" />
+                <div className="header-panel">
+                    <Grid className={styles.filter_side_container} container justify="space-between">
+                        <Grid item className="d-flex align-items-center gap-1">
+                            <MdContacts className="headerLogo" /> <span className="listingHeader">Contacts </span>
                             {
-                                contactPermissions.isCreate && <>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={clickCreateNew}
-                                        startIcon={<AddIcon />}
-                                        className={styles.add_submit_btn}>
-                                        Add
+                                ContactTypes && <ToggleButtonGroup size="small" className="ml-8"
+                                    value={filter}
+                                    exclusive
+                                    onChange={handleFilter}>
+                                    {ContactTypes.map((k, index) => {
+                                        return (
+                                            <ToggleButton value={k.key} key={index}>{k.key}
+                                            </ToggleButton>
+                                        );
+                                    })}
+                                </ToggleButtonGroup>
+                            }
+
+                        </Grid>
+                        <Grid className={styles.filter_side} item>
+                            <Box className={styles.filter_side_header} component="div">
+                                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={searchVal} size="small" />
+                                {
+                                    contactPermissions.isCreate && <>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={clickCreateNew}
+                                            startIcon={<AddIcon />}
+                                            className={styles.add_submit_btn}>
+                                            Add
                                 </Button>
-                                </>
-                            }
+                                    </>
+                                }
 
-                            {
-                                contactPermissions.isDelete && <>
-                                    <Button
-                                        // disabled={Boolean(!selectedBrand)}
-                                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                        variant="outlined"
-                                        color="default"
-                                        onClick={openActions}
-                                        className={styles.action_submit_btn}
-                                        aria-controls="action-menu"
-                                    >
-                                        Actions <ExpandMore />
-                                    </Button>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        getContentAnchorEl={null}
-                                        anchorOrigin={{
-                                            vertical: "bottom",
-                                            horizontal: "left"
-                                        }}
-                                        id="action-menu"
-                                        open={Boolean(anchorEl)}
-                                        onClose={closeActions}>
-
-                                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                            onClick={() => {
-                                                if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
-                                                    setShowDeleteWarningConfirmBox(true);
-                                                } else {
-                                                    setShowDeleteConfirmBox(true)
-                                                }
-                                            }}
+                                {
+                                    contactPermissions.isDelete && <>
+                                        <Button
+                                            // disabled={Boolean(!selectedBrand)}
+                                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                            variant="outlined"
+                                            color="default"
+                                            onClick={openActions}
+                                            className={styles.action_submit_btn}
+                                            aria-controls="action-menu"
                                         >
-                                            Delete
+                                            Actions <ExpandMore />
+                                        </Button>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left"
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}>
+
+                                            <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                                onClick={() => {
+                                                    if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
+                                                        closeActions();
+                                                        setShowDeleteWarningConfirmBox(true);
+                                                    } else {
+                                                        closeActions();
+                                                        setShowDeleteConfirmBox(true);
+                                                    }
+                                                }}
+                                            >
+                                                Delete
                                     </MenuItem>
-                                    </Menu>
-                                </>
-                            }
-                        </Box>
+                                        </Menu>
+                                    </>
+                                }
+                            </Box>
+                        </Grid>
                     </Grid>
-                </Grid>
-           </div>
+                </div>
             </CustomContainer>
 
             <Paper>

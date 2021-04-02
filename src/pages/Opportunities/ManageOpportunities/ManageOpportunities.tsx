@@ -104,6 +104,7 @@ export default function ManageOpportunity({ open, isNew, onClose, entityData, ha
     const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, errors, resetForm) => {
         // const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
+            toastConfig.setToastConfig({ open: true, type: "error", message: "Please fill all required fields" });
             entityData.fields.forEach((input) => {
                 if (input.required) {
                     setTouched(input.fieldName, true);

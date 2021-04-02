@@ -378,10 +378,7 @@ export default function Account() {
     }
 
     const handleDeleteAccounts = async () => {
-        let selectedRecs = []
-        dataRows.map(obj => {
-            if (obj.isChecked) selectedRecs.push(obj._id)
-        })
+        let selectedRecs = dataRows.filter(obj => obj.isChecked).map(cr => cr._id)
         if (selectedRecs && selectedRecs.length > 0) {
             axiosInstance().put(`/account/remove`, {
                 ids: [...selectedRecs]
@@ -561,6 +558,7 @@ export default function Account() {
                                                         dataRows.filter((d) => d.isChecked && !d.approved).length === 0
                                                     }
                                                     onClick={() => {
+                                                        closeActions()
                                                         setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
                                                     }}
                                                 >
@@ -574,6 +572,7 @@ export default function Account() {
                                                         dataRows.filter((d) => d.isChecked && d.approved).length === 0
                                                     }
                                                     onClick={() => {
+                                                        closeActions()
                                                         setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
                                                     }}
                                                 >
@@ -586,8 +585,10 @@ export default function Account() {
                                                 <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                                     onClick={() => {
                                                         if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
+                                                            closeActions()
                                                             setShowDeleteWarningConfirmBox(true);
                                                         } else {
+                                                            closeActions()
                                                             setShowDeleteConfirmBox(true)
                                                         }
                                                     }}

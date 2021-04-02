@@ -380,9 +380,7 @@ const Opportunities = () => {
       recs.push(deleteRec?._id)
     }
     else {
-      dataRows.forEach(obj => {
-        if (obj.isChecked) recs.push(obj._id)
-      })
+      recs = dataRows.filter(obj => obj.isChecked).map(o => o._id)
     }
     if (recs && recs.length > 0) {
       axiosInstance()
