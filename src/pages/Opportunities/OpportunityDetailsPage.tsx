@@ -19,11 +19,11 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import ManageOpportunity from './ManageOpportunities/ManageOpportunities'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { getObjKeysWithValues, removeEmptyKeys } from "../../constants/helpers";
+import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -41,7 +41,7 @@ function OpportunityDetailsPage() {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
-  
+
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -60,7 +60,7 @@ function OpportunityDetailsPage() {
   });
 
   useEffect(() => {
-    const data = user.role?.sideBar;
+    const data = user?.role?.sideBar;
 
     if (data) {
       const hasOpportunityPermission = data.find(
@@ -167,26 +167,26 @@ function OpportunityDetailsPage() {
     });
   };
 
-  const handleUpdateOpportunity = (values) => {
-    setUpdating(true);
-    const updatedData = {
-      ...values,
-      _id: opportunityData._id,
-    };
+  // const handleUpdateOpportunity = (values) => {
+  //   setUpdating(true);
+  //   const updatedData = {
+  //     ...values,
+  //     _id: opportunityData._id,
+  //   };
 
-    axiosInstance()
-      .put("/opportunity", removeEmptyKeys(updatedData))
-      .then(({ data }) => {
-        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-        setUpdating(false);
-        goBackToListing();
-        
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setUpdating(false);
-      });
-  };
+  //   axiosInstance()
+  //     .put("/opportunity", removeEmptyKeys(updatedData))
+  //     .then(({ data }) => {
+  //       toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+  //       setUpdating(false);
+  //       goBackToListing();
+
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //       setUpdating(false);
+  //     });
+  // };
 
   const quickLinks = [
     {
@@ -242,16 +242,16 @@ function OpportunityDetailsPage() {
           >
             {
               handleAllowToEditList ?
-              (
-              <Button
-                disabled={opportunityData.owner.optionValue !== user.user._id && opportunityData.collaborator.length === 0}
-                variant="contained"
-                color="primary"
-                onClick={handleOpenUpdateDialog}
-              >
-                Edit
-              </Button>
-            ) : null
+                (
+                  <Button
+                    disabled={opportunityData.owner.optionValue !== user.user._id && opportunityData.collaborator.length === 0}
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenUpdateDialog}
+                  >
+                    Edit
+                  </Button>
+                ) : null
             }
             <Box component="span" marginX={1} />
             {opportunityPermissions.isDelete &&
@@ -292,14 +292,14 @@ function OpportunityDetailsPage() {
                   </Box>
                 ) : (
                   <>
-                    
+
                     <TabPanel value={currentTabIndex} index={0}>
                       <Box padding="16px">
-                        <DetailsPage 
-                          data={opportunityData} 
-                          fields={opportunityFields} 
+                        <DetailsPage
+                          data={opportunityData}
+                          fields={opportunityFields}
                         />
-                        
+
                       </Box>
                     </TabPanel>
                     <TabPanel value={currentTabIndex} index={1}>
@@ -349,7 +349,7 @@ function OpportunityDetailsPage() {
               onOk={handleDeleteOpportunity}
             />
           ) : null}
-          {openUpdateDialog ? (
+          {/* {openUpdateDialog ? (
             <ManageOpportunity
               isNew={false}
               open={openUpdateDialog}
@@ -357,7 +357,20 @@ function OpportunityDetailsPage() {
               entityData={{ fields: opportunityFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })) }}
               handleSubmit={handleUpdateOpportunity}
             />
-          ): null}
+          ): null} */}
+
+          {
+            openUpdateDialog && <ManageOpportunityDialog
+              open={openUpdateDialog}
+              onSuccess={() => {
+                setOpenUpdateDialog(false);
+                fetchOpportunityData()
+              }}
+              onClose={() => { setOpenUpdateDialog(false) }}
+              isNew={false}
+              dataToUpdate={opportunityData}
+            />
+          }
         </div>
       </Layout>
     </>

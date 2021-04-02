@@ -11,7 +11,7 @@ import { withStyles, makeStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityMain from '../../pages/Opportunities/ManageOpportunities';
+import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 
 const Accordion = withStyles({
     root: {
@@ -176,7 +176,8 @@ export default function OpportunityInAccordian({ opportunities, onNewOpportunity
         </Accordion>
 
         {
-            showCreateOpportunityDialog && <ManageOpportunityMain
+            showCreateOpportunityDialog && <ManageOpportunityDialog
+                isNew={true}
                 open={showCreateOpportunityDialog}
                 onClose={() => setShowCreateOpportunityDialog(false)}
                 onSuccess={() => {
