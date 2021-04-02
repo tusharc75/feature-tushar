@@ -244,6 +244,7 @@ function OpportunityDetailsPage() {
               handleAllowToEditList ?
               (
               <Button
+                disabled={opportunityData.owner.optionValue !== user.user._id && opportunityData.collaborator.length === 0}
                 variant="contained"
                 color="primary"
                 onClick={handleOpenUpdateDialog}
