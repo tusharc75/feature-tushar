@@ -19,7 +19,6 @@ import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import ManageOpportunity from './ManageOpportunities/ManageOpportunities'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 
@@ -61,7 +60,7 @@ function OpportunityDetailsPage() {
   });
 
   useEffect(() => {
-    const data = user?.role?.sideBar;
+    const data = user.role?.sideBar;
 
     if (data) {
       const hasOpportunityPermission = data.find(
@@ -85,6 +84,7 @@ function OpportunityDetailsPage() {
   }, [id]);
 
   const fetchOpportunityData = () => {
+    setLoading(true)
     axiosInstance()
       .get(`/opportunity/${id}`)
       .then(({ data: { data } }) => {
@@ -153,7 +153,7 @@ function OpportunityDetailsPage() {
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch((error) => {
+        .catch(error => {
           toastConfig.setToastConfig(error);
           setShowConfirmBox(false);
         });
@@ -244,6 +244,7 @@ function OpportunityDetailsPage() {
               handleAllowToEditList ?
               (
               <Button
+                disabled={opportunityData.owner.optionValue !== user.user._id && opportunityData.collaborator.length === 0}
                 variant="contained"
                 color="primary"
                 onClick={handleOpenUpdateDialog}

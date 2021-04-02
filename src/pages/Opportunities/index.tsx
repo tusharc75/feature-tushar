@@ -72,9 +72,11 @@ const Opportunities = () => {
   const [opportunityData, setOpportunityData] = useState([]);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
   const [deleteRec, setDeleteRec] = useState<any>({})
+  const [selectedRecs, setSelectedRecs] = useState([])
   const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+  const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({ id: null, show: false, opportunityName: "" })
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -116,6 +118,7 @@ const Opportunities = () => {
         ...u,
         isChecked: false,
         id: u._id,
+        canDelete: u.owner?.optionValue === user?.user._id,
         owner: u.owner?.optionLabel ? u.owner.optionLabel : '',
         stage: u.stage ? u.stage:'',
         closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
@@ -125,7 +128,17 @@ const Opportunities = () => {
     });
     setDataRows([...rows]);
   }, [opportunityData])
+  const handleSingleDeleteOpportunity = async () => {
+    setLoading(true);
 
+    axiosInstance()
+        .put(`/opportunity/remove`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
+          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+          fetchOpportunities();
+          setLoading(false);
+        })
+        setSingleOpportunityDelete({id: null, show: false, opportunityName:""})
+}
   const fetchOpportunities = async () => {
     setLoading(true);
     let searchParams: any = { ...query, filterOpportunities: selectedType }
@@ -153,6 +166,17 @@ const Opportunities = () => {
     }
     setSearchVal(e.target.value);
   };
+
+  const handelSelectedOpportunity = (id, isChecked) => {
+    let tempSelectedRecs = [...selectedRecs], curRecIndex = selectedRecs.indexOf(id)
+    if (isChecked && curRecIndex < 0) {
+        tempSelectedRecs = [...selectedRecs, id]
+    }
+    else if (!isChecked && curRecIndex >= 0) {
+        tempSelectedRecs.splice(curRecIndex, 1)
+    }
+    setSelectedRecs(tempSelectedRecs)
+}
 
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
@@ -196,12 +220,34 @@ const Opportunities = () => {
       ),
       renderCell: (params) => (
         <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev)
+          // color="primary"
+          // checked={params.value}
+          // onChange={(ev) => {
+          //   updateCheckedStatus(params, ev)
 
-          }}
+          // }}
+
+          color="primary"
+                    // disabled={!params.canDelete}
+                    checked={params.value}
+                    onChange={(ev) => {
+                        const gridData = dataRows;
+                        const indexOfRecord = gridData.findIndex(
+                            (d) => d.id === params.row.id
+                        );
+                        gridData[indexOfRecord].isChecked = ev.target.checked;
+
+                        setDataRows([...gridData]);
+
+                        const checkedRecords = gridData.filter((d) => d.isChecked === true);
+
+                        if (checkedRecords.length === gridData.length) {
+                            setCheckAllOpportunities(true);
+                        } else {
+                            setCheckAllOpportunities(false);
+                        }
+                        handelSelectedOpportunity(params.row.id, ev.target.checked)
+                    }}
         />
       ),
       disableColumnMenu: true,
@@ -237,15 +283,15 @@ const Opportunities = () => {
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
-      field: "actions", headerName: "Actions ", disableColumnMenu: true, sortable: false, filterable: false,
+      field: "actions", headerName: "Actions ", 
       renderCell: (params) => (
         <>
-          {
+          { 
             opportunityPermissions.isDelete ?
-              params.row.allowToDelete ?
+              params.row.canDelete ?
                 <Tooltip
                   title="Delete" >
-                  <IconButton aria-label="Delete" onClick={() => showConfirmBox(params.row)} >
+                  <IconButton aria-label="Delete" onClick={() => setSingleOpportunityDelete({show: true, id: params.row._id,opportunityName: `${params.row.opportunityName}` })} >
                     <DeleteIcon
                       fontSize="small" color="error" />
                   </IconButton>
@@ -263,8 +309,12 @@ const Opportunities = () => {
           }
 
         </>
-      ), width: 200
-    }
+      ), 
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      width: 200
+    },
   ];
 
   const showConfirmBox = (row) => {
@@ -275,7 +325,7 @@ const Opportunities = () => {
       }
     }
     else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true)
@@ -488,6 +538,15 @@ const Opportunities = () => {
               }}
             />
           }
+                      {
+                        singleOpportunityDelete.show ?
+                            <ConfirmationDialog
+                                open={singleOpportunityDelete.show}
+                                message={`Are you sure, you want to delete contact: ${singleOpportunityDelete.opportunityName} ?`}
+                                onClose={() => setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" })}
+                                onOk={handleSingleDeleteOpportunity}
+                            /> : null
+                      }
         </Container>
       </Layout>
     </>
