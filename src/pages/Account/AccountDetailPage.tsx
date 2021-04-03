@@ -39,6 +39,7 @@ import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks"
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import { TiFlowChildren } from 'react-icons/ti';
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
+import CustomDynamicGrid from "../../components/CustomDynamicGrid/CustomDynamicGrid";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -118,7 +119,7 @@ const Roles = () => {
 
         axiosInstance().get(`/account/${id}`).then(({ data: { data } }) => {
             setCustomizedRoutes([routes.account, { title: data.accountName }]);
-            
+
             setHeadingLbl(data.accountName || '')
             handleMainPonts(data)
             setAccountData(data)
