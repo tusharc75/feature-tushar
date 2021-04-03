@@ -1,8 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { Formik, Form } from "formik";
-import { useHistory } from "react-router-dom";
-import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { getOwnerDropdownDataSource, getCollaboratorDropdownDataSource, getObjKeys, yupSchema, removeEmptyKeys, getObjKeysWithValues, initializeDropdownById } from '../../../constants/helpers';
@@ -130,7 +128,6 @@ export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNe
 
     const handleCreateOpportunity = (values) => {
         setLoading(true)
-
         axiosInstance().post('/opportunity', removeEmptyKeys(values))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
@@ -151,7 +148,6 @@ export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNe
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
                 onSuccess()
-                // fetchData()
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 setLoading(false);

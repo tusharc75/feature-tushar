@@ -18,6 +18,7 @@ import {
   ViewColumn,
 } from '@material-ui/icons';
 import * as yup from "yup";
+import moment from 'moment';
 
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
@@ -231,6 +232,9 @@ export const initializeDropdownById = (field, fieldName, id) => {
   }
 
   return field;
+}
+export const yyyyMMDD = (dateToBeFormatted) => {
+  return dateToBeFormatted ? moment(dateToBeFormatted).format("YYYY-MM-DD") : dateToBeFormatted;
 }
 
 export const materialTableIcons: any = {
