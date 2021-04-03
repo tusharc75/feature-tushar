@@ -117,8 +117,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -173,7 +173,7 @@ const FormTypes = (props) => {
     reader.onload = function () {
       cb(reader.result);
     };
-    reader.onerror = function (error) {};
+    reader.onerror = function (error) { };
   };
 
   return type === "singleLine" ? (
@@ -247,11 +247,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                setFieldValue(
-                  name,
-                  e.target.value == "" ? null : parseFloat(e.target.value)
-                );
-              }
+              setFieldValue(
+                name,
+                e.target.value == "" ? null : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -322,10 +322,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                setFieldValue(
-                  name,
-                  val && val.optionValue ? val.optionValue : ""
-                )
+              setFieldValue(
+                name,
+                val && val.optionValue ? val.optionValue : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -349,8 +349,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-                (data) => data.currencyCode === values[name]
-              )[0]
+              (data) => data.currencyCode === values[name]
+            )[0]
             : ""
         }
         options={currencyData}
@@ -411,10 +411,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -591,8 +591,6 @@ const FormTypes = (props) => {
               type="file"
             />
           </IconButton>
-          {/* <Button variant="outlined" size="small" color="primary" component="span">Upload Logo
-        </Button> */}
         </Box>
       </Box>
     </Fragment>
@@ -629,11 +627,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                setFieldValue(
-                  name,
-                  e.target.value == "" ? null : e.target.value
-                );
-              }
+              setFieldValue(
+                name,
+                e.target.value == "" ? null : e.target.value
+              );
+            }
         }
       />
     </InfoLabel>
