@@ -18,6 +18,7 @@ import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
+import { yyyyMMDD } from "../../constants/helpers";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -96,7 +97,7 @@ function OpportunityDetailsPage() {
   const handleMainPoints = (data) => {
     let tempMp = {
       accountName: data?.accountName?.optionLabel || "",
-      closeDate: moment(data.closeDate).format("YYYY-MM-DD") || "",
+      closeDate: yyyyMMDD(data.closeDate),
       amount: data.amount || "",
       opportunityOwner: data?.owner?.optionLabel || "",
     };
