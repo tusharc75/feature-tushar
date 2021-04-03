@@ -2,12 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
-import { getErrorMessage } from "../../services/util";
-import CustomTabs from "../../components/Helpers/CustomTabs";
-import BoxWithBorder from "../../components/BoxWithBorder";
 import TabPanel from "../../components/TabPanel";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import CustomDialog from "../../components/Helpers/CustomDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -15,15 +11,13 @@ import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
-import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
-import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-
+import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getObjKeysWithValues, removeEmptyKeys } from "../../constants/helpers";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
+import _ from "lodash";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -88,6 +82,9 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .get(`/opportunity/${id}`)
       .then(({ data: { data } }) => {
+        let closeDate = data.closeDate;
+        let formattedDate = moment(closeDate).format("YYYY-MM-DD");
+        data =  _.merge(data,{closeDate:formattedDate});
         handleMainPoints(data);
         setHeadingLbl(data.opportunityName);
         handleAllowToEditList(data);
@@ -365,6 +362,7 @@ function OpportunityDetailsPage() {
               onSuccess={() => {
                 setOpenUpdateDialog(false);
                 fetchOpportunityData()
+              
               }}
               onClose={() => { setOpenUpdateDialog(false) }}
               isNew={false}
