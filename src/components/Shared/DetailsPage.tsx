@@ -10,9 +10,9 @@ import {
   Avatar,
 } from "@material-ui/core";
 import { InfoOutlined } from "@material-ui/icons";
-
 import { getObjKeysWithValues } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -76,6 +76,9 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] ? "Inactive" : "Active";
     } else if (input.type === "checkBox") {
       text = values[input.fieldName] ? (values[input.fieldName] == true ? "Yes" : "No") : "_ _ _";
+    } else if (input.type === "date") {
+      let updatedDateFormat = moment(values[input.fieldName]).format("YYYY-MM-DD")
+      text = updatedDateFormat ? updatedDateFormat : "_ _ _";
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : "_ _ _";
     }

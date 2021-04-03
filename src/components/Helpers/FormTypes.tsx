@@ -27,6 +27,7 @@ import currencies from "../../constants/currency_with_country.json";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import moment from "moment";
 
 const InfoLabel = ({ children, info, isTooltip }) =>
   isTooltip ? (
@@ -621,11 +622,18 @@ const FormTypes = (props) => {
         label={label}
         required={required}
         name={name}
-        value={values[name]}
+        value={values[name] ? moment(values[name]).format("YYYY-MM-DD") : values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          onChange
+            ? onChange
+            : (e) => {
+                setFieldValue(
+                  name,
+                  e.target.value == "" ? null : e.target.value
+                );
+              }
         }
       />
     </InfoLabel>

@@ -82,9 +82,6 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .get(`/opportunity/${id}`)
       .then(({ data: { data } }) => {
-        let closeDate = data.closeDate;
-        let formattedDate = moment(closeDate).format("YYYY-MM-DD");
-        data =  _.merge(data,{closeDate:formattedDate});
         handleMainPoints(data);
         setHeadingLbl(data.opportunityName);
         handleAllowToEditList(data);
@@ -99,7 +96,7 @@ function OpportunityDetailsPage() {
   const handleMainPoints = (data) => {
     let tempMp = {
       accountName: data?.accountName?.optionLabel || "",
-      closeDate: data.closeDate || "",
+      closeDate: moment(data.closeDate).format("YYYY-MM-DD") || "",
       amount: data.amount || "",
       opportunityOwner: data?.owner?.optionLabel || "",
     };
@@ -362,7 +359,7 @@ function OpportunityDetailsPage() {
               onSuccess={() => {
                 setOpenUpdateDialog(false);
                 fetchOpportunityData()
-              
+
               }}
               onClose={() => { setOpenUpdateDialog(false) }}
               isNew={false}
