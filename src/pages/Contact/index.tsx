@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetContacts, RemoveContacts } from '../../axios/index';
 import {
     Box,
     Button,
@@ -30,7 +29,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import BlockIcon from '@material-ui/icons/Block';
 import CustomContainer from "./../../components/Container";
 import MessageDialog from '../../components/Helpers/MessageDialog'
-import { getErrorMessage } from '../../services/util'
+import { getErrorMessage, getSearchQuery } from '../../services/util'
 import contactStyles from './contact.module.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
@@ -39,6 +38,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
+import axiosInstance from '../../axios/axiosInstance';
 
 
 const ContactTypes = [
@@ -75,12 +75,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function Contact() {
+export default function Contact(props) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-
+    const { contactRoute, contactResource, contactPerm } = props;
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -160,7 +160,7 @@ export default function Contact() {
             field: "name", headerName: "Name", width: 400,
             renderCell: (params) => (
                 <Link className="link"
-                    to={`${contactDetailPage.path}/${params.row._id}`}>
+                    to={`/${contactRoute}/detail/${params.row._id}`}>
                     {params.value || ''}
                 </Link>
             )
@@ -212,7 +212,7 @@ export default function Contact() {
         const data = user.role?.sideBar;
 
         if (data) {
-            const hasContactPermission = data.find(d => d.name == "Contact");
+            const hasContactPermission = data.find(d => d.name == contactPerm);
             if (hasContactPermission) {
                 setContactPermissions({ isCreate: hasContactPermission.isCreate, isRead: hasContactPermission.isRead, isDelete: hasContactPermission.isDelete });
             }
@@ -227,33 +227,49 @@ export default function Contact() {
 
     const handleSingleDeleteContacts = async () => {
         setLoading(true);
-
-        let data = await RemoveContacts({ ids: [singleContactDelete.id] })
-        if (data.status === 200) {
-            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-            getContacts();
-            setLoading(false);
-        }
+        axiosInstance().put(`/${contactRoute}/remove`, { ids: [singleContactDelete.id] })
+            .then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                getContacts();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
         setSingleContactDelete({ id: null, show: false, contactName: "" });
 
     }
 
-    const getContacts = () => {
+    const getContacts = useCallback(() => {
         setLoading(true);
         let searchParams: any = { ...query, filterContacts: selectedType }
         searchParams = searchVal
             ? { ...searchParams, search: searchVal }
             : { ...searchParams };
 
-        GetContacts(searchParams).then(({ data, count }) => {
-            setContactData(data);
-            setRowCount(count)
-            setLoading(false);
-        }).catch(error => {
-            toastConfig.setToastConfig(error);
-            setLoading(false);
-        })
-    }
+        //     GetContacts(searchParams).then(({ data, count }) => {
+        //         setContactData(data);
+        //         setRowCount(count)
+        //         setLoading(false);
+        //     }).catch(error => {
+        //         toastConfig.setToastConfig(error);
+        //         setLoading(false);
+        //     })
+        // }
+        let api = getSearchQuery(`/${contactRoute}`, searchParams);
+        setLoading(true);
+        axiosInstance()
+            .get(api)
+            .then(({ data: { data, count } }) => {
+                setContactData(data);
+                // getRows(data);
+                setRowCount(count);
+                setLoading(false);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setLoading(false);
+            });
+    }, [searchVal, query]);
+
 
     useEffect(() => {
         let rows = contactData?.map((u) => ({
@@ -290,13 +306,19 @@ export default function Contact() {
 
     const handleDeleteContact = () => {
 
-        const selectedRecords = dataRows.filter(d => d.isChecked).map(m => { return m.id });
+        const selectedRecs = dataRows.filter(d => d.isChecked).map(m => { return m.id });
         setLoading(true);
-        RemoveContacts({ ids: selectedRecords }).then(() => {
-            getContacts();
-            setLoading(false);
-            setShowDeleteConfirmBox(false);
-        })
+        if (selectedRecs && selectedRecs.length > 0) {
+            axiosInstance().put(`/${contactRoute}/remove`, {
+                ids: [...selectedRecs]
+            }).then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setShowDeleteConfirmBox(false)
+                getContacts();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            })
+        }
     };
 
     const handleSearch = (e) => {
@@ -526,6 +548,8 @@ export default function Contact() {
                                 setShowCreateContactDialog(false);
                                 getContacts();
                             }}
+                            contactResource={contactResource}
+                            contactRoute={contactRoute}
                         />
                     }
 

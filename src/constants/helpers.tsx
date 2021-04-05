@@ -20,6 +20,13 @@ import {
 import * as yup from "yup";
 import moment from 'moment';
 
+export  enum SUPPLIER_CUSTOMER {
+  supplierResource="Supplier Acc",
+  customerResource="Customer Account",
+  supplierRoute="supplier-account",
+  customerRoute="customer-account"
+}
+
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
   for (const key of arr) {

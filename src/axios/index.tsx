@@ -2,7 +2,7 @@ import api from './axios'
 import { getSearchQuery } from '../services/util'
 
 export const GetAccounts = async (params) => {
-    let url = "/account";
+    let url = "/customer-account";
     url = getSearchQuery(url, params);
     const { data } = await api().get(url);
     return data;
