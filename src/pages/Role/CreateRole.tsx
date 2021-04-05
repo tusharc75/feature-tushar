@@ -77,7 +77,7 @@ const CreateRole = ({ open, close, fetchData }) => {
       fullWidth
       fullScreen={isMobile}
     >
-      <CustomDialogHeader title="Create New User" onClose={close} />
+      <CustomDialogHeader title="Create New Role" onClose={close} />
 
       {loading ? (
         <>
