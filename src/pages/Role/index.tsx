@@ -118,6 +118,7 @@ const Roles: FC = () => {
           isChecked: false,
           name: role.name,
           description: role.description,
+          type: `${role.type === 1 ? "Global" : "Regional"} Role`,
           createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
         }))
       : [];
@@ -175,7 +176,17 @@ const Roles: FC = () => {
     {
       field: "description",
       headerName: "Description",
-      width: 200,
+      width: 300,
+      renderCell: (params: any) => (
+        <p title={params.value} className="text-truncate">
+          {params.value}
+        </p>
+      ),
+    },
+    {
+      field: "type",
+      headerName: "Type",
+      width: 140,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
           {params.value}
@@ -396,7 +407,7 @@ const Roles: FC = () => {
           />
         </Container>
         <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-          <div className="contact-grid-height1">
+          <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,

@@ -398,7 +398,7 @@ const Entity: FC = () => {
           />
         </Container>
         <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-          <div className="contact-grid-height1">
+          <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
