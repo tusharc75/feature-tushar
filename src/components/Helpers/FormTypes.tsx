@@ -17,6 +17,12 @@ import {
   useTheme,
 } from "@material-ui/core";
 import _ from "lodash";
+import DateUtils from "@date-io/moment";
+import {
+  KeyboardDatePicker,
+  KeyboardDateTimePicker,
+  MuiPickersUtilsProvider,
+} from "@material-ui/pickers";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import InfoIcon from "@material-ui/icons/Info";
 import { Autocomplete } from "@material-ui/lab";
@@ -27,8 +33,39 @@ import currencies from "../../constants/currency_with_country.json";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import NumberFormat from "react-number-format";
 import moment from "moment";
-import {yyyyMMDD} from "../../constants/helpers";
+import { yyyyMMDD } from "../../constants/helpers";
+
+interface NumberFormatCustomProps {
+  inputRef: (instance: NumberFormat | null) => void;
+  onChange: (event: { target: { name: string; value: string } }) => void;
+  name: string;
+}
+
+const withValueLimit = (inputObj, limitVal) => {
+  const { value } = inputObj;
+  if (value <= limitVal) return inputObj;
+};
+
+const CustomFormat = (props: NumberFormatCustomProps) => {
+  const { inputRef, onChange, ...other } = props;
+  return (
+    <NumberFormat
+      {...other}
+      getInputRef={inputRef}
+      onValueChange={(values) => {
+        onChange({
+          target: {
+            name: props.name,
+            value: values.formattedValue,
+          },
+        });
+      }}
+      isNumericString
+    />
+  );
+};
 
 const InfoLabel = ({ children, info, isTooltip }) =>
   isTooltip ? (
@@ -118,8 +155,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-          ? 1
-          : 0
+        ? 1
+        : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -174,7 +211,7 @@ const FormTypes = (props) => {
     reader.onload = function () {
       cb(reader.result);
     };
-    reader.onerror = function (error) { };
+    reader.onerror = function (error) {};
   };
 
   return type === "singleLine" ? (
@@ -237,7 +274,6 @@ const FormTypes = (props) => {
       <TextField
         {...rest}
         variant="outlined"
-        type="number"
         label={label}
         name={name}
         required={required}
@@ -245,15 +281,15 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange
-            ? onChange
-            : (e) => {
-              setFieldValue(
-                name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
-              );
-            }
+          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
         }
+        InputProps={{
+          inputComponent: CustomFormat as any,
+          inputProps: {
+            allowNegative: false,
+            thousandSeparator: true,
+          },
+        }}
       />
     </InfoLabel>
   ) : type === "email" ? (
@@ -323,10 +359,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-              setFieldValue(
-                name,
-                val && val.optionValue ? val.optionValue : ""
-              )
+                setFieldValue(
+                  name,
+                  val && val.optionValue ? val.optionValue : ""
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -350,8 +386,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-              (data) => data.currencyCode === values[name]
-            )[0]
+                (data) => data.currencyCode === values[name]
+              )[0]
             : ""
         }
         options={currencyData}
@@ -412,10 +448,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-              setFieldValue(
-                name,
-                value.map((val) => val.optionValue)
-              )
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -614,26 +650,93 @@ const FormTypes = (props) => {
     </InfoLabel>
   ) : type === "date" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
+        <KeyboardDatePicker
+          clearable
+          {...rest}
+          variant="inline"
+          inputVariant="outlined"
+          value={values[name]}
+          name={name}
+          label={label}
+          placeholder="10/10/2018"
+          onChange={(date) => setFieldValue(name, date)}
+          minDate={new Date()}
+          format="MM/dd/yyyy"
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+      </MuiPickersUtilsProvider>
+    </InfoLabel>
+  ) : type === "dateTime" ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <MuiPickersUtilsProvider utils={DateUtils}>
+        <KeyboardDateTimePicker
+          {...rest}
+          variant="inline"
+          inputVariant="outlined"
+          ampm={false}
+          value={values[name]}
+          name={name}
+          label={label}
+          defaultValue={new Date("2018-01-01T00:00:00.000Z")}
+          onChange={(date) => setFieldValue(name, date)}
+          onError={console.log}
+          disablePast
+          format="yyyy/MM/dd HH:mm"
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+      </MuiPickersUtilsProvider>
+    </InfoLabel>
+  ) : type === "percent" ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
-        type="date"
         label={label}
         required={required}
         name={name}
-        value={yyyyMMDD(values[name])}
+        value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
-              setFieldValue(
-                name,
-                e.target.value == "" ? null : e.target.value
-              );
-            }
-        }
+        InputProps={{
+          inputComponent: CustomFormat as any,
+          inputProps: {
+            isAllowed: (props) => withValueLimit(props, 100),
+            decimalScale: 2,
+            onValueChange: (values: any) =>
+              setFieldValue(name, values.formattedValue),
+          },
+          endAdornment: "%",
+        }}
+      />
+    </InfoLabel>
+  ) : type === "decimal" ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <TextField
+        {...rest}
+        variant="outlined"
+        label={label}
+        required={required}
+        name={name}
+        value={values[name]}
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
+        InputProps={{
+          inputComponent: CustomFormat as any,
+          inputProps: {
+            decimalScale: 2,
+            onValueChange: (values: any) =>
+              setFieldValue(name, values.formattedValue),
+          },
+        }}
       />
     </InfoLabel>
   ) : null;
