@@ -94,7 +94,7 @@ const EntityDetailsPage = () => {
     axiosInstance()
       .get(`/role?entity=${id}`)
       .then(({ data: { data } }) => {
-        setGloabalRoles(data);
+        setGloabalRoles(data.slice(0, 2));
         setRolesLoading(false);
       })
       .catch((err) => {
@@ -247,7 +247,7 @@ const EntityDetailsPage = () => {
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
             <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "0px", minHeight: "450px" }}>
+              <BoxWithBorder style={{ padding: "0px" }}>
                 <Box
                   width="100%"
                   padding={1}
@@ -287,11 +287,13 @@ const EntityDetailsPage = () => {
                   ) : globalRoles.length ? (
                     <>
                       <Roles data={globalRoles} onDeleteGlobalRole={() => {}} />
+                      <Box marginY={1} />
                       <Button
                         fullWidth
                         variant="contained"
                         color="primary"
                         size="small"
+                        onClick={() => history.push("/role")}
                       >
                         View All
                       </Button>

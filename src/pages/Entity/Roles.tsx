@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
   },
   list: {
     width: "100%",
+    padding: 0,
   },
 }));
 
@@ -34,17 +35,17 @@ const Roles = ({ onDeleteGlobalRole, data }) => {
     <div className={classes.root}>
       <FormGroup row>
         <div className={classes.demo}>
-          <List style={{ padding: 0 }}>
+          <List disablePadding>
             {data && data.length
               ? data.map((obj) => {
                   return (
                     <BoxWithBorder styles={{ padding: "0px", margin: "8px" }}>
-                      <ListItem className={classes.list}>
+                      <ListItem disableGutters className={classes.list}>
                         <ListItemText
                           primary={
                             <Link
                               className="accountNameLink"
-                              to={`/global-roles/${obj._id}`}
+                              to={`/role/detail/${obj._id}`}
                             >
                               <Typography> {obj.name || ""}</Typography>
                             </Link>
