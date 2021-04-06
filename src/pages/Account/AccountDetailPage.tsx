@@ -55,7 +55,7 @@ export default function AccountDetailPage(props) {
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
     const classes = useStyles();
-    const { accountApi, accountResource, accountPermission, accountBreadcrumb } = props;
+    const { accountApi, accountResource, accountPermission, accountBreadcrumb, contactResource } = props;
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [isUpdating, setUpdating] = useState(false);
@@ -83,29 +83,29 @@ export default function AccountDetailPage(props) {
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
 
     useEffect(() => {
-        const data = user.role?.sideBar;
+        if (user) {
+            const data = user.role?.sideBar;
 
-        if (data) {
-            const hasAccountPermission = data.find((d: any) => d.name === accountPermission);
-            if (hasAccountPermission) {
-                setAccountPermissions(
-                    {
-                        isCreate: hasAccountPermission.isCreate,
-                        isUpdate: hasAccountPermission.isUpdate,
-                        isRead: hasAccountPermission.isRead,
-                        isDelete: hasAccountPermission.isDelete,
-                        approveAccount: user.user?.permissions?.approveAccount
-                    });
+            if (data) {
+                const hasAccountPermission = data.find((d: any) => d.name === accountPermission);
+                if (hasAccountPermission) {
+                    setAccountPermissions(
+                        {
+                            isCreate: hasAccountPermission.isCreate,
+                            isUpdate: hasAccountPermission.isUpdate,
+                            isRead: hasAccountPermission.isRead,
+                            isDelete: hasAccountPermission.isDelete,
+                            approveAccount: user.user?.permissions?.approveAccount
+                        });
+                }
+            }
+
+            if (id) {
+                fetchAccountData();
+                fetchRelatedData();
             }
         }
     }, [user]);
-
-    useEffect(() => {
-        if (id) {
-            fetchAccountData();
-            fetchRelatedData();
-        }
-    }, [id]);
 
     const fetchRelatedData = () => {
         axiosInstance().get(`/${accountApi}/related/${id}`).then(({ data: { data } }) => {
@@ -531,6 +531,7 @@ export default function AccountDetailPage(props) {
                                 setShowCreateContactDialog(false);
                                 // fetchRelatedContacts();
                             }}
+                            contactResource={contactResource}
                             accountId={accountData._id}
                         />
                     }

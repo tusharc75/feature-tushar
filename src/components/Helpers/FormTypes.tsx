@@ -610,7 +610,7 @@ const FormTypes = (props) => {
         includeInputInList
         filterSelectedOptions
         value={values[name]}
-        onChange={(event, newValue) => {
+        onChange={onChange ? onChange : (event, newValue) => {
           setOptions(newValue ? [newValue, ...optionsList] : optionsList);
           setValue(newValue);
         }}

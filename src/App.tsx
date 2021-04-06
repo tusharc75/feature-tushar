@@ -117,7 +117,8 @@ function App() {
               accountApi={customerAccount.api}
               accountResource={customerAccount.resource}
               accountPermission={customerAccount.permission}
-              accountBreadcrumb={routes.customerAccount} />
+              accountBreadcrumb={routes.customerAccount}
+              contactResource={customerContact.resource} />
           </PrivateRoute>
           <PrivateRoute exact path="/customer-contact">
             <Contact
@@ -139,7 +140,7 @@ function App() {
             <Account
               accountApi={supplierAccount.api}
               accountResource={supplierAccount.resource}
-              accountPerm={supplierAccount.permission}
+              accountPermission={supplierAccount.permission}
               accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
@@ -147,8 +148,9 @@ function App() {
             <AccountDetailPage
               accountApi={supplierAccount.api}
               accountResource={supplierAccount.resource}
-              accountPerm={supplierAccount.permission}
+              accountPermission={supplierAccount.permission}
               accountBreadcrumb={routes.supplierAccount}
+              contactResource={supplierContact.resource}
             />
           </PrivateRoute>
           <PrivateRoute exact path="/supplier-contact">
