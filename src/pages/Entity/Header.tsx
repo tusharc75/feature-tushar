@@ -19,6 +19,8 @@ const Header = (props) => {
     entityPermissions,
     showConfirmBox,
     canDelete,
+    openRolesDialog,
+    rolesActionDiabled,
   } = props;
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -86,9 +88,19 @@ const Header = (props) => {
                   disabled={Boolean(canDelete)}
                   onClick={() => {
                     showConfirmBox(null);
+                    closeActions();
                   }}
                 >
                   Delete
+                </MenuItem>
+                <MenuItem
+                  disabled={rolesActionDiabled}
+                  onClick={() => {
+                    openRolesDialog();
+                    closeActions();
+                  }}
+                >
+                  Assign Roles
                 </MenuItem>
               </Menu>
             </>
