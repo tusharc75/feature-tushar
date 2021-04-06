@@ -105,8 +105,10 @@ export default function Contact(props) {
 
     const [filter, setFilter] = useState("All Contacts");
     const handleFilter = (event, newFilter) => {
-        setFilter(newFilter);
-        handleContactSel(ContactTypes.find((d) => d.key === newFilter).value);
+        if (newFilter !== null) {
+            setFilter(newFilter);
+            handleContactSel(ContactTypes.find((d) => d.key === newFilter).value);
+        }
     };
 
     const columns = [
@@ -209,7 +211,7 @@ export default function Contact(props) {
     ];
 
     useEffect(() => {
-        const data = user.role?.sideBar;
+        const data = user?.role?.sideBar;
 
         if (data) {
             const hasContactPermission = data.find(d => d.name == contactPermission);
