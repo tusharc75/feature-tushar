@@ -366,7 +366,7 @@ const FormTypes = (props) => {
         name={name}
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
         onChange={
           onChange ? onChange : (e) => setFieldValue(name, e.target.value)
         }
