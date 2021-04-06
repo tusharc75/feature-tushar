@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 export default function ManageAccountMain(props) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { open, onClose, id,accountResource ,accountRoute } = props
+    const { open, onClose, id,accountResource ,accountApi } = props
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -25,7 +25,7 @@ export default function ManageAccountMain(props) {
                 const newFields = [];
                 data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
-                axiosInstance().get(`/${accountRoute}/clone/${id}`).then(({ data: dataToClone }) => {
+                axiosInstance().get(`/${accountApi}/clone/${id}`).then(({ data: dataToClone }) => {
                     setEntityData({
                         fields: newFields,
                         initialValues: dataToClone.data ? dataToClone.data : getObjKeys("", newFields),
@@ -56,7 +56,7 @@ export default function ManageAccountMain(props) {
 
     const handleCreateAccount = (values, saveAndNew, setValues) => {
         setLoading(false);
-        axiosInstance().post(`/${accountRoute}`, removeEmptyKeys(values)).then(({ data }) => {
+        axiosInstance().post(`/${accountApi}`, removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
             setLoading(false);

@@ -1,8 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Box } from '@material-ui/core'
-import { contactDetailPage } from '../../routes/Contacts'
-import { accountDetailPage } from '../../routes/Accounts'
 import { makeStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes'
 import accountClass from "./account.module.scss"
