@@ -83,7 +83,7 @@ const Roles = (props) => {
 
             setCanEdit([...data?.collaborator, data?.owner].some(obj => obj.optionValue === user.user._id))
 
-            setCustomizedRoutes([routes.contact, { title: `${data.firstName} ${data.lastName}` }]);
+            setCustomizedRoutes([{ title: `${contactPerm}`,path: `/${contactRoute}` }, { title: `${data.firstName} ${data.lastName}` }]);
         }).catch(err => {
             setLoading(false)
         })

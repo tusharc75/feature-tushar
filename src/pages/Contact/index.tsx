@@ -353,7 +353,7 @@ export default function Contact(props) {
 
     return (
         <Layout>
-            <CustomBreadCrumbs routes={[routes.contact]} />
+            <CustomBreadCrumbs routes={[{ title: `${contactPerm}`,path: `/${contactRoute}` }]} />
             <Grid container direction="row" className="header-links">
                 <Grid item xs={12} sm={12} className="pr-3">
                     <Grid container justify="flex-end">
@@ -408,7 +408,7 @@ export default function Contact(props) {
                 <div className="header-panel">
                     <Grid className={styles.filter_side_container} container justify="space-between">
                         <Grid item className="d-flex align-items-center gap-1">
-                            <MdContacts className="headerLogo" /> <span className="listingHeader">Contacts </span>
+                            <MdContacts className="headerLogo" /> <span className="listingHeader">{contactPerm} </span>
                             {
                                 ContactTypes && <ToggleButtonGroup size="small" className="ml-8"
                                     value={filter}

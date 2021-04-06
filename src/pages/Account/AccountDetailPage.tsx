@@ -119,7 +119,7 @@ const Roles = (props) => {
         setLoading(true)
 
         axiosInstance().get(`/${accountRoute}/${id}`).then(({ data: { data } }) => {
-            setCustomizedRoutes([routes.account, { title: data.accountName }]);
+            setCustomizedRoutes([{ title: `${accountPerm}`,path: `/${accountRoute}` }, { title: data.accountName }]);
 
             setHeadingLbl(data.accountName || '')
             handleMainPonts(data)

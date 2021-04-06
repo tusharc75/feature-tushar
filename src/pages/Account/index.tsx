@@ -468,7 +468,7 @@ export default function Account(props) {
         <>
 
             <Layout>
-                <CustomBreadCrumbs routes={[routes.account]} />
+                <CustomBreadCrumbs routes={[{ title: `${accountPerm}`,path: `/${accountRoute}` }]} />
                 <Grid container direction="row" className="header-links">
                     <Grid item xs={12} sm={12} className="pr-3">
                         <Grid container justify="flex-end">
@@ -524,7 +524,7 @@ export default function Account(props) {
                         <div className={`${accountClass["account_header_inner_container"]}`} >
                             <CustomHeader
                                 total={rowCount}
-                                heading="Accounts"
+                                heading={accountPerm}
                                 selectedType={selectedType}
                                 onTypeChange={handleAccountSel}
                                 options={AccTypes}
