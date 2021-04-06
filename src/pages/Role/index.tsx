@@ -42,6 +42,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const RoleTypes = [
+  {
+    key: "Global",
+    value: 1
+  },
+  {
+    key: "Regional",
+    value: 2
+  }
+]
+
 const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
@@ -49,6 +60,7 @@ const Roles: FC = () => {
     state: { user },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
+  const [selectedType, setSelectedType] = useState(1)
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [roles, setRoles] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
@@ -72,7 +84,7 @@ const Roles: FC = () => {
   ] = useState(false);
 
   const fetchRoles = useCallback(() => {
-    let searchParams: any = { ...query };
+    let searchParams: any = { ...query, type: selectedType };
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
@@ -90,7 +102,7 @@ const Roles: FC = () => {
         toastConfig.setToastConfig(err);
         setLoadingRoles(false);
       });
-  }, [searchVal, query]);
+  }, [searchVal, query, selectedType]);
 
   useEffect(() => {
     fetchRoles();
@@ -114,13 +126,13 @@ const Roles: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((role: any) => ({
-          id: role._id,
-          isChecked: false,
-          name: role.name,
-          description: role.description,
-          type: `${role.type === 1 ? "Global" : "Regional"} Role`,
-          createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
-        }))
+        id: role._id,
+        isChecked: false,
+        name: role.name,
+        description: role.description,
+        type: `${role.type === 1 ? "Global" : "Regional"} Role`,
+        createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
+      }))
       : [];
 
     setDataRows(rows);
@@ -337,11 +349,13 @@ const Roles: FC = () => {
   const handleClose = () => {
     setIsOpen(false);
   };
-
+  const handleRoleTypeSel = (filteredValue) => {
+    setSelectedType(filteredValue);
+  };
   return (
     <>
       {isOpen && (
-        <CreateRole open={isOpen} close={handleClose} fetchData={fetchRoles} />
+        <CreateRole open={isOpen} close={handleClose} fetchData={fetchRoles} roleType={selectedType} />
       )}
       <Layout>
         <Grid container spacing={3} direction="row">
@@ -398,6 +412,9 @@ const Roles: FC = () => {
         </Grid>
         <Container>
           <Header
+            selectedType={selectedType}
+            onTypeChange={handleRoleTypeSel}
+            options={RoleTypes}
             onSearch={handleSearch}
             searchVal={searchVal}
             rolePermissions={rolesPermissions}
@@ -440,9 +457,8 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete role ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
