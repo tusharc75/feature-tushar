@@ -2,6 +2,7 @@ import React, { Fragment } from "react";
 import {
   Avatar,
   Box,
+  Button,
   Checkbox,
   FormControl,
   FormControlLabel,
@@ -37,6 +38,8 @@ import { getFormulaValue } from "../../constants/formulaUtility";
 import NumberFormat from "react-number-format";
 import moment from "moment";
 import { yyyyMMDD } from "../../constants/helpers";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../axios/axiosInstance";
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -143,6 +146,8 @@ const FormTypes = (props) => {
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
+  const [isUploading, setUploading] = React.useState(false);
+  const { setToastConfig } = React.useContext(CustomToastContext);
 
   const fetch = React.useMemo(
     () =>
@@ -157,8 +162,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-          ? 1
-          : 0
+        ? 1
+        : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -197,52 +202,91 @@ const FormTypes = (props) => {
     };
   }, [type, value, values[name], fetch]);
 
-  const handleUploadFile = (event) => {
+  const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
-      // const size = event.target.files[0].size;
-      getBase64(file, (result) => {
-        setFieldValue(name, result);
-      });
+
+      getImageUrl(file);
     }
   };
 
-  const getBase64 = (file, cb) => {
-    let reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = function () {
-      cb(reader.result);
-    };
-    reader.onerror = function (error) { };
+  const handleUploadFile = (ev) => {
+    if (ev.target.files && ev.target.files.length) {
+      const file = ev.target.files[0];
+      getFileUrl(file);
+    }
   };
 
+  // For public upload
+  const getImageUrl = (file) => {
+    let formData = new FormData();
+    formData.append("file", file);
+    setUploading(true);
+    axiosInstance()
+      .post("/user/upload-public", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(({ data }) => {
+        setFieldValue(name, data.fileUrl);
+
+        setUploading(false);
+      })
+      .catch((err) => {
+        setUploading(false);
+        setToastConfig(err);
+      });
+  };
+
+  // for public upload
+  const getFileUrl = (file) => {
+    let formData = new FormData();
+    formData.append("file", file);
+    setUploading(true);
+    axiosInstance()
+      .post("/user/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(({ data }) => {
+        setFieldValue(name, data.fileName);
+        setUploading(false);
+      })
+      .catch((err) => {
+        setUploading(false);
+        setToastConfig(err);
+      });
+  };
 
   const handleChange = (name, value) => {
     setFieldValue(name, value);
-    handleFormula(name, value)
+    handleFormula(name, value);
   };
 
   const handleFormula = (name, value) => {
     if (fields && fields.filter((_f) => _f.type === "formula").length) {
-      fields.filter((_f) => _f.type === "formula").forEach(_data => {
-        if (_data.inputFields.includes(name)) {
-          let inputFields = {}
-          _data.inputFields.forEach(_input => {
-            if (name === _input) {
-              inputFields[_input] = value
-            }
-            else {
-              inputFields[_input] = values[_input] ? values[_input] : ""
-            }
-          })
-          let calValue = getFormulaValue(_data.formula, inputFields, _data.returnType, _data.decimalPlaces);
-          setFieldValue(_data.fieldName, calValue);
-          handleFormula(_data.fieldName, calValue)
-        }
-      })
+      fields
+        .filter((_f) => _f.type === "formula")
+        .forEach((_data) => {
+          if (_data.inputFields.includes(name)) {
+            let inputFields = {};
+            _data.inputFields.forEach((_input) => {
+              if (name === _input) {
+                inputFields[_input] = value;
+              } else {
+                inputFields[_input] = values[_input] ? values[_input] : "";
+              }
+            });
+            let calValue = getFormulaValue(
+              _data.formula,
+              inputFields,
+              _data.returnType,
+              _data.decimalPlaces
+            );
+            setFieldValue(_data.fieldName, calValue);
+            handleFormula(_data.fieldName, calValue);
+          }
+        });
     }
-  }
-
+  };
 
   return type === "singleLine" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
@@ -337,7 +381,12 @@ const FormTypes = (props) => {
         onChange={
           onChange
             ? onChange
-            : (e) => { handleChange(name, e.target.value == "" ? null : parseFloat(e.target.value)) }
+            : (e) => {
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -406,7 +455,7 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
-  ) : (type === "dropDown" || type === "lookup") ? (
+  ) : type === "dropDown" || type === "lookup" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
@@ -422,10 +471,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-              setFieldValue(
-                name,
-                val && val.optionValue ? val.optionValue : ""
-              )
+                setFieldValue(
+                  name,
+                  val && val.optionValue ? val.optionValue : ""
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -449,8 +498,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-              (data) => data.currencyCode === values[name]
-            )[0]
+                (data) => data.currencyCode === values[name]
+              )[0]
             : ""
         }
         options={currencyData}
@@ -511,10 +560,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-              setFieldValue(
-                name,
-                value.map((val) => val.optionValue)
-              )
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -610,10 +659,14 @@ const FormTypes = (props) => {
         includeInputInList
         filterSelectedOptions
         value={values[name]}
-        onChange={onChange ? onChange : (event, newValue) => {
-          setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-          setValue(newValue);
-        }}
+        onChange={
+          onChange
+            ? onChange
+            : (event, newValue) => {
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
+        }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
         }}
@@ -687,11 +740,11 @@ const FormTypes = (props) => {
               <input
                 id={name}
                 name={name}
-                onChange={handleUploadFile}
+                onChange={handleUploadImage}
                 accept="image/x-png,image/gif,image/jpeg"
                 style={{
-                  opacity: '0',
-                  position: 'absolute',
+                  opacity: "0",
+                  position: "absolute",
                   zIndex: -1,
                 }}
                 type="file"
@@ -699,6 +752,32 @@ const FormTypes = (props) => {
             </IconButton>
           </label>
         </Box>
+      </Box>
+    </Fragment>
+  ) : type === "fileUpload" ? (
+    <Fragment>
+      <Box display="flex" alignItems="center">
+        <input
+          id={name}
+          name={name}
+          onChange={handleUploadFile}
+          style={{ display: "none" }}
+          type="file"
+        />
+        <label htmlFor={name}>
+          <Button
+            disabled={isUploading}
+            variant="contained"
+            color="primary"
+            component="span"
+          >
+            Upload File
+          </Button>
+        </label>
+        <Box marginX={1} />
+        <p className="text-truncate">
+          {values[name] ? values[name] : "No file choosen"}
+        </p>
       </Box>
     </Fragment>
   ) : type === "url" ? (
