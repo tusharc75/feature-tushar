@@ -24,7 +24,7 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
 
-const CreateRole = ({ open, close, fetchData }) => {
+const CreateRole = ({ open, close, fetchData , roleType }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -39,8 +39,9 @@ const CreateRole = ({ open, close, fetchData }) => {
 
   const getInitialData = () => {
     setLoading(true);
+    let api = (roleType==1) ? "/field?resource=Role" : "/field?resource=Role&entity=606c03d2211b5acb3e18ad1f";
     axiosInstance()
-      .get("/field?resource=Role")
+      .get(api)
       .then(({ data: { data } }) => {
         setField(data.field);
         setResource(data.resource);

@@ -4,6 +4,9 @@ import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import SearchBox from "../../components/Helpers/SearchBox";
 
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+
 const useStyles = makeStyles((theme) => ({
   filter_side: {
     display: "flex",
@@ -12,7 +15,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Header = (props) => {
-  const {
+  const { selectedType,
+    onTypeChange,
+    options,
     onSearch,
     searchVal,
     onCreate,
@@ -22,7 +27,12 @@ const Header = (props) => {
   } = props;
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [filter, setFilter] = useState("Global");
 
+  const handleFilter = (event, newFilter) => {
+    setFilter(newFilter);
+    onTypeChange(options.find((d) => d.key === newFilter).value);
+  };
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -35,6 +45,19 @@ const Header = (props) => {
     <Grid container>
       <Grid item xs={6}>
         <h2>Roles</h2>
+        {
+          options && <ToggleButtonGroup size="small" className="ml-8"
+            value={filter}
+            exclusive
+            onChange={handleFilter}>
+            {options.map((k, index) => {
+              return (
+                <ToggleButton value={k.key} key={index}>{k.key}
+                </ToggleButton>
+              );
+            })}
+          </ToggleButtonGroup>
+        }
       </Grid>
       <Grid item xs={6} className={classes.filter_side}>
         <Box component="div">
@@ -55,7 +78,7 @@ const Header = (props) => {
             onSearch={onSearch}
             value={searchVal}
             size="small"
-            placeholder="Search Users"
+            placeholder="Search Role"
             width="242px"
           />
 
