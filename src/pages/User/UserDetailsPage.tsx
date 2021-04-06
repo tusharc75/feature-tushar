@@ -16,7 +16,7 @@ import {
   TableCell,
   TableBody,
 } from "@material-ui/core";
-import DeleteButton from '../../components/Helpers/DeleteButton'
+import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -35,6 +35,7 @@ import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import UserRoles from "./UserRoles";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -47,9 +48,11 @@ const UserDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
+  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [rolesLoading, setRolesLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userPermissions, setUserPermissions] = useState(null);
+
   const [isChangingPermission, setChangingPermission] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [userFields, setUserFIelds] = useState([]);
@@ -222,6 +225,14 @@ const UserDetailsPage = () => {
       });
   };
 
+  const handleOpenDialog = () => {
+    setRolesDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setRolesDialogOpen(false);
+  };
+
   return (
     <>
       {openUpdateDialog && (
@@ -235,7 +246,17 @@ const UserDetailsPage = () => {
           handleUpdate={handleUpdateUser}
         />
       )}
-
+      {rolesDialogOpen && (
+        <AssignRolesDialog
+          rolesDialogOpen={rolesDialogOpen}
+          handleCloseDialog={handleCloseDialog}
+          userIds={[id]}
+          onSuccess={() => {
+            handleCloseDialog();
+            fetchUserRoles();
+          }}
+        />
+      )}
       <Layout>
         <Grid container direction="row">
           <Grid item xs={12} className="pl-2">
@@ -277,7 +298,10 @@ const UserDetailsPage = () => {
             ) : null}
             <Box component="span" marginX={1} />
             {usersPermissions.isDelete ? (
-              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+              <DeleteButton
+                text="Delete"
+                onClick={() => setShowConfirmBox(true)}
+              />
             ) : null}
           </DetailsPageHeader>
         )}
@@ -367,7 +391,11 @@ const UserDetailsPage = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={4} container justify="flex-end">
-                  <IconButton color="primary" size="small">
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={handleOpenDialog}
+                  >
                     <ControlPoint />
                   </IconButton>
                 </Grid>
@@ -414,7 +442,7 @@ const UserDetailsPage = () => {
                       }}
                     >
                       {userData && (
-                        <UserRoles data={globalRoles} unassignRole={() => { }} />
+                        <UserRoles data={globalRoles} unassignRole={() => {}} />
                       )}
                     </Box>
                   )}
