@@ -71,7 +71,7 @@ const CreateUser = ({ open, close, fetchData }) => {
         close();
       })
       .catch((error) => {
-        toastConfig.setToastConfig({ open: true, type: "error", message: "Email iD already Exist" });
+        toastConfig.setToastConfig(error);
         setSubmitting(false);
       });
   };
