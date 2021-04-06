@@ -46,6 +46,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                 }
                 if (type === FieldList.FORMULA.type) {
                     insert_object.formula = ""
+                    insert_object.inputFields = []
                     insert_object.returnType = "decimal"
                 }
                 if (type === FieldList.FORMULA.type || type === FieldList.DECIMAL.type) {

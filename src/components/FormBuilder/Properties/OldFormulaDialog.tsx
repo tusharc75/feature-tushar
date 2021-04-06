@@ -21,13 +21,49 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: 300,
-    },
+const OperatorList = [
+  { name: "Add", value: "+" },
+  { name: "Subtract", value: "-" },
+  { name: "Multiply", value: "*" },
+  { name: "Divide", value: "/" },
+  { name: "Remainder", value: "%" },
+  { name: "Exponentiation", value: "^" },
+  { name: "Open parenthesis", value: "(" },
+  { name: "Close parenthesis", value: ")" },
+  { name: "Not equal", value: "<>" },
+  { name: "Equals", value: "=" },
+  { name: "Less than", value: "<" },
+  { name: "Greater than", value: ">" },
+  { name: "Less than or equal", value: "<=" },
+  { name: "Greater than or equal", value: ">=" },
+]
+
+const FunctionList = [
+  { name: "IF", value: "IF(,,)" },
+]
+
+
+const styles = (theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(2),
   },
-};
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.grey[500],
+  },
+});
+
+
+const useStyles = makeStyles((theme) => ({
+  active: {
+    backgroundColor: theme.palette.grey[300],
+  },
+}));
+
+
 
 export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section, setSection }) => {
 
@@ -43,8 +79,10 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
 
   const inputRef = useRef<any>();
   const [option, setOption] = useState(fieldData.option ? fieldData.option : []);
+  const [functionSelect, setFunctionSelect] = useState(null);
+  const [fieldSelect, seFieldSelect] = useState(null);
+  const [operatorSelect, setOperatorSelect] = useState(null);
   const [formulaError, setFormulaError] = useState(null);
-  const [inputFields, setInputFields] = React.useState(fieldData.inputFields ? fieldData.inputFields : []);
 
   const handleChecked = (event) => {
     setState({ ...state, [event.target.name]: event.target.checked });
@@ -66,7 +104,6 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
             ele.tooltipMessage = state.tooltipMessage
             ele.option = option
             ele.formula = state.formula
-            ele.inputFields = inputFields
             ele.returnType = state.returnType
             ele.decimalPlaces = state.decimalPlaces
           }
@@ -79,10 +116,8 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
 
   const handleCheckSyntax = () => {
     if (state.formula !== "") {
-      let values = {}
-      inputFields.forEach(_input => {
-        values[_input] = 1;
-      })
+      //let values = { owner: 5, rate: 5, amount: 10 }
+      let values = { rate: 10, qty: 5, fix: 12 }
       //getFormulaValue(state.formula, values, "decimal", 2)
       if (checkFormula(state.formula, values)) {
         setFormulaError("Valid Formula")
@@ -93,10 +128,29 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
     }
   }
 
-  const handleSelectChange = (event) => {
-    setInputFields(event.target.value);
-  };
+  const handleAddSyntax = (from) => {
+    let pushPosition = inputRef.current.selectionStart
+    let content = ""
+    if (from === "function") {
+      if (functionSelect) {
+        content = functionSelect;
+      }
+    }
+    else if (from === "field") {
+      if (fieldSelect) {
+        content = "{" + fieldSelect + "}";
+      }
+    }
+    else if (from === "operator") {
+      if (operatorSelect) {
+        content = operatorSelect;
+      }
+    }
+    var contentPush = [state.formula.slice(0, pushPosition), content, state.formula.slice(pushPosition)].join('');
+    setState({ ...state, formula: contentPush });
+  }
 
+  const classes = useStyles();
   return (
     <div>
       <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={open}>
@@ -190,34 +244,44 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
             }
           </Box>
           <Box padding={1}>
-            <Box>
-              <FormControl variant="outlined" fullWidth margin="dense">
-                <InputLabel htmlFor="filled-age-native-simple">Input Parameters</InputLabel>
-                <Select
-                  inputProps={{
-                    name: 'reletedTo',
-                    id: "demo-simple-select-outlined"
-                  }}
-                  margin="dense"
-                  label="Input Parameters"
-                  multiple
-                  name="reletedTo"
-                  value={inputFields}
-                  onChange={handleSelectChange}
-                  renderValue={(selected: any) => selected.join(', ')}
-                  MenuProps={MenuProps}
-                >
+            <Grid container spacing={5}>
+              <Grid item xs={4} >
+                <Typography variant="subtitle2">Select Function</Typography>
+                <Box mt={1} mb={1} border={1} borderColor="grey.300" minHeight={150} maxHeight={150} style={{ overflow: "auto" }}>
+                  {FunctionList.map((_function) => (
+                    <ListItem className={_function.value === functionSelect && classes.active} key={_function.name} dense button onClick={() => setFunctionSelect(_function.value)} >
+                      <ListItemText primary={_function.name} />
+                    </ListItem>
+                  ))}
+                </Box>
+                <Button variant="outlined" size="small" onClick={() => handleAddSyntax("function")} color="primary">Insert</Button>
+              </Grid>
+              <Grid item xs={4} >
+                <Typography variant="subtitle2">Select Field</Typography>
+                <Box mt={1} mb={1} border={1} borderColor="grey.300" minHeight={150} maxHeight={150} style={{ overflow: "auto" }} >
                   {section.map((_section) => (
-                    _section.field.map((_field) => (_field.fieldId !== fieldData.fieldId &&
-                      <MenuItem key={_field.fieldName} value={_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)}>
-                        <Checkbox color="primary" checked={inputFields.indexOf(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)) > -1} />
-                        <ListItemText primary={_field.fieldLabel} />
-                      </MenuItem>
+                    _section.field.map((_field) => (
+                      _field.type !== FieldList.FORMULA.type &&
+                      <ListItem className={(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)) === fieldSelect && classes.active} key={_field.fieldId} dense button onClick={() => seFieldSelect(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel))} >
+                        <ListItemText primary={_field.fieldLabel + " (" + (_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)) + ")"} />
+                      </ListItem>
                     ))
                   ))}
-                </Select>
-              </FormControl>
-            </Box>
+                </Box>
+                <Button variant="outlined" size="small" onClick={() => handleAddSyntax("field")} color="primary">Insert</Button>
+              </Grid>
+              <Grid item xs={4} >
+                <Typography variant="subtitle2">Select Operator</Typography>
+                <Box mt={1} mb={1} border={1} borderColor="grey.300" minHeight={150} maxHeight={150} style={{ overflow: "auto" }} >
+                  {OperatorList.map((_operator) => (
+                    <ListItem className={_operator.value === operatorSelect && classes.active} key={_operator.name} dense button onClick={() => setOperatorSelect(_operator.value)} >
+                      <ListItemText primary={_operator.value + "  " + _operator.name} />
+                    </ListItem>
+                  ))}
+                </Box>
+                <Button variant="outlined" size="small" onClick={() => handleAddSyntax("operator")} color="primary">Insert</Button>
+              </Grid>
+            </Grid>
             <Box pt={2}>
               <TextField
                 id="standard-basic"
@@ -227,7 +291,7 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
                 margin="dense"
                 fullWidth
                 multiline
-                rows={8}
+                rows={4}
                 value={state.formula}
                 inputRef={inputRef}
                 onChange={handleChange}

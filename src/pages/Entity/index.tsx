@@ -8,6 +8,14 @@ import {
   IconButton,
   makeStyles,
   Link as MuiLink,
+  Dialog,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Button,
+  CircularProgress,
 } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
@@ -27,6 +35,11 @@ import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import Loader from "../../components/Loader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: "flex",
@@ -49,13 +62,19 @@ const Entity: FC = () => {
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [entities, setEntities] = useState<any[]>([]);
+  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<any[]>([]);
+  const [selectedEntities, setSelectedEntities] = useState<any[]>([]);
+  const [isAssigning, setAssigning] = useState(false);
+
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
 
   const [loadingEntities, setLoadingEntities] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllEntities, setCheckAllEntities] = useState(false);
-  const [showCreateEntityDialog, setShowCreateEntityDialog] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [entitiesPermissions, setEntitiesPermissions] = useState({
@@ -236,6 +255,8 @@ const Entity: FC = () => {
     } else {
       setCheckAllEntities(false);
     }
+
+    handleSelectedEntities(params.row.id, ev.target.checked);
   };
 
   const showConfirmBox = (row) => {
@@ -316,13 +337,87 @@ const Entity: FC = () => {
     }
   };
 
+  // Get all roles
+  const getRoles = async () => {
+    setLoadingRoles(true);
+    try {
+      const {
+        data: { data },
+      } = await axiosInstance().get(`/role`);
+      setRoles(data);
+      setLoadingRoles(false);
+    } catch (error) {
+      setLoadingRoles(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  // Handle entity selection
+  const handleSelectedEntities = (id, isChecked) => {
+    let tempSelectedRecs = [...selectedEntities],
+      curRecIndex = selectedEntities.indexOf(id);
+    if (isChecked && curRecIndex < 0) {
+      tempSelectedRecs = [...selectedEntities, id];
+    } else if (!isChecked && curRecIndex >= 0) {
+      tempSelectedRecs.splice(curRecIndex, 1);
+    }
+    setSelectedEntities(tempSelectedRecs);
+  };
+
+  // handle role selection from dialog
+  const handleRoleSelection = (e, id) => {
+    let tempSelectedRoles = [...selectedRoles];
+    let curIndex = tempSelectedRoles.indexOf(id);
+    if (e.target.checked) {
+      if (curIndex < 0) tempSelectedRoles = [...tempSelectedRoles, id];
+    } else if (curIndex >= 0) {
+      tempSelectedRoles.splice(curIndex, 1);
+    }
+    setSelectedRoles(tempSelectedRoles);
+  };
+
+  // Handle/Submit Roles
+  const handleAssignRoles = async () => {
+    if (selectedEntities.length && selectedRoles.length) {
+      setAssigning(true);
+      try {
+        const dataObj = {
+          entities: selectedEntities,
+          roles: selectedRoles,
+        };
+        const { data } = await axiosInstance().put("/entity/add-role", dataObj);
+        toastConfig.setToastConfig({
+          message: "Roles assigned successfully",
+          type: "success",
+          open: true,
+        });
+        setAssigning(false);
+        handleCloseDialog();
+        fetchEntities();
+        setSelectedRoles([]);
+        setSelectedEntities([]);
+      } catch (error) {
+        setAssigning(false);
+        toastConfig.setToastConfig(error);
+      }
+    }
+  };
+
   const handleCreate = () => {
     setIsOpen(true);
-    setShowCreateEntityDialog(true);
   };
 
   const handleClose = () => {
     setIsOpen(false);
+  };
+
+  const handleOpenDialog = () => {
+    setRolesDialogOpen(true);
+    getRoles();
+  };
+
+  const handleCloseDialog = () => {
+    setRolesDialogOpen(false);
   };
 
   return (
@@ -334,6 +429,59 @@ const Entity: FC = () => {
           fetchData={fetchEntities}
         />
       )}
+      <Dialog
+        fullWidth
+        maxWidth="xs"
+        open={rolesDialogOpen}
+        onClose={handleCloseDialog}
+        aria-labelledby="assign-roles-dialog"
+      >
+        <CustomDialogHeader title="Assign roles" />
+        <CustomDialogContent>
+          {loadingRoles ? (
+            <Loader text="Loading Roles" />
+          ) : roles.length ? (
+            <List style={{ padding: 0 }}>
+              {roles.map((role) => (
+                <ListItem divider key={role._id}>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      onChange={(e) => handleRoleSelection(e, role._id)}
+                      checked={selectedRoles.indexOf(role._id) >= 0}
+                      inputProps={{
+                        "aria-labelledby": `checkbox-list-label-${role._id}`,
+                      }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={role.name}
+                    secondary={role.description}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            <Typography>No Roles</Typography>
+          )}
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <Button
+            disabled={isAssigning}
+            onClick={handleCloseDialog}
+            color="primary"
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={!selectedRoles.length || isAssigning}
+            onClick={handleAssignRoles}
+            color="primary"
+          >
+            {isAssigning ? <CircularProgress size={22} /> : "Save"}
+          </Button>
+        </CustomDialogFooter>
+      </Dialog>
       <Layout>
         <Grid container spacing={3} direction="row">
           <Grid item xs={12} sm={6} className="pl-3">
@@ -394,7 +542,9 @@ const Entity: FC = () => {
             entityPermissions={entitiesPermissions}
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
-            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+            openRolesDialog={handleOpenDialog}
+            rolesActionDiabled={Boolean(!selectedEntities.length)}
+            canDelete={dataRows.filter((d) => d.isChecked).length === 0}
           />
         </Container>
         <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
