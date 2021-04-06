@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useContext } from "react";
 import {
   Dialog,
   Button,
@@ -13,6 +13,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import InputField from "../../components/Helpers/InputField";
 import {
   getObjKeys,
@@ -26,6 +27,7 @@ interface InitialData {
 }
 
 const CreateUser = ({ open, close, fetchData }) => {
+  const toastConfig = useContext(CustomToastContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -52,6 +54,7 @@ const CreateUser = ({ open, close, fetchData }) => {
         setLoading(false);
       })
       .catch((err) => {
+        toastConfig.setToastConfig(err);
         setLoading(false);
       });
   };
@@ -61,13 +64,14 @@ const CreateUser = ({ open, close, fetchData }) => {
     axiosInstance()
       .post("/user", removeEmptyKeys(values))
       .then(({ data }) => {
+        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         console.log(data);
         setSubmitting(false);
         fetchData();
         close();
       })
       .catch((err) => {
-        console.log(err);
+        toastConfig.setToastConfig({ open: true, type: "error" });
         setSubmitting(false);
       });
   };
