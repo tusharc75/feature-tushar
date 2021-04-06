@@ -35,6 +35,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 import Roles from "./pages/Role";
 import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
+import Product from "./pages/Product";
+
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -55,7 +57,8 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <AnimatePresence initial={false} exitBeforeEnter>
-        <Switch location={location} key={location.key}>
+        {/* <Switch location={location} key={location.key}> */}
+        <Switch>
           <Route
             exact
             path="/login"
@@ -144,11 +147,14 @@ function App() {
             <Activity />
           </PrivateRoute>
 
-          <PrivateRoute exact path="/product">
+          <PrivateRoute exact path="/product-category">
             <ProductCategory />
           </PrivateRoute>
           <PrivateRoute exact path="/product-category/:id">
             <CreateProductCategory />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product">
+            <Product />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

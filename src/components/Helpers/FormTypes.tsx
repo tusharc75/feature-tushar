@@ -27,6 +27,7 @@ import currencies from "../../constants/currency_with_country.json";
 import { withStyles } from "@material-ui/core/styles";
 import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import { getFormulaValue } from "../../constants/formulaUtility";
 
 const InfoLabel = ({ children, info, isTooltip }) =>
   isTooltip ? (
@@ -96,6 +97,7 @@ const FormTypes = (props) => {
     required,
     isTooltip,
     tooltipMessage,
+    fields,
     ...rest
   } = props;
 
@@ -116,8 +118,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -172,8 +174,36 @@ const FormTypes = (props) => {
     reader.onload = function () {
       cb(reader.result);
     };
-    reader.onerror = function (error) {};
+    reader.onerror = function (error) { };
   };
+
+
+  const handleChange = (name, value) => {
+    setFieldValue(name, value);
+    handleFormula(name, value)
+  };
+
+  const handleFormula = (name, value) => {
+    if (fields && fields.filter((_f) => _f.type === "formula").length) {
+      fields.filter((_f) => _f.type === "formula").forEach(_data => {
+        if (_data.inputFields.includes(name)) {
+          let inputFields = {}
+          _data.inputFields.forEach(_input => {
+            if (name === _input) {
+              inputFields[_input] = value
+            }
+            else {
+              inputFields[_input] = values[_input] ? values[_input] : ""
+            }
+          })
+          let calValue = getFormulaValue(_data.formula, inputFields, _data.returnType, _data.decimalPlaces);
+          setFieldValue(_data.fieldName, calValue);
+          handleFormula(_data.fieldName, calValue)
+        }
+      })
+    }
+  }
+
 
   return type === "singleLine" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
@@ -246,12 +276,45 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                setFieldValue(
-                  name,
-                  e.target.value == "" ? null : parseFloat(e.target.value)
-                );
-              }
+              setFieldValue(
+                name,
+                e.target.value == "" ? null : parseFloat(e.target.value)
+              );
+            }
         }
+      />
+    </InfoLabel>
+  ) : type === "decimal" ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <TextField
+        {...rest}
+        variant="outlined"
+        type="number"
+        label={label}
+        name={name}
+        required={required}
+        value={values[name]}
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
+        onChange={
+          onChange
+            ? onChange
+            : (e) => { handleChange(name, e.target.value == "" ? null : parseFloat(e.target.value)) }
+        }
+      />
+    </InfoLabel>
+  ) : type === "formula" ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <TextField
+        {...rest}
+        variant="outlined"
+        type="text"
+        label={label}
+        name={name}
+        required={required}
+        value={values[name]}
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
   ) : type === "email" ? (
@@ -305,7 +368,7 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
-  ) : type === "dropDown" ? (
+  ) : (type === "dropDown" || type === "lookup") ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
@@ -321,10 +384,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                setFieldValue(
-                  name,
-                  val && val.optionValue ? val.optionValue : ""
-                )
+              setFieldValue(
+                name,
+                val && val.optionValue ? val.optionValue : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -348,8 +411,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-                (data) => data.currencyCode === values[name]
-              )[0]
+              (data) => data.currencyCode === values[name]
+            )[0]
             : ""
         }
         options={currencyData}
@@ -410,10 +473,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField

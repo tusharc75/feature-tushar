@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react'
-import MaterialTable from 'material-table';
+//import MaterialTable from 'material-table';
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import Check from '@material-ui/icons/Check';
@@ -102,7 +102,7 @@ export default function AccountHierarchy({ data, currentAccountId }) {
 
     return (
         <>
-            {
+            {/* {
                 data.length == 1 ? <MaterialTable
                     icons={tableIcons}
                     data={data}
@@ -116,7 +116,7 @@ export default function AccountHierarchy({ data, currentAccountId }) {
                         parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
                         options={options}
                     />
-            }
+            } */}
         </>
     );
 }

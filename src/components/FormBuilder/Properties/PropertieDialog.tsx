@@ -20,6 +20,18 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
+const LookupResource = [
+  { name: "Account", value: "Account" },
+  { name: "User", value: "User" },
+  { name: "Contact", value: "Contact" },
+  { name: "Brand", value: "Brand" },
+  { name: "Entity", value: "Entity" },
+  { name: "Role", value: "Role" },
+  { name: "Lead", value: "Lead" },
+  { name: "Opportunity", value: "Opportunity" },
+  { name: "Product Category", value: "ProductCategory" },
+]
+
 export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, section, setSection }) => {
 
   const [state, setState] = React.useState({
@@ -28,6 +40,7 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
     isTooltip: fieldData.isTooltip,
     tooltipMessage: fieldData.tooltipMessage,
     decimalPlaces: fieldData.decimalPlaces,
+    lookupResource: fieldData.lookupResource,
   });
   const [option, setOption] = useState(fieldData.option ? fieldData.option : []);
 
@@ -81,6 +94,9 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
             if (fieldData.type === "decimal") {
               ele.decimalPlaces = state.decimalPlaces
             }
+            if (fieldData.type === "lookup") {
+              ele.lookupResource = state.lookupResource
+            }
           }
         })
       }
@@ -121,6 +137,22 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
                   <MenuItem value={2}>2</MenuItem>
                   <MenuItem value={3}>3</MenuItem>
                   <MenuItem value={4}>4</MenuItem>
+                </Select>
+              </FormControl>}
+            {fieldData.type === "lookup" &&
+              <FormControl fullWidth margin="dense" variant="outlined">
+                <InputLabel id="demo-simple-select-outlined-label">Lookup Resource</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  value={state.lookupResource}
+                  onChange={handleChange}
+                  label="Lookup Resource"
+                  name="lookupResource"
+                >
+                  {LookupResource.map((_data) => (
+                    <MenuItem value={_data.value}>{_data.name}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>}
             {option.length > 0 ?
