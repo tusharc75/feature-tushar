@@ -36,6 +36,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
       pathname.includes("opportunity") ||
       pathname.includes("lead") ||
       pathname.includes("activity") ||
+      pathname.includes("account") ||
+      pathname.includes("contact") ||
       pathname.includes("product")
     ) {
       setAccess(true);

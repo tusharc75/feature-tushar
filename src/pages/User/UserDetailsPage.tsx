@@ -55,6 +55,8 @@ const UserDetailsPage = () => {
 
   const [isChangingPermission, setChangingPermission] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [deleteUserRec, setDeleteUserRec] = useState(undefined);
+  const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
   const [userFields, setUserFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -147,11 +149,16 @@ const UserDetailsPage = () => {
       });
   };
 
-  const handleDeleteUser = () => {
-    if (id) {
+  const handleDeleteUser = (id) => {
+    setDeleteUserRec(id);
+    setShowConfirmBox(true);
+  };
+
+  const DeleteUser = () => {
+    if (deleteUserRec) {
       if (usersPermissions.isDelete) {
         axiosInstance()
-          .put(`/user/remove`, { ids: [id] })
+          .put(`/user/remove`, { ids: [deleteUserRec] })
           .then(({ data }) => {
             setShowConfirmBox(false);
             history.goBack();
@@ -195,6 +202,37 @@ const UserDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
+  /* Unassign role */
+  const handleUnassignRole = (rec) => {
+    setRoleDeleteRec(rec);
+    setShowConfirmBox(true);
+  };
+
+  const unassignUserRole = () => {
+    if (roleDeleteRec?._id) {
+      const data = {
+        user: id,
+        roles: [roleDeleteRec?._id],
+      };
+      axiosInstance()
+        .post("/role/un-assign-role", data)
+        .then(() => {
+          setShowConfirmBox(false);
+          fetchUserData();
+          fetchUserRoles();
+          // setUnionRoleData(null);
+          // getRoleUnion();
+          toastConfig.setToastConfig({
+            message: "Successfully unassigned role",
+            type: "success",
+            open: true,
+          });
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  };
   /**
    *  Permissions Change Handle
    */
@@ -298,10 +336,13 @@ const UserDetailsPage = () => {
             ) : null}
             <Box component="span" marginX={1} />
             {usersPermissions.isDelete ? (
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)}
-              />
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => handleDeleteUser(id)}
+              >
+                Delete
+              </Button>
             ) : null}
           </DetailsPageHeader>
         )}
@@ -442,7 +483,10 @@ const UserDetailsPage = () => {
                       }}
                     >
                       {userData && (
-                        <UserRoles data={globalRoles} unassignRole={() => {}} />
+                        <UserRoles
+                          data={globalRoles}
+                          unassignRole={handleUnassignRole}
+                        />
                       )}
                     </Box>
                   )}
@@ -479,9 +523,24 @@ const UserDetailsPage = () => {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this User ?`}
-          onClose={() => setShowConfirmBox(false)}
-          onOk={handleDeleteUser}
+          // message={`Are you sure you want to delete this User ?`}
+          // onClose={() => setShowConfirmBox(false)}
+          // onOk={handleDeleteUser}
+          message={
+            deleteUserRec
+              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
+              : roleDeleteRec
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+              : ""
+          }
+          onClose={() => {
+            setShowConfirmBox(false);
+            if (roleDeleteRec) setRoleDeleteRec(undefined);
+            if (deleteUserRec) setDeleteUserRec(undefined);
+          }}
+          onOk={
+            deleteUserRec ? DeleteUser : roleDeleteRec ? unassignUserRole : null
+          }
         />
       ) : null}
     </>

@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 export default function ManageAccountMain(props) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { open, onClose, id } = props
+    const { open, onClose, id,accountResource ,accountRoute } = props
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -21,11 +21,11 @@ export default function ManageAccountMain(props) {
     useEffect(() => {
         if (id) {
             setLoading(true)
-            axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
+            axiosInstance().get(`/field?resource=${accountResource}`).then(({ data: { data } }) => {
                 const newFields = [];
                 data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
-                axiosInstance().get(`/account/clone/${id}`).then(({ data: dataToClone }) => {
+                axiosInstance().get(`/${accountRoute}/clone/${id}`).then(({ data: dataToClone }) => {
                     setEntityData({
                         fields: newFields,
                         initialValues: dataToClone.data ? dataToClone.data : getObjKeys("", newFields),
@@ -43,7 +43,7 @@ export default function ManageAccountMain(props) {
 
     const getAccountFields = () => {
         setLoading(true)
-        axiosInstance().get(`/field?resource=Account`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${accountResource}`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
             setEntityData({
@@ -56,7 +56,7 @@ export default function ManageAccountMain(props) {
 
     const handleCreateAccount = (values, saveAndNew, setValues) => {
         setLoading(false);
-        axiosInstance().post('/account', removeEmptyKeys(values)).then(({ data }) => {
+        axiosInstance().post(`/${accountRoute}`, removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
             setLoading(false);
