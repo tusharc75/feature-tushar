@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 export default function ManageContactMain(props) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { open, onClose, onSuccess, accountId } = props
+    const { open, onClose, onSuccess, accountId ,contactResource ,contactRoute} = props
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -25,7 +25,7 @@ export default function ManageContactMain(props) {
 
     const getContactFields = () => {
         setLoading(true)
-        axiosInstance().get(`/field?resource=Contact`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${contactResource}`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => {
 
@@ -50,7 +50,7 @@ export default function ManageContactMain(props) {
     }
 
     const handleCreateContact = (values, saveAndNew, setValues) => {
-        axiosInstance().post('/contact', removeEmptyKeys(values)).then(({ data }) => {
+        axiosInstance().post(`/${contactRoute}`, removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             onSuccess({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })

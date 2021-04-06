@@ -95,23 +95,65 @@ function App() {
           {/* <PrivateRoute exact path="/">
           <CreateBrand />
         </PrivateRoute> */}
-          <PrivateRoute exact path="/contact">
-            <Contact />
-          </PrivateRoute>
           {/* <PrivateRoute exact path="/contact/new">
                     <CreateContact />
                 </PrivateRoute>
                 <PrivateRoute exact path="/contact/:id">
                     <CreateContact />
                 </PrivateRoute> */}
-          <PrivateRoute exact path="/account">
-            <Account />
+          <PrivateRoute exact path="/customer-account">
+            <Account
+              accountRoute={"customer-account"}
+              accountResource={"Customer Account"}
+              accountPerm={"Customer Account"} />
           </PrivateRoute>
-          <PrivateRoute exact path="/account/detail/:id">
-            <AccountDetailPage />
+          <PrivateRoute exact path="/customer-account/detail/:id">
+            <AccountDetailPage
+              accountRoute={"customer-account"}
+              accountResource={"Customer Account"}
+              accountPerm={"Customer Account"} />
           </PrivateRoute>
-          <PrivateRoute exact path="/contact/detail/:id">
-            <ContactDetailPage />
+          <PrivateRoute exact path="/customer-contact">
+            <Contact 
+            contactRoute={"customer-contact"}
+            contactResource={"Customer Contact"}
+            contactPerm={"Customer Contact"}
+            />
+          </PrivateRoute>
+          <PrivateRoute exact path="/customer-contact/detail/:id">
+            <ContactDetailPage 
+            contactRoute={"customer-contact"}
+            contactResource={"Customer Contact"}
+            contactPerm={"Customer Contact"}
+            />
+          </PrivateRoute>
+          <PrivateRoute exact path="/supplier-account">
+            <Account
+              accountRoute={"supplier-account"}
+              accountResource={"Supplier Account"}
+              accountPerm={"Supplier Account"}
+            />
+          </PrivateRoute>
+          <PrivateRoute exact path="/supplier-account/detail/:id">
+            <AccountDetailPage
+              accountRoute={"supplier-account"}
+              accountResource={"Supplier Account"}
+              accountPerm={"Supplier Account"}
+            />
+          </PrivateRoute>
+          <PrivateRoute exact path="/supplier-contact">
+            <Contact 
+             contactRoute={"supplier-contact"}
+             contactResource={"Supplier Contact"}
+             contactPerm={"Supplier Contact"}
+            />
+          </PrivateRoute>
+          <PrivateRoute exact path="/supplier-contact/detail/:id">
+            <ContactDetailPage 
+            contactRoute={"supplier-contact"}
+            contactResource={"Supplier Contact"}
+            contactPerm={"Supplier Contact"}
+            />
           </PrivateRoute>
           <PrivateRoute exact path="/user">
             <User />

@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
@@ -39,6 +38,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FcApproval } from 'react-icons/fc';
 import { MdAccountCircle } from 'react-icons/md';
+import { getSearchQuery } from '../../services/util';
 const AccTypes = [
     {
         key: "All Accounts",
@@ -72,10 +72,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 let accountTimeout
-export default function Account() {
+export default function Account(props) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
-
+    const { accountRoute,accountResource,accountPerm } = props;
     const { state: { user } }: any = useData();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
@@ -103,7 +103,7 @@ export default function Account() {
         const data = user.role?.sideBar;
 
         if (data) {
-            const hasAccountPermission = data.find(d => d.name == "Account");
+            const hasAccountPermission = data.find((d: any) => d.name === accountPerm);
             if (hasAccountPermission) {
                 setAccountPermissions({
                     isCreate: hasAccountPermission.isCreate,
@@ -212,7 +212,7 @@ export default function Account() {
             field: "accountName", headerName: "Account Name", width: 300,
             renderCell: (params) => (
                 <Link className={`${accountClass.account_name_link}`}
-                    to={`${accountDetailPage.path}/${params.row._id}`}>
+                    to={`/${accountRoute}/detail/${params.row._id}`}>
                     <CustomRenderCell value={params?.value} />
                 </Link>
             )
@@ -323,22 +323,38 @@ export default function Account() {
         setSearchVal(e.target.value);
     };
 
-    const fetchAccounts = async () => {
+    const fetchAccounts = useCallback(() => {
+        
         setLoading(true);
         let searchParams: any = { ...query, filterAccounts: selectedType }
         searchParams = searchVal
             ? { ...searchParams, search: searchVal }
             : { ...searchParams };
-        try {
-            let tdata = await GetAccounts(searchParams)
-            setRowCount(tdata.count)
-            setAccountData(tdata.data)
-            setLoading(false);
-        }
-        catch (err) {
-            setLoading(false);
-        }
-    }
+        // try {
+        //     let tdata = await GetAccounts(searchParams)
+        //     setRowCount(tdata.count)
+        //     setAccountData(tdata.data)
+        //     setLoading(false);
+        // }
+        // catch (err) {
+        //     setLoading(false);
+        // }
+        let api = getSearchQuery(`/${accountRoute}`, searchParams);
+        setLoading(true);
+        axiosInstance()
+            .get(api)
+            .then(({ data: { data, count } }) => {
+                setAccountData(data);
+                // getRows(data);
+                setRowCount(count);
+                setLoading(false);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setLoading(false);
+            });
+    }, [searchVal, query]);
+
 
     // ****** ACTIONS BUTTON STUFF *********
     const openActions = (event) => {
@@ -380,7 +396,7 @@ export default function Account() {
     const handleDeleteAccounts = async () => {
         let selectedRecs = dataRows.filter(obj => obj.isChecked).map(cr => cr._id)
         if (selectedRecs && selectedRecs.length > 0) {
-            axiosInstance().put(`/account/remove`, {
+            axiosInstance().put(`/${accountRoute}/remove`, {
                 ids: [...selectedRecs]
             }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
@@ -394,7 +410,7 @@ export default function Account() {
 
     const handleSingleDeleteAccounts = async () => {
 
-        axiosInstance().put(`/account/remove`, { ids: [singleAccountDelete.id] })
+        axiosInstance().put(`/${accountRoute}/remove`, { ids: [singleAccountDelete.id] })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 fetchAccounts();
@@ -406,7 +422,7 @@ export default function Account() {
     }
 
     const handleSingleApproveDisapproveAccount = () => {
-        axiosInstance().post(`/account/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
+        axiosInstance().post(`/${accountRoute}/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
@@ -436,7 +452,7 @@ export default function Account() {
     const approveDisapproveAccounts = () => {
         const selectedAccountIds = dataRows.filter(d => d.approved == !multipleApproveDisapproveAccount.approved).map(m => m._id);
 
-        axiosInstance().post(`/account/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
+        axiosInstance().post(`/${accountRoute}/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
@@ -452,7 +468,7 @@ export default function Account() {
         <>
 
             <Layout>
-                <CustomBreadCrumbs routes={[routes.account]} />
+                <CustomBreadCrumbs routes={[{ title: `${accountPerm}`,path: `/${accountRoute}` }]} />
                 <Grid container direction="row" className="header-links">
                     <Grid item xs={12} sm={12} className="pr-3">
                         <Grid container justify="flex-end">
@@ -508,7 +524,7 @@ export default function Account() {
                         <div className={`${accountClass["account_header_inner_container"]}`} >
                             <CustomHeader
                                 total={rowCount}
-                                heading="Accounts"
+                                heading={accountPerm}
                                 selectedType={selectedType}
                                 onTypeChange={handleAccountSel}
                                 options={AccTypes}
@@ -680,6 +696,8 @@ export default function Account() {
                                     open={isAccDialogVisible}
                                     onClose={handleDialogClose}
                                     id={cloneId}
+                                    accountResource={accountResource}
+                                    accountRoute={accountRoute}
                                 /> : null
                         }
                     </CustomContainer>

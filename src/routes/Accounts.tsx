@@ -1,7 +1,7 @@
 export const accountPage = {
-    path: '/account'
+    path: '/customer-account'
 }
 
 export const accountDetailPage = {
-    path: "/account/detail"
+    path: "/customer-account/detail"
 }

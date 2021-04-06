@@ -25,9 +25,9 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import EditContact from "./ManageContact/ManageContact";
 
-const Roles = () => {
+const Roles = (props) => {
     const toastConfig = useContext(CustomToastContext);
-
+    const { contactRoute,contactResource,contactPerm } = props;
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
@@ -54,7 +54,7 @@ const Roles = () => {
         const data = user.role?.sideBar;
 
         if (data) {
-            const hasContactPermission = data.find(d => d.name == "Contact");
+            const hasContactPermission = data.find(d => d.name == contactPerm);
             if (hasContactPermission) {
                 setContactPermissions({
                     isCreate: hasContactPermission.isCreate,
@@ -68,7 +68,7 @@ const Roles = () => {
 
     const fetchContactData = async () => {
         setLoading(true)
-        axiosInstance().get(`/contact/${id}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/${contactRoute}/${id}`).then(({ data: { data } }) => {
 
             handleMainPoints(data)
             let name = [data.firstName, data.middleName, data.lastName].filter(d => d).join(" ");
@@ -83,7 +83,7 @@ const Roles = () => {
 
             setCanEdit([...data?.collaborator, data?.owner].some(obj => obj.optionValue === user.user._id))
 
-            setCustomizedRoutes([routes.contact, { title: `${data.firstName} ${data.lastName}` }]);
+            setCustomizedRoutes([{ title: `${contactPerm}`,path: `/${contactRoute}` }, { title: `${data.firstName} ${data.lastName}` }]);
         }).catch(err => {
             setLoading(false)
         })
@@ -103,7 +103,7 @@ const Roles = () => {
     }
 
     const getContactFields = () => {
-        axiosInstance().get('/field?resource=Contact').then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${contactResource}`).then(({ data: { data } }) => {
             setContactFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });
@@ -139,7 +139,7 @@ const Roles = () => {
     const handleDeleteContact = () => {
         if (contactData?._id) {
 
-            axiosInstance().put(`/contact/remove`, { ids: [contactData._id] }).then(({ data }) => {
+            axiosInstance().put(`/${contactRoute}/remove`, { ids: [contactData._id] }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
@@ -193,7 +193,7 @@ const Roles = () => {
             _id: contactData._id,
         };
 
-        axiosInstance().put('/contact', removeEmptyKeys(updatedData))
+        axiosInstance().put(`/${contactRoute}`, removeEmptyKeys(updatedData))
             .then(({ data }) => {
                 fetchContactData()
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
@@ -225,6 +225,8 @@ const Roles = () => {
                         entityData={{ fields: contactFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(contactData, contactFields.map((f) => { return f.fieldData })) }}
                         loading={loading}
                         handleSubmit={handleUpdateContact}
+                        contactResource={contactResource}
+                        contactRoute={contactRoute}
                     />
                 )}
                 <Grid container direction="row">
