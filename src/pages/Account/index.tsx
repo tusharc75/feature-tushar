@@ -20,7 +20,6 @@ import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import MessageDialog from '../../components/Helpers/MessageDialog'
 import SearchBox from '../../components/Helpers/SearchBox'
-import { accountDetailPage } from '../../routes/Accounts'
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ManageAccountDialog from './ManageAccount/index'
@@ -75,7 +74,7 @@ let accountTimeout
 export default function Account(props) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
-    const { accountRoute,accountResource,accountPerm } = props;
+    const { accountApi, accountResource, accountPermission, accountBreadcrumb, accountRoute } = props;
     const { state: { user } }: any = useData();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
@@ -103,7 +102,7 @@ export default function Account(props) {
         const data = user.role?.sideBar;
 
         if (data) {
-            const hasAccountPermission = data.find((d: any) => d.name === accountPerm);
+            const hasAccountPermission = data.find((d: any) => d.name === accountPermission);
             if (hasAccountPermission) {
                 setAccountPermissions({
                     isCreate: hasAccountPermission.isCreate,
@@ -324,7 +323,7 @@ export default function Account(props) {
     };
 
     const fetchAccounts = useCallback(() => {
-        
+
         setLoading(true);
         let searchParams: any = { ...query, filterAccounts: selectedType }
         searchParams = searchVal
@@ -339,7 +338,7 @@ export default function Account(props) {
         // catch (err) {
         //     setLoading(false);
         // }
-        let api = getSearchQuery(`/${accountRoute}`, searchParams);
+        let api = getSearchQuery(`/${accountApi}`, searchParams);
         setLoading(true);
         axiosInstance()
             .get(api)
@@ -396,7 +395,7 @@ export default function Account(props) {
     const handleDeleteAccounts = async () => {
         let selectedRecs = dataRows.filter(obj => obj.isChecked).map(cr => cr._id)
         if (selectedRecs && selectedRecs.length > 0) {
-            axiosInstance().put(`/${accountRoute}/remove`, {
+            axiosInstance().put(`/${accountApi}/remove`, {
                 ids: [...selectedRecs]
             }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
@@ -410,7 +409,7 @@ export default function Account(props) {
 
     const handleSingleDeleteAccounts = async () => {
 
-        axiosInstance().put(`/${accountRoute}/remove`, { ids: [singleAccountDelete.id] })
+        axiosInstance().put(`/${accountApi}/remove`, { ids: [singleAccountDelete.id] })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 fetchAccounts();
@@ -422,7 +421,7 @@ export default function Account(props) {
     }
 
     const handleSingleApproveDisapproveAccount = () => {
-        axiosInstance().post(`/${accountRoute}/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
+        axiosInstance().post(`/${accountApi}/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
@@ -452,7 +451,7 @@ export default function Account(props) {
     const approveDisapproveAccounts = () => {
         const selectedAccountIds = dataRows.filter(d => d.approved == !multipleApproveDisapproveAccount.approved).map(m => m._id);
 
-        axiosInstance().post(`/${accountRoute}/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
+        axiosInstance().post(`/${accountApi}/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
@@ -468,7 +467,7 @@ export default function Account(props) {
         <>
 
             <Layout>
-                <CustomBreadCrumbs routes={[{ title: `${accountPerm}`,path: `/${accountRoute}` }]} />
+                <CustomBreadCrumbs routes={[accountBreadcrumb]} />
                 <Grid container direction="row" className="header-links">
                     <Grid item xs={12} sm={12} className="pr-3">
                         <Grid container justify="flex-end">
@@ -524,7 +523,7 @@ export default function Account(props) {
                         <div className={`${accountClass["account_header_inner_container"]}`} >
                             <CustomHeader
                                 total={rowCount}
-                                heading={accountPerm}
+                                heading={accountResource}
                                 selectedType={selectedType}
                                 onTypeChange={handleAccountSel}
                                 options={AccTypes}
@@ -697,7 +696,7 @@ export default function Account(props) {
                                     onClose={handleDialogClose}
                                     id={cloneId}
                                     accountResource={accountResource}
-                                    accountRoute={accountRoute}
+                                    accountApi={accountApi}
                                 /> : null
                         }
                     </CustomContainer>
