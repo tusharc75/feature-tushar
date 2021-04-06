@@ -16,7 +16,7 @@ import {
   TableCell,
   TableBody,
 } from "@material-ui/core";
-import DeleteButton from '../../components/Helpers/DeleteButton'
+import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -35,6 +35,7 @@ import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import UserRoles from "./UserRoles";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -47,9 +48,11 @@ const UserDetailsPage = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
+  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [rolesLoading, setRolesLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userPermissions, setUserPermissions] = useState(null);
+
   const [isChangingPermission, setChangingPermission] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
@@ -149,8 +152,7 @@ const UserDetailsPage = () => {
   const handleDeleteUser = (id) => {
     setDeleteUserRec(id);
     setShowConfirmBox(true);
-};
-
+  };
 
   const DeleteUser = () => {
     if (deleteUserRec) {
@@ -213,7 +215,7 @@ const UserDetailsPage = () => {
         roles: [roleDeleteRec?._id],
       };
       axiosInstance()
-        .post('/role/un-assign-role', data)
+        .post("/role/un-assign-role", data)
         .then(() => {
           setShowConfirmBox(false);
           fetchUserData();
@@ -221,8 +223,8 @@ const UserDetailsPage = () => {
           // setUnionRoleData(null);
           // getRoleUnion();
           toastConfig.setToastConfig({
-            message: 'Successfully unassigned role',
-            type: 'success',
+            message: "Successfully unassigned role",
+            type: "success",
             open: true,
           });
         })
@@ -261,6 +263,14 @@ const UserDetailsPage = () => {
       });
   };
 
+  const handleOpenDialog = () => {
+    setRolesDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setRolesDialogOpen(false);
+  };
+
   return (
     <>
       {openUpdateDialog && (
@@ -274,7 +284,17 @@ const UserDetailsPage = () => {
           handleUpdate={handleUpdateUser}
         />
       )}
-
+      {rolesDialogOpen && (
+        <AssignRolesDialog
+          rolesDialogOpen={rolesDialogOpen}
+          handleCloseDialog={handleCloseDialog}
+          userIds={[id]}
+          onSuccess={() => {
+            handleCloseDialog();
+            fetchUserRoles();
+          }}
+        />
+      )}
       <Layout>
         <Grid container direction="row">
           <Grid item xs={12} className="pl-2">
@@ -412,7 +432,11 @@ const UserDetailsPage = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={4} container justify="flex-end">
-                  <IconButton color="primary" size="small">
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={handleOpenDialog}
+                  >
                     <ControlPoint />
                   </IconButton>
                 </Grid>
@@ -459,7 +483,10 @@ const UserDetailsPage = () => {
                       }}
                     >
                       {userData && (
-                        <UserRoles data={globalRoles} unassignRole= { handleUnassignRole} />
+                        <UserRoles
+                          data={globalRoles}
+                          unassignRole={handleUnassignRole}
+                        />
                       )}
                     </Box>
                   )}
@@ -503,20 +530,16 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
-                : ''
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+              : ""
           }
           onClose={() => {
-            setShowConfirmBox(false)
+            setShowConfirmBox(false);
             if (roleDeleteRec) setRoleDeleteRec(undefined);
             if (deleteUserRec) setDeleteUserRec(undefined);
           }}
           onOk={
-            deleteUserRec
-              ? DeleteUser
-              : roleDeleteRec
-                ? unassignUserRole
-                : null
+            deleteUserRec ? DeleteUser : roleDeleteRec ? unassignUserRole : null
           }
         />
       ) : null}
