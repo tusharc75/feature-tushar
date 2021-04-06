@@ -2,12 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
-import { getErrorMessage } from "../../services/util";
-import CustomTabs from "../../components/Helpers/CustomTabs";
-import BoxWithBorder from "../../components/BoxWithBorder";
 import TabPanel from "../../components/TabPanel";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import CustomDialog from "../../components/Helpers/CustomDialog";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -15,16 +11,14 @@ import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import axiosInstance from "./../../axios/axiosInstance";
 import routes from "../../components/Helpers/Routes";
-import Loader from "../../components/Loader";
 import { useData } from "../../StateProvider/Provider";
-import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import ManageOpportunity from './ManageOpportunities/ManageOpportunities'
 import DeleteButton from "../../components/Helpers/DeleteButton";
-
+import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getObjKeysWithValues, removeEmptyKeys } from "../../constants/helpers";
+import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
+import _ from "lodash";
+import { yyyyMMDD } from "../../constants/helpers";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -42,7 +36,7 @@ function OpportunityDetailsPage() {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
-  
+
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -85,6 +79,7 @@ function OpportunityDetailsPage() {
   }, [id]);
 
   const fetchOpportunityData = () => {
+    setLoading(true)
     axiosInstance()
       .get(`/opportunity/${id}`)
       .then(({ data: { data } }) => {
@@ -102,7 +97,7 @@ function OpportunityDetailsPage() {
   const handleMainPoints = (data) => {
     let tempMp = {
       accountName: data?.accountName?.optionLabel || "",
-      closeDate: data.closeDate || "",
+      closeDate: yyyyMMDD(data.closeDate),
       amount: data.amount || "",
       opportunityOwner: data?.owner?.optionLabel || "",
     };
@@ -153,7 +148,7 @@ function OpportunityDetailsPage() {
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch((error) => {
+        .catch(error => {
           toastConfig.setToastConfig(error);
           setShowConfirmBox(false);
         });
@@ -167,26 +162,26 @@ function OpportunityDetailsPage() {
     });
   };
 
-  const handleUpdateOpportunity = (values) => {
-    setUpdating(true);
-    const updatedData = {
-      ...values,
-      _id: opportunityData._id,
-    };
+  // const handleUpdateOpportunity = (values) => {
+  //   setUpdating(true);
+  //   const updatedData = {
+  //     ...values,
+  //     _id: opportunityData._id,
+  //   };
 
-    axiosInstance()
-      .put("/opportunity", removeEmptyKeys(updatedData))
-      .then(({ data }) => {
-        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-        setUpdating(false);
-        goBackToListing();
-        
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setUpdating(false);
-      });
-  };
+  //   axiosInstance()
+  //     .put("/opportunity", removeEmptyKeys(updatedData))
+  //     .then(({ data }) => {
+  //       toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+  //       setUpdating(false);
+  //       goBackToListing();
+
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //       setUpdating(false);
+  //     });
+  // };
 
   const quickLinks = [
     {
@@ -204,7 +199,7 @@ function OpportunityDetailsPage() {
     {
       label: "New Event",
       count: 0,
-    },
+    }
   ];
   return (
     <>
@@ -242,15 +237,16 @@ function OpportunityDetailsPage() {
           >
             {
               handleAllowToEditList ?
-              (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpenUpdateDialog}
-              >
-                Edit
-              </Button>
-            ) : null
+                (
+                  <Button
+                    disabled={opportunityData.owner.optionValue !== user.user._id && opportunityData.collaborator.length === 0}
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenUpdateDialog}
+                  >
+                    Edit
+                  </Button>
+                ) : null
             }
             <Box component="span" marginX={1} />
             {opportunityPermissions.isDelete &&
@@ -291,14 +287,14 @@ function OpportunityDetailsPage() {
                   </Box>
                 ) : (
                   <>
-                    
+
                     <TabPanel value={currentTabIndex} index={0}>
                       <Box padding="16px">
-                        <DetailsPage 
-                          data={opportunityData} 
-                          fields={opportunityFields} 
+                        <DetailsPage
+                          data={opportunityData}
+                          fields={opportunityFields}
                         />
-                        
+
                       </Box>
                     </TabPanel>
                     <TabPanel value={currentTabIndex} index={1}>
@@ -348,7 +344,7 @@ function OpportunityDetailsPage() {
               onOk={handleDeleteOpportunity}
             />
           ) : null}
-          {openUpdateDialog ? (
+          {/* {openUpdateDialog ? (
             <ManageOpportunity
               isNew={false}
               open={openUpdateDialog}
@@ -356,7 +352,21 @@ function OpportunityDetailsPage() {
               entityData={{ fields: opportunityFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })) }}
               handleSubmit={handleUpdateOpportunity}
             />
-          ): null}
+          ): null} */}
+
+          {
+            openUpdateDialog && <ManageOpportunityDialog
+              open={openUpdateDialog}
+              onSuccess={() => {
+                setOpenUpdateDialog(false);
+                fetchOpportunityData()
+
+              }}
+              onClose={() => { setOpenUpdateDialog(false) }}
+              isNew={false}
+              dataToUpdate={opportunityData}
+            />
+          }
         </div>
       </Layout>
     </>

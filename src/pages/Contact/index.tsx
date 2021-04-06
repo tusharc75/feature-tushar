@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetContacts, RemoveContacts } from '../../axios/index';
 import {
     Box,
     Button,
@@ -30,14 +29,31 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import BlockIcon from '@material-ui/icons/Block';
 import CustomContainer from "./../../components/Container";
 import MessageDialog from '../../components/Helpers/MessageDialog'
-import { getErrorMessage } from '../../services/util'
+import { getErrorMessage, getSearchQuery } from '../../services/util'
 import contactStyles from './contact.module.scss'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import styles from "../Leads/Header.module.scss"
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import { MdContacts } from 'react-icons/md';
+import axiosInstance from '../../axios/axiosInstance';
 
-const ContactTypes = {
+
+const ContactTypes = [
+    {
+        key: "All Contacts",
+        value: 1
+    },
+    {
+        key: "My Contacts",
+        value: 2
+    }
+]
+
+
+const ContactTypes1 = {
     "All Contacts": 1,
     "My Contacts": 2
 }
@@ -58,12 +74,13 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function Contact() {
+
+export default function Contact(props) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-
+    const { contactRoute, contactResource, contactPerm } = props;
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -85,6 +102,12 @@ export default function Contact() {
     })
 
     const [contactPermissions, setContactPermissions] = useState<any>({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
+
+    const [filter, setFilter] = useState("All Contacts");
+    const handleFilter = (event, newFilter) => {
+        setFilter(newFilter);
+        handleContactSel(ContactTypes.find((d) => d.key === newFilter).value);
+    };
 
     const columns = [
         {
@@ -134,25 +157,25 @@ export default function Contact() {
             width: 75,
         },
         {
-            field: "name", headerName: "Name", width: 200,
+            field: "name", headerName: "Name", width: 400,
             renderCell: (params) => (
                 <Link className="link"
-                    to={`${contactDetailPage.path}/${params.row._id}`}>
+                    to={`/${contactRoute}/detail/${params.row._id}`}>
                     {params.value || ''}
                 </Link>
             )
         },
         // { field: "lastName", headerName: "Last Name", width: 200 },
         {
-            field: "phone", headerName: "Phone", width: 200,
+            field: "phone", headerName: "Phone", width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
-            field: "email", headerName: "Email", width: 200,
+            field: "email", headerName: "Email", width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
-            field: "account", headerName: "Account", width: 200,
+            field: "account", headerName: "Account", width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
@@ -189,7 +212,7 @@ export default function Contact() {
         const data = user.role?.sideBar;
 
         if (data) {
-            const hasContactPermission = data.find(d => d.name == "Contact");
+            const hasContactPermission = data.find(d => d.name == contactPerm);
             if (hasContactPermission) {
                 setContactPermissions({ isCreate: hasContactPermission.isCreate, isRead: hasContactPermission.isRead, isDelete: hasContactPermission.isDelete });
             }
@@ -204,33 +227,49 @@ export default function Contact() {
 
     const handleSingleDeleteContacts = async () => {
         setLoading(true);
-
-        let data = await RemoveContacts({ ids: [singleContactDelete.id] })
-        if (data.status === 200) {
-            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-            getContacts();
-            setLoading(false);
-        }
+        axiosInstance().put(`/${contactRoute}/remove`, { ids: [singleContactDelete.id] })
+            .then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                getContacts();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
         setSingleContactDelete({ id: null, show: false, contactName: "" });
 
     }
 
-    const getContacts = () => {
+    const getContacts = useCallback(() => {
         setLoading(true);
         let searchParams: any = { ...query, filterContacts: selectedType }
         searchParams = searchVal
             ? { ...searchParams, search: searchVal }
             : { ...searchParams };
 
-        GetContacts(searchParams).then(({ data, count }) => {
-            setContactData(data);
-            setRowCount(count)
-            setLoading(false);
-        }).catch(error => {
-            toastConfig.setToastConfig(error);
-            setLoading(false);
-        })
-    }
+        //     GetContacts(searchParams).then(({ data, count }) => {
+        //         setContactData(data);
+        //         setRowCount(count)
+        //         setLoading(false);
+        //     }).catch(error => {
+        //         toastConfig.setToastConfig(error);
+        //         setLoading(false);
+        //     })
+        // }
+        let api = getSearchQuery(`/${contactRoute}`, searchParams);
+        setLoading(true);
+        axiosInstance()
+            .get(api)
+            .then(({ data: { data, count } }) => {
+                setContactData(data);
+                // getRows(data);
+                setRowCount(count);
+                setLoading(false);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setLoading(false);
+            });
+    }, [searchVal, query]);
+
 
     useEffect(() => {
         let rows = contactData?.map((u) => ({
@@ -267,13 +306,19 @@ export default function Contact() {
 
     const handleDeleteContact = () => {
 
-        const selectedRecords = dataRows.filter(d => d.isChecked).map(m => { return m.id });
+        const selectedRecs = dataRows.filter(d => d.isChecked).map(m => { return m.id });
         setLoading(true);
-        RemoveContacts({ ids: selectedRecords }).then(() => {
-            getContacts();
-            setLoading(false);
-            setShowDeleteConfirmBox(false);
-        })
+        if (selectedRecs && selectedRecs.length > 0) {
+            axiosInstance().put(`/${contactRoute}/remove`, {
+                ids: [...selectedRecs]
+            }).then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setShowDeleteConfirmBox(false)
+                getContacts();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            })
+        }
     };
 
     const handleSearch = (e) => {
@@ -302,17 +347,15 @@ export default function Contact() {
     }
 
 
-    const handleContactSel = (e) => {
-        setselectedType(e.target.value)
+    const handleContactSel = (filterValues) => {
+        setselectedType(filterValues)
     }
 
     return (
         <Layout>
-            <Grid container spacing={3} direction="row">
-                <Grid item xs={12} sm={6} className="pl-3">
-                    <CustomBreadCrumbs routes={[routes.contact]} />
-                </Grid>
-                <Grid item xs={12} sm={6} className="pr-3">
+            <CustomBreadCrumbs routes={[{ title: `${contactPerm}`,path: `/${contactRoute}` }]} />
+            <Grid container direction="row" className="header-links">
+                <Grid item xs={12} sm={12} className="pr-3">
                     <Grid container justify="flex-end">
                         <Link
                             to="#"
@@ -359,103 +402,95 @@ export default function Contact() {
                             </Link>
                     </Grid>
                 </Grid>
-
             </Grid>
 
             <CustomContainer>
-                <Grid className={styles.filter_side_container} container justify="space-between">
-                    <Grid item>
-                        {
-                            Object.keys(ContactTypes).length ? <Select
-                                style={{ width: '160px' }}
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                disableUnderline
-                                MenuProps={{
-                                    anchorOrigin: {
-                                        vertical: "bottom",
-                                        horizontal: "left"
-                                    },
-                                    getContentAnchorEl: null
-                                }}
-                                value={selectedType}
-                                onChange={handleContactSel}
-                                label="Select Type"
-                            >
+                <div className="header-panel">
+                    <Grid className={styles.filter_side_container} container justify="space-between">
+                        <Grid item className="d-flex align-items-center gap-1">
+                            <MdContacts className="headerLogo" /> <span className="listingHeader">{contactPerm} </span>
+                            {
+                                ContactTypes && <ToggleButtonGroup size="small" className="ml-8"
+                                    value={filter}
+                                    exclusive
+                                    onChange={handleFilter}>
+                                    {ContactTypes.map((k, index) => {
+                                        return (
+                                            <ToggleButton value={k.key} key={index}>{k.key}
+                                            </ToggleButton>
+                                        );
+                                    })}
+                                </ToggleButtonGroup>
+                            }
+
+                        </Grid>
+                        <Grid className={styles.filter_side} item>
+                            <Box className={styles.filter_side_header} component="div">
+                                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={searchVal} size="small" />
                                 {
-                                    Object.keys(ContactTypes).map((k, index) => {
-                                        return <MenuItem key={index} value={ContactTypes[k]}>{k}</MenuItem>
-                                    })
-                                }
-                            </Select>
-                                : null
-                        }
-                    </Grid>
-                    <Grid className={styles.filter_side} item>
-                        <Box className={styles.filter_side_header} component="div">
-                            <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} value={searchVal} size="small" />
-                            {
-                                contactPermissions.isCreate && <>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={clickCreateNew}
-                                        startIcon={<AddIcon />}
-                                        className={styles.add_submit_btn}
-                                    >
-                                        Add
+                                    contactPermissions.isCreate && <>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={clickCreateNew}
+                                            startIcon={<AddIcon />}
+                                            className={styles.add_submit_btn}>
+                                            Add
                                 </Button>
-                                </>
-                            }
+                                    </>
+                                }
 
-                            {
-                                contactPermissions.isDelete && <>
-                                    <Button
-                                        // disabled={Boolean(!selectedBrand)}
-                                        disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                        variant="outlined"
-                                        color="default"
-                                        onClick={openActions}
-                                        className={styles.action_submit_btn}
-                                        aria-controls="action-menu"
-                                    >
-                                        Actions <ExpandMore />
-                                    </Button>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        keepMounted
-                                        getContentAnchorEl={null}
-                                        anchorOrigin={{
-                                            vertical: "bottom",
-                                            horizontal: "left"
-                                        }}
-                                        id="action-menu"
-                                        open={Boolean(anchorEl)}
-                                        onClose={closeActions}>
-
-                                        <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
-                                            onClick={() => {
-                                                if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
-                                                    setShowDeleteWarningConfirmBox(true);
-                                                } else {
-                                                    setShowDeleteConfirmBox(true)
-                                                }
-                                            }}
+                                {
+                                    contactPermissions.isDelete && <>
+                                        <Button
+                                            // disabled={Boolean(!selectedBrand)}
+                                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                            variant="outlined"
+                                            color="default"
+                                            onClick={openActions}
+                                            className={styles.action_submit_btn}
+                                            aria-controls="action-menu"
                                         >
-                                            Delete
+                                            Actions <ExpandMore />
+                                        </Button>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left"
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}>
+
+                                            <MenuItem disabled={dataRows.filter((d) => d.isChecked).length == 0}
+                                                onClick={() => {
+                                                    if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
+                                                        closeActions();
+                                                        setShowDeleteWarningConfirmBox(true);
+                                                    } else {
+                                                        closeActions();
+                                                        setShowDeleteConfirmBox(true);
+                                                    }
+                                                }}
+                                            >
+                                                Delete
                                     </MenuItem>
-                                    </Menu>
-                                </>
-                            }
-                        </Box>
+                                        </Menu>
+                                    </>
+                                }
+                            </Box>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </div>
             </CustomContainer>
 
-            <Paper style={{ marginTop: 15 }}>
-                <Box component="div" style={{ padding: '4px 4px' }} className={classes.root}>
+            <Paper>
+                <Box component="div" >
                     {/* <Box component="div" marginY={1}> */}
-                    <div className="contact-grid-height1">
+                    <div className="listing-grid">
                         <DataGrid
                             components={{
                                 Toolbar: DataGridCustomToolbar,
@@ -513,6 +548,8 @@ export default function Contact() {
                                 setShowCreateContactDialog(false);
                                 getContacts();
                             }}
+                            contactResource={contactResource}
+                            contactRoute={contactRoute}
                         />
                     }
 

@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import SearchBox from "../../components/Helpers/SearchBox";
+import { FaUsers } from "react-icons/fa";
 
 const useStyles = makeStyles((theme) => ({
   filter_side: {
@@ -19,6 +20,8 @@ const Header = (props) => {
     userPermissions,
     showConfirmBox,
     canDelete,
+    openRolesDialog,
+    rolesActionDiabled,
   } = props;
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -33,8 +36,9 @@ const Header = (props) => {
 
   return (
     <Grid container>
-      <Grid item xs={6}>
-        <h2>Users</h2>
+      <Grid item xs={6} className="d-flex align-items-center gap-1">
+        <FaUsers className="headerLogo" />{" "}
+        <span className="listingHeader">Users</span>
       </Grid>
       <Grid item xs={6} className={classes.filter_side}>
         <Box component="div">
@@ -86,9 +90,19 @@ const Header = (props) => {
                   disabled={Boolean(canDelete)}
                   onClick={() => {
                     showConfirmBox(null);
+                    closeActions();
                   }}
                 >
                   Delete
+                </MenuItem>
+                <MenuItem
+                  disabled={rolesActionDiabled}
+                  onClick={() => {
+                    openRolesDialog();
+                    closeActions();
+                  }}
+                >
+                  Assign Roles
                 </MenuItem>
               </Menu>
             </>

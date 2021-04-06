@@ -21,7 +21,7 @@ export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, data
     const toastConfig = useContext(CustomToastContext);
 
     const { state: { user } }: any = useData();
-    const [disableOwnerSelection] = useState(!isNew && user.user._id !== dataToUpdate.initialValues.owner);
+    const [disableOwnerSelection] = useState(!isNew && user.user._id !== dataToUpdate.owner);
 
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -71,22 +71,23 @@ export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, data
     }
 
     useEffect(() => {
-        getContactFields();
+        getLeadFields();
     }, []);
 
-    const getContactFields = () => {
+    const getLeadFields = () => {
         axiosInstance().get('/field?resource=Lead').then(({ data: { data } }) => {
 
             const newFields = [];
-            data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
             if (isNew) {
+                data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
                 setEntityData({
                     fields: newFields,
                     initialValues: getObjKeys("", newFields),
                 });
             }
             else {
+                data.filter(d => d.isUpdate).map((_f) => newFields.push(_f.fieldData));
                 setEntityData({
                     fields: newFields,
                     initialValues: getObjKeysWithValues(dataToUpdate, newFields),

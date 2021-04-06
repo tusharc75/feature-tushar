@@ -23,7 +23,7 @@ import {
   ExpandMore,
 } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
-
+import { useData } from '../../StateProvider/Provider';
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
 import "./Header.scss";
@@ -107,9 +107,16 @@ const useStyles = makeStyles((theme) => ({
       display: "none",
     },
   },
+  brandLogo: {
+    maxWidth: '10%',
+    minWidth: '5%',
+    height: '45px',
+    borderRadius: '3px'
+  }
 }));
 
 const Header = ({ toggleDrawer }) => {
+  const { state: { user } }: any = useData();
   const classes = useStyles();
   const history = useHistory();
   const [isSearch, setSearch] = useState(false);
@@ -125,6 +132,7 @@ const Header = ({ toggleDrawer }) => {
   const isArcelorMenuOpen = Boolean(servicesAnchorEl);
   const isEntitiesMenuOpen = Boolean(entitiesEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -301,6 +309,7 @@ const Header = ({ toggleDrawer }) => {
               <div className={classes.searchIcon}>
                 <Search />
               </div>
+
               <InputBase
                 placeholder="Search…"
                 classes={{
@@ -380,6 +389,9 @@ const Header = ({ toggleDrawer }) => {
               Support <ExpandMore />
             </Button>
           </div>
+          {
+            user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} ></img> : null
+          }
 
           <IconButton aria-label="settings" color="inherit">
             <Badge badgeContent={1} color="secondary">

@@ -12,8 +12,6 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flexGrow: 1,
     width: "100%",
-    padding: theme.spacing(2),
-    background: "#eef9fd",
   },
 }));
 
@@ -64,7 +62,6 @@ const Layout = ({ children, width }) => {
               onClick={handleToggleState}
             >
               {children}
-              <Footer />
             </motion.div>
           </Box>
         </div>

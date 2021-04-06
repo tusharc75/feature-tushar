@@ -1,7 +1,6 @@
 import { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
-  Chip,
   Grid,
   Divider,
   Tooltip,
@@ -27,6 +26,8 @@ import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateUser from "./CreateUser";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
+import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -50,6 +51,8 @@ const User: FC = () => {
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [users, setUsers] = useState<any[]>([]);
+  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [renderCount, setRenderCount] = useState(0);
@@ -161,7 +164,7 @@ const User: FC = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 200,
+      width: 400,
       renderCell: (params: any) => (
         <Link
           title={params.value}
@@ -175,22 +178,27 @@ const User: FC = () => {
     {
       field: "status",
       headerName: "Status",
-      width: 100,
+      width: 150,
       sortable: false,
       filterable: false,
+      align: "center",
+      headerAlign: "center",
+      disableColumnMenu: true,
       renderCell: (params: any) => (
-        <Chip
-          size="small"
-          label={params.value ? "Inactive" : "Active"}
-          className={params.value ? "bg-primary" : "bg-danger"}
-        />
+        <div style={{ width: 150 }}>
+          {params.value ? (
+            <FaUserCheck className="text-success" />
+          ) : (
+            <FaUserAltSlash className="text-error" />
+          )}{" "}
+        </div>
       ),
     },
 
     {
       field: "email",
       headerName: "Email",
-      width: 200,
+      width: 300,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
           {params.value}
@@ -200,7 +208,7 @@ const User: FC = () => {
     {
       field: "createdAt",
       headerName: "Created At",
-      width: 150,
+      width: 200,
       renderCell: (params: any) => (
         <p title={`Created At • ${params.value}`} className="text-truncate">
           {params.value}
@@ -241,7 +249,7 @@ const User: FC = () => {
         ),
       width: 200,
     },
-  ];
+  ] as Array<any>;
 
   const updateCheckedStatus = (params, ev) => {
     const gridData = [...dataRows];
@@ -257,6 +265,7 @@ const User: FC = () => {
     } else {
       setCheckAllUsers(false);
     }
+    handleSelectedUsers(params.row.id, ev.target.checked);
   };
 
   const showConfirmBox = (row) => {
@@ -338,6 +347,18 @@ const User: FC = () => {
     }
   };
 
+  // Handle entity selection
+  const handleSelectedUsers = (id, isChecked) => {
+    let tempSelectedRecs = [...selectedUsers],
+      curRecIndex = selectedUsers.indexOf(id);
+    if (isChecked && curRecIndex < 0) {
+      tempSelectedRecs = [...selectedUsers, id];
+    } else if (!isChecked && curRecIndex >= 0) {
+      tempSelectedRecs.splice(curRecIndex, 1);
+    }
+    setSelectedUsers(tempSelectedRecs);
+  };
+
   const handleCreate = () => {
     setIsOpen(true);
   };
@@ -346,17 +367,34 @@ const User: FC = () => {
     setIsOpen(false);
   };
 
+  const handleOpenDialog = () => {
+    setRolesDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setRolesDialogOpen(false);
+  };
+
   return (
     <>
       {isOpen && (
         <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
       )}
+      {rolesDialogOpen && (
+        <AssignRolesDialog
+          rolesDialogOpen={rolesDialogOpen}
+          handleCloseDialog={handleCloseDialog}
+          userIds={selectedUsers}
+          onSuccess={() => {
+            handleCloseDialog();
+            setSelectedUsers([]);
+          }}
+        />
+      )}
       <Layout>
-        <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3">
-            <CustomBreadCrumbs routes={[routes.user]} />
-          </Grid>
-          <Grid item xs={12} sm={6} className="pr-3">
+        <CustomBreadCrumbs routes={[routes.user]} />
+        <Grid container direction="row" className="header-links">
+          <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
               <MuiLink
                 href="#"
@@ -405,17 +443,21 @@ const User: FC = () => {
           </Grid>
         </Grid>
         <Container>
-          <Header
-            onSearch={handleSearch}
-            searchVal={searchVal}
-            userPermissions={usersPermissions}
-            onCreate={handleCreate}
-            showConfirmBox={showConfirmBox}
-            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-          />
+          <div className="header-panel">
+            <Header
+              onSearch={handleSearch}
+              searchVal={searchVal}
+              userPermissions={usersPermissions}
+              onCreate={handleCreate}
+              showConfirmBox={showConfirmBox}
+              openRolesDialog={handleOpenDialog}
+              rolesActionDiabled={Boolean(!selectedUsers.length)}
+              canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+            />
+          </div>
         </Container>
-        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
-          <div className="contact-grid-height1">
+        <Container>
+          <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,

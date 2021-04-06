@@ -6,21 +6,23 @@ import "./sidebar.scss"
 const CustomBreadCrumbs = ({ routes = [] }) => {
 
     return (
-        <Breadcrumbs separator="›" aria-label="breadcrumb">
-            <Link color="inherit" to="/" className="cursor-pointer">
-                Home
-            </Link>
+        <div className="breadcrumbbox">
+                <Breadcrumbs separator="›" aria-label="breadcrumb">
+                    <Link color="inherit" to="/" className="cursor-pointer">
+                        Home
+                    </Link>
 
-            {
-                routes.map((route, index) => {
-                    return (index !== routes.length - 1) ?
-                        <Link key={index} color="inherit" to={route.path} className="cursor-pointer">
-                            {route.title}
-                        </Link> :
-                        <Typography key={index} color="textPrimary">{route.title}</Typography>
-                })
-            }
-        </Breadcrumbs>
+                    {
+                        routes.map((route, index) => {
+                            return (index !== routes.length - 1) ?
+                                <Link key={index} color="inherit" to={route.path} className="cursor-pointer">
+                                    {route.title}
+                                </Link> :
+                                <Typography key={index} color="textPrimary">{route.title}</Typography>
+                        })
+                    }
+                </Breadcrumbs>
+        </div>
     );
 
 };

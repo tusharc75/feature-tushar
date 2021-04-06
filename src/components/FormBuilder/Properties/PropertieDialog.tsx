@@ -21,9 +21,11 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 
 const LookupResource = [
-  { name: "Account", value: "Account" },
+  { name: "Supplier Account", value: "Supplier Account" },
+  { name: "Customer Account", value: "Customer Account" },
   { name: "User", value: "User" },
-  { name: "Contact", value: "Contact" },
+  { name: "Supplier Contact", value: "Supplier Contact" },
+  { name: "Customer Contact", value: "Customer Contact" },
   { name: "Brand", value: "Brand" },
   { name: "Entity", value: "Entity" },
   { name: "Role", value: "Role" },

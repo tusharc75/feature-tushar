@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
-import { GetAccounts } from '../../axios/index';
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
@@ -37,23 +36,25 @@ import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolba
 import CustomHeader from '../../components/Helpers/CustomHeader'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-
-const AccTypes = {
-    "All Accounts": 1,
-    "My Accounts": 2
-}
+import { FcApproval } from 'react-icons/fc';
+import { MdAccountCircle } from 'react-icons/md';
+import { getSearchQuery } from '../../services/util';
+const AccTypes = [
+    {
+        key: "All Accounts",
+        value: 1
+    },
+    {
+        key: "My Accounts",
+        value: 2
+    }
+]
 const useStyles = makeStyles((theme) => ({
     root: {
         width: "100%",
         border: "none",
         borderRadius: 8,
         padding: theme.spacing(3, 2),
-    },
-    grid: {
-        border: "2px solid #D4D6D7",
-        borderRadius: 8,
-        minHeight: '500px',
-        maxHeight: '500px'
     },
     linksContainer: {
         display: "flex",
@@ -71,10 +72,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 let accountTimeout
-export default function Account() {
+export default function Account(props) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
-
+    const { accountRoute,accountResource,accountPerm } = props;
     const { state: { user } }: any = useData();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
@@ -102,7 +103,7 @@ export default function Account() {
         const data = user.role?.sideBar;
 
         if (data) {
-            const hasAccountPermission = data.find(d => d.name == "Account");
+            const hasAccountPermission = data.find((d: any) => d.name === accountPerm);
             if (hasAccountPermission) {
                 setAccountPermissions({
                     isCreate: hasAccountPermission.isCreate,
@@ -194,7 +195,6 @@ export default function Account() {
                         } else {
                             setCheckAllAccounts(false);
                         }
-                        handleSelectedAccounts(params.row.id, ev.target.checked)
                     }}
                 />
                 //  : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the selection functionality">
@@ -209,10 +209,10 @@ export default function Account() {
             width: 75
         },
         {
-            field: "accountName", headerName: "Account Name", width: 200,
+            field: "accountName", headerName: "Account Name", width: 300,
             renderCell: (params) => (
                 <Link className={`${accountClass.account_name_link}`}
-                    to={`${accountDetailPage.path}/${params.row._id}`}>
+                    to={`/${accountRoute}/detail/${params.row._id}`}>
                     <CustomRenderCell value={params?.value} />
                 </Link>
             )
@@ -220,25 +220,25 @@ export default function Account() {
         {
             field: "typeOfAccount",
             headerName: "Type",
-            width: 200,
+            width: 250,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "industry",
             headerName: "Industry",
-            width: 200,
+            width: 250,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "parentAccount",
             headerName: "Parent Account",
-            width: 200,
+            width: 250,
             renderCell: (params) => <CustomRenderCell value={params?.value?.optionLabel} />
         },
         {
             field: "masterAccount",
             headerName: "Master Account",
-            width: 200,
+            width: 250,
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
@@ -247,7 +247,7 @@ export default function Account() {
         {
             field: "phone", headerName: "Phone",
             hide: true,
-            width: 200,
+            width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
@@ -274,14 +274,14 @@ export default function Account() {
                                     <IconButton aria-label="Disapprove" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: false, id: params.row._id, accountName: params.row.accountName })
                                     }}>
-                                        <CancelIcon fontSize="small" color="secondary" />
+                                        <CancelIcon fontSize="inherit" color="error" />
                                     </IconButton>
                                 </Tooltip> :
                                 <Tooltip title="Approve">
                                     <IconButton aria-label="Approve" onClick={() => {
                                         setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
                                     }}>
-                                        <CheckCircleIcon fontSize="small" color="primary" />
+                                        <FcApproval />
                                     </IconButton>
                                 </Tooltip> : ""
                     }
@@ -323,33 +323,38 @@ export default function Account() {
         setSearchVal(e.target.value);
     };
 
-    const fetchAccounts = async () => {
+    const fetchAccounts = useCallback(() => {
+        
         setLoading(true);
         let searchParams: any = { ...query, filterAccounts: selectedType }
         searchParams = searchVal
             ? { ...searchParams, search: searchVal }
             : { ...searchParams };
-        try {
-            let tdata = await GetAccounts(searchParams)
-            setRowCount(tdata.count)
-            setAccountData(tdata.data)
-            setLoading(false);
-        }
-        catch (err) {
-            setLoading(false);
-        }
-    }
+        // try {
+        //     let tdata = await GetAccounts(searchParams)
+        //     setRowCount(tdata.count)
+        //     setAccountData(tdata.data)
+        //     setLoading(false);
+        // }
+        // catch (err) {
+        //     setLoading(false);
+        // }
+        let api = getSearchQuery(`/${accountRoute}`, searchParams);
+        setLoading(true);
+        axiosInstance()
+            .get(api)
+            .then(({ data: { data, count } }) => {
+                setAccountData(data);
+                // getRows(data);
+                setRowCount(count);
+                setLoading(false);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setLoading(false);
+            });
+    }, [searchVal, query]);
 
-    const handleSelectedAccounts = (id, isChecked) => {
-        let tempSelectedRecs = [...selectedRecs], curRecIndex = selectedRecs.indexOf(id)
-        if (isChecked && curRecIndex < 0) {
-            tempSelectedRecs = [...selectedRecs, id]
-        }
-        else if (!isChecked && curRecIndex >= 0) {
-            tempSelectedRecs.splice(curRecIndex, 1)
-        }
-        setSelectedRecs(tempSelectedRecs)
-    }
 
     // ****** ACTIONS BUTTON STUFF *********
     const openActions = (event) => {
@@ -389,25 +394,23 @@ export default function Account() {
     }
 
     const handleDeleteAccounts = async () => {
-        let recLen = selectedRecs.length
-        if (selectedRecs && recLen > 0) {
-            let reqs = {
+        let selectedRecs = dataRows.filter(obj => obj.isChecked).map(cr => cr._id)
+        if (selectedRecs && selectedRecs.length > 0) {
+            axiosInstance().put(`/${accountRoute}/remove`, {
                 ids: [...selectedRecs]
-            }
-            axiosInstance().put(`/account/remove`, reqs).then(({ data }) => {
+            }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setShowDeleteConfirmBox(false)
                 fetchAccounts();
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             })
-            setSelectedRecs([])
         }
     }
 
     const handleSingleDeleteAccounts = async () => {
 
-        axiosInstance().put(`/account/remove`, { ids: [singleAccountDelete.id] })
+        axiosInstance().put(`/${accountRoute}/remove`, { ids: [singleAccountDelete.id] })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 fetchAccounts();
@@ -416,11 +419,10 @@ export default function Account() {
             });
 
         setSingleAccountDelete({ id: null, show: false, accountName: "" });
-        setSelectedRecs([])
     }
 
     const handleSingleApproveDisapproveAccount = () => {
-        axiosInstance().post(`/account/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
+        axiosInstance().post(`/${accountRoute}/approve`, { ids: [singleApproveDisapproveAccount.id], approved: singleApproveDisapproveAccount.approved })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
@@ -430,7 +432,6 @@ export default function Account() {
                 setSingleApproveDisapproveAccount({ show: false, approved: false, id: null, accountName: "" })
             });
         setCheckAllAccounts(false)
-        setSelectedRecs([])
     }
 
     const handleDialogClose = (params) => {
@@ -443,15 +444,15 @@ export default function Account() {
         }
     }
 
-    const handleAccountSel = (e) => {
-        setselectedType(e.target.value)
+    const handleAccountSel = (filterValues) => {
+        setselectedType(filterValues)
         setCheckAllAccounts(false)
     }
 
     const approveDisapproveAccounts = () => {
         const selectedAccountIds = dataRows.filter(d => d.approved == !multipleApproveDisapproveAccount.approved).map(m => m._id);
 
-        axiosInstance().post(`/account/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
+        axiosInstance().post(`/${accountRoute}/approve`, { ids: selectedAccountIds, approved: multipleApproveDisapproveAccount.approved })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setMultipleApproveDisapproveAccount({ show: false, approved: false, selectedRecords: 0 })
@@ -467,11 +468,9 @@ export default function Account() {
         <>
 
             <Layout>
-                <Grid container spacing={3} direction="row">
-                    <Grid item xs={12} sm={6} className="pl-3">
-                        <CustomBreadCrumbs routes={[routes.account]} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} className="pr-3">
+                <CustomBreadCrumbs routes={[{ title: `${accountPerm}`,path: `/${accountRoute}` }]} />
+                <Grid container direction="row" className="header-links">
+                    <Grid item xs={12} sm={12} className="pr-3">
                         <Grid container justify="flex-end">
                             <Link
                                 to="#"
@@ -522,17 +521,15 @@ export default function Account() {
 
                 <Box component="div">
                     <CustomContainer>
-                        <div className={`${accountClass["account_header_inner_container"]}`}
-                        >
+                        <div className={`${accountClass["account_header_inner_container"]}`} >
                             <CustomHeader
                                 total={rowCount}
-                                heading="Accounts"
+                                heading={accountPerm}
                                 selectedType={selectedType}
                                 onTypeChange={handleAccountSel}
                                 options={AccTypes}
                                 secondHeading="Account"
-                            // showHeading={false}
-                            >
+                                icon={<MdAccountCircle className="headerLogo" />} >
                                 <div className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`} >
                                     <SearchBox
                                         onSearch={handleSearch}
@@ -577,6 +574,7 @@ export default function Account() {
                                                         dataRows.filter((d) => d.isChecked && !d.approved).length === 0
                                                     }
                                                     onClick={() => {
+                                                        closeActions()
                                                         setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
                                                     }}
                                                 >
@@ -590,6 +588,7 @@ export default function Account() {
                                                         dataRows.filter((d) => d.isChecked && d.approved).length === 0
                                                     }
                                                     onClick={() => {
+                                                        closeActions()
                                                         setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
                                                     }}
                                                 >
@@ -602,8 +601,10 @@ export default function Account() {
                                                 <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                                     onClick={() => {
                                                         if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
+                                                            closeActions()
                                                             setShowDeleteWarningConfirmBox(true);
                                                         } else {
+                                                            closeActions()
                                                             setShowDeleteConfirmBox(true)
                                                         }
                                                     }}
@@ -619,9 +620,8 @@ export default function Account() {
                             </CustomHeader>
                         </div>
 
-                        <div className={`mt-3 ${accountClass["brand-grid"]}`}>
+                        <div className="listing-grid">
                             <DataGrid
-                                className={classes.grid}
                                 components={{
                                     Toolbar: DataGridCustomToolbar,
                                 }}
@@ -696,6 +696,8 @@ export default function Account() {
                                     open={isAccDialogVisible}
                                     onClose={handleDialogClose}
                                     id={cloneId}
+                                    accountResource={accountResource}
+                                    accountRoute={accountRoute}
                                 /> : null
                         }
                     </CustomContainer>
