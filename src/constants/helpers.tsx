@@ -22,24 +22,28 @@ import moment from "moment";
 
 export const supplierAccount = {
   api: "supplier-account",
+  route: "supplier-account",
   resource: "Supplier Account",
   permission: "Supplier Account"
 }
 
 export const customerAccount = {
   api: "customer-account",
+  route: "customer-account",
   resource: "Customer Account",
   permission: "Customer Account"
 }
 
 export const supplierContact = {
   api: "supplier-contact",
+  route: "supplier-contact",
   resource: "Supplier Contact",
   permission: "Supplier Contact"
 }
 
 export const customerContact = {
   api: "customer-contact",
+  route: "customer-contact",
   resource: "Customer Contact",
   permission: "Customer Contact"
 }

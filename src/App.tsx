@@ -110,13 +110,16 @@ function App() {
               accountApi={customerAccount.api}
               accountResource={customerAccount.resource}
               accountPermission={customerAccount.permission}
-              accountBreadcrumb={routes.customerAccount} />
+              accountRoute={customerAccount.route}
+              accountBreadcrumb={routes.customerAccount}
+            />
           </PrivateRoute>
           <PrivateRoute exact path="/customer-account/detail/:id">
             <AccountDetailPage
               accountApi={customerAccount.api}
               accountResource={customerAccount.resource}
               accountPermission={customerAccount.permission}
+              accountRoute={customerAccount.route}
               accountBreadcrumb={routes.customerAccount}
               contactResource={customerContact.resource} />
           </PrivateRoute>
@@ -125,6 +128,7 @@ function App() {
               contactApi={customerContact.api}
               contactResource={customerContact.resource}
               contactPermission={customerContact.permission}
+              contactRoute={customerContact.route}
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
@@ -133,6 +137,7 @@ function App() {
               contactApi={customerContact.api}
               contactResource={customerContact.resource}
               contactPermission={customerContact.permission}
+              contactRoute={customerContact.route}
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
@@ -141,6 +146,7 @@ function App() {
               accountApi={supplierAccount.api}
               accountResource={supplierAccount.resource}
               accountPermission={supplierAccount.permission}
+              accountRoute={supplierAccount.route}
               accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
@@ -149,6 +155,7 @@ function App() {
               accountApi={supplierAccount.api}
               accountResource={supplierAccount.resource}
               accountPermission={supplierAccount.permission}
+              accountRoute={supplierAccount.route}
               accountBreadcrumb={routes.supplierAccount}
               contactResource={supplierContact.resource}
             />
@@ -158,6 +165,7 @@ function App() {
               contactApi={supplierContact.api}
               contactResource={supplierContact.resource}
               contactPermission={supplierContact.permission}
+              contactRoute={supplierContact.route}
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
@@ -166,6 +174,7 @@ function App() {
               contactApi={supplierContact.api}
               contactResource={supplierContact.resource}
               contactPermission={supplierContact.permission}
+              contactRoute={supplierContact.route}
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>

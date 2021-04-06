@@ -74,7 +74,7 @@ let accountTimeout
 export default function Account(props) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
-    const { accountApi, accountResource, accountPermission, accountBreadcrumb } = props;
+    const { accountApi, accountResource, accountPermission, accountBreadcrumb, accountRoute } = props;
     const { state: { user } }: any = useData();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
@@ -211,7 +211,7 @@ export default function Account(props) {
             field: "accountName", headerName: "Account Name", width: 300,
             renderCell: (params) => (
                 <Link className={`${accountClass.account_name_link}`}
-                    to={`/${accountApi}/detail/${params.row._id}`}>
+                    to={`/${accountRoute}/detail/${params.row._id}`}>
                     <CustomRenderCell value={params?.value} />
                 </Link>
             )

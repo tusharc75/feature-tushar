@@ -80,7 +80,7 @@ export default function Contact(props) {
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const { contactApi, contactResource, contactPermission, contactBreadcrumb } = props;
+    const { contactApi, contactResource, contactPermission, contactBreadcrumb, contactRoute } = props;
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -160,7 +160,7 @@ export default function Contact(props) {
             field: "name", headerName: "Name", width: 400,
             renderCell: (params) => (
                 <Link className="link"
-                    to={`/${contactApi}/detail/${params.row._id}`}>
+                    to={`/${contactRoute}/detail/${params.row._id}`}>
                     {params.value || ''}
                 </Link>
             )
