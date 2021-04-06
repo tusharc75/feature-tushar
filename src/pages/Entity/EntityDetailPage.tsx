@@ -18,6 +18,7 @@ import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import Roles from "./Roles";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -91,7 +92,7 @@ const EntityDetailsPage = () => {
   const fetchEntityRoles = () => {
     setRolesLoading(true);
     axiosInstance()
-      .get(`/role?Entity=${id}`)
+      .get(`/role?entity=${id}`)
       .then(({ data: { data } }) => {
         setGloabalRoles(data);
         setRolesLoading(false);
@@ -247,8 +248,57 @@ const EntityDetailsPage = () => {
           <Grid item xs={12} sm={12} md={4} lg={4}>
             <Container styles={{ padding: "8px" }}>
               <BoxWithBorder style={{ padding: "0px", minHeight: "450px" }}>
-                <Box width="100%" padding={1} bgcolor="grey.200">
-                  <Typography color="primary">Entity Users</Typography>
+                <Box
+                  width="100%"
+                  padding={1}
+                  bgcolor="grey.200"
+                  display="flex"
+                  justifyContent="space-between"
+                >
+                  <Typography variant="subtitle2">
+                    Assigned Regional Roles ({globalRoles.length || 0})
+                  </Typography>
+
+                  <IconButton color="primary" size="small">
+                    <ControlPoint />
+                  </IconButton>
+                </Box>
+                <Box padding={1}>
+                  {rolesLoading ? (
+                    [1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        styles={{
+                          padding: "8px",
+                          margin: "8px 8px",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))
+                  ) : globalRoles.length ? (
+                    <>
+                      <Roles data={globalRoles} onDeleteGlobalRole={() => {}} />
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                      >
+                        View All
+                      </Button>
+                    </>
+                  ) : (
+                    <Box textAlign="center">No Roles</Box>
+                  )}
                 </Box>
               </BoxWithBorder>
             </Container>
@@ -262,9 +312,7 @@ const EntityDetailsPage = () => {
                 <Grid item xs={8}>
                   <Box display="flex">
                     <Box padding="5px">
-                      <Typography variant="subtitle2">
-                        Assigned Global Roles ({globalRoles.length || "0"})
-                      </Typography>
+                      <Typography variant="subtitle2">Entity Users</Typography>
                     </Box>
                   </Box>
                 </Grid>
