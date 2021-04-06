@@ -676,21 +676,28 @@ const FormTypes = (props) => {
           />
         </Box>
         <Box>
-          <IconButton
-            color="primary"
-            size="small"
-            aria-label="upload picture"
-            component="span"
-          >
-            <AddCircleIcon />
-            <input
-              name="logo_image_id"
-              onChange={handleUploadFile}
-              accept="image/x-png,image/gif,image/jpeg"
-              style={{ opacity: "0", position: "absolute", zIndex: -1 }}
-              type="file"
-            />
-          </IconButton>
+          <label htmlFor={name}>
+            <IconButton
+              color="primary"
+              size="small"
+              aria-label="upload picture"
+              component="span"
+            >
+              <AddCircleIcon />
+              <input
+                id={name}
+                name={name}
+                onChange={handleUploadFile}
+                accept="image/x-png,image/gif,image/jpeg"
+                style={{
+                  opacity: '0',
+                  position: 'absolute',
+                  zIndex: -1,
+                }}
+                type="file"
+              />
+            </IconButton>
+          </label>
         </Box>
       </Box>
     </Fragment>
