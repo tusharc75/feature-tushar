@@ -10,7 +10,9 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  Grid,
   CircularProgress,
+  Typography,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -27,6 +29,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import RoleEngine from "../../components/Shared/RoleEngine";
 import Loader from "../../components/Loader";
 import DeleteButton from "../../components/Helpers/DeleteButton";
+import AssignedUsers from "./AssignedUsers";
+import BoxWithBorder from "../../components/BoxWithBorder";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -200,65 +204,134 @@ const RoleDetailsPage = () => {
           </DetailsPageHeader>
         )}
 
-        <Container>
-          <Box display="flex" marginBottom={2} gridGap={10}>
-            <TextField
-              required
-              variant="outlined"
-              size="small"
-              fullWidth
-              label="Role Name"
-              value={values.name}
-              onChange={(e) => setValues({ ...values, name: e.target.value })}
-            />
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={8} md={8}>
+            <Container>
+              <Box display="flex" marginBottom={2} gridGap={10}>
+                <TextField
+                  required
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  label="Role Name"
+                  value={values.name}
+                  onChange={(e) =>
+                    setValues({ ...values, name: e.target.value })
+                  }
+                />
 
-            <TextField
-              required
-              variant="outlined"
-              size="small"
-              fullWidth
-              label="Role Description"
-              value={values.description}
-              onChange={(e) =>
-                setValues({ ...values, description: e.target.value })
-              }
-            />
-          </Box>
-          <Paper>
-            <TableContainer style={{ height: 440 }}>
-              <Table stickyHeader aria-label="roles" className="roles-table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Names</TableCell>
-                    <TableCell>Read</TableCell>
-                    <TableCell>Create</TableCell>
-                    <TableCell>Update</TableCell>
-                    <TableCell>Delete</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={5}>
-                        <Loader style={{ height: "100%" }} text="Loading..." />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    field.length &&
-                    resource.length && (
-                      <RoleEngine
-                        field={field}
-                        resource={resource}
-                        setField={setField}
-                        setResource={setResource}
-                      />
-                    )
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Container>
+                <TextField
+                  required
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  label="Role Description"
+                  value={values.description}
+                  onChange={(e) =>
+                    setValues({ ...values, description: e.target.value })
+                  }
+                />
+              </Box>
+              <Paper>
+                <TableContainer style={{ height: 440 }}>
+                  <Table
+                    stickyHeader
+                    aria-label="roles"
+                    className="roles-table"
+                  >
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Names</TableCell>
+                        <TableCell>Read</TableCell>
+                        <TableCell>Create</TableCell>
+                        <TableCell>Update</TableCell>
+                        <TableCell>Delete</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {loading ? (
+                        <TableRow>
+                          <TableCell colSpan={5}>
+                            <Loader
+                              style={{ height: "100%" }}
+                              text="Loading..."
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        field.length &&
+                        resource.length && (
+                          <RoleEngine
+                            field={field}
+                            resource={resource}
+                            setField={setField}
+                            setResource={setResource}
+                          />
+                        )
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
+            </Container>
+            <Box marginY={2} />
+            <Container>
+              <Box padding={1} bgcolor="grey.200">
+                <Typography variant="subtitle2">
+                  Assigned Entities ({(roleData && roleData.entity.length) || 0}
+                  )
+                </Typography>
+              </Box>
+
+              <Box padding={1}></Box>
+            </Container>
+          </Grid>
+          <Grid item xs={12} sm={4} md={4}>
+            <Container>
+              <Box padding={1} bgcolor="grey.200">
+                <Typography variant="subtitle2">
+                  Assigned Users ({(roleData && roleData.user.length) || 0})
+                </Typography>
+              </Box>
+              <Box padding={1}>
+                {loading ? (
+                  [1, 2].map((i) => (
+                    <BoxWithBorder
+                      key={i}
+                      styles={{
+                        padding: "8px",
+                        margin: "8px 8px",
+                      }}
+                    >
+                      <Box padding={1}>
+                        <Skeleton variant="text" width="100px" height="20px" />
+                        <Box marginTop={1} />
+                        <Skeleton variant="text" width="100%" height="15px" />
+                      </Box>
+                    </BoxWithBorder>
+                  ))
+                ) : (
+                  <>
+                    <AssignedUsers
+                      unassignRole={() => {}}
+                      data={roleData && roleData.user}
+                    />
+                    <Box marginY={1} />
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => history.push("/user")}
+                    >
+                      View All
+                    </Button>
+                  </>
+                )}
+              </Box>
+            </Container>
+          </Grid>
+        </Grid>
       </Layout>
       {showConfirmBox && (
         <ConfirmationDialog
