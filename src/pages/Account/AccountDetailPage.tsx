@@ -51,11 +51,11 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Roles = (props) => {
+export default function AccountDetailPage(props) {
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
     const classes = useStyles();
-    const { accountRoute,accountResource,accountPerm } = props;
+    const { accountApi, accountResource, accountPermission, accountBreadcrumb, contactResource } = props;
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [isUpdating, setUpdating] = useState(false);
@@ -83,32 +83,32 @@ const Roles = (props) => {
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
 
     useEffect(() => {
-        const data = user.role?.sideBar;
+        if (user) {
+            const data = user.role?.sideBar;
 
-        if (data) {
-            const hasAccountPermission = data.find((d: any) => d.name === accountPerm);
-            if (hasAccountPermission) {
-                setAccountPermissions(
-                    {
-                        isCreate: hasAccountPermission.isCreate,
-                        isUpdate: hasAccountPermission.isUpdate,
-                        isRead: hasAccountPermission.isRead,
-                        isDelete: hasAccountPermission.isDelete,
-                        approveAccount: user.user?.permissions?.approveAccount
-                    });
+            if (data) {
+                const hasAccountPermission = data.find((d: any) => d.name === accountPermission);
+                if (hasAccountPermission) {
+                    setAccountPermissions(
+                        {
+                            isCreate: hasAccountPermission.isCreate,
+                            isUpdate: hasAccountPermission.isUpdate,
+                            isRead: hasAccountPermission.isRead,
+                            isDelete: hasAccountPermission.isDelete,
+                            approveAccount: user.user?.permissions?.approveAccount
+                        });
+                }
+            }
+
+            if (id) {
+                fetchAccountData();
+                fetchRelatedData();
             }
         }
     }, [user]);
 
-    useEffect(() => {
-        if (id) {
-            fetchAccountData();
-            fetchRelatedData();
-        }
-    }, [id]);
-
     const fetchRelatedData = () => {
-        axiosInstance().get(`/${accountRoute}/related/${id}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/${accountApi}/related/${id}`).then(({ data: { data } }) => {
             setRelatedContacts(data.Contact && data.Contact["Account_Name"] ? data.Contact["Account_Name"] : []);
             setOpportunities(data.Opportunity && data.Opportunity["Account_Name"] ? data.Opportunity["Account_Name"] : []);
             setRelatedContactsLoading(false)
@@ -118,8 +118,8 @@ const Roles = (props) => {
     const fetchAccountData = async () => {
         setLoading(true)
 
-        axiosInstance().get(`/${accountRoute}/${id}`).then(({ data: { data } }) => {
-            setCustomizedRoutes([{ title: `${accountPerm}`,path: `/${accountRoute}` }, { title: data.accountName }]);
+        axiosInstance().get(`/${accountApi}/${id}`).then(({ data: { data } }) => {
+            setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
 
             setHeadingLbl(data.accountName || '')
             handleMainPonts(data)
@@ -251,7 +251,7 @@ const Roles = (props) => {
 
     const handleDeleteAcc = () => {
         if (accountData?._id) {
-            axiosInstance().put(`/${accountRoute}/remove`, { ids: [accountData._id] }).then(({ data }) => {
+            axiosInstance().put(`/${accountApi}/remove`, { ids: [accountData._id] }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 goBackToListing()
                 setShowConfirmBox(false)
@@ -266,7 +266,7 @@ const Roles = (props) => {
     }
 
     const handleApproveDisapprove = () => {
-        axiosInstance().post(`/${accountRoute}/approve`, { ids: [accountData._id], approved: !accountData.static?.approved })
+        axiosInstance().post(`/${accountApi}/approve`, { ids: [accountData._id], approved: !accountData.static?.approved })
             .then(() => {
                 fetchAccountData()
                 setShowApproveDisapproveConfirmBox(false);
@@ -284,7 +284,7 @@ const Roles = (props) => {
             _id: accountData._id,
         };
 
-        axiosInstance().put(`/${accountRoute}`, removeEmptyKeys(updatedData))
+        axiosInstance().put(`/${accountApi}`, removeEmptyKeys(updatedData))
             .then(({ data }) => {
                 fetchAccountData()
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
@@ -510,8 +510,6 @@ const Roles = (props) => {
                             entityData={{ fields: accountFields.map((f) => { return f.fieldData }), initialValues: getObjKeysWithValues(accountData, accountFields.map((f) => { return f.fieldData })) }}
                             loading={loading}
                             handleSubmit={onUpdateAccount}
-                            accountResource={accountResource}
-                            accountRoute={accountRoute}
                         />
                     )}
 
@@ -533,6 +531,7 @@ const Roles = (props) => {
                                 setShowCreateContactDialog(false);
                                 // fetchRelatedContacts();
                             }}
+                            contactResource={contactResource}
                             accountId={accountData._id}
                         />
                     }
@@ -550,4 +549,3 @@ const Roles = (props) => {
     );
 };
 
-export default Roles;
