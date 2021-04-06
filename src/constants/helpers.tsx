@@ -176,7 +176,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           //     return resolve(true);
           //   }
           // })
-          yup.string().email();
+          yup.string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === "switch" || input.type === "checkBox") {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)

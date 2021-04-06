@@ -34,33 +34,35 @@ const CustomHeader = (props) => {
   const [filter, setFilter] = useState("All Accounts");
 
   const handleFilter = (event, newFilter) => {
-        setFilter(newFilter);
-        onTypeChange(options.find((d) => d.key === newFilter).value);
-    };
+    if (filter != null) {
+      setFilter(newFilter);
+      onTypeChange(options.find((d) => d.key === newFilter).value);
+    }
+  };
 
   return (
     <React.Fragment>
       <Grid container className="header-panel" justify="space-between" alignContent="center">
-       <Grid item  className="d-flex align-items-center gap-1">
-         {icon} <span className="listingHeader">{heading}
-             </span>
-           {
-             options &&  <ToggleButtonGroup size="small"  className="ml-8"
-                value={filter}
-                exclusive
-                onChange={handleFilter}>
-                  {options.map((k, index) => {
-                  return (
-                      <ToggleButton value={k.key} key={index}>{k.key} 
-                      </ToggleButton>
-                    );
-                })}
-                </ToggleButtonGroup> 
-           }
+        <Grid item className="d-flex align-items-center gap-1">
+          {icon} <span className="listingHeader">{heading}
+          </span>
+          {
+            options && <ToggleButtonGroup size="small" className="ml-8"
+              value={filter}
+              exclusive
+              onChange={handleFilter}>
+              {options.map((k, index) => {
+                return (
+                  <ToggleButton value={k.key} key={index}>{k.key}
+                  </ToggleButton>
+                );
+              })}
+            </ToggleButtonGroup>
+          }
         </Grid>
         {/* <Box className="ml-2">
           {icon} */}
-          {/* {options && Object.keys(options).length ? (
+        {/* {options && Object.keys(options).length ? (
 
             <FormControl className="customHeaderDropdown">
               <InputLabel id="demo-simple-select-label">{secondHeading}</InputLabel>
@@ -92,7 +94,7 @@ const CustomHeader = (props) => {
               </Select>
             </FormControl>
           ) : null} */}
-          {/* <div className="customActiveInavtiveTab">
+        {/* <div className="customActiveInavtiveTab">
             {total ? (
               <Box
                 className="customHeaderCustomTab"
