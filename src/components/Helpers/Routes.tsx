@@ -84,4 +84,20 @@ export default {
     path: "/note",
     data: {},
   },
+  customerAccount: {
+    title: "Customer Account",
+    path: "/customer-account",
+  },
+  supplierAccount: {
+    title: "Supplier Account",
+    path: "/supplier-account",
+  },
+  customerContact: {
+    title: "Customer Contact",
+    path: "/customer-contact",
+  },
+  supplierContact: {
+    title: "Supplier Contact",
+    path: "/supplier-contact",
+  }
 };

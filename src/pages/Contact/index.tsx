@@ -80,7 +80,7 @@ export default function Contact(props) {
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const { contactRoute, contactResource, contactPerm } = props;
+    const { contactApi, contactResource, contactPermission, contactBreadcrumb, contactRoute } = props;
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -105,8 +105,10 @@ export default function Contact(props) {
 
     const [filter, setFilter] = useState("All Contacts");
     const handleFilter = (event, newFilter) => {
-        setFilter(newFilter);
-        handleContactSel(ContactTypes.find((d) => d.key === newFilter).value);
+        if (newFilter !== null) {
+            setFilter(newFilter);
+            handleContactSel(ContactTypes.find((d) => d.key === newFilter).value);
+        }
     };
 
     const columns = [
@@ -209,10 +211,10 @@ export default function Contact(props) {
     ];
 
     useEffect(() => {
-        const data = user.role?.sideBar;
+        const data = user?.role?.sideBar;
 
         if (data) {
-            const hasContactPermission = data.find(d => d.name == contactPerm);
+            const hasContactPermission = data.find(d => d.name == contactPermission);
             if (hasContactPermission) {
                 setContactPermissions({ isCreate: hasContactPermission.isCreate, isRead: hasContactPermission.isRead, isDelete: hasContactPermission.isDelete });
             }
@@ -227,7 +229,7 @@ export default function Contact(props) {
 
     const handleSingleDeleteContacts = async () => {
         setLoading(true);
-        axiosInstance().put(`/${contactRoute}/remove`, { ids: [singleContactDelete.id] })
+        axiosInstance().put(`/${contactApi}/remove`, { ids: [singleContactDelete.id] })
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 getContacts();
@@ -254,7 +256,7 @@ export default function Contact(props) {
         //         setLoading(false);
         //     })
         // }
-        let api = getSearchQuery(`/${contactRoute}`, searchParams);
+        let api = getSearchQuery(`/${contactApi}`, searchParams);
         setLoading(true);
         axiosInstance()
             .get(api)
@@ -309,7 +311,7 @@ export default function Contact(props) {
         const selectedRecs = dataRows.filter(d => d.isChecked).map(m => { return m.id });
         setLoading(true);
         if (selectedRecs && selectedRecs.length > 0) {
-            axiosInstance().put(`/${contactRoute}/remove`, {
+            axiosInstance().put(`/${contactApi}/remove`, {
                 ids: [...selectedRecs]
             }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
@@ -353,7 +355,7 @@ export default function Contact(props) {
 
     return (
         <Layout>
-            <CustomBreadCrumbs routes={[{ title: `${contactPerm}`,path: `/${contactRoute}` }]} />
+            <CustomBreadCrumbs routes={[contactBreadcrumb]} />
             <Grid container direction="row" className="header-links">
                 <Grid item xs={12} sm={12} className="pr-3">
                     <Grid container justify="flex-end">
@@ -408,7 +410,7 @@ export default function Contact(props) {
                 <div className="header-panel">
                     <Grid className={styles.filter_side_container} container justify="space-between">
                         <Grid item className="d-flex align-items-center gap-1">
-                            <MdContacts className="headerLogo" /> <span className="listingHeader">{contactPerm} </span>
+                            <MdContacts className="headerLogo" /> <span className="listingHeader">{contactResource} </span>
                             {
                                 ContactTypes && <ToggleButtonGroup size="small" className="ml-8"
                                     value={filter}
@@ -549,7 +551,7 @@ export default function Contact(props) {
                                 getContacts();
                             }}
                             contactResource={contactResource}
-                            contactRoute={contactRoute}
+                            contactApi={contactApi}
                         />
                     }
 

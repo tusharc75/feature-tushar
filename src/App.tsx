@@ -35,6 +35,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 import Roles from "./pages/Role";
 import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
+import Product from "./pages/Product";
+import { customerAccount, customerContact, supplierAccount, supplierContact } from "./constants/helpers";
+import routes from "./components/Helpers/Routes";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -55,7 +58,8 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <AnimatePresence initial={false} exitBeforeEnter>
-        <Switch location={location} key={location.key}>
+        {/* <Switch location={location} key={location.key}> */}
+        <Switch>
           <Route
             exact
             path="/login"
@@ -103,56 +107,75 @@ function App() {
                 </PrivateRoute> */}
           <PrivateRoute exact path="/customer-account">
             <Account
-              accountRoute={"customer-account"}
-              accountResource={"Customer Account"}
-              accountPerm={"Customer Account"} />
+              accountApi={customerAccount.api}
+              accountResource={customerAccount.resource}
+              accountPermission={customerAccount.permission}
+              accountRoute={customerAccount.route}
+              accountBreadcrumb={routes.customerAccount}
+            />
           </PrivateRoute>
           <PrivateRoute exact path="/customer-account/detail/:id">
             <AccountDetailPage
-              accountRoute={"customer-account"}
-              accountResource={"Customer Account"}
-              accountPerm={"Customer Account"} />
+              accountApi={customerAccount.api}
+              accountResource={customerAccount.resource}
+              accountPermission={customerAccount.permission}
+              accountRoute={customerAccount.route}
+              accountBreadcrumb={routes.customerAccount}
+              contactResource={customerContact.resource} />
           </PrivateRoute>
           <PrivateRoute exact path="/customer-contact">
-            <Contact 
-            contactRoute={"customer-contact"}
-            contactResource={"Customer Contact"}
-            contactPerm={"Customer Contact"}
+            <Contact
+              contactApi={customerContact.api}
+              contactResource={customerContact.resource}
+              contactPermission={customerContact.permission}
+              contactRoute={customerContact.route}
+              contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
           <PrivateRoute exact path="/customer-contact/detail/:id">
-            <ContactDetailPage 
-            contactRoute={"customer-contact"}
-            contactResource={"Customer Contact"}
-            contactPerm={"Customer Contact"}
+            <ContactDetailPage
+              contactApi={customerContact.api}
+              contactResource={customerContact.resource}
+              contactPermission={customerContact.permission}
+              contactRoute={customerContact.route}
+              contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
           <PrivateRoute exact path="/supplier-account">
             <Account
-              accountRoute={"supplier-account"}
-              accountResource={"Supplier Account"}
-              accountPerm={"Supplier Account"}
+              accountApi={supplierAccount.api}
+              accountResource={supplierAccount.resource}
+              accountPermission={supplierAccount.permission}
+              accountRoute={supplierAccount.route}
+              accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
           <PrivateRoute exact path="/supplier-account/detail/:id">
             <AccountDetailPage
-              accountRoute={"supplier-account"}
-              accountResource={"Supplier Account"}
-              accountPerm={"Supplier Account"}
+              accountApi={supplierAccount.api}
+              accountResource={supplierAccount.resource}
+              accountPermission={supplierAccount.permission}
+              accountRoute={supplierAccount.route}
+              accountBreadcrumb={routes.supplierAccount}
+              contactResource={supplierContact.resource}
             />
           </PrivateRoute>
           <PrivateRoute exact path="/supplier-contact">
-            <Contact 
-             contactRoute={"supplier-contact"}
-             contactResource={"Supplier Contact"}
-             contactPerm={"Supplier Contact"}
+            <Contact
+              contactApi={supplierContact.api}
+              contactResource={supplierContact.resource}
+              contactPermission={supplierContact.permission}
+              contactRoute={supplierContact.route}
+              contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
           <PrivateRoute exact path="/supplier-contact/detail/:id">
-            <ContactDetailPage 
-            contactRoute={"supplier-contact"}
-            contactResource={"Supplier Contact"}
-            contactPerm={"Supplier Contact"}
+            <ContactDetailPage
+              contactApi={supplierContact.api}
+              contactResource={supplierContact.resource}
+              contactPermission={supplierContact.permission}
+              contactRoute={supplierContact.route}
+              contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
           <PrivateRoute exact path="/user">
@@ -186,11 +209,14 @@ function App() {
             <Activity />
           </PrivateRoute>
 
-          <PrivateRoute exact path="/product">
+          <PrivateRoute exact path="/product-category">
             <ProductCategory />
           </PrivateRoute>
           <PrivateRoute exact path="/product-category/:id">
             <CreateProductCategory />
+          </PrivateRoute>
+          <PrivateRoute exact path="/product">
+            <Product />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

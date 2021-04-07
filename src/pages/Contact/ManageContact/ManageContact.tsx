@@ -73,11 +73,12 @@ export default function ManageContact(props) {
 
     const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
 
-        // const errors = formValidation(values, _.cloneDeep(entityData.fields));
         if (Object.keys(errors).length) {
-            toastConfig.setToastConfig({ open: true, type: "error", message: "Please fill all required fields" });
+            //  this message is coming even when all required fields are filled and email address is invalid,
+            //  So commenting right now, required and invalid fields will be highlighted by red color
+            // toastConfig.setToastConfig({ open: true, type: "error", message: "Please fill all required fields" });
             entityData.fields.forEach((input) => {
-                if (input.required) {
+                if (input.required || values[input.fieldName]) {
                     setTouched(input.fieldName, true);
                 }
             });
