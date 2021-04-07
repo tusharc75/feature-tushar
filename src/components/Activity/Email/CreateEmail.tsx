@@ -24,6 +24,8 @@ import PropTypes from 'prop-types'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import { Tooltip } from "@material-ui/core";
+import InfoIcon from "@material-ui/icons/Info";
 
 const EmailSchema = Yup.object().shape({
     name: Yup.string()
@@ -152,6 +154,11 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     placeholder="Email" />
                                             )}
                                             value={values["to"]}
+                                            onBlur={(e: any) => {
+                                                if (e.target.value && e.target.value.trim() != "") {
+                                                    setFieldValue("to", [...values["to"], e.target.value])
+                                                }
+                                            }}
                                             onChange={(e, value) => setFieldValue("to", value)}
                                         />
                                         <Autocomplete
@@ -172,6 +179,11 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     placeholder="Email" />
                                             )}
                                             value={values["cc"]}
+                                            onBlur={(e: any) => {
+                                                if (e.target.value && e.target.value.trim() != "") {
+                                                    setFieldValue("cc", [...values["cc"], e.target.value])
+                                                }
+                                            }}
                                             onChange={(e, value) => setFieldValue("cc", value)}
                                         />
                                         <Box mt={2}>
