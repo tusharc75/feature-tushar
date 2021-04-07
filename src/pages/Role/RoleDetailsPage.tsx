@@ -284,7 +284,7 @@ const RoleDetailsPage = () => {
         )}
 
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={8} md={8}>
+          <Grid item xs={12} sm={12} md={8}>
             <Container>
               <Box display="flex" marginBottom={2} gridGap={10}>
                 <TextField
@@ -429,7 +429,7 @@ const RoleDetailsPage = () => {
               </Container>
             )}
           </Grid>
-          <Grid item xs={12} sm={4} md={4}>
+          <Grid item xs={12} sm={12} md={4}>
             <Container>
               <Box
                 padding={1}
@@ -451,13 +451,12 @@ const RoleDetailsPage = () => {
                   <ControlPoint />
                 </IconButton>
               </Box>
-              <Box padding={1}>
+              <Box>
                 {loading ? (
                   [1, 2].map((i) => (
                     <BoxWithBorder
                       key={i}
                       style={{
-                        padding: "8px",
                         margin: "8px",
                       }}
                     >
