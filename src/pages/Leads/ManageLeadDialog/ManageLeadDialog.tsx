@@ -20,7 +20,7 @@ const arr = [...Array(9).keys()]
 export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, dataToUpdate }) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { state: { user } }: any = useData();
+    const { state: { user, selectedEntity } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== dataToUpdate.owner);
 
     const [entityData, setEntityData] = useState({
@@ -71,29 +71,33 @@ export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, data
     }
 
     useEffect(() => {
-        getLeadFields();
+        if (entityData.fields.length === 0) {
+            getLeadFields();
+        }
     }, []);
 
     const getLeadFields = () => {
-        axiosInstance().get('/field?resource=Lead').then(({ data: { data } }) => {
+        if (selectedEntity) {
+            axiosInstance().get(`/field?resource=Lead&entity=${selectedEntity}`).then(({ data: { data } }) => {
 
-            const newFields = [];
+                const newFields = [];
 
-            if (isNew) {
-                data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
-                setEntityData({
-                    fields: newFields,
-                    initialValues: getObjKeys("", newFields),
-                });
-            }
-            else {
-                data.filter(d => d.isUpdate).map((_f) => newFields.push(_f.fieldData));
-                setEntityData({
-                    fields: newFields,
-                    initialValues: getObjKeysWithValues(dataToUpdate, newFields),
-                });
-            }
-        });
+                if (isNew) {
+                    data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
+                    setEntityData({
+                        fields: newFields,
+                        initialValues: getObjKeys("", newFields),
+                    });
+                }
+                else {
+                    data.filter(d => d.isUpdate).map((_f) => newFields.push(_f.fieldData));
+                    setEntityData({
+                        fields: newFields,
+                        initialValues: getObjKeysWithValues(dataToUpdate, newFields),
+                    });
+                }
+            });
+        }
     };
 
     const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
@@ -112,7 +116,9 @@ export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, data
     const handleCreateLead = (values) => {
         setLoading(true)
 
-        axiosInstance().post('/lead', removeEmptyKeys(values))
+        if (values?.noOfEmployees) values.noOfEmployees = parseInt(values.noOfEmployees)
+
+        axiosInstance().post(`/lead?entity=${selectedEntity}`, removeEmptyKeys(values))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
@@ -127,7 +133,7 @@ export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, data
         values = { ...values, _id: dataToUpdate._id };
         setLoading(true)
 
-        axiosInstance().put('/lead', removeEmptyKeys(values))
+        axiosInstance().put(`/lead?entity=${selectedEntity}`, removeEmptyKeys(values))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)

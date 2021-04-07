@@ -57,7 +57,7 @@ const OpportunityTypes = [
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
-  const { state: { user } }: any = useData();
+  const { state: { user, selectedEntity } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -78,7 +78,10 @@ const Opportunities = () => {
   const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({ id: null, show: false, opportunityName: "" })
 
   useEffect(() => {
-    const data = user?.role?.sideBar;
+    let data
+    if (user?.entity && user.entity.length && selectedEntity) {
+      data = user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource
+    }
 
     if (data) {
       const hasOpportunityPermission = data.find(d => d.name == "Opportunity");
@@ -91,7 +94,7 @@ const Opportunities = () => {
         });
       }
     }
-  }, [user]);
+  }, [user, selectedEntity]);
 
   useEffect(() => {
     let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
@@ -109,7 +112,7 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query, , selectedType]);
+  }, [query, selectedType, selectedEntity]);
 
   useEffect(() => {
     let rows = opportunityData?.map((u) => {
@@ -127,11 +130,12 @@ const Opportunities = () => {
     });
     setDataRows([...rows]);
   }, [opportunityData])
+
   const handleSingleDeleteOpportunity = async () => {
     setLoading(true);
 
     axiosInstance()
-      .put(`/opportunity/remove`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
+      .put(`/opportunity/remove?entity=${selectedEntity}`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
         toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         fetchOpportunities();
         setLoading(false);
@@ -139,23 +143,25 @@ const Opportunities = () => {
     setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" })
   }
   const fetchOpportunities = async () => {
-    setLoading(true);
-    let searchParams: any = { ...query, filterOpportunities: selectedType }
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
-    let api = getSearchQuery("/opportunity", searchParams)
-    try {
-      axiosInstance()
-        .get(api).then(({ data }) => {
-          setRowCount(data.count)
-          setOpportunityData(data.data)
-          setLoading(false);
-        })
+    if (selectedEntity) {
+      setLoading(true);
+      let searchParams: any = { ...query, entity: selectedEntity, filterOpportunities: selectedType }
+      searchParams = searchVal
+        ? { ...searchParams, search: searchVal }
+        : { ...searchParams };
+      let api = getSearchQuery("/opportunity", searchParams)
+      try {
+        axiosInstance()
+          .get(api).then(({ data }) => {
+            setRowCount(data.count)
+            setOpportunityData(data.data)
+            setLoading(false);
+          })
 
-    }
-    catch (err) {
-      setLoading(false);
+      }
+      catch (err) {
+        setLoading(false);
+      }
     }
   }
 
@@ -383,7 +389,7 @@ const Opportunities = () => {
     }
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/opportunity/remove`, { ids: [...recs] }).then(({ data }) => {
+        .put(`/opportunity/remove?entity=${selectedEntity}`, { ids: [...recs] }).then(({ data }) => {
           toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
           setDeleteLoading(false)

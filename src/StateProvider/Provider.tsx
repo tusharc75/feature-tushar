@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 import reducer, { initialState } from "./reducer";
-import { SET_USER, USER_LOADING } from "./actionTypes";
+import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "./actionTypes";
 // import { UserMe } from "../axios";
 import axiosInstance from "./../axios/axiosInstance";
 
@@ -18,6 +18,9 @@ export const Provider = ({ children }) => {
         .then(({ data: response }) => {
           const { data } = response;
           dispatch({ type: SET_USER, payload: data });
+          if (data?.role?.selectedEntity?._id) {
+            dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+          }
           dispatch({ type: USER_LOADING, payload: false });
         })
         .catch((err) => {

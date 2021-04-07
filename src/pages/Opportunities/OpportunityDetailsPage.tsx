@@ -24,7 +24,7 @@ function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user },
+    state: { user, selectedEntity },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,11 @@ function OpportunityDetailsPage() {
   });
 
   useEffect(() => {
-    const data = user?.role?.sideBar;
+    let data
+
+    if (user?.entity && user.entity.length && selectedEntity) {
+      data = user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource
+    }
 
     if (data) {
       const hasOpportunityPermission = data.find(
@@ -79,19 +83,21 @@ function OpportunityDetailsPage() {
   }, [id]);
 
   const fetchOpportunityData = () => {
-    setLoading(true)
-    axiosInstance()
-      .get(`/opportunity/${id}`)
-      .then(({ data: { data } }) => {
-        handleMainPoints(data);
-        setHeadingLbl(data.opportunityName);
-        handleAllowToEditList(data);
-        setOpportunityData(data);
-        getOpportunityFields();
-        setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    if (selectedEntity) {
+      setLoading(true)
+      axiosInstance()
+        .get(`/opportunity/${id}?entity=${selectedEntity}`)
+        .then(({ data: { data } }) => {
+          handleMainPoints(data);
+          setHeadingLbl(data.opportunityName);
+          handleAllowToEditList(data);
+          setOpportunityData(data);
+          getOpportunityFields();
+          setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleMainPoints = (data) => {
@@ -105,14 +111,16 @@ function OpportunityDetailsPage() {
   };
 
   const getOpportunityFields = () => {
-    axiosInstance()
-      .get("/field?resource=Opportunity")
-      .then(({ data: { data } }) => {
-        setOpportunityFields(data);
-        setLoading(false);
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    if (selectedEntity) {
+      axiosInstance()
+        .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
+        .then(({ data: { data } }) => {
+          setOpportunityFields(data);
+          setLoading(false);
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleAllowToEditList = (opportunityDetails) => {
@@ -142,7 +150,7 @@ function OpportunityDetailsPage() {
   const handleDeleteOpportunity = () => {
     if (opportunityData?._id) {
       axiosInstance()
-        .put(`/opportunity/remove`, { ids: [opportunityData._id] })
+        .put(`/opportunity/remove?entity=${selectedEntity}`, { ids: [opportunityData._id] })
         .then(({ data }) => {
           toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           goBackToListing();
