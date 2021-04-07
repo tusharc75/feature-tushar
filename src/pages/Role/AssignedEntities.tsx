@@ -2,6 +2,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Grid, Typography, IconButton } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import { Link } from "react-router-dom";
+import BoxWithBorder from "../../components/BoxWithBorder";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,7 +39,7 @@ function DisplayData({ label, value, color }) {
   );
 }
 
-export default function UsersTab({ data, onDeleteUser }) {
+export default function AssignedEntities({ data, unassignEntity }) {
   const classes = useStyles();
 
   return (
@@ -47,26 +48,29 @@ export default function UsersTab({ data, onDeleteUser }) {
         <Grid container spacing={1}>
           {data.map((obj, index) => (
             <Grid item md={6} xs={12} sm={12} key={index}>
-              <span className={classes.actionsItems}>
-                {/* <VisibilityOutlined /> */}
-                <IconButton onClick={() => onDeleteUser(obj)} size="small">
-                  <Delete color="error" />
-                </IconButton>
-                {/* <EditOutlined /> */}
-              </span>
-              <Link
-                className="accountNameLink"
-                to={`/entity/detail/${obj._id}`}
-              >
-                <Typography className="text-capitalize">
-                  {obj?.entityName ?? ""}
-                </Typography>
-              </Link>
-              <DisplayData
-                label="Address"
-                value={obj?.address ?? ""}
-                color={null}
-              />
+              <BoxWithBorder>
+                <span
+                  className={classes.actionsItems}
+                  title={`Unassign ${obj.entityName}`}
+                >
+                  <IconButton onClick={() => unassignEntity(obj)} size="small">
+                    <Delete color="error" />
+                  </IconButton>
+                </span>
+                <Link
+                  className="accountNameLink"
+                  to={`/entity/detail/${obj._id}`}
+                >
+                  <Typography className="text-capitalize">
+                    {obj?.entityName ?? ""}
+                  </Typography>
+                </Link>
+                <DisplayData
+                  label="Address"
+                  value={obj?.address ?? "____"}
+                  color={null}
+                />
+              </BoxWithBorder>
             </Grid>
           ))}
         </Grid>

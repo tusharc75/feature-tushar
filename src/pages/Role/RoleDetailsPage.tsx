@@ -32,8 +32,10 @@ import RoleEngine from "../../components/Shared/RoleEngine";
 import Loader from "../../components/Loader";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedUsers from "./AssignedUsers";
+import AssignedEntities from "./AssignedEntities";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
+import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,6 +54,7 @@ const RoleDetailsPage = () => {
   const [userDeleteRec, setUserDeleteRec] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
+  const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [values, setValues] = useState({
@@ -203,6 +206,14 @@ const RoleDetailsPage = () => {
     setShowAssignUserDialog(false);
   };
 
+  const entityDialogOpen = () => {
+    setShowAssignEntityDialog(true);
+  };
+
+  const entityDialogClose = () => {
+    setShowAssignEntityDialog(false);
+  };
+
   return (
     <>
       {showAssignUserDialog && (
@@ -216,6 +227,18 @@ const RoleDetailsPage = () => {
           }}
         />
       )}
+      {showAssignEntityDialog && (
+        <AssignEntityDialog
+          entitiesDialogOpen={showAssignEntityDialog}
+          handleCloseDialog={entityDialogClose}
+          roleIds={[id]}
+          onSuccess={() => {
+            fetchRoleData();
+            entityDialogClose();
+          }}
+        />
+      )}
+
       <Layout>
         <CustomBreadCrumbs routes={customizedRoutes} />
         {!roleData ? (
@@ -333,14 +356,76 @@ const RoleDetailsPage = () => {
             <Box marginY={2} />
             {roleData && roleData.type === 2 && (
               <Container>
-                <Box padding={1} bgcolor="grey.200">
+                <Box
+                  padding={1}
+                  bgcolor="grey.200"
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   <Typography variant="subtitle2">
                     Assigned Entities (
                     {(roleData && roleData.entity.length) || 0})
                   </Typography>
+
+                  <IconButton
+                    title="Assign Entities"
+                    color="primary"
+                    size="small"
+                    onClick={entityDialogOpen}
+                  >
+                    <ControlPoint />
+                  </IconButton>
                 </Box>
 
-                <Box padding={1}></Box>
+                <Box padding={1}>
+                  {loading ? (
+                    <Box display="flex">
+                      {[1, 2].map((i) => (
+                        <BoxWithBorder
+                          key={i}
+                          style={{
+                            padding: "8px",
+                            margin: "8px",
+                            width: "100%",
+                          }}
+                        >
+                          <Box padding={1}>
+                            <Skeleton
+                              variant="text"
+                              width="100px"
+                              height="20px"
+                            />
+                            <Box marginTop={1} />
+                            <Skeleton
+                              variant="text"
+                              width="100%"
+                              height="15px"
+                            />
+                          </Box>
+                        </BoxWithBorder>
+                      ))}
+                    </Box>
+                  ) : (
+                    <>
+                      <AssignedEntities
+                        data={roleData && roleData.entity.slice(0, 2)}
+                        unassignEntity={() => {}}
+                      />
+
+                      <Box marginY={1} />
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => history.push("/entity")}
+                      >
+                        View All
+                      </Button>
+                    </>
+                  )}
+                </Box>
               </Container>
             )}
           </Grid>
@@ -358,6 +443,7 @@ const RoleDetailsPage = () => {
                 </Typography>
 
                 <IconButton
+                  title="Assign users"
                   color="primary"
                   size="small"
                   onClick={userDialogOpen}
@@ -386,7 +472,7 @@ const RoleDetailsPage = () => {
                   <>
                     <AssignedUsers
                       unassignRole={handleUnassignUser}
-                      data={roleData && roleData.user}
+                      data={roleData && roleData.user.slice(0, 4)}
                       currentUser={user?.user._id}
                     />
                     <Box marginY={1} />
