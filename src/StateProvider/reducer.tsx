@@ -1,10 +1,11 @@
-import { SET_USER, USER_LOADING, SET_ROLE } from "./actionTypes";
+import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY } from "./actionTypes";
 
 export const initialState = {
   user: null,
   userLoading: false,
   token: localStorage.getItem("token"),
-  role: null
+  role: null,
+  selectedEntity: null
 };
 
 const reducer = (state = initialState, action) => {
@@ -17,6 +18,9 @@ const reducer = (state = initialState, action) => {
 
     case USER_LOADING:
       return { ...state, userLoading: action.payload };
+
+    case SET_SELECTED_ENTITY:
+      return { ...state, selectedEntity: action.payload };
 
     default:
       return state;
