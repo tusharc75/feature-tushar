@@ -84,7 +84,7 @@ export default function AccountDetailPage(props) {
 
     useEffect(() => {
         if (user) {
-            const data = user.role?.sideBar;
+            const data = user?.role?.sideBar;
 
             if (data) {
                 const hasAccountPermission = data.find((d: any) => d.name === accountPermission);

@@ -5,7 +5,6 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
-import FormGroup from "@material-ui/core/FormGroup";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 
@@ -28,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Roles = ({ onDeleteGlobalRole, data }) => {
+const AssignedUsers = ({ unassignRole, data, currentUser }) => {
   const classes = useStyles();
 
   return (
@@ -43,23 +42,32 @@ const Roles = ({ onDeleteGlobalRole, data }) => {
                       primary={
                         <Link
                           className="accountNameLink"
-                          to={`/role/detail/${obj._id}`}
+                          to={`/user/detail/${obj._id}`}
                         >
-                          <Typography> {obj.name || ""}</Typography>
+                          <Typography>
+                            {`${obj.firstName} ${obj.lastName}` || ""}
+                          </Typography>
                         </Link>
                       }
-                      secondary={obj.description || ""}
+                      secondary={obj.email || ""}
                     />
-                    <ListItemSecondaryAction>
-                      <Tooltip title="Unassign Role">
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => onDeleteGlobalRole(obj)}
-                        >
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      </Tooltip>
+                    <ListItemSecondaryAction
+                      title={
+                        currentUser === obj._id
+                          ? "Primary user can't be unassigned"
+                          : "Unassign User"
+                      }
+                    >
+                      <IconButton
+                        disabled={currentUser === obj._id}
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => unassignRole(obj)}
+                      >
+                        <DeleteIcon
+                          color={currentUser === obj._id ? "disabled" : "error"}
+                        />
+                      </IconButton>
                     </ListItemSecondaryAction>
                   </ListItem>
                 </BoxWithBorder>
@@ -71,4 +79,4 @@ const Roles = ({ onDeleteGlobalRole, data }) => {
   );
 };
 
-export default Roles;
+export default AssignedUsers;

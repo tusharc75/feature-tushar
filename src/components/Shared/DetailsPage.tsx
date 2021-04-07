@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Grid,
   makeStyles,
@@ -8,11 +8,15 @@ import {
   useTheme,
   Divider,
   Avatar,
+  IconButton,
+  CircularProgress,
 } from "@material-ui/core";
-import { InfoOutlined } from "@material-ui/icons";
+import { GetApp, InfoOutlined } from "@material-ui/icons";
 import { getObjKeysWithValues, yyyyMMDD } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";
 import moment from "moment";
+import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -34,10 +38,13 @@ interface DetailProps {
 }
 
 const Details = (props: DetailProps) => {
+  const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
   const theme = useTheme();
   const { data, fields } = props;
 
+  const [isDownloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
 
@@ -50,6 +57,34 @@ const Details = (props: DetailProps) => {
     return () => setValues(null);
     // eslint-disable-next-line
   }, []);
+
+  const downloadFile = (fileName) => {
+    setDownloading(true);
+    axiosInstance()
+      .get(`user/download?fileName=${fileName}`, {
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor(
+            (progressEvent.loaded / progressEvent.total) * 100
+          );
+          setProgress(percentCompleted);
+          console.log("completed: ", percentCompleted);
+        },
+      })
+      .then(({ data }) => {
+        console.log(data);
+        setToastConfig({
+          message: "File Downloaded",
+          type: "success",
+          open: true,
+        });
+        setDownloading(false);
+      })
+      .catch((err) => {
+        setToastConfig(err);
+        setDownloading(false);
+        console.log(err);
+      });
+  };
 
   const normalizeValues = (values, input) => {
     let text = "";
@@ -75,9 +110,13 @@ const Details = (props: DetailProps) => {
     } else if (input.type === "switch") {
       text = values[input.fieldName] ? "Inactive" : "Active";
     } else if (input.type === "checkBox") {
-      text = values[input.fieldName] ? (values[input.fieldName] == true ? "Yes" : "No") : "_ _ _";
+      text = values[input.fieldName]
+        ? values[input.fieldName] == true
+          ? "Yes"
+          : "No"
+        : "_ _ _";
     } else if (input.type === "date") {
-      text = yyyyMMDD(values[input.fieldName])
+      text = yyyyMMDD(values[input.fieldName]);
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : "_ _ _";
     }
@@ -152,7 +191,7 @@ const Details = (props: DetailProps) => {
                     md={dynamicSize(7, field.fieldData.fieldName)}
                   >
                     {field.fieldData.fieldName === "avatar" ||
-                      field.fieldData.fieldName === "companyLogo" ? (
+                    field.fieldData.fieldName === "companyLogo" ? (
                       <Box paddingLeft={2}>
                         <Avatar src={initialVals[field.fieldData.fieldName]} />
                       </Box>
@@ -162,6 +201,23 @@ const Details = (props: DetailProps) => {
                         className={classes.fieldText}
                         variant="body2"
                       >
+                        {field.fieldData.type === "fileUpload" ? (
+                          <IconButton
+                            disabled={isDownloading}
+                            size="small"
+                            onClick={() =>
+                              downloadFile(
+                                normalizeValues(initialVals, field.fieldData)
+                              )
+                            }
+                          >
+                            {isDownloading ? (
+                              <CircularProgress size={20} color="inherit" />
+                            ) : (
+                              <GetApp />
+                            )}
+                          </IconButton>
+                        ) : null}{" "}
                         {normalizeValues(initialVals, field.fieldData)}
                       </Typography>
                     )}

@@ -38,7 +38,7 @@ export default function ConfirmationDialogRaw(props) {
             id="confirmation-dialog"
             keepMounted
         >
-            <DialogTitle id="confirmation-dialog-title">Confirm</DialogTitle>
+            <DialogTitle id="confirmation-dialog-title" className="text-white">Confirm</DialogTitle>
             <DialogContent dividers>
                 {
                     message ? <Typography>{message}</Typography> : null
