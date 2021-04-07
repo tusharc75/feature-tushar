@@ -155,7 +155,6 @@ export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNe
             });
     }
 
-    console.log('entityData', entityData)
     return (
         <Dialog
             maxWidth="md"
