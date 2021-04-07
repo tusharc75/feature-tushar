@@ -44,14 +44,14 @@ const Roles = (props) => {
     const [canEdit, setCanEdit] = useState(false)
     let { id } = useParams();
 
-    useEffect(() => {
-        if (id) {
-            fetchContactData()
-        }
-    }, [id]);
+    // useEffect(() => {
+    //     if (id) {
+    //         fetchContactData()
+    //     }
+    // }, [id]);
 
     useEffect(() => {
-        const data = user.role?.sideBar;
+        const data = user?.role?.sideBar;
 
         if (data) {
             const hasContactPermission = data.find(d => d.name == contactPermission);
@@ -62,6 +62,10 @@ const Roles = (props) => {
                     isRead: hasContactPermission.isRead,
                     isDelete: hasContactPermission.isDelete
                 });
+            }
+
+            if (id) {
+                fetchContactData()
             }
         }
     }, [user]);
