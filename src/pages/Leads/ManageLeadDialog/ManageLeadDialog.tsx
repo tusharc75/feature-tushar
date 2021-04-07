@@ -103,7 +103,6 @@ export default function ManageLeadDialog({ open, onSuccess, onClose, isNew, data
                     setTouched(input.fieldName, true);
                 }
             });
-            toastConfig.setToastConfig({ open: true, type: "error", message: 'Please fill all required fields' });
             setErrors({ ...errors });
         } else {
             isNew ? handleCreateLead(values) : handleUpdateLead(values);
