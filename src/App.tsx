@@ -36,7 +36,7 @@ import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToa
 import Roles from "./pages/Role";
 import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
 import Product from "./pages/Product";
-import { customerAccount, customerContact, supplierAccount, supplierContact } from "./constants/helpers";
+import { customerAccount, customerContact, sidebarResource, supplierAccount, supplierContact } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 
 function App() {
@@ -106,75 +106,76 @@ function App() {
                     <CreateContact />
                 </PrivateRoute> */}
           <PrivateRoute key="customer-account" exact path="/customer-account">
-            <Account
-              accountApi={customerAccount.api}
-              accountResource={customerAccount.resource}
-              accountPermission={customerAccount.permission}
-              accountRoute={customerAccount.route}
+            <Account account={customerAccount}
+              // accountApi={customerAccount.api}
+              // accountResource={customerAccount.resource}
+              // accountPermission={customerAccount.permission}
+              // accountRoute={customerAccount.route}
               accountBreadcrumb={routes.customerAccount}
             />
           </PrivateRoute>
           <PrivateRoute key="customer-account-edit" exact path="/customer-account/detail/:id">
-            <AccountDetailPage
-              accountApi={customerAccount.api}
-              accountResource={customerAccount.resource}
-              accountPermission={customerAccount.permission}
-              accountRoute={customerAccount.route}
+            <AccountDetailPage account={customerAccount}
+              // accountApi={customerAccount.api}
+              // accountResource={customerAccount.resource}
+              // accountPermission={customerAccount.permission}
+              // accountRoute={customerAccount.route}
               accountBreadcrumb={routes.customerAccount}
-              contactResource={customerContact.resource} />
+              contactResource={customerContact.contactResource}
+            />
           </PrivateRoute>
           <PrivateRoute key="customer-contact" exact path="/customer-contact">
-            <Contact
-              contactApi={customerContact.api}
-              contactResource={customerContact.resource}
-              contactPermission={customerContact.permission}
-              contactRoute={customerContact.route}
+            <Contact contact={customerContact}
+              // contactApi={customerContact.api}
+              // contactResource={customerContact.resource}
+              // contactPermission={customerContact.permission}
+              // contactRoute={customerContact.route}
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
           <PrivateRoute key="customer-contact-edit" exact path="/customer-contact/detail/:id">
-            <ContactDetailPage
-              contactApi={customerContact.api}
-              contactResource={customerContact.resource}
-              contactPermission={customerContact.permission}
-              contactRoute={customerContact.route}
+            <ContactDetailPage contact={customerContact}
+              // contactApi={customerContact.api}
+              // contactResource={customerContact.resource}
+              // contactPermission={customerContact.permission}
+              // contactRoute={customerContact.route}
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-account" exact path="/supplier-account">
-            <Account
-              accountApi={supplierAccount.api}
-              accountResource={supplierAccount.resource}
-              accountPermission={supplierAccount.permission}
-              accountRoute={supplierAccount.route}
+            <Account account={supplierAccount}
+              // accountApi={supplierAccount.api}
+              // accountResource={supplierAccount.resource}
+              // accountPermission={supplierAccount.permission}
+              // accountRoute={supplierAccount.route}
               accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-account-edit" exact path="/supplier-account/detail/:id">
-            <AccountDetailPage
-              accountApi={supplierAccount.api}
-              accountResource={supplierAccount.resource}
-              accountPermission={supplierAccount.permission}
-              accountRoute={supplierAccount.route}
+            <AccountDetailPage account={supplierAccount}
+              // accountApi={supplierAccount.api}
+              // accountResource={supplierAccount.resource}
+              // accountPermission={supplierAccount.permission}
+              // accountRoute={supplierAccount.route}
               accountBreadcrumb={routes.supplierAccount}
-              contactResource={supplierContact.resource}
+              contactResource={supplierContact.contactResource}
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-contact" exact path="/supplier-contact">
-            <Contact
-              contactApi={supplierContact.api}
-              contactResource={supplierContact.resource}
-              contactPermission={supplierContact.permission}
-              contactRoute={supplierContact.route}
+            <Contact contact={supplierContact}
+              // contactApi={supplierContact.api}
+              // contactResource={supplierContact.resource}
+              // contactPermission={supplierContact.permission}
+              // contactRoute={supplierContact.route}
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-contact-edit" exact path="/supplier-contact/detail/:id">
-            <ContactDetailPage
-              contactApi={supplierContact.api}
-              contactResource={supplierContact.resource}
-              contactPermission={supplierContact.permission}
-              contactRoute={supplierContact.route}
+            <ContactDetailPage contact={supplierContact}
+              // contactApi={supplierContact.api}
+              // contactResource={supplierContact.resource}
+              // contactPermission={supplierContact.permission}
+              // contactRoute={supplierContact.route}
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>

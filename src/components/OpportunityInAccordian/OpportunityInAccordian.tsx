@@ -70,7 +70,7 @@ function DisplayData({ label, value }) {
     </div>
 }
 
-export default function OpportunityInAccordian({ opportunities, onNewOpportunityAdd, accountId, expanded = true, recordsPerLine = 2 }) {
+export default function OpportunityInAccordian({ opportunities, onNewOpportunityAdd, accountId, expanded = true, recordsPerLine = 2, opportunityPermissions }) {
 
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -125,13 +125,15 @@ export default function OpportunityInAccordian({ opportunities, onNewOpportunity
                         </Box>
                     </Grid>
                     <Grid item xs={4} container justify="flex-end">
-                        <IconButton
-                            color="primary"
-                            size="small"
-                            onClick={() => { setShowCreateOpportunityDialog(true) }}
-                        >
-                            <ControlPointIcon />
-                        </IconButton>
+                        {
+                            opportunityPermissions.isCreate && <IconButton
+                                color="primary"
+                                size="small"
+                                onClick={() => { setShowCreateOpportunityDialog(true) }}
+                            >
+                                <ControlPointIcon />
+                            </IconButton>
+                        }
                     </Grid>
                 </Grid>
             </AccordionSummary>

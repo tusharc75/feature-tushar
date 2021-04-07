@@ -39,6 +39,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
+import { sidebarResource } from '../../constants/helpers';
 
 
 const ContactTypes = [
@@ -80,7 +81,7 @@ export default function Contact(props) {
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const { contactApi, contactResource, contactPermission, contactBreadcrumb, contactRoute } = props;
+    const { contact: { contactApi, contactResource, contactPermission, contactRoute }, contactBreadcrumb } = props;
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -410,7 +411,9 @@ export default function Contact(props) {
                 <div className="header-panel">
                     <Grid className={styles.filter_side_container} container justify="space-between">
                         <Grid item className="d-flex align-items-center gap-1">
-                            <MdContacts className="headerLogo" /> <span className="listingHeader">{contactResource} </span>
+                            <MdContacts className="headerLogo" /> <span className="listingHeader">
+                                {sidebarResource[contactResource]}
+                            </span>
                             {
                                 ContactTypes && <ToggleButtonGroup size="small" className="ml-8"
                                     value={filter}
