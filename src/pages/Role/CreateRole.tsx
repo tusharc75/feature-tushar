@@ -24,7 +24,7 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
 
-const CreateRole = ({ open, close, fetchData , roleType }) => {
+const CreateRole = ({ open, close, fetchData, roleType, setToastConfig }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -39,7 +39,10 @@ const CreateRole = ({ open, close, fetchData , roleType }) => {
 
   const getInitialData = () => {
     setLoading(true);
-    let api = (roleType==1) ? "/field?resource=Role" : "/field?resource=Role&entity=606c03d2211b5acb3e18ad1f";
+    let api =
+      roleType == 1
+        ? "/field?resource=Role"
+        : "/field?resource=Role&entity=606c03d2211b5acb3e18ad1f";
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
@@ -49,6 +52,7 @@ const CreateRole = ({ open, close, fetchData , roleType }) => {
       })
       .catch((err) => {
         setLoading(false);
+        setToastConfig(err);
       });
   };
 
@@ -59,14 +63,16 @@ const CreateRole = ({ open, close, fetchData , roleType }) => {
         ...values,
         field,
         resource,
+        type: roleType,
       })
-      .then(({ data: { data } }) => {
+      .then(() => {
         fetchData();
         setSubmitting(false);
         close();
       })
       .catch((err) => {
         setSubmitting(false);
+        setToastConfig(err);
       });
   };
 
