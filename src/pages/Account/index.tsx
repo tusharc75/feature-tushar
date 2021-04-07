@@ -38,7 +38,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { FcApproval } from 'react-icons/fc';
 import { MdAccountCircle } from 'react-icons/md';
 import { getSearchQuery } from '../../services/util';
-import { getPermissions } from '../../constants/helpers';
+import { getPermissions, sidebarResource } from '../../constants/helpers';
 const AccTypes = [
     {
         key: "All Accounts",
@@ -76,7 +76,7 @@ export default function Account(props) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const { account: { accountApi, accountResource, accountPermission, accountRoute }, accountBreadcrumb } = props;
-    const { state: { user } }: any = useData();
+    const { state: { user, permissions } }: any = useData();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
     const [loading, setLoading] = useState(false);
@@ -98,21 +98,12 @@ export default function Account(props) {
     const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState<any>({ show: false, approved: false, selectedRecords: 0 })
 
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false });
-    const [permissions, setPermissions] = useState(null);
-
+    
     useEffect(() => {
         if (permissions) {
             setAccountPermissions(permissions[accountResource]);
         }
     }, [permissions]);
-
-
-    useEffect(() => {
-        const data = user?.role?.sideBar;
-        if (data) {
-            setPermissions(getPermissions(user));
-        }
-    }, [user]);
 
     useEffect(() => {
         let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
@@ -522,7 +513,7 @@ export default function Account(props) {
                         <div className={`${accountClass["account_header_inner_container"]}`} >
                             <CustomHeader
                                 total={rowCount}
-                                heading={accountResource}
+                                heading={sidebarResource[accountResource]}
                                 selectedType={selectedType}
                                 onTypeChange={handleAccountSel}
                                 options={AccTypes}

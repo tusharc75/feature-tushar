@@ -20,7 +20,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from '../../components/Helpers/Routes';
 import axiosInstance from './../../axios/axiosInstance'
 import Activity from "../../components/Activity";
-import { getObjKeysWithValues, isObjectEmpty, removeEmptyKeys } from './../../constants/helpers'
+import { getObjKeysWithValues, isObjectEmpty, removeEmptyKeys, sidebarResource } from './../../constants/helpers'
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageContact from "./ManageContact/ManageContact";
@@ -29,7 +29,7 @@ const Roles = (props) => {
     const toastConfig = useContext(CustomToastContext);
     const { contact: { contactApi, contactResource, contactPermission, contactRoute }, contactBreadcrumb } = props;
     const history = useHistory();
-    const { state: { user } }: any = useData();
+    const { state: { user, selectedEntity } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [contactData, setContactData] = useState<any>({})
     const [loading, setLoading] = useState(false)
@@ -107,7 +107,7 @@ const Roles = (props) => {
     }
 
     const getContactFields = () => {
-        axiosInstance().get(`/field?resource=${contactResource}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${sidebarResource[contactResource]}`).then(({ data: { data } }) => {
             setContactFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });

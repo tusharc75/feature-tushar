@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ManageAccount from './ManageAccount'
-import { getObjKeys } from '../../../constants/helpers';
+import { getObjKeys, sidebarResource } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from '../../../axios/axiosInstance'
@@ -21,7 +21,7 @@ export default function ManageAccountMain(props) {
     useEffect(() => {
         if (id) {
             setLoading(true)
-            axiosInstance().get(`/field?resource=${accountResource}`).then(({ data: { data } }) => {
+            axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`).then(({ data: { data } }) => {
                 const newFields = [];
                 data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
@@ -43,7 +43,7 @@ export default function ManageAccountMain(props) {
 
     const getAccountFields = () => {
         setLoading(true)
-        axiosInstance().get(`/field?resource=${accountResource}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
             setEntityData({

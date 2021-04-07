@@ -341,37 +341,34 @@ interface IPermission {
 
 export const getPermissions = (user): IPermission | null => {
   let permissions = {};
-  if (user.role) {
+  const data = [...user.role.sideBar, ...user.role.selectedEntity.resource];
 
-    const data = [...user.role.sideBar, ...user.role.selectedEntity.resource];
+  if (data) {
+    const hasApproveAccountPermission = user.user.permissions.approveAccount;
+    const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
 
-    if (data) {
-      const hasApproveAccountPermission = user.user.permissions.approveAccount;
-      const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
+    const sidebarFieldsKeys = Object.keys(sidebarResource);
+    const sidebarFieldsValues = Object.values(sidebarResource);
 
-      const sidebarFieldsKeys = Object.keys(sidebarResource);
-      const sidebarFieldsValues = Object.values(sidebarResource);
+    data.forEach(d => {
+      const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
 
-      data.forEach(d => {
-        const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
+      if (indexOfPermission > -1) {
+        let permission = {
+          isCreate: d.isCreate,
+          isRead: d.isRead,
+          isUpdate: d.isUpdate,
+          isDelete: d.isDelete
+        };
 
-        if (indexOfPermission > -1) {
-          let permission = {
-            isCreate: d.isCreate,
-            isRead: d.isRead,
-            isUpdate: d.isUpdate,
-            isDelete: d.isDelete
-          };
-
-          if (accounts.some(acountType => acountType === d.name)) {
-            permission["approveAccount"] = hasApproveAccountPermission;
-          }
-
-          permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+        if (accounts.some(acountType => acountType === d.name)) {
+          permission["approveAccount"] = hasApproveAccountPermission;
         }
-      });
-    }
+
+        permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+      }
+    });
   }
-  
+
   return permissions;
 }

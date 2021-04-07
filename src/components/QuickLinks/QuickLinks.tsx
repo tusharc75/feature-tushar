@@ -18,7 +18,7 @@ export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
         <Typography variant="h6" className="mb-1">{title}</Typography>
         {
             quickLinks.map((k, index) => {
-                return <div className="font-size-3 link d-flex justify-content-center align-items-center gap-1">
+                return <div key={index} className="font-size-3 link d-flex justify-content-center align-items-center gap-1">
                     {
                         k.redirect == false ?
                             <>

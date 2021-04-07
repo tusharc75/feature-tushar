@@ -1,3 +1,4 @@
+import { getPermissions } from "../constants/helpers";
 import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY } from "./actionTypes";
 
 export const initialState = {
@@ -5,13 +6,14 @@ export const initialState = {
   userLoading: false,
   token: localStorage.getItem("token"),
   role: null,
-  selectedEntity: null
+  selectedEntity: null,
+  permissions: null
 };
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_USER:
-      return { ...state, user: action.payload };
+      return { ...state, user: action.payload, permissions: getPermissions(action.payload) };
 
     case SET_ROLE:
       return { ...state, role: action.payload };

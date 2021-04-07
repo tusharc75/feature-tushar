@@ -31,7 +31,7 @@ import accountClass from "./account.module.scss"
 import ManageContactDialog from '../Contact/ManageContact/index';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
-import { removeEmptyKeys, getObjKeysWithValues, isObjectEmpty, sidebarResource, getPermissions } from "../../constants/helpers";
+import { removeEmptyKeys, getObjKeysWithValues, isObjectEmpty, sidebarResource } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
@@ -39,7 +39,6 @@ import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks"
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import { TiFlowChildren } from 'react-icons/ti';
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
-import CustomDynamicGrid from "../../components/CustomDynamicGrid/CustomDynamicGrid";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -57,7 +56,7 @@ export default function AccountDetailPage(props) {
     const classes = useStyles();
     const { account: { accountApi, accountResource, accountPermission, accountRoute }, accountBreadcrumb, contactResource } = props;
 
-    const { state: { user } }: any = useData();
+    const { state: { user, permissions } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [isUpdating, setUpdating] = useState(false);
     const [accountData, setAccountData] = useState<any>({})
@@ -77,22 +76,13 @@ export default function AccountDetailPage(props) {
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
     const [canEdit, setCanEdit] = useState(false)
     const [showAccountHierarchyInFullScreenDialog, setShowAccountHierarchyInFullScreenDialog] = useState(false)
-    const [permissions, setPermissions] = useState(null);
 
     let { id } = useParams();
 
     useEffect(() => {
-        if (user) {
-            const data = user?.role?.sideBar;
-
-            if (data) {
-                setPermissions(getPermissions(user));
-            }
-
-            if (id) {
-                fetchAccountData();
-                fetchRelatedData();
-            }
+        if (user && id) {
+            fetchAccountData();
+            fetchRelatedData();
         }
     }, [user]);
 
@@ -401,7 +391,11 @@ export default function AccountDetailPage(props) {
                                                 </Box>
 
                                                 <Box hidden={currentTabIndex !== 1}>
-                                                    <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
+                                                    <AccountHierarchy
+                                                        data={accountHierarchyData}
+                                                        currentAccountId={accountData._id}
+                                                        accountRoute={accountRoute}
+                                                    />
                                                 </Box>
 
                                             </>
@@ -552,7 +546,11 @@ export default function AccountDetailPage(props) {
                             heading="Account Hierarchy"
                             open={showAccountHierarchyInFullScreenDialog}
                             close={() => { setShowAccountHierarchyInFullScreenDialog(false) }}>
-                            <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
+                            <AccountHierarchy
+                                data={accountHierarchyData}
+                                currentAccountId={accountData._id}
+                                accountRoute={accountRoute}
+                            />
                         </FullScreenDialog>
                     }
                 </div>
