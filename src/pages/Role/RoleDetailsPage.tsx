@@ -275,16 +275,18 @@ const RoleDetailsPage = () => {
               </Paper>
             </Container>
             <Box marginY={2} />
-            <Container>
-              <Box padding={1} bgcolor="grey.200">
-                <Typography variant="subtitle2">
-                  Assigned Entities ({(roleData && roleData.entity.length) || 0}
-                  )
-                </Typography>
-              </Box>
+            {roleData && roleData.type === 2 && (
+              <Container>
+                <Box padding={1} bgcolor="grey.200">
+                  <Typography variant="subtitle2">
+                    Assigned Entities (
+                    {(roleData && roleData.entity.length) || 0})
+                  </Typography>
+                </Box>
 
-              <Box padding={1}></Box>
-            </Container>
+                <Box padding={1}></Box>
+              </Container>
+            )}
           </Grid>
           <Grid item xs={12} sm={4} md={4}>
             <Container>
