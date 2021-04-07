@@ -12,7 +12,11 @@ import {
   Box,
   Badge,
   InputBase,
+  InputLabel,
+  FormControl,
+  Select
 } from "@material-ui/core";
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import {
   Search,
   Menu as MenuIcon,
@@ -21,12 +25,14 @@ import {
   Notifications,
   HelpOutline,
   ExpandMore,
+  ArrowDropDown
 } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
 import { useData } from '../../StateProvider/Provider';
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
-import "./Header.scss";
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes'
+import './Header.scss'
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -112,11 +118,18 @@ const useStyles = makeStyles((theme) => ({
     minWidth: '5%',
     height: '45px',
     borderRadius: '3px'
+  },
+  entitySelect: {
+    fontWeight: 'bold',
+    color: "inherit",
+    height: '38px',
+    minWidth: "100px",
+    paddingRight: '1px'
   }
 }));
 
 const Header = ({ toggleDrawer }) => {
-  const { state: { user } }: any = useData();
+  const { state: { user, selectedEntity }, dispatch }: any = useData();
   const classes = useStyles();
   const history = useHistory();
   const [isSearch, setSearch] = useState(false);
@@ -288,6 +301,9 @@ const Header = ({ toggleDrawer }) => {
     </Menu>
   );
 
+  const handleSelectedEnity = e => {
+    dispatch({ type: SET_SELECTED_ENTITY, payload: e.target.value });
+  }
   return (
     <div>
       <Slide direction="down" in={isSearch}>
@@ -353,14 +369,39 @@ const Header = ({ toggleDrawer }) => {
               >
                 Services <ExpandMore />
               </Button>
-              <Button
+              {/* <Button
                 aria-controls={entitiesMenuId}
                 color="inherit"
                 onClick={openEntitiesMenu}
                 title="Entities"
               >
                 Entities <ExpandMore />
-              </Button>
+              </Button> */}
+              <FormControl className="navHeader">
+                <Select
+                  id="headerEnitySelect"
+                  label="Entities"
+                  className={`${classes.entitySelect}`}
+                  MenuProps={{
+                    anchorOrigin: {
+                      vertical: "bottom",
+                      horizontal: "left"
+                    }
+                  }}
+                  value={selectedEntity}
+                  IconComponent={() => (<ExpandMore />)}
+                  onChange={handleSelectedEnity}
+                >
+                  {
+                    user?.entity && user.entity.length ?
+                      user.entity.map(curEntity => (
+                        <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
+                      ))
+                      : null
+                  }
+
+                </Select>
+              </FormControl>
             </Box>
             <div className={classes.search}>
               <div className={classes.searchIcon}>
@@ -413,6 +454,7 @@ const Header = ({ toggleDrawer }) => {
               <Search />
             </IconButton>
           </div>
+
           <UserProfile
             anchorRef={anchorRef}
             open={open}
@@ -434,11 +476,11 @@ const Header = ({ toggleDrawer }) => {
           </div>
         </Toolbar>
       </AppBar>
-      {renderMobileMenu}
-      {supportMenu}
-      {arcelorMenu}
-      {entitiesMenu}
-    </div>
+      { renderMobileMenu}
+      { supportMenu}
+      { arcelorMenu}
+      { entitiesMenu}
+    </div >
   );
 };
 

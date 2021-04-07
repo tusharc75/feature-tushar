@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme) => ({
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
-    state: { user },
+    state: { user, selectedEntity },
   }: any = useData();
   const classes = useStyles();
   const [open, setOpen] = useState({});
@@ -98,18 +98,41 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
 
   const listItems = () => {
     if (user) {
+
       const sections = [];
+
+      let entityData
+      if (user.entity && user.entity.length) {
+        entityData = user.entity.find(curEntity => curEntity._id === selectedEntity)
+      }
+
       user.role.sideBar.forEach((item) => {
         if (!sections.includes(item.sectionName) && item.isRead) {
           sections.push(item.sectionName);
         }
       });
 
+
+      if (entityData.resource && entityData.resource.length) {
+        entityData.resource.forEach(item => {
+          if (!sections.includes(item.sectionName) && item.isRead) {
+            sections.push(item.sectionName);
+          }
+        })
+      }
+
       return sections.map((section) => {
         const lists = user.role.sideBar.filter(
           (list) => list.sectionName === section
         );
-        const items = lists.filter((item) => item.isRead === true);
+
+        let enitityList = []
+
+        if (entityData.resource && entityData.resource.length) {
+          enitityList = entityData.resource.filter(list => list.sectionName === section)
+        }
+
+        const items = [...lists, ...enitityList].filter((item) => item.isRead === true);
         return { section, items };
       });
     }

@@ -19,7 +19,7 @@ const arr = [...Array(9).keys()]
 export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNew, dataToUpdate, accountId }) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { state: { user } }: any = useData();
+    const { state: { user, selectedEntity } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== dataToUpdate.owner);
 
     const [entityData, setEntityData] = useState({
@@ -74,7 +74,7 @@ export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNe
     }, []);
 
     const getOpportunityFields = () => {
-        axiosInstance().get('/field?resource=Opportunity').then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}`).then(({ data: { data } }) => {
 
             const newFields = [];
 
@@ -127,8 +127,9 @@ export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNe
     }
 
     const handleCreateOpportunity = (values) => {
+        // values.closeDate = "03/03/2021"
         setLoading(true)
-        axiosInstance().post('/opportunity', removeEmptyKeys(values))
+        axiosInstance().post(`/opportunity?entity=${selectedEntity}`, removeEmptyKeys(values))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
@@ -143,7 +144,7 @@ export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNe
         values = { ...values, _id: dataToUpdate._id };
         setLoading(true)
 
-        axiosInstance().put('/opportunity', removeEmptyKeys(values))
+        axiosInstance().put(`/opportunity?entity=${selectedEntity}`, removeEmptyKeys(values))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)

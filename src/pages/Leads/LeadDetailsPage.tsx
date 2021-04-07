@@ -25,7 +25,7 @@ const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user },
+    state: { user, selectedEntity },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,10 @@ const LeadDetailsPage = () => {
   // }, [id]);
 
   useEffect(() => {
-    const data = user?.role?.sideBar;
+    let data
+    if (user?.entity && user.entity.length && selectedEntity) {
+      data = user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource
+    }
 
     if (data) {
       const hasLeadsPermission = data.find((d) => d.name == "Lead");
@@ -68,28 +71,32 @@ const LeadDetailsPage = () => {
     }
 
     fetchLeadData();
-  }, [user]);
+  }, [user, selectedEntity]);
 
   const fetchLeadData = async () => {
-    axiosInstance().get(`/lead/${id}`).then(({ data: { data } }) => {
-      handleMainPoints(data);
-      let name = [data.firstName, data.middleName, data.lastName].filter(d => d).join(" ");
 
-      if (data?.salutation?.optionLabel) {
-        name = data.salutation.optionLabel + name;
-      }
-      setHeadingLbl(name);
-      const userId = user?.user?._id;
+    if (selectedEntity) {
+      axiosInstance().get(`/lead/${id}?entity=${selectedEntity}`).then(({ data: { data } }) => {
+        handleMainPoints(data);
+        let name = [data.firstName, data.middleName, data.lastName].filter(d => d).join(" ");
 
-      setAllowedToEdit([...data.collaborator, data.owner].some(d => d?.optionValue == userId));
-      setAllowedToDelete([data.owner].some(d => d?.optionValue == userId));
-      setLeadData(data);
-      getLeadFields();
-      setCustomizedRoutes([
-        routes.lead,
-        { title: name },
-      ]);
-    });
+        if (data?.salutation?.optionLabel) {
+          name = data.salutation.optionLabel + name;
+        }
+        setHeadingLbl(name);
+        const userId = user?.user?._id;
+
+        setAllowedToEdit([...data.collaborator, data.owner].some(d => d?.optionValue == userId));
+        setAllowedToDelete([data.owner].some(d => d?.optionValue == userId));
+        setLeadData(data);
+        getLeadFields();
+        setCustomizedRoutes([
+          routes.lead,
+          { title: name },
+        ]);
+      });
+    }
+
   };
 
   const handleMainPoints = (data) => {
@@ -104,7 +111,7 @@ const LeadDetailsPage = () => {
 
   const getLeadFields = () => {
     axiosInstance()
-      .get("/field?resource=Lead")
+      .get(`/field?resource=Lead&entity=${selectedEntity}`)
       .then(({ data }) => {
         setLeadFIelds(data.data);
         setLoading(false);
@@ -114,7 +121,7 @@ const LeadDetailsPage = () => {
   const handleDeleteLead = () => {
     if (leadData?._id) {
       axiosInstance()
-        .put(`/lead/remove`, { ids: [leadData._id] })
+        .put(`/lead/remove?entity=${selectedEntity}`, { ids: [leadData._id] })
         .then(({ data }) => {
           toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           goBackToListing();
