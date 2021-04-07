@@ -20,32 +20,55 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 
+export const sidebarResource = {
+  brand: "Brand",
+  role: "Role",
+  product: "Product",
+  entity: "Entity",
+  user: "User",
+  termsAndConditions: "Terms & Conditions",
+  doa: "DOA",
+  customerContact: "Customer Contact",
+  customerAccount: "Customer Account",
+  supplierContact: "Supplier Contact",
+  supplierAccount: "Supplier Account",
+  pricing: "Pricing",
+  currencyConvertor: "Currency Convertor",
+  priceBuilder: "Price Builder",
+  quoteBuilder: "Quote Builder",
+  reminder: "Reminder",
+  calendar: "Calendar",
+  flags: "Flags",
+  lead: "Lead",
+  opportunity: "Opportunity"
+}
+
 export const supplierAccount = {
-  api: "supplier-account",
-  route: "supplier-account",
-  resource: "Supplier Account",
-  permission: "Supplier Account",
+  accountApi: "supplier-account",
+  accountRoute: "supplier-account",
+  accountResource: "supplierAccount", //  Key of sidebar object
+  accountPermission: "Supplier Account",
 };
 
 export const customerAccount = {
-  api: "customer-account",
-  route: "customer-account",
-  resource: "Customer Account",
-  permission: "Customer Account",
+  accountApi: "customer-account",
+  accountRoute: "customer-account",
+  accountResource: "customerAccount", //  Key of sidebar object
+  accountPermission: "Customer Account",
 };
 
 export const supplierContact = {
-  api: "supplier-contact",
-  route: "supplier-contact",
-  resource: "Supplier Contact",
-  permission: "Supplier Contact",
+  contactApi: "supplier-contact",
+  contactRoute: "supplier-contact",
+  contactResource: "supplierContact", //  Key of sidebar object
+  contactPermission: "Supplier Contact",
 };
 
 export const customerContact = {
-  api: "customer-contact",
-  route: "customer-contact",
-  resource: "Customer Contact",
-  permission: "Customer Contact",
+  contactApi: "customer-contact",
+  contactRoute: "customer-contact",
+  contactResource: "customerContact", //  Key of sidebar object
+  contactPermission: "Customer Contact",
 };
 
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
@@ -77,8 +100,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-      ? data.optionValue
-      : "";
+        ? data.optionValue
+        : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkbox") {
@@ -127,51 +150,51 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .url("Enter valid url eg. https://www.hostname.com")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .url("Enter valid url eg. https://www.hostname.com")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-            .array()
-            .required(`${input.fieldLabel} is required`)
-            .length(1, "Select at least one service access")
+          .array()
+          .required(`${input.fieldLabel} is required`)
+          .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
         input.required && validEmail
           ? yup.string().email().required(`${input.fieldLabel} is required`)
           : // .test("email", "Email already exist", async function (value) {
-            //   let isvalidEmail = validateEmail(value);
+          //   let isvalidEmail = validateEmail(value);
 
-            //   if (isvalidEmail) {
-            //     const { path, createError, resolve } = this;
-            //     let { data } = await checkEmailExist(value);
-            //     if (data) {
-            //       return createError({
-            //         path,
-            //         message: "Email alreday exist",
-            //       });
-            //     }
-            //     return resolve(true);
-            //   }
-            // })
-            yup.string().email(`${input.fieldLabel} must be a valid email`);
+          //   if (isvalidEmail) {
+          //     const { path, createError, resolve } = this;
+          //     let { data } = await checkEmailExist(value);
+          //     if (data) {
+          //       return createError({
+          //         path,
+          //         message: "Email alreday exist",
+          //       });
+          //     }
+          //     return resolve(true);
+          //   }
+          // })
+          yup.string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === "switch" || input.type === "checkBox") {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)
@@ -305,3 +328,50 @@ export const materialTableIcons: any = {
     <ViewColumn {...props} ref={ref} />
   )),
 };
+
+interface IPermission {
+  [key: string]: {
+    isCreate: boolean,
+    isRead: boolean,
+    isUpdate: boolean,
+    isDelete: boolean,
+    approveAccount?: boolean
+  }
+}
+
+export const getPermissions = (user): IPermission | null => {
+  let permissions = {};
+  if (user.role) {
+
+    const data = [...user.role.sideBar, ...user.role.selectedEntity.resource];
+
+    if (data) {
+      const hasApproveAccountPermission = user.user.permissions.approveAccount;
+      const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
+
+      const sidebarFieldsKeys = Object.keys(sidebarResource);
+      const sidebarFieldsValues = Object.values(sidebarResource);
+
+      data.forEach(d => {
+        const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
+
+        if (indexOfPermission > -1) {
+          let permission = {
+            isCreate: d.isCreate,
+            isRead: d.isRead,
+            isUpdate: d.isUpdate,
+            isDelete: d.isDelete
+          };
+
+          if (accounts.some(acountType => acountType === d.name)) {
+            permission["approveAccount"] = hasApproveAccountPermission;
+          }
+
+          permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+        }
+      });
+    }
+  }
+  
+  return permissions;
+}

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 export interface IQuickLinks {
     label: string,
+    show: boolean
     count?: number,
     redirect?: boolean,
     onClick?: Function,
@@ -12,7 +13,7 @@ export interface IQuickLinks {
 }
 
 export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
-
+    
     return quickLinks && Array.isArray(quickLinks) ? <div className="d-flex flex-column gap-2 m-1">
         <Typography variant="h6" className="mb-1">{title}</Typography>
         {

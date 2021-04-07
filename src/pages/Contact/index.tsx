@@ -80,7 +80,7 @@ export default function Contact(props) {
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const { contactApi, contactResource, contactPermission, contactBreadcrumb, contactRoute } = props;
+    const { contact: { contactApi, contactResource, contactPermission, contactRoute }, contactBreadcrumb } = props;
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);

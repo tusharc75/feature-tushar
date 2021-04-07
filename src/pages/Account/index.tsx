@@ -38,6 +38,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { FcApproval } from 'react-icons/fc';
 import { MdAccountCircle } from 'react-icons/md';
 import { getSearchQuery } from '../../services/util';
+import { getPermissions } from '../../constants/helpers';
 const AccTypes = [
     {
         key: "All Accounts",
@@ -74,7 +75,7 @@ let accountTimeout
 export default function Account(props) {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
-    const { accountApi, accountResource, accountPermission, accountBreadcrumb, accountRoute } = props;
+    const { account: { accountApi, accountResource, accountPermission, accountRoute }, accountBreadcrumb } = props;
     const { state: { user } }: any = useData();
     const [accountData, setAccountData] = useState([]);
     const [cloneId, setCloneId] = useState('')
@@ -97,21 +98,19 @@ export default function Account(props) {
     const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState<any>({ show: false, approved: false, selectedRecords: 0 })
 
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false });
+    const [permissions, setPermissions] = useState(null);
+
+    useEffect(() => {
+        if (permissions) {
+            setAccountPermissions(permissions[accountResource]);
+        }
+    }, [permissions]);
+
 
     useEffect(() => {
         const data = user?.role?.sideBar;
-
         if (data) {
-            const hasAccountPermission = data.find((d: any) => d.name === accountPermission);
-            if (hasAccountPermission) {
-                setAccountPermissions({
-                    isCreate: hasAccountPermission.isCreate,
-                    isUpdate: hasAccountPermission.isUpdate,
-                    isRead: hasAccountPermission.isRead,
-                    isDelete: hasAccountPermission.isDelete,
-                    approveAccount: user.user?.permissions?.approveAccount
-                });
-            }
+            setPermissions(getPermissions(user));
         }
     }, [user]);
 

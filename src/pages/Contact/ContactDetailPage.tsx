@@ -27,7 +27,7 @@ import ManageContact from "./ManageContact/ManageContact";
 
 const Roles = (props) => {
     const toastConfig = useContext(CustomToastContext);
-    const { contactApi, contactResource, contactPermission, contactBreadcrumb } = props;
+    const { contact: { contactApi, contactResource, contactPermission, contactRoute }, contactBreadcrumb } = props;
     const history = useHistory();
     const { state: { user } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
