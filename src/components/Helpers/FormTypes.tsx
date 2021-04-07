@@ -258,7 +258,12 @@ const FormTypes = (props) => {
 
   const handleChange = (name, value) => {
     setFieldValue(name, value);
-    handleFormula(name, value);
+    if (type === "vlookupDropdown") {
+      handleVlookup(name, value)
+    }
+    else {
+      handleFormula(name, value)
+    }
   };
 
   const handleFormula = (name, value) => {
@@ -286,7 +291,20 @@ const FormTypes = (props) => {
           }
         });
     }
-  };
+  }
+
+  const handleVlookup = (name, value) => {
+    if (options && options.length) {
+      let result = options.filter((data) => data.optionValue === value)
+      if (result.length) {
+        for (var x in result[0]) {
+          if (x !== "optionLabel" && x !== "optionValue") {
+            setFieldValue(x, result[0][x]);
+          }
+        }
+      }
+    }
+  }
 
   return type === "singleLine" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
@@ -355,7 +373,7 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          onChange ? onChange : (e) => handleChange(name, e.target.value)
         }
         InputProps={{
           inputComponent: CustomFormat as any,
@@ -371,13 +389,48 @@ const FormTypes = (props) => {
       <TextField
         {...rest}
         variant="outlined"
-        type="number"
         label={label}
-        name={name}
         required={required}
+        name={name}
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
+        InputProps={{
+          inputComponent: CustomFormat as any,
+          inputProps: {
+            decimalScale: 2,
+            onValueChange: (values: any) =>
+              setFieldValue(name, values.formattedValue),
+          },
+        }}
+        onChange={
+          onChange
+            ? onChange
+            : (e) => { handleChange(name, e.target.value == "" ? null : parseFloat(e.target.value)) }
+        }
+      />
+    </InfoLabel>
+  ) : type === "percent" ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <TextField
+        {...rest}
+        variant="outlined"
+        label={label}
+        required={required}
+        name={name}
+        value={values[name]}
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
+        InputProps={{
+          inputComponent: CustomFormat as any,
+          inputProps: {
+            isAllowed: (props) => withValueLimit(props, 100),
+            decimalScale: 2,
+            onValueChange: (values: any) =>
+              setFieldValue(name, values.formattedValue),
+          },
+          endAdornment: "%",
+        }}
         onChange={
           onChange
             ? onChange
@@ -455,7 +508,7 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
-  ) : type === "dropDown" || type === "lookup" ? (
+  ) : (type === "dropDown" || type === "lookup" || type === "vlookupDropdown") ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
@@ -471,7 +524,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-              setFieldValue(
+              handleChange(
                 name,
                 val && val.optionValue ? val.optionValue : ""
               )
@@ -843,50 +896,6 @@ const FormTypes = (props) => {
           }}
         />
       </MuiPickersUtilsProvider>
-    </InfoLabel>
-  ) : type === "percent" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <TextField
-        {...rest}
-        variant="outlined"
-        label={label}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            isAllowed: (props) => withValueLimit(props, 100),
-            decimalScale: 2,
-            onValueChange: (values: any) =>
-              setFieldValue(name, values.formattedValue),
-          },
-          endAdornment: "%",
-        }}
-      />
-    </InfoLabel>
-  ) : type === "decimal" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <TextField
-        {...rest}
-        variant="outlined"
-        label={label}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            decimalScale: 2,
-            onValueChange: (values: any) =>
-              setFieldValue(name, values.formattedValue),
-          },
-        }}
-      />
     </InfoLabel>
   ) : null;
 };
