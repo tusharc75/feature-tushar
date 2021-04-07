@@ -109,6 +109,7 @@ const UserDetailsPage = () => {
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
+      setUserPermissions(data.permissions);
       setLoading(false);
     } catch (error) {
       console.log(error);

@@ -13,7 +13,9 @@ import {
   Grid,
   CircularProgress,
   Typography,
+  IconButton,
 } from "@material-ui/core";
+import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 
@@ -31,6 +33,7 @@ import Loader from "../../components/Loader";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedUsers from "./AssignedUsers";
 import BoxWithBorder from "../../components/BoxWithBorder";
+import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,7 +48,10 @@ const RoleDetailsPage = () => {
   const [roleData, setRoleData] = useState(null);
   const [currentData, setCurrentData] = useState(null);
   const [updatedData, setUpdatedData] = useState(null);
+  const [roleDeleteRec, setRoleDeleteRec] = useState(null);
+  const [userDeleteRec, setUserDeleteRec] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [values, setValues] = useState({
@@ -148,7 +154,7 @@ const RoleDetailsPage = () => {
       if (rolePermissions.isDelete) {
         axiosInstance()
           .put(`/role/remove`, { ids: [id] })
-          .then(({ data }) => {
+          .then(() => {
             setShowConfirmBox(false);
             history.goBack();
           })
@@ -161,8 +167,55 @@ const RoleDetailsPage = () => {
     }
   };
 
+  const handleUnassignUser = (rec) => {
+    setUserDeleteRec(rec);
+    setShowConfirmBox(true);
+  };
+
+  const unassignUserRole = () => {
+    if (userDeleteRec?._id) {
+      const data = {
+        user: userDeleteRec?._id,
+        roles: [id],
+      };
+      axiosInstance()
+        .post("/role/un-assign-role", data)
+        .then(() => {
+          setShowConfirmBox(false);
+          fetchRoleData();
+          toastConfig.setToastConfig({
+            message: "Successfully unassigned user",
+            type: "success",
+            open: true,
+          });
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  };
+
+  const userDialogOpen = () => {
+    setShowAssignUserDialog(true);
+  };
+
+  const userDialogClose = () => {
+    setShowAssignUserDialog(false);
+  };
+
   return (
     <>
+      {showAssignUserDialog && (
+        <AssignUserDialog
+          usersDialogOpen={showAssignUserDialog}
+          handleCloseDialog={userDialogClose}
+          roleIds={[id]}
+          onSuccess={() => {
+            fetchRoleData();
+            userDialogClose();
+          }}
+        />
+      )}
       <Layout>
         <CustomBreadCrumbs routes={customizedRoutes} />
         {!roleData ? (
@@ -198,7 +251,10 @@ const RoleDetailsPage = () => {
             {rolePermissions.isDelete ? (
               <DeleteButton
                 text="Delete"
-                onClick={() => setShowConfirmBox(true)}
+                onClick={() => {
+                  setRoleDeleteRec(id);
+                  setShowConfirmBox(true);
+                }}
               />
             ) : null}
           </DetailsPageHeader>
@@ -290,19 +346,33 @@ const RoleDetailsPage = () => {
           </Grid>
           <Grid item xs={12} sm={4} md={4}>
             <Container>
-              <Box padding={1} bgcolor="grey.200">
+              <Box
+                padding={1}
+                bgcolor="grey.200"
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
                 <Typography variant="subtitle2">
                   Assigned Users ({(roleData && roleData.user.length) || 0})
                 </Typography>
+
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={userDialogOpen}
+                >
+                  <ControlPoint />
+                </IconButton>
               </Box>
               <Box padding={1}>
                 {loading ? (
                   [1, 2].map((i) => (
                     <BoxWithBorder
                       key={i}
-                      styles={{
+                      style={{
                         padding: "8px",
-                        margin: "8px 8px",
+                        margin: "8px",
                       }}
                     >
                       <Box padding={1}>
@@ -315,8 +385,9 @@ const RoleDetailsPage = () => {
                 ) : (
                   <>
                     <AssignedUsers
-                      unassignRole={() => {}}
+                      unassignRole={handleUnassignUser}
                       data={roleData && roleData.user}
+                      currentUser={user?.user._id}
                     />
                     <Box marginY={1} />
                     <Button
@@ -338,9 +409,19 @@ const RoleDetailsPage = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Role ?`}
-          onClose={() => setShowConfirmBox(false)}
-          onOk={handleDeleteRole}
+          message={
+            roleDeleteRec
+              ? `Are you sure you want to delete this Role ?`
+              : userDeleteRec
+              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : ""
+          }
+          onClose={() => {
+            setShowConfirmBox(false);
+            setUserDeleteRec(null);
+            setRoleDeleteRec(null);
+          }}
+          onOk={roleDeleteRec ? handleDeleteRole : unassignUserRole}
         />
       )}
     </>
