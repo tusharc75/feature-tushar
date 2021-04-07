@@ -3,10 +3,13 @@ import { Grid, TextField, Typography } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
 import { SearchActivity } from "../../../axios/activity";
+import { UnCamelCase } from "../../../constants/helpers";
 
 const allSearch = [
-    { type: "account", name: "All", isAll: true },
-    { type: "contact", name: "All", isAll: true },
+    { type: "customerAccount", name: "All", isAll: true },
+    { type: "customerContact", name: "All", isAll: true },
+    { type: "supplierAccount", name: "All", isAll: true },
+    { type: "supplierContact", name: "All", isAll: true },
     { type: "lead", name: "All", isAll: true },
     { type: "opportunity", name: "All", isAll: true }
 ]
@@ -57,7 +60,7 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
         }}
         renderTags={(value, getTagProps) =>
             value.map((option, index) => (
-                <Chip variant="outlined" label={option && (capitalize(option.type) + " - " + option.name)} {...getTagProps({ index })} />
+                <Chip variant="outlined" label={option && (capitalize(UnCamelCase(option.type)) + " - " + option.name)} {...getTagProps({ index })} />
             ))
         }
         renderInput={(params) => (
@@ -74,7 +77,7 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
             return (
                 <Grid container alignItems="center" spacing={3}>
                     <Grid item>
-                        <Chip variant="outlined" color="primary" label={option.isAll ? option.name + " " + capitalize(option.type) : capitalize(option.type)} />
+                        <Chip variant="outlined" color="primary" label={option.isAll ? option.name + " " + capitalize(UnCamelCase(option.type)) : capitalize(UnCamelCase(option.type))} />
                     </Grid>
                     <Grid item xs>
                         {!option.isAll &&
