@@ -119,7 +119,6 @@ export default function ManageOpportunityDialog({ open, onSuccess, onClose, isNe
                     setTouched(input.fieldName, true);
                 }
             });
-            toastConfig.setToastConfig({ open: true, type: "error", message: 'Please fill all required fields' });
             setErrors({ ...errors });
         } else {
             isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
