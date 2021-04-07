@@ -99,7 +99,7 @@ export default function Account(props) {
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false });
 
     useEffect(() => {
-        const data = user.role?.sideBar;
+        const data = user?.role?.sideBar;
 
         if (data) {
             const hasAccountPermission = data.find((d: any) => d.name === accountPermission);
