@@ -18,7 +18,7 @@ const arr = [...Array(9).keys()]
 
 export default function ManageContact(props) {
 
-    const { entityData, handleSubmit, onClose, open, isNew } = props
+    const { entityData, handleSubmit, onClose, open, isNew, loading } = props
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user } }: any = useData();
@@ -29,8 +29,6 @@ export default function ManageContact(props) {
     const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
-
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (entityData.fields.length > 0) {
@@ -83,7 +81,6 @@ export default function ManageContact(props) {
                 }
             });
         } else {
-            setLoading(true)
             handleSubmit(values, saveAndNew, setValues)
             setErrors({});
         }

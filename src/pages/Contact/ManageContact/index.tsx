@@ -45,17 +45,13 @@ export default function ManageContactMain(props) {
         }).catch(err => setLoading(false))
     };
 
-    const handleLoading = (action, isSaveAndNew = false) => {
-        if (!isSaveAndNew) setLoading(action)
-    }
-
     const handleCreateContact = (values, saveAndNew, setValues) => {
+        setLoading(true)
         axiosInstance().post(`/${contactApi}`, removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             onSuccess({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-
-            handleLoading(false, saveAndNew)
+            setLoading(false);
         }).catch((error) => {
             setLoading(false);
             toastConfig.setToastConfig(error);
@@ -78,6 +74,7 @@ export default function ManageContactMain(props) {
     // }
 
     return <ManageContact
+        loading={loading}
         open={open}
         isNew={true}
         onClose={onClose}
