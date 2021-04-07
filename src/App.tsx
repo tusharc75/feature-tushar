@@ -105,7 +105,7 @@ function App() {
                 <PrivateRoute exact path="/contact/:id">
                     <CreateContact />
                 </PrivateRoute> */}
-          <PrivateRoute exact path="/customer-account">
+          <PrivateRoute key="customer-account" exact path="/customer-account">
             <Account
               accountApi={customerAccount.api}
               accountResource={customerAccount.resource}
@@ -114,7 +114,7 @@ function App() {
               accountBreadcrumb={routes.customerAccount}
             />
           </PrivateRoute>
-          <PrivateRoute exact path="/customer-account/detail/:id">
+          <PrivateRoute key="customer-account-edit" exact path="/customer-account/detail/:id">
             <AccountDetailPage
               accountApi={customerAccount.api}
               accountResource={customerAccount.resource}
@@ -123,7 +123,7 @@ function App() {
               accountBreadcrumb={routes.customerAccount}
               contactResource={customerContact.resource} />
           </PrivateRoute>
-          <PrivateRoute exact path="/customer-contact">
+          <PrivateRoute key="customer-contact" exact path="/customer-contact">
             <Contact
               contactApi={customerContact.api}
               contactResource={customerContact.resource}
@@ -132,7 +132,7 @@ function App() {
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
-          <PrivateRoute exact path="/customer-contact/detail/:id">
+          <PrivateRoute key="customer-contact-edit" exact path="/customer-contact/detail/:id">
             <ContactDetailPage
               contactApi={customerContact.api}
               contactResource={customerContact.resource}
@@ -141,7 +141,7 @@ function App() {
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
-          <PrivateRoute exact path="/supplier-account">
+          <PrivateRoute key="supplier-account" exact path="/supplier-account">
             <Account
               accountApi={supplierAccount.api}
               accountResource={supplierAccount.resource}
@@ -150,7 +150,7 @@ function App() {
               accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
-          <PrivateRoute exact path="/supplier-account/detail/:id">
+          <PrivateRoute key="supplier-account-edit" exact path="/supplier-account/detail/:id">
             <AccountDetailPage
               accountApi={supplierAccount.api}
               accountResource={supplierAccount.resource}
@@ -160,7 +160,7 @@ function App() {
               contactResource={supplierContact.resource}
             />
           </PrivateRoute>
-          <PrivateRoute exact path="/supplier-contact">
+          <PrivateRoute key="supplier-contact" exact path="/supplier-contact">
             <Contact
               contactApi={supplierContact.api}
               contactResource={supplierContact.resource}
@@ -169,7 +169,7 @@ function App() {
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
-          <PrivateRoute exact path="/supplier-contact/detail/:id">
+          <PrivateRoute key="supplier-contact-edit" exact path="/supplier-contact/detail/:id">
             <ContactDetailPage
               contactApi={supplierContact.api}
               contactResource={supplierContact.resource}
