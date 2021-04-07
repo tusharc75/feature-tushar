@@ -32,45 +32,41 @@ const Roles = ({ onDeleteGlobalRole, data }) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
-      <FormGroup row>
-        <div className={classes.demo}>
-          <List disablePadding>
-            {data && data.length
-              ? data.map((obj) => {
-                  return (
-                    <BoxWithBorder styles={{ padding: "0px", margin: "8px" }}>
-                      <ListItem disableGutters className={classes.list}>
-                        <ListItemText
-                          primary={
-                            <Link
-                              className="accountNameLink"
-                              to={`/role/detail/${obj._id}`}
-                            >
-                              <Typography> {obj.name || ""}</Typography>
-                            </Link>
-                          }
-                          secondary={obj.description || ""}
-                        />
-                        <ListItemSecondaryAction>
-                          <Tooltip title="Unassign Role">
-                            <IconButton
-                              edge="end"
-                              aria-label="delete"
-                              onClick={() => onDeleteGlobalRole(obj)}
-                            >
-                              <DeleteIcon color="error" />
-                            </IconButton>
-                          </Tooltip>
-                        </ListItemSecondaryAction>
-                      </ListItem>
-                    </BoxWithBorder>
-                  );
-                })
-              : null}
-          </List>
-        </div>
-      </FormGroup>
+    <div className={classes.demo}>
+      <List disablePadding>
+        {data && data.length
+          ? data.map((obj) => {
+              return (
+                <BoxWithBorder style={{ margin: "8px" }}>
+                  <ListItem disableGutters className={classes.list}>
+                    <ListItemText
+                      primary={
+                        <Link
+                          className="accountNameLink"
+                          to={`/role/detail/${obj._id}`}
+                        >
+                          <Typography> {obj.name || ""}</Typography>
+                        </Link>
+                      }
+                      secondary={obj.description || ""}
+                    />
+                    <ListItemSecondaryAction>
+                      <Tooltip title="Unassign Role">
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => onDeleteGlobalRole(obj)}
+                        >
+                          <DeleteIcon color="error" />
+                        </IconButton>
+                      </Tooltip>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                </BoxWithBorder>
+              );
+            })
+          : null}
+      </List>
     </div>
   );
 };

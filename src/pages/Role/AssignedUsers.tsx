@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AssignedUsers = ({ unassignRole, data }) => {
+const AssignedUsers = ({ unassignRole, data, currentUser }) => {
   const classes = useStyles();
 
   return (
@@ -36,7 +36,7 @@ const AssignedUsers = ({ unassignRole, data }) => {
         {data && data.length
           ? data.map((obj) => {
               return (
-                <BoxWithBorder styles={{ padding: "0px", margin: "8px" }}>
+                <BoxWithBorder style={{ margin: "8px" }}>
                   <ListItem disableGutters className={classes.list}>
                     <ListItemText
                       primary={
@@ -51,16 +51,23 @@ const AssignedUsers = ({ unassignRole, data }) => {
                       }
                       secondary={obj.email || ""}
                     />
-                    <ListItemSecondaryAction>
-                      <Tooltip title="Unassign Role">
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => unassignRole(obj)}
-                        >
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      </Tooltip>
+                    <ListItemSecondaryAction
+                      title={
+                        currentUser === obj._id
+                          ? "Primary user can't be unassigned"
+                          : "Unassign User"
+                      }
+                    >
+                      <IconButton
+                        disabled={currentUser === obj._id}
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => unassignRole(obj)}
+                      >
+                        <DeleteIcon
+                          color={currentUser === obj._id ? "disabled" : "error"}
+                        />
+                      </IconButton>
                     </ListItemSecondaryAction>
                   </ListItem>
                 </BoxWithBorder>
