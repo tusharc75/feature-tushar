@@ -124,6 +124,11 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 };
 
 export const removeEmptyKeys = (obj: object) => {
+  if (Object.keys(obj).length) {
+    Object.keys(obj).forEach(k => {
+      if (!obj[k]) delete obj[k]
+    })
+  }
   return obj;
 };
 

@@ -368,20 +368,21 @@ const FormTypes = (props) => {
         variant="outlined"
         label={label}
         name={name}
+        type="number"
         required={required}
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => handleChange(name, e.target.value)
+          onChange ? onChange : (e) => setFieldValue(name, parseInt(e.target.value))
         }
-        InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            allowNegative: false,
-            thousandSeparator: true,
-          },
-        }}
+      // InputProps={{
+      //   inputComponent: CustomFormat as any,
+      //   inputProps: {
+      //     allowNegative: false,
+      //     // thousandSeparator: true,
+      //   },
+      // }}
       />
     </InfoLabel>
   ) : type === "decimal" ? (

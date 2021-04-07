@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 export default function ManageAccountMain(props) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { open, onClose, id,accountResource ,accountApi } = props
+    const { open, onClose, id, accountResource, accountApi } = props
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -55,7 +55,7 @@ export default function ManageAccountMain(props) {
     };
 
     const handleCreateAccount = (values, saveAndNew, setValues) => {
-        setLoading(false);
+        setLoading(true);
         axiosInstance().post(`/${accountApi}`, removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
@@ -68,6 +68,7 @@ export default function ManageAccountMain(props) {
 
     return <ManageAccount
         open={open}
+        loading={loading}
         isNew={true}
         onClose={onClose}
         entityData={entityData}
