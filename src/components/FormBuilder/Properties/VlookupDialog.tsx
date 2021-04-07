@@ -77,6 +77,9 @@ export const VlookupDialog = ({ open, handleClose, fieldData, sectionId, section
 
   const onSubmitSave = () => {
     let data = [...section]
+    option.forEach((ele) => {
+      ele.optionValue = ele.optionLabel
+    })
     data.forEach((row) => {
       if (row.sectionId.toString() === sectionId.toString()) {
         row.field.forEach((ele) => {
