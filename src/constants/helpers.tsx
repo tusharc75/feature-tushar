@@ -100,8 +100,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-      ? data.optionValue
-      : "";
+        ? data.optionValue
+        : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkbox") {
@@ -152,30 +152,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .url("Enter valid url eg. https://www.hostname.com")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .url("Enter valid url eg. https://www.hostname.com")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-            .array()
-            .required(`${input.fieldLabel} is required`)
-            .length(1, "Select at least one service access")
+          .array()
+          .required(`${input.fieldLabel} is required`)
+          .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -326,9 +326,19 @@ interface IPermission {
   };
 }
 
-export const getPermissions = (user): IPermission | null => {
+export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
+
   let permissions = {};
-  const data = [...user.role.sideBar, ...user.role.selectedEntity.resource];
+  let data = [...user?.role?.sideBar]
+
+  if (selectedEntity) {
+    if (user?.entity && user.entity.length && selectedEntity) {
+      data = [...data, ...user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource]
+    }
+  }
+  else {
+    data = [...data, ...user?.role?.selectedEntity?.resource];
+  }
 
   if (data) {
     const hasApproveAccountPermission = user.user.permissions.approveAccount;
