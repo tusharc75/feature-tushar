@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ManageAccount from './ManageAccount'
-import { getObjKeys } from '../../../constants/helpers';
+import { getObjKeys, sidebarResource } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from '../../../axios/axiosInstance'
@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 export default function ManageAccountMain(props) {
     const toastConfig = useContext(CustomToastContext);
 
-    const { open, onClose, id,accountResource ,accountApi } = props
+    const { open, onClose, id, accountResource, accountApi } = props
     const { state: { user } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
@@ -21,7 +21,7 @@ export default function ManageAccountMain(props) {
     useEffect(() => {
         if (id) {
             setLoading(true)
-            axiosInstance().get(`/field?resource=${accountResource}`).then(({ data: { data } }) => {
+            axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`).then(({ data: { data } }) => {
                 const newFields = [];
                 data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
 
@@ -43,7 +43,7 @@ export default function ManageAccountMain(props) {
 
     const getAccountFields = () => {
         setLoading(true)
-        axiosInstance().get(`/field?resource=${accountResource}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
             setEntityData({
@@ -55,7 +55,7 @@ export default function ManageAccountMain(props) {
     };
 
     const handleCreateAccount = (values, saveAndNew, setValues) => {
-        setLoading(false);
+        setLoading(true);
         axiosInstance().post(`/${accountApi}`, removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
@@ -68,6 +68,7 @@ export default function ManageAccountMain(props) {
 
     return <ManageAccount
         open={open}
+        loading={loading}
         isNew={true}
         onClose={onClose}
         entityData={entityData}

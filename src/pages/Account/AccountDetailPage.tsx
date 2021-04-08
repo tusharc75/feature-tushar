@@ -31,7 +31,7 @@ import accountClass from "./account.module.scss"
 import ManageContactDialog from '../Contact/ManageContact/index';
 import DeleteButton from '../../components/Helpers/DeleteButton'
 import { makeStyles } from "@material-ui/core/styles";
-import { removeEmptyKeys, getObjKeysWithValues, isObjectEmpty } from "../../constants/helpers";
+import { removeEmptyKeys, getObjKeysWithValues, isObjectEmpty, sidebarResource } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
@@ -39,7 +39,6 @@ import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks"
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import { TiFlowChildren } from 'react-icons/ti';
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
-import CustomDynamicGrid from "../../components/CustomDynamicGrid/CustomDynamicGrid";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -55,8 +54,9 @@ export default function AccountDetailPage(props) {
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
     const classes = useStyles();
-    const { accountApi, accountResource, accountPermission, accountBreadcrumb, contactResource } = props;
-    const { state: { user } }: any = useData();
+    const { account: { accountApi, accountResource, accountPermission, accountRoute }, accountBreadcrumb, contactResource } = props;
+
+    const { state: { user, permissions } }: any = useData();
     const [headingLbl, setHeadingLbl] = useState('')
     const [isUpdating, setUpdating] = useState(false);
     const [accountData, setAccountData] = useState<any>({})
@@ -75,35 +75,14 @@ export default function AccountDetailPage(props) {
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
     const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
     const [canEdit, setCanEdit] = useState(false)
-
     const [showAccountHierarchyInFullScreenDialog, setShowAccountHierarchyInFullScreenDialog] = useState(false)
 
     let { id } = useParams();
 
-    const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false, approveAccount: false });
-
     useEffect(() => {
-        if (user) {
-            const data = user.role?.sideBar;
-
-            if (data) {
-                const hasAccountPermission = data.find((d: any) => d.name === accountPermission);
-                if (hasAccountPermission) {
-                    setAccountPermissions(
-                        {
-                            isCreate: hasAccountPermission.isCreate,
-                            isUpdate: hasAccountPermission.isUpdate,
-                            isRead: hasAccountPermission.isRead,
-                            isDelete: hasAccountPermission.isDelete,
-                            approveAccount: user.user?.permissions?.approveAccount
-                        });
-                }
-            }
-
-            if (id) {
-                fetchAccountData();
-                fetchRelatedData();
-            }
+        if (user && id) {
+            fetchAccountData();
+            fetchRelatedData();
         }
     }, [user]);
 
@@ -211,7 +190,7 @@ export default function AccountDetailPage(props) {
     }
 
     const getAccountFields = () => {
-        axiosInstance().get(`/field?resource=${accountResource}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`).then(({ data: { data } }) => {
             setAccountFields(data.filter(d => d.isUpdate || d.isRead))
             setLoading(false)
         });
@@ -224,30 +203,36 @@ export default function AccountDetailPage(props) {
             onClick: () => {
                 setShowAccountHierarchyInFullScreenDialog(true);
             },
-            icon: <TiFlowChildren />
+            icon: <TiFlowChildren />,
+            show: true
         },
         {
             label: "Projects",
-            count: 0
+            count: 0,
+            show: true
         },
         {
             label: "Opportunity",
-            count: opportunities ? opportunities.length : 0
+            count: opportunities ? opportunities.length : 0,
+            show: permissions?.opportunity?.isRead ?? false
         },
         {
             label: "Quotes",
-            count: 0
+            count: 0,
+            show: true
         },
         {
             label: "Accounts Teams",
-            count: 0
+            count: 0,
+            show: true
         },
         {
             label: "Contacts",
             count: relatedContacts ? relatedContacts.length : 0,
-            to: "/contact"
+            to: "/contact",
+            show: permissions && permissions[contactResource] ? permissions[contactResource].isRead : false
         },
-    ]
+    ].filter(d => d.show);
 
     const handleDeleteAcc = () => {
         if (accountData?._id) {
@@ -339,7 +324,7 @@ export default function AccountDetailPage(props) {
                             showHeading={true}
                         >
                             {
-                                accountPermissions.approveAccount && <>
+                                permissions && permissions[accountResource] && permissions[accountResource].approveAccount && <>
                                     <Button
                                         variant="contained"
                                         color={accountData.static?.approved ? "secondary" : "primary"}
@@ -352,7 +337,7 @@ export default function AccountDetailPage(props) {
                             }
 
                             {
-                                accountPermissions.isUpdate && canEdit && <>
+                                permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit && <>
                                     <Button
                                         variant="contained"
                                         color="primary"
@@ -365,7 +350,7 @@ export default function AccountDetailPage(props) {
                             }
 
                             {
-                                accountPermissions.isDelete && accountData?.owner?.optionValue && user?.user?._id &&
+                                permissions && permissions[accountResource] && permissions[accountResource].isDelete && accountData?.owner?.optionValue && user?.user?._id &&
                                     accountData.owner.optionValue === user.user._id ?
                                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                                     : null
@@ -406,7 +391,11 @@ export default function AccountDetailPage(props) {
                                                 </Box>
 
                                                 <Box hidden={currentTabIndex !== 1}>
-                                                    <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
+                                                    <AccountHierarchy
+                                                        data={accountHierarchyData}
+                                                        currentAccountId={accountData._id}
+                                                        accountRoute={accountRoute}
+                                                    />
                                                 </Box>
 
                                             </>
@@ -416,10 +405,18 @@ export default function AccountDetailPage(props) {
                                 </BoxWithBorder>
                                 <Box marginY={2} />
 
-                                <Container styles={{ padding: "0px", minHeight: "auto" }}>
-                                    <OpportunityInAccordian opportunities={opportunities} onNewOpportunityAdd={() => { fetchRelatedData() }} accountId={accountData._id} recordsPerLine={2} />
-                                    {/* onChange={handleChange('panel1')} */}
-                                </Container>
+                                {
+                                    permissions?.opportunity?.isRead && <Container styles={{ padding: "0px", minHeight: "auto" }}>
+                                        <OpportunityInAccordian
+                                            opportunityPermissions={permissions.opportunity}
+                                            opportunities={opportunities}
+                                            onNewOpportunityAdd={() => { fetchRelatedData() }}
+                                            accountId={accountData._id}
+                                            recordsPerLine={2}
+                                        />
+                                    </Container>
+                                }
+
                             </Container>
                         </Grid>
                         <Grid item xs={12} sm={12} md={4} lg={4}
@@ -441,41 +438,50 @@ export default function AccountDetailPage(props) {
                                         </div>
                                     </Grid>
 
-                                    <Grid item xs={12}>
-                                        <BoxWithBorder style={{ marginTop: "3%", padding: '0px' }}>
-                                            <div className={`${accountClass.detail_page_div3}`}>
-                                                <div className={`${accountClass.related_contacts}`}>
-                                                    <Typography color="primary"
-                                                        variant="h6"
-                                                        style={{ margin: "0 10px" }} >Related Contacts</Typography>
-                                                    <span>
-                                                        <IconButton
-                                                            onClick={handleCreateContact}
-                                                            color="primary"
-                                                            size="small" >
-                                                            <ControlPointIcon />
-                                                        </IconButton> </span>
-                                                </div>
-                                                {
-                                                    relatedContactsLoading ? (
-                                                        <CommonSkeleton lenArray={[...Array(4).keys()]} />
-                                                    ) : <>
-                                                        <Box className={`${accountClass.custom_box1}`}>
-                                                            <RelatedContactsBox
-                                                                contacts={relatedContacts}
-                                                                accountName={accountData.accountName}
-                                                            />
-                                                        </Box>
-                                                        {/* <div className={`${accountClass.view_all_btn}`}>
+                                    {
+                                        permissions && permissions[contactResource] && permissions[contactResource].isRead && <Grid item xs={12}>
+                                            <BoxWithBorder style={{ marginTop: "3%", padding: '0px' }}>
+                                                <div className={`${accountClass.detail_page_div3}`}>
+                                                    <div className={`${accountClass.related_contacts}`}>
+                                                        <Typography color="primary"
+                                                            variant="h6"
+                                                            style={{ margin: "0 10px" }} >Related Contacts</Typography>
+                                                        {
+                                                            permissions[contactResource].isCreate && <span>
+                                                                <IconButton
+                                                                    onClick={handleCreateContact}
+                                                                    color="primary"
+                                                                    size="small" >
+                                                                    <ControlPointIcon />
+                                                                </IconButton>
+                                                            </span>
+                                                        }
+
+                                                    </div>
+                                                    {
+                                                        relatedContactsLoading ? (
+                                                            <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                                                        ) : <>
+                                                            <Box className={`${accountClass.custom_box1}`}>
+                                                                <RelatedContactsBox
+                                                                    contacts={relatedContacts}
+                                                                    accountName={accountData.accountName}
+                                                                />
+                                                            </Box>
+                                                            {/* <div className={`${accountClass.view_all_btn}`}>
                                                             <Button
                                                                 variant="outlined"
                                                                 className={`${accountClass.btn}`}
                                                             >View All</Button></div> */}
-                                                    </>
-                                                }
-                                            </div>
-                                        </BoxWithBorder>
-                                    </Grid>
+                                                        </>
+                                                    }
+                                                </div>
+                                            </BoxWithBorder>
+                                        </Grid>
+                                    }
+
+
+
                                 </Grid>
                             </Container>
                         </Grid>
@@ -531,7 +537,7 @@ export default function AccountDetailPage(props) {
                                 setShowCreateContactDialog(false);
                                 // fetchRelatedContacts();
                             }}
-                            contactResource={contactResource}
+                            contactResource={sidebarResource[contactResource]}
                             accountId={accountData._id}
                         />
                     }
@@ -540,7 +546,11 @@ export default function AccountDetailPage(props) {
                             heading="Account Hierarchy"
                             open={showAccountHierarchyInFullScreenDialog}
                             close={() => { setShowAccountHierarchyInFullScreenDialog(false) }}>
-                            <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} />
+                            <AccountHierarchy
+                                data={accountHierarchyData}
+                                currentAccountId={accountData._id}
+                                accountRoute={accountRoute}
+                            />
                         </FullScreenDialog>
                     }
                 </div>

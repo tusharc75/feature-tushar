@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ManageContact from './ManageContact'
-import { getObjKeys, initializeDropdownById } from '../../../constants/helpers';
+import { getObjKeys, initializeDropdownById, sidebarResource } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash'
 import axiosInstance from '../../../axios/axiosInstance'
@@ -11,7 +11,7 @@ export default function ManageContactMain(props) {
     const toastConfig = useContext(CustomToastContext);
 
     const { open, onClose, onSuccess, accountId, contactResource, contactApi } = props
-    const { state: { user } }: any = useData();
+    const { state: { user, selectedEntity } }: any = useData();
     const [entityData, setEntityData] = useState({
         fields: [],
         initialValues: {},
@@ -25,7 +25,7 @@ export default function ManageContactMain(props) {
 
     const getContactFields = () => {
         setLoading(true)
-        axiosInstance().get(`/field?resource=${contactResource}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${sidebarResource[contactResource]}`).then(({ data: { data } }) => {
             const newFields = [];
             data.filter(d => d.isCreate).map((_f) => {
 
@@ -45,17 +45,13 @@ export default function ManageContactMain(props) {
         }).catch(err => setLoading(false))
     };
 
-    const handleLoading = (action, isSaveAndNew = false) => {
-        if (!isSaveAndNew) setLoading(action)
-    }
-
     const handleCreateContact = (values, saveAndNew, setValues) => {
+        setLoading(true)
         axiosInstance().post(`/${contactApi}`, removeEmptyKeys(values)).then(({ data }) => {
             onClose({ fetch: true })
             onSuccess({ fetch: true })
             toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-
-            handleLoading(false, saveAndNew)
+            setLoading(false);
         }).catch((error) => {
             setLoading(false);
             toastConfig.setToastConfig(error);
@@ -78,6 +74,7 @@ export default function ManageContactMain(props) {
     // }
 
     return <ManageContact
+        loading={loading}
         open={open}
         isNew={true}
         onClose={onClose}
