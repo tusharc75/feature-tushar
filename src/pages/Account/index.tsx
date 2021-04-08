@@ -85,7 +85,6 @@ export default function Account(props) {
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [renderCount, setRenderCount] = useState(0);
-    const [selectedRecs, setSelectedRecs] = useState([])
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
     const [isAccDialogVisible, setIsAccDialogVisible] = useState(false)
@@ -383,15 +382,16 @@ export default function Account(props) {
     }
 
     const handleDeleteAccounts = async () => {
-        let selectedRecs = dataRows.filter(obj => obj.isChecked).map(cr => cr._id)
-        if (selectedRecs && selectedRecs.length > 0) {
+        let selectedAccounts = dataRows.filter(obj => obj.isChecked).map(cr => cr._id)
+        if (selectedAccounts && selectedAccounts.length > 0) {
             axiosInstance().put(`/${accountApi}/remove`, {
-                ids: [...selectedRecs]
+                ids: [...selectedAccounts]
             }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setShowDeleteConfirmBox(false)
                 fetchAccounts();
             }).catch((error) => {
+                setShowDeleteConfirmBox(false)
                 toastConfig.setToastConfig(error);
             })
         }
@@ -405,6 +405,8 @@ export default function Account(props) {
                 fetchAccounts();
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
+            }).finally(() => {
+                setShowDeleteConfirmBox(false)
             });
 
         setSingleAccountDelete({ id: null, show: false, accountName: "" });

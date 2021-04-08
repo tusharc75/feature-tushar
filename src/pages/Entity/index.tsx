@@ -354,14 +354,14 @@ const Entity: FC = () => {
 
   // Handle entity selection
   const handleSelectedEntities = (id, isChecked) => {
-    let tempSelectedRecs = [...selectedEntities],
+    let tempSelectedEntities = [...selectedEntities],
       curRecIndex = selectedEntities.indexOf(id);
     if (isChecked && curRecIndex < 0) {
-      tempSelectedRecs = [...selectedEntities, id];
+      tempSelectedEntities = [...selectedEntities, id];
     } else if (!isChecked && curRecIndex >= 0) {
-      tempSelectedRecs.splice(curRecIndex, 1);
+      tempSelectedEntities.splice(curRecIndex, 1);
     }
-    setSelectedEntities(tempSelectedRecs);
+    setSelectedEntities(tempSelectedEntities);
   };
 
   // handle role selection from dialog
