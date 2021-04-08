@@ -40,8 +40,8 @@ export const sidebarResource = {
   calendar: "Calendar",
   flags: "Flags",
   lead: "Lead",
-  opportunity: "Opportunity"
-}
+  opportunity: "Opportunity",
+};
 
 export const supplierAccount = {
   accountApi: "supplier-account",
@@ -100,8 +100,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkbox") {
@@ -124,12 +124,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 };
 
 export const removeEmptyKeys = (obj: object) => {
-  if (Object.keys(obj).length) {
-    Object.keys(obj).forEach(k => {
-      if (!obj[k]) delete obj[k]
-    })
-  }
-  return obj;
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v !== "" || null || undefined)
+  );
 };
 
 const isEmailExist = async (email) => {
@@ -155,51 +152,36 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .url("Enter valid url eg. https://www.hostname.com")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .url("Enter valid url eg. https://www.hostname.com")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-          .array()
-          .required(`${input.fieldLabel} is required`)
-          .length(1, "Select at least one service access")
+            .array()
+            .required(`${input.fieldLabel} is required`)
+            .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
         input.required && validEmail
           ? yup.string().email().required(`${input.fieldLabel} is required`)
-          : // .test("email", "Email already exist", async function (value) {
-          //   let isvalidEmail = validateEmail(value);
-
-          //   if (isvalidEmail) {
-          //     const { path, createError, resolve } = this;
-          //     let { data } = await checkEmailExist(value);
-          //     if (data) {
-          //       return createError({
-          //         path,
-          //         message: "Email alreday exist",
-          //       });
-          //     }
-          //     return resolve(true);
-          //   }
-          // })
-          yup.string().email(`${input.fieldLabel} must be a valid email`);
+          : yup.string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === "switch" || input.type === "checkBox") {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)
@@ -336,12 +318,12 @@ export const materialTableIcons: any = {
 
 interface IPermission {
   [key: string]: {
-    isCreate: boolean,
-    isRead: boolean,
-    isUpdate: boolean,
-    isDelete: boolean,
-    approveAccount?: boolean
-  }
+    isCreate: boolean;
+    isRead: boolean;
+    isUpdate: boolean;
+    isDelete: boolean;
+    approveAccount?: boolean;
+  };
 }
 
 export const getPermissions = (user): IPermission | null => {
@@ -350,12 +332,15 @@ export const getPermissions = (user): IPermission | null => {
 
   if (data) {
     const hasApproveAccountPermission = user.user.permissions.approveAccount;
-    const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
+    const accounts = [
+      sidebarResource.customerAccount,
+      sidebarResource.supplierAccount,
+    ];
 
     const sidebarFieldsKeys = Object.keys(sidebarResource);
     const sidebarFieldsValues = Object.values(sidebarResource);
 
-    data.forEach(d => {
+    data.forEach((d) => {
       const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
 
       if (indexOfPermission > -1) {
@@ -363,10 +348,10 @@ export const getPermissions = (user): IPermission | null => {
           isCreate: d.isCreate,
           isRead: d.isRead,
           isUpdate: d.isUpdate,
-          isDelete: d.isDelete
+          isDelete: d.isDelete,
         };
 
-        if (accounts.some(acountType => acountType === d.name)) {
+        if (accounts.some((acountType) => acountType === d.name)) {
           permission["approveAccount"] = hasApproveAccountPermission;
         }
 
@@ -376,4 +361,4 @@ export const getPermissions = (user): IPermission | null => {
   }
 
   return permissions;
-}
+};

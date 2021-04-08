@@ -14,11 +14,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import InputField from "../../components/Helpers/InputField";
-import {
-  getObjKeys,
-  removeEmptyKeys,
-  yupSchema,
-} from "../../constants/helpers";
+import { getObjKeys, yupSchema } from "../../constants/helpers";
 
 interface InitialData {
   fields: any[];
@@ -60,7 +56,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
   const handleSubmit = (values) => {
     setSubmitting(true);
     axiosInstance()
-      .post("/entity", removeEmptyKeys(values))
+      .post("/entity", values)
       .then(({ data }) => {
         console.log(data);
         setSubmitting(false);
