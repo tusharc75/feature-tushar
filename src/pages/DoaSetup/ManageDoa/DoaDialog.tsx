@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
     Box,
@@ -15,7 +15,10 @@ import {
 import { Formik, Form, Field, FieldArray } from 'formik';
 import { Add, Delete } from "@material-ui/icons";
 import NumberFormat from "react-number-format";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { removeEmptyKeys } from "../../../constants/helpers";
 
 const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
 
@@ -37,9 +40,62 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
             cursor: "pointer"
         }
     }));
+    const toastConfig = useContext(CustomToastContext);
+    const classes = useStyles();
+    const [loading, setLoading] = useState(false);
+    const [users, setUsers] = useState<any[]>([{ id: user[0].id, name: user[0].name, amount: 0 }]);
+    // users = userSelected.length > 0 ? userSelected : [{ id: user[0].id, name: user[0].name, amount: 0 }];
 
-    const classes = useStyles(),
-        users = userSelected.length > 0 ? userSelected : [{ id: user[0].id, name: user[0].name, limit: 0 }];
+    const fetchDoa = useCallback(() => {
+        setLoading(true);
+        setUsers(([{ id: user[0].id, name: user[0].name, amount: 0 }]))
+        axiosInstance()
+            .get(`/doa/${userSelected.id}`)
+            .then(({ data: { data, count } }) => {
+                
+                setUsers(data?.doa?.map(item => {
+                    return {
+                        id: item.user?._id,
+                        name: `${item.user.firstName} ${item.user.lastName}`,
+                        amount: item.amount
+                    };
+                })
+                );
+                setLoading(false);
+            })
+            .catch((err) => {
+                setLoading(false);
+            });
+    }, [open]);
+
+    useEffect(() => {
+        fetchDoa();
+    }, [fetchDoa]);
+
+    const handleSubmit = async (values) => {
+        if (Object.keys(values).length) {
+            const doaArray = values.map(item => {
+                return {
+                    user: item.id,
+                    amount: Number(item.amount)
+                };
+            });
+            const userDoa = { _id: userSelected.id, doa: doaArray };
+            setLoading(true)
+            axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                    setLoading(false)
+                    setOpen(false)
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error);
+                    setLoading(false);
+                });
+        } else {
+            toastConfig.setToastConfig({ open: true, type: "error", message: 'Please add user' });
+
+        }
+    }
 
     const currencies = [
         { label: "USD", sign: "$", groupStyle: "thousand" },
@@ -70,15 +126,12 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
             onClose={setOpen}
             scroll="body"
         >
+            {!loading &&
+            <>
             <CustomDialogHeader title="Add Doa" />
             <Formik
                 initialValues={{ users: users }}
-                onSubmit={(values) => {
-                    setTimeout(() => {
-                        updatedUser(JSON.parse(JSON.stringify(values)));
-                        setOpen(false)
-                    }, 500)
-                }}
+                onSubmit={() => { }}
                 render={({ values }) => (
                     <>
                         <DialogContent>
@@ -100,8 +153,7 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                     alignItems="center"
                                                 >
                                                     <Grid item md={1}> Sr </Grid>
-                                                    <Grid item md={4}> Users </Grid>
-                                                    <Grid item md={1}> Currency </Grid>
+                                                    <Grid item md={5}> Users </Grid>
                                                     <Grid item md={4}> Amount </Grid>
                                                     <Grid item md={2}></Grid>
                                                 </Grid>
@@ -122,7 +174,7 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                         key={index}
                                                                     >
                                                                         <Grid item md={1}>{index + 1}</Grid>
-                                                                        <Grid item md={4}>
+                                                                        <Grid item md={5}>
                                                                             <Field
                                                                                 fullWidth
                                                                                 variant="outlined"
@@ -133,7 +185,8 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                                 defaultValue={userVal.name}
                                                                                 onChange={(e) => arrayHelpers.replace(index, {
                                                                                     ...values.users[index],
-                                                                                    ["name"]: e.target.value
+                                                                                    ["name"]: e.target.value,
+                                                                                    ["id"]: user.find(d => d.name == (e.target.value))?.id
                                                                                 })}
                                                                             >
                                                                                 {user
@@ -150,56 +203,27 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                                     : null}
                                                                             </Field>
                                                                         </Grid>
-                                                                        <Grid item md={1}>
-                                                                            <Field
-                                                                                fullWidth
-                                                                                variant="outlined"
-                                                                                component={TextField}
-                                                                                type="text"
-                                                                                select
-                                                                                name="currency"
-                                                                                value={userVal.currency || "USD"}
-                                                                                onChange={(e) => {
-                                                                                    // setCurrencySelected(i)
-                                                                                    arrayHelpers.replace(index, {
-                                                                                        ...values.users[index],
-                                                                                        ...{ ["currency"]: e.target.value }
-                                                                                    })
-                                                                                }}
-                                                                            >
-                                                                                {currencies.map((option, i) => (
-                                                                                    <MenuItem
-                                                                                        key={i}
-                                                                                        placeholder="Select Users"
-                                                                                        value={option.label}
-                                                                                    >
-                                                                                        {option.label}
-                                                                                    </MenuItem>
-                                                                                ))
-                                                                                }
-                                                                            </Field>
-                                                                        </Grid>
-                                                                        <Grid item md={4}>
+                                                                            <Grid item md={4}>
                                                                             <Field
                                                                                 fullWidth
                                                                                 variant="outlined"
                                                                                 type="text"
                                                                                 component={TextField}
-                                                                                name="limit"
+                                                                                name="amount"
                                                                                 placeholder="Enter Amount"
-                                                                                value={userVal.limit}
+                                                                                value={userVal.amount}
                                                                                 // id={userVal.id}
                                                                                 id={userVal.currency}
                                                                                 onChange={(e) => arrayHelpers.replace(index, {
                                                                                     ...values.users[index],
-                                                                                    ["limit"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                    ["amount"]: e.target.value.replace(/[^0-9]/g, '')
                                                                                 })}
                                                                                 InputProps={{
                                                                                     inputComponent: CurrencyFormat,
                                                                                 }}
                                                                             />
                                                                         </Grid>
-                                                                        <span><Add className={classes.addIcon} onClick={() => arrayHelpers.push({ "name": "", "limit": 0 })} /></span>
+                                                                        <span><Add className={classes.addIcon} onClick={() => arrayHelpers.push({ "id": "", "name": "", "amount": 0 })} /></span>
                                                                         <span><Delete className={classes.deleteIcon} onClick={() => arrayHelpers.remove(index)} /></span>
                                                                     </Grid>
                                                                 ))
@@ -240,6 +264,9 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                     variant="contained"
                                     color="primary"
                                     type="submit"
+                                    onClick={() => {
+                                        handleSubmit(values.users)
+                                    }}
                                 >
                                     Save
                                 </Button>
@@ -248,6 +275,9 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                     </>
                 )}
             />
+
+            </>
+        }
         </Dialog>
     )
 }
