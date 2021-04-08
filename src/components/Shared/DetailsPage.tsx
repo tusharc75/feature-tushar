@@ -14,7 +14,6 @@ import {
 import { GetApp, InfoOutlined } from "@material-ui/icons";
 import { getObjKeysWithValues, yyyyMMDD } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";
-import moment from "moment";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
@@ -67,7 +66,7 @@ const Details = (props: DetailProps) => {
             (progressEvent.loaded / progressEvent.total) * 100
           );
           setProgress(percentCompleted);
-          console.log("completed: ", percentCompleted);
+          console.log("completed: ", progress);
         },
       })
       .then(({ data }) => {
@@ -201,23 +200,28 @@ const Details = (props: DetailProps) => {
                         className={classes.fieldText}
                         variant="body2"
                       >
-                        {field.fieldData.type === "fileUpload" ? (
-                          <IconButton
-                            disabled={isDownloading}
-                            size="small"
-                            onClick={() =>
-                              downloadFile(
-                                normalizeValues(initialVals, field.fieldData)
-                              )
-                            }
-                          >
-                            {isDownloading ? (
-                              <CircularProgress size={20} color="inherit" />
-                            ) : (
-                              <GetApp />
-                            )}
-                          </IconButton>
-                        ) : null}{" "}
+                        {field.fieldData.type === "fileUpload"
+                          ? initialVals[field.fieldData.fieldName] && (
+                              <IconButton
+                                disabled={isDownloading}
+                                size="small"
+                                onClick={() =>
+                                  downloadFile(
+                                    normalizeValues(
+                                      initialVals,
+                                      field.fieldData
+                                    )
+                                  )
+                                }
+                              >
+                                {isDownloading ? (
+                                  <CircularProgress size={20} color="inherit" />
+                                ) : (
+                                  <GetApp />
+                                )}
+                              </IconButton>
+                            )
+                          : null}{" "}
                         {normalizeValues(initialVals, field.fieldData)}
                       </Typography>
                     )}

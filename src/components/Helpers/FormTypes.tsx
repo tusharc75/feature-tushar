@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -775,12 +776,24 @@ const FormTypes = (props) => {
   ) : type === "imageUpload" ? (
     <Fragment>
       <Box display="flex" flexDirection="row">
-        <Box>
+        <Box position="relative">
           <Avatar
             src={values[name]}
             style={{ width: 70, height: 70 }}
             alt="org_logo"
           />
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            position="absolute"
+            top="0"
+            right="0"
+            width="100%"
+            height="100%"
+          >
+            {isUploading && <CircularProgress size={22} />}
+          </Box>
         </Box>
         <Box>
           <label htmlFor={name}>
@@ -792,6 +805,7 @@ const FormTypes = (props) => {
             >
               <AddCircleIcon />
               <input
+                disabled={isUploading}
                 id={name}
                 name={name}
                 onChange={handleUploadImage}
@@ -812,6 +826,7 @@ const FormTypes = (props) => {
     <Fragment>
       <Box display="flex" alignItems="center">
         <input
+          disabled={isUploading}
           id={name}
           name={name}
           onChange={handleUploadFile}
@@ -830,7 +845,11 @@ const FormTypes = (props) => {
         </label>
         <Box marginX={1} />
         <p className="text-truncate">
-          {values[name] ? values[name] : "No file choosen"}
+          {values[name]
+            ? values[name]
+            : isUploading
+            ? "Uploading..."
+            : "No file choosen"}
         </p>
       </Box>
     </Fragment>
