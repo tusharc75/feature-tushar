@@ -29,6 +29,7 @@ export default function ManageLeadDialog({
   onClose,
   isNew,
   dataToUpdate,
+  leadApi
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -154,7 +155,7 @@ export default function ManageLeadDialog({
       values.noOfEmployees = parseInt(values.noOfEmployees);
 
     axiosInstance()
-      .post(`/lead?entity=${selectedEntity}`, values)
+      .post(`${leadApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -175,7 +176,7 @@ export default function ManageLeadDialog({
     setLoading(true);
 
     axiosInstance()
-      .put(`/lead?entity=${selectedEntity}`, values)
+      .put(`${leadApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -219,7 +220,7 @@ export default function ManageLeadDialog({
           initialValues={entityData.initialValues}
           validationSchema={yupSchema(entityData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,

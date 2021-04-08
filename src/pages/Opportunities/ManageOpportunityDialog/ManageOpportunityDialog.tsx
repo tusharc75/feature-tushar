@@ -30,6 +30,7 @@ export default function ManageOpportunityDialog({
   isNew,
   dataToUpdate,
   accountId,
+  opportunityApi
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -163,7 +164,7 @@ export default function ManageOpportunityDialog({
     // values.closeDate = "03/03/2021"
     setLoading(true);
     axiosInstance()
-      .post(`/opportunity?entity=${selectedEntity}`, values)
+      .post(`${opportunityApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -184,7 +185,7 @@ export default function ManageOpportunityDialog({
     setLoading(true);
 
     axiosInstance()
-      .put(`/opportunity?entity=${selectedEntity}`, values)
+      .put(`${opportunityApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -227,7 +228,7 @@ export default function ManageOpportunityDialog({
           initialValues={entityData.initialValues}
           validationSchema={yupSchema(entityData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,
@@ -368,4 +369,5 @@ ManageOpportunityDialog.propTypes = {
   isNew: PropTypes.bool,
   dataToUpdate: PropTypes.any,
   accountId: PropTypes.string,
+  opportunityApi: PropTypes.string
 };
