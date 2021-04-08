@@ -190,9 +190,9 @@ export default function ManageAccount(props) {
                                                                                                 isTooltip={true}
                                                                                                 size="small"
                                                                                                 onChange={(event, newValue) => {
-                                                                                                    setFieldValue(field.fieldName, newValue);
+                                                                                                    setFieldValue(field.fieldName, newValue?.description ?? "");
                                                                                                     if (values.isShippingAddressSameAsBillingAddress == true) {
-                                                                                                        setFieldValue("shippingAddress", newValue)
+                                                                                                        setFieldValue("shippingAddress", newValue?.description ?? "")
                                                                                                     }
                                                                                                 }}
                                                                                             /> : field.fieldName == "shippingAddress" ?
@@ -210,6 +210,9 @@ export default function ManageAccount(props) {
                                                                                                     isTooltip={true}
                                                                                                     size="small"
                                                                                                     disabled={values.isShippingAddressSameAsBillingAddress == true}
+                                                                                                    onChange={(event, newValue) => {
+                                                                                                        setFieldValue(field.fieldName, newValue?.description ?? "");
+                                                                                                    }}
                                                                                                 /> : <FormTypes
                                                                                                     // {...rest}
                                                                                                     values={values}
