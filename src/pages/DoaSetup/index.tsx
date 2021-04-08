@@ -132,7 +132,7 @@ export default function Doa() {
   const classes = useStyles();
   const [dataRows, setDataRows] = useState<any[]>([]);
   const { state: { user } }: any = useData();
-  const [userSelectedSingle, setUserSelectedSingle] = useState(null);
+  const [userSingleSelect, setUserSingleSelect] = useState(null);
   const [open, setOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -315,7 +315,7 @@ export default function Doa() {
           title={params.value}
           className="text-truncate LeadNameLink"
           onClick={() => {
-            setUserSelectedSingle(params?.row)
+            setUserSingleSelect(params?.row)
             fetchDoa(params?.row?.id)
           }
           }
@@ -381,7 +381,7 @@ export default function Doa() {
                   <IconButton aria-label="Edit" onClick={() => {
                     // setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
                     setOpen(true)
-                    setUserSelectedSingle(params.row);
+                    setUserSingleSelect(params.row);
                     fetchDoa(params?.row?.id)
                   }}>
                     <FcPlus />
@@ -442,12 +442,12 @@ export default function Doa() {
   };
 
   const updateUserDoa = (params) => {
-    setUserSelectedSingle({
-      ...userSelectedSingle,
+    setUserSingleSelect({
+      ...userSingleSelect,
       doa: params.users
     });
     const newDataRow = dataRows.map(elm => {
-      if (elm._id === userSelectedSingle._id) {
+      if (elm._id === userSingleSelect._id) {
         elm.doa = params.users
       }
       return elm;
@@ -524,10 +524,10 @@ export default function Doa() {
         </div>
       </Container>
       <Box component="div">
-        {(userSelectedSingle) && (
+        {(userSingleSelect) && (
           <DoaDialog
             user={dataRows}
-            userSelected={userSelectedSingle}
+            userSelected={userSingleSelect}
             open={open}
             setOpen={setOpen}
             updatedUser={updateUserDoa}
@@ -569,11 +569,11 @@ export default function Doa() {
           <Box marginY={5} />
           <BoxWithBorder styles={{ minHeight: "300px", padding: "0px" }}>
 
-            {userSelectedSingle ? (
+            {userSingleSelect ? (
               doa.length > 0
                 ? (
                   <NewStepper
-                    heading={"DOA Details of "+userSelectedSingle?.name}
+                    heading={"DOA Details of "+userSingleSelect?.name}
                     steps={doa}
                   />
                 ) : (
