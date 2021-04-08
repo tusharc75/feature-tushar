@@ -235,6 +235,7 @@ export default function Contact(props) {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 getContacts();
             }).catch((error) => {
+                setLoading(false);
                 toastConfig.setToastConfig(error);
             });
         setSingleContactDelete({ id: null, show: false, contactName: "" });
@@ -258,7 +259,7 @@ export default function Contact(props) {
         //     })
         // }
         let api = getSearchQuery(`/${contactApi}`, searchParams);
-        setLoading(true);
+        
         axiosInstance()
             .get(api)
             .then(({ data: { data, count } }) => {
@@ -308,18 +309,20 @@ export default function Contact(props) {
     }
 
     const handleDeleteContact = () => {
-
-        const selectedRecs = dataRows.filter(d => d.isChecked).map(m => { return m.id });
-        setLoading(true);
-        if (selectedRecs && selectedRecs.length > 0) {
+        const selectedContacts = dataRows.filter(d => d.isChecked).map(m => { return m.id });
+        
+        if (selectedContacts && selectedContacts.length > 0) {
+            setLoading(true);
             axiosInstance().put(`/${contactApi}/remove`, {
-                ids: [...selectedRecs]
+                ids: [...selectedContacts]
             }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-                setShowDeleteConfirmBox(false)
                 getContacts();
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
+            }).finally(() => {
+                setLoading(false);
+                setShowDeleteConfirmBox(false)
             })
         }
     };

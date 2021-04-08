@@ -358,14 +358,14 @@ const User: FC = () => {
 
   // Handle entity selection
   const handleSelectedUsers = (id, isChecked) => {
-    let tempSelectedRecs = [...selectedUsers],
+    let tempSelectedUsers = [...selectedUsers],
       curRecIndex = selectedUsers.indexOf(id);
     if (isChecked && curRecIndex < 0) {
-      tempSelectedRecs = [...selectedUsers, id];
+      tempSelectedUsers = [...selectedUsers, id];
     } else if (!isChecked && curRecIndex >= 0) {
-      tempSelectedRecs.splice(curRecIndex, 1);
+      tempSelectedUsers.splice(curRecIndex, 1);
     }
-    setSelectedUsers(tempSelectedRecs);
+    setSelectedUsers(tempSelectedUsers);
   };
 
   const handleCreate = () => {
