@@ -15,9 +15,9 @@ import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import { getObjKeysWithValues, removeEmptyKeys } from "../../constants/helpers";
+import { getObjKeysWithValues } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import styles from "./LeadDetailsPage.module.scss"
+import styles from "./LeadDetailsPage.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 
@@ -53,9 +53,10 @@ const LeadDetailsPage = () => {
   // }, [id]);
 
   useEffect(() => {
-    let data
+    let data;
     if (user?.entity && user.entity.length && selectedEntity) {
-      data = user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource
+      data = user.entity.find((entityObj) => entityObj._id === selectedEntity)
+        ?.resource;
     }
 
     if (data) {
@@ -74,29 +75,34 @@ const LeadDetailsPage = () => {
   }, [user, selectedEntity]);
 
   const fetchLeadData = async () => {
-
     if (selectedEntity) {
-      axiosInstance().get(`/lead/${id}?entity=${selectedEntity}`).then(({ data: { data } }) => {
-        handleMainPoints(data);
-        let name = [data.firstName, data.middleName, data.lastName].filter(d => d).join(" ");
+      axiosInstance()
+        .get(`/lead/${id}?entity=${selectedEntity}`)
+        .then(({ data: { data } }) => {
+          handleMainPoints(data);
+          let name = [data.firstName, data.middleName, data.lastName]
+            .filter((d) => d)
+            .join(" ");
 
-        if (data?.salutation?.optionLabel) {
-          name = data.salutation.optionLabel + name;
-        }
-        setHeadingLbl(name);
-        const userId = user?.user?._id;
+          if (data?.salutation?.optionLabel) {
+            name = data.salutation.optionLabel + name;
+          }
+          setHeadingLbl(name);
+          const userId = user?.user?._id;
 
-        setAllowedToEdit([...data.collaborator, data.owner].some(d => d?.optionValue == userId));
-        setAllowedToDelete([data.owner].some(d => d?.optionValue == userId));
-        setLeadData(data);
-        getLeadFields();
-        setCustomizedRoutes([
-          routes.lead,
-          { title: name },
-        ]);
-      });
+          setAllowedToEdit(
+            [...data.collaborator, data.owner].some(
+              (d) => d?.optionValue == userId
+            )
+          );
+          setAllowedToDelete(
+            [data.owner].some((d) => d?.optionValue == userId)
+          );
+          setLeadData(data);
+          getLeadFields();
+          setCustomizedRoutes([routes.lead, { title: name }]);
+        });
     }
-
   };
 
   const handleMainPoints = (data) => {
@@ -123,12 +129,16 @@ const LeadDetailsPage = () => {
       axiosInstance()
         .put(`/lead/remove?entity=${selectedEntity}`, { ids: [leadData._id] })
         .then(({ data }) => {
-          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
           goBackToListing();
           setShowConfirmBox(false);
         })
         .catch((error) => {
-          toastConfig.setToastConfig(error)
+          toastConfig.setToastConfig(error);
           setShowConfirmBox(false);
         });
     } else {
@@ -145,7 +155,6 @@ const LeadDetailsPage = () => {
     fetchLeadData();
     setOpenUpdateDialog(false);
   };
-
 
   const quickLinks = [
     {
@@ -174,15 +183,17 @@ const LeadDetailsPage = () => {
 
   return (
     <>
-      {
-        openUpdateDialog && <ManageLeadDialog
+      {openUpdateDialog && (
+        <ManageLeadDialog
           open={openUpdateDialog}
           onSuccess={handleUpdateLead}
-          onClose={() => { setOpenUpdateDialog(false) }}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+          }}
           isNew={false}
           dataToUpdate={leadData}
         />
-      }
+      )}
       {/* {openUpdateDialog && (
         <UpdateDetailsDialog
           title="Lead Update"
@@ -222,22 +233,22 @@ const LeadDetailsPage = () => {
             // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
-            {
-              leadsPermissions.isUpdate && allowedToEdit && <Button
+            {leadsPermissions.isUpdate && allowedToEdit && (
+              <Button
                 variant="contained"
                 color="primary"
                 onClick={handleOpneUpdateDialog}
               >
                 Edit
               </Button>
-            }
+            )}
             <Box component="span" marginX={1} />
-            {
-              leadsPermissions.isDelete && allowedToDelete && <DeleteButton
+            {leadsPermissions.isDelete && allowedToDelete && (
+              <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
               />
-            }
+            )}
           </DetailsPageHeader>
         )}
         <div>
@@ -250,13 +261,19 @@ const LeadDetailsPage = () => {
               <Container styles={{ height: "100%" }}>
                 {loading ? (
                   <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
-                      <Grid key={index} item sm={6} md={6}>
-                        <Skeleton variant="text" width="100px" height="16px" />
-                        <Box marginY={1} />
-                        <Skeleton width="100%" height="50px" />
-                      </Grid>
-                    ))}
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
+                      (i, index) => (
+                        <Grid key={index} item sm={6} md={6}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="16px"
+                          />
+                          <Box marginY={1} />
+                          <Skeleton width="100%" height="50px" />
+                        </Grid>
+                      )
+                    )}
                   </Grid>
                 ) : !leadFields.length ? (
                   <Box
@@ -273,7 +290,13 @@ const LeadDetailsPage = () => {
                 )}
               </Container>
             </Grid>
-            <Grid className={styles.activityContainer} item sm={4} md={4} lg={4}>
+            <Grid
+              className={styles.activityContainer}
+              item
+              sm={4}
+              md={4}
+              lg={4}
+            >
               <Container>
                 {!leadData ? (
                   <Box>
@@ -293,7 +316,7 @@ const LeadDetailsPage = () => {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => { }}
+                      handleActivityRefresh={() => {}}
                     />
                   </div>
                 )}

@@ -9,11 +9,7 @@ import {
   useMediaQuery,
 } from "@material-ui/core";
 import { Formik, Form } from "formik";
-import {
-  getObjKeysWithValues,
-  removeEmptyKeys,
-  yupSchema,
-} from "../../constants/helpers";
+import { getObjKeysWithValues, yupSchema } from "../../constants/helpers";
 import FormTypes from "../Helpers/FormTypes";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../CustomDialog/CustomDialogContent";
@@ -93,7 +89,7 @@ const UpdateDetailsDialog = (props) => {
   };
 
   const handleSubmit = (values) => {
-    handleUpdate(removeEmptyKeys(values));
+    handleUpdate(values);
   };
 
   const validateEmail = initialVals && initialVals.email ? false : true;
@@ -173,7 +169,7 @@ const UpdateDetailsDialog = (props) => {
                 onClick={submitForm}
                 disabled={
                   Object.values(simplifyValues(initialVals)).toString() ===
-                  Object.values(simplifyValues(values)).toString() ||
+                    Object.values(simplifyValues(values)).toString() ||
                   isUpdating
                 }
               >
