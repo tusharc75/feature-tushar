@@ -22,7 +22,10 @@ const reducer = (state = initialState, action) => {
       return { ...state, userLoading: action.payload };
 
     case SET_SELECTED_ENTITY:
-      return { ...state, selectedEntity: action.payload };
+      return {
+        ...state, selectedEntity: action.payload,
+        permissions: getPermissions(state.user, action.payload)
+      };
 
     default:
       return state;
