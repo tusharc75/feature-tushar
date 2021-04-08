@@ -27,6 +27,7 @@ import {
 } from "@material-ui/pickers";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import InfoIcon from "@material-ui/icons/Info";
+import DeleteIcon from "@material-ui/icons/Delete";
 import { Autocomplete } from "@material-ui/lab";
 import MuiPhoneInput from "material-ui-phone-number";
 import parse from "autosuggest-highlight/parse";
@@ -368,11 +369,13 @@ const FormTypes = (props) => {
         variant="outlined"
         label={label}
         name={name}
-        type="text"
         required={required}
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
+        onChange={
+          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+        }
         InputProps={{
           inputComponent: CustomFormat as any,
           inputProps: {
@@ -783,6 +786,7 @@ const FormTypes = (props) => {
             alt="org_logo"
           />
           <Box
+            title={values[name] ? values[name] : "No picture selected"}
             display="flex"
             justifyContent="center"
             alignItems="center"
@@ -798,6 +802,7 @@ const FormTypes = (props) => {
         <Box>
           <label htmlFor={name}>
             <IconButton
+              title="Add picture"
               color="primary"
               size="small"
               aria-label="upload picture"
@@ -818,6 +823,19 @@ const FormTypes = (props) => {
                 type="file"
               />
             </IconButton>
+            {
+              <IconButton
+                disabled={Boolean(!values[name])}
+                title="Remove picture"
+                color="secondary"
+                size="small"
+                aria-label="delete picture"
+                component="span"
+                onClick={() => setFieldValue(name, "")}
+              >
+                <DeleteIcon />
+              </IconButton>
+            }
           </label>
         </Box>
       </Box>
@@ -844,13 +862,27 @@ const FormTypes = (props) => {
           </Button>
         </label>
         <Box marginX={1} />
-        <p className="text-truncate">
-          {values[name]
-            ? values[name]
-            : isUploading
-            ? "Uploading..."
-            : "No file choosen"}
-        </p>
+
+        <Box flex="1">
+          <p className="text-truncate">
+            {values[name]
+              ? values[name]
+              : isUploading
+              ? "Uploading..."
+              : "No file choosen"}
+          </p>
+        </Box>
+        <IconButton
+          disabled={Boolean(!values[name])}
+          title="Remove File"
+          color="secondary"
+          size="small"
+          aria-label="delete picture"
+          component="span"
+          onClick={() => setFieldValue(name, "")}
+        >
+          <DeleteIcon />
+        </IconButton>
       </Box>
     </Fragment>
   ) : type === "url" ? (
