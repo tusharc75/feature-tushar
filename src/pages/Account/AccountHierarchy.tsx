@@ -21,9 +21,12 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
         {
             title: 'Account Name', field: 'accountName',
             render: (rowData: any) => <div style={{ width: 250 }}>
-                <Link className="link" to={`/${accountRoute}/detail/${rowData._id}`}>
-                    {rowData.accountName}
-                </Link>
+                {
+                    rowData._id === currentAccountId ? <span>{rowData.accountName}</span> :
+                        <Link className="link" to={`/${accountRoute}/detail/${rowData._id}`}>
+                            {rowData.accountName}
+                        </Link>
+                }
                 {
                     rowData._id === currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
                 }
@@ -62,7 +65,7 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
             </div>
         },
     ];
-    
+
     return (
         <>
             {
