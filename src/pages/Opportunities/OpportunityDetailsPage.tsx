@@ -55,10 +55,11 @@ function OpportunityDetailsPage() {
   });
 
   useEffect(() => {
-    let data
+    let data;
 
     if (user?.entity && user.entity.length && selectedEntity) {
-      data = user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource
+      data = user.entity.find((entityObj) => entityObj._id === selectedEntity)
+        ?.resource;
     }
 
     if (data) {
@@ -84,7 +85,7 @@ function OpportunityDetailsPage() {
 
   const fetchOpportunityData = () => {
     if (selectedEntity) {
-      setLoading(true)
+      setLoading(true);
       axiosInstance()
         .get(`/opportunity/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
@@ -93,8 +94,12 @@ function OpportunityDetailsPage() {
           handleAllowToEditList(data);
           setOpportunityData(data);
           getOpportunityFields();
-          setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
-        }).catch((error) => {
+          setCustomizedRoutes([
+            routes.opportunity,
+            { title: `${data.opportunityName}` },
+          ]);
+        })
+        .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
@@ -117,7 +122,8 @@ function OpportunityDetailsPage() {
         .then(({ data: { data } }) => {
           setOpportunityFields(data);
           setLoading(false);
-        }).catch((error) => {
+        })
+        .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
@@ -150,13 +156,19 @@ function OpportunityDetailsPage() {
   const handleDeleteOpportunity = () => {
     if (opportunityData?._id) {
       axiosInstance()
-        .put(`/opportunity/remove?entity=${selectedEntity}`, { ids: [opportunityData._id] })
+        .put(`/opportunity/remove?entity=${selectedEntity}`, {
+          ids: [opportunityData._id],
+        })
         .then(({ data }) => {
-          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
           goBackToListing();
           setShowConfirmBox(false);
         })
-        .catch(error => {
+        .catch((error) => {
           toastConfig.setToastConfig(error);
           setShowConfirmBox(false);
         });
@@ -178,7 +190,7 @@ function OpportunityDetailsPage() {
   //   };
 
   //   axiosInstance()
-  //     .put("/opportunity", removeEmptyKeys(updatedData))
+  //     .put("/opportunity", updatedData)
   //     .then(({ data }) => {
   //       toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
   //       setUpdating(false);
@@ -207,7 +219,7 @@ function OpportunityDetailsPage() {
     {
       label: "New Event",
       count: 0,
-    }
+    },
   ];
   return (
     <>
@@ -243,24 +255,24 @@ function OpportunityDetailsPage() {
             mainPoints={mainPoints}
             showHeading={true}
           >
-            {
-              handleAllowToEditList ?
-                (
-                  <Button
-                    disabled={opportunityData.owner.optionValue !== user.user._id && opportunityData.collaborator.length === 0}
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    Edit
-                  </Button>
-                ) : null
-            }
+            {handleAllowToEditList ? (
+              <Button
+                disabled={
+                  opportunityData.owner.optionValue !== user.user._id &&
+                  opportunityData.collaborator.length === 0
+                }
+                variant="contained"
+                color="primary"
+                onClick={handleOpenUpdateDialog}
+              >
+                Edit
+              </Button>
+            ) : null}
             <Box component="span" marginX={1} />
             {opportunityPermissions.isDelete &&
-              opportunityData?.owner.optionValue &&
-              user?.user?._id &&
-              opportunityData.owner.optionValue === user.user._id ? (
+            opportunityData?.owner.optionValue &&
+            user?.user?._id &&
+            opportunityData.owner.optionValue === user.user._id ? (
               <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
@@ -295,14 +307,12 @@ function OpportunityDetailsPage() {
                   </Box>
                 ) : (
                   <>
-
                     <TabPanel value={currentTabIndex} index={0}>
                       <Box padding="16px">
                         <DetailsPage
                           data={opportunityData}
                           fields={opportunityFields}
                         />
-
                       </Box>
                     </TabPanel>
                     <TabPanel value={currentTabIndex} index={1}>
@@ -337,7 +347,7 @@ function OpportunityDetailsPage() {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => { }}
+                      handleActivityRefresh={() => {}}
                     />
                   </div>
                 )}
@@ -362,23 +372,24 @@ function OpportunityDetailsPage() {
             />
           ): null} */}
 
-          {
-            openUpdateDialog && <ManageOpportunityDialog
+          {openUpdateDialog && (
+            <ManageOpportunityDialog
               open={openUpdateDialog}
               onSuccess={() => {
                 setOpenUpdateDialog(false);
-                fetchOpportunityData()
-
+                fetchOpportunityData();
               }}
-              onClose={() => { setOpenUpdateDialog(false) }}
+              onClose={() => {
+                setOpenUpdateDialog(false);
+              }}
               isNew={false}
               dataToUpdate={opportunityData}
             />
-          }
+          )}
         </div>
       </Layout>
     </>
   );
-};
+}
 
 export default OpportunityDetailsPage;

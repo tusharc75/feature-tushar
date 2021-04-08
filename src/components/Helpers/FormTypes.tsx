@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -162,8 +163,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-          ? 1
-          : 0
+        ? 1
+        : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -259,10 +260,9 @@ const FormTypes = (props) => {
   const handleChange = (name, value) => {
     setFieldValue(name, value);
     if (type === "vlookupDropdown") {
-      handleVlookup(name, value)
-    }
-    else {
-      handleFormula(name, value)
+      handleVlookup(name, value);
+    } else {
+      handleFormula(name, value);
     }
   };
 
@@ -291,11 +291,11 @@ const FormTypes = (props) => {
           }
         });
     }
-  }
+  };
 
   const handleVlookup = (name, value) => {
     if (options && options.length) {
-      let result = options.filter((data) => data.optionValue === value)
+      let result = options.filter((data) => data.optionValue === value);
       if (result.length) {
         for (var x in result[0]) {
           if (x !== "optionLabel" && x !== "optionValue") {
@@ -304,7 +304,7 @@ const FormTypes = (props) => {
         }
       }
     }
-  }
+  };
 
   return type === "singleLine" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
@@ -368,21 +368,17 @@ const FormTypes = (props) => {
         variant="outlined"
         label={label}
         name={name}
-        type="number"
+        type="text"
         required={required}
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
-        onChange={
-          onChange ? onChange : (e) => setFieldValue(name, parseInt(e.target.value))
-        }
-      // InputProps={{
-      //   inputComponent: CustomFormat as any,
-      //   inputProps: {
-      //     allowNegative: false,
-      //     // thousandSeparator: true,
-      //   },
-      // }}
+        InputProps={{
+          inputComponent: CustomFormat as any,
+          inputProps: {
+            allowNegative: false,
+          },
+        }}
       />
     </InfoLabel>
   ) : type === "decimal" ? (
@@ -407,7 +403,12 @@ const FormTypes = (props) => {
         onChange={
           onChange
             ? onChange
-            : (e) => { handleChange(name, e.target.value == "" ? null : parseFloat(e.target.value)) }
+            : (e) => {
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -436,11 +437,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -509,7 +510,7 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
-  ) : (type === "dropDown" || type === "lookup" || type === "vlookupDropdown") ? (
+  ) : type === "dropDown" || type === "lookup" || type === "vlookupDropdown" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
@@ -525,10 +526,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-              handleChange(
-                name,
-                val && val.optionValue ? val.optionValue : ""
-              )
+                handleChange(
+                  name,
+                  val && val.optionValue ? val.optionValue : ""
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -552,8 +553,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-              (data) => data.currencyCode === values[name]
-            )[0]
+                (data) => data.currencyCode === values[name]
+              )[0]
             : ""
         }
         options={currencyData}
@@ -614,10 +615,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-              setFieldValue(
-                name,
-                value.map((val) => val.optionValue)
-              )
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -717,9 +718,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-              setValue(newValue);
-            }
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -775,12 +776,24 @@ const FormTypes = (props) => {
   ) : type === "imageUpload" ? (
     <Fragment>
       <Box display="flex" flexDirection="row">
-        <Box>
+        <Box position="relative">
           <Avatar
             src={values[name]}
             style={{ width: 70, height: 70 }}
             alt="org_logo"
           />
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            position="absolute"
+            top="0"
+            right="0"
+            width="100%"
+            height="100%"
+          >
+            {isUploading && <CircularProgress size={22} />}
+          </Box>
         </Box>
         <Box>
           <label htmlFor={name}>
@@ -792,6 +805,7 @@ const FormTypes = (props) => {
             >
               <AddCircleIcon />
               <input
+                disabled={isUploading}
                 id={name}
                 name={name}
                 onChange={handleUploadImage}
@@ -812,6 +826,7 @@ const FormTypes = (props) => {
     <Fragment>
       <Box display="flex" alignItems="center">
         <input
+          disabled={isUploading}
           id={name}
           name={name}
           onChange={handleUploadFile}
@@ -830,7 +845,11 @@ const FormTypes = (props) => {
         </label>
         <Box marginX={1} />
         <p className="text-truncate">
-          {values[name] ? values[name] : "No file choosen"}
+          {values[name]
+            ? values[name]
+            : isUploading
+            ? "Uploading..."
+            : "No file choosen"}
         </p>
       </Box>
     </Fragment>
