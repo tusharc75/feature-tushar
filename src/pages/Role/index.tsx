@@ -364,72 +364,72 @@ const Roles: FC = () => {
         />
       )}
       <Layout>
-        <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3">
-            <CustomBreadCrumbs routes={[routes.role]} />
-          </Grid>
-          <Grid item xs={12} sm={6} className="pr-3">
+        <CustomBreadCrumbs routes={[routes.role]} />
+        <Grid container direction="row" className="header-links">
+          <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Import from Excel
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Export to Excel
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Download Template
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Email a Link
-              </MuiLink>
+              </Link>
             </Grid>
           </Grid>
         </Grid>
         <Container>
-          <Header
-            selectedType={selectedType}
-            onTypeChange={handleRoleTypeSel}
-            options={RoleTypes}
-            onSearch={handleSearch}
-            searchVal={searchVal}
-            rolePermissions={rolesPermissions}
-            onCreate={handleCreate}
-            showConfirmBox={showConfirmBox}
-            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-          />
+          <div className="header-panel">
+            <Header
+              selectedType={selectedType}
+              onTypeChange={handleRoleTypeSel}
+              options={RoleTypes}
+              onSearch={handleSearch}
+              searchVal={searchVal}
+              rolePermissions={rolesPermissions}
+              onCreate={handleCreate}
+              showConfirmBox={showConfirmBox}
+              canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+            />
+          </div>
         </Container>
-        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+        <Container>
           <div className="listing-grid">
             <DataGrid
               components={{

@@ -26,7 +26,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user },
+    state: { user, permissions },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,12 +41,6 @@ const EntityDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.entity,
   ]);
-  const [entitiesPermissions, setEntitiesPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
 
   useEffect(() => {
     if (id) {
@@ -55,22 +49,6 @@ const EntityDetailsPage = () => {
       fetchEntityRoles();
     }
   }, [id]);
-
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-
-    if (data) {
-      const hasEntityPermission = data.find((d) => d.name == "Entity");
-      if (hasEntityPermission) {
-        setEntitiesPermissions({
-          isCreate: hasEntityPermission.isCreate,
-          isUpdate: hasEntityPermission.isUpdate,
-          isRead: hasEntityPermission.isRead,
-          isDelete: hasEntityPermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
 
   const fetchEntityData = async () => {
     setLoading(true);
@@ -124,7 +102,7 @@ const EntityDetailsPage = () => {
 
   const handleDeleteEntity = () => {
     if (id) {
-      if (entitiesPermissions.isDelete) {
+      if (permissions?.entity?.isDelete) {
         axiosInstance()
           .put(`/entity/remove`, { ids: [id] })
           .then(({ data }) => {
@@ -212,7 +190,7 @@ const EntityDetailsPage = () => {
             mainPoints={mainPoints}
             showHeading={true}
           >
-            {entitiesPermissions.isUpdate ? (
+            {permissions?.entity?.isUpdate ? (
               <Button
                 variant="contained"
                 color="primary"
@@ -222,7 +200,7 @@ const EntityDetailsPage = () => {
               </Button>
             ) : null}
             <Box component="span" marginX={1} />
-            {entitiesPermissions.isDelete ? (
+            {permissions?.entity?.isDelete ? (
               <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
