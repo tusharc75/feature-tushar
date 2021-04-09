@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { lowerCase, kebabCase } from "lodash";
+import { useEffect, useState } from "react";
+import { camelCase } from "lodash";
 import { Redirect, Route, useLocation } from "react-router-dom";
 import { useData } from "../StateProvider/Provider";
 import Unauthorized from "../pages/Unauthorized";
-import Loader from "./Loader";
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
-    state: { user },
+    state: { user, permissions, userLoading },
   }: any = useData();
-  const { pathname } = useLocation();
+  const { pathname, key } = useLocation();
   const token = localStorage.getItem("token");
   const [access, setAccess] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -18,28 +17,17 @@ const ProtectedRoute = ({ children, ...rest }) => {
 
   useEffect(() => {
     checkAccess();
-
     // eslint-disable-next-line
-  }, [pathnames]);
+  }, [key, user]);
 
   const checkAccess = async () => {
-    const data = await user?.role.sideBar.find(
-      (item) => lowerCase(kebabCase(item.name)) === pathnames[0]
-    );
-    if (data) {
-      data.isRead ? setAccess(true) : setAccess(false);
-      setChecking(false);
-    }
-
-    if (
-      !pathnames.length ||
-      pathname.includes("opportunity") ||
-      pathname.includes("lead") ||
-      pathname.includes("activity") ||
-      pathname.includes("account") ||
-      pathname.includes("contact") ||
-      pathname.includes("product")
-    ) {
+    const path = camelCase(pathnames[0]);
+    if (permissions && permissions[path]) {
+      if (permissions[path].isRead) {
+        setAccess(true);
+        setChecking(false);
+      }
+    } else if (pathname === "/") {
       setAccess(true);
       setChecking(false);
     }
@@ -50,11 +38,16 @@ const ProtectedRoute = ({ children, ...rest }) => {
       {...rest}
       render={({ location }) =>
         user || token ? (
-          checking ? (
-            <Loader
-              style={{ height: "calc(100vh - 88px)" }}
-              text="Checking Authorization"
-            />
+          checking || userLoading ? (
+            <div
+              style={{
+                width: "100vw",
+                height: "100vh",
+                padding: "1rem",
+              }}
+            >
+              <p>Checking Credentials...</p>
+            </div>
           ) : access ? (
             children
           ) : (

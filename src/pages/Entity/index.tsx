@@ -57,7 +57,7 @@ const Entity: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user },
+    state: { user, permissions },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -77,12 +77,6 @@ const Entity: FC = () => {
   const [checkAllEntities, setCheckAllEntities] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [entitiesPermissions, setEntitiesPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [
     showDeleteWarningConfirmBox,
@@ -113,21 +107,6 @@ const Entity: FC = () => {
   useEffect(() => {
     fetchEntities();
   }, [fetchEntities]);
-
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-    if (data) {
-      const hasUsersPermission = data.find((d: any) => d.name === "Entity");
-      if (hasUsersPermission) {
-        setEntitiesPermissions({
-          isCreate: hasUsersPermission.isCreate,
-          isUpdate: hasUsersPermission.isUpdate,
-          isRead: hasUsersPermission.isRead,
-          isDelete: hasUsersPermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
 
   const getRows = (data: []) => {
     const rows = data.length
@@ -216,7 +195,7 @@ const Entity: FC = () => {
       headerName: "Actions ",
       renderCell: (params: any) => (
         <>
-          {entitiesPermissions.isDelete ? (
+          {permissions?.entity?.isDelete ? (
             <Tooltip title="Delete">
               <IconButton
                 aria-label="Delete"
@@ -483,71 +462,71 @@ const Entity: FC = () => {
         </CustomDialogFooter>
       </Dialog>
       <Layout>
-        <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3">
-            <CustomBreadCrumbs routes={[routes.entity]} />
-          </Grid>
-          <Grid item xs={12} sm={6} className="pr-3">
+        <CustomBreadCrumbs routes={[routes.entity]} />
+        <Grid container direction="row" className="header-links">
+          <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Import from Excel
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Export to Excel
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Download Template
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Email a Link
-              </MuiLink>
+              </Link>
             </Grid>
           </Grid>
         </Grid>
         <Container>
-          <Header
-            onSearch={handleSearch}
-            searchVal={searchVal}
-            entityPermissions={entitiesPermissions}
-            onCreate={handleCreate}
-            showConfirmBox={showConfirmBox}
-            openRolesDialog={handleOpenDialog}
-            rolesActionDiabled={Boolean(!selectedEntities.length)}
-            canDelete={dataRows.filter((d) => d.isChecked).length === 0}
-          />
+          <div className="header-panel">
+            <Header
+              onSearch={handleSearch}
+              searchVal={searchVal}
+              entityPermissions={permissions?.entity}
+              onCreate={handleCreate}
+              showConfirmBox={showConfirmBox}
+              openRolesDialog={handleOpenDialog}
+              rolesActionDiabled={Boolean(!selectedEntities.length)}
+              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
+            />
+          </div>
         </Container>
-        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+        <Container>
           <div className="listing-grid">
             <DataGrid
               components={{
