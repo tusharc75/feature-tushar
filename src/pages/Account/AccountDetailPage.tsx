@@ -63,6 +63,7 @@ export default function AccountDetailPage(props) {
   const {
     state: { user, permissions },
   }: any = useData();
+
   const [headingLbl, setHeadingLbl] = useState("");
   const [isUpdating, setUpdating] = useState(false);
   const [accountData, setAccountData] = useState<any>({});
@@ -95,11 +96,10 @@ export default function AccountDetailPage(props) {
   let { id } = useParams();
 
   useEffect(() => {
-    if (user && id) {
-      fetchAccountData();
-      fetchRelatedData();
-    }
-  }, [user]);
+    setShowAccountHierarchyInFullScreenDialog(false);
+    fetchAccountData();
+    fetchRelatedData();
+  }, [id]);
 
   const fetchRelatedData = () => {
     axiosInstance()
@@ -150,9 +150,9 @@ export default function AccountDetailPage(props) {
               current: true,
               parentAccount: data.parentAccount
                 ? {
-                    _id: data.parentAccount.optionValue,
-                    accountName: data.parentAccount.optionLabel,
-                  }
+                  _id: data.parentAccount.optionValue,
+                  accountName: data.parentAccount.optionLabel,
+                }
                 : null,
               // parentAccountName: data.parentAccount?.optionLabel,
               // parentAccount: data.parentAccount?.optionValue
@@ -416,11 +416,11 @@ export default function AccountDetailPage(props) {
                 )}
 
               {permissions &&
-              permissions[accountResource] &&
-              permissions[accountResource].isDelete &&
-              accountData?.owner?.optionValue &&
-              user?.user?._id &&
-              accountData.owner.optionValue === user.user._id ? (
+                permissions[accountResource] &&
+                permissions[accountResource].isDelete &&
+                accountData?.owner?.optionValue &&
+                user?.user?._id &&
+                accountData.owner.optionValue === user.user._id ? (
                 <DeleteButton
                   text="Delete"
                   onClick={() => setShowConfirmBox(true)}
@@ -529,7 +529,7 @@ export default function AccountDetailPage(props) {
                               access: true,
                             },
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                         />
                       </div>
                     )}
@@ -596,9 +596,8 @@ export default function AccountDetailPage(props) {
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
-              message={`Are you sure you want to delete this Account ${
-                accountData.accountName || ""
-              }`}
+              message={`Are you sure you want to delete this Account ${accountData.accountName || ""
+                }`}
               onClose={() => setShowConfirmBox(false)}
               onOk={handleDeleteAcc}
             />
@@ -606,9 +605,8 @@ export default function AccountDetailPage(props) {
           {showApproveDisapproveConfirmBox ? (
             <ConfirmationDialog
               open={showApproveDisapproveConfirmBox}
-              message={`Are you sure you want to ${
-                accountData.static?.approved ? "disapprove" : "approve"
-              } this Account ?`}
+              message={`Are you sure you want to ${accountData.static?.approved ? "disapprove" : "approve"
+                } this Account ?`}
               onClose={() => setShowApproveDisapproveConfirmBox(false)}
               onOk={handleApproveDisapprove}
             />
