@@ -39,6 +39,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
+import { sidebarResource } from '../../constants/helpers';
 
 
 const ContactTypes = [
@@ -80,7 +81,7 @@ export default function Contact(props) {
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const { contactApi, contactResource, contactPermission, contactBreadcrumb, contactRoute } = props;
+    const { contact: { contactApi, contactResource, contactPermission, contactRoute }, contactBreadcrumb } = props;
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -234,6 +235,7 @@ export default function Contact(props) {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 getContacts();
             }).catch((error) => {
+                setLoading(false);
                 toastConfig.setToastConfig(error);
             });
         setSingleContactDelete({ id: null, show: false, contactName: "" });
@@ -257,7 +259,7 @@ export default function Contact(props) {
         //     })
         // }
         let api = getSearchQuery(`/${contactApi}`, searchParams);
-        setLoading(true);
+        
         axiosInstance()
             .get(api)
             .then(({ data: { data, count } }) => {
@@ -307,18 +309,20 @@ export default function Contact(props) {
     }
 
     const handleDeleteContact = () => {
-
-        const selectedRecs = dataRows.filter(d => d.isChecked).map(m => { return m.id });
-        setLoading(true);
-        if (selectedRecs && selectedRecs.length > 0) {
+        const selectedContacts = dataRows.filter(d => d.isChecked).map(m => { return m.id });
+        
+        if (selectedContacts && selectedContacts.length > 0) {
+            setLoading(true);
             axiosInstance().put(`/${contactApi}/remove`, {
-                ids: [...selectedRecs]
+                ids: [...selectedContacts]
             }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-                setShowDeleteConfirmBox(false)
                 getContacts();
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
+            }).finally(() => {
+                setLoading(false);
+                setShowDeleteConfirmBox(false)
             })
         }
     };
@@ -410,7 +414,9 @@ export default function Contact(props) {
                 <div className="header-panel">
                     <Grid className={styles.filter_side_container} container justify="space-between">
                         <Grid item className="d-flex align-items-center gap-1">
-                            <MdContacts className="headerLogo" /> <span className="listingHeader">{contactResource} </span>
+                            <MdContacts className="headerLogo" /> <span className="listingHeader">
+                                {sidebarResource[contactResource]}
+                            </span>
                             {
                                 ContactTypes && <ToggleButtonGroup size="small" className="ml-8"
                                     value={filter}

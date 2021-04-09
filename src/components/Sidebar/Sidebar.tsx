@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import {
-  Box,
   CssBaseline,
   Drawer,
   IconButton,
@@ -13,9 +12,7 @@ import {
   Collapse,
 } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
-// import { SVG } from "../../assets";
 import Header from "../Header/Header";
-import Loader from "../Loader";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.scss";
 import {
@@ -24,8 +21,8 @@ import {
   ExpandMore,
   ExpandLess,
 } from "@material-ui/icons";
+import _ from "lodash";
 
-const _ = require("lodash");
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
@@ -44,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
   },
   drawerOpen: {
+    overflowY: "scroll",
     width: drawerWidth,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
@@ -86,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const {
-    state: { user },
+    state: { user, selectedEntity },
   }: any = useData();
   const classes = useStyles();
   const [open, setOpen] = useState({});
@@ -99,17 +97,44 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const listItems = () => {
     if (user) {
       const sections = [];
+
+      let entityData;
+      if (user.entity && user.entity.length) {
+        entityData = user.entity.find(
+          (curEntity) => curEntity._id === selectedEntity
+        );
+      }
+
       user.role.sideBar.forEach((item) => {
         if (!sections.includes(item.sectionName) && item.isRead) {
           sections.push(item.sectionName);
         }
       });
 
+      if (entityData.resource && entityData.resource.length) {
+        entityData.resource.forEach((item) => {
+          if (!sections.includes(item.sectionName) && item.isRead) {
+            sections.push(item.sectionName);
+          }
+        });
+      }
+
       return sections.map((section) => {
         const lists = user.role.sideBar.filter(
           (list) => list.sectionName === section
         );
-        const items = lists.filter((item) => item.isRead === true);
+
+        let enitityList = [];
+
+        if (entityData.resource && entityData.resource.length) {
+          enitityList = entityData.resource.filter(
+            (list) => list.sectionName === section
+          );
+        }
+
+        const items = [...lists, ...enitityList].filter(
+          (item) => item.isRead === true
+        );
         return { section, items };
       });
     }

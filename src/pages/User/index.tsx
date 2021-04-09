@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+let userTimeout
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
@@ -74,24 +75,32 @@ const User: FC = () => {
   ] = useState(false);
 
   const fetchUsers = useCallback(() => {
-    let searchParams: any = { ...query };
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
-    let api = getSearchQuery("/user", searchParams);
-    setLoadingUsers(true);
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data, count } }) => {
-        setUsers(data);
-        getRows(data);
-        setRowCount(count);
-        setLoadingUsers(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoadingUsers(false);
-      });
+
+    if (userTimeout) {
+      clearTimeout(userTimeout);
+    }
+
+    userTimeout = setTimeout(() => {
+      let searchParams: any = { ...query };
+      searchParams = searchVal
+        ? { ...searchParams, search: searchVal }
+        : { ...searchParams };
+      let api = getSearchQuery("/user", searchParams);
+      setLoadingUsers(true);
+      axiosInstance()
+        .get(api)
+        .then(({ data: { data, count } }) => {
+          setUsers(data);
+          getRows(data);
+          setRowCount(count);
+          setLoadingUsers(false);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setLoadingUsers(false);
+        });
+    }, 600)
+
   }, [searchVal, query]);
 
   useEffect(() => {
@@ -116,13 +125,13 @@ const User: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          isChecked: false,
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-          status: user.blocked ? user.blocked : false,
-        }))
+        id: user._id,
+        isChecked: false,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+        status: user.blocked ? user.blocked : false,
+      }))
       : [];
 
     setDataRows(rows);
@@ -349,14 +358,14 @@ const User: FC = () => {
 
   // Handle entity selection
   const handleSelectedUsers = (id, isChecked) => {
-    let tempSelectedRecs = [...selectedUsers],
+    let tempSelectedUsers = [...selectedUsers],
       curRecIndex = selectedUsers.indexOf(id);
     if (isChecked && curRecIndex < 0) {
-      tempSelectedRecs = [...selectedUsers, id];
+      tempSelectedUsers = [...selectedUsers, id];
     } else if (!isChecked && curRecIndex >= 0) {
-      tempSelectedRecs.splice(curRecIndex, 1);
+      tempSelectedUsers.splice(curRecIndex, 1);
     }
-    setSelectedUsers(tempSelectedRecs);
+    setSelectedUsers(tempSelectedUsers);
   };
 
   const handleCreate = () => {
@@ -490,9 +499,8 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete user ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

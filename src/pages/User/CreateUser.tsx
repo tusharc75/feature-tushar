@@ -1,4 +1,4 @@
-import { useEffect, useState,useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
   Dialog,
   Button,
@@ -15,11 +15,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import InputField from "../../components/Helpers/InputField";
-import {
-  getObjKeys,
-  removeEmptyKeys,
-  yupSchema,
-} from "../../constants/helpers";
+import { getObjKeys, yupSchema } from "../../constants/helpers";
 
 interface InitialData {
   fields: any[];
@@ -62,9 +58,13 @@ const CreateUser = ({ open, close, fetchData }) => {
   const handleSubmit = (values) => {
     setSubmitting(true);
     axiosInstance()
-      .post("/user", removeEmptyKeys(values))
+      .post("/user", values)
       .then(({ data }) => {
-        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
         console.log(data);
         setSubmitting(false);
         fetchData();

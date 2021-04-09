@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -26,6 +27,7 @@ import {
 } from "@material-ui/pickers";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import InfoIcon from "@material-ui/icons/Info";
+import DeleteIcon from "@material-ui/icons/Delete";
 import { Autocomplete } from "@material-ui/lab";
 import MuiPhoneInput from "material-ui-phone-number";
 import parse from "autosuggest-highlight/parse";
@@ -258,7 +260,11 @@ const FormTypes = (props) => {
 
   const handleChange = (name, value) => {
     setFieldValue(name, value);
-    handleFormula(name, value);
+    if (type === "vlookupDropdown") {
+      handleVlookup(name, value);
+    } else {
+      handleFormula(name, value);
+    }
   };
 
   const handleFormula = (name, value) => {
@@ -285,6 +291,19 @@ const FormTypes = (props) => {
             handleFormula(_data.fieldName, calValue);
           }
         });
+    }
+  };
+
+  const handleVlookup = (name, value) => {
+    if (options && options.length) {
+      let result = options.filter((data) => data.optionValue === value);
+      if (result.length) {
+        for (var x in result[0]) {
+          if (x !== "optionLabel" && x !== "optionValue") {
+            setFieldValue(x, result[0][x]);
+          }
+        }
+      }
     }
   };
 
@@ -361,7 +380,6 @@ const FormTypes = (props) => {
           inputComponent: CustomFormat as any,
           inputProps: {
             allowNegative: false,
-            thousandSeparator: true,
           },
         }}
       />
@@ -371,13 +389,53 @@ const FormTypes = (props) => {
       <TextField
         {...rest}
         variant="outlined"
-        type="number"
         label={label}
-        name={name}
         required={required}
+        name={name}
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
+        InputProps={{
+          inputComponent: CustomFormat as any,
+          inputProps: {
+            decimalScale: 2,
+            onValueChange: (values: any) =>
+              setFieldValue(name, values.formattedValue),
+          },
+        }}
+        onChange={
+          onChange
+            ? onChange
+            : (e) => {
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
+        }
+      />
+    </InfoLabel>
+  ) : type === "percent" ? (
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+      <TextField
+        {...rest}
+        variant="outlined"
+        label={label}
+        required={required}
+        name={name}
+        value={values[name]}
+        error={touched[name] && Boolean(errors[name])}
+        helperText={touched[name] && errors[name]}
+        InputProps={{
+          inputComponent: CustomFormat as any,
+          inputProps: {
+            isAllowed: (props) => withValueLimit(props, 100),
+            decimalScale: 2,
+            onValueChange: (values: any) =>
+              setFieldValue(name, values.formattedValue),
+          },
+          endAdornment: "%",
+        }}
         onChange={
           onChange
             ? onChange
@@ -455,7 +513,7 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
-  ) : type === "dropDown" || type === "lookup" ? (
+  ) : type === "dropDown" || type === "lookup" || type === "vlookupDropdown" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
         {...rest}
@@ -471,7 +529,7 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                setFieldValue(
+                handleChange(
                   name,
                   val && val.optionValue ? val.optionValue : ""
                 )
@@ -721,16 +779,30 @@ const FormTypes = (props) => {
   ) : type === "imageUpload" ? (
     <Fragment>
       <Box display="flex" flexDirection="row">
-        <Box>
+        <Box position="relative">
           <Avatar
             src={values[name]}
             style={{ width: 70, height: 70 }}
             alt="org_logo"
           />
+          <Box
+            title={values[name] ? values[name] : "No picture selected"}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            position="absolute"
+            top="0"
+            right="0"
+            width="100%"
+            height="100%"
+          >
+            {isUploading && <CircularProgress size={22} />}
+          </Box>
         </Box>
         <Box>
           <label htmlFor={name}>
             <IconButton
+              title="Add picture"
               color="primary"
               size="small"
               aria-label="upload picture"
@@ -738,6 +810,7 @@ const FormTypes = (props) => {
             >
               <AddCircleIcon />
               <input
+                disabled={isUploading}
                 id={name}
                 name={name}
                 onChange={handleUploadImage}
@@ -750,6 +823,19 @@ const FormTypes = (props) => {
                 type="file"
               />
             </IconButton>
+            {
+              <IconButton
+                disabled={Boolean(!values[name])}
+                title="Remove picture"
+                color="secondary"
+                size="small"
+                aria-label="delete picture"
+                component="span"
+                onClick={() => setFieldValue(name, "")}
+              >
+                <DeleteIcon />
+              </IconButton>
+            }
           </label>
         </Box>
       </Box>
@@ -758,6 +844,7 @@ const FormTypes = (props) => {
     <Fragment>
       <Box display="flex" alignItems="center">
         <input
+          disabled={isUploading}
           id={name}
           name={name}
           onChange={handleUploadFile}
@@ -775,9 +862,27 @@ const FormTypes = (props) => {
           </Button>
         </label>
         <Box marginX={1} />
-        <p className="text-truncate">
-          {values[name] ? values[name] : "No file choosen"}
-        </p>
+
+        <Box flex="1">
+          <p className="text-truncate">
+            {values[name]
+              ? values[name]
+              : isUploading
+              ? "Uploading..."
+              : "No file choosen"}
+          </p>
+        </Box>
+        <IconButton
+          disabled={Boolean(!values[name])}
+          title="Remove File"
+          color="secondary"
+          size="small"
+          aria-label="delete picture"
+          component="span"
+          onClick={() => setFieldValue(name, "")}
+        >
+          <DeleteIcon />
+        </IconButton>
       </Box>
     </Fragment>
   ) : type === "url" ? (
@@ -843,50 +948,6 @@ const FormTypes = (props) => {
           }}
         />
       </MuiPickersUtilsProvider>
-    </InfoLabel>
-  ) : type === "percent" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <TextField
-        {...rest}
-        variant="outlined"
-        label={label}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            isAllowed: (props) => withValueLimit(props, 100),
-            decimalScale: 2,
-            onValueChange: (values: any) =>
-              setFieldValue(name, values.formattedValue),
-          },
-          endAdornment: "%",
-        }}
-      />
-    </InfoLabel>
-  ) : type === "decimal" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <TextField
-        {...rest}
-        variant="outlined"
-        label={label}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            decimalScale: 2,
-            onValueChange: (values: any) =>
-              setFieldValue(name, values.formattedValue),
-          },
-        }}
-      />
     </InfoLabel>
   ) : null;
 };

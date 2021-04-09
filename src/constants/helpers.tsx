@@ -20,34 +20,56 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 
+export const sidebarResource = {
+  brand: "Brand",
+  role: "Role",
+  product: "Product",
+  entity: "Entity",
+  user: "User",
+  termsAndConditions: "Terms & Conditions",
+  doa: "DOA",
+  customerContact: "Customer Contact",
+  customerAccount: "Customer Account",
+  supplierContact: "Supplier Contact",
+  supplierAccount: "Supplier Account",
+  pricing: "Pricing",
+  currencyConvertor: "Currency Convertor",
+  priceBuilder: "Price Builder",
+  quoteBuilder: "Quote Builder",
+  reminder: "Reminder",
+  calendar: "Calendar",
+  flags: "Flags",
+  lead: "Lead",
+  opportunity: "Opportunity",
+};
+
 export const supplierAccount = {
-  api: "supplier-account",
-  route: "supplier-account",
-  resource: "Supplier Account",
-  permission: "Supplier Account"
-}
+  accountApi: "supplier-account",
+  accountRoute: "supplier-account",
+  accountResource: "supplierAccount", //  Key of sidebar object
+  accountPermission: "Supplier Account",
+};
 
 export const customerAccount = {
-  api: "customer-account",
-  route: "customer-account",
-  resource: "Customer Account",
-  permission: "Customer Account"
-}
+  accountApi: "customer-account",
+  accountRoute: "customer-account",
+  accountResource: "customerAccount", //  Key of sidebar object
+  accountPermission: "Customer Account",
+};
 
 export const supplierContact = {
-  api: "supplier-contact",
-  route: "supplier-contact",
-  resource: "Supplier Contact",
-  permission: "Supplier Contact"
-}
+  contactApi: "supplier-contact",
+  contactRoute: "supplier-contact",
+  contactResource: "supplierContact", //  Key of sidebar object
+  contactPermission: "Supplier Contact",
+};
 
 export const customerContact = {
-  api: "customer-contact",
-  route: "customer-contact",
-  resource: "Customer Contact",
-  permission: "Customer Contact"
-}
-
+  contactApi: "customer-contact",
+  contactRoute: "customer-contact",
+  contactResource: "customerContact", //  Key of sidebar object
+  contactPermission: "Customer Contact",
+};
 
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
@@ -102,11 +124,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 };
 
 export const removeEmptyKeys = (obj: object) => {
-  Object.keys(obj).forEach(
-    (k) =>
-      obj[k] !== false && obj[k] === "" && obj[k] !== undefined && delete obj[k]
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v !== "" || null || undefined)
   );
-  return obj;
 };
 
 const isEmailExist = async (email) => {
@@ -161,22 +181,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] =
         input.required && validEmail
           ? yup.string().email().required(`${input.fieldLabel} is required`)
-          : // .test("email", "Email already exist", async function (value) {
-          //   let isvalidEmail = validateEmail(value);
-
-          //   if (isvalidEmail) {
-          //     const { path, createError, resolve } = this;
-          //     let { data } = await checkEmailExist(value);
-          //     if (data) {
-          //       return createError({
-          //         path,
-          //         message: "Email alreday exist",
-          //       });
-          //     }
-          //     return resolve(true);
-          //   }
-          // })
-          yup.string().email(`${input.fieldLabel} must be a valid email`);
+          : yup.string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === "switch" || input.type === "checkBox") {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)
@@ -309,4 +314,61 @@ export const materialTableIcons: any = {
   ViewColumn: forwardRef((props: any, ref: any) => (
     <ViewColumn {...props} ref={ref} />
   )),
+};
+
+interface IPermission {
+  [key: string]: {
+    isCreate: boolean;
+    isRead: boolean;
+    isUpdate: boolean;
+    isDelete: boolean;
+    approveAccount?: boolean;
+  };
+}
+
+export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
+
+  let permissions = {};
+  let data = [...user?.role?.sideBar]
+
+  if (selectedEntity) {
+    if (user?.entity && user.entity.length && selectedEntity) {
+      data = [...data, ...user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource]
+    }
+  }
+  else {
+    data = [...data, ...user?.role?.selectedEntity?.resource];
+  }
+
+  if (data) {
+    const hasApproveAccountPermission = user.user.permissions.approveAccount;
+    const accounts = [
+      sidebarResource.customerAccount,
+      sidebarResource.supplierAccount,
+    ];
+
+    const sidebarFieldsKeys = Object.keys(sidebarResource);
+    const sidebarFieldsValues = Object.values(sidebarResource);
+
+    data.forEach((d) => {
+      const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
+
+      if (indexOfPermission > -1) {
+        let permission = {
+          isCreate: d.isCreate,
+          isRead: d.isRead,
+          isUpdate: d.isUpdate,
+          isDelete: d.isDelete,
+        };
+
+        if (accounts.some((acountType) => acountType === d.name)) {
+          permission["approveAccount"] = hasApproveAccountPermission;
+        }
+
+        permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+      }
+    });
+  }
+
+  return permissions;
 };

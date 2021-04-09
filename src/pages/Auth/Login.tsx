@@ -13,7 +13,7 @@ import { TextField } from "formik-material-ui";
 
 import demoImg from "../../assets/clip-hardworking-man.png";
 import { useData } from "../../StateProvider/Provider";
-import { SET_USER } from "../../StateProvider/actionTypes";
+import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 import axiosInstance from './../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -75,6 +75,9 @@ const Login = () => {
         const { data } = response;
         localStorage.setItem("token", data.token);
         dispatch({ type: SET_USER, payload: data });
+        if (data?.role?.selectedEntity?._id) {
+          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+        }
       })
       .catch((error) => {
         setSubmitting(false);

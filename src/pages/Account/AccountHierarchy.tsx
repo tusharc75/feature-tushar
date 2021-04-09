@@ -4,7 +4,7 @@ import routes from './../../components/Helpers/Routes';
 import { Link } from 'react-router-dom'
 import { materialTableIcons } from './../../constants/helpers';
 
-export default function AccountHierarchy({ data, currentAccountId }) {
+export default function AccountHierarchy({ data, currentAccountId, accountRoute }) {
 
     const commonFieldWidth = 150;
     const options: any = {
@@ -21,9 +21,12 @@ export default function AccountHierarchy({ data, currentAccountId }) {
         {
             title: 'Account Name', field: 'accountName',
             render: (rowData: any) => <div style={{ width: 250 }}>
-                <Link className="link" to={`${routes.accountDetails.path}/${rowData._id}`}>
-                    {rowData.accountName}
-                </Link>
+                {
+                    rowData._id === currentAccountId ? <span>{rowData.accountName}</span> :
+                        <Link className="link" to={`/${accountRoute}/detail/${rowData._id}`}>
+                            {rowData.accountName}
+                        </Link>
+                }
                 {
                     rowData._id === currentAccountId ? <Chip label="Current" size="small" className="ml-2" /> : ""
                 }

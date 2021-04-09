@@ -46,11 +46,11 @@ const useStyles = makeStyles((theme) => ({
 
 const LeadTypes = [
   {
-    key:"All Leads",
+    key: "All Leads",
     value: 1
   },
   {
-    key:"My Leads",
+    key: "My Leads",
     value: 2
   }
 ]
@@ -60,7 +60,7 @@ let leadTimeout
 const Leads = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
-  const { state: { user } }: any = useData();
+  const { state: { user, selectedEntity } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -77,13 +77,13 @@ const Leads = () => {
   const [deleteRec, setDeleteRec] = useState<any>({})
   const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
-  const [entityData, setEntityData] = useState({
-    fields: [],
-    initialValues: {},
-  });
+
 
   useEffect(() => {
-    const data = user?.role?.sideBar;
+    let data
+    if (user?.entity && user.entity.length && selectedEntity) {
+      data = user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource
+    }
 
     if (data) {
       const hasLeadsPermission = data.find(d => d.name == "Lead");
@@ -96,9 +96,10 @@ const Leads = () => {
         });
       }
     }
-  }, [user]);
+  }, [user, selectedEntity]);
 
   useEffect(() => {
+
     let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
     if (leadTimeout) {
       clearTimeout(leadTimeout);
@@ -114,7 +115,7 @@ const Leads = () => {
     if (renderCount > 0) {
       fetchLeads();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query, , selectedType]);
+  }, [query, , selectedType, selectedEntity]);
 
   useEffect(() => {
     let rows = leadData?.map((u) => {
@@ -133,23 +134,25 @@ const Leads = () => {
   }, [leadData])
 
   const fetchLeads = async () => {
-    setLoading(true);
-    let searchParams: any = { ...query, filterLeads: selectedType }
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
-    let api = getSearchQuery("/lead", searchParams)
-    try {
-      axiosInstance()
-        .get(api).then(({ data }) => {
-          setRowCount(data.count)
-          setLeadData(data.data)
-          setLoading(false);
-        })
+    if (selectedEntity) {
+      setLoading(true);
+      let searchParams: any = { ...query, entity: selectedEntity, filterLeads: selectedType }
+      searchParams = searchVal
+        ? { ...searchParams, search: searchVal }
+        : { ...searchParams };
+      let api = getSearchQuery("/lead", searchParams)
+      try {
+        axiosInstance()
+          .get(api).then(({ data }) => {
+            setRowCount(data.count)
+            setLeadData(data.data)
+            setLoading(false);
+          })
 
-    }
-    catch (err) {
-      setLoading(false);
+      }
+      catch (err) {
+        setLoading(false);
+      }
     }
   }
 
@@ -160,34 +163,13 @@ const Leads = () => {
     setSearchVal(e.target.value);
   };
 
-  // ****** ACTIONS BUTTON STUFF *********
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const handleLeadTypeSel = (filteredValue) => {
     setSelectedType(filteredValue);
   };
 
   const handleCreate = () => {
-
-    axiosInstance().get('/field?resource=Lead').then(({ data: { data } }) => {
-
-      const newFields = [];
-      data.filter(d => d.isCreate).map((_f) => newFields.push(_f.fieldData));
-
-      setEntityData({
-        fields: newFields,
-        initialValues: getObjKeys("", newFields),
-      });
-
-      setIsOpen(true)
-
-    });
+    setIsOpen(true)
   }
 
   const handleClose = () => {
@@ -371,7 +353,7 @@ const Leads = () => {
     }
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/lead/remove`, { ids: [...recs] }).then(({ data }) => {
+        .put(`/lead/remove?entity=${selectedEntity}`, { ids: [...recs] }).then(({ data }) => {
           toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
@@ -437,21 +419,21 @@ const Leads = () => {
         </Grid>
       </Grid>
       <Container>
-      <div className="header-panel">
-        <Header
-          selectedType={selectedType}
-          onTypeChange={handleLeadTypeSel}
-          options={LeadTypes}
-          onSearch={handleSearch}
-          searchVal={searchVal}
-          leadPermissions={leadsPermissions}
-          onCreate={handleCreate}
-          showConfirmBox={showConfirmBox}
-          canDelete={dataRows.filter((d) => d.isChecked).length == 0}
-          icon={<HiUserGroup className="headerLogo" />}
-          heading="Leads"
-        />
-      </div>
+        <div className="header-panel">
+          <Header
+            selectedType={selectedType}
+            onTypeChange={handleLeadTypeSel}
+            options={LeadTypes}
+            onSearch={handleSearch}
+            searchVal={searchVal}
+            leadPermissions={leadsPermissions}
+            onCreate={handleCreate}
+            showConfirmBox={showConfirmBox}
+            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+            icon={<HiUserGroup className="headerLogo" />}
+            heading="Leads"
+          />
+        </div>
         {
           isOpen && <ManageLeadDialog
             open={isOpen}
@@ -461,7 +443,7 @@ const Leads = () => {
             dataToUpdate={null}
           />
         }
-     
+
       </Container>
       <Container>
         <div className="listing-grid">

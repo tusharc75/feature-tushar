@@ -3,7 +3,6 @@ import { Box, Button, Grid } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
-import { commonStyle } from '../../Contact/CommonStyles'
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -20,14 +19,14 @@ export default function ManageAccount(props) {
 
     const { state: { user } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
-    
+
     //  Owner, Collaborator Code - Start
     const [formsData, setFormsData] = useState([]);
     const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
 
-    
+
 
     // const [loading, setLoading] = useState(false);
 
@@ -71,10 +70,11 @@ export default function ManageAccount(props) {
     const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
         if (Object.keys(errors).length) {
             entityData.fields.forEach((input) => {
-                if (input.required) {
+                if (input.required || values[input.fieldName]) {
                     setTouched(input.fieldName, true);
                 }
             });
+            setErrors({ ...errors });
         } else {
             handleSubmit(values, saveAndNew, setValues)
             setErrors({});
@@ -190,9 +190,9 @@ export default function ManageAccount(props) {
                                                                                                 isTooltip={true}
                                                                                                 size="small"
                                                                                                 onChange={(event, newValue) => {
-                                                                                                    setFieldValue(field.fieldName, newValue);
+                                                                                                    setFieldValue(field.fieldName, newValue?.description ?? "");
                                                                                                     if (values.isShippingAddressSameAsBillingAddress == true) {
-                                                                                                        setFieldValue("shippingAddress", newValue)
+                                                                                                        setFieldValue("shippingAddress", newValue?.description ?? "")
                                                                                                     }
                                                                                                 }}
                                                                                             /> : field.fieldName == "shippingAddress" ?
@@ -210,6 +210,9 @@ export default function ManageAccount(props) {
                                                                                                     isTooltip={true}
                                                                                                     size="small"
                                                                                                     disabled={values.isShippingAddressSameAsBillingAddress == true}
+                                                                                                    onChange={(event, newValue) => {
+                                                                                                        setFieldValue(field.fieldName, newValue?.description ?? "");
+                                                                                                    }}
                                                                                                 /> : <FormTypes
                                                                                                     // {...rest}
                                                                                                     values={values}
