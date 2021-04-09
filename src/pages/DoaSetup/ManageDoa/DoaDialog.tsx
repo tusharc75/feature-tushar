@@ -12,6 +12,7 @@ import {
     DialogTitle,
     DialogActions,
 } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 import { Formik, Form, Field, FieldArray } from 'formik';
 import { Add, Delete } from "@material-ui/icons";
 import NumberFormat from "react-number-format";
@@ -71,29 +72,25 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
     }, [fetchDoa]);
 
     const handleSubmit = async (values) => {
-        if (Object.keys(values).length) {
-            const doaArray = values.map(item => {
-                if (item.amount != 0 && item.name != '')
-                    return {
-                        user: item.id,
-                        amount: Number(item.amount)
-                    };
+        const doaArray = values.map(item => {
+            if (item.amount != 0 && item.name != '')
+                return {
+                    user: item.id,
+                    amount: Number(item.amount)
+                };
+        });
+        const userDoa = { _id: userSelected.id, doa: doaArray };
+        setLoading(true)
+        axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
+            .then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setLoading(false)
+                setOpen(false)
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoading(false);
             });
-            const userDoa = { _id: userSelected.id, doa: doaArray };
-            setLoading(true)
-            axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
-                .then(({ data }) => {
-                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-                    setLoading(false)
-                    setOpen(false)
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error);
-                    setLoading(false);
-                });
-        } else {
-            toastConfig.setToastConfig({ open: true, type: "error", message: 'Please add user' });
 
-        }
     }
 
 
@@ -152,7 +149,25 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                             >
                                                                                 <Grid item md={1}>{index + 1}</Grid>
                                                                                 <Grid item md={5}>
-                                                                                    <Field
+
+                                                                                    <Autocomplete
+                                                                                        id="combo-box-demo"
+                                                                                        value={user.find(v => v.name == userVal.name)}
+                                                                                        options={user.filter(element => !values.users.map(e=>e.name).includes(element.name))}
+                                                                                        getOptionLabel={(option: any) => option.name}
+                                                                                        style={{ width: 200 }}
+                                                                                        onChange={(event, newValue) => {
+                                                                                            arrayHelpers.replace(index, {
+                                                                                                ...values.users[index],
+                                                                                                ["name"]: newValue.name,
+                                                                                                ["id"]: newValue.id,
+                                                                                            });
+                                                                                        }}
+                                                                                        
+                                                                                        renderInput={(params) => <TextField {...params} variant="outlined" 
+                                                                                        />}
+                                                                                    />
+                                                                                    {/* <Field
                                                                                         fullWidth
                                                                                         variant="outlined"
                                                                                         component={TextField}
@@ -174,6 +189,7 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                                         {user
                                                                                             // ? user.filter(element => !values.users.map(e=>e.name).includes(element.name)).map((option, i) => (
                                                                                             ? user.map((option, i) => (
+                                                                                                !values.users.map(e=>e.name).includes(option.name)?(
                                                                                                 <MenuItem
                                                                                                     key={i}
                                                                                                     placeholder="Select Users"
@@ -182,9 +198,10 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                                                 >
                                                                                                     {option.name}
                                                                                                 </MenuItem>
+                                                                                                ):null
                                                                                             ))
                                                                                             : null}
-                                                                                    </Field>
+                                                                                    </Field> */}
                                                                                 </Grid>
                                                                                 <Grid item md={4}>
                                                                                     <Field
@@ -199,7 +216,7 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                                             ...values.users[index],
                                                                                             ["amount"]: e.target.value.replace(/[^0-9]/g, '')
                                                                                         })}
-                                                                                    
+
                                                                                     />
                                                                                 </Grid>
                                                                                 <span><Add className={classes.addIcon} onClick={() => arrayHelpers.push({ "id": "", "name": "", "amount": 0 })} /></span>
