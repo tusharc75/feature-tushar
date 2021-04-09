@@ -19,7 +19,7 @@ import BrandHeader from "../../components/BrandHeader";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import NewStepper from "../../components/Helpers/NewStepper";
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import DoaDialog from "./ManageDoa/DoaDialog";
+import DoaDialog from "./ManageDoa/ManageDoaDialog";
 import DoaHeader from "./DoaHeader";
 import { GiHiveMind } from "react-icons/gi";
 import routes from './../../components/Helpers/Routes';
@@ -37,7 +37,7 @@ import { FaUserAltSlash, FaUserCheck } from "react-icons/fa";
 const useStyles = makeStyles((theme) => ({
   actionBtn: {
     background: theme.palette.primary.light,  //  lightBg
-    color: "#fff",
+    color: theme.palette.error.contrastText,
     "&:hover": {
       background: theme.palette.primary.light,  //  lightBg
     },
@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   box: {
-    backgroundColor: "#E9F1FF",
+    backgroundColor: theme.palette.primary.light,
     borderRadius: 8,
     padding: theme.spacing(1.5, 2),
     margin: theme.spacing(0, 2),
@@ -77,9 +77,9 @@ const useStyles = makeStyles((theme) => ({
   },
 
   newBox: {
-    backgroundColor: "#11A1FD",
+    backgroundColor: theme.palette.primary.light,
     borderRadius: 5,
-    color: "#fff",
+    color: theme.palette.error.contrastText,
     display: "flex",
     padding: theme.spacing(1, 4),
     justifyContent: "space-evenly",
@@ -109,12 +109,7 @@ const useStyles = makeStyles((theme) => ({
     margin: 2
   },
 
-  disabled: {
-    "&:hover": {
-      cursor: "no-drop"
-    },
-    color: "#91A2A9"
-  },
+  
   linksContainer: {
     display: "flex",
   },
