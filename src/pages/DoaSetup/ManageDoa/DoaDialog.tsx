@@ -44,15 +44,13 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<any[]>([{ id: user[0].id, name: user[0].name, amount: 0 }]);
-    // users = userSelected.length > 0 ? userSelected : [{ id: user[0].id, name: user[0].name, amount: 0 }];
-
     const fetchDoa = useCallback(() => {
         setLoading(true);
         setUsers(([{ id: user[0].id, name: user[0].name, amount: 0 }]))
         axiosInstance()
             .get(`/doa/${userSelected.id}`)
             .then(({ data: { data, count } }) => {
-                
+
                 setUsers(data?.doa?.map(item => {
                     return {
                         id: item.user?._id,
@@ -75,10 +73,11 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
     const handleSubmit = async (values) => {
         if (Object.keys(values).length) {
             const doaArray = values.map(item => {
-                return {
-                    user: item.id,
-                    amount: Number(item.amount)
-                };
+                if (item.amount != 0 && item.name != '')
+                    return {
+                        user: item.id,
+                        amount: Number(item.amount)
+                    };
             });
             const userDoa = { _id: userSelected.id, doa: doaArray };
             setLoading(true)
@@ -97,29 +96,7 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
         }
     }
 
-    const currencies = [
-        { label: "USD", sign: "$", groupStyle: "thousand" },
-        { label: "AUD", sign: "$", groupStyle: "thousand" },
-        { label: "INR", sign: "₹", groupStyle: "lakh" }
-    ];
 
-    const CurrencyFormat = (props) => {
-        const { inputRef, id, ...other } = props;
-        const currencySelected = id
-            ? currencies.find(em => em.label === id)
-            : currencies[0];
-
-        return (
-            <NumberFormat
-                {...other}
-                thousandSeparator
-                thousandsGroupStyle={currencySelected.groupStyle}
-                prefix={currencySelected.sign}
-                isNumericString
-                getInputRef={inputRef}
-            />
-        );
-    };
     return (
         <Dialog
             open={open}
@@ -127,157 +104,159 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
             scroll="body"
         >
             {!loading &&
-            <>
-            <CustomDialogHeader title="Add Doa" />
-            <Formik
-                initialValues={{ users: users }}
-                onSubmit={() => { }}
-                render={({ values }) => (
-                    <>
-                        <DialogContent>
-                            <Form>
-                                <Container>
+                <>
+                    <CustomDialogHeader title="Add Doa" />
+                    <Formik
+                        initialValues={{ users: users }}
+                        onSubmit={() => { }}
+                        render={({ values }) => (
+                            <>
+                                <DialogContent>
+                                    <Form>
+                                        <Container>
+                                            <Grid
+                                                container
+                                                direction="row"
+                                                justify="space-evenly"
+                                                alignItems="center"
+                                            >
+                                                <Grid item md={12}>
+                                                    <Box>
+                                                        <Grid
+                                                            container
+                                                            spacing={2}
+                                                            direction="row"
+                                                            justify="flex-start"
+                                                            alignItems="center"
+                                                        >
+                                                            <Grid item md={1}> Sr </Grid>
+                                                            <Grid item md={5}> Users </Grid>
+                                                            <Grid item md={4}> Amount </Grid>
+                                                            <Grid item md={2}></Grid>
+                                                        </Grid>
+                                                    </Box>
+                                                    <Box>
+                                                        <FieldArray
+                                                            name="users"
+                                                            render={arrayHelpers => (
+                                                                <div>
+                                                                    {values.users && values.users.length > 0 ? (
+                                                                        values.users.map((userVal, index) => (
+                                                                            <Grid
+                                                                                container
+                                                                                spacing={2}
+                                                                                direction="row"
+                                                                                justify="flex-start"
+                                                                                alignItems="center"
+                                                                                key={index}
+                                                                            >
+                                                                                <Grid item md={1}>{index + 1}</Grid>
+                                                                                <Grid item md={5}>
+                                                                                    <Field
+                                                                                        fullWidth
+                                                                                        variant="outlined"
+                                                                                        component={TextField}
+                                                                                        type="text"
+                                                                                        select
+                                                                                        name="name"
+                                                                                        defaultValue={userVal.name}
+                                                                                        onChange={(e) => {
+
+                                                                                            arrayHelpers.replace(index, {
+                                                                                                ...values.users[index],
+                                                                                                ["name"]: e.target.value,
+                                                                                                ["id"]: user.find(d => d.name == (e.target.value))?.id,
+                                                                                            });
+
+                                                                                        }
+                                                                                        }
+                                                                                    >
+                                                                                        {user
+                                                                                            // ? user.filter(element => !values.users.map(e=>e.name).includes(element.name)).map((option, i) => (
+                                                                                            ? user.map((option, i) => (
+                                                                                                <MenuItem
+                                                                                                    key={i}
+                                                                                                    placeholder="Select Users"
+                                                                                                    value={option.name}
+                                                                                                    selected={userVal.selected}
+                                                                                                >
+                                                                                                    {option.name}
+                                                                                                </MenuItem>
+                                                                                            ))
+                                                                                            : null}
+                                                                                    </Field>
+                                                                                </Grid>
+                                                                                <Grid item md={4}>
+                                                                                    <Field
+                                                                                        fullWidth
+                                                                                        variant="outlined"
+                                                                                        type="text"
+                                                                                        component={TextField}
+                                                                                        name="amount"
+                                                                                        placeholder="Enter Amount"
+                                                                                        value={userVal.amount}
+                                                                                        onChange={(e) => arrayHelpers.replace(index, {
+                                                                                            ...values.users[index],
+                                                                                            ["amount"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                        })}
+                                                                                    
+                                                                                    />
+                                                                                </Grid>
+                                                                                <span><Add className={classes.addIcon} onClick={() => arrayHelpers.push({ "id": "", "name": "", "amount": 0 })} /></span>
+                                                                                <span><Delete className={classes.deleteIcon} onClick={() => arrayHelpers.remove(index)} /></span>
+                                                                            </Grid>
+                                                                        ))
+                                                                    ) : (
+                                                                        <Grid item md={2}>
+                                                                            <div>
+                                                                                <span><Add className={classes.addIcon} /></span>
+                                                                                <span><Delete className={classes.deleteIcon} /></span>
+                                                                            </div>
+                                                                        </Grid>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        />
+                                                    </Box>
+                                                </Grid>
+                                            </Grid>
+                                        </Container>
+                                    </Form>
+
+                                </DialogContent>
+
+                                <DialogActions>
                                     <Grid
                                         container
                                         direction="row"
-                                        justify="space-evenly"
-                                        alignItems="center"
+                                        justify="space-between"
+                                        alignItems="flex-start"
+                                        className={classes.btnPadding}
                                     >
-                                        <Grid item md={12}>
-                                            <Box>
-                                                <Grid
-                                                    container
-                                                    spacing={2}
-                                                    direction="row"
-                                                    justify="flex-start"
-                                                    alignItems="center"
-                                                >
-                                                    <Grid item md={1}> Sr </Grid>
-                                                    <Grid item md={5}> Users </Grid>
-                                                    <Grid item md={4}> Amount </Grid>
-                                                    <Grid item md={2}></Grid>
-                                                </Grid>
-                                            </Box>
-                                            <Box>
-                                                <FieldArray
-                                                    name="users"
-                                                    render={arrayHelpers => (
-                                                        <div>
-                                                            {values.users && values.users.length > 0 ? (
-                                                                values.users.map((userVal, index) => (
-                                                                    <Grid
-                                                                        container
-                                                                        spacing={2}
-                                                                        direction="row"
-                                                                        justify="flex-start"
-                                                                        alignItems="center"
-                                                                        key={index}
-                                                                    >
-                                                                        <Grid item md={1}>{index + 1}</Grid>
-                                                                        <Grid item md={5}>
-                                                                            <Field
-                                                                                fullWidth
-                                                                                variant="outlined"
-                                                                                component={TextField}
-                                                                                type="text"
-                                                                                select
-                                                                                name="name"
-                                                                                defaultValue={userVal.name}
-                                                                                onChange={(e) => arrayHelpers.replace(index, {
-                                                                                    ...values.users[index],
-                                                                                    ["name"]: e.target.value,
-                                                                                    ["id"]: user.find(d => d.name == (e.target.value))?.id
-                                                                                })}
-                                                                            >
-                                                                                {user
-                                                                                    ? user.map((option, i) => (
-                                                                                        <MenuItem
-                                                                                            key={i}
-                                                                                            placeholder="Select Users"
-                                                                                            value={option.name}
-                                                                                            selected={userVal.selected}
-                                                                                        >
-                                                                                            {option.name}
-                                                                                        </MenuItem>
-                                                                                    ))
-                                                                                    : null}
-                                                                            </Field>
-                                                                        </Grid>
-                                                                            <Grid item md={4}>
-                                                                            <Field
-                                                                                fullWidth
-                                                                                variant="outlined"
-                                                                                type="text"
-                                                                                component={TextField}
-                                                                                name="amount"
-                                                                                placeholder="Enter Amount"
-                                                                                value={userVal.amount}
-                                                                                // id={userVal.id}
-                                                                                id={userVal.currency}
-                                                                                onChange={(e) => arrayHelpers.replace(index, {
-                                                                                    ...values.users[index],
-                                                                                    ["amount"]: e.target.value.replace(/[^0-9]/g, '')
-                                                                                })}
-                                                                                InputProps={{
-                                                                                    inputComponent: CurrencyFormat,
-                                                                                }}
-                                                                            />
-                                                                        </Grid>
-                                                                        <span><Add className={classes.addIcon} onClick={() => arrayHelpers.push({ "id": "", "name": "", "amount": 0 })} /></span>
-                                                                        <span><Delete className={classes.deleteIcon} onClick={() => arrayHelpers.remove(index)} /></span>
-                                                                    </Grid>
-                                                                ))
-                                                            ) : (
-                                                                <Grid item md={2}>
-                                                                    <div>
-                                                                        <span><Add className={classes.addIcon} /></span>
-                                                                        <span><Delete className={classes.deleteIcon} /></span>
-                                                                    </div>
-                                                                </Grid>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                />
-                                            </Box>
-                                        </Grid>
+                                        <Button
+                                            onClick={() => setOpen(false)}
+                                            variant="contained"
+                                        >
+                                            Close
+                                </Button>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            type="submit"
+                                            onClick={() => {
+                                                handleSubmit(values.users)
+                                            }}
+                                        >
+                                            Save
+                                </Button>
                                     </Grid>
-                                </Container>
-                            </Form>
+                                </DialogActions>
+                            </>
+                        )}
+                    />
 
-                        </DialogContent>
-
-                        <DialogActions>
-                            <Grid
-                                container
-                                direction="row"
-                                justify="space-between"
-                                alignItems="flex-start"
-                                className={classes.btnPadding}
-                            >
-                                <Button
-                                    onClick={() => setOpen(false)}
-                                    variant="contained"
-                                >
-                                    Close
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    type="submit"
-                                    onClick={() => {
-                                        handleSubmit(values.users)
-                                    }}
-                                >
-                                    Save
-                                </Button>
-                            </Grid>
-                        </DialogActions>
-                    </>
-                )}
-            />
-
-            </>
-        }
+                </>
+            }
         </Dialog>
     )
 }
