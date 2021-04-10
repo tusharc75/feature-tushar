@@ -27,6 +27,13 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { Tooltip } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 
+const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
+    if (this.isType(value) && value !== null) {
+        return value;
+    }
+    return originalValue ? originalValue.split(/[\s,]+/) : [];
+}).of(Yup.string().email(({ value }) => `${value} is not a valid email`));
+
 const EmailSchema = Yup.object().shape({
     name: Yup.string()
         .required("please enter subject"),
@@ -38,6 +45,9 @@ const EmailSchema = Yup.object().shape({
             return originalValue ? originalValue.split(/[\s,]+/) : [];
         })
         .of(Yup.string().email(({ value }) => `${value} is not a valid email`)),
+    // to: emailSchemaHelper.min(1),
+    // cc: emailSchemaHelper,   //  Commented by punit
+
 });
 
 
@@ -195,6 +205,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     variant="outlined"
                                                     label="Cc"
                                                     margin="dense"
+                                                    error={touched["cc"] && Boolean(errors["cc"])}
+                                                    helperText={touched["cc"] && errors["cc"]}
                                                     placeholder="Email" />
                                             )}
                                             value={values["cc"]}
