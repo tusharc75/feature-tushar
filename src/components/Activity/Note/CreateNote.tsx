@@ -3,7 +3,6 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { TextField as TextFieldFormik, Select } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
@@ -82,21 +81,25 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
     const classes = useStyles();
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <Form>
+            <Form autoComplete="off" autoCorrect="off" noValidate >
                 <CustomDialogHeader onClose={handleClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
                 <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
-                                    <Field
-                                        component={TextFieldFormik}
-                                        fullWidth
-                                        margin="dense"
+                                    <TextField
+                                        variant="outlined"
                                         type="text"
                                         label="Note Title"
+                                        required={true}
                                         name="name"
-                                        variant="outlined"
+                                        fullWidth
+                                        margin="dense"
+                                        value={values["name"]}
+                                        error={touched["name"] && Boolean(errors["name"])}
+                                        helperText={touched["name"] && errors["name"]}
+                                        onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                     />
                                     <Box mt={2}>
                                         <RichTextEditor
