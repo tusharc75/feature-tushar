@@ -27,25 +27,18 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { Tooltip } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 
+const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
+    if (this.isType(value) && value !== null) {
+        return value;
+    }
+    return originalValue ? originalValue.split(/[\s,]+/) : [];
+})
+    .of(Yup.string().email(({ value }) => `${value} is not a valid email`));
 const EmailSchema = Yup.object().shape({
     name: Yup.string()
         .required("please enter subject"),
-    to: Yup.array().min(1)
-        .transform(function (value, originalValue) {
-            if (this.isType(value) && value !== null) {
-                return value;
-            }
-            return originalValue ? originalValue.split(/[\s,]+/) : [];
-        })
-        .of(Yup.string().email(({ value }) => `${value} is not a valid email`)),
-    cc: Yup.array()
-        .transform(function (value, originalValue) {
-            if (this.isType(value) && value !== null) {
-                return value;
-            }
-            return originalValue ? originalValue.split(/[\s,]+/) : [];
-        })
-        .of(Yup.string().email(({ value }) => `${value} is not a valid email`)),
+    to: emailSchemaHelper.min(1),
+    cc: emailSchemaHelper,
 
 });
 
