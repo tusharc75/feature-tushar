@@ -31,7 +31,22 @@ const EmailSchema = Yup.object().shape({
     name: Yup.string()
         .required("please enter subject"),
     to: Yup.array().min(1)
-        .required("please enter subject"),
+        .transform(function (value, originalValue) {
+            if (this.isType(value) && value !== null) {
+                return value;
+            }
+            return originalValue ? originalValue.split(/[\s,]+/) : [];
+        })
+        .of(Yup.string().email(({ value }) => `${value} is not a valid email`)),
+    cc: Yup.array()
+        .transform(function (value, originalValue) {
+            if (this.isType(value) && value !== null) {
+                return value;
+            }
+            return originalValue ? originalValue.split(/[\s,]+/) : [];
+        })
+        .of(Yup.string().email(({ value }) => `${value} is not a valid email`)),
+
 });
 
 
@@ -176,6 +191,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     variant="outlined"
                                                     label="Cc"
                                                     margin="dense"
+                                                    error={touched["cc"] && Boolean(errors["cc"])}
+                                                    helperText={touched["cc"] && errors["cc"]}
                                                     placeholder="Email" />
                                             )}
                                             value={values["cc"]}
