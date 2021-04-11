@@ -253,7 +253,6 @@ const Leads = () => {
                   </span>
               </h5>
           ) : <NoDataCell />
-      // renderCell: (params) => <CustomRenderCell value={params?.value?.createdBy?.optionLabel} />
   },
   {
       field: "updatedBy",
@@ -262,14 +261,14 @@ const Leads = () => {
       sortable: false,
       filterable: false,
       renderCell: (params) =>
-          params?.value?.user ? (
+         params?.value && params?.value?.user ? (
               <h5 className="updateBy">
                   {params.value.user.firstName}
                   <span
                       title={params.value.date}
                       className="updatedAtTime"
                   >
-                      {moment(params?.value?.date?.slice(0, 10)).format(
+                      {moment(params.value.date.slice(0, 10)).format(
                           'MMM Do, YYYY'
                       )}
                   </span>
@@ -277,7 +276,6 @@ const Leads = () => {
           ) :
               <NoDataCell />
 
-      // renderCell: (params) => <CustomRenderCell value={params?.value?.updatedBy?.optionLabel} />
   },
     {
       field: "phone", headerName: "Phone", width: 250,

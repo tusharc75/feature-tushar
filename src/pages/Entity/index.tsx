@@ -39,6 +39,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import Loader from "../../components/Loader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -112,14 +113,14 @@ const Entity: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((entity: any) => ({
-          id: entity._id,
-          isChecked: false,
-          name: entity.entityName,
-          address: entity.address,
-          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-          createdBy: entity?.createdBy,
-          updatedBy: entity?.updatedBy,
-        }))
+        id: entity._id,
+        isChecked: false,
+        name: entity.entityName,
+        address: entity.address,
+        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
+        createdBy: entity?.createdBy,
+        updatedBy: entity?.updatedBy,
+      }))
       : [];
     setDataRows(rows);
   };
@@ -197,19 +198,20 @@ const Entity: FC = () => {
       headerName: "Created By",
       width: 150,
       renderCell: (params: any) => (
-        <h5 className="createBy">
-        {params?.value?.user?.firstName}
-        <span
-            className="createdAtTime"
-            title={`${params?.value?.user?.firstName} • ${moment(
+        params?.value && params?.value?.user ?
+          (<h5 className="createBy">
+            {params?.value?.user?.firstName}
+            <span
+              className="createdAtTime"
+              title={`${params?.value?.user?.firstName} • ${moment(
                 params?.value?.date?.slice(0, 10)
-            ).format('MMM Do, YYYY')}`}
-        >
-            {moment(params?.value?.date?.slice(0, 10)).format(
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params?.value?.date?.slice(0, 10)).format(
                 'MMM Do, YYYY'
-            )}
-        </span>
-    </h5>
+              )}
+            </span>
+          </h5>) : <NoDataCell />
       ),
     },
     {
@@ -217,19 +219,20 @@ const Entity: FC = () => {
       headerName: "Updated By",
       width: 150,
       renderCell: (params: any) => (
-        <h5 className="updateBy">
-        {params?.value?.user?.firstName}
-        <span
-            className="updatedAtTime"
-            title={`${params?.value?.user?.firstName} • ${moment(
-                params?.value?.date?.slice(0, 10)
-            ).format('MMM Do, YYYY')}`}
-        >
-            {moment(params?.value?.date?.slice(0, 10)).format(
+        params?.value && params?.value?.user ?
+          (<h5 className="updateBy">
+            {params.value.user.firstName}
+            <span
+              className="updatedAtTime"
+              title={`${params.value.user.firstName} • ${moment(
+                params.value.date.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params.value.date.slice(0, 10)).format(
                 'MMM Do, YYYY'
-            )}
-        </span>
-    </h5>
+              )}
+            </span>
+          </h5>) : <NoDataCell />
       ),
     },
 
@@ -604,9 +607,8 @@ const Entity: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
