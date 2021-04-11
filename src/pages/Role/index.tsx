@@ -1,4 +1,4 @@
-import { useState, FC, useCallback, useEffect, useContext } from "react";
+import React, { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
   Chip,
@@ -28,6 +28,7 @@ import { useData } from "../../StateProvider/Provider";
 
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CreateRole from "./CreateRole";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -126,13 +127,15 @@ const Roles: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((role: any) => ({
-          id: role._id,
-          isChecked: false,
-          name: role.name,
-          description: role.description,
-          type: `${role.type === 1 ? "Global" : "Regional"} Role`,
-          createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
-        }))
+        id: role._id,
+        isChecked: false,
+        name: role.name,
+        description: role.description,
+        type: `${role.type === 1 ? "Global" : "Regional"} Role`,
+        createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
+        createdBy: role.createdBy,
+        updatedBy: role.updatedBy,
+      }))
       : [];
 
     setDataRows(rows);
@@ -205,17 +208,63 @@ const Roles: FC = () => {
         </p>
       ),
     },
+    // {
+    //   field: "createdAt",
+    //   headerName: "Created At",
+    //   width: 150,
+    //   renderCell: (params: any) => (
+    //     <p title={`Created At • ${params.value}`} className="text-truncate">
+    //       {params.value}
+    //     </p>
+    //   ),
+    // },
     {
-      field: "createdAt",
-      headerName: "Created At",
-      width: 150,
-      renderCell: (params: any) => (
-        <p title={`Created At • ${params.value}`} className="text-truncate">
-          {params.value}
-        </p>
-      ),
+      field: "createdBy",
+      headerName: "Created By",
+      width: 250,
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: any) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="createBy">
+            {params.value.user.firstName}
+            <span
+              className="createdAtTime"
+              title={`${params.value.user.firstName} • ${moment(
+                params.value.date.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params.value.date.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>
+        ) : <NoDataCell />
     },
+    {
+      field: "updatedBy",
+      headerName: "Updated By",
+      width: 250,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: any) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="updateBy">
+            {params.value.user.firstName}
+            <span
+              title={`${params.value.user.firstName} • ${params.value.date}`}
+              className="updatedAtTime"
+            >
+              {moment(params.value.date.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>
+        ) :
+          <NoDataCell />
 
+    },
     {
       field: "actions",
       headerName: "Actions ",
@@ -463,9 +512,8 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete role ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

@@ -1,9 +1,20 @@
-
-
-.nameLink{
-    color: #0645ad;
-    cursor: pointer;
-  }
-.nameLink:hover{
-    text-decoration: underline;
-  }
+.nameLink {
+  color: #0645ad;
+  cursor: pointer;
+}
+.nameLink:hover {
+  text-decoration: underline;
+}
+.updatedAtTime,
+.createdAtTime {
+  font-size: 0.6 rem;
+  line-height: 1 rem;
+  display: block;
+  font-weight: lighter;
+}
+.updateBy,
+.createBy {
+  font-size: 0.8rem;
+  line-height: 1rem;
+  display: block;
+}
