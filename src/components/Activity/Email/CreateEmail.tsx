@@ -32,13 +32,21 @@ const emailSchemaHelper = Yup.array().transform(function (value, originalValue) 
         return value;
     }
     return originalValue ? originalValue.split(/[\s,]+/) : [];
-})
-    .of(Yup.string().email(({ value }) => `${value} is not a valid email`));
+}).of(Yup.string().email(({ value }) => `${value} is not a valid email`));
+
 const EmailSchema = Yup.object().shape({
     name: Yup.string()
         .required("please enter subject"),
-    to: emailSchemaHelper.min(1),
-    cc: emailSchemaHelper,
+    to: Yup.array().min(1)
+        .transform(function (value, originalValue) {
+            if (this.isType(value) && value !== null) {
+                return value;
+            }
+            return originalValue ? originalValue.split(/[\s,]+/) : [];
+        })
+        .of(Yup.string().email(({ value }) => `${value} is not a valid email`)),
+    // to: emailSchemaHelper.min(1),
+    // cc: emailSchemaHelper,   //  Commented by punit
 
 });
 
@@ -106,7 +114,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
 
     return (initialValues && <Formik initialValues={initialValues} validationSchema={EmailSchema} onSubmit={handleSave} onKeyPress={onKeyPress}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <Form>
+            <Form autoComplete="off" autoCorrect="off" noValidate >
                 <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
                 <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -133,14 +141,18 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                 </Fragment> :
                                 <Grid container spacing={3}>
                                     <Grid item xs={12}>
-                                        <Field
-                                            component={TextFieldFormik}
-                                            fullWidth
-                                            margin="dense"
+                                        <TextField
+                                            variant="outlined"
                                             type="text"
                                             label="Subject"
+                                            required={true}
                                             name="name"
-                                            variant="outlined"
+                                            fullWidth
+                                            margin="dense"
+                                            value={values["name"]}
+                                            error={touched["name"] && Boolean(errors["name"])}
+                                            helperText={touched["name"] && errors["name"]}
+                                            onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                         <Autocomplete
                                             multiple
@@ -157,17 +169,26 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     variant="outlined"
                                                     label="To"
                                                     margin="dense"
+                                                    required={true}
                                                     error={touched["to"] && Boolean(errors["to"])}
                                                     helperText={touched["to"] && errors["to"]}
                                                     placeholder="Email" />
                                             )}
                                             value={values["to"]}
                                             onBlur={(e: any) => {
-                                                if (e.target.value && e.target.value.trim() != "") {
+                                                if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
                                                     setFieldValue("to", [...values["to"], e.target.value])
                                                 }
                                             }}
-                                            onChange={(e, value) => setFieldValue("to", value)}
+                                            onChange={(e, value) => {
+                                                let val = []
+                                                for (var email of value) {
+                                                    if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+                                                        val.push(email)
+                                                    }
+                                                }
+                                                setFieldValue("to", val)
+                                            }}
                                         />
                                         <Autocomplete
                                             multiple
@@ -190,11 +211,19 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                             )}
                                             value={values["cc"]}
                                             onBlur={(e: any) => {
-                                                if (e.target.value && e.target.value.trim() != "") {
+                                                if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
                                                     setFieldValue("cc", [...values["cc"], e.target.value])
                                                 }
                                             }}
-                                            onChange={(e, value) => setFieldValue("cc", value)}
+                                            onChange={(e, value) => {
+                                                let val = []
+                                                for (var email of value) {
+                                                    if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+                                                        val.push(email)
+                                                    }
+                                                }
+                                                setFieldValue("cc", val)
+                                            }}
                                         />
                                         <Box mt={2}>
                                             <RichTextEditor
