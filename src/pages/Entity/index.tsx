@@ -39,6 +39,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import Loader from "../../components/Loader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -93,6 +94,7 @@ const Entity: FC = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
+
         setEntities(data);
         getRows(data);
         setRowCount(count);
@@ -111,12 +113,14 @@ const Entity: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((entity: any) => ({
-          id: entity._id,
-          isChecked: false,
-          name: entity.entityName,
-          address: entity.address,
-          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-        }))
+        id: entity._id,
+        isChecked: false,
+        name: entity.entityName,
+        address: entity.address,
+        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
+        createdBy: entity?.createdBy,
+        updatedBy: entity?.updatedBy,
+      }))
       : [];
     setDataRows(rows);
   };
@@ -179,14 +183,56 @@ const Entity: FC = () => {
         </p>
       ),
     },
+    // {
+    //   field: "createdAt",
+    //   headerName: "Created At",
+    //   width: 150,
+    //   renderCell: (params: any) => (
+    //     <p title={`Created At • ${params.value}`} className="text-truncate">
+    //       {params?.value}
+    //     </p>
+    //   ),
+    // },
     {
-      field: "createdAt",
-      headerName: "Created At",
+      field: "createdBy",
+      headerName: "Created By",
       width: 150,
       renderCell: (params: any) => (
-        <p title={`Created At • ${params.value}`} className="text-truncate">
-          {params.value}
-        </p>
+        params?.value && params?.value?.user ?
+          (<h5 className="createBy">
+            {params?.value?.user?.firstName}
+            <span
+              className="createdAtTime"
+              title={`${params?.value?.user?.firstName} • ${moment(
+                params?.value?.date?.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params?.value?.date?.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>) : <NoDataCell />
+      ),
+    },
+    {
+      field: "updatedBy",
+      headerName: "Updated By",
+      width: 150,
+      renderCell: (params: any) => (
+        params?.value && params?.value?.user ?
+          (<h5 className="updateBy">
+            {params.value.user.firstName}
+            <span
+              className="updatedAtTime"
+              title={`${params.value.user.firstName} • ${moment(
+                params.value.date.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params.value.date.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>) : <NoDataCell />
       ),
     },
 
@@ -561,9 +607,8 @@ const Entity: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

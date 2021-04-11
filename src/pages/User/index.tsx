@@ -1,4 +1,4 @@
-import { useState, FC, useCallback, useEffect, useContext } from "react";
+import React, { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
   Grid,
@@ -28,6 +28,7 @@ import CreateUser from "./CreateUser";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -130,6 +131,8 @@ const User: FC = () => {
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
         createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+        createdBy: user.createdBy,
+        updatedBy: user.updatedBy,
         status: user.blocked ? user.blocked : false,
       }))
       : [];
@@ -214,17 +217,64 @@ const User: FC = () => {
         </p>
       ),
     },
+    // {
+    //   field: "createdAt",
+    //   headerName: "Created At",
+    //   width: 200,
+    //   renderCell: (params: any) => (
+    //     <p title={`Created At • ${params.value}`} className="text-truncate">
+    //       {params.value}
+    //     </p>
+    //   ),
+    // },
     {
-      field: "createdAt",
-      headerName: "Created At",
-      width: 200,
-      renderCell: (params: any) => (
-        <p title={`Created At • ${params.value}`} className="text-truncate">
-          {params.value}
-        </p>
-      ),
-    },
+      field: "createdBy",
+      headerName: "Created By",
+      width: 250,
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: any) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="createBy">
+            {params.value.user.firstName}
+            <span
+              className="createdAtTime"
+              title={`${params.value.user.firstName} • ${moment(
+                params.value.date.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params.value.date.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>
 
+        ) : <NoDataCell />
+    },
+    {
+      field: "updatedBy",
+      headerName: "Updated By",
+      width: 250,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) =>
+        params?.value?.user ? (
+          <h5 className="updateBy">
+            {params?.value?.user?.firstName}
+            <span
+              title={params?.value?.date}
+              className="updatedAtTime"
+            >
+              {moment(params?.value?.date?.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>
+        ) :
+          <NoDataCell />
+
+    },
     {
       field: "actions",
       headerName: "Actions ",
