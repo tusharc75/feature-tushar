@@ -40,6 +40,8 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
 import { sidebarResource } from '../../constants/helpers';
+import moment from 'moment';
+import NoDataCell from '../../components/Helpers/NoDataCell';
 
 
 const ContactTypes = [
@@ -178,6 +180,40 @@ export default function Contact(props) {
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
+            field: "createdBy", headerName: "Created By", width: 250,
+            renderCell: (params) => params?.value && params?.value?.user ?
+                (<h5 className="createBy">
+                    {params.value.user.firstName}
+                    <span
+                        className="createdAtTime"
+                        title={`${params.value.user.firstName} • ${moment(
+                            params.value.date.slice(0, 10)
+                        ).format('MMM Do, YYYY')}`}
+                    >
+                        {moment(params.value.date.slice(0, 10)).format(
+                            'MMM Do, YYYY'
+                        )}
+                    </span>
+                </h5>) : <NoDataCell />
+        },
+        {
+            field: "updatedBy", headerName: "Updated By", width: 250,
+            renderCell: (params) => params?.value && params?.value?.user ?
+                (<h5 className="updateBy">
+                    {params.value.user.firstName}
+                    <span
+                        className="updatedAtTime"
+                        title={`${params.value.user.firstName} • ${moment(
+                            params.value.date.slice(0, 10)
+                        ).format('MMM Do, YYYY')}`}
+                    >
+                        {moment(params.value.date.slice(0, 10)).format(
+                            'MMM Do, YYYY'
+                        )}
+                    </span>
+                </h5>) : <NoDataCell />
+        },
+        {
             field: "account", headerName: "Account", width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
@@ -259,7 +295,7 @@ export default function Contact(props) {
         //     })
         // }
         let api = getSearchQuery(`/${contactApi}`, searchParams);
-        
+
         axiosInstance()
             .get(api)
             .then(({ data: { data, count } }) => {
@@ -310,7 +346,7 @@ export default function Contact(props) {
 
     const handleDeleteContact = () => {
         const selectedContacts = dataRows.filter(d => d.isChecked).map(m => { return m.id });
-        
+
         if (selectedContacts && selectedContacts.length > 0) {
             setLoading(true);
             axiosInstance().put(`/${contactApi}/remove`, {

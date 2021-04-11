@@ -31,6 +31,8 @@ import { getObjKeys } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import { HiUserGroup } from 'react-icons/hi';
 import { lead } from '../../constants/helpers'
+import moment from "moment";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -217,6 +219,53 @@ const Leads = () => {
       field: "company", headerName: "Company", width: 300,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
+    {
+      field: "createdBy",
+      headerName: "Created By",
+      width: 250,
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) =>
+          params?.value && params?.value?.user ? (
+              <h5 className="createBy">
+                  {params.value.user.firstName}
+                  <span
+                      className="createdAtTime"
+                      title={`${params.value.user.firstName} • ${moment(
+                          params?.value?.date?.slice(0, 10)
+                      ).format('MMM Do, YYYY')}`}
+                  >
+                      {moment(params?.value?.date?.slice(0, 10)).format(
+                          'MMM Do, YYYY'
+                      )}
+                  </span>
+              </h5>
+          ) : <NoDataCell />
+  },
+  {
+      field: "updatedBy",
+      headerName: "Updated By",
+      width: 250,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) =>
+         params?.value && params?.value?.user ? (
+              <h5 className="updateBy">
+                  {params.value.user.firstName}
+                  <span
+                      title={params.value.date}
+                      className="updatedAtTime"
+                  >
+                      {moment(params.value.date.slice(0, 10)).format(
+                          'MMM Do, YYYY'
+                      )}
+                  </span>
+              </h5>
+          ) :
+              <NoDataCell />
+
+  },
     {
       field: "phone", headerName: "Phone", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />

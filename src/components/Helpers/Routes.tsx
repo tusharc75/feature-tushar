@@ -99,5 +99,9 @@ export default {
   supplierContact: {
     title: "Supplier Contact",
     path: "/supplier-contact",
+  },
+  doa: {
+    title: "Doa",
+    path: "/doa",
   }
 };

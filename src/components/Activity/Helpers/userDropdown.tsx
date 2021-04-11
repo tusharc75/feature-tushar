@@ -6,7 +6,7 @@ import Chip from '@material-ui/core/Chip';
 import PropTypes from 'prop-types'
 var _ = require('lodash');
 
-export const UserDropdown = ({ name, label, value, multiple, touched, errors, setFieldValue }) => {
+export const UserDropdown = ({ name, label, value, multiple, touched, errors, setFieldValue, required }) => {
 
     const [users, setUsers] = React.useState(null);
 
@@ -68,6 +68,7 @@ export const UserDropdown = ({ name, label, value, multiple, touched, errors, se
                 error={touched[name] && Boolean(errors[name])}
                 helperText={touched[name] && errors[name]}
                 margin="dense"
+                required={required}
             />
         )}
     />

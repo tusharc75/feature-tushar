@@ -11,7 +11,8 @@ import {
   IconButton,
   CircularProgress,
 } from "@material-ui/core";
-import { GetApp, InfoOutlined } from "@material-ui/icons";
+import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
+
 import { getObjKeysWithValues, yyyyMMDD } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";
 import axiosInstance from "../../axios/axiosInstance";
@@ -20,7 +21,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 const useStyles = makeStyles((theme) => ({
   fieldText: {
     width: "100%",
-    padding: 10,
+    padding: theme.spacing(1, 1, 1, 0.5),
     borderRadius: 4,
     cursor: "normal",
     textOverflow: "ellipsis",
@@ -66,7 +67,6 @@ const Details = (props: DetailProps) => {
             (progressEvent.loaded / progressEvent.total) * 100
           );
           setProgress(percentCompleted);
-          console.log("completed: ", progress);
         },
       })
       .then(({ data }) => {
@@ -77,10 +77,12 @@ const Details = (props: DetailProps) => {
           open: true,
         });
         setDownloading(false);
+        setProgress(0);
       })
       .catch((err) => {
         setToastConfig(err);
         setDownloading(false);
+        setProgress(0);
         console.log(err);
       });
   };
@@ -141,8 +143,8 @@ const Details = (props: DetailProps) => {
     setFormsData(customData);
   };
 
-  const dynamicSize = (size, name) =>
-    name === "avatar" || name === "companyLogo" ? 12 : size;
+  const dynamicSize = (size, type) =>
+    type === "imageUpload" || type === "fileUpload" ? 12 : size;
 
   return (
     <>
@@ -154,13 +156,19 @@ const Details = (props: DetailProps) => {
           <Box marginY={2} />
           <Grid container spacing={2}>
             {form.sectionFields.map((field, i) => (
-              <Grid key={i} item xs={12} sm={6} md={6}>
+              <Grid
+                key={i}
+                item
+                xs={12}
+                sm={dynamicSize(6, field.fieldData.type)}
+                md={dynamicSize(6, field.fieldData.type)}
+              >
                 <Grid container alignItems="center">
                   <Grid
                     item
-                    xs={dynamicSize(6, field.fieldData.fieldName)}
-                    sm={dynamicSize(5, field.fieldData.fieldName)}
-                    md={dynamicSize(5, field.fieldData.fieldName)}
+                    xs={dynamicSize(6, field.fieldData.type)}
+                    sm={dynamicSize(5, field.fieldData.type)}
+                    md={dynamicSize(5, field.fieldData.type)}
                   >
                     <Box height="100%" display="flex" alignItems="center">
                       {field.fieldData.isTooltip && (
@@ -185,24 +193,38 @@ const Details = (props: DetailProps) => {
                   </Grid>
                   <Grid
                     item
-                    xs={dynamicSize(6, field.fieldData.fieldName)}
-                    sm={dynamicSize(7, field.fieldData.fieldName)}
-                    md={dynamicSize(7, field.fieldData.fieldName)}
+                    xs={dynamicSize(6, field.fieldData.type)}
+                    sm={dynamicSize(7, field.fieldData.type)}
+                    md={dynamicSize(7, field.fieldData.type)}
                   >
-                    {field.fieldData.fieldName === "avatar" ||
-                    field.fieldData.fieldName === "companyLogo" ? (
-                      <Box paddingLeft={2}>
+                    {field.fieldData.type === "imageUpload" ? (
+                      <Box paddingLeft={1} marginTop={1}>
                         <Avatar src={initialVals[field.fieldData.fieldName]} />
                       </Box>
                     ) : (
-                      <Typography
-                        title={normalizeValues(initialVals, field.fieldData)}
-                        className={classes.fieldText}
-                        variant="body2"
-                      >
+                      <Box display="flex" alignItems="center">
+                        {field.fieldData.type === "fileUpload" &&
+                        initialVals[field.fieldData.fieldName] ? (
+                          <InsertDriveFile />
+                        ) : null}{" "}
+                        <Typography
+                          title={
+                            normalizeValues(initialVals, field.fieldData) ===
+                            "_ _ _"
+                              ? ""
+                              : normalizeValues(initialVals, field.fieldData)
+                          }
+                          className={classes.fieldText}
+                          variant="body2"
+                        >
+                          {normalizeValues(initialVals, field.fieldData)}
+                        </Typography>
                         {field.fieldData.type === "fileUpload"
                           ? initialVals[field.fieldData.fieldName] && (
                               <IconButton
+                                title={`Download ${
+                                  initialVals[field.fieldData.fieldName]
+                                }`}
                                 disabled={isDownloading}
                                 size="small"
                                 onClick={() =>
@@ -215,21 +237,46 @@ const Details = (props: DetailProps) => {
                                 }
                               >
                                 {isDownloading ? (
-                                  <CircularProgress size={20} color="inherit" />
+                                  <Box
+                                    position="relative"
+                                    display="inline-flex"
+                                  >
+                                    <CircularProgress
+                                      variant="determinate"
+                                      value={progress}
+                                      size={30}
+                                      color="inherit"
+                                    />
+                                    <Box
+                                      top={0}
+                                      left={0}
+                                      bottom={0}
+                                      right={0}
+                                      position="absolute"
+                                      display="flex"
+                                      alignItems="center"
+                                      justifyContent="center"
+                                    >
+                                      <Typography
+                                        variant="caption"
+                                        component="div"
+                                        color="textSecondary"
+                                      >{`${Math.round(progress)}%`}</Typography>
+                                    </Box>
+                                  </Box>
                                 ) : (
                                   <GetApp />
                                 )}
                               </IconButton>
                             )
                           : null}{" "}
-                        {normalizeValues(initialVals, field.fieldData)}
-                      </Typography>
+                      </Box>
                     )}
                   </Grid>
                 </Grid>
                 <Box marginY={1} />
-                {field.fieldData.fieldName !== "companyLogo" &&
-                  field.fieldData.fieldName !== "avatar" && (
+                {field.fieldData.type !== "imageUpload" &&
+                  field.fieldData.type !== "fileUpload" && (
                     <Divider
                       style={{ color: "gray" }}
                       orientation="horizontal"

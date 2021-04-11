@@ -15,6 +15,8 @@ import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CreateProduct from "../../components/Product/CreateProduct";
+import moment from "moment";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 
 const Product = () => {
@@ -71,6 +73,42 @@ const Product = () => {
             headerName: "Product Category",
             width: 300,
             renderCell: (params) => (params.row.productCategory?.productCategory)
+        },
+        {
+            field: "createdBy",
+            headerName: "Created By",
+            width: 300,
+            renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
+                {params.row.createdBy.user.firstName}
+                <span
+                    className="createdAtTime"
+                    title={`${params.row.createdBy.user.firstName} • ${moment(
+                        params.row.createdBy.date.slice(0, 10)
+                    ).format('MMM Do, YYYY')}`}
+                >
+                    {moment(params.row.createdBy.date.slice(0, 10)).format(
+                        'MMM Do, YYYY'
+                    )}
+                </span>
+            </h5>) : <NoDataCell />
+        },
+        {
+            field: "updatedBy",
+            headerName: "Updated By",
+            width: 300,
+            renderCell: (params) => params?.row && params?.row?.updatedBy ? (<h5 className="createBy">
+                {params.row.updatedBy.user.firstName}
+                <span
+                    className="updatedAtTime"
+                    title={`${params.row.updatedBy.user.firstName} • ${moment(
+                        params.row.updatedBy.date.slice(0, 10)
+                    ).format('MMM Do, YYYY')}`}
+                >
+                    {moment(params.row.updatedBy.date.slice(0, 10)).format(
+                        'MMM Do, YYYY'
+                    )}
+                </span>
+            </h5>) : <NoDataCell />
         },
         {
             field: "description",

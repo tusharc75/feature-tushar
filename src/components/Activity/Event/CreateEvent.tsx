@@ -6,6 +6,7 @@ import { UserDropdown } from '../Helpers/userDropdown';
 import statusList from '../Helpers/statusList';
 import Typography from '@material-ui/core/Typography';
 import { TextField as TextFieldFormik, Select } from "formik-material-ui";
+import TextField from '@material-ui/core/TextField';
 import { Formik, Form, Field } from "formik";
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -100,21 +101,25 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     let times = TimeList()
     return (initialValues && <Formik initialValues={initialValues} validationSchema={EventSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <Form>
+            <Form autoComplete="off" autoCorrect="off" noValidate >
                 <CustomDialogHeader title={`${eventId ? "Edit" : "New"} Event`} onClose={handleClose}></CustomDialogHeader>
                 <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={7}>
-                                    <Field
-                                        component={TextFieldFormik}
-                                        fullWidth
-                                        margin="dense"
+                                    <TextField
+                                        variant="outlined"
                                         type="text"
                                         label="Event Name"
+                                        required={true}
                                         name="name"
-                                        variant="outlined"
+                                        fullWidth
+                                        margin="dense"
+                                        value={values["name"]}
+                                        error={touched["name"] && Boolean(errors["name"])}
+                                        helperText={touched["name"] && errors["name"]}
+                                        onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                     />
                                     <Box pt={1}>
                                         <Field
@@ -174,6 +179,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                             label="Participant"
                                             errors={errors}
                                             touched={touched}
+                                            required={false}
                                             setFieldValue={setFieldValue}
                                             multiple={true}
                                             value={values["participant"]}
