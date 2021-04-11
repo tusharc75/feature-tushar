@@ -28,6 +28,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { GiHiveMind } from 'react-icons/gi';
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
+import { opportunity } from '../../constants/helpers'
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 
@@ -59,7 +60,7 @@ const OpportunityTypes = [
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
-  const { state: { user, selectedEntity } }: any = useData();
+  const { state: { user, selectedEntity, permissions } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -79,24 +80,13 @@ const Opportunities = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
   const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({ id: null, show: false, opportunityName: "" })
 
-  useEffect(() => {
-    let data
-    if (user?.entity && user.entity.length && selectedEntity) {
-      data = user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource
-    }
+  const { opportunityResource, opportunityApi } = opportunity
 
-    if (data) {
-      const hasOpportunityPermission = data.find(d => d.name == "Opportunity");
-      if (hasOpportunityPermission) {
-        setOpportunityPermissions({
-          isCreate: hasOpportunityPermission.isCreate,
-          isUpdate: hasOpportunityPermission.isUpdate,
-          isRead: hasOpportunityPermission.isRead,
-          isDelete: hasOpportunityPermission.isDelete
-        });
-      }
+  useEffect(() => {
+    if (permissions) {
+      setOpportunityPermissions(permissions[opportunityResource]);
     }
-  }, [user, selectedEntity]);
+  }, [permissions]);
 
   useEffect(() => {
     let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
@@ -137,7 +127,7 @@ const Opportunities = () => {
     setLoading(true);
 
     axiosInstance()
-      .put(`/opportunity/remove?entity=${selectedEntity}`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
+      .put(`${opportunityApi}/remove?entity=${selectedEntity}`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
         toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
         fetchOpportunities();
         setLoading(false);
@@ -151,7 +141,7 @@ const Opportunities = () => {
       searchParams = searchVal
         ? { ...searchParams, search: searchVal }
         : { ...searchParams };
-      let api = getSearchQuery("/opportunity", searchParams)
+      let api = getSearchQuery(opportunityApi, searchParams)
       try {
         axiosInstance()
           .get(api).then(({ data }) => {
@@ -440,7 +430,7 @@ const Opportunities = () => {
     }
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/opportunity/remove?entity=${selectedEntity}`, { ids: [...recs] }).then(({ data }) => {
+        .put(`${opportunityApi}/remove?entity=${selectedEntity}`, { ids: [...recs] }).then(({ data }) => {
           toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
@@ -600,6 +590,7 @@ const Opportunities = () => {
           onClose={() => { setShowCreateOpportunityDialog(false) }}
           isNew={true}
           dataToUpdate={null}
+          opportunityApi={opportunityApi}
         />
       }
     </>

@@ -43,6 +43,16 @@ export const sidebarResource = {
   opportunity: "Opportunity",
 };
 
+export const lead = {
+  LeadResource: "lead", //  Key of sidebar object
+  leadApi: "/lead"
+};
+
+export const opportunity = {
+  opportunityResource: "opportunity", //  Key of sidebar object
+  opportunityApi: "/opportunity"
+};
+
 export const supplierAccount = {
   accountApi: "supplier-account",
   accountRoute: "supplier-account",
