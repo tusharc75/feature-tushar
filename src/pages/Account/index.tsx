@@ -39,6 +39,8 @@ import { FcApproval } from 'react-icons/fc';
 import { MdAccountCircle } from 'react-icons/md';
 import { getSearchQuery } from '../../services/util';
 import { getPermissions, sidebarResource } from '../../constants/helpers';
+import moment from 'moment';
+import NoDataCell from '../../components/Helpers/NoDataCell';
 const AccTypes = [
     {
         key: "All Accounts",
@@ -97,7 +99,7 @@ export default function Account(props) {
     const [multipleApproveDisapproveAccount, setMultipleApproveDisapproveAccount] = useState<any>({ show: false, approved: false, selectedRecords: 0 })
 
     const [accountPermissions, setAccountPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false });
-    
+
     useEffect(() => {
         if (permissions) {
             setAccountPermissions(permissions[accountResource]);
@@ -216,6 +218,55 @@ export default function Account(props) {
             headerName: "Industry",
             width: 250,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
+        },
+        {
+            field: "createdBy",
+            headerName: "Created By",
+            width: 250,
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) =>
+                params?.value && params?.value?.user ? (
+                    <h5 className="createBy">
+                        {params.value.user.firstName}
+                        <span
+                            className="createdAtTime"
+                            title={`${params.value.user.firstName} • ${moment(
+                                params?.value?.date?.slice(0, 10)
+                            ).format('MMM Do, YYYY')}`}
+                        >
+                            {moment(params?.value?.date?.slice(0, 10)).format(
+                                'MMM Do, YYYY'
+                            )}
+                        </span>
+                    </h5>
+                ) : <NoDataCell />
+            // renderCell: (params) => <CustomRenderCell value={params?.value?.createdBy?.optionLabel} />
+        },
+        {
+            field: "updatedBy",
+            headerName: "Updated By",
+            width: 250,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) =>
+                params?.value?.user ? (
+                    <h5 className="updateBy">
+                        {params.value.user.firstName}
+                        <span
+                            title={params.value.date}
+                            className="updatedAtTime"
+                        >
+                            {moment(params?.value?.date?.slice(0, 10)).format(
+                                'MMM Do, YYYY'
+                            )}
+                        </span>
+                    </h5>
+                ) :
+                    <NoDataCell />
+
+            // renderCell: (params) => <CustomRenderCell value={params?.value?.updatedBy?.optionLabel} />
         },
         {
             field: "parentAccount",

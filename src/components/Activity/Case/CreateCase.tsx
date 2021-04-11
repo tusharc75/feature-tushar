@@ -4,7 +4,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { UserDropdown } from '../Helpers/userDropdown';
 import statusList from '../Helpers/statusList';
-import Typography from '@material-ui/core/Typography';
 import { TextField as TextFieldFormik, Select } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
 import MenuItem from '@material-ui/core/MenuItem';
@@ -12,6 +11,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import { KeyboardDatePicker } from 'formik-material-ui-pickers';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import TextField from '@material-ui/core/TextField';
 import MomentUtils from '@date-io/moment';
 import * as Yup from "yup";
 import { GetCaseDetail, CreateNewCase, UpdateCase } from "../../../axios/activity";
@@ -25,6 +25,7 @@ import PropTypes from 'prop-types'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import { Breadcrumbs, Link, Typography } from "@material-ui/core";
 
 const CaseSchema = Yup.object().shape({
     name: Yup.string()
@@ -84,21 +85,32 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
 
     return (initialValues && <Formik initialValues={initialValues} validationSchema={CaseSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <Form>
+            <Form autoComplete="off" autoCorrect="off" noValidate >
                 <CustomDialogHeader title={`${id ? "Edit" : "New"} Case`} onClose={handleClose}></CustomDialogHeader>
                 <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
+                            <Box mb={2} >
+                                <Breadcrumbs separator="›" aria-label="breadcrumb">
+                                    {initialValues.parent && initialValues.parent.map((_p, index) => {
+                                        return <Typography key={index} onClick={() => setId(_p._id)} className="cursor-pointer" variant="body1">{_p.name}</Typography>
+                                    })}
+                                </Breadcrumbs>
+                            </Box>
                             <Grid container spacing={3}>
                                 <Grid item xs={7}>
-                                    <Field
-                                        component={TextFieldFormik}
-                                        fullWidth
-                                        margin="dense"
+                                    <TextField
+                                        variant="outlined"
                                         type="text"
                                         label="Case Name"
+                                        required={true}
                                         name="name"
-                                        variant="outlined"
+                                        fullWidth
+                                        margin="dense"
+                                        value={values["name"]}
+                                        error={touched["name"] && Boolean(errors["name"])}
+                                        helperText={touched["name"] && errors["name"]}
+                                        onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                     />
                                     <Box pt={1}>
                                         <Field
@@ -167,6 +179,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
                                             label="Assignee"
                                             errors={errors}
                                             touched={touched}
+                                            required={true}
                                             setFieldValue={setFieldValue}
                                             multiple={false}
                                             value={values["assignee"]}
@@ -178,6 +191,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
                                             label="Reporter"
                                             errors={errors}
                                             touched={touched}
+                                            required={true}
                                             setFieldValue={setFieldValue}
                                             multiple={false}
                                             value={values["reporter"]}

@@ -39,7 +39,13 @@ const InputField = (props) => {
             <Box marginY={2}>
               <Grid spacing={3} container>
                 {form.sectionFields.map((field) => (
-                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                  <Grid
+                    key={field.fieldName}
+                    item
+                    xs={12}
+                    sm={field.type === "imageUpload" ? 12 : 6}
+                    md={field.type === "imageUpload" ? 12 : 6}
+                  >
                     <FormTypes
                       {...rest}
                       values={values}

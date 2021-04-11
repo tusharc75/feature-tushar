@@ -19,7 +19,7 @@ import {
   useTheme,
 } from "@material-ui/core";
 import _ from "lodash";
-import DateUtils from "@date-io/moment";
+import DateUtils from "@date-io/date-fns";
 import {
   KeyboardDatePicker,
   KeyboardDateTimePicker,
@@ -913,9 +913,8 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={label}
-          placeholder="10/10/2018"
+          defaultValue={new Date()}
           onChange={(date) => setFieldValue(name, date)}
-          minDate={new Date()}
           format="MM/dd/yyyy"
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}

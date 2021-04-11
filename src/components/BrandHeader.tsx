@@ -8,12 +8,14 @@ import Container from "./Container";
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100%!important",
-    marginTop: 0
+    marginTop: 5
   },
   box: {
     backgroundColor: "#E6F4FF",
     borderRadius: 6,
     padding: theme.spacing(0.5, 1.5),
+    marginTop: 5,
+    marginLeft: 5,
   },
 }));
 
