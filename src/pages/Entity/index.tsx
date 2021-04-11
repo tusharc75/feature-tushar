@@ -39,6 +39,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import Loader from "../../components/Loader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -57,7 +58,7 @@ const Entity: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user },
+    state: { user, permissions },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -77,12 +78,6 @@ const Entity: FC = () => {
   const [checkAllEntities, setCheckAllEntities] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [entitiesPermissions, setEntitiesPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [
     showDeleteWarningConfirmBox,
@@ -99,6 +94,7 @@ const Entity: FC = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
+
         setEntities(data);
         getRows(data);
         setRowCount(count);
@@ -114,30 +110,17 @@ const Entity: FC = () => {
     fetchEntities();
   }, [fetchEntities]);
 
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-    if (data) {
-      const hasUsersPermission = data.find((d: any) => d.name === "Entity");
-      if (hasUsersPermission) {
-        setEntitiesPermissions({
-          isCreate: hasUsersPermission.isCreate,
-          isUpdate: hasUsersPermission.isUpdate,
-          isRead: hasUsersPermission.isRead,
-          isDelete: hasUsersPermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
-
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((entity: any) => ({
-          id: entity._id,
-          isChecked: false,
-          name: entity.entityName,
-          address: entity.address,
-          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-        }))
+        id: entity._id,
+        isChecked: false,
+        name: entity.entityName,
+        address: entity.address,
+        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
+        createdBy: entity?.createdBy,
+        updatedBy: entity?.updatedBy,
+      }))
       : [];
     setDataRows(rows);
   };
@@ -200,14 +183,56 @@ const Entity: FC = () => {
         </p>
       ),
     },
+    // {
+    //   field: "createdAt",
+    //   headerName: "Created At",
+    //   width: 150,
+    //   renderCell: (params: any) => (
+    //     <p title={`Created At • ${params.value}`} className="text-truncate">
+    //       {params?.value}
+    //     </p>
+    //   ),
+    // },
     {
-      field: "createdAt",
-      headerName: "Created At",
+      field: "createdBy",
+      headerName: "Created By",
       width: 150,
       renderCell: (params: any) => (
-        <p title={`Created At • ${params.value}`} className="text-truncate">
-          {params.value}
-        </p>
+        params?.value && params?.value?.user ?
+          (<h5 className="createBy">
+            {params?.value?.user?.firstName}
+            <span
+              className="createdAtTime"
+              title={`${params?.value?.user?.firstName} • ${moment(
+                params?.value?.date?.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params?.value?.date?.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>) : <NoDataCell />
+      ),
+    },
+    {
+      field: "updatedBy",
+      headerName: "Updated By",
+      width: 150,
+      renderCell: (params: any) => (
+        params?.value && params?.value?.user ?
+          (<h5 className="updateBy">
+            {params.value.user.firstName}
+            <span
+              className="updatedAtTime"
+              title={`${params.value.user.firstName} • ${moment(
+                params.value.date.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params.value.date.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>) : <NoDataCell />
       ),
     },
 
@@ -216,7 +241,7 @@ const Entity: FC = () => {
       headerName: "Actions ",
       renderCell: (params: any) => (
         <>
-          {entitiesPermissions.isDelete ? (
+          {permissions?.entity?.isDelete ? (
             <Tooltip title="Delete">
               <IconButton
                 aria-label="Delete"
@@ -483,71 +508,71 @@ const Entity: FC = () => {
         </CustomDialogFooter>
       </Dialog>
       <Layout>
-        <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3">
-            <CustomBreadCrumbs routes={[routes.entity]} />
-          </Grid>
-          <Grid item xs={12} sm={6} className="pr-3">
+        <CustomBreadCrumbs routes={[routes.entity]} />
+        <Grid container direction="row" className="header-links">
+          <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Import from Excel
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Export to Excel
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Download Template
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Email a Link
-              </MuiLink>
+              </Link>
             </Grid>
           </Grid>
         </Grid>
         <Container>
-          <Header
-            onSearch={handleSearch}
-            searchVal={searchVal}
-            entityPermissions={entitiesPermissions}
-            onCreate={handleCreate}
-            showConfirmBox={showConfirmBox}
-            openRolesDialog={handleOpenDialog}
-            rolesActionDiabled={Boolean(!selectedEntities.length)}
-            canDelete={dataRows.filter((d) => d.isChecked).length === 0}
-          />
+          <div className="header-panel">
+            <Header
+              onSearch={handleSearch}
+              searchVal={searchVal}
+              entityPermissions={permissions?.entity}
+              onCreate={handleCreate}
+              showConfirmBox={showConfirmBox}
+              openRolesDialog={handleOpenDialog}
+              rolesActionDiabled={Boolean(!selectedEntities.length)}
+              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
+            />
+          </div>
         </Container>
-        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+        <Container>
           <div className="listing-grid">
             <DataGrid
               components={{
@@ -582,9 +607,8 @@ const Entity: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

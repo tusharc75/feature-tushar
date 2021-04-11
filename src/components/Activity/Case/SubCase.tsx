@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import { CreateNewCase } from "../../../axios/activity";
 import * as Yup from "yup";
-import { TextField } from "formik-material-ui";
+import TextField from '@material-ui/core/TextField';
 import { Formik, Form, Field } from "formik";
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
@@ -82,16 +82,20 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
         ))}
         {openAddSub && <Box>
             <Formik initialValues={{ name: "" }} validationSchema={ActivitySchema} onSubmit={handleSave}>
-                {({ submitForm }) => (
-                    <Form>
-                        <Field
-                            component={TextField}
+                {({ submitForm, touched, errors, setFieldValue, values }) => (
+                   <Form autoComplete="off" autoCorrect="off" noValidate >
+                        <TextField
+                            variant="outlined"
+                            type="text"
+                            label="Case Name"
+                            required={true}
+                            name="name"
                             fullWidth
                             margin="dense"
-                            type="text"
-                            label={"Case Name"}
-                            name="name"
-                            variant="outlined"
+                            value={values["name"]}
+                            error={touched["name"] && Boolean(errors["name"])}
+                            helperText={touched["name"] && errors["name"]}
+                            onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                         />
                         <Box mt={1}>
                             <Button color="primary" size="small" variant="contained" onClick={submitForm}>Create</Button>
