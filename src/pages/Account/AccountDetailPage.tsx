@@ -57,9 +57,9 @@ export default function AccountDetailPage(props) {
   const {
     account: { accountApi, accountResource, accountPermission, accountRoute },
     accountBreadcrumb,
-    contactResource,
+    contact: { contactResource, contactRoute },
   } = props;
-
+  
   const {
     state: { user, permissions },
   }: any = useData();
@@ -106,8 +106,8 @@ export default function AccountDetailPage(props) {
       .get(`/${accountApi}/related/${id}`)
       .then(({ data: { data } }) => {
         setRelatedContacts(
-          data.Contact && data.Contact["Account_Name"]
-            ? data.Contact["Account_Name"]
+          data[sidebarResource[contactResource]] && data[sidebarResource[contactResource]]["Account_Name"]
+            ? data[sidebarResource[contactResource]]["Account_Name"]
             : []
         );
         setOpportunities(
@@ -236,7 +236,6 @@ export default function AccountDetailPage(props) {
   const quickLinks: IQuickLinks[] = [
     {
       label: "Account Heirarchy",
-      redirect: false,
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
@@ -266,7 +265,14 @@ export default function AccountDetailPage(props) {
     {
       label: "Contacts",
       count: relatedContacts ? relatedContacts.length : 0,
-      to: "/contact",
+      onClick: () => {
+        history.push({
+          pathname: `/${contactRoute}`,
+          state: {
+            accountName: accountData.accountName,
+          },
+        });
+      },
       show:
         permissions && permissions[contactResource]
           ? permissions[contactResource].isRead
@@ -650,7 +656,7 @@ export default function AccountDetailPage(props) {
                 setShowCreateContactDialog(false);
                 // fetchRelatedContacts();
               }}
-              contactResource={sidebarResource[contactResource]}
+              contactResource={contactResource}
               accountId={accountData._id}
             />
           )}
