@@ -124,7 +124,7 @@ function App() {
               // accountPermission={customerAccount.permission}
               // accountRoute={customerAccount.route}
               accountBreadcrumb={routes.customerAccount}
-              contactResource={customerContact.contactResource}
+              contact={customerContact}
             />
           </PrivateRoute>
           <PrivateRoute key="customer-contact" exact path="/customer-contact">
@@ -161,7 +161,7 @@ function App() {
               // accountPermission={supplierAccount.permission}
               // accountRoute={supplierAccount.route}
               accountBreadcrumb={routes.supplierAccount}
-              contactResource={supplierContact.contactResource}
+              contact={supplierContact}
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-contact" exact path="/supplier-contact">

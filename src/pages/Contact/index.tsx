@@ -10,8 +10,7 @@ import {
     IconButton,
     Paper,
     Grid,
-    Divider,
-    Select
+    Divider
 } from "@material-ui/core";
 import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom'
@@ -19,18 +18,14 @@ import { DataGrid } from "@material-ui/data-grid";
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
-import { contactDetailPage } from '../../routes/Contacts'
 import ManageContactDialog from './ManageContact/index';
 import { makeStyles } from "@material-ui/core/styles";
-import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from '../../components/Helpers/SearchBox'
 import DeleteIcon from '@material-ui/icons/Delete';
-import BlockIcon from '@material-ui/icons/Block';
 import CustomContainer from "./../../components/Container";
 import MessageDialog from '../../components/Helpers/MessageDialog'
-import { getErrorMessage, getSearchQuery } from '../../services/util'
-import contactStyles from './contact.module.scss'
+import { getSearchQuery } from '../../services/util'
 import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import styles from "../Leads/Header.module.scss"
@@ -42,7 +37,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { sidebarResource } from '../../constants/helpers';
 import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-
+import { useHistory, useParams } from "react-router-dom";
 
 const ContactTypes = [
     {
@@ -54,12 +49,6 @@ const ContactTypes = [
         value: 2
     }
 ]
-
-
-const ContactTypes1 = {
-    "All Contacts": 1,
-    "My Contacts": 2
-}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -103,6 +92,9 @@ export default function Contact(props) {
         fields: [],
         initialValues: {},
     })
+
+    const history = useHistory();
+    const accountName = history.location?.state?.accountName;
 
     const [contactPermissions, setContactPermissions] = useState<any>({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
 
@@ -214,7 +206,7 @@ export default function Contact(props) {
                 </h5>) : <NoDataCell />
         },
         {
-            field: "account", headerName: "Account", width: 300,
+            field: "accountName", headerName: "Account", width: 300,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
@@ -247,6 +239,19 @@ export default function Contact(props) {
         }
     ];
 
+    const onFilterChange = React.useCallback((params) => {
+        console.log("onFilterChange")
+        if (params.filterModel.items[0].value) {
+            setQuery((prevState) => ({
+                ...prevState,
+                [params.filterModel.items[0].columnField]:
+                    params.filterModel.items[0].value,
+            }));
+        } else {
+            setQuery({ page: 0, limit: 25 });
+        }
+    }, []);
+
     useEffect(() => {
         const data = user?.role?.sideBar;
 
@@ -259,6 +264,7 @@ export default function Contact(props) {
     }, [user]);
 
     useEffect(() => {
+        debugger;
         getContacts();
         // eslint-disable-next-line
     }, [query, searchVal, selectedType]);
@@ -318,7 +324,7 @@ export default function Contact(props) {
             id: u._id,
             canDelete: u?.owner?.optionValue === user?.user._id,
             collaborator: u.collaborator || [],
-            account: u.accountName?.optionLabel,
+            accountName: u.accountName?.optionLabel,
             name: `${u.firstName || ''} ${u.middleName || ''} ${u.lastName || ''}`
         }));
         setDataRows([...rows]);
@@ -554,6 +560,13 @@ export default function Contact(props) {
                             rowsPerPageOptions={[25, 50, 75]}
                             onSortModelChange={handleSortModelChange}
                             density="compact"
+                            filterMode="server"
+                            onFilterModelChange={onFilterChange}
+                            // filterModel={{
+                            //     items: [
+                            //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
+                            //     ],
+                            // }}
                         />
                     </div>
                     {/* </Box> */}

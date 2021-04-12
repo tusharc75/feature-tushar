@@ -110,7 +110,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig }) => {
       ) : (
         <>
           <CustomDialogContent>
-            <Box padding={2}>
+            <Box paddingX={1} paddingY={2}>
               <Box display="flex" marginBottom={2} gridGap={10}>
                 <TextField
                   required
