@@ -50,6 +50,13 @@ export const supplierAccount = {
   accountPermission: "Supplier Account",
 };
 
+export const termsAndCondition = {
+  Api: "/termsandconditions",
+  route: "/terms-conditions",
+  // resource: "supplierAccount", //  Key of sidebar object
+  permission: "termsAndConditions",
+};
+
 export const customerAccount = {
   accountApi: "customer-account",
   accountRoute: "customer-account",

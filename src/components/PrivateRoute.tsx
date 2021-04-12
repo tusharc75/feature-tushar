@@ -4,6 +4,7 @@ import { Redirect, Route, useLocation } from "react-router-dom";
 import { useData } from "../StateProvider/Provider";
 import Unauthorized from "../pages/Unauthorized";
 import Loader from "./Loader";
+const _ = require('lodash')
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -24,7 +25,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
 
   const checkAccess = async () => {
     const data = await user?.role.sideBar.find(
-      (item) => lowerCase(kebabCase(item.name)) === pathnames[0]
+      (item) => _.kebabCase(_.lowerCase(item.name)) === pathnames[0]
     );
     if (data) {
       data.isRead ? setAccess(true) : setAccess(false);

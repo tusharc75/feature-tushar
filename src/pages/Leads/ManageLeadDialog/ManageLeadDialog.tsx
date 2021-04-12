@@ -150,9 +150,6 @@ export default function ManageLeadDialog({
   const handleCreateLead = (values) => {
     setLoading(true);
 
-    if (values?.noOfEmployees)
-      values.noOfEmployees = parseInt(values.noOfEmployees);
-
     axiosInstance()
       .post(`/lead?entity=${selectedEntity}`, values)
       .then(({ data }) => {
@@ -219,7 +216,7 @@ export default function ManageLeadDialog({
           initialValues={entityData.initialValues}
           validationSchema={yupSchema(entityData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,

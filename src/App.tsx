@@ -36,7 +36,8 @@ import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToa
 import Roles from "./pages/Role";
 import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
 import Product from "./pages/Product";
-import { customerAccount, customerContact, sidebarResource, supplierAccount, supplierContact } from "./constants/helpers";
+import TermsAndConditions from './pages/TermsAndConditions'
+import { termsAndCondition, customerAccount, customerContact, sidebarResource, supplierAccount, supplierContact } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 
 function App() {
@@ -96,6 +97,7 @@ function App() {
           <PrivateRoute exact path="/new-opp">
             <AddNewOpportunity />
           </PrivateRoute>
+
           {/* <PrivateRoute exact path="/">
           <CreateBrand />
         </PrivateRoute> */}
@@ -218,6 +220,11 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/product">
             <Product />
+          </PrivateRoute>
+          <PrivateRoute exact path={termsAndCondition.route}>
+            <TermsAndConditions
+              leadBreadcrumb={routes.lead}
+            />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
