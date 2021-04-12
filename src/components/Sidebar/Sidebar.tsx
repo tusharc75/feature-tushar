@@ -176,12 +176,16 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           })}
         >
           <List>
-            <ListItem button>
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            <ListItem button>
-              <ListItemText primary="Activities" />
-            </ListItem>
+            <Link to="/">
+              <ListItem button selected={location.pathname === "/"}>
+                <ListItemText primary="Dashboard" />
+              </ListItem>
+            </Link>
+            <Link to="/activity">
+              <ListItem button selected={pathnames[0] === "activity"}>
+                <ListItemText primary="Activities" />
+              </ListItem>
+            </Link>
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>

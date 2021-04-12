@@ -36,8 +36,15 @@ import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToa
 import Roles from "./pages/Role";
 import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
 import Product from "./pages/Product";
-import { customerAccount, customerContact, sidebarResource, supplierAccount, supplierContact } from "./constants/helpers";
+import {
+  customerAccount,
+  customerContact,
+  sidebarResource,
+  supplierAccount,
+  supplierContact,
+} from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -73,7 +80,7 @@ function App() {
             }
           />
           <PrivateRoute exact path="/">
-            <Leads />
+            <Dashboard />
           </PrivateRoute>
           <PrivateRoute exact path="/lead">
             <Leads />
@@ -109,7 +116,8 @@ function App() {
                     <CreateContact />
                 </PrivateRoute> */}
           <PrivateRoute key="customer-account" exact path="/customer-account">
-            <Account account={customerAccount}
+            <Account
+              account={customerAccount}
               // accountApi={customerAccount.api}
               // accountResource={customerAccount.resource}
               // accountPermission={customerAccount.permission}
@@ -117,8 +125,13 @@ function App() {
               accountBreadcrumb={routes.customerAccount}
             />
           </PrivateRoute>
-          <PrivateRoute key="customer-account-edit" exact path="/customer-account/detail/:id">
-            <AccountDetailPage account={customerAccount}
+          <PrivateRoute
+            key="customer-account-edit"
+            exact
+            path="/customer-account/detail/:id"
+          >
+            <AccountDetailPage
+              account={customerAccount}
               // accountApi={customerAccount.api}
               // accountResource={customerAccount.resource}
               // accountPermission={customerAccount.permission}
@@ -128,7 +141,8 @@ function App() {
             />
           </PrivateRoute>
           <PrivateRoute key="customer-contact" exact path="/customer-contact">
-            <Contact contact={customerContact}
+            <Contact
+              contact={customerContact}
               // contactApi={customerContact.api}
               // contactResource={customerContact.resource}
               // contactPermission={customerContact.permission}
@@ -136,8 +150,13 @@ function App() {
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
-          <PrivateRoute key="customer-contact-edit" exact path="/customer-contact/detail/:id">
-            <ContactDetailPage contact={customerContact}
+          <PrivateRoute
+            key="customer-contact-edit"
+            exact
+            path="/customer-contact/detail/:id"
+          >
+            <ContactDetailPage
+              contact={customerContact}
               // contactApi={customerContact.api}
               // contactResource={customerContact.resource}
               // contactPermission={customerContact.permission}
@@ -146,7 +165,8 @@ function App() {
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-account" exact path="/supplier-account">
-            <Account account={supplierAccount}
+            <Account
+              account={supplierAccount}
               // accountApi={supplierAccount.api}
               // accountResource={supplierAccount.resource}
               // accountPermission={supplierAccount.permission}
@@ -154,8 +174,13 @@ function App() {
               accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
-          <PrivateRoute key="supplier-account-edit" exact path="/supplier-account/detail/:id">
-            <AccountDetailPage account={supplierAccount}
+          <PrivateRoute
+            key="supplier-account-edit"
+            exact
+            path="/supplier-account/detail/:id"
+          >
+            <AccountDetailPage
+              account={supplierAccount}
               // accountApi={supplierAccount.api}
               // accountResource={supplierAccount.resource}
               // accountPermission={supplierAccount.permission}
@@ -165,7 +190,8 @@ function App() {
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-contact" exact path="/supplier-contact">
-            <Contact contact={supplierContact}
+            <Contact
+              contact={supplierContact}
               // contactApi={supplierContact.api}
               // contactResource={supplierContact.resource}
               // contactPermission={supplierContact.permission}
@@ -173,8 +199,13 @@ function App() {
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
-          <PrivateRoute key="supplier-contact-edit" exact path="/supplier-contact/detail/:id">
-            <ContactDetailPage contact={supplierContact}
+          <PrivateRoute
+            key="supplier-contact-edit"
+            exact
+            path="/supplier-contact/detail/:id"
+          >
+            <ContactDetailPage
+              contact={supplierContact}
               // contactApi={supplierContact.api}
               // contactResource={supplierContact.resource}
               // contactPermission={supplierContact.permission}
