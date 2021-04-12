@@ -8,7 +8,7 @@ import { kebabCase } from "lodash";
 
 function Dashboard() {
   const {
-    state: { user },
+    state: { user, permissions },
   } = useData();
   const [sections, setSections] = useState([]);
 
@@ -25,7 +25,7 @@ function Dashboard() {
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
     const data = arr.map((sec) => {
-      const list = allData?.filter((u) => sec === u.sectionName);
+      const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
 
       return {
         head: sec,
@@ -40,28 +40,29 @@ function Dashboard() {
       <Container>
         <Box marginY={2}>
           <Grid container spacing={2}>
-            {sections.map((section) => (
-              <Grid key={section.head} item xs={12} sm={6} md={4}>
-                <Paper>
-                  <Box padding={2}>
-                    <Box textAlign="center" marginBottom={2}>
-                      <Typography variant="h6">{section.head}</Typography>
+            {sections.map((section) => {
+              return section.items.length > 0 ?
+                <Grid key={section.head} item xs={12} sm={6} md={4}>
+                  <Paper>
+                    <Box padding={2}>
+                      <Box textAlign="center" marginBottom={2}>
+                        <Typography variant="h6">{section.head}</Typography>
+                      </Box>
+                      <Box height="150px" style={{ overflowY: "auto" }}>
+                        {section.items.map((item) => (
+                          <Box marginY={1} key={item.name} component="div">
+                            <Typography paragraph>
+                              <Link to={`/${kebabCase(item.name)}`}>
+                                {item.name}
+                              </Link>
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
                     </Box>
-                    <Box height="150px" style={{ overflowY: "auto" }}>
-                      {section.items.map((item) => (
-                        <Box marginY={1} key={item.name} component="div">
-                          <Typography paragraph>
-                            <Link to={`/${kebabCase(item.name)}`}>
-                              {item.name}
-                            </Link>
-                          </Typography>
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                </Paper>
-              </Grid>
-            ))}
+                  </Paper>
+                </Grid> : null
+            })}
           </Grid>
         </Box>
       </Container>
