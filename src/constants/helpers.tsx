@@ -114,7 +114,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
         : "";
 
   for (const key of arr) {
-    if (key.type === "switch" || key.type === "checkbox") {
+    if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = dataObj[key.fieldName]
         ? dataObj[key.fieldName]
         : false;
