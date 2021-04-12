@@ -11,7 +11,8 @@ import {
     IconButton,
     Grid,
     Divider,
-    Chip
+    Chip,
+    Typography
 } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
@@ -38,7 +39,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { FcApproval } from 'react-icons/fc';
 import { MdAccountCircle } from 'react-icons/md';
 import { getSearchQuery } from '../../services/util';
-import { getPermissions, sidebarResource } from '../../constants/helpers';
+import { downloadExcel, getPermissions, sidebarResource } from '../../constants/helpers';
 import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 const AccTypes = [
@@ -62,7 +63,8 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
     },
     links: {
-        color: theme.palette.primary.main   //  textDark
+        color: theme.palette.primary.main,   //  textDark
+        fontSize: "0.90rem"
     },
     linkDivider: {
         backgroundColor: theme.palette.primary.main,  //  darkBg
@@ -506,57 +508,110 @@ export default function Account(props) {
         setCheckAllAccounts(false)
     }
 
+    const uploadAccounts = (event) => {
+        if (event.target.files && event.target.files.length) {
+            toastConfig.setToastConfig({ open: true, type: "info", message: "Uploading account, Please wait..." });
+            const file = event.target.files[0];
+
+            let formData = new FormData();
+            formData.append("file", file);
+            axiosInstance()
+                .post(`/${accountApi}/import`, formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                })
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                    fetchAccounts();
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
+        }
+    };
+
     return (
         <>
 
             <Layout>
-                <CustomBreadCrumbs routes={[accountBreadcrumb]} />
+                <CustomBreadCrumbs routes={[{ title: accountBreadcrumb.title }]} />
                 <Grid container direction="row" className="header-links">
                     <Grid item xs={12} sm={12} className="pr-3">
                         <Grid container justify="flex-end">
-                            <Link
-                                to="#"
-                                onClick={(e) => e.preventDefault()}
-                                className={classes.links}
+                            <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`}>
+                                <input
+                                    id="importFromExcel"
+                                    name="importFromExcel"
+                                    onChange={uploadAccounts}
+                                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                    style={{
+                                        opacity: "0",
+                                        position: "absolute",
+                                        zIndex: -1,
+                                    }}
+                                    type="file"
+                                />
+                                Import from Excel
+                            </label>
+                            {/* <Typography
+                                onClick={(e) => {
+                                    axiosInstance().get(`/${accountApi}/import`).then((response) => {
+                                        debugger;
+                                    }).catch((error) => {
+                                        toastConfig.setToastConfig(error);
+                                    });
+                                }}
+                                className={`${classes.links} cursor-pointer`}
                             >
                                 Import from Excel
-                            </Link>
+                            </Typography> */}
                             <Divider
                                 orientation="vertical"
                                 flexItem
                                 className={classes.linkDivider}
                             />
-                            <Link
-                                to="#"
-                                onClick={(e) => e.preventDefault()}
-                                className={classes.links}
+                            <Typography
+                                onClick={(e) => {
+                                    axiosInstance().get(`/${accountApi}/template?export=true`, { responseType: "arraybuffer" })
+                                        .then((response) => {
+                                            // const headerval = response.headers['content-disposition'];
+                                            // var filename = headerval.split(';')[1].split('=')[1].replace('"', '').replace('"', '');
+                                            downloadExcel(response.data, "file.xlsx")
+                                        }).catch((error) => {
+                                            toastConfig.setToastConfig(error);
+                                        });
+                                }}
+                                className={`${classes.links} cursor-pointer`}
                             >
                                 Export to Excel
-                            </Link>
+                            </Typography>
                             <Divider
                                 orientation="vertical"
                                 flexItem
                                 className={classes.linkDivider}
                             />
-                            <Link
-                                to="#"
-                                onClick={(e) => e.preventDefault()}
-                                className={classes.links}
+                            <Typography
+                                onClick={(e) => {
+                                    axiosInstance().get(`/${accountApi}/template`, { responseType: "arraybuffer" }).then((response) => {
+                                        downloadExcel(response.data, "Template.xlsx")
+                                    }).catch((error) => {
+                                        toastConfig.setToastConfig(error);
+                                    });
+                                }}
+                                className={`${classes.links} cursor-pointer`}
                             >
                                 Download Template
-                            </Link>
+                            </Typography>
                             <Divider
                                 orientation="vertical"
                                 flexItem
                                 className={classes.linkDivider}
                             />
-                            <Link
-                                to="#"
+                            <Typography
                                 onClick={(e) => e.preventDefault()}
-                                className={classes.links}
+                                className={`${classes.links} cursor-pointer`}
                             >
                                 Email a Link
-                            </Link>
+                            </Typography>
                         </Grid>
                     </Grid>
                 </Grid>
