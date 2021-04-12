@@ -27,7 +27,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         setAccess(true);
         setChecking(false);
       }
-    } else if (pathname === "/") {
+    } else if (pathname === "/" || pathnames[0] === "activity") {
       setAccess(true);
       setChecking(false);
     }
