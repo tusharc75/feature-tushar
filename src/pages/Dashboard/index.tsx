@@ -14,13 +14,13 @@ function Dashboard() {
 
   useEffect(() => {
     const arr = [];
-    // const allData = [
-    //   ...user?.role.sideBar,
-    //   ...user?.role.selectedEntity.resource,
-    // ];
-    const allData = [
+    let allData = [
       ...user?.role.sideBar
     ];
+    if (user?.role?.selectedEntity) {
+      allData = [...allData, ...user?.role?.selectedEntity?.resource];
+    }
+
     allData?.forEach((u) => {
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
