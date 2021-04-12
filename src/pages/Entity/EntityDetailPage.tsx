@@ -19,6 +19,7 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import Roles from "./Roles";
+import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,7 +27,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions },
+    state: { permissions },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,6 +38,7 @@ const EntityDetailsPage = () => {
   const [entityFields, setEntityFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openRolesDialog, setOpenRolesDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.entity,
@@ -147,6 +149,14 @@ const EntityDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleOpenRolesDialog = () => {
+    setOpenRolesDialog(true);
+  };
+
+  const closeRolesDIalog = () => {
+    setOpenRolesDialog(false);
+  };
+
   return (
     <>
       {openUpdateDialog && (
@@ -160,7 +170,18 @@ const EntityDetailsPage = () => {
           handleUpdate={handleUpdateEntity}
         />
       )}
-
+      {openRolesDialog && (
+        <AssignRolesDialog
+          entitiesDialogOpen={openRolesDialog}
+          handleCloseDialog={closeRolesDIalog}
+          type="role"
+          ids={[id]}
+          onSuccess={() => {
+            fetchEntityRoles();
+            closeRolesDIalog();
+          }}
+        />
+      )}
       <Layout>
         <Grid container direction="row">
           <Grid item xs={12} className="pl-2">
@@ -237,7 +258,11 @@ const EntityDetailsPage = () => {
                     Assigned Regional Roles ({globalRoles.length || 0})
                   </Typography>
 
-                  <IconButton color="primary" size="small">
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={handleOpenRolesDialog}
+                  >
                     <ControlPoint />
                   </IconButton>
                 </Box>
