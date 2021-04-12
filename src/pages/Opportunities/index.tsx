@@ -83,7 +83,7 @@ const Opportunities = () => {
   const { opportunityResource, opportunityApi } = opportunity
 
   useEffect(() => {
-    if (permissions) {
+    if (permissions && permissions[opportunityResource]) {
       setOpportunityPermissions(permissions[opportunityResource]);
     }
   }, [permissions]);

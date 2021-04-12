@@ -40,6 +40,7 @@ import Loader from "../../components/Loader";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -58,7 +59,7 @@ const Entity: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user, permissions },
+    state: { user, permissions }, dispatch
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -322,6 +323,7 @@ const Entity: FC = () => {
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
           fetchEntities();
+          fetchUserData()
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -444,6 +446,24 @@ const Entity: FC = () => {
   const handleCloseDialog = () => {
     setRolesDialogOpen(false);
   };
+
+  const fetchUserData = () => {
+    dispatch({ type: USER_LOADING, payload: true });
+    axiosInstance()
+      .get("/user/me")
+      .then(({ data: response }) => {
+        const { data } = response;
+        dispatch({ type: SET_USER, payload: data });
+        if (data?.role?.selectedEntity?._id) {
+          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+        }
+        dispatch({ type: USER_LOADING, payload: false });
+      })
+      .catch((err) => {
+        localStorage.setItem("token", "");
+        dispatch({ type: USER_LOADING, payload: false });
+      });
+  }
 
   return (
     <>

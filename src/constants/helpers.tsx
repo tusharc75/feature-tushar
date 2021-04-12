@@ -347,7 +347,9 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
     }
   }
   else {
-    data = [...data, ...user?.role?.selectedEntity?.resource];
+    if (user?.role?.selectedEntity) {
+      data = [...data, ...user?.role?.selectedEntity?.resource];
+    }
   }
 
   if (data) {

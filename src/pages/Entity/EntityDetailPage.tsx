@@ -19,6 +19,7 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import Roles from "./Roles";
+import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,7 +27,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions },
+    state: { user, permissions }, dispatch
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -107,6 +108,7 @@ const EntityDetailsPage = () => {
           .put(`/entity/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
+            fetchUserData()
             history.goBack();
           })
           .catch((err) => {
@@ -117,6 +119,24 @@ const EntityDetailsPage = () => {
       setShowConfirmBox(false);
     }
   };
+
+  const fetchUserData = () => {
+    dispatch({ type: USER_LOADING, payload: true });
+    axiosInstance()
+      .get("/user/me")
+      .then(({ data: response }) => {
+        const { data } = response;
+        dispatch({ type: SET_USER, payload: data });
+        if (data?.role?.selectedEntity?._id) {
+          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+        }
+        dispatch({ type: USER_LOADING, payload: false });
+      })
+      .catch((err) => {
+        localStorage.setItem("token", "");
+        dispatch({ type: USER_LOADING, payload: false });
+      });
+  }
 
   const handleUpdateEntity = (values) => {
     setUpdating(true);
@@ -132,6 +152,7 @@ const EntityDetailsPage = () => {
         });
         setUpdating(false);
         closeUpdateDIalog();
+        fetchUserData()
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -264,7 +285,7 @@ const EntityDetailsPage = () => {
                     ))
                   ) : globalRoles.length ? (
                     <>
-                      <Roles data={globalRoles} onDeleteGlobalRole={() => {}} />
+                      <Roles data={globalRoles} onDeleteGlobalRole={() => { }} />
                       <Box marginY={1} />
                       <Button
                         fullWidth
