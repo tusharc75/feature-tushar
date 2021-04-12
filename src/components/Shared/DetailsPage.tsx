@@ -111,11 +111,9 @@ const Details = (props: DetailProps) => {
     } else if (input.type === "switch") {
       text = values[input.fieldName] ? "Inactive" : "Active";
     } else if (input.type === "checkBox") {
-      text = values[input.fieldName]
-        ? values[input.fieldName] == true
-          ? "Yes"
-          : "No"
-        : "_ _ _";
+      text = values[input.fieldName] == true
+        ? "Yes"
+        : "No"
     } else if (input.type === "date") {
       text = yyyyMMDD(values[input.fieldName]);
     } else {
@@ -204,13 +202,13 @@ const Details = (props: DetailProps) => {
                     ) : (
                       <Box display="flex" alignItems="center">
                         {field.fieldData.type === "fileUpload" &&
-                        initialVals[field.fieldData.fieldName] ? (
+                          initialVals[field.fieldData.fieldName] ? (
                           <InsertDriveFile />
                         ) : null}{" "}
                         <Typography
                           title={
                             normalizeValues(initialVals, field.fieldData) ===
-                            "_ _ _"
+                              "_ _ _"
                               ? ""
                               : normalizeValues(initialVals, field.fieldData)
                           }
@@ -221,54 +219,53 @@ const Details = (props: DetailProps) => {
                         </Typography>
                         {field.fieldData.type === "fileUpload"
                           ? initialVals[field.fieldData.fieldName] && (
-                              <IconButton
-                                title={`Download ${
-                                  initialVals[field.fieldData.fieldName]
+                            <IconButton
+                              title={`Download ${initialVals[field.fieldData.fieldName]
                                 }`}
-                                disabled={isDownloading}
-                                size="small"
-                                onClick={() =>
-                                  downloadFile(
-                                    normalizeValues(
-                                      initialVals,
-                                      field.fieldData
-                                    )
+                              disabled={isDownloading}
+                              size="small"
+                              onClick={() =>
+                                downloadFile(
+                                  normalizeValues(
+                                    initialVals,
+                                    field.fieldData
                                   )
-                                }
-                              >
-                                {isDownloading ? (
+                                )
+                              }
+                            >
+                              {isDownloading ? (
+                                <Box
+                                  position="relative"
+                                  display="inline-flex"
+                                >
+                                  <CircularProgress
+                                    variant="determinate"
+                                    value={progress}
+                                    size={30}
+                                    color="inherit"
+                                  />
                                   <Box
-                                    position="relative"
-                                    display="inline-flex"
+                                    top={0}
+                                    left={0}
+                                    bottom={0}
+                                    right={0}
+                                    position="absolute"
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
                                   >
-                                    <CircularProgress
-                                      variant="determinate"
-                                      value={progress}
-                                      size={30}
-                                      color="inherit"
-                                    />
-                                    <Box
-                                      top={0}
-                                      left={0}
-                                      bottom={0}
-                                      right={0}
-                                      position="absolute"
-                                      display="flex"
-                                      alignItems="center"
-                                      justifyContent="center"
-                                    >
-                                      <Typography
-                                        variant="caption"
-                                        component="div"
-                                        color="textSecondary"
-                                      >{`${Math.round(progress)}%`}</Typography>
-                                    </Box>
+                                    <Typography
+                                      variant="caption"
+                                      component="div"
+                                      color="textSecondary"
+                                    >{`${Math.round(progress)}%`}</Typography>
                                   </Box>
-                                ) : (
-                                  <GetApp />
-                                )}
-                              </IconButton>
-                            )
+                                </Box>
+                              ) : (
+                                <GetApp />
+                              )}
+                            </IconButton>
+                          )
                           : null}{" "}
                       </Box>
                     )}
