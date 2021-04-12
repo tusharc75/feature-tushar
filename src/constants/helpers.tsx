@@ -384,3 +384,24 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
 
   return permissions;
 };
+
+export const downloadExcel = (fileDetails, filename) => {
+  const blob = new Blob([fileDetails as any],
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+  debugger;
+  //Check the Browser type and download the File.
+  const isIE = false || !!document["documentMode"];
+  if (isIE) {
+    window.navigator.msSaveBlob(blob, filename);
+  } else {
+    var url = window.URL || window.webkitURL;
+    let link = url.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.setAttribute("download", filename);
+    a.setAttribute("href", link);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
