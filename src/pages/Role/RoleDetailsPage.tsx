@@ -265,7 +265,8 @@ const RoleDetailsPage = () => {
         <AssignEntityDialog
           entitiesDialogOpen={showAssignEntityDialog}
           handleCloseDialog={entityDialogClose}
-          roleIds={[id]}
+          type="entity"
+          ids={[id]}
           onSuccess={() => {
             fetchRoleData();
             fetchUserData();

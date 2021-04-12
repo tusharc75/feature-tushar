@@ -59,7 +59,7 @@ const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user },
+    state: { user, selectedEntity },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [selectedType, setSelectedType] = useState(1);
@@ -417,6 +417,7 @@ const Roles: FC = () => {
           fetchData={fetchRoles}
           roleType={selectedType}
           setToastConfig={toastConfig.setToastConfig}
+          selectedEntity={selectedEntity}
         />
       )}
       <Layout>

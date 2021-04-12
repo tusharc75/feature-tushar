@@ -21,47 +21,55 @@ const AssignEntityDialog = ({
   entitiesDialogOpen,
   onSuccess,
   handleCloseDialog,
-  roleIds,
+  ids,
+  type,
 }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [users, setEntities] = useState([]);
-  const [loadingEntities, setLoadingEntities] = useState(false);
-  const [selectedEntities, setSelectedEntities] = useState([]);
+  const [data, setData] = useState([]);
+  const [loadingData, setLoadingData] = useState(false);
+  const [selectedData, setSelectedData] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
 
   useEffect(() => {
-    setLoadingEntities(true);
+    setLoadingData(true);
     axiosInstance()
-      .get(`/entity`)
+      .get(`/${type}`)
       .then(({ data: { data } }) => {
-        setEntities(data);
-        setLoadingEntities(false);
+        setData(data);
+        setLoadingData(false);
       })
       .catch((error) => {
-        setLoadingEntities(false);
+        setLoadingData(false);
         toastConfig.setToastConfig(error);
       });
   }, []);
 
   const handleEntitySelection = (e, id) => {
-    let tempSelectedEntities = [...selectedEntities];
+    let tempSelectedEntities = [...selectedData];
     let curIndex = tempSelectedEntities.indexOf(id);
     if (e.target.checked) {
       if (curIndex < 0) tempSelectedEntities = [...tempSelectedEntities, id];
     } else if (curIndex >= 0) {
       tempSelectedEntities.splice(curIndex, 1);
     }
-    setSelectedEntities(tempSelectedEntities);
+    setSelectedData(tempSelectedEntities);
   };
 
   const handleAssignRoles = async () => {
-    if (selectedEntities.length) {
+    if (selectedData.length) {
       setAssigning(true);
-
-      const dataObj = {
-        entities: selectedEntities,
-        roles: roleIds,
-      };
+      let dataObj: any;
+      if (type === "entity") {
+        dataObj = {
+          entities: selectedData,
+          roles: ids,
+        };
+      } else {
+        dataObj = {
+          entities: ids,
+          roles: selectedData,
+        };
+      }
 
       await axiosInstance()
         .put(`/entity/add-role`, dataObj)
@@ -92,25 +100,25 @@ const AssignEntityDialog = ({
     >
       <CustomDialogHeader title="Assign Entities" />
       <CustomDialogContent>
-        {loadingEntities ? (
+        {loadingData ? (
           <Loader text="Loading Entities" />
-        ) : users.length ? (
+        ) : data.length ? (
           <List style={{ padding: 0 }}>
-            {users.map((entity) => (
-              <ListItem divider key={entity._id}>
+            {data.map((d) => (
+              <ListItem divider key={d._id}>
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
-                    onChange={(e) => handleEntitySelection(e, entity._id)}
-                    checked={selectedEntities.indexOf(entity._id) >= 0}
+                    onChange={(e) => handleEntitySelection(e, d._id)}
+                    checked={selectedData.indexOf(d._id) >= 0}
                     inputProps={{
-                      "aria-labelledby": `checkbox-list-label-${entity._id}`,
+                      "aria-labelledby": `checkbox-list-label-${d._id}`,
                     }}
                   />
                 </ListItemIcon>
                 <ListItemText
-                  primary={entity.entityName}
-                  secondary={entity.address || ""}
+                  primary={type === "entity" ? d.entityName : d.name || ""}
+                  secondary={type === "role" ? d.description : d.address || ""}
                 />
               </ListItem>
             ))}
@@ -128,7 +136,7 @@ const AssignEntityDialog = ({
           Cancel
         </Button>
         <Button
-          disabled={!selectedEntities.length || isAssigning}
+          disabled={!selectedData.length || isAssigning}
           onClick={handleAssignRoles}
           color="primary"
         >

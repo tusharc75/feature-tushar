@@ -1,21 +1,12 @@
 import { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
-  Chip,
   Grid,
   Divider,
   Tooltip,
   IconButton,
   makeStyles,
   Link as MuiLink,
-  Dialog,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  Button,
-  CircularProgress,
 } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
@@ -35,12 +26,9 @@ import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import Loader from "../../components/Loader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -65,11 +53,7 @@ const Entity: FC = () => {
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [entities, setEntities] = useState<any[]>([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
-  const [loadingRoles, setLoadingRoles] = useState(false);
-  const [roles, setRoles] = useState<any[]>([]);
-  const [selectedRoles, setSelectedRoles] = useState<any[]>([]);
   const [selectedEntities, setSelectedEntities] = useState<any[]>([]);
-  const [isAssigning, setAssigning] = useState(false);
 
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
@@ -95,7 +79,6 @@ const Entity: FC = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
-
         setEntities(data);
         getRows(data);
         setRowCount(count);
@@ -198,43 +181,43 @@ const Entity: FC = () => {
       field: "createdBy",
       headerName: "Created By",
       width: 150,
-      renderCell: (params: any) => (
-        params?.value && params?.value?.user ?
-          (<h5 className="createBy">
+      renderCell: (params: any) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="createBy">
             {params?.value?.user?.firstName}
             <span
               className="createdAtTime"
               title={`${params?.value?.user?.firstName} • ${moment(
                 params?.value?.date?.slice(0, 10)
-              ).format('MMM Do, YYYY')}`}
+              ).format("MMM Do, YYYY")}`}
             >
-              {moment(params?.value?.date?.slice(0, 10)).format(
-                'MMM Do, YYYY'
-              )}
+              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
-          </h5>) : <NoDataCell />
-      ),
+          </h5>
+        ) : (
+          <NoDataCell />
+        ),
     },
     {
       field: "updatedBy",
       headerName: "Updated By",
       width: 150,
-      renderCell: (params: any) => (
-        params?.value && params?.value?.user ?
-          (<h5 className="updateBy">
+      renderCell: (params: any) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="updateBy">
             {params.value.user.firstName}
             <span
               className="updatedAtTime"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
-              ).format('MMM Do, YYYY')}`}
+              ).format("MMM Do, YYYY")}`}
             >
-              {moment(params.value.date.slice(0, 10)).format(
-                'MMM Do, YYYY'
-              )}
+              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
-          </h5>) : <NoDataCell />
-      ),
+          </h5>
+        ) : (
+          <NoDataCell />
+        ),
     },
 
     {
@@ -364,21 +347,6 @@ const Entity: FC = () => {
     }
   };
 
-  // Get all roles
-  const getRoles = async () => {
-    setLoadingRoles(true);
-    try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`/role`);
-      setRoles(data);
-      setLoadingRoles(false);
-    } catch (error) {
-      setLoadingRoles(false);
-      toastConfig.setToastConfig(error);
-    }
-  };
-
   // Handle entity selection
   const handleSelectedEntities = (id, isChecked) => {
     let tempSelectedEntities = [...selectedEntities],
@@ -391,45 +359,6 @@ const Entity: FC = () => {
     setSelectedEntities(tempSelectedEntities);
   };
 
-  // handle role selection from dialog
-  const handleRoleSelection = (e, id) => {
-    let tempSelectedRoles = [...selectedRoles];
-    let curIndex = tempSelectedRoles.indexOf(id);
-    if (e.target.checked) {
-      if (curIndex < 0) tempSelectedRoles = [...tempSelectedRoles, id];
-    } else if (curIndex >= 0) {
-      tempSelectedRoles.splice(curIndex, 1);
-    }
-    setSelectedRoles(tempSelectedRoles);
-  };
-
-  // Handle/Submit Roles
-  const handleAssignRoles = async () => {
-    if (selectedEntities.length && selectedRoles.length) {
-      setAssigning(true);
-      try {
-        const dataObj = {
-          entities: selectedEntities,
-          roles: selectedRoles,
-        };
-        const { data } = await axiosInstance().put("/entity/add-role", dataObj);
-        toastConfig.setToastConfig({
-          message: "Roles assigned successfully",
-          type: "success",
-          open: true,
-        });
-        setAssigning(false);
-        handleCloseDialog();
-        fetchEntities();
-        setSelectedRoles([]);
-        setSelectedEntities([]);
-      } catch (error) {
-        setAssigning(false);
-        toastConfig.setToastConfig(error);
-      }
-    }
-  };
-
   const handleCreate = () => {
     setIsOpen(true);
   };
@@ -440,7 +369,6 @@ const Entity: FC = () => {
 
   const handleOpenDialog = () => {
     setRolesDialogOpen(true);
-    getRoles();
   };
 
   const handleCloseDialog = () => {
@@ -474,59 +402,18 @@ const Entity: FC = () => {
           fetchData={fetchEntities}
         />
       )}
-      <Dialog
-        fullWidth
-        maxWidth="xs"
-        open={rolesDialogOpen}
-        onClose={handleCloseDialog}
-        aria-labelledby="assign-roles-dialog"
-      >
-        <CustomDialogHeader title="Assign roles" />
-        <CustomDialogContent>
-          {loadingRoles ? (
-            <Loader text="Loading Roles" />
-          ) : roles.length ? (
-            <List style={{ padding: 0 }}>
-              {roles.map((role) => (
-                <ListItem divider key={role._id}>
-                  <ListItemIcon>
-                    <Checkbox
-                      edge="start"
-                      onChange={(e) => handleRoleSelection(e, role._id)}
-                      checked={selectedRoles.indexOf(role._id) >= 0}
-                      inputProps={{
-                        "aria-labelledby": `checkbox-list-label-${role._id}`,
-                      }}
-                    />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={role.name}
-                    secondary={role.description}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          ) : (
-            <Typography>No Roles</Typography>
-          )}
-        </CustomDialogContent>
-        <CustomDialogFooter>
-          <Button
-            disabled={isAssigning}
-            onClick={handleCloseDialog}
-            color="primary"
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={!selectedRoles.length || isAssigning}
-            onClick={handleAssignRoles}
-            color="primary"
-          >
-            {isAssigning ? <CircularProgress size={22} /> : "Save"}
-          </Button>
-        </CustomDialogFooter>
-      </Dialog>
+      {rolesDialogOpen && (
+        <AssignRolesDialog
+          entitiesDialogOpen={rolesDialogOpen}
+          handleCloseDialog={handleCloseDialog}
+          type="role"
+          ids={selectedEntities}
+          onSuccess={() => {
+            fetchEntities();
+            handleCloseDialog();
+          }}
+        />
+      )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.entity]} />
         <Grid container direction="row" className="header-links">
