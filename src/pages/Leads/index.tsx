@@ -84,7 +84,7 @@ const Leads = () => {
   const { LeadResource, leadApi } = lead
 
   useEffect(() => {
-    if (permissions) {
+    if (permissions && permissions[LeadResource]) {
       setLeadsPermissions(permissions[LeadResource]);
     }
   }, [permissions]);
@@ -227,45 +227,45 @@ const Leads = () => {
       sortable: false,
       filterable: false,
       renderCell: (params) =>
-          params?.value && params?.value?.user ? (
-              <h5 className="createBy">
-                  {params.value.user.firstName}
-                  <span
-                      className="createdAtTime"
-                      title={`${params.value.user.firstName} • ${moment(
-                          params?.value?.date?.slice(0, 10)
-                      ).format('MMM Do, YYYY')}`}
-                  >
-                      {moment(params?.value?.date?.slice(0, 10)).format(
-                          'MMM Do, YYYY'
-                      )}
-                  </span>
-              </h5>
-          ) : <NoDataCell />
-  },
-  {
+        params?.value && params?.value?.user ? (
+          <h5 className="createBy">
+            {params.value.user.firstName}
+            <span
+              className="createdAtTime"
+              title={`${params.value.user.firstName} • ${moment(
+                params?.value?.date?.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params?.value?.date?.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>
+        ) : <NoDataCell />
+    },
+    {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
       sortable: false,
       filterable: false,
       renderCell: (params) =>
-         params?.value && params?.value?.user ? (
-              <h5 className="updateBy">
-                  {params.value.user.firstName}
-                  <span
-                      title={params.value.date}
-                      className="updatedAtTime"
-                  >
-                      {moment(params.value.date.slice(0, 10)).format(
-                          'MMM Do, YYYY'
-                      )}
-                  </span>
-              </h5>
-          ) :
-              <NoDataCell />
+        params?.value && params?.value?.user ? (
+          <h5 className="updateBy">
+            {params.value.user.firstName}
+            <span
+              title={params.value.date}
+              className="updatedAtTime"
+            >
+              {moment(params.value.date.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>
+        ) :
+          <NoDataCell />
 
-  },
+    },
     {
       field: "phone", headerName: "Phone", width: 250,
       renderCell: (params) => <CustomRenderCell value={params?.value} />

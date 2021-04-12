@@ -13,7 +13,6 @@ import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
-
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -29,7 +28,9 @@ import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CreateRole from "./CreateRole";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import { PERMISSION } from "../../constants/Roles"
 
+const permissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin]
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: "flex",
@@ -284,8 +285,14 @@ const Roles: FC = () => {
               className="cursor-stop"
               title="You do not have permission to delete role"
             >
-              <IconButton aria-label="Delete">
-                <DeleteIcon fontSize="small" />
+              <IconButton aria-label="Delete"
+                disabled={permissionArray.indexOf(params?.row?.permission) >= 0}
+              >
+                {
+                  permissionArray.indexOf(params?.row?.permission) >= 0 ?
+                    <DeleteIcon fontSize="small" color="disabled" /> : <DeleteIcon fontSize="small" />
+                }
+
               </IconButton>
             </Tooltip>
           )}

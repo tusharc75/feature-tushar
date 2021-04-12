@@ -36,13 +36,14 @@ import AssignedEntities from "./AssignedEntities";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { id } = useParams();
   const {
-    state: { user },
+    state: { user }, dispatch
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -68,6 +69,7 @@ const RoleDetailsPage = () => {
     isRead: false,
     isDelete: false,
   });
+
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -214,6 +216,38 @@ const RoleDetailsPage = () => {
     setShowAssignEntityDialog(false);
   };
 
+  const fetchUserData = () => {
+    dispatch({ type: USER_LOADING, payload: true });
+    axiosInstance()
+      .get("/user/me")
+      .then(({ data: response }) => {
+        const { data } = response;
+        dispatch({ type: SET_USER, payload: data });
+        if (data?.role?.selectedEntity?._id) {
+          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+        }
+        dispatch({ type: USER_LOADING, payload: false });
+      })
+      .catch((err) => {
+        localStorage.setItem("token", "");
+        dispatch({ type: USER_LOADING, payload: false });
+      });
+  }
+
+  const handleDeleteEntities = (obj) => {
+    if (obj && obj._id) {
+      setLoading(true)
+      axiosInstance()
+        .put(`/entity/remove`, { ids: [obj._id] })
+        .then(({ data }) => {
+          fetchUserData()
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  }
+
   return (
     <>
       {showAssignUserDialog && (
@@ -235,6 +269,7 @@ const RoleDetailsPage = () => {
           ids={[id]}
           onSuccess={() => {
             fetchRoleData();
+            fetchUserData();
             entityDialogClose();
           }}
         />
@@ -411,7 +446,7 @@ const RoleDetailsPage = () => {
                     <>
                       <AssignedEntities
                         data={roleData && roleData.entity.slice(0, 2)}
-                        unassignEntity={() => {}}
+                        unassignEntity={handleDeleteEntities}
                       />
 
                       <Box marginY={1} />
@@ -499,8 +534,8 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : ""
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

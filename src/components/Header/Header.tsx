@@ -377,31 +377,34 @@ const Header = ({ toggleDrawer }) => {
               >
                 Entities <ExpandMore />
               </Button> */}
-              <FormControl className="navHeader">
-                <Select
-                  id="headerEnitySelect"
-                  label="Entities"
-                  className={`${classes.entitySelect}`}
-                  MenuProps={{
-                    anchorOrigin: {
-                      vertical: "bottom",
-                      horizontal: "left"
-                    }
-                  }}
-                  value={selectedEntity}
-                  IconComponent={() => (<ExpandMore />)}
-                  onChange={handleSelectedEnity}
-                >
-                  {
-                    user?.entity && user.entity.length ?
-                      user.entity.map(curEntity => (
-                        <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
-                      ))
-                      : null
-                  }
+              {
+                selectedEntity ?
+                  <FormControl className="navHeader">
+                    <Select
+                      id="headerEnitySelect"
+                      label="Entities"
+                      className={`${classes.entitySelect}`}
+                      MenuProps={{
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left"
+                        }
+                      }}
+                      value={selectedEntity}
+                      IconComponent={() => (<ExpandMore />)}
+                      onChange={handleSelectedEnity}
+                    >
+                      {
+                        user?.entity && user.entity.length ?
+                          user.entity.map(curEntity => (
+                            <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
+                          ))
+                          : null
+                      }
 
-                </Select>
-              </FormControl>
+                    </Select>
+                  </FormControl> : null
+              }
             </Box>
             <div className={classes.search}>
               <div className={classes.searchIcon}>
