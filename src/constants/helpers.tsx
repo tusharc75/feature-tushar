@@ -389,7 +389,6 @@ export const downloadExcel = (fileDetails, filename) => {
   const blob = new Blob([fileDetails as any],
     { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
 
-  debugger;
   //Check the Browser type and download the File.
   const isIE = false || !!document["documentMode"];
   if (isIE) {
