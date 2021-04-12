@@ -14,9 +14,12 @@ function Dashboard() {
 
   useEffect(() => {
     const arr = [];
+    // const allData = [
+    //   ...user?.role.sideBar,
+    //   ...user?.role.selectedEntity.resource,
+    // ];
     const allData = [
-      ...user?.role.sideBar,
-      ...user?.role.selectedEntity.resource,
+      ...user?.role.sideBar
     ];
     allData?.forEach((u) => {
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
