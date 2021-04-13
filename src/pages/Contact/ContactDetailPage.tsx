@@ -28,6 +28,7 @@ const Roles = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
+    account: { accountResource },
     contactBreadcrumb,
   } = props;
   const history = useHistory();
@@ -280,8 +281,8 @@ const Roles = (props) => {
             }}
             loading={loading}
             handleSubmit={handleUpdateContact}
-            // contactResource={contactResource}
-            // contactApi={contactApi}
+          // contactResource={contactResource}
+          // contactApi={contactApi}
           />
         )}
         <Grid container direction="row">
@@ -312,9 +313,9 @@ const Roles = (props) => {
 
             <Box component="span" marginX={1} />
             {contactPermissions.isDelete &&
-            contactData?.owner?.optionValue &&
-            user?.user?._id &&
-            contactData.owner.optionValue === user.user._id ? (
+              contactData?.owner?.optionValue &&
+              user?.user?._id &&
+              contactData.owner.optionValue === user.user._id ? (
               <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
@@ -328,7 +329,7 @@ const Roles = (props) => {
                 <Grid item sm={8} md={8} lg={8}>
                   <div
                     className={`${contactClass.detail_page_div1}`}
-                    // style={{ pointerEvents: allowedToEdit ? "" : "none" }}
+                  // style={{ pointerEvents: allowedToEdit ? "" : "none" }}
                   >
                     {
                       loading ? (
@@ -378,17 +379,17 @@ const Roles = (props) => {
                       <Activity
                         relatedTo={[
                           {
-                            type: "account",
+                            type: accountResource,
                             referenceId: contactData?.accountName?.optionValue,
                             access: false,
                           },
                           {
-                            type: "contact",
+                            type: contactResource,
                             referenceId: contactData._id,
                             access: true,
                           },
                         ]}
-                        handleActivityRefresh={() => {}}
+                        handleActivityRefresh={() => { }}
                       />
                     </div>
                   )}
@@ -396,12 +397,12 @@ const Roles = (props) => {
                   <div className={`${contactClass.detail_page_div2}`}>
                     {quickLinks && quickLinks.length
                       ? quickLinks.map((k, index) => {
-                          return (
-                            <Link key={index} className="link">
-                              {k.label || ""}({k.count || 0})
-                            </Link>
-                          );
-                        })
+                        return (
+                          <Link key={index} className="link">
+                            {k.label || ""}({k.count || 0})
+                          </Link>
+                        );
+                      })
                       : null}
                   </div>
                   <div className={`${contactClass.detail_page_div3}`}>
