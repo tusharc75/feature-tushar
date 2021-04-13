@@ -10,7 +10,8 @@ import {
     IconButton,
     Paper,
     Grid,
-    Divider
+    Divider,
+    Typography
 } from "@material-ui/core";
 import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom'
@@ -34,10 +35,10 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { sidebarResource } from '../../constants/helpers';
+import { contactTemplateFileName, downloadExcel, sidebarResource, contactImportErrorFileName } from '../../constants/helpers';
 import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 const ContactTypes = [
     {
@@ -58,7 +59,8 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
     },
     links: {
-        color: theme.palette.primary.main   //  textDark
+        color: theme.palette.primary.main,   //  textDark
+        fontSize: "0.90rem"
     },
     linkDivider: {
         backgroundColor: theme.palette.primary.main,  //  darkBg
@@ -240,7 +242,6 @@ export default function Contact(props) {
     ];
 
     const onFilterChange = React.useCallback((params) => {
-        console.log("onFilterChange")
         if (params.filterModel.items[0].value) {
             setQuery((prevState) => ({
                 ...prevState,
@@ -394,10 +395,36 @@ export default function Contact(props) {
         }
     }
 
-
     const handleContactSel = (filterValues) => {
         setselectedType(filterValues)
     }
+
+    const uploadContacts = (event) => {
+        if (event.target.files && event.target.files.length) {
+            toastConfig.setToastConfig({ open: true, type: "info", message: "Uploading contact(s), Please wait..." });
+            const file = event.target.files[0];
+
+            let formData = new FormData();
+            formData.append("file", file);
+            axiosInstance()
+                .post(`/${contactApi}/import`, formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                })
+                .then(({ data }) => {
+                    if (data.message) {
+                        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                        getContacts();
+                    }
+                    else {
+                        downloadExcel(data, contactImportErrorFileName);
+                        toastConfig.setToastConfig({ open: true, type: "error", message: "Found some issue(s) while importing contact(s)" });
+                    }
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
+        }
+    };
 
     return (
         <Layout>
@@ -405,49 +432,67 @@ export default function Contact(props) {
             <Grid container direction="row" className="header-links">
                 <Grid item xs={12} sm={12} className="pr-3">
                     <Grid container justify="flex-end">
-                        <Link
-                            to="#"
-                            onClick={(e) => e.preventDefault()}
-                            className={classes.links}
-                        >
-                            Import from Excel
-                            </Link>
+                        <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`} style={{ marginTop: 1 }}>
+                            <input
+                                id="importFromExcel"
+                                name="importFromExcel"
+                                onChange={uploadContacts}
+                                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                style={{
+                                    opacity: "0",
+                                    position: "absolute",
+                                    zIndex: -1,
+                                }}
+                                type="file"
+                            />
+                                Import from Excel
+                            </label>
                         <Divider
                             orientation="vertical"
                             flexItem
                             className={classes.linkDivider}
                         />
-                        <Link
-                            to="#"
-                            onClick={(e) => e.preventDefault()}
-                            className={classes.links}
+                        <label
+                            onClick={(e) => {
+                                axiosInstance().get(`/${contactApi}/template?export=true`, { responseType: "arraybuffer" })
+                                    .then((response) => {
+                                        downloadExcel(response.data, contactTemplateFileName)
+                                    }).catch((error) => {
+                                        toastConfig.setToastConfig(error);
+                                    });
+                            }}
+                            className={`${classes.links} cursor-pointer`}
                         >
                             Export to Excel
-                            </Link>
+                            </label>
                         <Divider
                             orientation="vertical"
                             flexItem
                             className={classes.linkDivider}
                         />
-                        <Link
-                            to="#"
-                            onClick={(e) => e.preventDefault()}
-                            className={classes.links}
+                        <label
+                            onClick={(e) => {
+                                axiosInstance().get(`/${contactApi}/template`, { responseType: "arraybuffer" }).then((response) => {
+                                    downloadExcel(response.data, contactTemplateFileName)
+                                }).catch((error) => {
+                                    toastConfig.setToastConfig(error);
+                                });
+                            }}
+                            className={`${classes.links} cursor-pointer`}
                         >
                             Download Template
-                            </Link>
+                        </label>
                         <Divider
                             orientation="vertical"
                             flexItem
                             className={classes.linkDivider}
                         />
-                        <Link
-                            to="#"
+                        <label
                             onClick={(e) => e.preventDefault()}
-                            className={classes.links}
+                            className={`${classes.links} cursor-pointer`}
                         >
                             Email a Link
-                            </Link>
+                            </label>
                     </Grid>
                 </Grid>
             </Grid>
@@ -562,11 +607,11 @@ export default function Contact(props) {
                             density="compact"
                             filterMode="server"
                             onFilterModelChange={onFilterChange}
-                            // filterModel={{
-                            //     items: [
-                            //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
-                            //     ],
-                            // }}
+                        // filterModel={{
+                        //     items: [
+                        //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
+                        //     ],
+                        // }}
                         />
                     </div>
                     {/* </Box> */}
