@@ -452,7 +452,7 @@ const User: FC = () => {
       )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.user]} />
-        <Grid container direction="row" className="header-links">
+        {/* <Grid container direction="row" className="header-links">
           <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
               <MuiLink
@@ -501,6 +501,7 @@ const User: FC = () => {
             </Grid>
           </Grid>
         </Grid>
+       */}
         <Container>
           <div className="header-panel">
             <Header
