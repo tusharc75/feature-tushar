@@ -434,74 +434,81 @@ const Leads = () => {
 
   return (
     <Layout>
-      <CustomBreadCrumbs routes={[routes.lead]} />
-      <Grid container direction="row" className="header-links">
-        <Grid item xs={12} sm={12} className="pr-3">
-          <Grid container justify="flex-end">
-            <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`}>
-              <input
-                id="importFromExcel"
-                name="importFromExcel"
-                onChange={uploadLeads}
-                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                style={{
-                  opacity: "0",
-                  position: "absolute",
-                  zIndex: -1,
-                }}
-                type="file"
-              />
+      <Grid container>
+        <Grid item md={6} sm={12} xs={12}>
+          <CustomBreadCrumbs routes={[routes.lead]} />
+        </Grid>
+        <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center">
+          <Grid container direction="row">
+            <Grid item xs={12} sm={12} className="pr-3">
+              <Grid container justify="flex-end">
+                <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`}>
+                  <input
+                    id="importFromExcel"
+                    name="importFromExcel"
+                    onChange={uploadLeads}
+                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    style={{
+                      opacity: "0",
+                      position: "absolute",
+                      zIndex: -1,
+                    }}
+                    type="file"
+                  />
               Import from Excel
              </label>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <label
-              onClick={(e) => {
-                axiosInstance().get(`/${leadApi}/template?export=true`, { responseType: "arraybuffer" })
-                  .then((response) => {
-                    downloadExcel(response.data, leadTemplateFileName)
-                  }).catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
-              }}
-              className={`${classes.links} cursor-pointer`}
-            >
-              Export to Excel
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  className={classes.linkDivider}
+                />
+                <label
+                  onClick={(e) => {
+                    axiosInstance().get(`/${leadApi}/template?export=true`, { responseType: "arraybuffer" })
+                      .then((response) => {
+                        downloadExcel(response.data, leadTemplateFileName)
+                      }).catch((error) => {
+                        toastConfig.setToastConfig(error);
+                      });
+                  }}
+                  className={`${classes.links} cursor-pointer`}
+                >
+                  Export to Excel
             </label>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <label
-              onClick={(e) => {
-                axiosInstance().get(`/${leadApi}/template`, { responseType: "arraybuffer" }).then((response) => {
-                  downloadExcel(response.data, leadTemplateFileName)
-                }).catch((error) => {
-                  toastConfig.setToastConfig(error);
-                });
-              }}
-              className={`${classes.links} cursor-pointer`}
-            >
-              Download Template
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  className={classes.linkDivider}
+                />
+                <label
+                  onClick={(e) => {
+                    axiosInstance().get(`/${leadApi}/template`, { responseType: "arraybuffer" }).then((response) => {
+                      downloadExcel(response.data, leadTemplateFileName)
+                    }).catch((error) => {
+                      toastConfig.setToastConfig(error);
+                    });
+                  }}
+                  className={`${classes.links} cursor-pointer`}
+                >
+                  Download Template
             </label>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <label
-              onClick={(e) => e.preventDefault()}
-              className={`${classes.links} cursor-pointer`}
-            >
-              Email a Link
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  className={classes.linkDivider}
+                />
+                <label
+                  onClick={(e) => e.preventDefault()}
+                  className={`${classes.links} cursor-pointer`}
+                >
+                  Email a Link
             </label>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>
+
       <Container>
         <div className="header-panel">
           <Header
