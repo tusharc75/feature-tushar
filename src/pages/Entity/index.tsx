@@ -27,7 +27,11 @@ import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import {
+  SET_USER,
+  USER_LOADING,
+  SET_SELECTED_ENTITY,
+} from "../../StateProvider/actionTypes";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +51,8 @@ const Entity: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user, permissions }, dispatch
+    state: { permissions },
+    dispatch,
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -97,14 +102,14 @@ const Entity: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((entity: any) => ({
-        id: entity._id,
-        isChecked: false,
-        name: entity.entityName,
-        address: entity.address,
-        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-        createdBy: entity?.createdBy,
-        updatedBy: entity?.updatedBy,
-      }))
+          id: entity._id,
+          isChecked: false,
+          name: entity.entityName,
+          address: entity.address,
+          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
+          createdBy: entity?.createdBy,
+          updatedBy: entity?.updatedBy,
+        }))
       : [];
     setDataRows(rows);
   };
@@ -306,7 +311,7 @@ const Entity: FC = () => {
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
           fetchEntities();
-          fetchUserData()
+          fetchUserData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -383,7 +388,10 @@ const Entity: FC = () => {
         const { data } = response;
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
-          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+          dispatch({
+            type: SET_SELECTED_ENTITY,
+            payload: data.role.selectedEntity._id,
+          });
         }
         dispatch({ type: USER_LOADING, payload: false });
       })
@@ -391,7 +399,7 @@ const Entity: FC = () => {
         localStorage.setItem("token", "");
         dispatch({ type: USER_LOADING, payload: false });
       });
-  }
+  };
 
   return (
     <>
@@ -515,8 +523,9 @@ const Entity: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete entity ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

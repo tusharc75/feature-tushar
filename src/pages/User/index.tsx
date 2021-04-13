@@ -43,12 +43,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-let userTimeout
+let userTimeout;
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user },
+    state: { user, permissions },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -63,12 +63,6 @@ const User: FC = () => {
   const [checkAllUsers, setCheckAllUsers] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [usersPermissions, setUsersPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [
     showDeleteWarningConfirmBox,
@@ -76,7 +70,6 @@ const User: FC = () => {
   ] = useState(false);
 
   const fetchUsers = useCallback(() => {
-
     if (userTimeout) {
       clearTimeout(userTimeout);
     }
@@ -100,41 +93,25 @@ const User: FC = () => {
           toastConfig.setToastConfig(err);
           setLoadingUsers(false);
         });
-    }, 600)
-
+    }, 600);
   }, [searchVal, query]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-    if (data) {
-      const hasUsersPermission = data.find((d: any) => d.name === "User");
-      if (hasUsersPermission) {
-        setUsersPermissions({
-          isCreate: hasUsersPermission.isCreate,
-          isUpdate: hasUsersPermission.isUpdate,
-          isRead: hasUsersPermission.isRead,
-          isDelete: hasUsersPermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
-
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        isChecked: false,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-        createdBy: user.createdBy,
-        updatedBy: user.updatedBy,
-        status: user.blocked ? user.blocked : false,
-      }))
+          id: user._id,
+          isChecked: false,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+          createdBy: user.createdBy,
+          updatedBy: user.updatedBy,
+          status: user.blocked ? user.blocked : false,
+        }))
       : [];
 
     setDataRows(rows);
@@ -242,15 +219,14 @@ const User: FC = () => {
               className="createdAtTime"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
-              ).format('MMM Do, YYYY')}`}
+              ).format("MMM Do, YYYY")}`}
             >
-              {moment(params.value.date.slice(0, 10)).format(
-                'MMM Do, YYYY'
-              )}
+              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
-
-        ) : <NoDataCell />
+        ) : (
+          <NoDataCell />
+        ),
     },
     {
       field: "updatedBy",
@@ -262,18 +238,13 @@ const User: FC = () => {
         params?.value?.user ? (
           <h5 className="updateBy">
             {params?.value?.user?.firstName}
-            <span
-              title={params?.value?.date}
-              className="updatedAtTime"
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format(
-                'MMM Do, YYYY'
-              )}
+            <span title={params?.value?.date} className="updatedAtTime">
+              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
-        ) :
+        ) : (
           <NoDataCell />
-
+        ),
     },
     {
       field: "actions",
@@ -285,7 +256,7 @@ const User: FC = () => {
           </p>
         ) : (
           <>
-            {usersPermissions.isDelete ? (
+            {permissions.user.isDelete ? (
               <Tooltip title="Delete">
                 <IconButton
                   aria-label="Delete"
@@ -507,7 +478,7 @@ const User: FC = () => {
             <Header
               onSearch={handleSearch}
               searchVal={searchVal}
-              userPermissions={usersPermissions}
+              userPermissions={permissions.user}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               openRolesDialog={handleOpenDialog}
@@ -550,8 +521,9 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete user ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

@@ -20,8 +20,9 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { removeEmptyKeys } from "../../../constants/helpers";
+import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 
-const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
+const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
 
     const useStyles = makeStyles((theme) => ({
         btnPadding: {
@@ -44,27 +45,11 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
-    const [users, setUsers] = useState<any[]>([{ id: user[0].id, name: user[0].name, amount: 0 }]);
+    const [users, setUsers] = useState<any[]>([{ id: user[0].id, name: user[0].name, currency: "USD", amount: 0 }]);
     const fetchDoa = useCallback(() => {
-        setLoading(true);
-        setUsers(([{ id: user[0].id, name: user[0].name, amount: 0 }]))
-        axiosInstance()
-            .get(`/doa/${userSelected.id}`)
-            .then(({ data: { data, count } }) => {
-
-                setUsers(data?.doa?.map(item => {
-                    return {
-                        id: item.user?._id,
-                        name: `${item.user.firstName} ${item.user.lastName}`,
-                        amount: item.amount
-                    };
-                })
-                );
-                setLoading(false);
-            })
-            .catch((err) => {
-                setLoading(false);
-            });
+        doa.length > 0 ?
+            setUsers(doa) :
+            setUsers(([{ id: user[0].id, name: user[0].name, currency: "USD", amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
@@ -72,6 +57,7 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
     }, [fetchDoa]);
 
     const handleSubmit = async (values) => {
+        values.sort((a, b) => a.amount - b.amount)
         const doaArray = values.map(item => {
             if (item.amount != 0 && item.name != '')
                 return {
@@ -92,6 +78,12 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
             });
 
     }
+    const currencies = [
+        { label: "USD", sign: "$", groupStyle: "thousand" },
+        { label: "AUD", sign: "$", groupStyle: "thousand" },
+        { label: "INR", sign: "₹", groupStyle: "lakh" }
+    ];
+
 
 
     return (
@@ -127,8 +119,9 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                             alignItems="center"
                                                         >
                                                             <Grid item md={1}> Sr </Grid>
-                                                            <Grid item md={5}> Users </Grid>
-                                                            <Grid item md={4}> Amount </Grid>
+                                                            <Grid item md={4}> Users </Grid>
+                                                            <Grid item md={2}> Currency </Grid>
+                                                            <Grid item md={3}> Amount </Grid>
                                                             <Grid item md={2}></Grid>
                                                         </Grid>
                                                     </Box>
@@ -148,14 +141,14 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                                 key={index}
                                                                             >
                                                                                 <Grid item md={1}>{index + 1}</Grid>
-                                                                                <Grid item md={5}>
+                                                                                <Grid item md={4}>
 
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
                                                                                         value={user.find(v => v.name == userVal.name)}
-                                                                                        options={user.filter(element => !values.users.map(e=>e.name).includes(element.name))}
+                                                                                        options={user.filter(element => !values.users.map(e => e.name).includes(element.name))}
                                                                                         getOptionLabel={(option: any) => option.name}
-                                                                                        style={{ width: 200 }}
+                                                                                        style={{ width: 160 }}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
@@ -163,47 +156,32 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
                                                                                                 ["id"]: newValue.id,
                                                                                             });
                                                                                         }}
-                                                                                        
-                                                                                        renderInput={(params) => <TextField {...params} variant="outlined" 
+
+                                                                                        renderInput={(params) => <TextField {...params} variant="outlined"
                                                                                         />}
                                                                                     />
-                                                                                    {/* <Field
-                                                                                        fullWidth
-                                                                                        variant="outlined"
-                                                                                        component={TextField}
-                                                                                        type="text"
-                                                                                        select
-                                                                                        name="name"
-                                                                                        defaultValue={userVal.name}
-                                                                                        onChange={(e) => {
 
+                                                                                </Grid>
+                                                                                <Grid item md={2}>
+                                                                                    <Autocomplete
+                                                                                        id="combo-box-demo"
+                                                                                        value={currencies.find(v => v.label == userVal.currency)}
+                                                                                        options={currencies}
+                                                                                        getOptionLabel={(option: any) => option.label}
+                                                                                        style={{ width: 80 }}
+                                                                                        onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
-                                                                                                ["name"]: e.target.value,
-                                                                                                ["id"]: user.find(d => d.name == (e.target.value))?.id,
+                                                                                                ["currency"]: newValue?.label
                                                                                             });
 
-                                                                                        }
-                                                                                        }
-                                                                                    >
-                                                                                        {user
-                                                                                            // ? user.filter(element => !values.users.map(e=>e.name).includes(element.name)).map((option, i) => (
-                                                                                            ? user.map((option, i) => (
-                                                                                                !values.users.map(e=>e.name).includes(option.name)?(
-                                                                                                <MenuItem
-                                                                                                    key={i}
-                                                                                                    placeholder="Select Users"
-                                                                                                    value={option.name}
-                                                                                                    selected={userVal.selected}
-                                                                                                >
-                                                                                                    {option.name}
-                                                                                                </MenuItem>
-                                                                                                ):null
-                                                                                            ))
-                                                                                            : null}
-                                                                                    </Field> */}
+                                                                                        }}
+
+                                                                                        renderInput={(params) => <TextField {...params} variant="outlined"
+                                                                                        />}
+                                                                                    />
                                                                                 </Grid>
-                                                                                <Grid item md={4}>
+                                                                                <Grid item md={3}>
                                                                                     <Field
                                                                                         fullWidth
                                                                                         variant="outlined"
@@ -219,7 +197,11 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
 
                                                                                     />
                                                                                 </Grid>
-                                                                                <span><Add className={classes.addIcon} onClick={() => arrayHelpers.push({ "id": "", "name": "", "amount": 0 })} /></span>
+                                                                                <span><Add className={classes.addIcon} onClick={() => {
+                                                                                    values.users.sort((a, b) => a.amount - b.amount)
+                                                                                    arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
+                                                                                }
+                                                                                } /></span>
                                                                                 <span><Delete className={classes.deleteIcon} onClick={() => arrayHelpers.remove(index)} /></span>
                                                                             </Grid>
                                                                         ))
@@ -242,32 +224,25 @@ const DoaDialog = ({ userSelected, user, open, setOpen, updatedUser }) => {
 
                                 </DialogContent>
 
-                                <DialogActions>
-                                    <Grid
-                                        container
-                                        direction="row"
-                                        justify="space-between"
-                                        alignItems="flex-start"
-                                        className={classes.btnPadding}
+                                <CustomDialogFooter>
+
+                                    <Button
+                                        onClick={() => setOpen(false)}
+                                        variant="contained"
                                     >
-                                        <Button
-                                            onClick={() => setOpen(false)}
-                                            variant="contained"
-                                        >
-                                            Close
+                                        Cancel
                                 </Button>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            type="submit"
-                                            onClick={() => {
-                                                handleSubmit(values.users)
-                                            }}
-                                        >
-                                            Save
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        type="submit"
+                                        onClick={() => {
+                                            handleSubmit(values.users)
+                                        }}
+                                    >
+                                        Save
                                 </Button>
-                                    </Grid>
-                                </DialogActions>
+                                </CustomDialogFooter>
                             </>
                         )}
                     />
