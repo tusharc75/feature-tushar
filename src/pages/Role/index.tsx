@@ -409,6 +409,7 @@ const Roles: FC = () => {
   };
 
   const disableDelete = dataRows.some(o => o.isChecked && rolePermissionArray.indexOf(o?.permission) >= 0)
+  console.log("🚀 ~ file: index.tsx ~ line 412 ~ disableDelete", disableDelete)
   return (
     <>
       {isOpen && (
@@ -483,7 +484,7 @@ const Roles: FC = () => {
               rolePermissions={rolesPermissions}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              canDelete={!disableDelete}
+              canDelete={disableDelete}
             />
           </div>
         </Container>
