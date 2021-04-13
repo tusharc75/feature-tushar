@@ -37,7 +37,9 @@ import BoxWithBorder from "../../components/BoxWithBorder";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import { PERMISSION } from "../../constants/Roles"
 
+const permissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin]
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -248,6 +250,8 @@ const RoleDetailsPage = () => {
     }
   }
 
+  const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0
+
   return (
     <>
       {showAssignUserDialog && (
@@ -296,26 +300,24 @@ const RoleDetailsPage = () => {
           </Container>
         ) : (
           <DetailsPageHeader heading={headingLbl} showHeading={true}>
-            {rolePermissions.isUpdate && (
-              <Button
-                disabled={currentData === updatedData}
-                variant="contained"
-                color="primary"
-                onClick={handleUpdateRole}
-              >
-                {isUpdating ? <CircularProgress size={22} /> : "Update"}
-              </Button>
-            )}
+            <Button
+              // disabled={currentData === updatedData}
+              disabled={rolePermissions.isUpdate && !isEditDeleteDisable ? false : true}
+              variant="contained"
+              color="primary"
+              onClick={handleUpdateRole}
+            >
+              {isUpdating ? <CircularProgress size={22} /> : "Update"}
+            </Button>
             <Box marginX={1} component="span" />
-            {rolePermissions.isDelete ? (
-              <DeleteButton
-                text="Delete"
-                onClick={() => {
-                  setRoleDeleteRec(id);
-                  setShowConfirmBox(true);
-                }}
-              />
-            ) : null}
+            <DeleteButton
+              text="Delete"
+              onClick={() => {
+                setRoleDeleteRec(id);
+                setShowConfirmBox(true);
+              }}
+              disabled={rolePermissions.isDelete && !isEditDeleteDisable ? false : true}
+            />
           </DetailsPageHeader>
         )}
 
@@ -381,6 +383,7 @@ const RoleDetailsPage = () => {
                             resource={resource}
                             setField={setField}
                             setResource={setResource}
+                            isDisable={rolePermissions.isUpdate ? isEditDeleteDisable ? true : false : false}
                           />
                         )
                       )}
