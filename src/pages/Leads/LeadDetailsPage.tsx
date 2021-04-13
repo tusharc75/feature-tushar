@@ -44,7 +44,7 @@ const LeadDetailsPage = () => {
     isDelete: false,
   });
 
-  const { LeadResource, leadApi } = lead
+  const { leadResource, leadApi } = lead
   let { id } = useParams();
 
   // useEffect(() => {
@@ -55,7 +55,7 @@ const LeadDetailsPage = () => {
 
   useEffect(() => {
     if (permissions) {
-      setLeadsPermissions(permissions[LeadResource]);
+      setLeadsPermissions(permissions[leadResource]);
     }
   }, [permissions]);
 

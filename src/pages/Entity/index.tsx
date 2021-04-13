@@ -416,7 +416,7 @@ const Entity: FC = () => {
       )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.entity]} />
-        <Grid container direction="row" className="header-links">
+        {/* <Grid container direction="row" className="header-links">
           <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
               <Link
@@ -465,6 +465,7 @@ const Entity: FC = () => {
             </Grid>
           </Grid>
         </Grid>
+         */}
         <Container>
           <div className="header-panel">
             <Header
