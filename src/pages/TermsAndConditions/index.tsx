@@ -31,8 +31,6 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { getSearchQuery } from '../../services/util';
 import { termsAndCondition } from '../../constants/helpers';
 import CreateTermsAndCondition from './CreateTermsAndCondition'
-import moment from 'moment';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -312,45 +310,8 @@ export default function TermsAndCondition(props) {
                             <Link
                                 to="#"
                                 onClick={(e) => e.preventDefault()}
-                                className={classes.links}
-                            >
-                                Import from Excel
-                            </Link>
-                            <Divider
-                                orientation="vertical"
-                                flexItem
-                                className={classes.linkDivider}
-                            />
-                            <Link
-                                to="#"
-                                onClick={(e) => e.preventDefault()}
-                                className={classes.links}
-                            >
-                                Export to Excel
-                            </Link>
-                            <Divider
-                                orientation="vertical"
-                                flexItem
-                                className={classes.linkDivider}
-                            />
-                            <Link
-                                to="#"
-                                onClick={(e) => e.preventDefault()}
-                                className={classes.links}
-                            >
+                                className={classes.links}>
                                 Download Template
-                            </Link>
-                            <Divider
-                                orientation="vertical"
-                                flexItem
-                                className={classes.linkDivider}
-                            />
-                            <Link
-                                to="#"
-                                onClick={(e) => e.preventDefault()}
-                                className={classes.links}
-                            >
-                                Email a Link
                             </Link>
                         </Grid>
                     </Grid>
@@ -381,7 +342,7 @@ export default function TermsAndCondition(props) {
                                         }
 
                                         <Button
-                                            // disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                             variant="outlined"
                                             color="default"
                                             className={`${styles.terms_header_action_btn}`}
@@ -404,8 +365,10 @@ export default function TermsAndCondition(props) {
                                             {
                                                 actionsPermissions.isDelete &&
                                                 <MenuItem
-                                                    disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                                    onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                                                    onClick={() => {
+                                                        closeActions();
+                                                        setShowDeleteConfirmBox(true);
+                                                    }}>Delete</MenuItem>
                                             }
 
                                         </Menu>

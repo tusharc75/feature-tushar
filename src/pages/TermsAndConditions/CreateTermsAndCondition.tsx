@@ -21,7 +21,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 
 const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string()
-        .required("please enter note title"),
+        .required("please enter terms and condition title"),
 });
 
 
