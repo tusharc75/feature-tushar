@@ -39,7 +39,11 @@ function DisplayData({ label, value, color }) {
   );
 }
 
-export default function AssignedEntities({ data, unassignEntity }) {
+export default function AssignedEntities({
+  data,
+  unassignEntity,
+  permissions,
+}) {
   const classes = useStyles();
 
   return (
@@ -53,9 +57,14 @@ export default function AssignedEntities({ data, unassignEntity }) {
                   className={classes.actionsItems}
                   title={`Unassign ${obj.entityName}`}
                 >
-                  <IconButton onClick={() => unassignEntity(obj)} size="small">
-                    <Delete color="error" />
-                  </IconButton>
+                  {permissions.role.isUpdate && (
+                    <IconButton
+                      onClick={() => unassignEntity(obj)}
+                      size="small"
+                    >
+                      <Delete color="error" />
+                    </IconButton>
+                  )}
                 </span>
                 <Link
                   className="accountNameLink"

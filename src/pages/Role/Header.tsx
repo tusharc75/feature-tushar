@@ -103,7 +103,7 @@ const Header = (props) => {
                 onClose={closeActions}
               >
                 <MenuItem
-                  disabled={Boolean(canDelete)}
+                  disabled={Boolean(!canDelete)}
                   onClick={() => {
                     showConfirmBox(null);
                   }}

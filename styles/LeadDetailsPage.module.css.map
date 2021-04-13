@@ -1,0 +1,9 @@
+{
+    "version": 3,
+    "mappings": "AAAA,AAAA,kBAAkB,CAAA;EAChB,KAAK,EAAE,IAAI;CACZ;;AACD,MAAM,MAAM,MAAM,MAAM,SAAS,EAAE,KAAK;EACtC,AAAA,kBAAkB,CAAA;IAChB,KAAK,EAAE,eAAe;GACvB",
+    "sources": [
+        "../src/pages/Leads/LeadDetailsPage.module.scss"
+    ],
+    "names": [],
+    "file": "LeadDetailsPage.module.css"
+}
