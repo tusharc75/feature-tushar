@@ -28,43 +28,43 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Roles = ({ onDeleteGlobalRole, data }) => {
+const Roles = ({ unassignRole, data, permissions }) => {
   const classes = useStyles();
 
   return (
     <div className={classes.demo}>
       <List disablePadding>
         {data && data.length
-          ? data.map((obj) => {
-              return (
-                <BoxWithBorder style={{ margin: "8px" }} key={obj._id}>
-                  <ListItem disableGutters className={classes.list}>
-                    <ListItemText
-                      primary={
-                        <Link
-                          className="accountNameLink"
-                          to={`/role/detail/${obj._id}`}
-                        >
-                          <Typography> {obj.name || ""}</Typography>
-                        </Link>
-                      }
-                      secondary={obj.description || ""}
-                    />
+          ? data.map((obj) => (
+              <BoxWithBorder style={{ margin: "8px" }} key={obj._id}>
+                <ListItem disableGutters className={classes.list}>
+                  <ListItemText
+                    primary={
+                      <Link
+                        className="accountNameLink"
+                        to={`/role/detail/${obj._id}`}
+                      >
+                        <Typography> {obj.name || ""}</Typography>
+                      </Link>
+                    }
+                    secondary={obj.description || ""}
+                  />
+                  {permissions.entity.isUpdate && (
                     <ListItemSecondaryAction>
                       <Tooltip title="Unassign Role">
                         <IconButton
                           edge="end"
                           aria-label="delete"
-                          onClick={() => onDeleteGlobalRole(obj)}
+                          onClick={() => unassignRole(obj)}
                         >
                           <DeleteIcon color="error" />
                         </IconButton>
                       </Tooltip>
                     </ListItemSecondaryAction>
-                  </ListItem>
-                </BoxWithBorder>
-              );
-            })
+                  )}
+                </ListItem>
+              </BoxWithBorder>
+            ))
           : null}
       </List>
     </div>

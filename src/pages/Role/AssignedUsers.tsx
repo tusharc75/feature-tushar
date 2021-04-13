@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
-import { Typography, Tooltip } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -27,30 +27,30 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AssignedUsers = ({ unassignRole, data, currentUser }) => {
+const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
   const classes = useStyles();
 
   return (
     <div className={classes.demo}>
       <List disablePadding>
         {data && data.length
-          ? data.map((obj) => {
-              return (
-                <BoxWithBorder style={{ margin: "8px" }}>
-                  <ListItem disableGutters className={classes.list}>
-                    <ListItemText
-                      primary={
-                        <Link
-                          className="accountNameLink"
-                          to={`/user/detail/${obj._id}`}
-                        >
-                          <Typography>
-                            {`${obj.firstName} ${obj.lastName}` || ""}
-                          </Typography>
-                        </Link>
-                      }
-                      secondary={obj.email || ""}
-                    />
+          ? data.map((obj) => (
+              <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
+                <ListItem disableGutters className={classes.list}>
+                  <ListItemText
+                    primary={
+                      <Link
+                        className="accountNameLink"
+                        to={`/user/detail/${obj._id}`}
+                      >
+                        <Typography>
+                          {`${obj.firstName} ${obj.lastName}` || ""}
+                        </Typography>
+                      </Link>
+                    }
+                    secondary={obj.email || ""}
+                  />
+                  {permissions.role.isUpdate && (
                     <ListItemSecondaryAction
                       title={
                         currentUser === obj._id
@@ -69,10 +69,10 @@ const AssignedUsers = ({ unassignRole, data, currentUser }) => {
                         />
                       </IconButton>
                     </ListItemSecondaryAction>
-                  </ListItem>
-                </BoxWithBorder>
-              );
-            })
+                  )}
+                </ListItem>
+              </BoxWithBorder>
+            ))
           : null}
       </List>
     </div>
