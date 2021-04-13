@@ -90,9 +90,9 @@ function QontoStepIcon(props) {
   );
 }
 
-const NewStepper = ({steps, heading}) => {
+const NewStepper = ({ steps, heading }) => {
   const classes = useStyles();
-  
+
   return (
     <Paper elevation={0} className={classes.container}>
       <Typography variant="h6">{heading}</Typography>
@@ -107,16 +107,16 @@ const NewStepper = ({steps, heading}) => {
             {steps.map((label) => (
               <Step key={label.id}>
                 <StepLabel StepIconComponent={QontoStepIcon}>
-                  <div style={{color: "#09445A"}}>{label.name}</div>
+                  <div style={{ color: "#09445A" }}>{label.name}</div>
                   {/* <div style={{color: "#09445A"}}>{label.currency || "$"}{label.amount}</div> */}
-                  <div style={{color: "#09445A"}}>{"$"}{label.amount}</div>
+                  <div style={{ color: "#09445A" }}>{"$"}{label.amount}</div>
                 </StepLabel>
               </Step>
             ))}
           </Stepper>
         </Grid>
       </Grid>
-      </Paper>
+    </Paper>
   );
 };
 

@@ -22,7 +22,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import { removeEmptyKeys } from "../../../constants/helpers";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 
-const DoaDialog = ({ userSelected, user,doa, open, setOpen }) => {
+const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
 
     const useStyles = makeStyles((theme) => ({
         btnPadding: {
@@ -45,11 +45,11 @@ const DoaDialog = ({ userSelected, user,doa, open, setOpen }) => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
-    const [users, setUsers] = useState<any[]>([{ id: user[0].id, name: user[0].name,currency: "USD", amount: 0 }]);
+    const [users, setUsers] = useState<any[]>([{ id: user[0].id, name: user[0].name, currency: "USD", amount: 0 }]);
     const fetchDoa = useCallback(() => {
-        doa.length > 0?
-        setUsers(doa):
-        setUsers(([{ id: user[0].id, name: user[0].name,currency: "USD", amount: 0 }]))
+        doa.length > 0 ?
+            setUsers(doa) :
+            setUsers(([{ id: user[0].id, name: user[0].name, currency: "USD", amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
@@ -163,23 +163,23 @@ const DoaDialog = ({ userSelected, user,doa, open, setOpen }) => {
 
                                                                                 </Grid>
                                                                                 <Grid item md={2}>
-                                                                                   <Autocomplete
-                                                                                    id="combo-box-demo"
-                                                                                    value={currencies.find(v => v.label == userVal.currency) }
-                                                                                    options={currencies}
-                                                                                    getOptionLabel={(option: any) => option.label}
-                                                                                    style={{ width: 80 }}
-                                                                                    onChange={(event, newValue) => {
-                                                                                        arrayHelpers.replace(index, {
-                                                                                            ...values.users[index],
-                                                                                            ["currency"]: newValue?.label
-                                                                                        });
-                                                                                        
-                                                                                    }}
-                                                                                    
-                                                                                    renderInput={(params) => <TextField {...params} variant="outlined"
-                                                                                    />}
-                                                                                   />
+                                                                                    <Autocomplete
+                                                                                        id="combo-box-demo"
+                                                                                        value={currencies.find(v => v.label == userVal.currency)}
+                                                                                        options={currencies}
+                                                                                        getOptionLabel={(option: any) => option.label}
+                                                                                        style={{ width: 80 }}
+                                                                                        onChange={(event, newValue) => {
+                                                                                            arrayHelpers.replace(index, {
+                                                                                                ...values.users[index],
+                                                                                                ["currency"]: newValue?.label
+                                                                                            });
+
+                                                                                        }}
+
+                                                                                        renderInput={(params) => <TextField {...params} variant="outlined"
+                                                                                        />}
+                                                                                    />
                                                                                 </Grid>
                                                                                 <Grid item md={3}>
                                                                                     <Field
@@ -194,12 +194,12 @@ const DoaDialog = ({ userSelected, user,doa, open, setOpen }) => {
                                                                                             ...values.users[index],
                                                                                             ["amount"]: e.target.value.replace(/[^0-9]/g, '')
                                                                                         })}
-                                                                                    
+
                                                                                     />
                                                                                 </Grid>
                                                                                 <span><Add className={classes.addIcon} onClick={() => {
                                                                                     values.users.sort((a, b) => a.amount - b.amount)
-                                                                                    arrayHelpers.push({ "id": "", "name": "","currency":"USD", "amount": 0 })
+                                                                                    arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
                                                                                 }
                                                                                 } /></span>
                                                                                 <span><Delete className={classes.deleteIcon} onClick={() => arrayHelpers.remove(index)} /></span>

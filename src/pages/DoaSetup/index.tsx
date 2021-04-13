@@ -108,7 +108,7 @@ const useStyles = makeStyles((theme) => ({
     margin: 2
   },
 
-  
+
   linksContainer: {
     display: "flex",
   },
@@ -200,7 +200,7 @@ export default function Doa() {
             name: `${item.user.firstName} ${item.user.lastName}`,
             firstName: item.user.firstName,
             lastName: item.user.lastName,
-            currency: item.currency?item.currency:"USD",
+            currency: item.currency ? item.currency : "USD",
             amount: item.amount
           };
         })
@@ -514,7 +514,7 @@ export default function Doa() {
         </div>
       </Container>
       <Box component="div">
-        {(userSingleSelect) &&(
+        {(userSingleSelect) && (
           <DoaDialog
             user={dataRows}
             doa={doa}
@@ -563,17 +563,17 @@ export default function Doa() {
               doa.length > 0
                 ? (
                   <>
-                  <Button
-                  color="inherit"
-                  className={classes.actionBtn}
-                  onClick={() => setOpen(true)}
-                >
-                  Edit Doa
+                    <Button
+                      color="inherit"
+                      className={classes.actionBtn}
+                      onClick={() => setOpen(true)}
+                    >
+                      Edit Doa
                 </Button>
-                  <NewStepper
-                    heading={"DOA Details of "+userSingleSelect?.name}
-                    steps={doa}
-                  />
+                    <NewStepper
+                      heading={"DOA Details of " + userSingleSelect?.name}
+                      steps={doa}
+                    />
                   </>
                 ) : (
                   <React.Fragment>
