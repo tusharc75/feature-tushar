@@ -51,7 +51,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
             delete values["isChecked"]
             delete values["id"]
             axiosInstance()
-                .put(termsAndCondition.Api, values)
+                .put(termsAndCondition.api, values)
                 .then(({ data }) => {
                     // toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()
@@ -63,7 +63,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         }
         else {
             axiosInstance()
-                .post(termsAndCondition.Api, values)
+                .post(termsAndCondition.api, values)
                 .then(({ data }) => {
                     // toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()

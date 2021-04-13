@@ -217,7 +217,7 @@ export default function Account(props) {
             let searchParams = searchVal
                 ? { ...query, search: searchVal }
                 : { ...query };
-            let api = getSearchQuery(termsAndCondition.Api, searchParams);
+            let api = getSearchQuery(termsAndCondition.api, searchParams);
             setLoading(true);
             axiosInstance()
                 .get(api)
@@ -279,7 +279,7 @@ export default function Account(props) {
         }
         if (recs && recs.length > 0) {
             setDeleteLoading(true)
-            axiosInstance().put(`${termsAndCondition.Api}/remove`, { "ids": [...recs] }).then(({ data }) => {
+            axiosInstance().put(`${termsAndCondition.api}/remove`, { "ids": [...recs] }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setShowDeleteConfirmBox(false)
                 setDeleteLoading(false)
