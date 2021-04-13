@@ -1,0 +1,148 @@
+.MuiToolbar-root {
+  min-height: 55px !important;
+}
+
+.MuiButton-root {
+  padding: 6px 16px !important;
+}
+
+/* .MuiOutlinedInput-input {
+    padding: 12px 14px !important;
+  } */
+.MuiOutlinedInput-inputMultiline {
+  padding: 0 !important;
+}
+
+.MuiLink-root {
+  font-size: 14px;
+}
+
+.MuiStepper-root {
+  padding: 0 !important;
+  padding-top: 20px !important;
+}
+
+.MuiDataGrid-root .MuiDataGrid-colCell {
+  border: 1px solid #f7f7f7 !important;
+}
+
+.MuiDataGrid-root .MuiDataGrid-colCellWrapper {
+  background: #f7f7f7;
+  border-color: #d0dbe6 !important;
+  border-top: 1px solid;
+}
+
+.MuiDataGrid-root .MuiDataGrid-toolbar {
+  background: #f7f7f7;
+  border-color: #d0dbe6 !important;
+  border-top: 1px solid;
+}
+
+.MuiDataGrid-root .MuiDataGrid-colCellTitle {
+  border-color: #d0dbe6;
+  font-weight: bold !important;
+}
+
+.MuiDataGrid-root .MuiDataGrid-cell {
+  font-size: 16px;
+  border: 1px solid #f9f9f9;
+}
+
+.MuiDataGrid-root .MuiDataGrid-columnSeparator {
+  display: none !important;
+}
+
+.MuiDataGrid-root .MuiDataGrid-footer {
+  background: #f7f7f7;
+  border: 1px solid #e7e7e7;
+}
+
+.MuiDataGrid-root .MuiDataGrid-row.Mui-odd {
+  background-color: #fcfcfc;
+}
+
+.MuiDataGrid-root .MuiDataGrid-row:hover {
+  background-color: #e4e4e4 !important;
+}
+
+.MuiButton-outlined.Mui-disabled {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  cursor: no-drop !important;
+  background: gainsboro;
+  border: none;
+}
+
+.MuiDialog-container .MuiDialogTitle-root {
+  background: var(--primary-light);
+}
+
+.MuiDialog-container .MuiDialogTitle-root h6 {
+  color: white;
+  font-weight: bold;
+}
+
+.MuiDialog-container .MuiDialogTitle-root .MuiIconButton-label {
+  color: white;
+  font-weight: bold;
+}
+
+.MuiDialog-container .MuiDialogActions-root {
+  background: #ebebeb;
+}
+
+.MuiOutlinedInput-root {
+  border-radius: 0 !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: #e7e7e7 !important;
+}
+
+.MuiInputLabel-outlined.MuiInputLabel-shrink {
+  font-size: 0.8rem !important;
+}
+
+.MuiAutocomplete-input, .MuiOutlinedInput-input {
+  font-size: 0.9rem !important;
+}
+
+Button.MuiButtonBase-root {
+  font-weight: bold;
+  border-radius: 0.2rem;
+}
+
+.MuiDataGrid-window::-webkit-scrollbar {
+  background-color: #fff;
+  width: 8px;
+  height: 8px;
+}
+
+.MuiDataGrid-window::-webkit-scrollbar-track {
+  background-color: #eee;
+  border-radius: 16px;
+  margin: 2px 0;
+}
+
+.MuiDataGrid-window::-webkit-scrollbar-thumb {
+  background-color: #babac0;
+  border-radius: 16px;
+  border: 1px solid transparent;
+}
+
+.MuiPaper-rounded {
+  border-radius: 0 !important;
+}
+
+.MuiCollapse-container {
+  background: white;
+}
+
+.MuiFormHelperText-contained {
+  margin-left: 7px !important;
+  margin-right: 0px !important;
+}
+
+.MuiSvgIcon-colorError {
+  color: var(--error) !important;
+}
+/*# sourceMappingURL=material-component.css.map */
