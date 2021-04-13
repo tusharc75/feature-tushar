@@ -53,7 +53,7 @@ const Header = (props) => {
             </Button>
           )}
 
-          {entityPermissions.isDelete && (
+          {entityPermissions.isDelete || entityPermissions.isUpdate ? (
             <>
               <Button
                 className={styles.action_submit_btn}
@@ -76,27 +76,31 @@ const Header = (props) => {
                 open={Boolean(anchorEl)}
                 onClose={closeActions}
               >
-                <MenuItem
-                  disabled={Boolean(canDelete)}
-                  onClick={() => {
-                    showConfirmBox(null);
-                    closeActions();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-                <MenuItem
-                  disabled={rolesActionDiabled}
-                  onClick={() => {
-                    openRolesDialog();
-                    closeActions();
-                  }}
-                >
-                  Assign Roles
-                </MenuItem>
+                {entityPermissions.isDelete && (
+                  <MenuItem
+                    disabled={Boolean(canDelete)}
+                    onClick={() => {
+                      showConfirmBox(null);
+                      closeActions();
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                )}
+                {entityPermissions.isUpdate && (
+                  <MenuItem
+                    disabled={rolesActionDiabled}
+                    onClick={() => {
+                      openRolesDialog();
+                      closeActions();
+                    }}
+                  >
+                    Assign Roles
+                  </MenuItem>
+                )}
               </Menu>
             </>
-          )}
+          ) : null}
         </Box>
       </Grid>
     </Grid>
