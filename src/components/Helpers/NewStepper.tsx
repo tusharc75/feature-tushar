@@ -108,7 +108,8 @@ const NewStepper = ({steps, heading}) => {
               <Step key={label.id}>
                 <StepLabel StepIconComponent={QontoStepIcon}>
                   <div style={{color: "#09445A"}}>{label.name}</div>
-                  <div style={{color: "#09445A"}}>{label.currency || "$"}{label.amount}</div>
+                  {/* <div style={{color: "#09445A"}}>{label.currency || "$"}{label.amount}</div> */}
+                  <div style={{color: "#09445A"}}>{"$"}{label.amount}</div>
                 </StepLabel>
               </Step>
             ))}
