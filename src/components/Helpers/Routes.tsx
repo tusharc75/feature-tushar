@@ -103,5 +103,17 @@ export default {
   doa: {
     title: "Doa",
     path: "/doa",
-  }
+  },
+  product: {
+    title: "Product",
+    path: "/product",
+  },
+  formBuilder: {
+    title: "Form Builder",
+    path: "/form-builder",
+  },
+  formBuilderResource: {
+    title: "Resource",
+    path: "/resource",
+  },
 };

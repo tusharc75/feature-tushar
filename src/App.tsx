@@ -46,6 +46,9 @@ import {
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
 
+import FormBuilder from "./pages/FormBuilder";
+import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
+
 function App() {
   const toast = useContext(CustomToastContext);
 
@@ -250,8 +253,14 @@ function App() {
           <PrivateRoute exact path="/product-category/:id">
             <CreateProductCategory />
           </PrivateRoute>
-          <PrivateRoute exact path="/product">
+          <PrivateRoute exact path={routes.product.path}>
             <Product />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.formBuilder.path}>
+            <FormBuilder />
+          </PrivateRoute>
+          <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
+            <CreateFormBuilder />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
