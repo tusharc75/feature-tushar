@@ -118,10 +118,6 @@ function App() {
           <PrivateRoute key="customer-account" exact path="/customer-account">
             <Account
               account={customerAccount}
-              // accountApi={customerAccount.api}
-              // accountResource={customerAccount.resource}
-              // accountPermission={customerAccount.permission}
-              // accountRoute={customerAccount.route}
               accountBreadcrumb={routes.customerAccount}
             />
           </PrivateRoute>
@@ -132,45 +128,26 @@ function App() {
           >
             <AccountDetailPage
               account={customerAccount}
-              // accountApi={customerAccount.api}
-              // accountResource={customerAccount.resource}
-              // accountPermission={customerAccount.permission}
-              // accountRoute={customerAccount.route}
-              accountBreadcrumb={routes.customerAccount}
               contact={customerContact}
+              accountBreadcrumb={routes.customerAccount}
             />
           </PrivateRoute>
           <PrivateRoute key="customer-contact" exact path="/customer-contact">
             <Contact
               contact={customerContact}
-              // contactApi={customerContact.api}
-              // contactResource={customerContact.resource}
-              // contactPermission={customerContact.permission}
-              // contactRoute={customerContact.route}
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
-          <PrivateRoute
-            key="customer-contact-edit"
-            exact
-            path="/customer-contact/detail/:id"
-          >
+          <PrivateRoute key="customer-contact-edit" exact path="/customer-contact/detail/:id">
             <ContactDetailPage
+              account={customerAccount}
               contact={customerContact}
-              // contactApi={customerContact.api}
-              // contactResource={customerContact.resource}
-              // contactPermission={customerContact.permission}
-              // contactRoute={customerContact.route}
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-account" exact path="/supplier-account">
             <Account
               account={supplierAccount}
-              // accountApi={supplierAccount.api}
-              // accountResource={supplierAccount.resource}
-              // accountPermission={supplierAccount.permission}
-              // accountRoute={supplierAccount.route}
               accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
@@ -181,35 +158,20 @@ function App() {
           >
             <AccountDetailPage
               account={supplierAccount}
-              // accountApi={supplierAccount.api}
-              // accountResource={supplierAccount.resource}
-              // accountPermission={supplierAccount.permission}
-              // accountRoute={supplierAccount.route}
-              accountBreadcrumb={routes.supplierAccount}
               contact={supplierContact}
+              accountBreadcrumb={routes.supplierAccount}
             />
           </PrivateRoute>
           <PrivateRoute key="supplier-contact" exact path="/supplier-contact">
             <Contact
               contact={supplierContact}
-              // contactApi={supplierContact.api}
-              // contactResource={supplierContact.resource}
-              // contactPermission={supplierContact.permission}
-              // contactRoute={supplierContact.route}
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
-          <PrivateRoute
-            key="supplier-contact-edit"
-            exact
-            path="/supplier-contact/detail/:id"
-          >
+          <PrivateRoute key="supplier-contact-edit" exact path="/supplier-contact/detail/:id" >
             <ContactDetailPage
+              account={supplierAccount}
               contact={supplierContact}
-              // contactApi={supplierContact.api}
-              // contactResource={supplierContact.resource}
-              // contactPermission={supplierContact.permission}
-              // contactRoute={supplierContact.route}
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>

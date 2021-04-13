@@ -453,7 +453,7 @@ export default function Doa() {
   return (
     <Layout>
       <CustomBreadCrumbs routes={[routes.doa]} />
-      <Grid container direction="row" className="header-links">
+      {/* <Grid container direction="row" className="header-links">
         <Grid item xs={12} sm={12} className="pr-3">
           <Grid container justify="flex-end">
             <Link
@@ -501,7 +501,7 @@ export default function Doa() {
             </Link>
           </Grid>
         </Grid>
-      </Grid>
+      </Grid> */}
 
       {/* Tables Begins Here */}
       <Container>

@@ -20,6 +20,18 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 
+export const accountTemplateFileName = "Accounts-Template.xlsx";
+export const accountImportErrorFileName = "Accounts-Errors.xlsx";
+
+export const contactTemplateFileName = "Contacts-Template.xlsx";
+export const contactImportErrorFileName = "Contacts-Errors.xlsx";
+
+export const leadTemplateFileName = "Leads-Template.xlsx";
+export const leadImportErrorFileName = "Leads-Errors.xlsx";
+
+export const opportunityTemplateFileName = "Opportunities-Template.xlsx";
+export const opportunityImportErrorFileName = "Opportunities-Errors.xlsx";
+
 export const sidebarResource = {
   brand: "Brand",
   role: "Role",
@@ -44,7 +56,7 @@ export const sidebarResource = {
 };
 
 export const lead = {
-  LeadResource: "lead", //  Key of sidebar object
+  leadResource: "lead", //  Key of sidebar object
   leadApi: "/lead"
 };
 
@@ -385,19 +397,30 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
   return permissions;
 };
 
-export const downloadExcel = (fileDetails, filename) => {
-  const blob = new Blob([fileDetails as any],
-    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+export const downloadExcel = (fileDetails, fileName) => {
+  const extension = `.${fileName.split('.').pop()}`;
+  let type = null;
+  debugger;
+  switch (extension) {
+    case ".xlsx":
+      type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      break;
+
+    default:
+      break;
+  }
+
+  const blob = new Blob([fileDetails as any], { type: type });
 
   //Check the Browser type and download the File.
   const isIE = false || !!document["documentMode"];
   if (isIE) {
-    window.navigator.msSaveBlob(blob, filename);
+    window.navigator.msSaveBlob(blob, fileName);
   } else {
     var url = window.URL || window.webkitURL;
     let link = url.createObjectURL(blob);
     var a = document.createElement("a");
-    a.setAttribute("download", filename);
+    a.setAttribute("download", fileName);
     a.setAttribute("href", link);
     document.body.appendChild(a);
     a.click();
