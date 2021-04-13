@@ -43,6 +43,16 @@ export const sidebarResource = {
   opportunity: "Opportunity",
 };
 
+export const lead = {
+  LeadResource: "lead", //  Key of sidebar object
+  leadApi: "/lead"
+};
+
+export const opportunity = {
+  opportunityResource: "opportunity", //  Key of sidebar object
+  opportunityApi: "/opportunity"
+};
+
 export const supplierAccount = {
   accountApi: "supplier-account",
   accountRoute: "supplier-account",
@@ -111,7 +121,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
         : "";
 
   for (const key of arr) {
-    if (key.type === "switch" || key.type === "checkbox") {
+    if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = dataObj[key.fieldName]
         ? dataObj[key.fieldName]
         : false;
@@ -344,7 +354,9 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
     }
   }
   else {
-    data = [...data, ...user?.role?.selectedEntity?.resource];
+    if (user?.role?.selectedEntity) {
+      data = [...data, ...user?.role?.selectedEntity?.resource];
+    }
   }
 
   if (data) {
@@ -379,3 +391,23 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
 
   return permissions;
 };
+
+export const downloadExcel = (fileDetails, filename) => {
+  const blob = new Blob([fileDetails as any],
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+  //Check the Browser type and download the File.
+  const isIE = false || !!document["documentMode"];
+  if (isIE) {
+    window.navigator.msSaveBlob(blob, filename);
+  } else {
+    var url = window.URL || window.webkitURL;
+    let link = url.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.setAttribute("download", filename);
+    a.setAttribute("href", link);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}

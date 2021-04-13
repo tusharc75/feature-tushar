@@ -18,6 +18,17 @@
 .custom_grid {
   background-color: aliceblue;
 }
+.updatedAtTime , .createdAtTime{
+  font-size: 0.6 rem;
+  line-height: 1 rem;
+  display: block;
+  font-weight: lighter;
+}
+.updateBy, .createBy{
+  font-size: 0.8rem;
+  line-height: 1rem;
+  display: block;
+}
 // .detail_page_div2 {
 //   padding: 10px;
 //   background-color: var(--white);

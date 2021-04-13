@@ -24,11 +24,6 @@ const FieldList = {
       type: "dropDown",
       icon: "far fa-calendar-check",
     },
-    LOOKUP: {
-      label: "Lookup",
-      type: "lookup",
-      icon: "far fa-calendar-check",
-    },
     MULTISELECT: {
       label: "Multi-Select",
       type: "multiSelect",

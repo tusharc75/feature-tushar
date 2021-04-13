@@ -289,15 +289,15 @@ const Header = ({ toggleDrawer }) => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem onClick={openServicesMenu}>
+      {/* <MenuItem onClick={openServicesMenu}>
         <p>Services</p> <ExpandMore />
-      </MenuItem>
+      </MenuItem> */}
       <MenuItem onClick={openEntitiesMenu}>
         <p>Entities</p> <ExpandMore />
       </MenuItem>
-      <MenuItem onClick={openSupportMenu}>
+      {/* <MenuItem onClick={openSupportMenu}>
         <p>Support</p> <ExpandMore />
-      </MenuItem>
+      </MenuItem> */}
     </Menu>
   );
 
@@ -360,7 +360,7 @@ const Header = ({ toggleDrawer }) => {
               title="eQuipt Logo"
             />
             <Box marginLeft={2} className={classes.servicesButton}>
-              <Button
+              {/* <Button
                 aria-controls={servicesMenuId}
                 color="inherit"
                 onClick={openServicesMenu}
@@ -368,7 +368,7 @@ const Header = ({ toggleDrawer }) => {
                 className={classes.sectionDesktop}
               >
                 Services <ExpandMore />
-              </Button>
+              </Button> */}
               {/* <Button
                 aria-controls={entitiesMenuId}
                 color="inherit"
@@ -377,31 +377,34 @@ const Header = ({ toggleDrawer }) => {
               >
                 Entities <ExpandMore />
               </Button> */}
-              <FormControl className="navHeader">
-                <Select
-                  id="headerEnitySelect"
-                  label="Entities"
-                  className={`${classes.entitySelect}`}
-                  MenuProps={{
-                    anchorOrigin: {
-                      vertical: "bottom",
-                      horizontal: "left"
-                    }
-                  }}
-                  value={selectedEntity}
-                  IconComponent={() => (<ExpandMore />)}
-                  onChange={handleSelectedEnity}
-                >
-                  {
-                    user?.entity && user.entity.length ?
-                      user.entity.map(curEntity => (
-                        <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
-                      ))
-                      : null
-                  }
+              {
+                selectedEntity ?
+                  <FormControl className="navHeader">
+                    <Select
+                      id="headerEnitySelect"
+                      label="Entities"
+                      className={`${classes.entitySelect}`}
+                      MenuProps={{
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left"
+                        }
+                      }}
+                      value={selectedEntity}
+                      IconComponent={() => (<ExpandMore />)}
+                      onChange={handleSelectedEnity}
+                    >
+                      {
+                        user?.entity && user.entity.length ?
+                          user.entity.map(curEntity => (
+                            <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
+                          ))
+                          : null
+                      }
 
-                </Select>
-              </FormControl>
+                    </Select>
+                  </FormControl> : null
+              }
             </Box>
             <div className={classes.search}>
               <div className={classes.searchIcon}>
@@ -420,7 +423,7 @@ const Header = ({ toggleDrawer }) => {
             </div>
           </Box>
 
-          <div className={classes.sectionDesktop}>
+          {/* <div className={classes.sectionDesktop}>
             <Button
               aria-controls={supportMenuId}
               color="inherit"
@@ -429,7 +432,7 @@ const Header = ({ toggleDrawer }) => {
             >
               Support <ExpandMore />
             </Button>
-          </div>
+          </div> */}
           {
             user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} ></img> : null
           }

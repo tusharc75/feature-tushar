@@ -19,7 +19,7 @@ import {
   useTheme,
 } from "@material-ui/core";
 import _ from "lodash";
-import DateUtils from "@date-io/moment";
+import DateUtils from "@date-io/date-fns";
 import {
   KeyboardDatePicker,
   KeyboardDateTimePicker,
@@ -320,7 +320,9 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          onChange
+            ? onChange
+            : (e) => setFieldValue(name, e.target.value.trimStart())
         }
       />
     </InfoLabel>
@@ -337,8 +339,8 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={(e) => {
-          const regex = /^[a-zA-Z]+$/i;
-          if (e.target.value === "" || regex.test(e.target.value)) {
+          const regex = /^[a-zA-Z ]+$/i;
+          if (e.target.value === "" || regex.test(e.target.value.trim())) {
             setFieldValue(name, e.target.value);
           }
         }}
@@ -358,7 +360,9 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          onChange
+            ? onChange
+            : (e) => setFieldValue(name, e.target.value.trimStart())
         }
       />
     </InfoLabel>
@@ -913,9 +917,8 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={label}
-          placeholder="10/10/2018"
+          defaultValue={new Date()}
           onChange={(date) => setFieldValue(name, date)}
-          minDate={new Date()}
           format="MM/dd/yyyy"
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}

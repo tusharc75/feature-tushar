@@ -99,7 +99,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       const sections = [];
 
       let entityData;
-      if (user.entity && user.entity.length) {
+      if (user?.entity && user.entity.length) {
         entityData = user.entity.find(
           (curEntity) => curEntity._id === selectedEntity
         );
@@ -111,7 +111,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         }
       });
 
-      if (entityData.resource && entityData.resource.length) {
+      if (entityData?.resource && entityData.resource.length) {
         entityData.resource.forEach((item) => {
           if (!sections.includes(item.sectionName) && item.isRead) {
             sections.push(item.sectionName);
@@ -126,7 +126,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
 
         let enitityList = [];
 
-        if (entityData.resource && entityData.resource.length) {
+        if (entityData?.resource && entityData.resource.length) {
           enitityList = entityData.resource.filter(
             (list) => list.sectionName === section
           );
@@ -176,12 +176,16 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           })}
         >
           <List>
-            <ListItem button>
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            <ListItem button>
-              <ListItemText primary="Activities" />
-            </ListItem>
+            <Link to="/">
+              <ListItem button selected={location.pathname === "/"}>
+                <ListItemText primary="Dashboard" />
+              </ListItem>
+            </Link>
+            <Link to="/activity">
+              <ListItem button selected={pathnames[0] === "activity"}>
+                <ListItemText primary="Activities" />
+              </ListItem>
+            </Link>
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>

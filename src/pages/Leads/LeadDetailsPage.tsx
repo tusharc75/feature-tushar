@@ -15,7 +15,7 @@ import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import { getObjKeysWithValues } from "../../constants/helpers";
+import { getObjKeysWithValues, lead } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import styles from "./LeadDetailsPage.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -25,7 +25,7 @@ const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity },
+    state: { user, selectedEntity, permissions },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(true);
@@ -44,6 +44,7 @@ const LeadDetailsPage = () => {
     isDelete: false,
   });
 
+  const { LeadResource, leadApi } = lead
   let { id } = useParams();
 
   // useEffect(() => {
@@ -53,31 +54,19 @@ const LeadDetailsPage = () => {
   // }, [id]);
 
   useEffect(() => {
-    let data;
-    if (user?.entity && user.entity.length && selectedEntity) {
-      data = user.entity.find((entityObj) => entityObj._id === selectedEntity)
-        ?.resource;
+    if (permissions) {
+      setLeadsPermissions(permissions[LeadResource]);
     }
+  }, [permissions]);
 
-    if (data) {
-      const hasLeadsPermission = data.find((d) => d.name == "Lead");
-      if (hasLeadsPermission) {
-        setLeadsPermissions({
-          isCreate: hasLeadsPermission.isCreate,
-          isUpdate: hasLeadsPermission.isUpdate,
-          isRead: hasLeadsPermission.isRead,
-          isDelete: hasLeadsPermission.isDelete,
-        });
-      }
-    }
-
+  useEffect(() => {
     fetchLeadData();
   }, [user, selectedEntity]);
 
   const fetchLeadData = async () => {
     if (selectedEntity) {
       axiosInstance()
-        .get(`/lead/${id}?entity=${selectedEntity}`)
+        .get(`${leadApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName]
@@ -127,7 +116,7 @@ const LeadDetailsPage = () => {
   const handleDeleteLead = () => {
     if (leadData?._id) {
       axiosInstance()
-        .put(`/lead/remove?entity=${selectedEntity}`, { ids: [leadData._id] })
+        .put(`${leadApi}/remove?entity=${selectedEntity}`, { ids: [leadData._id] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -192,6 +181,7 @@ const LeadDetailsPage = () => {
           }}
           isNew={false}
           dataToUpdate={leadData}
+          leadApi={leadApi}
         />
       )}
       {/* {openUpdateDialog && (
@@ -316,7 +306,7 @@ const LeadDetailsPage = () => {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => {}}
+                      handleActivityRefresh={() => { }}
                     />
                   </div>
                 )}

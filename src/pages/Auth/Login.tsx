@@ -88,7 +88,7 @@ const Login = () => {
   const validateForm = (values) => {
     const errors: any = {};
     if (!values.email) {
-      errors.email = "Required";
+      errors.email = "Email is required";
     } else if (
       !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)
     ) {
@@ -96,7 +96,7 @@ const Login = () => {
     }
 
     if (!values.password) {
-      errors.password = "Required";
+      errors.password = "Password is required";
     }
 
     return errors;
@@ -126,6 +126,7 @@ const Login = () => {
                       type="email"
                       label="Email"
                       variant="outlined"
+                      size="small"
                     />
                     <br />
                     <Field
@@ -134,6 +135,7 @@ const Login = () => {
                       label="Password"
                       name="password"
                       variant="outlined"
+                      size="small"
                     />
                     <br />
                     {isSubmitting && <LinearProgress />}

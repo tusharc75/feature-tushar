@@ -19,6 +19,8 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import Roles from "./Roles";
+import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,7 +28,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user },
+    state: { user, permissions }, dispatch
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,16 +39,11 @@ const EntityDetailsPage = () => {
   const [entityFields, setEntityFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openRolesDialog, setOpenRolesDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.entity,
   ]);
-  const [entitiesPermissions, setEntitiesPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
 
   useEffect(() => {
     if (id) {
@@ -55,22 +52,6 @@ const EntityDetailsPage = () => {
       fetchEntityRoles();
     }
   }, [id]);
-
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-
-    if (data) {
-      const hasEntityPermission = data.find((d) => d.name == "Entity");
-      if (hasEntityPermission) {
-        setEntitiesPermissions({
-          isCreate: hasEntityPermission.isCreate,
-          isUpdate: hasEntityPermission.isUpdate,
-          isRead: hasEntityPermission.isRead,
-          isDelete: hasEntityPermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
 
   const fetchEntityData = async () => {
     setLoading(true);
@@ -124,11 +105,12 @@ const EntityDetailsPage = () => {
 
   const handleDeleteEntity = () => {
     if (id) {
-      if (entitiesPermissions.isDelete) {
+      if (permissions?.entity?.isDelete) {
         axiosInstance()
           .put(`/entity/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
+            fetchUserData()
             history.goBack();
           })
           .catch((err) => {
@@ -139,6 +121,24 @@ const EntityDetailsPage = () => {
       setShowConfirmBox(false);
     }
   };
+
+  const fetchUserData = () => {
+    dispatch({ type: USER_LOADING, payload: true });
+    axiosInstance()
+      .get("/user/me")
+      .then(({ data: response }) => {
+        const { data } = response;
+        dispatch({ type: SET_USER, payload: data });
+        if (data?.role?.selectedEntity?._id) {
+          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+        }
+        dispatch({ type: USER_LOADING, payload: false });
+      })
+      .catch((err) => {
+        localStorage.setItem("token", "");
+        dispatch({ type: USER_LOADING, payload: false });
+      });
+  }
 
   const handleUpdateEntity = (values) => {
     setUpdating(true);
@@ -154,6 +154,7 @@ const EntityDetailsPage = () => {
         });
         setUpdating(false);
         closeUpdateDIalog();
+        fetchUserData()
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -169,6 +170,14 @@ const EntityDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
+  const handleOpenRolesDialog = () => {
+    setOpenRolesDialog(true);
+  };
+
+  const closeRolesDIalog = () => {
+    setOpenRolesDialog(false);
+  };
+
   return (
     <>
       {openUpdateDialog && (
@@ -182,7 +191,18 @@ const EntityDetailsPage = () => {
           handleUpdate={handleUpdateEntity}
         />
       )}
-
+      {openRolesDialog && (
+        <AssignRolesDialog
+          entitiesDialogOpen={openRolesDialog}
+          handleCloseDialog={closeRolesDIalog}
+          type="role"
+          ids={[id]}
+          onSuccess={() => {
+            fetchEntityRoles();
+            closeRolesDIalog();
+          }}
+        />
+      )}
       <Layout>
         <Grid container direction="row">
           <Grid item xs={12} className="pl-2">
@@ -212,7 +232,7 @@ const EntityDetailsPage = () => {
             mainPoints={mainPoints}
             showHeading={true}
           >
-            {entitiesPermissions.isUpdate ? (
+            {permissions?.entity?.isUpdate ? (
               <Button
                 variant="contained"
                 color="primary"
@@ -222,7 +242,7 @@ const EntityDetailsPage = () => {
               </Button>
             ) : null}
             <Box component="span" marginX={1} />
-            {entitiesPermissions.isDelete ? (
+            {permissions?.entity?.isDelete ? (
               <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
@@ -259,7 +279,11 @@ const EntityDetailsPage = () => {
                     Assigned Regional Roles ({globalRoles.length || 0})
                   </Typography>
 
-                  <IconButton color="primary" size="small">
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={handleOpenRolesDialog}
+                  >
                     <ControlPoint />
                   </IconButton>
                 </Box>
@@ -286,7 +310,7 @@ const EntityDetailsPage = () => {
                     ))
                   ) : globalRoles.length ? (
                     <>
-                      <Roles data={globalRoles} onDeleteGlobalRole={() => {}} />
+                      <Roles data={globalRoles} onDeleteGlobalRole={() => { }} />
                       <Box marginY={1} />
                       <Button
                         fullWidth

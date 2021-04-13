@@ -37,7 +37,7 @@ const Roles = ({ onDeleteGlobalRole, data }) => {
         {data && data.length
           ? data.map((obj) => {
               return (
-                <BoxWithBorder style={{ margin: "8px" }}>
+                <BoxWithBorder style={{ margin: "8px" }} key={obj._id}>
                   <ListItem disableGutters className={classes.list}>
                     <ListItemText
                       primary={

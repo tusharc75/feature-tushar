@@ -19,12 +19,13 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
 import { yyyyMMDD } from "../../constants/helpers";
+import { opportunity } from '../../constants/helpers'
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, selectedEntity },
+    state: { user, selectedEntity, permissions },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(true);
@@ -54,28 +55,13 @@ function OpportunityDetailsPage() {
     isDelete: false,
   });
 
+  const { opportunityResource, opportunityApi } = opportunity
+
   useEffect(() => {
-    let data;
-
-    if (user?.entity && user.entity.length && selectedEntity) {
-      data = user.entity.find((entityObj) => entityObj._id === selectedEntity)
-        ?.resource;
+    if (permissions) {
+      setOpportunityPermissions(permissions[opportunityResource]);
     }
-
-    if (data) {
-      const hasOpportunityPermission = data.find(
-        (d) => d.name == "Opportunity"
-      );
-      if (hasOpportunityPermission) {
-        setOpportunityPermissions({
-          isCreate: hasOpportunityPermission.isCreate,
-          isUpdate: hasOpportunityPermission.isUpdate,
-          isRead: hasOpportunityPermission.isRead,
-          isDelete: hasOpportunityPermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
+  }, [permissions]);
 
   useEffect(() => {
     if (id) {
@@ -87,7 +73,7 @@ function OpportunityDetailsPage() {
     if (selectedEntity) {
       setLoading(true);
       axiosInstance()
-        .get(`/opportunity/${id}?entity=${selectedEntity}`)
+        .get(`${opportunityApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
@@ -156,7 +142,7 @@ function OpportunityDetailsPage() {
   const handleDeleteOpportunity = () => {
     if (opportunityData?._id) {
       axiosInstance()
-        .put(`/opportunity/remove?entity=${selectedEntity}`, {
+        .put(`${opportunityApi}/remove?entity=${selectedEntity}`, {
           ids: [opportunityData._id],
         })
         .then(({ data }) => {
@@ -270,9 +256,9 @@ function OpportunityDetailsPage() {
             ) : null}
             <Box component="span" marginX={1} />
             {opportunityPermissions.isDelete &&
-            opportunityData?.owner.optionValue &&
-            user?.user?._id &&
-            opportunityData.owner.optionValue === user.user._id ? (
+              opportunityData?.owner.optionValue &&
+              user?.user?._id &&
+              opportunityData.owner.optionValue === user.user._id ? (
               <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
@@ -347,7 +333,7 @@ function OpportunityDetailsPage() {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => {}}
+                      handleActivityRefresh={() => { }}
                     />
                   </div>
                 )}

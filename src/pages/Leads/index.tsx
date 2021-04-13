@@ -30,6 +30,9 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { getObjKeys } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import { HiUserGroup } from 'react-icons/hi';
+import { lead } from '../../constants/helpers'
+import moment from "moment";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -60,7 +63,7 @@ let leadTimeout
 const Leads = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
-  const { state: { user, selectedEntity } }: any = useData();
+  const { state: { user, selectedEntity, permissions } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -78,25 +81,13 @@ const Leads = () => {
   const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
 
+  const { LeadResource, leadApi } = lead
 
   useEffect(() => {
-    let data
-    if (user?.entity && user.entity.length && selectedEntity) {
-      data = user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource
+    if (permissions && permissions[LeadResource]) {
+      setLeadsPermissions(permissions[LeadResource]);
     }
-
-    if (data) {
-      const hasLeadsPermission = data.find(d => d.name == "Lead");
-      if (hasLeadsPermission) {
-        setLeadsPermissions({
-          isCreate: hasLeadsPermission.isCreate,
-          isUpdate: hasLeadsPermission.isUpdate,
-          isRead: hasLeadsPermission.isRead,
-          isDelete: hasLeadsPermission.isDelete
-        });
-      }
-    }
-  }, [user, selectedEntity]);
+  }, [permissions]);
 
   useEffect(() => {
 
@@ -140,7 +131,7 @@ const Leads = () => {
       searchParams = searchVal
         ? { ...searchParams, search: searchVal }
         : { ...searchParams };
-      let api = getSearchQuery("/lead", searchParams)
+      let api = getSearchQuery(leadApi, searchParams)
       try {
         axiosInstance()
           .get(api).then(({ data }) => {
@@ -227,6 +218,53 @@ const Leads = () => {
     {
       field: "company", headerName: "Company", width: 300,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
+    },
+    {
+      field: "createdBy",
+      headerName: "Created By",
+      width: 250,
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="createBy">
+            {params.value.user.firstName}
+            <span
+              className="createdAtTime"
+              title={`${params.value.user.firstName} • ${moment(
+                params?.value?.date?.slice(0, 10)
+              ).format('MMM Do, YYYY')}`}
+            >
+              {moment(params?.value?.date?.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>
+        ) : <NoDataCell />
+    },
+    {
+      field: "updatedBy",
+      headerName: "Updated By",
+      width: 250,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="updateBy">
+            {params.value.user.firstName}
+            <span
+              title={params.value.date}
+              className="updatedAtTime"
+            >
+              {moment(params.value.date.slice(0, 10)).format(
+                'MMM Do, YYYY'
+              )}
+            </span>
+          </h5>
+        ) :
+          <NoDataCell />
+
     },
     {
       field: "phone", headerName: "Phone", width: 250,
@@ -353,7 +391,7 @@ const Leads = () => {
     }
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/lead/remove?entity=${selectedEntity}`, { ids: [...recs] }).then(({ data }) => {
+        .put(`${leadApi}/remove?entity=${selectedEntity}`, { ids: [...recs] }).then(({ data }) => {
           toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
           setDeleteLoading(false)
@@ -441,6 +479,7 @@ const Leads = () => {
             onClose={() => { setIsOpen(false) }}
             isNew={true}
             dataToUpdate={null}
+            leadApi={leadApi}
           />
         }
 

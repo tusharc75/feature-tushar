@@ -1,16 +1,10 @@
 import { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import { Box, Grid, MenuItem, Button, Menu } from "@material-ui/core";
 import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { FaUsers } from "react-icons/fa";
 
-const useStyles = makeStyles((theme) => ({
-  filter_side: {
-    display: "flex",
-    justifyContent: "flex-end",
-  },
-}));
+import styles from "../Leads/Header.module.scss";
 
 const Header = (props) => {
   const {
@@ -23,7 +17,6 @@ const Header = (props) => {
     openRolesDialog,
     rolesActionDiabled,
   } = props;
-  const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const openActions = (event) => {
@@ -35,17 +28,24 @@ const Header = (props) => {
   };
 
   return (
-    <Grid container>
+    <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
         <FaUsers className="headerLogo" />{" "}
         <span className="listingHeader">Users</span>
       </Grid>
-      <Grid item xs={6} className={classes.filter_side}>
-        <Box component="div">
-          <Box component="span" marginX={1} />
-
+      <Grid item xs={6} className={styles.filter_side}>
+        <Box component="div" className={styles.filter_side_header}>
+          <SearchBox
+            searchbox={styles.search_box_input}
+            onSearch={onSearch}
+            value={searchVal}
+            size="small"
+            placeholder="Search Users"
+            width="242px"
+          />
           {userPermissions.isCreate && (
             <Button
+              className={styles.add_submit_btn}
               variant="contained"
               color="primary"
               onClick={onCreate}
@@ -54,19 +54,11 @@ const Header = (props) => {
               Add
             </Button>
           )}
-          <Box component="span" marginX={1} />
-          <SearchBox
-            onSearch={onSearch}
-            value={searchVal}
-            size="small"
-            placeholder="Search Users"
-            width="242px"
-          />
 
-          <Box component="span" marginX={1} />
           {userPermissions.isDelete && (
             <>
               <Button
+                className={styles.action_submit_btn}
                 variant="outlined"
                 color="default"
                 onClick={openActions}

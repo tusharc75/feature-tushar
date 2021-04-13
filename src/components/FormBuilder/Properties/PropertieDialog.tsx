@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -42,6 +42,7 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
     isTooltip: fieldData.isTooltip,
     tooltipMessage: fieldData.tooltipMessage,
     decimalPlaces: fieldData.decimalPlaces,
+    lookup: fieldData.lookup,
     lookupResource: fieldData.lookupResource,
   });
   const [option, setOption] = useState(fieldData.option ? fieldData.option : []);
@@ -96,7 +97,8 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
             if (fieldData.type === "decimal") {
               ele.decimalPlaces = state.decimalPlaces
             }
-            if (fieldData.type === "lookup") {
+            if (state.lookup) {
+              ele.lookup = state.lookup
               ele.lookupResource = state.lookupResource
             }
           }
@@ -141,23 +143,39 @@ export const PropertieDialog = ({ open, handleClose, fieldData, sectionId, secti
                   <MenuItem value={4}>4</MenuItem>
                 </Select>
               </FormControl>}
-            {fieldData.type === "lookup" &&
-              <FormControl fullWidth margin="dense" variant="outlined">
-                <InputLabel id="demo-simple-select-outlined-label">Lookup Resource</InputLabel>
-                <Select
-                  labelId="demo-simple-select-outlined-label"
-                  id="demo-simple-select-outlined"
-                  value={state.lookupResource}
-                  onChange={handleChange}
-                  label="Lookup Resource"
-                  name="lookupResource"
-                >
-                  {LookupResource.map((_data) => (
-                    <MenuItem value={_data.value}>{_data.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>}
-            {option.length > 0 ?
+            {(fieldData.type === "multiSelect" || fieldData.type === "dropDown") &&
+              <Fragment>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="lookup"
+                      checked={state.lookup}
+                      onChange={handleChecked}
+                      color="primary"
+                    />
+                  }
+                  label="Lookup"
+                />
+                {state.lookup &&
+                  <Box pt={2} pb={2}>
+                    <FormControl fullWidth margin="dense" variant="outlined">
+                      <InputLabel id="demo-simple-select-outlined-label">Lookup Resource</InputLabel>
+                      <Select
+                        labelId="demo-simple-select-outlined-label"
+                        id="demo-simple-select-outlined"
+                        value={state.lookupResource}
+                        onChange={handleChange}
+                        label="Lookup Resource"
+                        name="lookupResource"
+                      >
+                        {LookupResource.map((_data) => (
+                          <MenuItem value={_data.value}>{_data.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>}
+              </Fragment>}
+            {(option.length > 0 && !state.lookup) ?
               <Box pt={2} pb={2}>
                 <Typography variant="body2">Options</Typography>
                 <Box border={1} mt={1} p={1} bgcolor="grey.100" borderColor="grey.300">

@@ -1,21 +1,12 @@
 import { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
-  Chip,
   Grid,
   Divider,
   Tooltip,
   IconButton,
   makeStyles,
   Link as MuiLink,
-  Dialog,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  Button,
-  CircularProgress,
 } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
@@ -35,10 +26,9 @@ import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import Loader from "../../components/Loader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import NoDataCell from "../../components/Helpers/NoDataCell";
+import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -57,17 +47,13 @@ const Entity: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user },
+    state: { user, permissions }, dispatch
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [entities, setEntities] = useState<any[]>([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
-  const [loadingRoles, setLoadingRoles] = useState(false);
-  const [roles, setRoles] = useState<any[]>([]);
-  const [selectedRoles, setSelectedRoles] = useState<any[]>([]);
   const [selectedEntities, setSelectedEntities] = useState<any[]>([]);
-  const [isAssigning, setAssigning] = useState(false);
 
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
@@ -77,12 +63,6 @@ const Entity: FC = () => {
   const [checkAllEntities, setCheckAllEntities] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [entitiesPermissions, setEntitiesPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [
     showDeleteWarningConfirmBox,
@@ -114,30 +94,17 @@ const Entity: FC = () => {
     fetchEntities();
   }, [fetchEntities]);
 
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-    if (data) {
-      const hasUsersPermission = data.find((d: any) => d.name === "Entity");
-      if (hasUsersPermission) {
-        setEntitiesPermissions({
-          isCreate: hasUsersPermission.isCreate,
-          isUpdate: hasUsersPermission.isUpdate,
-          isRead: hasUsersPermission.isRead,
-          isDelete: hasUsersPermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
-
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((entity: any) => ({
-          id: entity._id,
-          isChecked: false,
-          name: entity.entityName,
-          address: entity.address,
-          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-        }))
+        id: entity._id,
+        isChecked: false,
+        name: entity.entityName,
+        address: entity.address,
+        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
+        createdBy: entity?.createdBy,
+        updatedBy: entity?.updatedBy,
+      }))
       : [];
     setDataRows(rows);
   };
@@ -200,15 +167,57 @@ const Entity: FC = () => {
         </p>
       ),
     },
+    // {
+    //   field: "createdAt",
+    //   headerName: "Created At",
+    //   width: 150,
+    //   renderCell: (params: any) => (
+    //     <p title={`Created At • ${params.value}`} className="text-truncate">
+    //       {params?.value}
+    //     </p>
+    //   ),
+    // },
     {
-      field: "createdAt",
-      headerName: "Created At",
+      field: "createdBy",
+      headerName: "Created By",
       width: 150,
-      renderCell: (params: any) => (
-        <p title={`Created At • ${params.value}`} className="text-truncate">
-          {params.value}
-        </p>
-      ),
+      renderCell: (params: any) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="createBy">
+            {params?.value?.user?.firstName}
+            <span
+              className="createdAtTime"
+              title={`${params?.value?.user?.firstName} • ${moment(
+                params?.value?.date?.slice(0, 10)
+              ).format("MMM Do, YYYY")}`}
+            >
+              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
+            </span>
+          </h5>
+        ) : (
+          <NoDataCell />
+        ),
+    },
+    {
+      field: "updatedBy",
+      headerName: "Updated By",
+      width: 150,
+      renderCell: (params: any) =>
+        params?.value && params?.value?.user ? (
+          <h5 className="updateBy">
+            {params.value.user.firstName}
+            <span
+              className="updatedAtTime"
+              title={`${params.value.user.firstName} • ${moment(
+                params.value.date.slice(0, 10)
+              ).format("MMM Do, YYYY")}`}
+            >
+              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+            </span>
+          </h5>
+        ) : (
+          <NoDataCell />
+        ),
     },
 
     {
@@ -216,7 +225,7 @@ const Entity: FC = () => {
       headerName: "Actions ",
       renderCell: (params: any) => (
         <>
-          {entitiesPermissions.isDelete ? (
+          {permissions?.entity?.isDelete ? (
             <Tooltip title="Delete">
               <IconButton
                 aria-label="Delete"
@@ -297,6 +306,7 @@ const Entity: FC = () => {
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
           fetchEntities();
+          fetchUserData()
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -337,21 +347,6 @@ const Entity: FC = () => {
     }
   };
 
-  // Get all roles
-  const getRoles = async () => {
-    setLoadingRoles(true);
-    try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`/role`);
-      setRoles(data);
-      setLoadingRoles(false);
-    } catch (error) {
-      setLoadingRoles(false);
-      toastConfig.setToastConfig(error);
-    }
-  };
-
   // Handle entity selection
   const handleSelectedEntities = (id, isChecked) => {
     let tempSelectedEntities = [...selectedEntities],
@@ -364,45 +359,6 @@ const Entity: FC = () => {
     setSelectedEntities(tempSelectedEntities);
   };
 
-  // handle role selection from dialog
-  const handleRoleSelection = (e, id) => {
-    let tempSelectedRoles = [...selectedRoles];
-    let curIndex = tempSelectedRoles.indexOf(id);
-    if (e.target.checked) {
-      if (curIndex < 0) tempSelectedRoles = [...tempSelectedRoles, id];
-    } else if (curIndex >= 0) {
-      tempSelectedRoles.splice(curIndex, 1);
-    }
-    setSelectedRoles(tempSelectedRoles);
-  };
-
-  // Handle/Submit Roles
-  const handleAssignRoles = async () => {
-    if (selectedEntities.length && selectedRoles.length) {
-      setAssigning(true);
-      try {
-        const dataObj = {
-          entities: selectedEntities,
-          roles: selectedRoles,
-        };
-        const { data } = await axiosInstance().put("/entity/add-role", dataObj);
-        toastConfig.setToastConfig({
-          message: "Roles assigned successfully",
-          type: "success",
-          open: true,
-        });
-        setAssigning(false);
-        handleCloseDialog();
-        fetchEntities();
-        setSelectedRoles([]);
-        setSelectedEntities([]);
-      } catch (error) {
-        setAssigning(false);
-        toastConfig.setToastConfig(error);
-      }
-    }
-  };
-
   const handleCreate = () => {
     setIsOpen(true);
   };
@@ -413,12 +369,29 @@ const Entity: FC = () => {
 
   const handleOpenDialog = () => {
     setRolesDialogOpen(true);
-    getRoles();
   };
 
   const handleCloseDialog = () => {
     setRolesDialogOpen(false);
   };
+
+  const fetchUserData = () => {
+    dispatch({ type: USER_LOADING, payload: true });
+    axiosInstance()
+      .get("/user/me")
+      .then(({ data: response }) => {
+        const { data } = response;
+        dispatch({ type: SET_USER, payload: data });
+        if (data?.role?.selectedEntity?._id) {
+          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+        }
+        dispatch({ type: USER_LOADING, payload: false });
+      })
+      .catch((err) => {
+        localStorage.setItem("token", "");
+        dispatch({ type: USER_LOADING, payload: false });
+      });
+  }
 
   return (
     <>
@@ -429,125 +402,84 @@ const Entity: FC = () => {
           fetchData={fetchEntities}
         />
       )}
-      <Dialog
-        fullWidth
-        maxWidth="xs"
-        open={rolesDialogOpen}
-        onClose={handleCloseDialog}
-        aria-labelledby="assign-roles-dialog"
-      >
-        <CustomDialogHeader title="Assign roles" />
-        <CustomDialogContent>
-          {loadingRoles ? (
-            <Loader text="Loading Roles" />
-          ) : roles.length ? (
-            <List style={{ padding: 0 }}>
-              {roles.map((role) => (
-                <ListItem divider key={role._id}>
-                  <ListItemIcon>
-                    <Checkbox
-                      edge="start"
-                      onChange={(e) => handleRoleSelection(e, role._id)}
-                      checked={selectedRoles.indexOf(role._id) >= 0}
-                      inputProps={{
-                        "aria-labelledby": `checkbox-list-label-${role._id}`,
-                      }}
-                    />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={role.name}
-                    secondary={role.description}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          ) : (
-            <Typography>No Roles</Typography>
-          )}
-        </CustomDialogContent>
-        <CustomDialogFooter>
-          <Button
-            disabled={isAssigning}
-            onClick={handleCloseDialog}
-            color="primary"
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={!selectedRoles.length || isAssigning}
-            onClick={handleAssignRoles}
-            color="primary"
-          >
-            {isAssigning ? <CircularProgress size={22} /> : "Save"}
-          </Button>
-        </CustomDialogFooter>
-      </Dialog>
+      {rolesDialogOpen && (
+        <AssignRolesDialog
+          entitiesDialogOpen={rolesDialogOpen}
+          handleCloseDialog={handleCloseDialog}
+          type="role"
+          ids={selectedEntities}
+          onSuccess={() => {
+            fetchEntities();
+            handleCloseDialog();
+          }}
+        />
+      )}
       <Layout>
-        <Grid container spacing={3} direction="row">
-          <Grid item xs={12} sm={6} className="pl-3">
-            <CustomBreadCrumbs routes={[routes.entity]} />
-          </Grid>
-          <Grid item xs={12} sm={6} className="pr-3">
+        <CustomBreadCrumbs routes={[routes.entity]} />
+        <Grid container direction="row" className="header-links">
+          <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Import from Excel
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Export to Excel
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Download Template
-              </MuiLink>
+              </Link>
               <Divider
                 orientation="vertical"
                 flexItem
                 className={classes.linkDivider}
               />
-              <MuiLink
+              <Link
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className={classes.links}
               >
                 Email a Link
-              </MuiLink>
+              </Link>
             </Grid>
           </Grid>
         </Grid>
         <Container>
-          <Header
-            onSearch={handleSearch}
-            searchVal={searchVal}
-            entityPermissions={entitiesPermissions}
-            onCreate={handleCreate}
-            showConfirmBox={showConfirmBox}
-            openRolesDialog={handleOpenDialog}
-            rolesActionDiabled={Boolean(!selectedEntities.length)}
-            canDelete={dataRows.filter((d) => d.isChecked).length === 0}
-          />
+          <div className="header-panel">
+            <Header
+              onSearch={handleSearch}
+              searchVal={searchVal}
+              entityPermissions={permissions?.entity}
+              onCreate={handleCreate}
+              showConfirmBox={showConfirmBox}
+              openRolesDialog={handleOpenDialog}
+              rolesActionDiabled={Boolean(!selectedEntities.length)}
+              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
+            />
+          </div>
         </Container>
-        <Container styles={{ minHeight: "calc(100vh - 210px)", padding: 10 }}>
+        <Container>
           <div className="listing-grid">
             <DataGrid
               components={{
@@ -582,9 +514,8 @@ const Entity: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
