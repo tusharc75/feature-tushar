@@ -30,7 +30,7 @@ import CreateRole from "./CreateRole";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { PERMISSION } from "../../constants/Roles"
 
-const permissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin]
+const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin]
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: "flex",
@@ -128,6 +128,7 @@ const Roles: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((role: any) => ({
+        ...role,
         id: role._id,
         isChecked: false,
         name: role.name,
@@ -276,8 +277,12 @@ const Roles: FC = () => {
               <IconButton
                 aria-label="Delete"
                 onClick={() => showConfirmBox(params.row)}
+                disabled={rolePermissionArray.indexOf(params?.row?.permission) >= 0}
               >
-                <DeleteIcon fontSize="small" color="error" />
+                {
+                  rolePermissionArray.indexOf(params?.row?.permission) >= 0 ?
+                    <DeleteIcon fontSize="small" color="disabled" /> : <DeleteIcon fontSize="small" color="error" />
+                }
               </IconButton>
             </Tooltip>
           ) : (
@@ -285,14 +290,8 @@ const Roles: FC = () => {
               className="cursor-stop"
               title="You do not have permission to delete role"
             >
-              <IconButton aria-label="Delete"
-                disabled={permissionArray.indexOf(params?.row?.permission) >= 0}
-              >
-                {
-                  permissionArray.indexOf(params?.row?.permission) >= 0 ?
-                    <DeleteIcon fontSize="small" color="disabled" /> : <DeleteIcon fontSize="small" />
-                }
-
+              <IconButton aria-label="Delete">
+                <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
@@ -408,6 +407,9 @@ const Roles: FC = () => {
   const handleRoleTypeSel = (filteredValue) => {
     setSelectedType(filteredValue);
   };
+
+  const disableDelete = dataRows.some(o => o.isChecked && rolePermissionArray.indexOf(o?.permission) >= 0)
+  console.log("🚀 ~ file: index.tsx ~ line 412 ~ disableDelete", disableDelete)
   return (
     <>
       {isOpen && (
@@ -422,7 +424,7 @@ const Roles: FC = () => {
       )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.role]} />
-        <Grid container direction="row" className="header-links">
+        {/* <Grid container direction="row" className="header-links">
           <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
               <Link
@@ -471,6 +473,7 @@ const Roles: FC = () => {
             </Grid>
           </Grid>
         </Grid>
+        */}
         <Container>
           <div className="header-panel">
             <Header
@@ -482,7 +485,7 @@ const Roles: FC = () => {
               rolePermissions={rolesPermissions}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+              canDelete={disableDelete}
             />
           </div>
         </Container>
