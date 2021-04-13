@@ -435,7 +435,7 @@ const RoleDetailsPage = () => {
                         </BoxWithBorder>
                       ))}
                     </Box>
-                  ) : (
+                  ) : roleData.entity.length ? (
                     <>
                       <AssignedEntities
                         selectedEntity={selectedEntity}
@@ -455,6 +455,10 @@ const RoleDetailsPage = () => {
                         View All
                       </Button>
                     </>
+                  ) : (
+                    <Box textAlign="center" padding={2}>
+                      <Typography>No entities has been assigned </Typography>
+                    </Box>
                   )}
                 </Box>
               </Container>
@@ -484,43 +488,53 @@ const RoleDetailsPage = () => {
                   </IconButton>
                 )}
               </Box>
-              <Box>
-                {loading ? (
-                  [1, 2].map((i) => (
-                    <BoxWithBorder
-                      key={i}
-                      style={{
-                        margin: "8px",
-                      }}
-                    >
-                      <Box padding={1}>
-                        <Skeleton variant="text" width="100px" height="20px" />
-                        <Box marginTop={1} />
-                        <Skeleton variant="text" width="100%" height="15px" />
-                      </Box>
-                    </BoxWithBorder>
-                  ))
-                ) : (
-                  <>
-                    <AssignedUsers
-                      permissions={permissions}
-                      unassignRole={handleUnassignUser}
-                      data={roleData && roleData.user.slice(0, 4)}
-                      currentUser={user?.user._id}
-                    />
-                    <Box marginY={1} />
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => history.push("/user")}
-                    >
-                      View All
-                    </Button>
-                  </>
-                )}
-              </Box>
+              {roleData && roleData.user && (
+                <Box>
+                  {loading ? (
+                    [1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        style={{
+                          margin: "8px",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))
+                  ) : roleData.user.length ? (
+                    <>
+                      <AssignedUsers
+                        permissions={permissions}
+                        unassignRole={handleUnassignUser}
+                        data={roleData && roleData.user.slice(0, 4)}
+                        currentUser={user?.user._id}
+                      />
+                      <Box marginY={1} />
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => history.push("/user")}
+                      >
+                        View All
+                      </Button>
+                    </>
+                  ) : (
+                    <Box textAlign="center" padding={2}>
+                      <Typography>No users has been assigned </Typography>
+                    </Box>
+                  )}
+                </Box>
+              )}
             </Container>
           </Grid>
         </Grid>

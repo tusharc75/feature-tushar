@@ -336,7 +336,9 @@ const EntityDetailsPage = () => {
                       </Button>
                     </>
                   ) : (
-                    <Box textAlign="center">No Roles</Box>
+                    <Box textAlign="center" padding={2}>
+                      No Assigned Roles
+                    </Box>
                   )}
                 </Box>
               </BoxWithBorder>
