@@ -28,9 +28,9 @@ import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CreateRole from "./CreateRole";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { PERMISSION } from "../../constants/Roles"
+import { PERMISSION } from "../../constants/Roles";
 
-const permissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin]
+const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: "flex",
@@ -59,7 +59,7 @@ const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { user, selectedEntity },
+    state: { permissions, selectedEntity },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [selectedType, setSelectedType] = useState(1);
@@ -73,12 +73,6 @@ const Roles: FC = () => {
   const [checkAllRoles, setCheckAllRoles] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [rolesPermissions, setRolesPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [
     showDeleteWarningConfirmBox,
@@ -110,33 +104,19 @@ const Roles: FC = () => {
     fetchRoles();
   }, [fetchRoles]);
 
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-    if (data) {
-      const hasRolePermission = data.find((d: any) => d.name === "Role");
-      if (hasRolePermission) {
-        setRolesPermissions({
-          isCreate: hasRolePermission.isCreate,
-          isUpdate: hasRolePermission.isUpdate,
-          isRead: hasRolePermission.isRead,
-          isDelete: hasRolePermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
-
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((role: any) => ({
-        id: role._id,
-        isChecked: false,
-        name: role.name,
-        description: role.description,
-        type: `${role.type === 1 ? "Global" : "Regional"} Role`,
-        createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
-        createdBy: role.createdBy,
-        updatedBy: role.updatedBy,
-      }))
+          ...role,
+          id: role._id,
+          isChecked: false,
+          name: role.name,
+          description: role.description,
+          type: `${role.type === 1 ? "Global" : "Regional"} Role`,
+          createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
+          createdBy: role.createdBy,
+          updatedBy: role.updatedBy,
+        }))
       : [];
 
     setDataRows(rows);
@@ -234,14 +214,14 @@ const Roles: FC = () => {
               className="createdAtTime"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
-              ).format('MMM Do, YYYY')}`}
+              ).format("MMM Do, YYYY")}`}
             >
-              {moment(params.value.date.slice(0, 10)).format(
-                'MMM Do, YYYY'
-              )}
+              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
-        ) : <NoDataCell />
+        ) : (
+          <NoDataCell />
+        ),
     },
     {
       field: "updatedBy",
@@ -257,27 +237,32 @@ const Roles: FC = () => {
               title={`${params.value.user.firstName} • ${params.value.date}`}
               className="updatedAtTime"
             >
-              {moment(params.value.date.slice(0, 10)).format(
-                'MMM Do, YYYY'
-              )}
+              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
-        ) :
+        ) : (
           <NoDataCell />
-
+        ),
     },
     {
       field: "actions",
       headerName: "Actions ",
       renderCell: (params: any) => (
         <>
-          {rolesPermissions.isDelete ? (
+          {permissions.role.isDelete ? (
             <Tooltip title="Delete">
               <IconButton
                 aria-label="Delete"
                 onClick={() => showConfirmBox(params.row)}
+                disabled={
+                  rolePermissionArray.indexOf(params?.row?.permission) >= 0
+                }
               >
-                <DeleteIcon fontSize="small" color="error" />
+                {rolePermissionArray.indexOf(params?.row?.permission) >= 0 ? (
+                  <DeleteIcon fontSize="small" color="disabled" />
+                ) : (
+                  <DeleteIcon fontSize="small" color="error" />
+                )}
               </IconButton>
             </Tooltip>
           ) : (
@@ -285,14 +270,8 @@ const Roles: FC = () => {
               className="cursor-stop"
               title="You do not have permission to delete role"
             >
-              <IconButton aria-label="Delete"
-                disabled={permissionArray.indexOf(params?.row?.permission) >= 0}
-              >
-                {
-                  permissionArray.indexOf(params?.row?.permission) >= 0 ?
-                    <DeleteIcon fontSize="small" color="disabled" /> : <DeleteIcon fontSize="small" />
-                }
-
+              <IconButton aria-label="Delete">
+                <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
@@ -408,6 +387,7 @@ const Roles: FC = () => {
   const handleRoleTypeSel = (filteredValue) => {
     setSelectedType(filteredValue);
   };
+
   return (
     <>
       {isOpen && (
@@ -422,7 +402,7 @@ const Roles: FC = () => {
       )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.role]} />
-        <Grid container direction="row" className="header-links">
+        {/* <Grid container direction="row" className="header-links">
           <Grid item xs={12} sm={12} className="pr-3">
             <Grid container justify="flex-end">
               <Link
@@ -471,6 +451,7 @@ const Roles: FC = () => {
             </Grid>
           </Grid>
         </Grid>
+        */}
         <Container>
           <div className="header-panel">
             <Header
@@ -479,10 +460,10 @@ const Roles: FC = () => {
               options={RoleTypes}
               onSearch={handleSearch}
               searchVal={searchVal}
-              rolePermissions={rolesPermissions}
+              rolePermissions={permissions.role}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+              canDelete={dataRows.filter((d) => d.isChecked).length > 0}
             />
           </div>
         </Container>
@@ -520,8 +501,9 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete role ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

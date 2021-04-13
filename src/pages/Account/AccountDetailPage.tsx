@@ -11,7 +11,6 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { useData } from "../../StateProvider/Provider";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import routes from "../../components/Helpers/Routes";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import RelatedContactsBox from "./RelatedContacts";
@@ -59,7 +58,7 @@ export default function AccountDetailPage(props) {
     accountBreadcrumb,
     contact: { contactResource, contactRoute },
   } = props;
-  
+
   const {
     state: { user, permissions },
   }: any = useData();
@@ -530,7 +529,7 @@ export default function AccountDetailPage(props) {
                         <Activity
                           relatedTo={[
                             {
-                              type: "account",
+                              type: accountResource,
                               referenceId: accountData._id,
                               access: true,
                             },

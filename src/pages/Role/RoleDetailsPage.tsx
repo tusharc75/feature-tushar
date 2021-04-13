@@ -36,14 +36,21 @@ import AssignedEntities from "./AssignedEntities";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import {
+  SET_USER,
+  USER_LOADING,
+  SET_SELECTED_ENTITY,
+} from "../../StateProvider/actionTypes";
+import { PERMISSION } from "../../constants/Roles";
 
+const permissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { id } = useParams();
   const {
-    state: { user }, dispatch
+    state: { user, permissions },
+    dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,29 +70,6 @@ const RoleDetailsPage = () => {
     description: "",
   });
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.role]);
-  const [rolePermissions, setRolePermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
-
-
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-
-    if (data) {
-      const hasRolePermission = data.find((d) => d.name == "Role");
-      if (hasRolePermission) {
-        setRolePermissions({
-          isCreate: hasRolePermission.isCreate,
-          isUpdate: hasRolePermission.isUpdate,
-          isRead: hasRolePermission.isRead,
-          isDelete: hasRolePermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
 
   useEffect(() => {
     if (id) {
@@ -132,7 +116,7 @@ const RoleDetailsPage = () => {
     setUpdating(true);
 
     axiosInstance()
-      .put(`/role/${id}`, {
+      .put(`/role`, {
         _id: id,
         ...values,
         field,
@@ -156,19 +140,15 @@ const RoleDetailsPage = () => {
 
   const handleDeleteRole = () => {
     if (id) {
-      if (rolePermissions.isDelete) {
-        axiosInstance()
-          .put(`/role/remove`, { ids: [id] })
-          .then(() => {
-            setShowConfirmBox(false);
-            history.goBack();
-          })
-          .catch((err) => {
-            setShowConfirmBox(false);
-          });
-      }
-    } else {
-      setShowConfirmBox(false);
+      axiosInstance()
+        .put(`/role/remove`, { ids: [id] })
+        .then(() => {
+          setShowConfirmBox(false);
+          history.goBack();
+        })
+        .catch((err) => {
+          setShowConfirmBox(false);
+        });
     }
   };
 
@@ -224,7 +204,10 @@ const RoleDetailsPage = () => {
         const { data } = response;
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
-          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+          dispatch({
+            type: SET_SELECTED_ENTITY,
+            payload: data.role.selectedEntity._id,
+          });
         }
         dispatch({ type: USER_LOADING, payload: false });
       })
@@ -232,21 +215,26 @@ const RoleDetailsPage = () => {
         localStorage.setItem("token", "");
         dispatch({ type: USER_LOADING, payload: false });
       });
-  }
+  };
 
   const handleDeleteEntities = (obj) => {
     if (obj && obj._id) {
-      setLoading(true)
+      setLoading(true);
       axiosInstance()
         .put(`/entity/remove`, { ids: [obj._id] })
         .then(({ data }) => {
-          fetchUserData()
+          fetchUserData();
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
     }
-  }
+  };
+
+  const isEditDeleteDisable =
+    [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(
+      roleData?.permission
+    ) >= 0;
 
   return (
     <>
@@ -296,7 +284,7 @@ const RoleDetailsPage = () => {
           </Container>
         ) : (
           <DetailsPageHeader heading={headingLbl} showHeading={true}>
-            {rolePermissions.isUpdate && (
+            {permissions.role.isUpdate && (
               <Button
                 disabled={currentData === updatedData}
                 variant="contained"
@@ -307,7 +295,7 @@ const RoleDetailsPage = () => {
               </Button>
             )}
             <Box marginX={1} component="span" />
-            {rolePermissions.isDelete ? (
+            {permissions.role.isDelete && (
               <DeleteButton
                 text="Delete"
                 onClick={() => {
@@ -315,7 +303,7 @@ const RoleDetailsPage = () => {
                   setShowConfirmBox(true);
                 }}
               />
-            ) : null}
+            )}
           </DetailsPageHeader>
         )}
 
@@ -324,6 +312,7 @@ const RoleDetailsPage = () => {
             <Container>
               <Box display="flex" marginBottom={2} gridGap={10}>
                 <TextField
+                  disabled={!permissions.role.isUpdate}
                   required
                   variant="outlined"
                   size="small"
@@ -336,6 +325,7 @@ const RoleDetailsPage = () => {
                 />
 
                 <TextField
+                  disabled={!permissions.role.isUpdate}
                   required
                   variant="outlined"
                   size="small"
@@ -381,6 +371,7 @@ const RoleDetailsPage = () => {
                             resource={resource}
                             setField={setField}
                             setResource={setResource}
+                            isDisable={!permissions.role.isUpdate}
                           />
                         )
                       )}
@@ -404,14 +395,16 @@ const RoleDetailsPage = () => {
                     {(roleData && roleData.entity.length) || 0})
                   </Typography>
 
-                  <IconButton
-                    title="Assign Entities"
-                    color="primary"
-                    size="small"
-                    onClick={entityDialogOpen}
-                  >
-                    <ControlPoint />
-                  </IconButton>
+                  {permissions.role.isUpdate && (
+                    <IconButton
+                      title="Assign Entities"
+                      color="primary"
+                      size="small"
+                      onClick={entityDialogOpen}
+                    >
+                      <ControlPoint />
+                    </IconButton>
+                  )}
                 </Box>
 
                 <Box padding={1}>
@@ -445,6 +438,7 @@ const RoleDetailsPage = () => {
                   ) : (
                     <>
                       <AssignedEntities
+                        permissions={permissions}
                         data={roleData && roleData.entity.slice(0, 2)}
                         unassignEntity={handleDeleteEntities}
                       />
@@ -478,14 +472,16 @@ const RoleDetailsPage = () => {
                   Assigned Users ({(roleData && roleData.user.length) || 0})
                 </Typography>
 
-                <IconButton
-                  title="Assign users"
-                  color="primary"
-                  size="small"
-                  onClick={userDialogOpen}
-                >
-                  <ControlPoint />
-                </IconButton>
+                {permissions.role.isUpdate && (
+                  <IconButton
+                    title="Assign users"
+                    color="primary"
+                    size="small"
+                    onClick={userDialogOpen}
+                  >
+                    <ControlPoint />
+                  </IconButton>
+                )}
               </Box>
               <Box>
                 {loading ? (
@@ -506,6 +502,7 @@ const RoleDetailsPage = () => {
                 ) : (
                   <>
                     <AssignedUsers
+                      permissions={permissions}
                       unassignRole={handleUnassignUser}
                       data={roleData && roleData.user.slice(0, 4)}
                       currentUser={user?.user._id}
@@ -534,8 +531,8 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-                : ""
+              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
