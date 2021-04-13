@@ -103,5 +103,9 @@ export default {
   doa: {
     title: "Doa",
     path: "/doa",
+  },
+  termsAndConditions: {
+    title: "Terms Conditions",
+    path: "/terms-conditions"
   }
 };

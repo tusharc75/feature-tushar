@@ -125,6 +125,9 @@ const useStyles = makeStyles((theme) => ({
     height: '38px',
     minWidth: "100px",
     paddingRight: '1px'
+  },
+  mobileEntity: {
+    padding: '3px'
   }
 }));
 
@@ -210,6 +213,9 @@ const Header = ({ toggleDrawer }) => {
       setOpen(false);
     }
   }
+  const handleSelectedEnity = e => {
+    dispatch({ type: SET_SELECTED_ENTITY, payload: e.target.value });
+  }
 
   const supportMenuId = "support-menu";
 
@@ -279,6 +285,37 @@ const Header = ({ toggleDrawer }) => {
 
   const mobileMenuId = "primary-search-account-menu-mobile";
 
+
+
+  const SelectEntityDropDown = (
+    <FormControl className="navHeader">
+      < Select
+        id="headerEnitySelect"
+        label="Entities"
+        className={`${classes.entitySelect}`
+        }
+        MenuProps={{
+          anchorOrigin: {
+            vertical: "bottom",
+            horizontal: "left"
+          }
+        }}
+        value={selectedEntity}
+        IconComponent={() => (<ExpandMore />)}
+        onChange={handleSelectedEnity}
+      >
+        {
+          user?.entity && user.entity.length ?
+            user.entity.map(curEntity => (
+              <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
+            ))
+            : null
+        }
+
+      </Select >
+    </FormControl >
+  )
+
   const renderMobileMenu = (
     <Menu
       anchorEl={mobileMoreAnchorEl}
@@ -289,21 +326,13 @@ const Header = ({ toggleDrawer }) => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      {/* <MenuItem onClick={openServicesMenu}>
-        <p>Services</p> <ExpandMore />
-      </MenuItem> */}
-      <MenuItem onClick={openEntitiesMenu}>
-        <p>Entities</p> <ExpandMore />
-      </MenuItem>
-      {/* <MenuItem onClick={openSupportMenu}>
-        <p>Support</p> <ExpandMore />
-      </MenuItem> */}
+      <span className={classes.mobileEntity}>
+        {SelectEntityDropDown}
+      </span>
     </Menu>
   );
 
-  const handleSelectedEnity = e => {
-    dispatch({ type: SET_SELECTED_ENTITY, payload: e.target.value });
-  }
+
   return (
     <div>
       <Slide direction="down" in={isSearch}>
@@ -379,31 +408,7 @@ const Header = ({ toggleDrawer }) => {
               </Button> */}
               {
                 selectedEntity ?
-                  <FormControl className="navHeader">
-                    <Select
-                      id="headerEnitySelect"
-                      label="Entities"
-                      className={`${classes.entitySelect}`}
-                      MenuProps={{
-                        anchorOrigin: {
-                          vertical: "bottom",
-                          horizontal: "left"
-                        }
-                      }}
-                      value={selectedEntity}
-                      IconComponent={() => (<ExpandMore />)}
-                      onChange={handleSelectedEnity}
-                    >
-                      {
-                        user?.entity && user.entity.length ?
-                          user.entity.map(curEntity => (
-                            <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
-                          ))
-                          : null
-                      }
-
-                    </Select>
-                  </FormControl> : null
+                  SelectEntityDropDown : null
               }
             </Box>
             <div className={classes.search}>
@@ -479,7 +484,7 @@ const Header = ({ toggleDrawer }) => {
           </div>
         </Toolbar>
       </AppBar>
-      { renderMobileMenu}
+      {renderMobileMenu}
       { supportMenu}
       { arcelorMenu}
       { entitiesMenu}

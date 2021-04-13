@@ -18,6 +18,7 @@ import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import SearchBox from '../../components/Helpers/SearchBox'
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from '../../axios/axiosInstance'
@@ -27,11 +28,11 @@ import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolba
 import CustomHeader from '../../components/Helpers/CustomHeader'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { MdAccountCircle } from 'react-icons/md';
 import { getSearchQuery } from '../../services/util';
-import { sidebarResource, termsAndCondition } from '../../constants/helpers';
+import { termsAndCondition } from '../../constants/helpers';
 import CreateTermsAndCondition from './CreateTermsAndCondition'
-
+import moment from 'moment';
+import NoDataCell from '../../components/Helpers/NoDataCell';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -58,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
 let termsTimeout
 export default function Account(props) {
 
-    const { leadBreadcrumb } = props
+    const { termsAndConditionBreadcrumb } = props
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const { state: { user, permissions } }: any = useData();
@@ -76,6 +77,7 @@ export default function Account(props) {
     const [actionsPermissions, setActionsPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false });
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteRec, setDeleteRec] = useState<any>({})
+    const [editRecord, setEditRecord] = useState<any>({})
 
     useEffect(() => {
         if (permissions) {
@@ -145,7 +147,7 @@ export default function Account(props) {
             width: 75
         },
         {
-            field: "TACName", headerName: "Name", width: 300,
+            field: "TACName", headerName: "Name", width: 500,
             renderCell: (params) => (
                 <Link className={`${styles.terms_name_link}`}
                     to={`/${termsAndCondition.route}/detail/${params.row._id}`}>
@@ -153,27 +155,44 @@ export default function Account(props) {
                 </Link>
             )
         },
-        {
-            field: "description ",
-            headerName: "Description ",
-            width: 250,
-            renderCell: (params) => <CustomRenderCell value={params?.value} />
-        },
+        // {
+        //     field: "description ",
+        //     headerName: "Description ",
+        //     width: 250,
+        //     renderCell: (params) => <CustomRenderCell value={params?.value} />
+        // },
         {
             field: "actions", headerName: "Actions",
             renderCell: (params) => (
-                <Tooltip title="Delete">
-                    <IconButton aria-label="Delete" onClick={() => {
-                        setDeleteRec(params.row);
-                        setShowDeleteConfirmBox(true)
-                    }}
-                        disabled={actionsPermissions.isDelete ? false : true}
-                    >
-                        <DeleteIcon fontSize="small"
-                            color={actionsPermissions.isDelete ? "error" : "disabled"}
-                        />
-                    </IconButton>
-                </Tooltip >
+                <>
+                    <Tooltip title="Delete">
+                        <IconButton aria-label="Delete" onClick={() => {
+                            setDeleteRec(params.row);
+                            setShowDeleteConfirmBox(true)
+                        }}
+                            disabled={actionsPermissions.isDelete ? false : true}
+                        >
+                            <DeleteIcon fontSize="small"
+                                color={actionsPermissions.isDelete ? "error" : "disabled"}
+                            />
+                        </IconButton>
+                    </Tooltip >
+                    {
+                        <Tooltip title="Edit">
+                            <IconButton aria-label="Delete"
+                                disabled={actionsPermissions.isUpdate ? false : true}
+                                onClick={() => {
+                                    setShowCreateDialog(true);
+                                    setEditRecord(params.row)
+                                }}>
+                                <EditIcon
+                                    fontSize="small"
+                                    color={actionsPermissions.isUpdate ? "inherit" : "disabled"}
+                                />
+                            </IconButton>
+                        </Tooltip>
+                    }
+                </>
             ),
             disableColumnMenu: true,
             sortable: false,
@@ -204,7 +223,7 @@ export default function Account(props) {
                 .get(api)
                 .then(({ data }) => {
                     setData(data.data);
-                    setRowCount(data.data.length);
+                    setRowCount(data.count);
                     setLoading(false);
                 })
                 .catch((err) => {
@@ -260,18 +279,17 @@ export default function Account(props) {
         }
         if (recs && recs.length > 0) {
             setDeleteLoading(true)
-            axiosInstance()
-                .put(`/${termsAndCondition.Api}/remove`, { ids: [...recs] }).then(({ data }) => {
-                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-                    setShowDeleteConfirmBox(false)
-                    setDeleteLoading(false)
-                    if (deleteRec) setDeleteRec({})
-                    fetchTermsAndConditions()
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error);
-                    setShowDeleteConfirmBox(false)
-                    setDeleteLoading(false)
-                })
+            axiosInstance().put(`${termsAndCondition.Api}/remove`, { "ids": [...recs] }).then(({ data }) => {
+                toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+                setShowDeleteConfirmBox(false)
+                setDeleteLoading(false)
+                if (deleteRec) setDeleteRec({})
+                fetchTermsAndConditions()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+                setShowDeleteConfirmBox(false)
+                setDeleteLoading(false)
+            })
         }
     }
 
@@ -280,13 +298,14 @@ export default function Account(props) {
     }
     const handleCloseCreateDialog = (params) => {
         setShowCreateDialog(false)
+        if (editRecord) setEditRecord({})
         if (params?.fetchData) fetchTermsAndConditions()
     }
     return (
         <>
 
             <Layout>
-                <CustomBreadCrumbs routes={[leadBreadcrumb]} />
+                <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
                 <Grid container direction="row" className="header-links">
                     <Grid item xs={12} sm={12} className="pr-3">
                         <Grid container justify="flex-end">
@@ -344,7 +363,7 @@ export default function Account(props) {
                                 total={rowCount}
                                 heading="Terms and Conditions"
                                 secondHeading="Terms and Conditions"
-                                icon={<MdAccountCircle className="headerLogo" />} >
+                            >
                                 <div className={`${styles.terms_header} ${styles["terms_header-mobile"]}`} >
                                     <SearchBox
                                         onSearch={handleSearch}
@@ -424,7 +443,7 @@ export default function Account(props) {
                             showDeleteConfirmBox ?
                                 <ConfirmationDialog
                                     open={showDeleteConfirmBox}
-                                    message={`Are you sure, you want to delete selected TermsAndCondition(s) ? ${deleteRec?._id ? "custom" : ""}`}
+                                    message={`Are you sure, you want to delete selected TermsAndCondition  ${deleteRec?._id ? deleteRec?.TACName : ""} ?`}
                                     onClose={() => setShowDeleteConfirmBox(false)}
                                     onOk={handleDeleteTermsAndConditions}
                                 /> : null
@@ -434,8 +453,8 @@ export default function Account(props) {
                                 termsAndCondition={termsAndCondition}
                                 open={showCreateDialog}
                                 handleClose={handleCloseCreateDialog}
-                                // onMessage={handleMessage}
-                                noteId=""
+                                fetchData={fetchTermsAndConditions}
+                                editRecord={editRecord}
                             />
                         ) : null}
                     </CustomContainer>

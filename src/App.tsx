@@ -258,7 +258,7 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path={termsAndCondition.route}>
             <TermsAndConditions
-              leadBreadcrumb={routes.lead}
+              termsAndConditionBreadcrumb={routes.termsAndConditions}
             />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}

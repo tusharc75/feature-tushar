@@ -10,6 +10,7 @@ import {
   yupSchema,
   getObjKeysWithValues,
   initializeDropdownById,
+  opportunity
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -29,9 +30,9 @@ export default function ManageOpportunityDialog({
   onClose,
   isNew,
   dataToUpdate,
-  accountId,
-  opportunityApi
+  accountId
 }) {
+  const { opportunityResource, opportunityApi } = opportunity
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -156,6 +157,7 @@ export default function ManageOpportunityDialog({
       });
       setErrors({ ...errors });
     } else {
+      console.log('values', values)
       isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
     }
   };
@@ -368,6 +370,5 @@ ManageOpportunityDialog.propTypes = {
   onClose: PropTypes.any,
   isNew: PropTypes.bool,
   dataToUpdate: PropTypes.any,
-  accountId: PropTypes.string,
-  opportunityApi: PropTypes.string
+  accountId: PropTypes.string
 };
