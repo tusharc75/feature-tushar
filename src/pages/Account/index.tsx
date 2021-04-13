@@ -637,7 +637,7 @@ export default function Account(props) {
                                                 startIcon={<AddOutlined />} >Add</Button>
                                         }
 
-                                        {accountPermissions.isDelete && <>
+                                        { (accountPermissions.isDelete || accountPermissions.approveAccount ) && 
                                             <Button
                                                 disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                                 variant="outlined"
@@ -648,6 +648,7 @@ export default function Account(props) {
                                             >
                                                 Actions <ExpandMore />
                                             </Button>
+                                            }
                                             <Menu
                                                 anchorEl={anchorEl}
                                                 keepMounted
@@ -659,6 +660,7 @@ export default function Account(props) {
                                                 id="action-menu"
                                                 open={Boolean(anchorEl)}
                                                 onClose={closeActions}>
+                                                    
 
 
 
@@ -709,7 +711,7 @@ export default function Account(props) {
 
 
                                             </Menu>
-                                        </>}
+                                        
 
                                     </div>
                                 </div>
