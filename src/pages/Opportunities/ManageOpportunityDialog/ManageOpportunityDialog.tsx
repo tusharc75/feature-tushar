@@ -157,7 +157,6 @@ export default function ManageOpportunityDialog({
       });
       setErrors({ ...errors });
     } else {
-      console.log('values', values)
       isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
     }
   };

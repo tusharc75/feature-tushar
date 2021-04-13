@@ -287,7 +287,7 @@ const Header = ({ toggleDrawer }) => {
 
 
 
-  const SelectEntityDropDown = (
+  const selectEntityDropDown = (
     <FormControl className="navHeader">
       < Select
         id="headerEnitySelect"
@@ -317,19 +317,23 @@ const Header = ({ toggleDrawer }) => {
   )
 
   const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      <span className={classes.mobileEntity}>
-        {SelectEntityDropDown}
-      </span>
-    </Menu>
+    <>
+      {selectedEntity ?
+        <Menu
+          anchorEl={mobileMoreAnchorEl}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          id={mobileMenuId}
+          keepMounted
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          open={isMobileMenuOpen}
+          onClose={handleMobileMenuClose}
+        >
+          <span className={classes.mobileEntity}>
+            {selectEntityDropDown}
+          </span>
+        </Menu> : null
+      }
+    </>
   );
 
 
@@ -408,7 +412,7 @@ const Header = ({ toggleDrawer }) => {
               </Button> */}
               {
                 selectedEntity ?
-                  SelectEntityDropDown : null
+                  selectEntityDropDown : null
               }
             </Box>
             <div className={classes.search}>

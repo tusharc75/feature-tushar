@@ -19,7 +19,7 @@ import CustomButton from "../../components/Helpers/Button";
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 
-const NoteSchema = Yup.object().shape({
+const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string()
         .required("please enter note title"),
 });
@@ -32,13 +32,12 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Temp = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) => {
+const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) => {
 
     const [initialValues, setInitialValues] = useState({ TACName: "", description: RichTextEditor.createEmptyValue() });
     const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
-        console.log(" ~ editRecord", editRecord)
         if (editRecord && editRecord?._id) {
             editRecord.description = RichTextEditor.createValueFromString(editRecord.description, 'html')
             setInitialValues(editRecord)
@@ -85,7 +84,7 @@ const Temp = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) =
         fullWidth
     >
         {
-            (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
+            (initialValues && <Formik initialValues={initialValues} validationSchema={termsAndConditionSchema} onSubmit={handleSave}>
                 {({ submitForm, touched, errors, setFieldValue, values }) => (
                     <Form>
                         <CustomDialogHeader onClose={handleClose}
@@ -132,5 +131,5 @@ const Temp = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) =
     </Dialog >
 }
 
-export default Temp
+export default TermsAndCondition
 

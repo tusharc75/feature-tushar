@@ -449,7 +449,7 @@ const RoleDetailsPage = () => {
                     <>
                       <AssignedEntities
                         data={roleData && roleData.entity.slice(0, 2)}
-                        unassignEntity={handleDeleteEntities}
+                        unassignEntity={() => { }}
                       />
 
                       <Box marginY={1} />

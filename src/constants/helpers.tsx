@@ -73,9 +73,8 @@ export const supplierAccount = {
 };
 
 export const termsAndCondition = {
-  Api: "/termsandconditions",
+  api: "/termsandconditions",
   route: "/terms-conditions",
-  // resource: "supplierAccount", //  Key of sidebar object
   permission: "termsAndConditions",
 };
 
@@ -407,7 +406,7 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
 export const downloadExcel = (fileDetails, fileName) => {
   const extension = `.${fileName.split('.').pop()}`;
   let type = null;
-  
+
   switch (extension) {
     case ".xlsx":
       type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
