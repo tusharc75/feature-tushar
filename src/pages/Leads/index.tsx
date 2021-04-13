@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useState, useEffect, useContext } from "react";
+import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
   Divider,
@@ -9,8 +9,7 @@ import {
 } from "@material-ui/core";
 import { Link } from 'react-router-dom'
 import DeleteIcon from '@material-ui/icons/Delete';
-import BlockIcon from '@material-ui/icons/Block';
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { DataGrid } from "@material-ui/data-grid";
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import Layout from "../../components/Layout";
@@ -23,23 +22,24 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import MessageDialog from '../../components/Helpers/MessageDialog'
 import { leadDetailPage } from '../../routes/Lead'
 
-import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getObjKeys } from "../../constants/helpers";
+import { downloadExcel, leadTemplateFileName, leadImportErrorFileName } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import { HiUserGroup } from 'react-icons/hi';
 import { lead } from '../../constants/helpers'
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import "./style.scss";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: "flex",
   },
   links: {
-    color: theme.palette.primary.main,  //  textDark
+    color: theme.palette.primary.main,   //  textDark
+    fontSize: "0.90rem"
   },
   linkDivider: {
     backgroundColor: theme.palette.primary.main,  //  darkBg
@@ -81,11 +81,11 @@ const Leads = () => {
   const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
 
-  const { LeadResource, leadApi } = lead
+  const { leadResource, leadApi } = lead
 
   useEffect(() => {
-    if (permissions && permissions[LeadResource]) {
-      setLeadsPermissions(permissions[LeadResource]);
+    if (permissions && permissions[leadResource]) {
+      setLeadsPermissions(permissions[leadResource]);
     }
   }, [permissions]);
 
@@ -404,58 +404,111 @@ const Leads = () => {
         })
     }
   }
+
+  const uploadLeads = (event) => {
+    if (event.target.files && event.target.files.length) {
+      toastConfig.setToastConfig({ open: true, type: "info", message: "Uploading lead(s), Please wait..." });
+      const file = event.target.files[0];
+
+      let formData = new FormData();
+      formData.append("file", file);
+      axiosInstance()
+        .post(`/${leadApi}/import`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then(({ data }) => {
+          if (data.message) {
+            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+            fetchLeads();
+          }
+          else {
+            downloadExcel(data, leadImportErrorFileName);
+            toastConfig.setToastConfig({ open: true, type: "error", message: "Found some issue(s) while importing lead(s)" });
+          }
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error)
+        });
+    }
+  };
+
   return (
     <Layout>
-      <CustomBreadCrumbs routes={[routes.lead]} />
-      <Grid container direction="row" className="header-links">
-        <Grid item xs={12} sm={12} className="pr-3">
-          <Grid container justify="flex-end">
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
+      <Grid container>
+        <Grid item md={6} sm={12} xs={12}>
+          <CustomBreadCrumbs routes={[routes.lead]} />
+        </Grid>
+        <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center">
+          <Grid container direction="row">
+            <Grid item xs={12} sm={12} className="pr-3">
+              <Grid container justify="flex-end">
+                <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`}>
+                  <input
+                    id="importFromExcel"
+                    name="importFromExcel"
+                    onChange={uploadLeads}
+                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    style={{
+                      opacity: "0",
+                      position: "absolute",
+                      zIndex: -1,
+                    }}
+                    type="file"
+                  />
               Import from Excel
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Export to Excel
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Download Template
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Email a Link
-            </Link>
+             </label>
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  className={classes.linkDivider}
+                />
+                <label
+                  onClick={(e) => {
+                    axiosInstance().get(`/${leadApi}/template?export=true`, { responseType: "arraybuffer" })
+                      .then((response) => {
+                        downloadExcel(response.data, leadTemplateFileName)
+                      }).catch((error) => {
+                        toastConfig.setToastConfig(error);
+                      });
+                  }}
+                  className={`${classes.links} cursor-pointer`}
+                >
+                  Export to Excel
+            </label>
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  className={classes.linkDivider}
+                />
+                <label
+                  onClick={(e) => {
+                    axiosInstance().get(`/${leadApi}/template`, { responseType: "arraybuffer" }).then((response) => {
+                      downloadExcel(response.data, leadTemplateFileName)
+                    }).catch((error) => {
+                      toastConfig.setToastConfig(error);
+                    });
+                  }}
+                  className={`${classes.links} cursor-pointer`}
+                >
+                  Download Template
+            </label>
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  className={classes.linkDivider}
+                />
+                <label
+                  onClick={(e) => e.preventDefault()}
+                  className={`${classes.links} cursor-pointer`}
+                >
+                  Email a Link
+            </label>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>
+
       <Container>
         <div className="header-panel">
           <Header

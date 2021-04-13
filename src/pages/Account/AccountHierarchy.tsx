@@ -53,9 +53,12 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
         {
             title: 'Parent Account', field: 'parentAccountText',
             render: rowData => <div style={{ width: commonFieldWidth }}>
-                <Link className="link" to={`${routes.accountDetails.path}/${rowData.parentAccountId}`}>
-                    {rowData.parentAccountText}
-                </Link>
+                {
+                    rowData.parentAccountId === currentAccountId ? <span>{rowData.parentAccountText}</span> :
+                        <Link className="link" to={`/${accountRoute}/detail/${rowData.parentAccountId}`}>
+                            {rowData.parentAccountText}
+                        </Link>
+                }
             </div>
         },
         {
