@@ -151,9 +151,6 @@ export default function ManageLeadDialog({
   const handleCreateLead = (values) => {
     setLoading(true);
 
-    if (values?.noOfEmployees)
-      values.noOfEmployees = parseInt(values.noOfEmployees);
-
     axiosInstance()
       .post(`${leadApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
