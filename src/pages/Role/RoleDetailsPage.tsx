@@ -49,7 +49,7 @@ const RoleDetailsPage = () => {
   const history = useHistory();
   const { id } = useParams();
   const {
-    state: { user, permissions },
+    state: { user, permissions, selectedEntity },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -438,6 +438,7 @@ const RoleDetailsPage = () => {
                   ) : roleData.entity.length ? (
                     <>
                       <AssignedEntities
+                        selectedEntity={selectedEntity}
                         permissions={permissions}
                         data={roleData && roleData.entity.slice(0, 2)}
                         unassignEntity={handleDeleteEntities}

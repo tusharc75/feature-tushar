@@ -15,7 +15,6 @@ import { Link } from 'react-router-dom'
 import { DataGrid } from "@material-ui/data-grid";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import BrandHeader from "../../components/BrandHeader";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import NewStepper from "../../components/Helpers/NewStepper";
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -109,12 +108,16 @@ const useStyles = makeStyles((theme) => ({
     margin: 2
   },
 
-  
+
   linksContainer: {
     display: "flex",
   },
   links: {
     color: theme.palette.primary.main,  //  textDark
+  },
+
+  no_doa: {
+    color: theme.palette.error.main,  //  textDark
   },
   linkDivider: {
     backgroundColor: theme.palette.primary.main,  //  darkBg
@@ -193,7 +196,11 @@ export default function Doa() {
       .then(({ data: { data, count } }) => {
         setDoa(data?.doa.map(item => {
           return {
+            id: item.user?._id,
             name: `${item.user.firstName} ${item.user.lastName}`,
+            firstName: item.user.firstName,
+            lastName: item.user.lastName,
+            currency: item.currency ? item.currency : "USD",
             amount: item.amount
           };
         })
@@ -310,6 +317,7 @@ export default function Doa() {
           title={params.value}
           className="text-truncate LeadNameLink"
           onClick={() => {
+            // setOpen(true)
             setUserSingleSelect(params?.row)
             fetchDoa(params?.row?.id)
           }
@@ -360,52 +368,52 @@ export default function Doa() {
       ),
     },
 
-    {
-      field: "actions",
-      headerName: "Actions ",
-      renderCell: (params: any) =>
-        user?.user._id === params.row.id ? (
-          <p title="There is no action for currently logged in user">
-            No Actions
-          </p>
-        ) : (
-          <>
-            {
-              doaPermissions.isUpdate ?
-                <Tooltip title="Edit">
-                  <IconButton aria-label="Edit" onClick={() => {
-                    // setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
-                    setOpen(true)
-                    setUserSingleSelect(params.row);
-                    fetchDoa(params?.row?.id)
-                  }}>
-                    <FcPlus />
-                  </IconButton>
-                </Tooltip> : ""
-            }
-            {doaPermissions.isDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You do not have permission to delete user"
-              >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </>
-        ),
-      width: 200,
-    },
+    // {
+    //   field: "actions",
+    //   headerName: "Actions ",
+    //   renderCell: (params: any) =>
+    //     user?.user._id === params.row.id ? (
+    //       <p title="There is no action for currently logged in user">
+    //         No Actions
+    //       </p>
+    //     ) : (
+    //       <>
+    //         {
+    //           doaPermissions.isUpdate ?
+    //             <Tooltip title="Edit">
+    //               <IconButton aria-label="Edit" onClick={() => {
+    //                 // setSingleApproveDisapproveAccount({ show: true, approved: true, id: params.row._id, accountName: params.row.accountName })
+    //                 setOpen(true)
+    //                 setUserSingleSelect(params.row);
+    //                 // fetchDoa(params?.row?.id)
+    //               }}>
+    //                 <FcPlus />
+    //               </IconButton>
+    //             </Tooltip> : ""
+    //         }
+    //         {doaPermissions.isDelete ? (
+    //           <Tooltip title="Delete">
+    //             <IconButton
+    //               aria-label="Delete"
+    //               onClick={() => showConfirmBox(params.row)}
+    //             >
+    //               <DeleteIcon fontSize="small" color="error" />
+    //             </IconButton>
+    //           </Tooltip>
+    //         ) : (
+    //           <Tooltip
+    //             className="cursor-stop"
+    //             title="You do not have permission to delete user"
+    //           >
+    //             <IconButton aria-label="Delete">
+    //               <DeleteIcon fontSize="small" />
+    //             </IconButton>
+    //           </Tooltip>
+    //         )}
+    //       </>
+    //     ),
+    //   width: 200,
+    // },
   ] as Array<any>;
 
   const updateCheckedStatus = (params, ev) => {
@@ -436,19 +444,6 @@ export default function Doa() {
     setSelectedUsers(tempSelectedRecs);
   };
 
-  const updateUserDoa = (params) => {
-    setUserSingleSelect({
-      ...userSingleSelect,
-      doa: params.users
-    });
-    const newDataRow = dataRows.map(elm => {
-      if (elm._id === userSingleSelect._id) {
-        elm.doa = params.users
-      }
-      return elm;
-    })
-    setDataRows(newDataRow);
-  }
 
   return (
     <Layout>
@@ -522,13 +517,13 @@ export default function Doa() {
         {(userSingleSelect) && (
           <DoaDialog
             user={dataRows}
+            doa={doa}
             userSelected={userSingleSelect}
             open={open}
             setOpen={setOpen}
-            updatedUser={updateUserDoa}
           />
         )}
-        <BrandHeader
+        {/* <BrandHeader
           total={dataRows.length}
           totalHeading={"Total no. of Users"}
           active={[1, 78, 786]}
@@ -537,7 +532,7 @@ export default function Doa() {
           inActiveHeading={"DOA - Incomplete"}
           heading="DOA Set up"
         >
-        </BrandHeader>
+        </BrandHeader> */}
         <Container>
           <div className="listing-grid">
             <DataGrid
@@ -567,13 +562,22 @@ export default function Doa() {
             {userSingleSelect ? (
               doa.length > 0
                 ? (
-                  <NewStepper
-                    heading={"DOA Details of "+userSingleSelect?.name}
-                    steps={doa}
-                  />
+                  <>
+                    <Button
+                      color="inherit"
+                      className={classes.actionBtn}
+                      onClick={() => setOpen(true)}
+                    >
+                      Edit Doa
+                </Button>
+                    <NewStepper
+                      heading={"DOA Details of " + userSingleSelect?.name}
+                      steps={doa}
+                    />
+                  </>
                 ) : (
                   <React.Fragment>
-                    <div style={{ color: "#DD5052" }}>No DOA created </div>
+                    <div className={classes.no_doa}>No DOA created </div>
                     <Button
                       color="inherit"
                       className={classes.actionBtn}

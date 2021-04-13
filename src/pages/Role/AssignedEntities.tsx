@@ -43,6 +43,7 @@ export default function AssignedEntities({
   data,
   unassignEntity,
   permissions,
+  selectedEntity,
 }) {
   const classes = useStyles();
 
@@ -55,14 +56,23 @@ export default function AssignedEntities({
               <BoxWithBorder>
                 <span
                   className={classes.actionsItems}
-                  title={`Unassign ${obj.entityName}`}
+                  title={
+                    selectedEntity === obj._id
+                      ? "Default entity can't be un-assigned"
+                      : `Un-assign ${obj.entityName}`
+                  }
                 >
                   {permissions.role.isUpdate && (
                     <IconButton
+                      disabled={selectedEntity === obj._id}
                       onClick={() => unassignEntity(obj)}
                       size="small"
                     >
-                      <Delete color="error" />
+                      <Delete
+                        color={
+                          selectedEntity === obj._id ? "disabled" : "error"
+                        }
+                      />
                     </IconButton>
                   )}
                 </span>
