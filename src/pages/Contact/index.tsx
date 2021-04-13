@@ -265,7 +265,6 @@ export default function Contact(props) {
     }, [user]);
 
     useEffect(() => {
-        debugger;
         getContacts();
         // eslint-disable-next-line
     }, [query, searchVal, selectedType]);
