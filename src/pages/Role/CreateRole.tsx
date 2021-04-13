@@ -24,7 +24,7 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
 
-const CreateRole = ({ open, close, fetchData, roleType, setToastConfig ,selectedEntity}) => {
+const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selectedEntity }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -57,24 +57,40 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig ,selected
   };
 
   const handleSubmit = () => {
-    setSubmitting(true);
-    axiosInstance()
-      .post("/role", {
-        ...values,
-        field,
-        resource,
-        type: roleType,
-      })
-      .then(() => {
-        fetchData();
-        setSubmitting(false);
-        close();
-      })
-      .catch((err) => {
-        setSubmitting(false);
-        setToastConfig(err);
+    if (
+      resource.some(
+        (d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete
+      ) ||
+      field.some(
+        (d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete
+      )
+    ) {
+      setSubmitting(true);
+      axiosInstance()
+        .post("/role", {
+          ...values,
+          field,
+          resource,
+          type: roleType,
+        })
+        .then(() => {
+          fetchData();
+          setSubmitting(false);
+          close();
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          setToastConfig(err);
+        });
+    }
+    else {
+      setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Please check atleast one permission',
       });
-  };
+    }
+  }
 
   return (
     <Dialog
@@ -195,16 +211,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig ,selected
               disabled={
                 isSubmitting ||
                 Boolean(!values.name) ||
-                Boolean(!values.description) ||
-                Boolean(
-                  !field.filter((f) => f.isCreate || f.isRead || f.isUpdate)
-                    .length
-                ) ||
-                Boolean(
-                  !resource.filter(
-                    (f) => f.isCreate || f.isRead || f.isUpdate || f.isDelete
-                  ).length
-                )
+                Boolean(!values.description)
               }
             >
               {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
