@@ -43,7 +43,7 @@ const UserDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { user, permissions },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -320,14 +320,13 @@ const UserDetailsPage = () => {
               </Button>
             ) : null}
             <Box component="span" marginX={1} />
+
             {permissions.user.isDelete ? (
-              <Button
-                variant="contained"
-                color="secondary"
+              <DeleteButton
+                text="Delete"
+                disabled={user?.user?._id == id}
                 onClick={() => handleDeleteUser(id)}
-              >
-                Delete
-              </Button>
+              />
             ) : null}
           </DetailsPageHeader>
         )}
@@ -521,8 +520,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
-              : ""
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
