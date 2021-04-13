@@ -400,7 +400,7 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
 export const downloadExcel = (fileDetails, fileName) => {
   const extension = `.${fileName.split('.').pop()}`;
   let type = null;
-  debugger;
+  
   switch (extension) {
     case ".xlsx":
       type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
