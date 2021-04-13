@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 let termsTimeout
-export default function Account(props) {
+export default function TermsAndCondition(props) {
 
     const { termsAndConditionBreadcrumb } = props
     const toastConfig = useContext(CustomToastContext);

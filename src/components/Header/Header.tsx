@@ -306,8 +306,8 @@ const Header = ({ toggleDrawer }) => {
       >
         {
           user?.entity && user.entity.length ?
-            user.entity.map(curEntity => (
-              <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
+            user.entity.map(currentEntity => (
+              <MenuItem key={currentEntity._id} value={currentEntity._id}>{currentEntity.entityName}</MenuItem>
             ))
             : null
         }
