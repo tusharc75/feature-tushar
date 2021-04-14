@@ -14,9 +14,9 @@ import {
   InputBase,
   InputLabel,
   FormControl,
-  Select
+  Select,
 } from "@material-ui/core";
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import {
   Search,
   Menu as MenuIcon,
@@ -25,14 +25,14 @@ import {
   Notifications,
   HelpOutline,
   ExpandMore,
-  ArrowDropDown
+  ArrowDropDown,
 } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
-import { useData } from '../../StateProvider/Provider';
+import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes'
-import './Header.scss'
+import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import "./Header.scss";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -114,22 +114,21 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   brandLogo: {
-    maxWidth: '10%',
-    minWidth: '5%',
-    height: '45px',
-    borderRadius: '3px'
+    maxWidth: "10%",
+    minWidth: "5%",
+    height: "45px",
+    borderRadius: "3px",
   },
   entitySelect: {
-    fontWeight: 'bold',
-    color: "inherit",
-    height: '38px',
-    minWidth: "100px",
-    paddingRight: '1px'
-  }
+    minWidth: "200px",
+  },
 }));
 
 const Header = ({ toggleDrawer }) => {
-  const { state: { user, selectedEntity }, dispatch }: any = useData();
+  const {
+    state: { user, selectedEntity },
+    dispatch,
+  }: any = useData();
   const classes = useStyles();
   const history = useHistory();
   const [isSearch, setSearch] = useState(false);
@@ -145,7 +144,6 @@ const Header = ({ toggleDrawer }) => {
   const isArcelorMenuOpen = Boolean(servicesAnchorEl);
   const isEntitiesMenuOpen = Boolean(entitiesEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -263,17 +261,17 @@ const Header = ({ toggleDrawer }) => {
         },
       }}
     >
-      <MenuItem>Entities 1</MenuItem>
-      <MenuItem>Entities 2</MenuItem>
-      <MenuItem>Entities 3</MenuItem>
-      <MenuItem>Entities 4</MenuItem>
-      <MenuItem>Entities 5</MenuItem>
-      <MenuItem>Entities 6</MenuItem>
-      <MenuItem>Entities 7</MenuItem>
-      <MenuItem>Entities 8</MenuItem>
-      {/* <Box display="flex" alignItems="center" justifyContent="center">
-        <CircularProgress size={20} />
-      </Box> */}
+      {user?.entity && user.entity.length
+        ? user.entity.map((curEntity) => (
+            <MenuItem
+              key={curEntity._id}
+              value={curEntity._id}
+              onClick={() => handleSelectedEnity(curEntity._id)}
+            >
+              {curEntity.entityName}
+            </MenuItem>
+          ))
+        : null}
     </Menu>
   );
 
@@ -301,9 +299,13 @@ const Header = ({ toggleDrawer }) => {
     </Menu>
   );
 
-  const handleSelectedEnity = e => {
-    dispatch({ type: SET_SELECTED_ENTITY, payload: e.target.value });
+  function handleSelectedEnity(id) {
+    dispatch({ type: SET_SELECTED_ENTITY, payload: id });
   }
+
+  const curEntity =
+    user?.entity.find((en) => en._id === selectedEntity) || null;
+
   return (
     <div>
       <Slide direction="down" in={isSearch}>
@@ -369,42 +371,15 @@ const Header = ({ toggleDrawer }) => {
               >
                 Services <ExpandMore />
               </Button> */}
-              {/* <Button
+              <Button
                 aria-controls={entitiesMenuId}
                 color="inherit"
                 onClick={openEntitiesMenu}
                 title="Entities"
+                className={classes.entitySelect}
               >
-                Entities <ExpandMore />
-              </Button> */}
-              {
-                selectedEntity ?
-                  <FormControl className="navHeader">
-                    <Select
-                      id="headerEnitySelect"
-                      label="Entities"
-                      className={`${classes.entitySelect}`}
-                      MenuProps={{
-                        anchorOrigin: {
-                          vertical: "bottom",
-                          horizontal: "left"
-                        }
-                      }}
-                      value={selectedEntity}
-                      IconComponent={() => (<ExpandMore />)}
-                      onChange={handleSelectedEnity}
-                    >
-                      {
-                        user?.entity && user.entity.length ?
-                          user.entity.map(curEntity => (
-                            <MenuItem key={curEntity._id} value={curEntity._id}>{curEntity.entityName}</MenuItem>
-                          ))
-                          : null
-                      }
-
-                    </Select>
-                  </FormControl> : null
-              }
+                <span>{curEntity && curEntity.entityName}</span> <ExpandMore />
+              </Button>
             </Box>
             <div className={classes.search}>
               <div className={classes.searchIcon}>
@@ -433,9 +408,13 @@ const Header = ({ toggleDrawer }) => {
               Support <ExpandMore />
             </Button>
           </div> */}
-          {
-            user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} ></img> : null
-          }
+          {user?.brandLogo ? (
+            <img
+              src={user.brandLogo}
+              alt="brand"
+              className={classes.brandLogo}
+            ></img>
+          ) : null}
 
           <IconButton aria-label="settings" color="inherit">
             <Badge badgeContent={1} color="secondary">
@@ -479,11 +458,11 @@ const Header = ({ toggleDrawer }) => {
           </div>
         </Toolbar>
       </AppBar>
-      { renderMobileMenu}
-      { supportMenu}
-      { arcelorMenu}
-      { entitiesMenu}
-    </div >
+      {renderMobileMenu}
+      {supportMenu}
+      {arcelorMenu}
+      {entitiesMenu}
+    </div>
   );
 };
 
