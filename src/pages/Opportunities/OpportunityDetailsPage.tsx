@@ -370,7 +370,7 @@ function OpportunityDetailsPage() {
               }}
               isNew={false}
               dataToUpdate={opportunityData}
-              opportunityApi={opportunityApi}
+            // opportunityApi={opportunityApi}
             />
           )}
         </div>
