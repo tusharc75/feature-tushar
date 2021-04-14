@@ -19,8 +19,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
     width: "100%",
   },
-  title: {
-    margin: theme.spacing(4, 0, 2),
+  text: {
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    marginRight: 50,
   },
   list: {
     width: "100%",
@@ -36,7 +39,7 @@ const Roles = ({ unassignRole, data, permissions }) => {
       <List disablePadding>
         {data && data.length
           ? data.map((obj) => (
-              <BoxWithBorder style={{ margin: "8px" }} key={obj._id}>
+              <BoxWithBorder style={{ marginBottom: "8px" }} key={obj._id}>
                 <ListItem disableGutters className={classes.list}>
                   <ListItemText
                     primary={
@@ -44,22 +47,38 @@ const Roles = ({ unassignRole, data, permissions }) => {
                         className="accountNameLink"
                         to={`/role/detail/${obj._id}`}
                       >
-                        <Typography> {obj.name || ""}</Typography>
+                        <Typography className={classes.text}>
+                          {obj.name || ""}
+                        </Typography>
                       </Link>
                     }
-                    secondary={obj.description || ""}
+                    secondary={
+                      <Typography
+                        color="textSecondary"
+                        className={classes.text}
+                      >
+                        {obj.description || ""}
+                      </Typography>
+                    }
                   />
                   {permissions.entity.isUpdate && (
-                    <ListItemSecondaryAction>
-                      <Tooltip title="Unassign Role">
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => unassignRole(obj)}
-                        >
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      </Tooltip>
+                    <ListItemSecondaryAction
+                      title={
+                        obj.permission
+                          ? "Default role can't be un-assigned"
+                          : "Un-assign"
+                      }
+                    >
+                      <IconButton
+                        disabled={obj?.permission}
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => unassignRole(obj)}
+                      >
+                        <DeleteIcon
+                          color={obj?.permission ? "disabled" : "error"}
+                        />
+                      </IconButton>
                     </ListItemSecondaryAction>
                   )}
                 </ListItem>
