@@ -249,7 +249,7 @@ const Opportunities = () => {
     {
       field: "accountName", headerName: "Account Name", width: 300,
       renderCell: (params) => (
-        <Link className="accountNameLink" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
+        <Link className="link" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
           {params?.row?.accountName?.optionLabel ? params.row.accountName.optionLabel : ''}
         </Link>
       )

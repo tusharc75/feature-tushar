@@ -211,7 +211,7 @@ function OpportunityDetailsPage() {
     <>
       <Layout>
         <Grid container direction="row">
-          <Grid item xs={12} className="pl-2">
+          <Grid item xs={12}>
             <CustomBreadCrumbs routes={customizedRoutes} />
           </Grid>
         </Grid>

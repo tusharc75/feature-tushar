@@ -78,7 +78,7 @@ export default function AssignedEntities({
                 </span>
                 <Typography className="text-capitalize">
                   <Link
-                    className="accountNameLink"
+                    className="link"
                     to={`/entity/detail/${obj._id}`}
                   >
                     {obj?.entityName ?? ""}

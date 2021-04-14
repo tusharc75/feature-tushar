@@ -147,7 +147,7 @@ const Product = () => {
 
     return (<Layout>
         <Grid container direction="row">
-            <Grid item xs={12} className="pl-2">
+            <Grid item xs={12}>
                 <CustomBreadCrumbs routes={[{ title: "Product" }]} />
             </Grid>
         </Grid>
