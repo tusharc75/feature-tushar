@@ -286,9 +286,7 @@ const Roles = (props) => {
           />
         )}
         <Grid container direction="row">
-          <Grid item xs={12} className="pl-2">
-            <CustomBreadCrumbs routes={customizedRoutes} />
-          </Grid>
+          <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
 
         <div>
@@ -393,8 +391,9 @@ const Roles = (props) => {
                       />
                     </div>
                   )}
+                  {/* <QuickLinks quickLinks={quickLinks} /> */}
 
-                  <div className={`${contactClass.detail_page_div2}`}>
+                  {/* <div className={`${contactClass.detail_page_div2}`}>
                     {quickLinks && quickLinks.length
                       ? quickLinks.map((k, index) => {
                         return (
@@ -404,13 +403,13 @@ const Roles = (props) => {
                         );
                       })
                       : null}
-                  </div>
-                  <div className={`${contactClass.detail_page_div3}`}>
+                  </div> */}
+                  {/* <div className={`${contactClass.detail_page_div3}`}>
                     <Typography color="primary" variant="h6">
                       Related Accounts
                     </Typography>
                     <Box className={`${contactClass.custom_box1}`}></Box>
-                  </div>
+                  </div> */}
                 </Grid>
               </Grid>
               {showConfirmBox ? (

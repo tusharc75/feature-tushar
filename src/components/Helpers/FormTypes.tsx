@@ -74,7 +74,7 @@ const CustomFormat = (props: NumberFormatCustomProps) => {
 };
 
 const InfoLabel = ({ children, info, isTooltip }) =>
-  isTooltip ? (
+  isTooltip && info ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
         {children}
@@ -164,8 +164,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -411,11 +411,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? null : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? null : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -444,11 +444,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? null : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? null : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -533,10 +533,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                handleChange(
-                  name,
-                  val && val.optionValue ? val.optionValue : ""
-                )
+              handleChange(
+                name,
+                val && val.optionValue ? val.optionValue : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -560,8 +560,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-                (data) => data.currencyCode === values[name]
-              )[0]
+              (data) => data.currencyCode === values[name]
+            )[0]
             : ""
         }
         options={currencyData}
@@ -622,10 +622,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -725,9 +725,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+              setValue(newValue);
+            }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -872,8 +872,8 @@ const FormTypes = (props) => {
             {values[name]
               ? values[name]
               : isUploading
-              ? "Uploading..."
-              : "No file choosen"}
+                ? "Uploading..."
+                : "No file choosen"}
           </p>
         </Box>
         <IconButton

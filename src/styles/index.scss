@@ -22,6 +22,7 @@ html {
 
 body {
   font-family: Nunito Sans,sans-serif!important;
+  background-color: var(--aliceblue) !important;
 }
 
 /* Let's get this party started */
@@ -302,11 +303,9 @@ body::-webkit-scrollbar-thumb {
     margin-left: 4px
 }
 
-
 .text-primary{
   color: var(--primary);
 }
-
 
 .text-error{
   color: var(--error);
@@ -318,4 +317,8 @@ body::-webkit-scrollbar-thumb {
 
 .text-center{
   text-align: center !important;
+}
+
+.bg-white {
+  background: var(--white) !important;
 }
