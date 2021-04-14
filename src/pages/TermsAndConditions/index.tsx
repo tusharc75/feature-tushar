@@ -292,18 +292,6 @@ export default function TermsAndCondition(props) {
         <>
             <Layout>
                 <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
-                <Grid container direction="row" className="header-links">
-                    <Grid item xs={12} sm={12} className="pr-3">
-                        <Grid container justify="flex-end">
-                            <Link
-                                to="#"
-                                onClick={(e) => e.preventDefault()}
-                                className={classes.links}>
-                                Download Template
-                            </Link>
-                        </Grid>
-                    </Grid>
-                </Grid>
 
                 <Box component="div">
                     <CustomContainer>
