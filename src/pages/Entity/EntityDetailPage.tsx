@@ -32,7 +32,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { permissions, selectedEntity },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -277,19 +277,29 @@ const EntityDetailsPage = () => {
               </Button>
             )}
             <Box component="span" marginX={1} />
+
             {permissions?.entity?.isDelete && (
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)}
-              />
+              <span
+                title={
+                  selectedEntity === id
+                    ? "Primarily selected entity can't be deleted"
+                    : "Permanently delete this entity"
+                }
+              >
+                <DeleteButton
+                  disabled={selectedEntity === id}
+                  text="Delete"
+                  onClick={() => setShowConfirmBox(true)}
+                />
+              </span>
             )}
           </DetailsPageHeader>
         )}
 
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "8px", minHeight: "450px" }}>
+            <Container styles={{ borderRadius: "8px" }}>
+              <Box style={{ padding: "8px", minHeight: "450px" }}>
                 {loading || !entityFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -297,12 +307,12 @@ const EntityDetailsPage = () => {
                 ) : (
                   <DetailsPage data={entityData} fields={entityFields} />
                 )}
-              </BoxWithBorder>
+              </Box>
             </Container>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "0px" }}>
+            <Container styles={{ borderRadius: "8px" }}>
+              <Box style={{ padding: "0px", maxHeight: "450px" }}>
                 <Box
                   width="100%"
                   padding={1}
@@ -326,13 +336,7 @@ const EntityDetailsPage = () => {
                 <Box padding={1}>
                   {rolesLoading ? (
                     [1, 2].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        styles={{
-                          padding: "8px",
-                          margin: "8px 8px",
-                        }}
-                      >
+                      <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
                         <Box padding={1}>
                           <Skeleton
                             variant="text"
@@ -368,13 +372,13 @@ const EntityDetailsPage = () => {
                     </Box>
                   )}
                 </Box>
-              </BoxWithBorder>
+              </Box>
             </Container>
           </Grid>
         </Grid>
         <Box marginY={1} />
-        <Container styles={{ padding: "8px" }}>
-          <BoxWithBorder style={{ padding: "0px", minHeight: "300px" }}>
+        <Container styles={{ borderRadius: "8px" }}>
+          <Box style={{ padding: "0px", minHeight: "300px" }}>
             <Box display="flex" padding={1} bgcolor="grey.200">
               <Grid container>
                 <Grid item xs={8}>
@@ -395,7 +399,7 @@ const EntityDetailsPage = () => {
                 </Grid>
               </Grid>
             </Box>
-          </BoxWithBorder>
+          </Box>
         </Container>
       </Layout>
       {showConfirmBox ? (

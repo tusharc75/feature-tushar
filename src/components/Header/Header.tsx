@@ -120,7 +120,8 @@ const useStyles = makeStyles((theme) => ({
     minWidth: "200px",
   },
   entityName: {
-    textOverflow: "ellipses",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
     width: "150px",
   },
 }));
