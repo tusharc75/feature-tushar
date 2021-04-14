@@ -103,15 +103,15 @@ const User: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          isChecked: false,
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-          createdBy: user.createdBy,
-          updatedBy: user.updatedBy,
-          status: user.blocked ? user.blocked : false,
-        }))
+        id: user._id,
+        isChecked: false,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+        createdBy: user.createdBy,
+        updatedBy: user.updatedBy,
+        status: user.blocked ? user.blocked : false,
+      }))
       : [];
 
     setDataRows(rows);
@@ -163,6 +163,8 @@ const User: FC = () => {
           {params.value}
         </Link>
       ),
+      sortable: false,
+      filterable: false,
     },
     {
       field: "status",
@@ -249,6 +251,9 @@ const User: FC = () => {
     {
       field: "actions",
       headerName: "Actions ",
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
       renderCell: (params: any) =>
         user?.user._id === params.row.id ? (
           <p title="There is no action for currently logged in user">
@@ -405,6 +410,18 @@ const User: FC = () => {
     setRolesDialogOpen(false);
   };
 
+  const onFilterChange = React.useCallback((params) => {
+    if (params.filterModel.items[0].value) {
+      setQuery((prevState) => ({
+        ...prevState,
+        [params.filterModel.items[0].columnField]:
+          params.filterModel.items[0].value,
+      }));
+    } else {
+      setQuery({ page: 0, limit: 25 });
+    }
+  }, []);
+
   return (
     <>
       {isOpen && (
@@ -508,6 +525,7 @@ const User: FC = () => {
               onSortModelChange={handleSortModelChange}
               rowsPerPageOptions={[25, 50, 75]}
               density="compact"
+              onFilterModelChange={onFilterChange}
             />
           </div>
         </Container>
@@ -521,9 +539,8 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete user ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
