@@ -40,7 +40,10 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
     useEffect(() => {
         if (editRecord && editRecord?._id) {
             editRecord.description = RichTextEditor.createValueFromString(editRecord.description, 'html')
-            setInitialValues(editRecord)
+            setInitialValues({
+                description: editRecord.description,
+                TACName: editRecord.TACName
+            })
         }
     }, [])
     const handleSave = (values) => {
@@ -48,10 +51,8 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         values.description = description;
 
         if (editRecord?._id) {
-            delete values["isChecked"]
-            delete values["id"]
             axiosInstance()
-                .put(termsAndCondition.api, values)
+                .put(termsAndCondition.api, { ...values, _id: editRecord?._id })
                 .then(({ data }) => {
                     // toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()

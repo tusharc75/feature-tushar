@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
 import { useData } from '../../StateProvider/Provider';
 import {
@@ -30,7 +30,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { getSearchQuery } from '../../services/util';
 import { termsAndCondition } from '../../constants/helpers';
-import CreateTermsAndCondition from './CreateTermsAndCondition'
+import ManageTermsAndCondition from './ManageTermsAndCondition'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -412,7 +412,7 @@ export default function TermsAndCondition(props) {
                                 /> : null
                         }
                         {showCreateDialog ? (
-                            <CreateTermsAndCondition
+                            <ManageTermsAndCondition
                                 termsAndCondition={termsAndCondition}
                                 open={showCreateDialog}
                                 handleClose={handleCloseCreateDialog}
