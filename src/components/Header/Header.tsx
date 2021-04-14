@@ -290,7 +290,7 @@ const Header = ({ toggleDrawer }) => {
       {/* <MenuItem onClick={openServicesMenu}>
         <p>Services</p> <ExpandMore />
       </MenuItem> */}
-      <MenuItem onClick={openEntitiesMenu}>
+      <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu}>
         <p>Entities</p> <ExpandMore />
       </MenuItem>
       {/* <MenuItem onClick={openSupportMenu}>
