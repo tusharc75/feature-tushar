@@ -107,16 +107,16 @@ const Roles: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((role: any) => ({
-          ...role,
-          id: role._id,
-          isChecked: false,
-          name: role.name,
-          description: role.description,
-          type: `${role.type === 1 ? "Global" : "Regional"} Role`,
-          createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
-          createdBy: role.createdBy,
-          updatedBy: role.updatedBy,
-        }))
+        ...role,
+        id: role._id,
+        isChecked: false,
+        name: role.name,
+        description: role.description,
+        type: `${role.type === 1 ? "Global" : "Regional"} Role`,
+        createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
+        createdBy: role.createdBy,
+        updatedBy: role.updatedBy,
+      }))
       : [];
 
     setDataRows(rows);
@@ -388,6 +388,7 @@ const Roles: FC = () => {
     setSelectedType(filteredValue);
   };
 
+  const disableDelete = dataRows.some(o => o.isChecked && rolePermissionArray.indexOf(o?.permission) >= 0)
   return (
     <>
       {isOpen && (
@@ -463,7 +464,7 @@ const Roles: FC = () => {
               rolePermissions={permissions.role}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              canDelete={dataRows.filter((d) => d.isChecked).length > 0}
+              canDelete={disableDelete}
             />
           </div>
         </Container>
@@ -501,9 +502,8 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete role ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

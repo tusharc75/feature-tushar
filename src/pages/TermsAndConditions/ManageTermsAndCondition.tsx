@@ -54,35 +54,35 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
             axiosInstance()
                 .put(termsAndCondition.api, { ...values, _id: editRecord?._id })
                 .then(({ data }) => {
-                    // toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()
                     fetchData()
                 })
                 .catch((error) => {
-                    // toastConfig.setToastConfig(error);
+                    toastConfig.setToastConfig(error);
                 });
         }
         else {
             axiosInstance()
                 .post(termsAndCondition.api, values)
                 .then(({ data }) => {
-                    // toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()
                     fetchData()
                 })
                 .catch((error) => {
-                    // toastConfig.setToastConfig(error);
+                    toastConfig.setToastConfig(error);
                 });
         }
     };
 
     const classes = useStyles();
     return <Dialog
+        disableBackdropClick={true}
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
         onClose={handleClose}
         fullWidth
+
     >
         {
             (initialValues && <Formik initialValues={initialValues} validationSchema={termsAndConditionSchema} onSubmit={handleSave}>

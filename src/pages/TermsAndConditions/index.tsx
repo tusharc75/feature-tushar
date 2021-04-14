@@ -18,7 +18,6 @@ import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import SearchBox from '../../components/Helpers/SearchBox'
 import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from '../../axios/axiosInstance'
@@ -31,6 +30,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { getSearchQuery } from '../../services/util';
 import { termsAndCondition } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
+import _ from 'lodash'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -68,7 +68,6 @@ export default function TermsAndCondition(props) {
     const [rowCount, setRowCount] = useState(0);
     const [checkAllAccounts, setCheckAllRecords] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [renderCount, setRenderCount] = useState(0);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [searchVal, setSearchVal] = useState("");
@@ -148,7 +147,11 @@ export default function TermsAndCondition(props) {
             field: "TACName", headerName: "Name", width: 500,
             renderCell: (params) => (
                 <Link className={`${styles.terms_name_link}`}
-                    to={`/${termsAndCondition.route}/detail/${params.row._id}`}>
+                    style={{ pointerEvents: actionsPermissions.isUpdate ? "" : "none" }}
+                    onClick={() => {
+                        setShowCreateDialog(true);
+                        setEditRecord(_.cloneDeep(params.row))
+                    }}>
                     <CustomRenderCell value={params?.value} />
                 </Link>
             )
@@ -175,21 +178,6 @@ export default function TermsAndCondition(props) {
                             />
                         </IconButton>
                     </Tooltip >
-                    {
-                        <Tooltip title="Edit">
-                            <IconButton aria-label="Delete"
-                                disabled={actionsPermissions.isUpdate ? false : true}
-                                onClick={() => {
-                                    setShowCreateDialog(true);
-                                    setEditRecord(params.row)
-                                }}>
-                                <EditIcon
-                                    fontSize="small"
-                                    color={actionsPermissions.isUpdate ? "inherit" : "disabled"}
-                                />
-                            </IconButton>
-                        </Tooltip>
-                    }
                 </>
             ),
             disableColumnMenu: true,
@@ -291,17 +279,17 @@ export default function TermsAndCondition(props) {
         }
     }
 
-    const handleMessage = (obj) => {
-        toastConfig.setToastConfig({ ...obj });
-    }
     const handleCloseCreateDialog = (params) => {
         setShowCreateDialog(false)
-        if (editRecord) setEditRecord({})
+        setEditRecord({})
         if (params?.fetchData) fetchTermsAndConditions()
+    }
+    const handleFetchData = () => {
+        toastConfig.setToastConfig({ open: true, type: "success", message: "Record created successfully." });
+        fetchTermsAndConditions()
     }
     return (
         <>
-
             <Layout>
                 <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
                 <Grid container direction="row" className="header-links">
@@ -416,7 +404,7 @@ export default function TermsAndCondition(props) {
                                 termsAndCondition={termsAndCondition}
                                 open={showCreateDialog}
                                 handleClose={handleCloseCreateDialog}
-                                fetchData={fetchTermsAndConditions}
+                                fetchData={handleFetchData}
                                 editRecord={editRecord}
                             />
                         ) : null}

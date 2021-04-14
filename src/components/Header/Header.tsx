@@ -343,7 +343,7 @@ const Header = ({ toggleDrawer }) => {
   }
 
   const curEntity =
-    user?.entity.find((en) => en._id === selectedEntity) || null;
+    user?.entity?.find((en) => en._id === selectedEntity) || null;
 
   return (
     <div>
