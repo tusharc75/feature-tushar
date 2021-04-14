@@ -298,8 +298,8 @@ const EntityDetailsPage = () => {
 
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "8px", minHeight: "450px" }}>
+            <Container styles={{ borderRadius: "8px" }}>
+              <Box style={{ padding: "8px", minHeight: "450px" }}>
                 {loading || !entityFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -307,12 +307,12 @@ const EntityDetailsPage = () => {
                 ) : (
                   <DetailsPage data={entityData} fields={entityFields} />
                 )}
-              </BoxWithBorder>
+              </Box>
             </Container>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "0px" }}>
+            <Container styles={{ borderRadius: "8px" }}>
+              <Box style={{ padding: "0px", maxHeight: "450px" }}>
                 <Box
                   width="100%"
                   padding={1}
@@ -372,13 +372,13 @@ const EntityDetailsPage = () => {
                     </Box>
                   )}
                 </Box>
-              </BoxWithBorder>
+              </Box>
             </Container>
           </Grid>
         </Grid>
         <Box marginY={1} />
-        <Container styles={{ padding: "8px" }}>
-          <BoxWithBorder style={{ padding: "0px", minHeight: "300px" }}>
+        <Container styles={{ borderRadius: "8px" }}>
+          <Box style={{ padding: "0px", minHeight: "300px" }}>
             <Box display="flex" padding={1} bgcolor="grey.200">
               <Grid container>
                 <Grid item xs={8}>
@@ -399,7 +399,7 @@ const EntityDetailsPage = () => {
                 </Grid>
               </Grid>
             </Box>
-          </BoxWithBorder>
+          </Box>
         </Container>
       </Layout>
       {showConfirmBox ? (

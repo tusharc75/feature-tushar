@@ -1,11 +1,10 @@
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
-import { Typography, Tooltip } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
-import FormGroup from "@material-ui/core/FormGroup";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 
@@ -43,14 +42,14 @@ const Roles = ({ unassignRole, data, permissions }) => {
                 <ListItem disableGutters className={classes.list}>
                   <ListItemText
                     primary={
-                      <Link
-                        className="accountNameLink"
-                        to={`/role/detail/${obj._id}`}
-                      >
-                        <Typography className={classes.text}>
+                      <Typography className={classes.text}>
+                        <Link
+                          className="accountNameLink"
+                          to={`/role/detail/${obj._id}`}
+                        >
                           {obj.name || ""}
-                        </Typography>
-                      </Link>
+                        </Link>
+                      </Typography>
                     }
                     secondary={
                       <Typography
@@ -70,6 +69,7 @@ const Roles = ({ unassignRole, data, permissions }) => {
                       }
                     >
                       <IconButton
+                        size="small"
                         disabled={obj?.permission}
                         edge="end"
                         aria-label="delete"
