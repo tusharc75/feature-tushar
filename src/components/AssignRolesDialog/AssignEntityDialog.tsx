@@ -35,7 +35,12 @@ const AssignEntityDialog = ({
     axiosInstance()
       .get(`/${type}`)
       .then(({ data: { data } }) => {
-        setData(data);
+        if (type === "role") {
+          let roles = data.filter((d) => d.type === 2);
+          setData(roles);
+        } else {
+          setData(data);
+        }
         setLoadingData(false);
       })
       .catch((error) => {
