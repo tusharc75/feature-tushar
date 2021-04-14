@@ -371,15 +371,18 @@ const Header = ({ toggleDrawer }) => {
               >
                 Services <ExpandMore />
               </Button> */}
-              <Button
-                aria-controls={entitiesMenuId}
-                color="inherit"
-                onClick={openEntitiesMenu}
-                title="Entities"
-                className={classes.entitySelect}
-              >
-                <span>{curEntity && curEntity.entityName}</span> <ExpandMore />
-              </Button>
+              {selectedEntity && (
+                <Button
+                  aria-controls={entitiesMenuId}
+                  color="inherit"
+                  onClick={openEntitiesMenu}
+                  title="Entities"
+                  className={classes.entitySelect}
+                >
+                  <span>{curEntity && curEntity.entityName}</span>{" "}
+                  <ExpandMore />
+                </Button>
+              )}
             </Box>
             <div className={classes.search}>
               <div className={classes.searchIcon}>
