@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import Layout from "../../components/Layout";
 import { useData } from '../../StateProvider/Provider';
 import {
@@ -288,6 +288,17 @@ export default function TermsAndCondition(props) {
         toastConfig.setToastConfig({ open: true, type: "success", message: "Record created successfully." });
         fetchTermsAndConditions()
     }
+    const onFilterChange = useCallback((params) => {
+        if (params.filterModel.items[0].value) {
+            setQuery((prevState) => ({
+                ...prevState,
+                [params.filterModel.items[0].columnField]:
+                    params.filterModel.items[0].value,
+            }));
+        } else {
+            setQuery({ page: 0, limit: 25 });
+        }
+    }, []);
     return (
         <>
             <Layout>
@@ -376,6 +387,7 @@ export default function TermsAndCondition(props) {
                                 onSortModelChange={handleSortModelChange}
                                 // onRowClick={handleRowClick}
                                 density="compact"
+                                onFilterModelChange={onFilterChange}
                             />
                         </div>
                         {
