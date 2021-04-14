@@ -642,7 +642,6 @@ const Opportunities = () => {
           onClose={() => { setShowCreateOpportunityDialog(false) }}
           isNew={true}
           dataToUpdate={null}
-          opportunityApi={opportunityApi}
         />
       }
     </>

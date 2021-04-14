@@ -32,7 +32,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { permissions, selectedEntity },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -43,6 +43,7 @@ const EntityDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [entityFields, setEntityFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
+  const [deleteRoleRec, setDeleteRoleRec] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openRolesDialog, setOpenRolesDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -170,6 +171,32 @@ const EntityDetailsPage = () => {
       });
   };
 
+  const handleUnassignRole = (roleRec) => {
+    setShowConfirmBox(true);
+    setDeleteRoleRec(roleRec);
+  };
+
+  const unassignRole = () => {
+    if (deleteRoleRec && deleteRoleRec._id) {
+      axiosInstance()
+        .put(`/entity/remove-role`, { entities: [id], role: deleteRoleRec._id })
+        .then(({ data }) => {
+          fetchEntityRoles();
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          setShowConfirmBox(false);
+          fetchUserData();
+        })
+        .catch((error) => {
+          setShowConfirmBox(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -250,11 +277,21 @@ const EntityDetailsPage = () => {
               </Button>
             )}
             <Box component="span" marginX={1} />
+
             {permissions?.entity?.isDelete && (
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)}
-              />
+              <span
+                title={
+                  selectedEntity === id
+                    ? "Primarily selected entity can't be deleted"
+                    : "Permanently delete this entity"
+                }
+              >
+                <DeleteButton
+                  disabled={selectedEntity === id}
+                  text="Delete"
+                  onClick={() => setShowConfirmBox(true)}
+                />
+              </span>
             )}
           </DetailsPageHeader>
         )}
@@ -299,13 +336,7 @@ const EntityDetailsPage = () => {
                 <Box padding={1}>
                   {rolesLoading ? (
                     [1, 2].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        styles={{
-                          padding: "8px",
-                          margin: "8px 8px",
-                        }}
-                      >
+                      <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
                         <Box padding={1}>
                           <Skeleton
                             variant="text"
@@ -322,7 +353,7 @@ const EntityDetailsPage = () => {
                       <Roles
                         permissions={permissions}
                         data={globalRoles}
-                        unassignRole={() => {}}
+                        unassignRole={handleUnassignRole}
                       />
                       <Box marginY={1} />
                       <Button
@@ -374,9 +405,16 @@ const EntityDetailsPage = () => {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this entity ?`}
-          onClose={() => setShowConfirmBox(false)}
-          onOk={handleDeleteEntity}
+          message={
+            deleteRoleRec
+              ? `Are you sure you want to un-assign role ${deleteRoleRec.name} from entity ${entityData.entityName}`
+              : `Are you sure you want to delete this entity ?`
+          }
+          onClose={() => {
+            setDeleteRoleRec(null);
+            setShowConfirmBox(false);
+          }}
+          onOk={deleteRoleRec ? unassignRole : handleDeleteEntity}
         />
       ) : null}
     </>
