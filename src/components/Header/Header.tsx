@@ -12,11 +12,9 @@ import {
   Box,
   Badge,
   InputBase,
-  InputLabel,
-  FormControl,
-  Select,
+  Chip,
+  Typography,
 } from "@material-ui/core";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import {
   Search,
   Menu as MenuIcon,
@@ -25,7 +23,6 @@ import {
   Notifications,
   HelpOutline,
   ExpandMore,
-  ArrowDropDown,
 } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
@@ -121,6 +118,10 @@ const useStyles = makeStyles((theme) => ({
   },
   entitySelect: {
     minWidth: "200px",
+  },
+  entityName: {
+    textOverflow: "ellipses",
+    width: "150px",
   },
 }));
 
@@ -257,23 +258,36 @@ const Header = ({ toggleDrawer }) => {
       PaperProps={{
         style: {
           maxHeight: 48 * 4.5,
-          width: "20ch",
+          width: "25ch",
         },
       }}
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
             <MenuItem
+              title={curEntity.entityName}
               key={curEntity._id}
-              value={curEntity._id}
-              onClick={() => handleSelectedEnity(curEntity._id)}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
             >
-              {curEntity.entityName}
+              <Typography className={classes.entityName}>
+                {curEntity.entityName}
+              </Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && (
+                <Chip size="small" label="Current" color="primary" />
+              )}
             </MenuItem>
           ))
         : null}
     </Menu>
   );
+
+  const curEntity =
+    user?.entity.find((en) => en._id === selectedEntity) || null;
 
   const mobileMenuId = "primary-search-account-menu-mobile";
 
@@ -291,7 +305,13 @@ const Header = ({ toggleDrawer }) => {
         <p>Services</p> <ExpandMore />
       </MenuItem> */}
       <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu}>
-        <p>Entities</p> <ExpandMore />
+        {selectedEntity ? (
+          <>
+            {curEntity && curEntity.entityName} <ExpandMore />
+          </>
+        ) : (
+          "No Entity"
+        )}
       </MenuItem>
       {/* <MenuItem onClick={openSupportMenu}>
         <p>Support</p> <ExpandMore />
@@ -302,9 +322,6 @@ const Header = ({ toggleDrawer }) => {
   function handleSelectedEnity(id) {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
   }
-
-  const curEntity =
-    user?.entity.find((en) => en._id === selectedEntity) || null;
 
   return (
     <div>
@@ -376,7 +393,7 @@ const Header = ({ toggleDrawer }) => {
                   aria-controls={entitiesMenuId}
                   color="inherit"
                   onClick={openEntitiesMenu}
-                  title="Entities"
+                  title={`Selected entity - ${curEntity.entityName}`}
                   className={classes.entitySelect}
                 >
                   <span>{curEntity && curEntity.entityName}</span>{" "}
