@@ -32,7 +32,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { permissions, selectedEntity },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -277,11 +277,21 @@ const EntityDetailsPage = () => {
               </Button>
             )}
             <Box component="span" marginX={1} />
+
             {permissions?.entity?.isDelete && (
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)}
-              />
+              <span
+                title={
+                  selectedEntity === id
+                    ? "Primarily selected entity can't be deleted"
+                    : "Permanently delete this entity"
+                }
+              >
+                <DeleteButton
+                  disabled={selectedEntity === id}
+                  text="Delete"
+                  onClick={() => setShowConfirmBox(true)}
+                />
+              </span>
             )}
           </DetailsPageHeader>
         )}
@@ -326,13 +336,7 @@ const EntityDetailsPage = () => {
                 <Box padding={1}>
                   {rolesLoading ? (
                     [1, 2].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        styles={{
-                          padding: "8px",
-                          margin: "8px 8px",
-                        }}
-                      >
+                      <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
                         <Box padding={1}>
                           <Skeleton
                             variant="text"

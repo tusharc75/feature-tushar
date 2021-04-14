@@ -122,6 +122,7 @@ const RoleDetailsPage = () => {
         ...values,
         field,
         resource,
+        type: roleData.type,
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -302,7 +303,7 @@ const RoleDetailsPage = () => {
           <DetailsPageHeader heading={headingLbl} showHeading={true}>
             {permissions.role.isUpdate && !isEditDeleteDisable ? (
               <Button
-                disabled={currentData === updatedData}
+                disabled={currentData === updatedData || isUpdating}
                 variant="contained"
                 color="primary"
                 onClick={handleUpdateRole}
@@ -387,7 +388,13 @@ const RoleDetailsPage = () => {
                             resource={resource}
                             setField={setField}
                             setResource={setResource}
-                            isDisable={permissions.role.isUpdate ? isEditDeleteDisable ? true : false : false}
+                            isDisable={
+                              permissions.role.isUpdate
+                                ? isEditDeleteDisable
+                                  ? true
+                                  : false
+                                : false
+                            }
                           />
                         )
                       )}
@@ -562,10 +569,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-                : entityDeleteRec
-                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-                  : ""
+              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : entityDeleteRec
+              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -577,8 +584,8 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? handleDeleteRole
               : entityDeleteRec
-                ? unassignEntity
-                : unassignUserRole
+              ? unassignEntity
+              : unassignUserRole
           }
         />
       )}
