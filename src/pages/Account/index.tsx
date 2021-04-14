@@ -637,74 +637,81 @@ export default function Account(props) {
                                                 startIcon={<AddOutlined />} >Add</Button>
                                         }
 
-                                        <Button
-                                            disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                            variant="outlined"
-                                            color="default"
-                                            className={`${accountClass.account_header_action_btn}`}
-                                            onClick={openActions}
-                                            aria-controls="action-menu"
-                                        >
-                                            Actions <ExpandMore />
-                                        </Button>
-                                        <Menu
-                                            anchorEl={anchorEl}
-                                            keepMounted
-                                            getContentAnchorEl={null}
-                                            anchorOrigin={{
-                                                vertical: "bottom",
-                                                horizontal: "left"
-                                            }}
-                                            id="action-menu"
-                                            open={Boolean(anchorEl)}
-                                            onClose={closeActions}>
+                                        { (accountPermissions.isDelete || accountPermissions.approveAccount ) && 
+                                            <Button
+                                                disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                                variant="outlined"
+                                                color="default"
+                                                className={`${accountClass.account_header_action_btn}`}
+                                                onClick={openActions}
+                                                aria-controls="action-menu"
+                                            >
+                                                Actions <ExpandMore />
+                                            </Button>
+                                            }
+                                            <Menu
+                                                anchorEl={anchorEl}
+                                                keepMounted
+                                                getContentAnchorEl={null}
+                                                anchorOrigin={{
+                                                    vertical: "bottom",
+                                                    horizontal: "left"
+                                                }}
+                                                id="action-menu"
+                                                open={Boolean(anchorEl)}
+                                                onClose={closeActions}>
+                                                    
 
-                                            {
-                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
-                                                    disabled={
-                                                        dataRows.filter((d) => d.isChecked && !d.approved).length === 0
-                                                    }
-                                                    onClick={() => {
-                                                        closeActions()
-                                                        setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
-                                                    }}
-                                                >
-                                                    Approve Accounts &nbsp;{" "}
-                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
-                                                </MenuItem>
-                                            }
-                                            {
-                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
-                                                    disabled={
-                                                        dataRows.filter((d) => d.isChecked && d.approved).length === 0
-                                                    }
-                                                    onClick={() => {
-                                                        closeActions()
-                                                        setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
-                                                    }}
-                                                >
-                                                    Disapprove Accounts &nbsp;{" "}
-                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
-                                                </MenuItem>
-                                            }
-                                            {
-                                                accountPermissions.isDelete &&
-                                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                                    onClick={() => {
-                                                        if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
-                                                            closeActions()
-                                                            setShowDeleteWarningConfirmBox(true);
-                                                        } else {
-                                                            closeActions()
-                                                            setShowDeleteConfirmBox(true)
+
+
+                                                {
+                                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                        disabled={
+                                                            dataRows.filter((d) => d.isChecked && !d.approved).length === 0
                                                         }
-                                                    }}
-                                                >
-                                                    Delete
+                                                        onClick={() => {
+                                                            closeActions()
+                                                            setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
+                                                        }}
+                                                    >
+                                                        Approve Accounts &nbsp;{" "}
+                                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
+                                                    </MenuItem>
+                                                }
+                                                {
+                                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                        disabled={
+                                                            dataRows.filter((d) => d.isChecked && d.approved).length === 0
+                                                        }
+                                                        onClick={() => {
+                                                            closeActions()
+                                                            setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
+                                                        }}
+                                                    >
+                                                        Disapprove Accounts &nbsp;{" "}
+                                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
+                                                    </MenuItem>
+                                                }
+                                                {
+                                                    accountPermissions.isDelete &&
+                                                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                                        onClick={() => {
+                                                            if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
+                                                                closeActions()
+                                                                setShowDeleteWarningConfirmBox(true);
+                                                            } else {
+                                                                closeActions()
+                                                                setShowDeleteConfirmBox(true)
+                                                            }
+                                                        }}
+                                                    >
+                                                        Delete
                                     </MenuItem>
-                                            }
+                                                }
 
-                                        </Menu>
+
+                                            </Menu>
+                                        
 
                                     </div>
                                 </div>
