@@ -1,0 +1,32 @@
+.MuiDrawer-paper::-webkit-scrollbar {
+  background-color: #fff;
+  width: 8px;
+}
+
+.MuiDrawer-paper::-webkit-scrollbar-track {
+  background-color: #eee;
+  border-radius: 16px;
+  margin: 2px 0;
+}
+
+.MuiDrawer-paper::-webkit-scrollbar-thumb {
+  background-color: #babac0;
+  border-radius: 16px;
+  border: 1px solid transparent;
+}
+
+.breadcrumbbox {
+  border-bottom: 1px solid #f3f3f3;
+  background: white;
+  padding: 10px;
+  border-top: 2px solid white;
+  height: 47px;
+  width: 100%;
+}
+
+.breadcrumb li, .breadcrumb li p {
+  margin: 0px 4px;
+  font-size: 18px;
+  color: #848282;
+}
+/*# sourceMappingURL=Sidebar.css.map */

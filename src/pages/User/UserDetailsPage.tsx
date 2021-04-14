@@ -43,7 +43,7 @@ const UserDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user },
+    state: { user, permissions },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,7 +62,7 @@ const UserDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
-  const [usersPermissions, setUsersPermissions] = useState({
+  const [usersPermissions] = useState({
     isCreate: false,
     isUpdate: false,
     isRead: false,
@@ -76,22 +76,6 @@ const UserDetailsPage = () => {
       fetchUserRoles();
     }
   }, [id]);
-
-  useEffect(() => {
-    const data = user?.role?.sideBar;
-
-    if (data) {
-      const hasUsersPermission = data.find((d) => d.name == "User");
-      if (hasUsersPermission) {
-        setUsersPermissions({
-          isCreate: hasUsersPermission.isCreate,
-          isUpdate: hasUsersPermission.isUpdate,
-          isRead: hasUsersPermission.isRead,
-          isDelete: hasUsersPermission.isDelete,
-        });
-      }
-    }
-  }, [user]);
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -157,7 +141,7 @@ const UserDetailsPage = () => {
 
   const DeleteUser = () => {
     if (deleteUserRec) {
-      if (usersPermissions.isDelete) {
+      if (permissions.user.isDelete) {
         axiosInstance()
           .put(`/user/remove`, { ids: [deleteUserRec] })
           .then(({ data }) => {
@@ -177,7 +161,7 @@ const UserDetailsPage = () => {
     setUpdating(true);
 
     axiosInstance()
-      .put(`/user/${id}`, values)
+      .put(`/user`, { ...values, _id: id })
       .then(({ data }) => {
         fetchUserData();
         toastConfig.setToastConfig({
@@ -326,7 +310,7 @@ const UserDetailsPage = () => {
             mainPoints={mainPoints}
             showHeading={true}
           >
-            {usersPermissions.isUpdate ? (
+            {permissions.user.isUpdate ? (
               <Button
                 variant="contained"
                 color="primary"
@@ -336,14 +320,13 @@ const UserDetailsPage = () => {
               </Button>
             ) : null}
             <Box component="span" marginX={1} />
-            {usersPermissions.isDelete ? (
-              <Button
-                variant="contained"
-                color="secondary"
+
+            {permissions.user.isDelete ? (
+              <DeleteButton
+                text="Delete"
+                disabled={user?.user?._id == id}
                 onClick={() => handleDeleteUser(id)}
-              >
-                Delete
-              </Button>
+              />
             ) : null}
           </DetailsPageHeader>
         )}
@@ -401,7 +384,10 @@ const UserDetailsPage = () => {
                               <Switch
                                 checked={userPermissions[key]}
                                 name={key}
-                                disabled={isChangingPermission}
+                                disabled={
+                                  isChangingPermission ||
+                                  !permissions.user.isUpdate
+                                }
                                 onChange={handleChangePermissions}
                               />
                             }
@@ -433,13 +419,15 @@ const UserDetailsPage = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={4} container justify="flex-end">
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={handleOpenDialog}
-                  >
-                    <ControlPoint />
-                  </IconButton>
+                  {permissions.user.isUpdate && (
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenDialog}
+                    >
+                      <ControlPoint />
+                    </IconButton>
+                  )}
                 </Grid>
               </Grid>
             </Box>
@@ -485,6 +473,7 @@ const UserDetailsPage = () => {
                     >
                       {userData && (
                         <UserRoles
+                          permissions={permissions}
                           data={globalRoles}
                           unassignRole={handleUnassignRole}
                         />
@@ -531,8 +520,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
-              : ""
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

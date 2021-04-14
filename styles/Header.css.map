@@ -1,0 +1,9 @@
+{
+    "version": 3,
+    "mappings": "AACA,AACI,UADM,CACN,kBAAkB,CAAA;EACd,aAAa,EAAE,GAAG;CACrB",
+    "sources": [
+        "../src/components/Header/Header.scss"
+    ],
+    "names": [],
+    "file": "Header.css"
+}

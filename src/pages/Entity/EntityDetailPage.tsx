@@ -19,7 +19,11 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import Roles from "./Roles";
-import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import {
+  SET_USER,
+  USER_LOADING,
+  SET_SELECTED_ENTITY,
+} from "../../StateProvider/actionTypes";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 
 const EntityDetailsPage = () => {
@@ -28,7 +32,8 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions }, dispatch
+    state: { permissions },
+    dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -110,7 +115,7 @@ const EntityDetailsPage = () => {
           .put(`/entity/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-            fetchUserData()
+            fetchUserData();
             history.goBack();
           })
           .catch((err) => {
@@ -130,7 +135,10 @@ const EntityDetailsPage = () => {
         const { data } = response;
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
-          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+          dispatch({
+            type: SET_SELECTED_ENTITY,
+            payload: data.role.selectedEntity._id,
+          });
         }
         dispatch({ type: USER_LOADING, payload: false });
       })
@@ -138,7 +146,7 @@ const EntityDetailsPage = () => {
         localStorage.setItem("token", "");
         dispatch({ type: USER_LOADING, payload: false });
       });
-  }
+  };
 
   const handleUpdateEntity = (values) => {
     setUpdating(true);
@@ -154,7 +162,7 @@ const EntityDetailsPage = () => {
         });
         setUpdating(false);
         closeUpdateDIalog();
-        fetchUserData()
+        fetchUserData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -232,7 +240,7 @@ const EntityDetailsPage = () => {
             mainPoints={mainPoints}
             showHeading={true}
           >
-            {permissions?.entity?.isUpdate ? (
+            {permissions?.entity?.isUpdate && (
               <Button
                 variant="contained"
                 color="primary"
@@ -240,14 +248,14 @@ const EntityDetailsPage = () => {
               >
                 Edit
               </Button>
-            ) : null}
+            )}
             <Box component="span" marginX={1} />
-            {permissions?.entity?.isDelete ? (
+            {permissions?.entity?.isDelete && (
               <DeleteButton
                 text="Delete"
                 onClick={() => setShowConfirmBox(true)}
               />
-            ) : null}
+            )}
           </DetailsPageHeader>
         )}
 
@@ -280,6 +288,7 @@ const EntityDetailsPage = () => {
                   </Typography>
 
                   <IconButton
+                    disabled={!permissions.role.isUpdate}
                     color="primary"
                     size="small"
                     onClick={handleOpenRolesDialog}
@@ -310,7 +319,11 @@ const EntityDetailsPage = () => {
                     ))
                   ) : globalRoles.length ? (
                     <>
-                      <Roles data={globalRoles} onDeleteGlobalRole={() => { }} />
+                      <Roles
+                        permissions={permissions}
+                        data={globalRoles}
+                        unassignRole={() => {}}
+                      />
                       <Box marginY={1} />
                       <Button
                         fullWidth
@@ -323,7 +336,9 @@ const EntityDetailsPage = () => {
                       </Button>
                     </>
                   ) : (
-                    <Box textAlign="center">No Roles</Box>
+                    <Box textAlign="center" padding={2}>
+                      No Assigned Roles
+                    </Box>
                   )}
                 </Box>
               </BoxWithBorder>
@@ -343,7 +358,11 @@ const EntityDetailsPage = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={4} container justify="flex-end">
-                  <IconButton color="primary" size="small">
+                  <IconButton
+                    disabled={!permissions.entity.isUpdate}
+                    color="primary"
+                    size="small"
+                  >
                     <ControlPoint />
                   </IconButton>
                 </Grid>
