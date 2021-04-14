@@ -300,7 +300,7 @@ const RoleDetailsPage = () => {
           </Container>
         ) : (
           <DetailsPageHeader heading={headingLbl} showHeading={true}>
-            {permissions.role.isUpdate && (
+            {permissions.role.isUpdate && !isEditDeleteDisable ? (
               <Button
                 disabled={currentData === updatedData}
                 variant="contained"
@@ -309,9 +309,9 @@ const RoleDetailsPage = () => {
               >
                 {isUpdating ? <CircularProgress size={22} /> : "Update"}
               </Button>
-            )}
+            ) : null}
             <Box marginX={1} component="span" />
-            {permissions.role.isDelete && (
+            {permissions.role.isDelete && !isEditDeleteDisable ? (
               <DeleteButton
                 text="Delete"
                 onClick={() => {
@@ -319,7 +319,7 @@ const RoleDetailsPage = () => {
                   setShowConfirmBox(true);
                 }}
               />
-            )}
+            ) : null}
           </DetailsPageHeader>
         )}
 
@@ -387,7 +387,7 @@ const RoleDetailsPage = () => {
                             resource={resource}
                             setField={setField}
                             setResource={setResource}
-                            isDisable={!permissions.role.isUpdate}
+                            isDisable={permissions.role.isUpdate ? isEditDeleteDisable ? true : false : false}
                           />
                         )
                       )}
@@ -562,10 +562,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ""
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                  : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -577,8 +577,8 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? handleDeleteRole
               : entityDeleteRec
-              ? unassignEntity
-              : unassignUserRole
+                ? unassignEntity
+                : unassignUserRole
           }
         />
       )}
