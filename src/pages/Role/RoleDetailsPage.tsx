@@ -59,6 +59,7 @@ const RoleDetailsPage = () => {
   const [currentData, setCurrentData] = useState(null);
   const [updatedData, setUpdatedData] = useState(null);
   const [roleDeleteRec, setRoleDeleteRec] = useState(null);
+  const [entityDeleteRec, setEntityDeleteRec] = useState(null);
   const [userDeleteRec, setUserDeleteRec] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
@@ -217,16 +218,31 @@ const RoleDetailsPage = () => {
       });
   };
 
-  const handleDeleteEntities = (obj) => {
-    if (obj && obj._id) {
-      setLoading(true);
+  const handleUnassignEntity = (entityRec) => {
+    setEntityDeleteRec(entityRec);
+    setShowConfirmBox(true);
+  };
+
+  const unassignEntity = () => {
+    if (entityDeleteRec && entityDeleteRec._id) {
       axiosInstance()
-        .put(`/entity/remove`, { ids: [obj._id] })
+        .put(`/entity/remove-role`, {
+          entities: [entityDeleteRec._id],
+          role: id,
+        })
         .then(({ data }) => {
+          fetchRoleData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          setShowConfirmBox(false);
           fetchUserData();
         })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
+        .catch((error) => {
+          setShowConfirmBox(false);
+          toastConfig.setToastConfig(error);
         });
     }
   };
@@ -441,7 +457,7 @@ const RoleDetailsPage = () => {
                         selectedEntity={selectedEntity}
                         permissions={permissions}
                         data={roleData && roleData.entity.slice(0, 2)}
-                        unassignEntity={handleDeleteEntities}
+                        unassignEntity={handleUnassignEntity}
                       />
 
                       <Box marginY={1} />
@@ -547,14 +563,23 @@ const RoleDetailsPage = () => {
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
               ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : entityDeleteRec
+              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
               : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
             setUserDeleteRec(null);
             setRoleDeleteRec(null);
+            setEntityDeleteRec(null);
           }}
-          onOk={roleDeleteRec ? handleDeleteRole : unassignUserRole}
+          onOk={
+            roleDeleteRec
+              ? handleDeleteRole
+              : entityDeleteRec
+              ? unassignEntity
+              : unassignUserRole
+          }
         />
       )}
     </>
