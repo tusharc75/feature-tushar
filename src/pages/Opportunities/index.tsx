@@ -248,6 +248,8 @@ const Opportunities = () => {
     },
     {
       field: "accountName", headerName: "Account Name", width: 300,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => (
         <Link className="accountNameLink" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
           {params?.row?.accountName?.optionLabel ? params.row.accountName.optionLabel : ''}
@@ -314,6 +316,8 @@ const Opportunities = () => {
     // { field: "status", headerName: "Lead Status", width: 200 },
     {
       field: "owner", headerName: "Opportunity Owner", width: 250,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
@@ -472,6 +476,17 @@ const Opportunities = () => {
     }
   };
 
+  const onFilterChange = React.useCallback((params) => {
+    if (params.filterModel.items[0].value) {
+      setQuery((prevState) => ({
+        ...prevState,
+        [params.filterModel.items[0].columnField]:
+          params.filterModel.items[0].value,
+      }));
+    } else {
+      setQuery({ page: 0, limit: 25 });
+    }
+  }, []);
   return (
     <>
       <Layout>
@@ -589,6 +604,7 @@ const Opportunities = () => {
               rowsPerPageOptions={[25, 50, 75]}
               onSortModelChange={handleSortModelChange}
               density="compact"
+              onFilterModelChange={onFilterChange}
             />
           </div>
 
