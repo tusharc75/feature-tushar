@@ -76,14 +76,14 @@ export default function AssignedEntities({
                     </IconButton>
                   )}
                 </span>
-                <Link
-                  className="accountNameLink"
-                  to={`/entity/detail/${obj._id}`}
-                >
-                  <Typography className="text-capitalize">
+                <Typography className="text-capitalize">
+                  <Link
+                    className="accountNameLink"
+                    to={`/entity/detail/${obj._id}`}
+                  >
                     {obj?.entityName ?? ""}
-                  </Typography>
-                </Link>
+                  </Link>
+                </Typography>
                 <DisplayData
                   label="Address"
                   value={obj?.address ?? "____"}
