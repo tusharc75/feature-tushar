@@ -312,7 +312,7 @@ const EntityDetailsPage = () => {
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
             <Container styles={{ borderRadius: "8px" }}>
-              <Box style={{ padding: "0px", minHeight: "450px" }}>
+              <Box style={{ padding: "0px", maxHeight: "450px" }}>
                 <Box
                   width="100%"
                   padding={1}
