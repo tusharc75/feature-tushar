@@ -12,11 +12,9 @@ import {
   Box,
   Badge,
   InputBase,
-  InputLabel,
-  FormControl,
-  Select,
+  Chip,
+  Typography,
 } from "@material-ui/core";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import {
   Search,
   Menu as MenuIcon,
@@ -25,7 +23,6 @@ import {
   Notifications,
   HelpOutline,
   ExpandMore,
-  ArrowDropDown,
 } from "@material-ui/icons";
 import { useHistory } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
@@ -120,15 +117,12 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "3px",
   },
   entitySelect: {
-    fontWeight: 'bold',
-    color: "inherit",
-    height: '38px',
     minWidth: "200px",
-    paddingRight: '1px',
   },
-  mobileEntity: {
-    padding: '3px'
-  }
+  entityName: {
+    textOverflow: "ellipses",
+    width: "150px",
+  },
 }));
 
 const Header = ({ toggleDrawer }) => {
@@ -215,9 +209,6 @@ const Header = ({ toggleDrawer }) => {
       setOpen(false);
     }
   }
-  // const handleSelectedEnity = e => {
-  //   dispatch({ type: SET_SELECTED_ENTITY, payload: e.target.value });
-  // }
 
   const supportMenuId = "support-menu";
 
@@ -267,83 +258,70 @@ const Header = ({ toggleDrawer }) => {
       PaperProps={{
         style: {
           maxHeight: 48 * 4.5,
-          width: "20ch",
+          width: "25ch",
         },
       }}
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
           <MenuItem
+            title={curEntity.entityName}
             key={curEntity._id}
-            value={curEntity._id}
-            onClick={() => handleSelectedEnity(curEntity._id)}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+            }}
           >
-            {curEntity.entityName}
+            <Typography className={classes.entityName}>
+              {curEntity.entityName}
+            </Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && (
+              <Chip size="small" label="Current" color="primary" />
+            )}
           </MenuItem>
         ))
         : null}
     </Menu>
   );
 
+  const curEntity =
+    user?.entity?.find((en) => en._id === selectedEntity) || null;
+
   const mobileMenuId = "primary-search-account-menu-mobile";
 
-
-
-  const selectEntityDropDown = (
-    <FormControl className="navHeader">
-      < Select
-        id="headerEnitySelect"
-        label="Entities"
-        className={`${classes.entitySelect}`
-        }
-        MenuProps={{
-          anchorOrigin: {
-            vertical: "bottom",
-            horizontal: "left"
-          }
-        }}
-        value={selectedEntity}
-        IconComponent={() => (<ExpandMore />)}
-        onChange={handleSelectedEnity}
-      >
-        {
-          user?.entity && user.entity.length ?
-            user.entity.map(currentEntity => (
-              <MenuItem key={currentEntity._id} value={currentEntity._id}>{currentEntity.entityName}</MenuItem>
-            ))
-            : null
-        }
-
-      </Select >
-    </FormControl >
-  )
-
   const renderMobileMenu = (
-    <>
-      {selectedEntity ?
-        <Menu
-          anchorEl={mobileMoreAnchorEl}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          id={mobileMenuId}
-          keepMounted
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-          open={isMobileMenuOpen}
-          onClose={handleMobileMenuClose}
-        >
-          <span className={classes.mobileEntity}>
-            {selectEntityDropDown}
-          </span>
-        </Menu> : null
-      }
-    </>
+    <Menu
+      anchorEl={mobileMoreAnchorEl}
+      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      id={mobileMenuId}
+      keepMounted
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      open={isMobileMenuOpen}
+      onClose={handleMobileMenuClose}
+    >
+      {/* <MenuItem onClick={openServicesMenu}>
+        <p>Services</p> <ExpandMore />
+      </MenuItem> */}
+      <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu}>
+        {selectedEntity ? (
+          <>
+            {curEntity && curEntity.entityName} <ExpandMore />
+          </>
+        ) : (
+          "No Entity"
+        )}
+      </MenuItem>
+      {/* <MenuItem onClick={openSupportMenu}>
+        <p>Support</p> <ExpandMore />
+      </MenuItem> */}
+    </Menu>
   );
 
   function handleSelectedEnity(id) {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
   }
-
-  const curEntity =
-    user?.entity?.find((en) => en._id === selectedEntity) || null;
 
   return (
     <div>
@@ -410,16 +388,12 @@ const Header = ({ toggleDrawer }) => {
               >
                 Services <ExpandMore />
               </Button> */}
-              {/* {
-                selectedEntity ?
-                  selectEntityDropDown : null
-              } */}
               {selectedEntity && (
                 <Button
                   aria-controls={entitiesMenuId}
                   color="inherit"
                   onClick={openEntitiesMenu}
-                  title="Entities"
+                  title={`Selected entity - ${curEntity.entityName}`}
                   className={classes.entitySelect}
                 >
                   <span>{curEntity && curEntity.entityName}</span>{" "}
