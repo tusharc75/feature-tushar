@@ -265,30 +265,30 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-              }}
-            >
-              <Typography className={classes.entityName}>
-                {curEntity.entityName}
-              </Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && (
-                <Chip size="small" label="Current" color="primary" />
-              )}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+            }}
+          >
+            <Typography className={classes.entityName}>
+              {curEntity.entityName}
+            </Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && (
+              <Chip size="small" label="Current" color="primary" />
+            )}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );
 
   const curEntity =
-    user?.entity.find((en) => en._id === selectedEntity) || null;
+    user?.entity?.find((en) => en._id === selectedEntity) || null;
 
   const mobileMenuId = "primary-search-account-menu-mobile";
 

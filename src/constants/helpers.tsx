@@ -72,6 +72,12 @@ export const supplierAccount = {
   accountPermission: "Supplier Account",
 };
 
+export const termsAndCondition = {
+  api: "/termsandconditions",
+  route: "/terms-conditions",
+  permission: "termsAndConditions",
+};
+
 export const customerAccount = {
   accountApi: "customer-account",
   accountRoute: "customer-account",
@@ -400,7 +406,7 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
 export const downloadExcel = (fileDetails, fileName) => {
   const extension = `.${fileName.split('.').pop()}`;
   let type = null;
-  
+
   switch (extension) {
     case ".xlsx":
       type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
