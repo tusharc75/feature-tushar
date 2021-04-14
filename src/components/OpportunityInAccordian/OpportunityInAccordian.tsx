@@ -96,7 +96,7 @@ export default function OpportunityInAccordian({ opportunities, onNewOpportunity
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
 
     return <>
-        <Accordion square expanded={expandOpportunity}>
+        <Accordion expanded={expandOpportunity}>
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"

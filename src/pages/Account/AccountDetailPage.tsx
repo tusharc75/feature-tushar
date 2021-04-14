@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid, Typography, IconButton } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
-import _ from "lodash";
+import { reverse as _reverse } from "lodash";
 import { Skeleton } from "@material-ui/lab";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
@@ -13,7 +13,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import RelatedContactsBox from "./RelatedContacts";
+import RelatedContacts from "./RelatedContacts";
 import axiosInstance from "./../../axios/axiosInstance";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -59,7 +59,7 @@ export default function AccountDetailPage(props) {
   const {
     account: { accountApi, accountResource, accountPermission, accountRoute },
     accountBreadcrumb,
-    contact: { contactResource, contactRoute },
+    contact: { contactResource, contactRoute, contactApi },
   } = props;
 
   const {
@@ -582,16 +582,13 @@ export default function AccountDetailPage(props) {
                           ) : (
                             <>
                               <Box className={`${accountClass.custom_box1}`}>
-                                <RelatedContactsBox
-                                  contacts={relatedContacts}
+                                <RelatedContacts
+                                  contacts={_reverse(relatedContacts.slice(0, 2))}
                                   accountName={accountData.accountName}
+                                  contactApi={contactApi}
+                                  contactRoute={contactRoute}
                                 />
                               </Box>
-                              {/* <div className={`${accountClass.view_all_btn}`}>
-                                                            <Button
-                                                                variant="outlined"
-                                                                className={`${accountClass.btn}`}
-                                                            >View All</Button></div> */}
                             </>
                           )}
                         </div>
@@ -647,7 +644,7 @@ export default function AccountDetailPage(props) {
               onClose={() => setShowCreateOpportunityDialog(false)}
               onSuccess={() => {
                 setShowCreateOpportunityDialog(false);
-                // fetchOpportunities()
+                fetchRelatedData();
               }}
               accountId={accountData._id}
             />
@@ -657,10 +654,11 @@ export default function AccountDetailPage(props) {
               open={showCreateContactDialog}
               onClose={() => {
                 setShowCreateContactDialog(false);
-                // fetchRelatedContacts();
+                fetchRelatedData();
               }}
               contactResource={contactResource}
               accountId={accountData._id}
+              contactApi={contactApi}
             />
           )}
           {showAccountHierarchyInFullScreenDialog && (
