@@ -36,6 +36,7 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import UserRoles from "./UserRoles";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
+import RoleEngine from "../../components/Shared/RoleEngine";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,6 +53,7 @@ const UserDetailsPage = () => {
   const [rolesLoading, setRolesLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userPermissions, setUserPermissions] = useState(null);
+  const [unionRoleData, setUnionRoleData] = useState(null);
 
   const [isChangingPermission, setChangingPermission] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -73,6 +75,7 @@ const UserDetailsPage = () => {
     if (id) {
       getUserFields();
       fetchUserData();
+      getRoleUnion();
       fetchUserRoles();
     }
   }, [id]);
@@ -105,7 +108,7 @@ const UserDetailsPage = () => {
     axiosInstance()
       .get(`/role?User=${id}`)
       .then(({ data: { data } }) => {
-        setGloabalRoles(data);
+        setGloabalRoles(data.filter((d) => d?.type === 1)); // global role --- type 1
         setRolesLoading(false);
       })
       .catch((err) => {
@@ -187,6 +190,16 @@ const UserDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
+  const getRoleUnion = () => {
+    axiosInstance()
+      .get(`/user/union-role/${id}`)
+      .then(({ data: { data: data } }) => {
+        setUnionRoleData(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
   /* Unassign role */
   const handleUnassignRole = (rec) => {
     setRoleDeleteRec(rec);
@@ -205,8 +218,8 @@ const UserDetailsPage = () => {
           setShowConfirmBox(false);
           fetchUserData();
           fetchUserRoles();
-          // setUnionRoleData(null);
-          // getRoleUnion();
+          setUnionRoleData(null);
+          getRoleUnion();
           toastConfig.setToastConfig({
             message: "Successfully unassigned role",
             type: "success",
@@ -276,6 +289,7 @@ const UserDetailsPage = () => {
           userIds={[id]}
           onSuccess={() => {
             handleCloseDialog();
+            getRoleUnion();
             fetchUserRoles();
           }}
         />
@@ -489,8 +503,12 @@ const UserDetailsPage = () => {
                     height: "352px",
                   }}
                 >
-                  <TableContainer>
-                    <Table stickyHeader aria-label="roles">
+                  <TableContainer style={{ height: 440 }}>
+                    <Table
+                      stickyHeader
+                      aria-label="roles"
+                      className="roles-table"
+                    >
                       <TableHead>
                         <TableRow>
                           <TableCell>Names</TableCell>
@@ -501,7 +519,21 @@ const UserDetailsPage = () => {
                         </TableRow>
                       </TableHead>
 
-                      <TableBody></TableBody>
+                      <TableBody>
+                        <RoleEngine
+                          field={
+                            unionRoleData
+                              ? unionRoleData.field
+                              : []
+                          }
+                          resource={
+                            unionRoleData
+                              ? unionRoleData.resource
+                              : []
+                          }
+                          isDisable={true}
+                        />
+                      </TableBody>
                     </Table>
                   </TableContainer>
                 </BoxWithBorder>
@@ -520,8 +552,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
-              : ""
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
