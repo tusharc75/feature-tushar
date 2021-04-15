@@ -27,13 +27,23 @@ function DisplayData({ label, value, color }) {
   return (
     <div className="cTr">
       <div className="td1">
-        <Typography color="textSecondary" variant="subtitle1">
+        <Typography
+          color="textSecondary"
+          className="text-truncate"
+          variant="subtitle1"
+        >
           {label}
         </Typography>
       </div>
       <div className="td2">
         {" "}
-        <Typography style={{ color: color ? color : "" }}>{value}</Typography>
+        <Typography
+          title={value}
+          className="text-truncate"
+          style={{ color: color ? color : "" }}
+        >
+          {value}
+        </Typography>
       </div>
     </div>
   );
@@ -76,7 +86,10 @@ export default function AssignedEntities({
                     </IconButton>
                   )}
                 </span>
-                <Typography className="text-capitalize">
+                <Typography
+                  title={obj?.entityName ?? ""}
+                  className="text-capitalize"
+                >
                   <Link
                     className="accountNameLink"
                     to={`/entity/detail/${obj._id}`}
