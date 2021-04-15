@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -14,6 +14,9 @@ import { getObjKeys, yupSchema } from '../../constants/helpers';
 import CustomButton from '../../components/Helpers/Button'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import IconButton from '@material-ui/core/IconButton';
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import { AddField } from '../FormBuilder/AddField';
 
 
 const CreateProduct = (props) => {
@@ -25,6 +28,12 @@ const CreateProduct = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
+    const [isAddField, setIsAddField] = useState(false);
+    const [fields, setFields] = useState([]);
+    const [sectionName, setSectionName] = useState("");
+    const ref = useRef(null);
+
+
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
             setMasterFields(data.map((_f) => _f.fieldData))
@@ -34,6 +43,8 @@ const CreateProduct = (props) => {
                 const newField = _fields;
                 axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
                     data.fields?.map((_f) => newField.push(_f));
+                    data.productData.fields?.map((_f) => newField.push(_f));
+                    setFields(data.productData.fields)
                     setInitialData({
                         fields: newField,
                         values: data.productData
@@ -55,10 +66,9 @@ const CreateProduct = (props) => {
         });
     }, []);
 
-
-
     const handleSubmit = (values) => {
         setLoading(true);
+        values.fields = fields;
         if (productId) {
             values._id = productId;
             axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
@@ -98,11 +108,36 @@ const CreateProduct = (props) => {
                 })
                 setInitialData({
                     fields: newField,
-                    values: { ...getObjKeys('', newField), productCategory: value },
+                    values: { ...getObjKeys('', newField), ...ref.current.values },
                 });
                 EvaluteproductFields(newField)
             });
         }
+    }
+
+    const handleOpenAddField = (name) => {
+        setSectionName(name)
+        setIsAddField(true)
+    }
+
+    const handleCloseAddField = () => {
+        setSectionName("")
+        setIsAddField(false)
+    }
+
+    const handleAddField = (field) => {
+        field.sectionName = sectionName;
+        fields.push(field)
+        setFields(fields)
+        let newField = initialData.fields;
+        newField.push(field)
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField)
+        setSectionName("")
+        setIsAddField(false)
     }
 
     return (<Dialog
@@ -113,6 +148,7 @@ const CreateProduct = (props) => {
     >
         {initialData && initialData.fields.length ?
             <Formik
+                innerRef={ref}
                 enableReinitialize={true}
                 initialValues={initialData.values}
                 validationSchema={yupSchema(initialData.fields)}
@@ -131,7 +167,13 @@ const CreateProduct = (props) => {
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
-                                            <h2 className="form-label-style">{section.name}</h2>
+                                            <h2 className="form-label-style">{section.name}
+                                                <span style={{ float: "right", marginTop: "-5px" }}>
+                                                    <IconButton color="primary" size="small" onClick={() => handleOpenAddField(section.name)} >
+                                                        <ControlPointIcon />
+                                                    </IconButton>
+                                                </span>
+                                            </h2>
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
@@ -201,6 +243,7 @@ const CreateProduct = (props) => {
             <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
+        {isAddField && <AddField handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
     </Dialog>
     );
 }
