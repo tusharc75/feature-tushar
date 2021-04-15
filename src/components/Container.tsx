@@ -1,17 +1,8 @@
-import React from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
 import { Paper, Container, CssBaseline } from "@material-ui/core";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-  
-  },
-}));
-
 const CustomContainer = (props) => {
-  const classes = useStyles();
-  const { children, styles, maxWidth, minHeight, className, padding } = props;
+  const { children, styles, maxWidth, minHeight, padding } = props;
 
   return (
     <>
@@ -25,7 +16,7 @@ const CustomContainer = (props) => {
           maxWidth={maxWidth}
           style={{
             minHeight: minHeight ? "100%" : "calc(100vh - 65px)",
-            padding: padding || '',
+            padding: padding || "",
             ...styles,
           }}
         >
@@ -45,7 +36,6 @@ CustomContainer.propTypes = {
 };
 
 export default CustomContainer;
-
 
 // import React from "react";
 // import { makeStyles } from "@material-ui/core/styles";
