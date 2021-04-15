@@ -67,7 +67,7 @@ const CreateFormBuilder = (props) => {
                 _field_data.fieldId = _field_data.fieldId.toString();
                 _field_data.sectionName = _section.sectionName
                 if (!isNaN(_field.fieldId)) {
-                    _field_data.fieldName = camelCase(_field.fieldLabel)
+                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z ]/g, ""))
                 }
                 _field_data.order = ++order
                 data.push(_field_data)
