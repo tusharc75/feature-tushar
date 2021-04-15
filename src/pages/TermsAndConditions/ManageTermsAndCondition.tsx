@@ -1,5 +1,5 @@
 
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -16,7 +16,6 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from "../../axios/axiosInstance";
 import CustomButton from "../../components/Helpers/Button";
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 
 const termsAndConditionSchema = Yup.object().shape({
@@ -35,7 +34,6 @@ const useStyles = makeStyles((theme) => ({
 const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) => {
 
     const [initialValues, setInitialValues] = useState({ TACName: "", description: RichTextEditor.createEmptyValue() });
-    const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
         if (editRecord && editRecord?._id) {
@@ -57,9 +55,6 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                     handleClose()
                     fetchData()
                 })
-                .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                });
         }
         else {
             axiosInstance()
@@ -68,9 +63,6 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                     handleClose()
                     fetchData()
                 })
-                .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                });
         }
     };
 
@@ -87,7 +79,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         {
             (initialValues && <Formik initialValues={initialValues} validationSchema={termsAndConditionSchema} onSubmit={handleSave}>
                 {({ submitForm, touched, errors, setFieldValue, values }) => (
-                    <Form>
+                    <Form noValidate>
                         <CustomDialogHeader onClose={handleClose}
                             title={`${editRecord?._id ? "Edit" : "Create"} Terms and Condition`} ></CustomDialogHeader>
                         <CustomDialogContent>
@@ -103,6 +95,9 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                 label="Terms and Condition Name"
                                                 name="TACName"
                                                 variant="outlined"
+                                                required={true}
+                                                value={values["TACName"]}
+                                                onChange={(e) => setFieldValue("TACName", e.target.value.trimStart())}
                                             />
                                             <Box mt={2}>
                                                 <RichTextEditor

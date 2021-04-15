@@ -51,13 +51,24 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
                   <ListItem className={classes.list}>
                     <ListItemText
                       primary={
-                        <Typography>
+                        <Typography
+                          title={obj.name || ""}
+                          className="text-truncate"
+                        >
                           <Link to={`/role/detail/${obj._id}`}>
                             {obj.name || ""}
                           </Link>
                         </Typography>
                       }
-                      secondary={obj.description || ""}
+                      secondary={
+                        <Typography
+                          color="textSecondary"
+                          title={obj.description || ""}
+                          className="text-truncate"
+                        >
+                          {obj.description || ""}
+                        </Typography>
+                      }
                     />
                     {permissions.user.isUpdate && (
                       <ListItemSecondaryAction

@@ -1,6 +1,6 @@
 :root {
-  --primary : #003f57 ;
-  --primary-light : #003f57 ;
+  --primary: #003f57;
+  --primary-light: #003f57;
   --secondary: #dc004e;
   --error: #df2e18;
   --info: #2196f3;
@@ -11,27 +11,28 @@
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: Nunito Sans,sans-serif!important;
+  font-family: Nunito Sans, sans-serif !important;
 }
 
 /* Let's get this party started */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
   -webkit-border-radius: 10px;
   border-radius: 10px;
 }
@@ -40,11 +41,11 @@ body {
 ::-webkit-scrollbar-thumb {
   -webkit-border-radius: 10px;
   border-radius: 10px;
-  background: #ddd; 
-  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+  background: #ddd;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
 }
 ::-webkit-scrollbar-thumb:window-inactive {
-background:#ada7a7cc; 
+  background: #ada7a7cc;
 }
 
 /* total width */
@@ -54,20 +55,19 @@ body::-webkit-scrollbar {
 
 /* scrollbar itself */
 body::-webkit-scrollbar-thumb {
-    background-color: #9e9ea5;
-    box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
-    -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+  background-color: #9e9ea5;
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
 body::-webkit-scrollbar-thumb:hover {
-    background-color: #969696;
-    border-color: #f4f4f4;
+  background-color: #969696;
+  border-color: #f4f4f4;
 }
 
 /* set button(top and bottom of the scrollbar) */
 body::-webkit-scrollbar-button {
-    display: none;
+  display: none;
 }
-
 
 /* MAC like scrollbar - End */
 
@@ -79,6 +79,7 @@ a {
 .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* body::-webkit-scrollbar {
@@ -216,7 +217,8 @@ body::-webkit-scrollbar-thumb {
   color: #222;
 }
 
-.select-search:not(.is-loading):not(.select-search--multiple) .select-search__value::after {
+.select-search:not(.is-loading):not(.select-search--multiple)
+  .select-search__value::after {
   transform: rotate(45deg);
   border-right: 1px solid #000;
   border-bottom: 1px solid #000;
@@ -245,7 +247,7 @@ body::-webkit-scrollbar-thumb {
   color: #888;
 }
 
-.listing-grid{
+.listing-grid {
   height: calc(100vh - 10rem);
   padding: 0.3rem;
 }
@@ -279,43 +281,41 @@ body::-webkit-scrollbar-thumb {
   border-bottom: 0px;
 }
 
-.header-links{
+.header-links {
   position: absolute;
   top: 4.3rem;
-  right: 0
+  right: 0;
 }
-.header-panel{
-  color:var(--primary);
+.header-panel {
+  color: var(--primary);
   background-color: #f7f7f7 !important;
   border-bottom: 1px solid #ecf1f3 !important;
   border-top: 1px solid #ecf1f3 !important;
   padding: 8px 10px;
 }
-.listingHeader{
+.listingHeader {
   font-size: 1.35rem;
   font-weight: bold;
   color: var(--primary);
 }
-.headerLogo{
-    font-size: 1.35rem;
-    color: var(--primary);
-    margin-left: 4px
+.headerLogo {
+  font-size: 1.35rem;
+  color: var(--primary);
+  margin-left: 4px;
 }
 
-
-.text-primary{
+.text-primary {
   color: var(--primary);
 }
 
-
-.text-error{
+.text-error {
   color: var(--error);
 }
 
-.text-success{
+.text-success {
   color: var(--success);
 }
 
-.text-center{
+.text-center {
   text-align: center !important;
 }
