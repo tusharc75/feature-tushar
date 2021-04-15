@@ -25,6 +25,7 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignedUsers from "./AssignedUsers";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -37,8 +38,10 @@ const EntityDetailsPage = () => {
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [globalRoles, setGloabalRoles] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [rolesLoading, setRolesLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [entityData, setEntityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [entityFields, setEntityFIelds] = useState([]);
@@ -56,6 +59,7 @@ const EntityDetailsPage = () => {
       getEntityFields();
       fetchEntityData();
       fetchEntityRoles();
+      fetchEntityUser();
     }
   }, [id]);
 
@@ -81,11 +85,25 @@ const EntityDetailsPage = () => {
     axiosInstance()
       .get(`/role?entity=${id}`)
       .then(({ data: { data } }) => {
-        setGloabalRoles(data.slice(0, 2));
+        setRoles(data.slice(0, 4));
         setRolesLoading(false);
       })
       .catch((err) => {
         setRolesLoading(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchEntityUser = () => {
+    setUsersLoading(true);
+    axiosInstance()
+      .get(`/entity/user/${id}`)
+      .then(({ data: { data } }) => {
+        setUsers(data);
+        setUsersLoading(false);
+      })
+      .catch((err) => {
+        setUsersLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -309,6 +327,74 @@ const EntityDetailsPage = () => {
                 )}
               </Box>
             </Container>
+            <Box marginY={1} />
+            <Container>
+              <Box
+                width="100%"
+                padding={1}
+                bgcolor="grey.200"
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Typography variant="subtitle2">
+                  Assigned Users ({users.length || 0})
+                </Typography>
+                {permissions.entity.isUpdate && (
+                  <IconButton title="Assign users" color="primary" size="small">
+                    <ControlPoint />
+                  </IconButton>
+                )}
+              </Box>
+              <Box padding={1}>
+                {usersLoading ? (
+                  <Box display="flex">
+                    {[1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        style={{
+                          padding: "8px",
+                          margin: "8px",
+                          width: "100%",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))}
+                  </Box>
+                ) : users.length ? (
+                  <>
+                    <AssignedUsers
+                      permissions={permissions}
+                      data={users.slice(0, 2)}
+                      unassignUser={() => {}}
+                    />
+
+                    <Box marginY={1} />
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => history.push("/user")}
+                    >
+                      View All
+                    </Button>
+                  </>
+                ) : (
+                  <Box textAlign="center" padding={2}>
+                    <Typography>No Users </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Container>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
             <Container styles={{ borderRadius: "8px" }}>
@@ -321,7 +407,7 @@ const EntityDetailsPage = () => {
                   justifyContent="space-between"
                 >
                   <Typography variant="subtitle2">
-                    Assigned Regional Roles ({globalRoles.length || 0})
+                    Assigned Regional Roles ({roles.length || 0})
                   </Typography>
 
                   <IconButton
@@ -348,11 +434,11 @@ const EntityDetailsPage = () => {
                         </Box>
                       </BoxWithBorder>
                     ))
-                  ) : globalRoles.length ? (
+                  ) : roles.length ? (
                     <>
                       <Roles
                         permissions={permissions}
-                        data={globalRoles}
+                        data={roles}
                         unassignRole={handleUnassignRole}
                       />
                       <Box marginY={1} />
@@ -376,31 +462,6 @@ const EntityDetailsPage = () => {
             </Container>
           </Grid>
         </Grid>
-        <Box marginY={1} />
-        <Container styles={{ borderRadius: "8px" }}>
-          <Box style={{ padding: "0px", minHeight: "300px" }}>
-            <Box display="flex" padding={1} bgcolor="grey.200">
-              <Grid container>
-                <Grid item xs={8}>
-                  <Box display="flex">
-                    <Box padding="5px">
-                      <Typography variant="subtitle2">Entity Users</Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={4} container justify="flex-end">
-                  <IconButton
-                    disabled={!permissions.entity.isUpdate}
-                    color="primary"
-                    size="small"
-                  >
-                    <ControlPoint />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            </Box>
-          </Box>
-        </Container>
       </Layout>
       {showConfirmBox ? (
         <ConfirmationDialog
