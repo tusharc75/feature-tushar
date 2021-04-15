@@ -106,7 +106,7 @@ const UserDetailsPage = () => {
   const fetchUserRoles = () => {
     setRolesLoading(true);
     axiosInstance()
-      .get(`/role?User=${id}`)
+      .get(`/role?user=${id}`)
       .then(({ data: { data } }) => {
         setGloabalRoles(data.filter((d) => d?.type === 1)); // global role --- type 1
         setRolesLoading(false);
