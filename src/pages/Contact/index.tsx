@@ -157,6 +157,8 @@ export default function Contact(props) {
         },
         {
             field: "name", headerName: "Name", width: 400,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => (
                 <Link className="link"
                     to={`/${contactRoute}/detail/${params.row._id}`}>
@@ -175,6 +177,9 @@ export default function Contact(props) {
         },
         {
             field: "createdBy", headerName: "Created By", width: 250,
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => params?.value && params?.value?.user ?
                 (<h5 className="createBy">
                     {params.value.user.firstName}
@@ -192,6 +197,8 @@ export default function Contact(props) {
         },
         {
             field: "updatedBy", headerName: "Updated By", width: 250,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => params?.value && params?.value?.user ?
                 (<h5 className="updateBy">
                     {params.value.user.firstName}
@@ -209,10 +216,15 @@ export default function Contact(props) {
         },
         {
             field: "accountName", headerName: "Account", width: 300,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => <CustomRenderCell value={params?.value} />
         },
         {
             field: "actions", headerName: "Actions ",
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => (
                 <>
                     {

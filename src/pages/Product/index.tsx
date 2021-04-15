@@ -78,6 +78,9 @@ const Product = () => {
             field: "createdBy",
             headerName: "Created By",
             width: 300,
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
                 {params.row.createdBy.user.firstName}
                 <span
@@ -96,6 +99,9 @@ const Product = () => {
             field: "updatedBy",
             headerName: "Updated By",
             width: 300,
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => params?.row && params?.row?.updatedBy ? (<h5 className="createBy">
                 {params.row.updatedBy.user.firstName}
                 <span

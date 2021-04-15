@@ -271,13 +271,14 @@ export default function Account(props) {
             field: "parentAccount",
             headerName: "Parent Account",
             width: 250,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => <CustomRenderCell value={params?.value?.optionLabel} />
         },
         {
             field: "masterAccount",
             headerName: "Master Account",
             width: 250,
-            disableColumnMenu: true,
             sortable: false,
             filterable: false,
             renderCell: (params) => <CustomRenderCell value={params?.value?.optionLabel} />
@@ -362,7 +363,6 @@ export default function Account(props) {
     };
 
     const fetchAccounts = useCallback(() => {
-
         setLoading(true);
         let searchParams: any = { ...query, filterAccounts: selectedType }
         searchParams = searchVal
@@ -532,6 +532,17 @@ export default function Account(props) {
         }
     };
 
+    const onFilterChange = useCallback((params) => {
+        if (params.filterModel.items[0].value) {
+            setQuery((prevState) => ({
+                ...prevState,
+                [params.filterModel.items[0].columnField]:
+                    params.filterModel.items[0].value,
+            }));
+        } else {
+            setQuery({ page: 0, limit: 25 });
+        }
+    }, []);
     return (
         <>
             <Layout>
@@ -637,7 +648,7 @@ export default function Account(props) {
                                                 startIcon={<AddOutlined />} >Add</Button>
                                         }
 
-                                        { (accountPermissions.isDelete || accountPermissions.approveAccount ) && 
+                                        {(accountPermissions.isDelete || accountPermissions.approveAccount) &&
                                             <Button
                                                 disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                                 variant="outlined"
@@ -648,70 +659,70 @@ export default function Account(props) {
                                             >
                                                 Actions <ExpandMore />
                                             </Button>
+                                        }
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            keepMounted
+                                            getContentAnchorEl={null}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "left"
+                                            }}
+                                            id="action-menu"
+                                            open={Boolean(anchorEl)}
+                                            onClose={closeActions}>
+
+
+
+
+                                            {
+                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                    disabled={
+                                                        dataRows.filter((d) => d.isChecked && !d.approved).length === 0
+                                                    }
+                                                    onClick={() => {
+                                                        closeActions()
+                                                        setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
+                                                    }}
+                                                >
+                                                    Approve Accounts &nbsp;{" "}
+                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
+                                                </MenuItem>
                                             }
-                                            <Menu
-                                                anchorEl={anchorEl}
-                                                keepMounted
-                                                getContentAnchorEl={null}
-                                                anchorOrigin={{
-                                                    vertical: "bottom",
-                                                    horizontal: "left"
-                                                }}
-                                                id="action-menu"
-                                                open={Boolean(anchorEl)}
-                                                onClose={closeActions}>
-                                                    
-
-
-
-                                                {
-                                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
-                                                        disabled={
-                                                            dataRows.filter((d) => d.isChecked && !d.approved).length === 0
-                                                        }
-                                                        onClick={() => {
+                                            {
+                                                accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
+                                                    disabled={
+                                                        dataRows.filter((d) => d.isChecked && d.approved).length === 0
+                                                    }
+                                                    onClick={() => {
+                                                        closeActions()
+                                                        setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
+                                                    }}
+                                                >
+                                                    Disapprove Accounts &nbsp;{" "}
+                                                    <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
+                                                </MenuItem>
+                                            }
+                                            {
+                                                accountPermissions.isDelete &&
+                                                <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
+                                                    onClick={() => {
+                                                        if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
                                                             closeActions()
-                                                            setMultipleApproveDisapproveAccount({ show: true, approved: true, selectedRecords: dataRows.filter((d) => d.isChecked && !d.approved).length })
-                                                        }}
-                                                    >
-                                                        Approve Accounts &nbsp;{" "}
-                                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && !d.approved).length} />
-                                                    </MenuItem>
-                                                }
-                                                {
-                                                    accountPermissions.isUpdate && accountPermissions.approveAccount && <MenuItem
-                                                        disabled={
-                                                            dataRows.filter((d) => d.isChecked && d.approved).length === 0
-                                                        }
-                                                        onClick={() => {
+                                                            setShowDeleteWarningConfirmBox(true);
+                                                        } else {
                                                             closeActions()
-                                                            setMultipleApproveDisapproveAccount({ show: true, approved: false, selectedRecords: dataRows.filter((d) => d.isChecked && d.approved).length })
-                                                        }}
-                                                    >
-                                                        Disapprove Accounts &nbsp;{" "}
-                                                        <Chip size="small" label={dataRows.filter((d) => d.isChecked && d.approved).length} />
-                                                    </MenuItem>
-                                                }
-                                                {
-                                                    accountPermissions.isDelete &&
-                                                    <MenuItem disabled={dataRows.filter((d) => d.isChecked).length === 0}
-                                                        onClick={() => {
-                                                            if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
-                                                                closeActions()
-                                                                setShowDeleteWarningConfirmBox(true);
-                                                            } else {
-                                                                closeActions()
-                                                                setShowDeleteConfirmBox(true)
-                                                            }
-                                                        }}
-                                                    >
-                                                        Delete
+                                                            setShowDeleteConfirmBox(true)
+                                                        }
+                                                    }}
+                                                >
+                                                    Delete
                                     </MenuItem>
-                                                }
+                                            }
 
 
-                                            </Menu>
-                                        
+                                        </Menu>
+
 
                                     </div>
                                 </div>
@@ -740,6 +751,7 @@ export default function Account(props) {
                                 onSortModelChange={handleSortModelChange}
                                 // onRowClick={handleRowClick}
                                 density="compact"
+                                onFilterModelChange={onFilterChange}
                             />
                         </div>
                         {

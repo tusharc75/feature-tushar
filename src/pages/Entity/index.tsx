@@ -102,14 +102,14 @@ const Entity: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((entity: any) => ({
-          id: entity._id,
-          isChecked: false,
-          name: entity.entityName,
-          address: entity.address,
-          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-          createdBy: entity?.createdBy,
-          updatedBy: entity?.updatedBy,
-        }))
+        id: entity._id,
+        isChecked: false,
+        name: entity.entityName,
+        address: entity.address,
+        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
+        createdBy: entity?.createdBy,
+        updatedBy: entity?.updatedBy,
+      }))
       : [];
     setDataRows(rows);
   };
@@ -186,6 +186,9 @@ const Entity: FC = () => {
       field: "createdBy",
       headerName: "Created By",
       width: 150,
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
       renderCell: (params: any) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -223,11 +226,17 @@ const Entity: FC = () => {
         ) : (
           <NoDataCell />
         ),
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
     },
 
     {
       field: "actions",
       headerName: "Actions ",
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
       renderCell: (params: any) => (
         <>
           {permissions?.entity?.isDelete ? (
@@ -401,6 +410,17 @@ const Entity: FC = () => {
       });
   };
 
+  const onFilterChange = useCallback((params) => {
+    if (params.filterModel.items[0].value) {
+      setQuery((prevState) => ({
+        ...prevState,
+        [params.filterModel.items[0].columnField]:
+          params.filterModel.items[0].value,
+      }));
+    } else {
+      setQuery({ page: 0, limit: 25 });
+    }
+  }, []);
   return (
     <>
       {isOpen && (
@@ -509,6 +529,7 @@ const Entity: FC = () => {
               onSortModelChange={handleSortModelChange}
               rowsPerPageOptions={[25, 50, 75]}
               density="compact"
+              onFilterModelChange={onFilterChange}
             />
           </div>
         </Container>
@@ -523,9 +544,8 @@ const Entity: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

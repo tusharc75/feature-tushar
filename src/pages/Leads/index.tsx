@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
@@ -211,7 +211,9 @@ const Leads = () => {
         >
           {params?.value ?? ''}
         </Link>
-      )
+      ),
+      sortable: false,
+      filterable: false,
     },
     {
       field: "title", headerName: "Title", width: 300,
@@ -285,6 +287,8 @@ const Leads = () => {
     {
       field: "owner", headerName: "Owner Alies", width: 250,
       hide: true,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => <CustomRenderCell value={params?.value} />
     },
     {
@@ -449,6 +453,17 @@ const Leads = () => {
     }
   };
 
+  const onFilterChange = useCallback((params) => {
+    if (params.filterModel.items[0].value) {
+      setQuery((prevState) => ({
+        ...prevState,
+        [params.filterModel.items[0].columnField]:
+          params.filterModel.items[0].value,
+      }));
+    } else {
+      setQuery({ page: 0, limit: 25 });
+    }
+  }, []);
   return (
     <Layout>
       <Grid container>
@@ -575,6 +590,7 @@ const Leads = () => {
             rowsPerPageOptions={[25, 50, 75]}
             onSortModelChange={handleSortModelChange}
             density="compact"
+            onFilterModelChange={onFilterChange}
           />
         </div>
         {

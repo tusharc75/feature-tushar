@@ -247,6 +247,9 @@ const Roles: FC = () => {
     {
       field: "actions",
       headerName: "Actions ",
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
       renderCell: (params: any) => (
         <>
           {permissions.role.isDelete ? (
@@ -388,7 +391,20 @@ const Roles: FC = () => {
     setSelectedType(filteredValue);
   };
 
+  const onFilterChange = React.useCallback((params) => {
+    if (params.filterModel.items[0].value) {
+      setQuery((prevState) => ({
+        ...prevState,
+        [params.filterModel.items[0].columnField]:
+          params.filterModel.items[0].value,
+      }));
+    } else {
+      setQuery({ page: 0, limit: 25 });
+    }
+  }, []);
+
   const disableDelete = dataRows.some(o => o.isChecked && rolePermissionArray.indexOf(o?.permission) >= 0)
+
   return (
     <>
       {isOpen && (
@@ -464,7 +480,7 @@ const Roles: FC = () => {
               rolePermissions={permissions.role}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              canDelete={disableDelete}
+              canDelete={!disableDelete}
             />
           </div>
         </Container>
@@ -489,6 +505,7 @@ const Roles: FC = () => {
               onSortModelChange={handleSortModelChange}
               rowsPerPageOptions={[25, 50, 75]}
               density="compact"
+              onFilterModelChange={onFilterChange}
             />
           </div>
         </Container>

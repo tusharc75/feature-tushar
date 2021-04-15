@@ -49,12 +49,7 @@ function DisplayData({ label, value, color }) {
   );
 }
 
-export default function AssignedEntities({
-  data,
-  unassignEntity,
-  permissions,
-  selectedEntity,
-}) {
+export default function AssignedUsers({ data, unassignUser, permissions }) {
   const classes = useStyles();
 
   return (
@@ -64,42 +59,27 @@ export default function AssignedEntities({
           {data.map((obj, index) => (
             <Grid item md={6} xs={12} sm={12} key={index}>
               <BoxWithBorder>
-                <span
-                  className={classes.actionsItems}
-                  title={
-                    selectedEntity === obj._id
-                      ? "Default entity can't be un-assigned"
-                      : `Un-assign ${obj.entityName}`
-                  }
-                >
+                <span className={classes.actionsItems}>
                   {permissions.role.isUpdate && (
-                    <IconButton
-                      disabled={selectedEntity === obj._id}
-                      onClick={() => unassignEntity(obj)}
-                      size="small"
-                    >
-                      <Delete
-                        color={
-                          selectedEntity === obj._id ? "disabled" : "error"
-                        }
-                      />
+                    <IconButton onClick={() => unassignUser(obj)} size="small">
+                      <Delete color={"error"} />
                     </IconButton>
                   )}
                 </span>
                 <Typography
-                  title={obj?.entityName ?? ""}
+                  title={`${obj?.firstName} ${obj?.lastName}` ?? ""}
                   className="text-capitalize"
                 >
                   <Link
-                    className="link"
-                    to={`/entity/detail/${obj._id}`}
+                    className="accountNameLink"
+                    to={`/user/detail/${obj._id}`}
                   >
-                    {obj?.entityName ?? ""}
+                    {`${obj?.firstName} ${obj?.lastName}` ?? ""}
                   </Link>
                 </Typography>
                 <DisplayData
-                  label="Address"
-                  value={obj?.address ?? "____"}
+                  label="Email"
+                  value={obj?.email ?? "____"}
                   color={null}
                 />
               </BoxWithBorder>
