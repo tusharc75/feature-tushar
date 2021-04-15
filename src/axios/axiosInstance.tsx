@@ -28,9 +28,11 @@ export default (history = null) => {
     }
 
     axiosInstance.interceptors.request.use((request) => {
-        const entityId = localStorage.getItem("entityId");
-        if (entityId) {
-            request.url = `${request.url}&entity=${entityId}`
+        if (request.url != "/user/login") {
+            const entityId = localStorage.getItem("selectedEntity");
+            if (entityId) {
+                request.url = `${request.url}&entity=${entityId}`
+            }
         }
         return request;
     }, error => {
