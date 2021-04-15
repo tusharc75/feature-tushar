@@ -3,6 +3,8 @@ import { camelCase } from "lodash";
 import { Redirect, Route, useLocation } from "react-router-dom";
 import { useData } from "../StateProvider/Provider";
 import Unauthorized from "../pages/Unauthorized";
+import Loader from "./Loader";
+const _ = require('lodash')
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -27,7 +29,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         setAccess(true);
         setChecking(false);
       }
-    } else if (pathname === "/" || pathnames[0] === "activity" || pathnames[0] === "product-category" || pathnames[0] === "form-builder") {
+    } else if (pathname === "/" || pathnames[0] === "activity" || pathnames[0] === "terms-conditions" || pathnames[0] === "product-category" || pathnames[0] === "form-builder") {
       setAccess(true);
       setChecking(false);
     }

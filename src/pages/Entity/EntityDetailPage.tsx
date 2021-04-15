@@ -25,6 +25,7 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignedUsers from "./AssignedUsers";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -32,17 +33,20 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { permissions, selectedEntity },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [globalRoles, setGloabalRoles] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [rolesLoading, setRolesLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [entityData, setEntityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [entityFields, setEntityFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
+  const [deleteRoleRec, setDeleteRoleRec] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openRolesDialog, setOpenRolesDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -55,6 +59,7 @@ const EntityDetailsPage = () => {
       getEntityFields();
       fetchEntityData();
       fetchEntityRoles();
+      fetchEntityUser();
     }
   }, [id]);
 
@@ -80,11 +85,25 @@ const EntityDetailsPage = () => {
     axiosInstance()
       .get(`/role?entity=${id}`)
       .then(({ data: { data } }) => {
-        setGloabalRoles(data.slice(0, 2));
+        setRoles(data.slice(0, 4));
         setRolesLoading(false);
       })
       .catch((err) => {
         setRolesLoading(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchEntityUser = () => {
+    setUsersLoading(true);
+    axiosInstance()
+      .get(`/entity/user/${id}`)
+      .then(({ data: { data } }) => {
+        setUsers(data);
+        setUsersLoading(false);
+      })
+      .catch((err) => {
+        setUsersLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -170,6 +189,32 @@ const EntityDetailsPage = () => {
       });
   };
 
+  const handleUnassignRole = (roleRec) => {
+    setShowConfirmBox(true);
+    setDeleteRoleRec(roleRec);
+  };
+
+  const unassignRole = () => {
+    if (deleteRoleRec && deleteRoleRec._id) {
+      axiosInstance()
+        .put(`/entity/remove-role`, { entities: [id], role: deleteRoleRec._id })
+        .then(({ data }) => {
+          fetchEntityRoles();
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          setShowConfirmBox(false);
+          fetchUserData();
+        })
+        .catch((error) => {
+          setShowConfirmBox(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -250,19 +295,29 @@ const EntityDetailsPage = () => {
               </Button>
             )}
             <Box component="span" marginX={1} />
+
             {permissions?.entity?.isDelete && (
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)}
-              />
+              <span
+                title={
+                  selectedEntity === id
+                    ? "Primarily selected entity can't be deleted"
+                    : "Permanently delete this entity"
+                }
+              >
+                <DeleteButton
+                  disabled={selectedEntity === id}
+                  text="Delete"
+                  onClick={() => setShowConfirmBox(true)}
+                />
+              </span>
             )}
           </DetailsPageHeader>
         )}
 
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "8px", minHeight: "450px" }}>
+            <Container styles={{ borderRadius: "8px" }}>
+              <Box style={{ padding: "8px", minHeight: "450px" }}>
                 {loading || !entityFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -270,12 +325,80 @@ const EntityDetailsPage = () => {
                 ) : (
                   <DetailsPage data={entityData} fields={entityFields} />
                 )}
-              </BoxWithBorder>
+              </Box>
+            </Container>
+            <Box marginY={2} />
+            <Container>
+              <Box
+                width="100%"
+                padding={1}
+                bgcolor="grey.200"
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Typography variant="subtitle2">
+                  Assigned Users ({users.length || 0})
+                </Typography>
+                {permissions.entity.isUpdate && (
+                  <IconButton title="Assign users" color="primary" size="small">
+                    <ControlPoint />
+                  </IconButton>
+                )}
+              </Box>
+              <Box padding={1}>
+                {usersLoading ? (
+                  <Box display="flex">
+                    {[1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        style={{
+                          padding: "8px",
+                          margin: "8px",
+                          width: "100%",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))}
+                  </Box>
+                ) : users.length ? (
+                  <>
+                    <AssignedUsers
+                      permissions={permissions}
+                      data={users.slice(0, 2)}
+                      unassignUser={() => {}}
+                    />
+
+                    <Box marginY={1} />
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => history.push("/user")}
+                    >
+                      View All
+                    </Button>
+                  </>
+                ) : (
+                  <Box textAlign="center" padding={2}>
+                    <Typography>No Users </Typography>
+                  </Box>
+                )}
+              </Box>
             </Container>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "0px" }}>
+            <Container styles={{ borderRadius: "8px" }}>
+              <Box style={{ padding: "0px", maxHeight: "450px" }}>
                 <Box
                   width="100%"
                   padding={1}
@@ -284,7 +407,7 @@ const EntityDetailsPage = () => {
                   justifyContent="space-between"
                 >
                   <Typography variant="subtitle2">
-                    Assigned Regional Roles ({globalRoles.length || 0})
+                    Assigned Regional Roles ({roles.length || 0})
                   </Typography>
 
                   <IconButton
@@ -299,13 +422,7 @@ const EntityDetailsPage = () => {
                 <Box padding={1}>
                   {rolesLoading ? (
                     [1, 2].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        styles={{
-                          padding: "8px",
-                          margin: "8px 8px",
-                        }}
-                      >
+                      <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
                         <Box padding={1}>
                           <Skeleton
                             variant="text"
@@ -317,12 +434,12 @@ const EntityDetailsPage = () => {
                         </Box>
                       </BoxWithBorder>
                     ))
-                  ) : globalRoles.length ? (
+                  ) : roles.length ? (
                     <>
                       <Roles
                         permissions={permissions}
-                        data={globalRoles}
-                        unassignRole={() => {}}
+                        data={roles}
+                        unassignRole={handleUnassignRole}
                       />
                       <Box marginY={1} />
                       <Button
@@ -336,45 +453,29 @@ const EntityDetailsPage = () => {
                       </Button>
                     </>
                   ) : (
-                    <Box textAlign="center">No Roles</Box>
+                    <Box textAlign="center" padding={2}>
+                      No Assigned Roles
+                    </Box>
                   )}
                 </Box>
-              </BoxWithBorder>
+              </Box>
             </Container>
           </Grid>
         </Grid>
-        <Box marginY={1} />
-        <Container styles={{ padding: "8px" }}>
-          <BoxWithBorder style={{ padding: "0px", minHeight: "300px" }}>
-            <Box display="flex" padding={1} bgcolor="grey.200">
-              <Grid container>
-                <Grid item xs={8}>
-                  <Box display="flex">
-                    <Box padding="5px">
-                      <Typography variant="subtitle2">Entity Users</Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={4} container justify="flex-end">
-                  <IconButton
-                    disabled={!permissions.entity.isUpdate}
-                    color="primary"
-                    size="small"
-                  >
-                    <ControlPoint />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            </Box>
-          </BoxWithBorder>
-        </Container>
       </Layout>
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this entity ?`}
-          onClose={() => setShowConfirmBox(false)}
-          onOk={handleDeleteEntity}
+          message={
+            deleteRoleRec
+              ? `Are you sure you want to un-assign role ${deleteRoleRec.name} from entity ${entityData.entityName}`
+              : `Are you sure you want to delete this entity ?`
+          }
+          onClose={() => {
+            setDeleteRoleRec(null);
+            setShowConfirmBox(false);
+          }}
+          onOk={deleteRoleRec ? unassignRole : handleDeleteEntity}
         />
       ) : null}
     </>

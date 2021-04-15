@@ -116,4 +116,8 @@ export default {
     title: "Resource",
     path: "/resource",
   },
+  termsAndConditions: {
+    title: "Terms and Conditions",
+    path: "/terms-conditions"
+  }
 };

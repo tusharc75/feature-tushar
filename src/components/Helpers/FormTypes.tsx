@@ -674,6 +674,7 @@ const FormTypes = (props) => {
       <FormControlLabel
         control={
           <Checkbox
+            required={required}
             name={name}
             checked={values[name]}
             onChange={
@@ -687,7 +688,7 @@ const FormTypes = (props) => {
     </InfoLabel>
   ) : type === "radio" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <FormControl component="fieldset">
+      <FormControl component="fieldset" required={required}>
         <FormLabel component="legend">{label}</FormLabel>
         <RadioGroup
           aria-label="gender"
@@ -912,6 +913,7 @@ const FormTypes = (props) => {
         <KeyboardDatePicker
           clearable
           {...rest}
+          required={required}
           variant="inline"
           inputVariant="outlined"
           value={values[name]}
@@ -933,6 +935,7 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDateTimePicker
           {...rest}
+          required={required}
           variant="inline"
           inputVariant="outlined"
           ampm={false}

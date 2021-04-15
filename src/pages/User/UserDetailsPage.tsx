@@ -36,6 +36,7 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import UserRoles from "./UserRoles";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
+import RoleEngine from "../../components/Shared/RoleEngine";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,7 +44,7 @@ const UserDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions },
+    state: { user, permissions },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -52,6 +53,7 @@ const UserDetailsPage = () => {
   const [rolesLoading, setRolesLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userPermissions, setUserPermissions] = useState(null);
+  const [unionRoleData, setUnionRoleData] = useState(null);
 
   const [isChangingPermission, setChangingPermission] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -62,17 +64,12 @@ const UserDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
-  const [usersPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
 
   useEffect(() => {
     if (id) {
       getUserFields();
       fetchUserData();
+      getRoleUnion();
       fetchUserRoles();
     }
   }, [id]);
@@ -105,7 +102,7 @@ const UserDetailsPage = () => {
     axiosInstance()
       .get(`/role?User=${id}`)
       .then(({ data: { data } }) => {
-        setGloabalRoles(data);
+        setGloabalRoles(data.filter((d) => d?.type === 1)); // global role --- type 1
         setRolesLoading(false);
       })
       .catch((err) => {
@@ -187,6 +184,16 @@ const UserDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
+  const getRoleUnion = () => {
+    axiosInstance()
+      .get(`/user/union-role/${id}`)
+      .then(({ data: { data: data } }) => {
+        setUnionRoleData(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
   /* Unassign role */
   const handleUnassignRole = (rec) => {
     setRoleDeleteRec(rec);
@@ -205,8 +212,8 @@ const UserDetailsPage = () => {
           setShowConfirmBox(false);
           fetchUserData();
           fetchUserRoles();
-          // setUnionRoleData(null);
-          // getRoleUnion();
+          setUnionRoleData(null);
+          getRoleUnion();
           toastConfig.setToastConfig({
             message: "Successfully unassigned role",
             type: "success",
@@ -276,16 +283,14 @@ const UserDetailsPage = () => {
           userIds={[id]}
           onSuccess={() => {
             handleCloseDialog();
+            getRoleUnion();
             fetchUserRoles();
           }}
         />
       )}
       <Layout>
-        <Grid container direction="row">
-          <Grid item xs={12} className="pl-2">
-            <CustomBreadCrumbs routes={customizedRoutes} />
-          </Grid>
-        </Grid>
+        <CustomBreadCrumbs routes={customizedRoutes} />
+
         {!userData ? (
           <Container>
             <Skeleton variant="text" width="150px" height="40px" />
@@ -320,22 +325,21 @@ const UserDetailsPage = () => {
               </Button>
             ) : null}
             <Box component="span" marginX={1} />
+
             {permissions.user.isDelete ? (
-              <Button
-                variant="contained"
-                color="secondary"
+              <DeleteButton
+                text="Delete"
+                disabled={user?.user?._id == id}
                 onClick={() => handleDeleteUser(id)}
-              >
-                Delete
-              </Button>
+              />
             ) : null}
           </DetailsPageHeader>
         )}
 
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "8px", minHeight: "450px" }}>
+            <Container styles={{ borderRadius: 8 }}>
+              <Box style={{ padding: "8px", minHeight: "450px" }}>
                 {loading || !userFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -343,12 +347,12 @@ const UserDetailsPage = () => {
                 ) : (
                   <DetailsPage data={userData} fields={userFields} />
                 )}
-              </BoxWithBorder>
+              </Box>
             </Container>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Container styles={{ padding: "8px" }}>
-              <BoxWithBorder style={{ padding: "0px", minHeight: "450px" }}>
+            <Container styles={{ borderRadius: 8 }}>
+              <Box style={{ padding: "0px", minHeight: "450px" }}>
                 <Box width="100%" padding={1} bgcolor="grey.200">
                   <Typography color="primary">Approval Process</Typography>
                 </Box>
@@ -401,13 +405,13 @@ const UserDetailsPage = () => {
                     </FormGroup>
                   </FormControl>
                 </Box>
-              </BoxWithBorder>
+              </Box>
             </Container>
           </Grid>
         </Grid>
-        <Box marginY={1} />
-        <Container styles={{ padding: "8px" }}>
-          <BoxWithBorder style={{ padding: "0px", minHeight: "300px" }}>
+        <Box marginY={2} />
+        <Container styles={{ borderRadius: 8 }}>
+          <Box style={{ padding: "0px", minHeight: "300px" }}>
             <Box display="flex" padding={1} bgcolor="grey.200">
               <Grid container>
                 <Grid item xs={8}>
@@ -433,7 +437,7 @@ const UserDetailsPage = () => {
               </Grid>
             </Box>
 
-            <Grid container style={{ padding: "10px" }} spacing={1}>
+            <Grid container style={{ padding: "8px" }} spacing={1}>
               <Grid item xs={12} sm={12} md={4}>
                 <BoxWithBorder
                   style={{
@@ -445,7 +449,7 @@ const UserDetailsPage = () => {
                     [1, 2].map((i) => (
                       <BoxWithBorder
                         key={i}
-                        styles={{ padding: "0px", margin: "8px 8px" }}
+                        style={{ padding: "0px", margin: "8px" }}
                       >
                         <Box padding={1}>
                           <Skeleton
@@ -490,8 +494,12 @@ const UserDetailsPage = () => {
                     height: "352px",
                   }}
                 >
-                  <TableContainer>
-                    <Table stickyHeader aria-label="roles">
+                  <TableContainer style={{ height: "352px" }}>
+                    <Table
+                      stickyHeader
+                      aria-label="roles"
+                      className="roles-table"
+                    >
                       <TableHead>
                         <TableRow>
                           <TableCell>Names</TableCell>
@@ -502,13 +510,19 @@ const UserDetailsPage = () => {
                         </TableRow>
                       </TableHead>
 
-                      <TableBody></TableBody>
+                      <TableBody>
+                        <RoleEngine
+                          field={unionRoleData ? unionRoleData.field : []}
+                          resource={unionRoleData ? unionRoleData.resource : []}
+                          isDisable={true}
+                        />
+                      </TableBody>
                     </Table>
                   </TableContainer>
                 </BoxWithBorder>
               </Grid>
             </Grid>
-          </BoxWithBorder>
+          </Box>
         </Container>
       </Layout>
       {showConfirmBox ? (

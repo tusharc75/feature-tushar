@@ -49,7 +49,7 @@ const RoleDetailsPage = () => {
   const history = useHistory();
   const { id } = useParams();
   const {
-    state: { user, permissions },
+    state: { user, permissions, selectedEntity },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -59,6 +59,7 @@ const RoleDetailsPage = () => {
   const [currentData, setCurrentData] = useState(null);
   const [updatedData, setUpdatedData] = useState(null);
   const [roleDeleteRec, setRoleDeleteRec] = useState(null);
+  const [entityDeleteRec, setEntityDeleteRec] = useState(null);
   const [userDeleteRec, setUserDeleteRec] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
@@ -121,6 +122,7 @@ const RoleDetailsPage = () => {
         ...values,
         field,
         resource,
+        type: roleData.type,
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -217,16 +219,31 @@ const RoleDetailsPage = () => {
       });
   };
 
-  const handleDeleteEntities = (obj) => {
-    if (obj && obj._id) {
-      setLoading(true);
+  const handleUnassignEntity = (entityRec) => {
+    setEntityDeleteRec(entityRec);
+    setShowConfirmBox(true);
+  };
+
+  const unassignEntity = () => {
+    if (entityDeleteRec && entityDeleteRec._id) {
       axiosInstance()
-        .put(`/entity/remove`, { ids: [obj._id] })
+        .put(`/entity/remove-role`, {
+          entities: [entityDeleteRec._id],
+          role: id,
+        })
         .then(({ data }) => {
+          fetchRoleData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          setShowConfirmBox(false);
           fetchUserData();
         })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
+        .catch((error) => {
+          setShowConfirmBox(false);
+          toastConfig.setToastConfig(error);
         });
     }
   };
@@ -284,18 +301,18 @@ const RoleDetailsPage = () => {
           </Container>
         ) : (
           <DetailsPageHeader heading={headingLbl} showHeading={true}>
-            {permissions.role.isUpdate && (
+            {permissions.role.isUpdate && !isEditDeleteDisable ? (
               <Button
-                disabled={currentData === updatedData}
+                disabled={currentData === updatedData || isUpdating}
                 variant="contained"
                 color="primary"
                 onClick={handleUpdateRole}
               >
                 {isUpdating ? <CircularProgress size={22} /> : "Update"}
               </Button>
-            )}
+            ) : null}
             <Box marginX={1} component="span" />
-            {permissions.role.isDelete && (
+            {permissions.role.isDelete && !isEditDeleteDisable ? (
               <DeleteButton
                 text="Delete"
                 onClick={() => {
@@ -303,7 +320,7 @@ const RoleDetailsPage = () => {
                   setShowConfirmBox(true);
                 }}
               />
-            )}
+            ) : null}
           </DetailsPageHeader>
         )}
 
@@ -371,7 +388,13 @@ const RoleDetailsPage = () => {
                             resource={resource}
                             setField={setField}
                             setResource={setResource}
-                            isDisable={!permissions.role.isUpdate}
+                            isDisable={
+                              permissions.role.isUpdate
+                                ? isEditDeleteDisable
+                                  ? true
+                                  : false
+                                : false
+                            }
                           />
                         )
                       )}
@@ -435,12 +458,13 @@ const RoleDetailsPage = () => {
                         </BoxWithBorder>
                       ))}
                     </Box>
-                  ) : (
+                  ) : roleData.entity.length ? (
                     <>
                       <AssignedEntities
+                        selectedEntity={selectedEntity}
                         permissions={permissions}
                         data={roleData && roleData.entity.slice(0, 2)}
-                        unassignEntity={handleDeleteEntities}
+                        unassignEntity={handleUnassignEntity}
                       />
 
                       <Box marginY={1} />
@@ -454,6 +478,10 @@ const RoleDetailsPage = () => {
                         View All
                       </Button>
                     </>
+                  ) : (
+                    <Box textAlign="center" padding={2}>
+                      <Typography>No entities has been assigned </Typography>
+                    </Box>
                   )}
                 </Box>
               </Container>
@@ -483,43 +511,53 @@ const RoleDetailsPage = () => {
                   </IconButton>
                 )}
               </Box>
-              <Box>
-                {loading ? (
-                  [1, 2].map((i) => (
-                    <BoxWithBorder
-                      key={i}
-                      style={{
-                        margin: "8px",
-                      }}
-                    >
-                      <Box padding={1}>
-                        <Skeleton variant="text" width="100px" height="20px" />
-                        <Box marginTop={1} />
-                        <Skeleton variant="text" width="100%" height="15px" />
-                      </Box>
-                    </BoxWithBorder>
-                  ))
-                ) : (
-                  <>
-                    <AssignedUsers
-                      permissions={permissions}
-                      unassignRole={handleUnassignUser}
-                      data={roleData && roleData.user.slice(0, 4)}
-                      currentUser={user?.user._id}
-                    />
-                    <Box marginY={1} />
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => history.push("/user")}
-                    >
-                      View All
-                    </Button>
-                  </>
-                )}
-              </Box>
+              {roleData && roleData.user && (
+                <Box>
+                  {loading ? (
+                    [1, 2].map((i) => (
+                      <BoxWithBorder
+                        key={i}
+                        style={{
+                          margin: "8px",
+                        }}
+                      >
+                        <Box padding={1}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="20px"
+                          />
+                          <Box marginTop={1} />
+                          <Skeleton variant="text" width="100%" height="15px" />
+                        </Box>
+                      </BoxWithBorder>
+                    ))
+                  ) : roleData.user.length ? (
+                    <>
+                      <AssignedUsers
+                        permissions={permissions}
+                        unassignRole={handleUnassignUser}
+                        data={roleData && roleData.user.slice(0, 4)}
+                        currentUser={user?.user._id}
+                      />
+                      <Box marginY={1} />
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => history.push("/user")}
+                      >
+                        View All
+                      </Button>
+                    </>
+                  ) : (
+                    <Box textAlign="center" padding={2}>
+                      <Typography>No users has been assigned </Typography>
+                    </Box>
+                  )}
+                </Box>
+              )}
             </Container>
           </Grid>
         </Grid>
@@ -532,14 +570,23 @@ const RoleDetailsPage = () => {
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
               ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : entityDeleteRec
+              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
               : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
             setUserDeleteRec(null);
             setRoleDeleteRec(null);
+            setEntityDeleteRec(null);
           }}
-          onOk={roleDeleteRec ? handleDeleteRole : unassignUserRole}
+          onOk={
+            roleDeleteRec
+              ? handleDeleteRole
+              : entityDeleteRec
+              ? unassignEntity
+              : unassignUserRole
+          }
         />
       )}
     </>

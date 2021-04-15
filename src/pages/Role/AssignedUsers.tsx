@@ -39,14 +39,14 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                 <ListItem disableGutters className={classes.list}>
                   <ListItemText
                     primary={
-                      <Link
-                        className="accountNameLink"
-                        to={`/user/detail/${obj._id}`}
-                      >
-                        <Typography>
+                      <Typography>
+                        <Link
+                          className="accountNameLink"
+                          to={`/user/detail/${obj._id}`}
+                        >
                           {`${obj.firstName} ${obj.lastName}` || ""}
-                        </Typography>
-                      </Link>
+                        </Link>
+                      </Typography>
                     }
                     secondary={obj.email || ""}
                   />
@@ -59,6 +59,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                       }
                     >
                       <IconButton
+                        size="small"
                         disabled={currentUser === obj._id}
                         edge="end"
                         aria-label="delete"

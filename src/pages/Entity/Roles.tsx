@@ -1,11 +1,10 @@
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
-import { Typography, Tooltip } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
-import FormGroup from "@material-ui/core/FormGroup";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 
@@ -19,8 +18,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
     width: "100%",
   },
-  title: {
-    margin: theme.spacing(4, 0, 2),
+  text: {
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    marginRight: 50,
   },
   list: {
     width: "100%",
@@ -36,30 +38,47 @@ const Roles = ({ unassignRole, data, permissions }) => {
       <List disablePadding>
         {data && data.length
           ? data.map((obj) => (
-              <BoxWithBorder style={{ margin: "8px" }} key={obj._id}>
+              <BoxWithBorder style={{ marginBottom: "8px" }} key={obj._id}>
                 <ListItem disableGutters className={classes.list}>
                   <ListItemText
                     primary={
-                      <Link
-                        className="accountNameLink"
-                        to={`/role/detail/${obj._id}`}
-                      >
-                        <Typography> {obj.name || ""}</Typography>
-                      </Link>
+                      <Typography className={classes.text}>
+                        <Link
+                          className="accountNameLink"
+                          to={`/role/detail/${obj._id}`}
+                        >
+                          {obj.name || ""}
+                        </Link>
+                      </Typography>
                     }
-                    secondary={obj.description || ""}
+                    secondary={
+                      <Typography
+                        color="textSecondary"
+                        className={classes.text}
+                      >
+                        {obj.description || ""}
+                      </Typography>
+                    }
                   />
                   {permissions.entity.isUpdate && (
-                    <ListItemSecondaryAction>
-                      <Tooltip title="Unassign Role">
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => unassignRole(obj)}
-                        >
-                          <DeleteIcon color="error" />
-                        </IconButton>
-                      </Tooltip>
+                    <ListItemSecondaryAction
+                      title={
+                        obj.permission
+                          ? "Default role can't be un-assigned"
+                          : "Un-assign"
+                      }
+                    >
+                      <IconButton
+                        size="small"
+                        disabled={obj?.permission}
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => unassignRole(obj)}
+                      >
+                        <DeleteIcon
+                          color={obj?.permission ? "disabled" : "error"}
+                        />
+                      </IconButton>
                     </ListItemSecondaryAction>
                   )}
                 </ListItem>

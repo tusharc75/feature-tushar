@@ -1,13 +1,13 @@
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
-  Tooltip,
   List,
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
   IconButton,
 } from "@material-ui/core";
+import { Link } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import { PERMISSION } from "../../constants/Roles";
@@ -50,29 +50,51 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
                 >
                   <ListItem className={classes.list}>
                     <ListItemText
-                      primary={<Typography> {obj.name || ""}</Typography>}
-                      secondary={obj.description || ""}
+                      primary={
+                        <Typography
+                          title={obj.name || ""}
+                          className="text-truncate"
+                        >
+                          <Link to={`/role/detail/${obj._id}`}>
+                            {obj.name || ""}
+                          </Link>
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography
+                          color="textSecondary"
+                          title={obj.description || ""}
+                          className="text-truncate"
+                        >
+                          {obj.description || ""}
+                        </Typography>
+                      }
                     />
                     {permissions.user.isUpdate && (
-                      <ListItemSecondaryAction>
-                        <Tooltip title="Unassign Role">
-                          <IconButton
-                            edge="end"
-                            aria-label="delete"
-                            onClick={() => unassignRole(obj)}
-                            disabled={
+                      <ListItemSecondaryAction
+                        title={
+                          rolesPermissions.indexOf(obj?.permission) >= 0
+                            ? ""
+                            : "Unassign Role"
+                        }
+                      >
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => unassignRole(obj)}
+                          disabled={
+                            rolesPermissions.indexOf(obj?.permission) >= 0
+                          }
+                        >
+                          <DeleteIcon
+                            color={
                               rolesPermissions.indexOf(obj?.permission) >= 0
+                                ? "disabled"
+                                : "error"
                             }
-                          >
-                            <DeleteIcon
-                              color={
-                                rolesPermissions.indexOf(obj?.permission) >= 0
-                                  ? "disabled"
-                                  : "error"
-                              }
-                            />
-                          </IconButton>
-                        </Tooltip>
+                          />
+                        </IconButton>
                       </ListItemSecondaryAction>
                     )}
                   </ListItem>
