@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export default (entityId, history = null) => {
+export default (history = null) => {
     const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
 
     let headers: any = {};
@@ -28,6 +28,7 @@ export default (entityId, history = null) => {
     }
 
     axiosInstance.interceptors.request.use((request) => {
+        const entityId = localStorage.getItem("entityId");
         if (entityId) {
             request.url = `${request.url}&entity=${entityId}`
         }
