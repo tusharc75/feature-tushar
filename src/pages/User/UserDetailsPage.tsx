@@ -64,12 +64,6 @@ const UserDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
-  const [usersPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false,
-  });
 
   useEffect(() => {
     if (id) {
@@ -295,11 +289,8 @@ const UserDetailsPage = () => {
         />
       )}
       <Layout>
-        <Grid container direction="row">
-          <Grid item xs={12} className="pl-2">
-            <CustomBreadCrumbs routes={customizedRoutes} />
-          </Grid>
-        </Grid>
+        <CustomBreadCrumbs routes={customizedRoutes} />
+
         {!userData ? (
           <Container>
             <Skeleton variant="text" width="150px" height="40px" />
@@ -418,7 +409,7 @@ const UserDetailsPage = () => {
             </Container>
           </Grid>
         </Grid>
-        <Box marginY={1} />
+        <Box marginY={2} />
         <Container styles={{ borderRadius: 8 }}>
           <Box style={{ padding: "0px", minHeight: "300px" }}>
             <Box display="flex" padding={1} bgcolor="grey.200">
@@ -503,7 +494,7 @@ const UserDetailsPage = () => {
                     height: "352px",
                   }}
                 >
-                  <TableContainer style={{ height: 440 }}>
+                  <TableContainer style={{ height: "352px" }}>
                     <Table
                       stickyHeader
                       aria-label="roles"
@@ -521,16 +512,8 @@ const UserDetailsPage = () => {
 
                       <TableBody>
                         <RoleEngine
-                          field={
-                            unionRoleData
-                              ? unionRoleData.field
-                              : []
-                          }
-                          resource={
-                            unionRoleData
-                              ? unionRoleData.resource
-                              : []
-                          }
+                          field={unionRoleData ? unionRoleData.field : []}
+                          resource={unionRoleData ? unionRoleData.resource : []}
                           isDisable={true}
                         />
                       </TableBody>
@@ -552,8 +535,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
-                : ""
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

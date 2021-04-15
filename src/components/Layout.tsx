@@ -4,21 +4,18 @@ import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
 import Sidebar from "./Sidebar/Sidebar";
-import { useData } from "../StateProvider/Provider";
 
 const useStyles = makeStyles(() => ({
   content: {
     flexGrow: 1,
     width: "100%",
+    overflow: "hidden",
   },
 }));
 
 const Layout = ({ children, width }) => {
   const contentRef = useRef(null);
   const { key } = useLocation();
-  const {
-    state: { userLoading },
-  }: any = useData();
   const classes = useStyles();
   const [toggleDrawer, setToggleDrawer] = useState<Boolean>(false);
 
