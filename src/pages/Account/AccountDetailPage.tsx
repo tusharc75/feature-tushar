@@ -512,6 +512,7 @@ export default function AccountDetailPage(props) {
                       }}
                       accountId={accountData._id}
                       recordsPerLine={2}
+                      resource={accountResource}
                     />
                   </Container>
                 )}
@@ -647,6 +648,7 @@ export default function AccountDetailPage(props) {
                 fetchRelatedData();
               }}
               accountId={accountData._id}
+              resource={accountResource}
             />
           )}
           {showCreateContactDialog && (
