@@ -8,13 +8,12 @@ import {
   Checkbox
 } from "@material-ui/core";
 import { Link } from 'react-router-dom'
-import DeleteIcon from '@material-ui/icons/Delete';
 import { DataGrid } from "@material-ui/data-grid";
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import Header from "./LeadsHeader";
+import LeadsHeader from "./LeadsHeader";
 import axiosInstance from '../../axios/axiosInstance'
 import { getSearchQuery } from '../../services/util'
 import { useData } from '../../StateProvider/Provider';
@@ -31,6 +30,8 @@ import { HiUserGroup } from 'react-icons/hi';
 import { lead } from '../../constants/helpers'
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import { SiConvertio } from 'react-icons/si';
 import "./style.scss";
 
 const useStyles = makeStyles((theme) => ({
@@ -58,7 +59,6 @@ const LeadTypes = [
   }
 ]
 
-const notAllowedMes = "You must be the owner or collaborator of this contact to get the delete functionality"
 let leadTimeout
 const Leads = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -74,12 +74,14 @@ const Leads = () => {
   const [rowCount, setRowCount] = useState(0);
   const [renderCount, setRenderCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [leadData, setLeadData] = useState([]);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
   const [deleteRec, setDeleteRec] = useState<any>({})
   const [leadsPermissions, setLeadsPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+
+  const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({ open: false, id: null, leadName: null, message: null });
 
   const { leadResource, leadApi } = lead
 
@@ -293,26 +295,25 @@ const Leads = () => {
       filterable: false,
       renderCell: (params) => (
         <>
-          {
-            leadsPermissions.isDelete ?
-              params.row.owner.optionValue == user._id ?
-                <Tooltip title="Delete" >
-                  <IconButton aria-label="Delete" onClick={() => showConfirmBox(params.row)}>
-                    <DeleteIcon
-                      fontSize="small" color="error" />
-                  </IconButton>
-                </Tooltip > :
-                <Tooltip className="cursor-stop" title="You must be the owner of this lead to get the delete functionality">
-                  <IconButton aria-label="Delete">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip> :
-              <Tooltip className="cursor-stop" title="You do not have permission to delete lead">
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-          }
+          {/* <Tooltip title="Convert this lead to opportunity" >
+            <IconButton aria-label="Convert to opportunity" onClick={() => {
+              const leadName = [params.row.firstName, params.row.lastName].filter(d => d).join(" ");
+              setConvertLeadToOpportunityConfirmationDialog({
+                open: true, id: params.row._id, leadName: leadName,
+                message: `Are you sure, You want to convert ${leadName} to opportunity ?`
+              })
+            }}>
+              <SiConvertio size={18} />
+            </IconButton>
+          </Tooltip> */}
+
+          <GridDeleteIcon
+            hasDeletePermission={leadsPermissions.isDelete}
+            ownerId={params.row.owner.optionValue}
+            userId={user._id}
+            onDelete={() => showConfirmBox(params.row)}
+            entity="lead"
+          />
 
         </>
       ), width: 200
@@ -379,7 +380,7 @@ const Leads = () => {
   }
 
   const handleDeleteLeads = async () => {
-    setDeleteLoading(true)
+    setOkButtonLoading(true)
     let recs = []
     if (deleteRec?._id) {
       recs.push(deleteRec?._id)
@@ -394,15 +395,31 @@ const Leads = () => {
         .put(`${leadApi}/remove?entity=${selectedEntity}`, { ids: [...recs] }).then(({ data }) => {
           toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
           setIsConformDialogVisible(false)
-          setDeleteLoading(false)
+          setOkButtonLoading(false)
           if (deleteRec) setDeleteRec({})
           fetchLeads()
         }).catch((error) => {
           toastConfig.setToastConfig(error);
           setIsConformDialogVisible(false)
-          setDeleteLoading(false)
+          setOkButtonLoading(false)
         })
     }
+  }
+
+  const convertLeadToOpportunity = () => {
+    //  TODO: need to think about which records to pick
+    const ids = convertLeadToOpportunityConfirmationDialog.id ? [convertLeadToOpportunityConfirmationDialog.id] :
+      dataRows.filter(d => d.isChecked == true).map(m => m._id);
+
+    //  TODO: api needed
+    axiosInstance().put("", ids).then(({ data }) => {
+
+      toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+      setConvertLeadToOpportunityConfirmationDialog({ open: false, id: null, leadName: null, message: null })
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setOkButtonLoading(false);
+    })
   }
 
   const uploadLeads = (event) => {
@@ -511,7 +528,7 @@ const Leads = () => {
 
       <Container>
         <div className="header-panel">
-          <Header
+          <LeadsHeader
             selectedType={selectedType}
             onTypeChange={handleLeadTypeSel}
             options={LeadTypes}
@@ -520,7 +537,7 @@ const Leads = () => {
             leadPermissions={leadsPermissions}
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
-            canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+            allowToDelete={!dataRows.some((d) => d.isChecked && d.owner != user?.user?._id)}
             icon={<HiUserGroup className="headerLogo" />}
             heading="Leads"
           />
@@ -577,10 +594,25 @@ const Leads = () => {
                 if (deleteRec) setDeleteRec({})
                 setIsConformDialogVisible(false)
               }}
-              okBtnLoading={deleteLoading}
+              okBtnLoading={okButtonLoading}
               onOk={handleDeleteLeads}
             /> : null
         }
+
+        {
+          convertLeadToOpportunityConfirmationDialog.open ?
+            <ConfirmationDialog
+              open={convertLeadToOpportunityConfirmationDialog.open}
+              message={convertLeadToOpportunityConfirmationDialog.message}
+              onClose={() => {
+                setConvertLeadToOpportunityConfirmationDialog({ open: false, id: null, leadName: null, message: null })
+                fetchLeads();
+              }}
+              okBtnLoading={okButtonLoading}
+              onOk={convertLeadToOpportunity}
+            /> : null
+        }
+
       </Container>
     </Layout>
   );

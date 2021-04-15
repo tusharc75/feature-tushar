@@ -642,6 +642,7 @@ const Opportunities = () => {
           onClose={() => { setShowCreateOpportunityDialog(false) }}
           isNew={true}
           dataToUpdate={null}
+          resource={null}
         />
       }
     </>

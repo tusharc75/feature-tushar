@@ -42,32 +42,32 @@
     color: var(--white) !important;
 }
 
-$max: 50;
-$offset: 1;
+// $offset: 1;
+// $max: 50;
 
-@mixin list-loop($className, $styleName, $unit) {
-    $i: 0;
-    @while $i <= $max {
-        #{$className + $i} {
-            #{$styleName}: #{$i + $unit} !important;
-        }
-        $i: $i + $offset;
-    }
-}
+// @mixin list-loop($className, $styleName, $unit) {
+//     $i: 0;
+//     @while $i <= $max {
+//         #{$className + $i} {
+//             #{$styleName}: #{$i + $unit} !important;
+//         }
+//         $i: $i + $offset;
+//     }
+// }
 
 // Margins
-@include list-loop(".mt-", "margin-top", "px");
-@include list-loop(".mr-", "margin-right", "px");
-@include list-loop(".mb-", "margin-bottom", "px");
-@include list-loop(".ml-", "margin-left", "px");
-@include list-loop(".m-", "margin", "px");
+// @include list-loop(".mt-", "margin-top", "px");
+// @include list-loop(".mr-", "margin-right", "px");
+// @include list-loop(".mb-", "margin-bottom", "px");
+// @include list-loop(".ml-", "margin-left", "px");
+// @include list-loop(".m-", "margin", "px");
 
-// Paddings
-@include list-loop(".pt-", "padding-top", "px");
-@include list-loop(".pr-", "padding-right", "px");
-@include list-loop(".pb-", "padding-bottom", "px");
-@include list-loop(".pl-", "padding-left", "px");
-@include list-loop(".p-", "padding", "px");
+// // Paddings
+// @include list-loop(".pt-", "padding-top", "px");
+// @include list-loop(".pr-", "padding-right", "px");
+// @include list-loop(".pb-", "padding-bottom", "px");
+// @include list-loop(".pl-", "padding-left", "px");
+// @include list-loop(".p-", "padding", "px");
 
 // Used below mixin to generate some fixed sized size
 
