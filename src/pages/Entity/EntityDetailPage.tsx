@@ -327,7 +327,7 @@ const EntityDetailsPage = () => {
                 )}
               </Box>
             </Container>
-            <Box marginY={1} />
+            <Box marginY={2} />
             <Container>
               <Box
                 width="100%"
