@@ -279,7 +279,6 @@ const Roles = (props) => {
                 })
               ),
             }}
-            fields={contactFields}
             loading={loading}
             handleSubmit={handleUpdateContact}
           // contactResource={contactResource}

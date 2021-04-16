@@ -29,7 +29,6 @@ export default function ManageContactMain(props) {
     initialValues: {},
   });
   const [loading, setLoading] = useState(false);
-  const [fields, setFields] = useState([]);
 
   useEffect(() => {
     getContactFields();
@@ -41,7 +40,6 @@ export default function ManageContactMain(props) {
       .get(`/field?resource=${sidebarResource[contactResource]}`)
       .then(({ data: { data } }) => {
         const newFields = [];
-        setFields(data);
         data
           .filter((d) => d.isCreate)
           .map((_f) => {
@@ -103,7 +101,6 @@ export default function ManageContactMain(props) {
       open={open}
       isNew={true}
       onClose={onClose}
-      fields={fields}
       entityData={entityData}
       handleSubmit={handleCreateContact}
     />

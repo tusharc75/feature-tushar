@@ -18,7 +18,6 @@ export default function ManageAccountMain(props) {
     initialValues: {},
   });
   const [loading, setLoading] = useState(false);
-  const [fields, setFields] = useState([]);
 
   useEffect(() => {
     if (id) {
@@ -59,7 +58,6 @@ export default function ManageAccountMain(props) {
       .get(`/field?resource=${sidebarResource[accountResource]}`)
       .then(({ data: { data } }) => {
         const newFields = [];
-        setFields(data);
         data
           .filter((d) => d.isCreate)
           .map((_f) => newFields.push(_f.fieldData));
@@ -99,7 +97,6 @@ export default function ManageAccountMain(props) {
       isNew={true}
       onClose={onClose}
       entityData={entityData}
-      fields={fields}
       handleSubmit={handleCreateAccount}
     />
   );
