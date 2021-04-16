@@ -57,12 +57,12 @@ export const sidebarResource = {
 
 export const lead = {
   leadResource: "lead", //  Key of sidebar object
-  leadApi: "/lead"
+  leadApi: "/lead",
 };
 
 export const opportunity = {
   opportunityResource: "opportunity", //  Key of sidebar object
-  opportunityApi: "/opportunity"
+  opportunityApi: "/opportunity",
 };
 
 export const supplierAccount = {
@@ -111,6 +111,8 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       );
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = val ? val : options;
+    } else if (key.type === "date") {
+      obj[key.fieldName] = val ? val : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = val ? val : false;
     } else {
@@ -128,8 +130,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -180,30 +182,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .url("Enter valid url eg. https://www.hostname.com")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .url("Enter valid url eg. https://www.hostname.com")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-          .array()
-          .required(`${input.fieldLabel} is required`)
-          .length(1, "Select at least one service access")
+            .array()
+            .required(`${input.fieldLabel} is required`)
+            .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -354,17 +356,22 @@ interface IPermission {
   };
 }
 
-export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
-
+export const getPermissions = (
+  user,
+  selectedEntity = undefined
+): IPermission | null => {
   let permissions = {};
-  let data = [...user?.role?.sideBar]
+  let data = [...user?.role?.sideBar];
 
   if (selectedEntity) {
     if (user?.entity && user.entity.length && selectedEntity) {
-      data = [...data, ...user.entity.find(entityObj => entityObj._id === selectedEntity)?.resource]
+      data = [
+        ...data,
+        ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
+          ?.resource,
+      ];
     }
-  }
-  else {
+  } else {
     if (user?.role?.selectedEntity) {
       data = [...data, ...user?.role?.selectedEntity?.resource];
     }
@@ -404,12 +411,13 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
 };
 
 export const downloadExcel = (fileDetails, fileName) => {
-  const extension = `.${fileName.split('.').pop()}`;
+  const extension = `.${fileName.split(".").pop()}`;
   let type = null;
 
   switch (extension) {
     case ".xlsx":
-      type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      type =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
       break;
 
     default:
@@ -432,32 +440,29 @@ export const downloadExcel = (fileDetails, fileName) => {
     a.click();
     document.body.removeChild(a);
   }
-}
+};
 
-export const simplifyValues = (obj,fields) => {
+export const simplifyValues = (obj, fields) => {
   const newObj = {};
   if (obj) {
-      for (const  fieldData  of fields) {
-          // if (fieldData.type === "multiSelect") {
-          //     if (Array.isArray(newObj[fieldData.fieldName])) {
-          //         newObj[fieldData.fieldName] = obj[fieldData.fieldName].join(", ");
-          //     } else {
-          //         newObj[fieldData.fieldName] = "";
-          //     }
-          // } else if (
-          if (
-              fieldData.type === "switch" ||
-              fieldData.type === "checkBox"
-          ) {
-              newObj[fieldData.fieldName] = obj[fieldData.fieldName]
-                  ? "Active"
-                  : "Inactive";
-          } else {
-              newObj[fieldData.fieldName] = obj[fieldData.fieldName]
-                  ? obj[fieldData.fieldName]
-                  : "";
-          }
+    for (const fieldData of fields) {
+      // if (fieldData.type === "multiSelect") {
+      //     if (Array.isArray(newObj[fieldData.fieldName])) {
+      //         newObj[fieldData.fieldName] = obj[fieldData.fieldName].join(", ");
+      //     } else {
+      //         newObj[fieldData.fieldName] = "";
+      //     }
+      // } else if (
+      if (fieldData.type === "switch" || fieldData.type === "checkBox") {
+        newObj[fieldData.fieldName] = obj[fieldData.fieldName]
+          ? "Active"
+          : "Inactive";
+      } else {
+        newObj[fieldData.fieldName] = obj[fieldData.fieldName]
+          ? obj[fieldData.fieldName]
+          : "";
       }
+    }
   }
   return newObj;
 };
