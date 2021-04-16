@@ -828,20 +828,20 @@ const FormTypes = (props) => {
                 type="file"
               />
             </IconButton>
-            {
-              <IconButton
-                disabled={Boolean(!values[name])}
-                title="Remove picture"
-                color="secondary"
-                size="small"
-                aria-label="delete picture"
-                component="span"
-                onClick={() => setFieldValue(name, "")}
-              >
-                <DeleteIcon />
-              </IconButton>
-            }
           </label>
+          {
+            <IconButton
+              disabled={Boolean(!values[name])}
+              title="Remove picture"
+              color="secondary"
+              size="small"
+              aria-label="delete picture"
+              component="span"
+              onClick={() => setFieldValue(name, "")}
+            >
+              <DeleteIcon />
+            </IconButton>
+          }
         </Box>
       </Box>
     </Fragment>
