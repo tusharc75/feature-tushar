@@ -1,0 +1,250 @@
+import React, { useState, Fragment, useRef } from 'react';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import FieldList from '../FieldList';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import * as Yup from "yup";
+import { Formik, Form, Field } from "formik";
+import { camelCase } from "./../../../constants/helpers";
+import ListItemText from '@material-ui/core/ListItemText';
+import { checkFormula } from "../../../constants/formulaUtility";
+
+const FieldSchema = Yup.object().shape({
+  type: Yup.string()
+    .required("please select field type"),
+  fieldLabel: Yup.string()
+    .required("please enter field label"),
+});
+
+
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: 300,
+    },
+  },
+};
+
+export const AddField = ({ handleClose, handleAddField, fields }) => {
+
+  const [initialValues, setInitialValues] = useState({
+    type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
+    tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], formula: ""
+  });
+  const [formulaError, setFormulaError] = useState(null);
+  const ref = useRef(null);
+
+  const handleSave = (values) => {
+    values.fieldName = camelCase(values.fieldLabel.replace(/[^a-zA-Z ]/g, ""))
+    if (values.type !== "formula") {
+      delete values.inputFields
+      delete values.formula
+      delete values.returnType
+    }
+    if (values.type !== "formula" || values.type !== "decimal") {
+      delete values.decimalPlaces
+    }
+    handleAddField(values)
+  }
+
+  const handleCheckSyntax = () => {
+    if (ref.current.values["formula"] !== "") {
+      let values = {}
+      ref.current.values["inputFields"].forEach(_input => {
+        values[_input] = 1;
+      })
+      if (checkFormula(ref.current.values["formula"], values)) {
+        setFormulaError("Valid Formula")
+      }
+      else {
+        setFormulaError("Invalid Formula")
+      }
+    }
+  }
+
+  return (
+    <div>
+      <Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"sm"} open={true}>
+        <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
+          {({ submitForm, touched, errors, setFieldValue, values }) => (
+            <Form autoComplete="off" autoCorrect="off" noValidate >
+              <CustomDialogHeader title={"Add Field"} onClose={handleClose}></CustomDialogHeader>
+              <CustomDialogContent>
+                <FormControl fullWidth margin="dense" variant="outlined">
+                  <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-outlined-label"
+                    id="demo-simple-select-outlined"
+                    value={values["type"]}
+                    onChange={(e) => setFieldValue("type", e.target.value)}
+                    label="Type"
+                    name="type"
+                    error={touched["type"] && Boolean(errors["type"])}
+                  >
+                    <MenuItem value={"singleLine"}>Single Line</MenuItem>
+                    <MenuItem value={"multiLine"}>Multi-Line</MenuItem>
+                    <MenuItem value={"decimal"}>Decimal</MenuItem>
+                    <MenuItem value={"percent"}>Percent</MenuItem>
+                    <MenuItem value={"formula"}>Formula</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  variant="outlined"
+                  type="text"
+                  label="Field Label"
+                  required={true}
+                  name="fieldLabel"
+                  fullWidth
+                  margin="dense"
+                  value={values["fieldLabel"]}
+                  error={touched["fieldLabel"] && Boolean(errors["fieldLabel"])}
+                  helperText={touched["fieldLabel"] && errors["fieldLabel"]}
+                  onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
+                />
+                {(values["type"] === "decimal" || values["type"] === "formula") &&
+                  <Grid spacing={3} container>
+                    {values["type"] === "formula" && <Grid item xs={12} sm={6} md={6}>
+                      <FormControl fullWidth margin="dense" variant="outlined">
+                        <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                        <Select
+                          labelId="demo-simple-select-outlined-label"
+                          id="demo-simple-select-outlined"
+                          value={values["returnType"]}
+                          onChange={(e) => setFieldValue("returnType", e.target.value)}
+                          label="Return Type"
+                          name="returnType"
+                        >
+                          <MenuItem value="decimal">Decimal</MenuItem>
+                          <MenuItem value="string">String</MenuItem>
+                          <MenuItem value="boolean">Boolean</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    }
+                    {(values["type"] === "decimal" || values["returnType"] === "decimal") &&
+                      <Grid item xs={12} sm={6} md={6}>
+                        <FormControl fullWidth margin="dense" variant="outlined">
+                          <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={values["decimalPlaces"]}
+                            onChange={(e) => setFieldValue("decimalPlaces", e.target.value)}
+                            label="Number of decimal places"
+                            name="decimalPlaces"
+                          >
+                            <MenuItem value={0}>0</MenuItem>
+                            <MenuItem value={1}>1</MenuItem>
+                            <MenuItem value={2}>2</MenuItem>
+                            <MenuItem value={3}>3</MenuItem>
+                            <MenuItem value={4}>4</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>}
+                  </Grid>}
+                {values["type"] === "formula" && <Box>
+                  <FormControl variant="outlined" fullWidth margin="dense">
+                    <InputLabel htmlFor="filled-age-native-simple">Input Parameters</InputLabel>
+                    <Select
+                      inputProps={{
+                        name: 'reletedTo',
+                        id: "demo-simple-select-outlined"
+                      }}
+                      margin="dense"
+                      label="Input Parameters"
+                      multiple
+                      name="inputFields"
+                      value={values["inputFields"]}
+                      onChange={(e) => setFieldValue("inputFields", e.target.value)}
+                      renderValue={(selected: any) => selected.join(', ')}
+                      MenuProps={MenuProps}
+                    >
+                      {fields && fields.map((_field) => (
+                        <MenuItem key={_field.fieldName} value={_field.fieldName}>
+                          <Checkbox color="primary" checked={values["inputFields"].indexOf(_field.fieldName) > -1} />
+                          <ListItemText primary={_field.fieldLabel} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Box pt={2}>
+                    <TextField
+                      id="standard-basic"
+                      name="formula"
+                      variant="outlined"
+                      label="Formula"
+                      margin="dense"
+                      fullWidth
+                      multiline
+                      rows={8}
+                      value={values["formula"]}
+                      onChange={(e) => setFieldValue("formula", e.target.value)}
+                    />
+                    {formulaError && <Typography variant="caption" display="block">{formulaError} </Typography>}
+                    <Button onClick={handleCheckSyntax} color="primary">Check Syntax</Button>
+                  </Box>
+                </Box>}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="required"
+                      value={values["required"]}
+                      onChange={(e) => setFieldValue("required", e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Required"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isTooltip"
+                      value={values["isTooltip"]}
+                      onChange={(e) => setFieldValue("isTooltip", e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Show Tooltip"
+                />
+                {values["isTooltip"] &&
+                  <TextField
+                    variant="outlined"
+                    type="text"
+                    label="Tooltip Message"
+                    required={true}
+                    name="tooltipMessage"
+                    fullWidth
+                    margin="dense"
+                    value={values["tooltipMessage"]}
+                    error={touched["tooltipMessage"] && Boolean(errors["tooltipMessage"])}
+                    helperText={touched["tooltipMessage"] && errors["tooltipMessage"]}
+                    onChange={(e) => setFieldValue("tooltipMessage", e.target.value.trimStart())}
+                  />
+                }
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button onClick={handleClose} color="primary">Cancel</Button>
+                <Button type="submit" color="primary" variant="contained">Add</Button>
+              </CustomDialogFooter>
+            </Form>)}
+        </Formik>
+      </Dialog>
+    </div>
+  );
+}
