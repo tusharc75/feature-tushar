@@ -23,8 +23,8 @@ import {
   ExpandLess,
 } from "@material-ui/icons";
 import _ from "lodash";
-import { FaUserTie, FaDatabase ,FaHandshake} from 'react-icons/fa';
-import { BsCalendarFill, BsFillPuzzleFill} from 'react-icons/bs';
+import { FaUserTie, FaDatabase, FaHandshake } from 'react-icons/fa';
+import { BsCalendarFill, BsFillPuzzleFill } from 'react-icons/bs';
 import { MdDashboard, MdLocalActivity } from 'react-icons/md';
 
 const drawerWidth = 240;
@@ -96,23 +96,23 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const iconMapping = [
     {
       key: 'Brand Admin',
-      icon: <FaUserTie size={15} className="sidebar-icon"/>
+      icon: <FaUserTie size={15} className="sidebar-icon" />
     },
     {
       key: 'Master Data',
-      icon: <FaDatabase size={15}  className="sidebar-icon"/>
+      icon: <FaDatabase size={15} className="sidebar-icon" />
     },
     {
       key: 'Admin Portal',
-      icon: <BsCalendarFill size={15} className="sidebar-icon"/>
+      icon: <BsCalendarFill size={15} className="sidebar-icon" />
     },
     {
       key: 'CRM',
-      icon: <FaHandshake size={15} className="sidebar-icon"/>
+      icon: <FaHandshake size={15} className="sidebar-icon" />
     },
     {
       key: 'Activities Management',
-      icon: <BsFillPuzzleFill size={15} className="sidebar-icon"/>
+      icon: <BsFillPuzzleFill size={15} className="sidebar-icon" />
     }
   ]
   const handleToggleDrawer = () => {
@@ -211,7 +211,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             <Link to="/activity">
               <ListItem button selected={pathnames[0] === "activity"} className="list-item">
                 <ListItemIcon>
-                  <MdLocalActivity size={15}  className="sidebar-icon"/>
+                  <MdLocalActivity size={15} className="sidebar-icon" />
                 </ListItemIcon>
                 <ListItemText primary="Activities" />
               </ListItem>
