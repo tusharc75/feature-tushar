@@ -632,6 +632,7 @@ export default function AccountDetailPage(props) {
                   })
                 ),
               }}
+              fields={accountFields}
               loading={loading}
               handleSubmit={onUpdateAccount}
             />

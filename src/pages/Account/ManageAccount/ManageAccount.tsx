@@ -15,7 +15,7 @@ import _ from 'lodash'
 const arr = [...Array(9).keys()]
 
 export default function ManageAccount(props) {
-    const { entityData, handleSubmit, onClose, open, isNew, loading } = props;
+    const { entityData, handleSubmit, onClose, open, isNew, loading, fields } = props;
 
     const { state: { user } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
@@ -39,6 +39,34 @@ export default function ManageAccount(props) {
         }
         sortArray();
     }, [entityData.fields]);
+
+    const simplifyValues = (obj) => {
+        const newObj = {};
+        if (obj) {
+            for (const { fieldData } of fields) {
+                // if (fieldData.type === "multiSelect") {
+                //     if (Array.isArray(newObj[fieldData.fieldName])) {
+                //         newObj[fieldData.fieldName] = obj[fieldData.fieldName].join(", ");
+                //     } else {
+                //         newObj[fieldData.fieldName] = "";
+                //     }
+                // } else if (
+                 if (
+                    fieldData.type === "switch" ||
+                    fieldData.type === "checkBox"
+                ) {
+                    newObj[fieldData.fieldName] = obj[fieldData.fieldName]
+                        ? "Active"
+                        : "Inactive";
+                } else {
+                    newObj[fieldData.fieldName] = obj[fieldData.fieldName]
+                        ? obj[fieldData.fieldName]
+                        : "";
+                }
+            }
+        }
+        return newObj;
+    };
 
     const sortArray = () => {
         const sections = [];
@@ -246,18 +274,25 @@ export default function ManageAccount(props) {
                                             Cancel
                                              </Button>
 
-                                        <CustomButton
-                                            loading={loading}
+
+                                        <Button
                                             variant="contained"
                                             color="primary"
-                                            disabled={loading || Object.keys(errors).length > 0 ? true : false}
+
+                                            disabled={
+                                                loading || Object.values(simplifyValues(entityData.initialValues)).toString() ===
+                                                Object.values(simplifyValues(values)).toString()
+                                                // || Object.keys(errors).length > 0 ? true : false
+
+                                            }
                                             onClick={(e) => {
                                                 e.preventDefault()
                                                 onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm, errors)
+
                                             }}
                                         >
                                             Save
-                                    </CustomButton>
+                                        </Button>
                                     </CustomDialogFooter>
                                 </>
                             )}
