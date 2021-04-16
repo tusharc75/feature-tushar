@@ -113,8 +113,8 @@ export default function AccountDetailPage(props) {
             : []
         );
         setOpportunities(
-          data.Opportunity && data.Opportunity["Account_Name"]
-            ? data.Opportunity["Account_Name"]
+          data.Opportunity && data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
+            ? data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
             : []
         );
         setRelatedContactsLoading(false);

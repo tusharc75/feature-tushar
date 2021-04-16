@@ -247,12 +247,22 @@ const Opportunities = () => {
       )
     },
     {
-      field: "accountName", headerName: "Account Name", width: 300,
+      field: "supplierAccountName", headerName: "Supplier Account Name", width: 300,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <Link className="link" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
-          {params?.row?.accountName?.optionLabel ? params.row.accountName.optionLabel : ''}
+        <Link className="link" to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName?.optionValue}`}>
+          {params?.row?.supplierAccountName?.optionLabel ? params.row.supplierAccountName.optionLabel : ''}
+        </Link>
+      )
+    },
+    {
+      field: "customerAccountName", headerName: "Customer Account Name", width: 300,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Link className="link" to={`${routes.customerAccount.path}/detail/${params?.row?.customerAccountName?.optionValue}`}>
+          {params?.row?.customerAccountName?.optionLabel ? params.row.customerAccountName.optionLabel : ''}
         </Link>
       )
     },

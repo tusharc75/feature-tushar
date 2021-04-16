@@ -93,7 +93,7 @@ const UserDetailsPage = () => {
       setUserPermissions(data.permissions);
       setLoading(false);
     } catch (error) {
-      console.log(error);
+      toastConfig.setToastConfig(error)
     }
   };
 
@@ -105,9 +105,9 @@ const UserDetailsPage = () => {
         setGloabalRoles(data.filter((d) => d?.type === 1)); // global role --- type 1
         setRolesLoading(false);
       })
-      .catch((err) => {
+      .catch((error) => {
         setRolesLoading(false);
-        console.log(err);
+        toastConfig.setToastConfig(error)
       });
   };
 
