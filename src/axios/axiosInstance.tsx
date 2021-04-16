@@ -9,6 +9,11 @@ export default (history = null) => {
         headers.Authorization = `Bearer ${localStorage.token}`;
     }
 
+    const entityId = localStorage.getItem("selectedEntity");
+    if (entityId) {
+        headers.entity = entityId;
+    }
+
     const axiosInstance = axios.create({
         baseURL: baseURL,
         headers
@@ -28,12 +33,6 @@ export default (history = null) => {
     }
 
     axiosInstance.interceptors.request.use((request) => {
-        if (request.url != "/user/login") {
-            const entityId = localStorage.getItem("selectedEntity");
-            if (entityId) {
-                request.url = `${request.url}&entity=${entityId}`
-            }
-        }
         return request;
     }, error => {
         return Promise.reject(error);
