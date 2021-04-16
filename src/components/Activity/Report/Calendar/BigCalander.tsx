@@ -111,7 +111,6 @@ export default function BigCalander({ type, activity }) {
     let days = GetDays(month, year);
     const classes = useStyles();
 
-    console.log(activity)
     return (<Box border={1} borderColor="grey.300" bgcolor="white">
         <Box pt={1} display="flex" flexDirection="row">
             <Box>

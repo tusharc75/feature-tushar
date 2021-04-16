@@ -65,7 +65,6 @@ const CreateUser = ({ open, close, fetchData }) => {
           type: "success",
           message: data.message,
         });
-        console.log(data);
         setSubmitting(false);
         fetchData();
         close();

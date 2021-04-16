@@ -38,8 +38,6 @@ import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import { getFormulaValue } from "../../constants/formulaUtility";
 import NumberFormat from "react-number-format";
-import moment from "moment";
-import { yyyyMMDD } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 
@@ -164,8 +162,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-          ? 1
-          : 0
+        ? 1
+        : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -411,11 +409,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -444,11 +442,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -533,10 +531,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-              handleChange(
-                name,
-                val && val.optionValue ? val.optionValue : ""
-              )
+                handleChange(
+                  name,
+                  val && val.optionValue ? val.optionValue : ""
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -560,8 +558,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-              (data) => data.currencyCode === values[name]
-            )[0]
+                (data) => data.currencyCode === values[name]
+              )[0]
             : ""
         }
         options={currencyData}
@@ -622,10 +620,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-              setFieldValue(
-                name,
-                value.map((val) => val.optionValue)
-              )
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -726,9 +724,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-              setValue(newValue);
-            }
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -873,8 +871,8 @@ const FormTypes = (props) => {
             {values[name]
               ? values[name]
               : isUploading
-                ? "Uploading..."
-                : "No file choosen"}
+              ? "Uploading..."
+              : "No file choosen"}
           </p>
         </Box>
         <IconButton
@@ -911,15 +909,14 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDatePicker
-          clearable
           {...rest}
+          clearable="true"
           required={required}
           variant="inline"
           inputVariant="outlined"
           value={values[name]}
           name={name}
           label={label}
-          defaultValue={new Date()}
           onChange={(date) => setFieldValue(name, date)}
           format="MM/dd/yyyy"
           error={touched[name] && Boolean(errors[name])}
@@ -939,10 +936,9 @@ const FormTypes = (props) => {
           variant="inline"
           inputVariant="outlined"
           ampm={false}
-          value={values[name]}
+          value={values[name] || new Date("2018-01-01T00:00:00.000Z")}
           name={name}
           label={label}
-          defaultValue={new Date("2018-01-01T00:00:00.000Z")}
           onChange={(date) => setFieldValue(name, date)}
           onError={console.log}
           disablePast

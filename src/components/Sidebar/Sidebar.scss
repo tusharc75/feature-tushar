@@ -13,17 +13,68 @@
   border: 1px solid transparent;
 }
 
-
-.breadcrumbbox{
+.breadcrumbbox {
   border-bottom: 1px solid #f3f3f3;
   background: white;
   padding: 10px;
   border-top: 2px solid white;
   height: 47px;
   width: 100%;
- }
- .breadcrumb li,.breadcrumb li p { 
+}
+.breadcrumb li,
+.breadcrumb li p {
   margin: 0px 4px;
   font-size: 18px;
   color: #848282;
+}
+
+.sidebar-list {
+  .MuiListItemIcon-root {
+    min-width: auto !important;
+    padding-right: 10px;
+  }
+  &.MuiList-padding {
+    padding: 0;
+  }
+  .list-item {
+    color: var(--primary);
+    border-bottom: 1px solid #eaeaea;
+
+    .sub-list {
+      .MuiListItem-root {
+        padding: 2px 0px 0 40px;
+        background: #f2f2f2;
+
+        &:hover {
+          background: #d7d7d7;
+        }
+      }
+    }
+    .sub-list::before {
+      background-color: white;
+      bottom: auto;
+      content: "";
+      height: 8.5px;
+      left: 15px;
+      margin-top: 14px;
+      position: absolute;
+      right: auto;
+      width: 8px;
+      z-index: 1;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+    }
+
+    .sub-list::after {
+      border-left: 2px solid var(--primary);
+      bottom: 0;
+      content: "";
+      left: 18px;
+      position: absolute;
+      top: 0;
+    }
+  }
+}
+.sidebar-icon {
+  color: var(--primary);
 }
