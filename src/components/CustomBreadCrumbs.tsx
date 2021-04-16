@@ -1,7 +1,6 @@
 import _ from "lodash";
 import { Breadcrumbs, Link as MuiLink, Typography } from "@material-ui/core";
 import { Link } from 'react-router-dom';
-import "./sidebar.scss"
 
 const CustomBreadCrumbs = ({ routes = [] }) => {
 

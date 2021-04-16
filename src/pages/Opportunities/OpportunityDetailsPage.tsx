@@ -18,7 +18,7 @@ import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
-import { yyyyMMDD } from "../../constants/helpers";
+import { customerAccount, supplierAccount, yyyyMMDD } from "../../constants/helpers";
 import { opportunity } from '../../constants/helpers'
 
 function OpportunityDetailsPage() {
@@ -211,7 +211,7 @@ function OpportunityDetailsPage() {
     <>
       <Layout>
         <Grid container direction="row">
-          <Grid item xs={12} className="pl-2">
+          <Grid item xs={12}>
             <CustomBreadCrumbs routes={customizedRoutes} />
           </Grid>
         </Grid>
@@ -323,8 +323,8 @@ function OpportunityDetailsPage() {
                     <Activity
                       relatedTo={[
                         {
-                          type: "account",
-                          referenceId: opportunityData.accountName.optionValue,
+                          type: opportunityData.customerAccountName ?  customerAccount.accountResource : supplierAccount.accountResource,
+                          referenceId: opportunityData.customerAccountName ? opportunityData.customerAccountName.optionValue :  opportunityData.supplierAccountName.optionValue,
                           access: false,
                         },
                         {
@@ -370,6 +370,7 @@ function OpportunityDetailsPage() {
               }}
               isNew={false}
               dataToUpdate={opportunityData}
+              resource={null}
             // opportunityApi={opportunityApi}
             />
           )}

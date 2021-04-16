@@ -70,7 +70,7 @@ function DisplayData({ label, value }) {
     </div>
 }
 
-export default function OpportunityInAccordian({ opportunities, onNewOpportunityAdd, accountId, expanded = true, recordsPerLine = 2, opportunityPermissions }) {
+export default function OpportunityInAccordian({ opportunities, onNewOpportunityAdd, accountId, expanded = true, recordsPerLine = 2, opportunityPermissions, resource }) {
 
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -96,7 +96,7 @@ export default function OpportunityInAccordian({ opportunities, onNewOpportunity
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
 
     return <>
-        <Accordion square expanded={expandOpportunity}>
+        <Accordion expanded={expandOpportunity}>
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -187,6 +187,7 @@ export default function OpportunityInAccordian({ opportunities, onNewOpportunity
                     onNewOpportunityAdd();
                 }}
                 accountId={accountId}
+                resource={resource}
             />
         }
     </>

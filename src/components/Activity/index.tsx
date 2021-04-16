@@ -17,6 +17,11 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import Dialog from '@material-ui/core/Dialog';
+import { MdEventNote } from 'react-icons/md';
+import { IoIosMail } from 'react-icons/io'
+import { RiTaskFill } from 'react-icons/ri'
+import { FaSuitcase } from 'react-icons/fa'
+import { MdNoteAdd } from 'react-icons/md'
 
 const Activity = (props) => {
 
@@ -25,6 +30,25 @@ const Activity = (props) => {
     const [open, setOpen] = useState(false);
 
     const tabs = ["Task", "Event", "Case", "Note", "Email"];
+
+    const getIcon = (tab: string) => {
+        switch (tab) {
+            case "Task":
+                return <RiTaskFill size={20} />
+
+            case "Event":
+                return <MdEventNote size={20} />
+
+            case "Case":
+                return <FaSuitcase size={20} />
+
+            case "Note":
+                return <MdNoteAdd size={20} />
+
+            case "Email":
+                return <IoIosMail size={20} />
+        }
+    }
 
     const handleChangeType = (event, data) => {
         event.stopPropagation();
@@ -56,7 +80,7 @@ const Activity = (props) => {
         </Box>
         {tabs.map((data, index) => (
             <Fragment key={index}>
-                <Box display="flex"  mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" onClick={(event) => handleChangeType(event, data)} style={{ cursor: "pointer" }}>
+                <Box display="flex" mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" onClick={(event) => handleChangeType(event, data)} style={{ cursor: "pointer" }}>
                     <Grid container>
                         <Grid item xs={8} >
                             <Box display="flex">
@@ -66,7 +90,7 @@ const Activity = (props) => {
                                     </IconButton>
                                 </Box>
                                 <Box ml={1} mt={0.5}>
-                                    <Typography variant="subtitle2">{data}</Typography>
+                                    <Typography variant="subtitle2" className="d-flex align-items-center gap-2">{getIcon(data)} {data}</Typography>
                                 </Box>
                             </Box>
                         </Grid>
