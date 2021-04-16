@@ -32,6 +32,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import moment from "moment";
 import { FaUserAltSlash, FaUserCheck } from "react-icons/fa";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const useStyles = makeStyles((theme) => ({
   actionBtn: {
@@ -538,6 +539,7 @@ export default function Doa() {
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}
               columns={columns}

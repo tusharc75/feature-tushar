@@ -39,6 +39,7 @@ import { contactTemplateFileName, downloadExcel, sidebarResource, contactImportE
 import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { useHistory } from "react-router-dom";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const ContactTypes = [
     {
@@ -606,6 +607,7 @@ export default function Contact(props) {
                         <DataGrid
                             components={{
                                 Toolbar: DataGridCustomToolbar,
+                                NoRowsOverlay: CustomDataGridNoDataFound,
                             }}
                             rows={loading ? [] : dataRows}
                             columns={columns}
