@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { Skeleton } from "@material-ui/lab";
@@ -14,8 +14,7 @@ import routes from "../../components/Helpers/Routes";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import { getObjKeysWithValues, lead } from "../../constants/helpers";
+import { lead } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import styles from "./LeadDetailsPage.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -33,9 +32,9 @@ const LeadDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [leadFields, setLeadFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
-  const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.lead]);
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
@@ -44,7 +43,7 @@ const LeadDetailsPage = () => {
     isDelete: false,
   });
 
-  const { leadResource, leadApi } = lead
+  const { leadResource, leadApi } = lead;
   let { id } = useParams();
 
   // useEffect(() => {
@@ -64,6 +63,7 @@ const LeadDetailsPage = () => {
   }, [user, selectedEntity]);
 
   const fetchLeadData = async () => {
+    setLoading(true);
     if (selectedEntity) {
       axiosInstance()
         .get(`${leadApi}/${id}?entity=${selectedEntity}`)
@@ -116,7 +116,9 @@ const LeadDetailsPage = () => {
   const handleDeleteLead = () => {
     if (leadData?._id) {
       axiosInstance()
-        .put(`${leadApi}/remove?entity=${selectedEntity}`, { ids: [leadData._id] })
+        .put(`${leadApi}/remove?entity=${selectedEntity}`, {
+          ids: [leadData._id],
+        })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -145,29 +147,8 @@ const LeadDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
-  const quickLinks = [
-    {
-      label: "Files",
-      count: 0,
-    },
-    {
-      label: "Notes",
-      count: 0,
-    },
-  ];
-  const [showCreateUserDialog, setShowCreateUserDialog] = useState(false);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-
   const handleOpneUpdateDialog = () => {
     setOpenUpdateDialog(true);
-  };
-
-  const closeUpdateDIalog = () => {
-    setOpenUpdateDialog(false);
-  };
-
-  const handleUpdateBrand = (values) => {
-    setUpdating(true);
   };
 
   return (
@@ -184,17 +165,6 @@ const LeadDetailsPage = () => {
           leadApi={leadApi}
         />
       )}
-      {/* {openUpdateDialog && (
-        <UpdateDetailsDialog
-          title="Lead Update"
-          openDialog={openUpdateDialog}
-          onClose={closeUpdateDIalog}
-          data={leadData}
-          fields={leadFields}
-          isUpdating={isUpdating}
-          handleUpdate={handleUpdateLead}
-        />
-      )} */}
       <Layout>
         <CustomBreadCrumbs routes={customizedRoutes} />
 
@@ -220,7 +190,6 @@ const LeadDetailsPage = () => {
             heading={headingLbl}
             logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
             mainPoints={mainPoints}
-            // style={{ marginTop: "150px", minHeight: "200px" }}
             showHeading={true}
           >
             {leadsPermissions.isUpdate && allowedToEdit && (
@@ -306,7 +275,7 @@ const LeadDetailsPage = () => {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => { }}
+                      handleActivityRefresh={() => {}}
                     />
                   </div>
                 )}
