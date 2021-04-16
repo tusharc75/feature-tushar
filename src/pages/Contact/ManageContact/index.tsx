@@ -50,7 +50,6 @@ export default function ManageContactMain(props) {
 
             newFields.push(_f.fieldData);
           });
-
         setEntityData({
           fields: newFields,
           initialValues: getObjKeys("", newFields),

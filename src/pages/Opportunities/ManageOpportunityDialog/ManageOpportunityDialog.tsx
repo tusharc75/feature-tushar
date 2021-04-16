@@ -37,7 +37,7 @@ export default function ManageOpportunityDialog({
 }) {
   const { opportunityResource, opportunityApi } = opportunity
   const toastConfig = useContext(CustomToastContext);
-  console.log(resource);
+
   const {
     state: { user, selectedEntity },
   }: any = useData();
@@ -117,8 +117,9 @@ export default function ManageOpportunityDialog({
           .filter((d) => d.isCreate)
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
-            if (accountId) {
-              _f = initializeDropdownById(_f, "accountName", accountId);
+
+            if (accountId && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
             }
 
             if (resource && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
@@ -129,48 +130,12 @@ export default function ManageOpportunityDialog({
             } else {
               newFields.push(_f.fieldData);
             }
-
-
-            // if (resource) {
-            //   if (resource === customerAccount.accountResource && _f.fieldData.fieldName == "customerAccountName") {
-            //     newFields.push(_f.fieldData);
-            //   } else if (resource === supplierAccount.accountResource && _f.fieldData.fieldName == "supplierAccountName") {
-            //     newFields.push(_f.fieldData);
-            //   }
-            // } else {
-            //   newFields.push(_f.fieldData);
-            // }
           });
 
         setEntityData({
           fields: newFields,
           initialValues: isNew ? getObjKeys("", newFields) : getObjKeysWithValues(dataToUpdate, newFields)
         });
-        // } else {
-        //   data
-        //     .filter((d) => d.isUpdate)
-        //     .map((_f) => {
-        //       //  If this dialog opens from account details screen, make that account preselected
-        //       if (accountId) {
-        //         _f = initializeDropdownById(_f, "accountName", accountId);
-        //       }
-
-        //       if (resource && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
-        //         if ((resource === supplierAccount.accountResource && _f.fieldData.fieldName == "customerAccountName") ||
-        //           (resource === customerAccount.accountResource && _f.fieldData.fieldName == "supplierAccountName")) {
-        //           newFields.push(_f.fieldData);
-        //         }
-        //       } else {
-        //         newFields.push(_f.fieldData);
-        //       }
-        //     });
-
-        //   console.log(data);
-        //   setEntityData({
-        //     fields: newFields,
-        //     initialValues: getObjKeysWithValues(dataToUpdate, newFields),
-        //   });
-        // }
       });
   };
 
@@ -362,6 +327,30 @@ export default function ManageOpportunityDialog({
                                     isTooltip={true}
                                     size="small"
                                   />
+                                ) : field.fieldName == "probability" ? (
+                                  <FormTypes
+                                    // {...rest}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={setFieldValue}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={true}
+                                    size="small"
+                                    onChange={(e) => {
+                                      if (e.target.value && parseFloat(e.target.value) > 100) {
+                                        setFieldValue("probability", "100")
+                                      }
+                                      else {
+                                        setFieldValue("probability", e.target.value)
+                                      }
+                                    }}
+                                  />
                                 ) : (
                                   <FormTypes
                                     // {...rest}
@@ -378,7 +367,8 @@ export default function ManageOpportunityDialog({
                                     isTooltip={true}
                                     size="small"
                                   />
-                                )}
+                                )
+                                }
                               </Grid>
                             ))}
                           </Grid>
