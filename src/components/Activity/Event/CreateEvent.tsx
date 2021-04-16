@@ -100,7 +100,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                     .then(({ data }) => {
                         handleClose()
                     })
-                    .catch((err) => {
+                    .catch((error) => {
+                        toastConfig.setToastConfig(error)
                     });
             }
             else {
@@ -108,7 +109,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                     .then(({ data }) => {
                         handleClose()
                     })
-                    .catch((err) => {
+                    .catch((error) => {
+                        toastConfig.setToastConfig(error)
                     });
             }
         }
