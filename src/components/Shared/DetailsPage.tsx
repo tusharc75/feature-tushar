@@ -158,7 +158,7 @@ const Details = (props: DetailProps) => {
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any) => (
-                  <>
+                  <React.Fragment key={_val.optionValue}>
                     <MuiLink
                       component={Link}
                       to={redirectLink(_val.optionValue)}
@@ -166,7 +166,7 @@ const Details = (props: DetailProps) => {
                       {_val.optionLabel}
                     </MuiLink>
                     <Box component="span" marginX={1} />
-                  </>
+                  </React.Fragment>
                 ))
               ) : (
                 "_ _ _"
