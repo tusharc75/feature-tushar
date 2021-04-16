@@ -162,7 +162,7 @@ const Product = () => {
                 <Grid item xs={6} className="d-flex align-items-center gap-1">
                     <GiAbstract055 /> <span className="listingHeader">Products </span>
                 </Grid>
-                <Grid xs={6} container justify="flex-end">
+                <Grid item xs={6} container justify="flex-end">
                     <Button onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                 </Grid>
             </Grid>
