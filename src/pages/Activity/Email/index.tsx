@@ -84,7 +84,7 @@ const Email = () => {
                     </Grid>
                 </Grid>
             </Box>
-            <Box height={500}>
+            <div className="listing-grid">
                 <DataGrid
                     components={{
                         Toolbar: DataGridCustomToolbar,
@@ -98,7 +98,7 @@ const Email = () => {
                     pageSize={10}
                     density="compact"
                 />
-            </Box>
+            </div>
         </Box>
     </Layout>
     );

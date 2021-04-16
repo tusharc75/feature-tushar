@@ -167,7 +167,7 @@ const Product = () => {
                 </Grid>
             </Grid>
         </div>
-        <Box height={window.innerHeight - 200}>
+        <div className="listing-grid">
             <DataGrid
                 components={{
                     Toolbar: DataGridCustomToolbar,
@@ -181,7 +181,7 @@ const Product = () => {
                 pageSize={25}
                 density="compact"
             />
-        </Box>
+        </div>
         {open && <CreateProduct productId={productId} handleClose={handleClose} />}
     </Layout>
     );
