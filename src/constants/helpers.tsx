@@ -433,3 +433,31 @@ export const downloadExcel = (fileDetails, fileName) => {
     document.body.removeChild(a);
   }
 }
+
+export const simplifyValues = (obj,fields) => {
+  const newObj = {};
+  if (obj) {
+      for (const  fieldData  of fields) {
+          // if (fieldData.type === "multiSelect") {
+          //     if (Array.isArray(newObj[fieldData.fieldName])) {
+          //         newObj[fieldData.fieldName] = obj[fieldData.fieldName].join(", ");
+          //     } else {
+          //         newObj[fieldData.fieldName] = "";
+          //     }
+          // } else if (
+          if (
+              fieldData.type === "switch" ||
+              fieldData.type === "checkBox"
+          ) {
+              newObj[fieldData.fieldName] = obj[fieldData.fieldName]
+                  ? "Active"
+                  : "Inactive";
+          } else {
+              newObj[fieldData.fieldName] = obj[fieldData.fieldName]
+                  ? obj[fieldData.fieldName]
+                  : "";
+          }
+      }
+  }
+  return newObj;
+};
