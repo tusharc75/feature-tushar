@@ -2,7 +2,7 @@ import React from "react";
 import { DataGrid } from "@material-ui/data-grid";
 import { Box, Button, TextField, InputAdornment } from "@material-ui/core";
 import { Add, Search } from "@material-ui/icons";
-import CustomDataGridNoDataFound from "../Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const Entities = ({ brand }) => {
   const columns = [
@@ -36,7 +36,7 @@ const Entities = ({ brand }) => {
           }}
         />
       </Box>
-      <div style={{ width: "100%", height: "250px" }}>
+      <div className="listing-grid">
         <DataGrid
           components={{
             NoRowsOverlay: CustomDataGridNoDataFound,

@@ -106,8 +106,7 @@ const Note = () => {
                     </Grid>
                 </Grid>
             </Box>
-            <Box height={500}>
-
+            <div className="listing-grid">
                 <DataGrid
                     components={{
                         Toolbar: DataGridCustomToolbar,
@@ -121,8 +120,7 @@ const Note = () => {
                     pageSize={10}
                     density="compact"
                 />
-
-            </Box>
+            </div>
         </Box>
         {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
     </Layout>

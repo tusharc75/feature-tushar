@@ -109,7 +109,7 @@ const ProductCategory = () => {
                     </Grid>
                 </Grid>
             </Box>
-            <Box height={window.innerHeight - 200}>
+            <div className="listing-grid">
                 <DataGrid
                     components={{
                         Toolbar: DataGridCustomToolbar,
@@ -123,7 +123,7 @@ const ProductCategory = () => {
                     pageSize={25}
                     density="compact"
                 />
-            </Box>
+            </div>
         </Box>
     </Layout>
     );
