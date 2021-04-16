@@ -46,7 +46,8 @@ function LeadsHeader(props) {
         }
     };
 
-    const { selectedType,
+    const {
+        selectedType,
         onTypeChange,
         options,
         onSearch,
@@ -54,7 +55,7 @@ function LeadsHeader(props) {
         onCreate,
         leadPermissions,
         showConfirmBox,
-        canDelete,
+        allowToDelete,
         icon,
         heading
     } = props
@@ -63,7 +64,7 @@ function LeadsHeader(props) {
             {icon} <span className="listingHeader">{heading}
             </span>
             {
-                options && <ToggleButtonGroup size="small" className="ml-8"
+                options && <ToggleButtonGroup size="small" className="ml-2"
                     value={filter}
                     exclusive
                     onChange={handleFilter}>
@@ -120,13 +121,21 @@ function LeadsHeader(props) {
                             }}
                             id="action-menu"
                             open={Boolean(anchorEl)}
-                            onClose={closeActions}>
-
-                            <MenuItem onClick={() => {
-                                closeActions();
-                                showConfirmBox(null)
-                            }}
+                            onClose={closeActions}
+                        >
+                            <MenuItem
+                                onClick={() => {
+                                    closeActions();
+                                    showConfirmBox(null)
+                                }}
+                                disabled={allowToDelete}
                             >Delete</MenuItem>
+
+                            {/* <MenuItem
+                                onClick={() => {
+                                    
+                                }}
+                            >Convert To Opportunity</MenuItem> */}
                         </Menu>
                     </>
                 }

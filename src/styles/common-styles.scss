@@ -42,32 +42,32 @@
     color: var(--white) !important;
 }
 
-$max: 50;
-$offset: 1;
+// $offset: 1;
+// $max: 50;
 
-@mixin list-loop($className, $styleName, $unit) {
-    $i: 0;
-    @while $i <= $max {
-        #{$className + $i} {
-            #{$styleName}: #{$i + $unit};
-        }
-        $i: $i + $offset;
-    }
-}
+// @mixin list-loop($className, $styleName, $unit) {
+//     $i: 0;
+//     @while $i <= $max {
+//         #{$className + $i} {
+//             #{$styleName}: #{$i + $unit} !important;
+//         }
+//         $i: $i + $offset;
+//     }
+// }
 
 // Margins
-@include list-loop(".mt-", "margin-top", "px");
-@include list-loop(".mr-", "margin-right", "px");
-@include list-loop(".mb-", "margin-bottom", "px");
-@include list-loop(".ml-", "margin-left", "px");
-@include list-loop(".m-", "margin", "px");
+// @include list-loop(".mt-", "margin-top", "px");
+// @include list-loop(".mr-", "margin-right", "px");
+// @include list-loop(".mb-", "margin-bottom", "px");
+// @include list-loop(".ml-", "margin-left", "px");
+// @include list-loop(".m-", "margin", "px");
 
-// Paddings
-@include list-loop(".pt-", "padding-top", "px");
-@include list-loop(".pr-", "padding-right", "px");
-@include list-loop(".pb-", "padding-bottom", "px");
-@include list-loop(".pl-", "padding-left", "px");
-@include list-loop(".p-", "padding", "px");
+// // Paddings
+// @include list-loop(".pt-", "padding-top", "px");
+// @include list-loop(".pr-", "padding-right", "px");
+// @include list-loop(".pb-", "padding-bottom", "px");
+// @include list-loop(".pl-", "padding-left", "px");
+// @include list-loop(".p-", "padding", "px");
 
 // Used below mixin to generate some fixed sized size
 
@@ -77,7 +77,7 @@ $sizes: 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
     $i: 1;
     @each $size in $sizes {
         #{$className + $i} {
-            #{$styleName}: #{$size};
+            #{$styleName}: #{$size} !important;
         }
         $i: $i + $offset;
     }
@@ -99,14 +99,128 @@ $sizes: 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 
 // Font size
 @include fixed-list-loop(".font-size-", "font-size", "rem");
-@include fixed-list-loop(".font-size-", "font-size", "rem");
-@include fixed-list-loop(".font-size-", "font-size", "rem");
-@include fixed-list-loop(".font-size-", "font-size", "rem");
-@include fixed-list-loop(".font-size-", "font-size", "rem");
 
 // Gap
 @include fixed-list-loop(".gap-", "gap", "rem");
-@include fixed-list-loop(".gap-", "gap", "rem");
-@include fixed-list-loop(".gap-", "gap", "rem");
-@include fixed-list-loop(".gap-", "gap", "rem");
-@include fixed-list-loop(".gap-", "gap", "rem");
+
+
+// Margin on x axis
+.mx-0 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.mx-1 {
+    margin-left: 0.25rem !important;
+    margin-right: 0.25rem !important;
+}
+.mx-2 {
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+}
+
+.mx-3 {
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+}
+
+.mx-4 {
+    margin-left: 1.5rem !important;
+    margin-right: 1.5rem !important;
+}
+
+.mx-5 {
+    margin-left: 3rem !important;
+    margin-right: 3rem !important;
+}
+
+// Margin on y axis
+
+.my-0 {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+.my-1 {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+}
+.my-2 {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.my-3 {
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.my-4 {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.my-5 {
+    margin-top: 3rem !important;
+    margin-bottom: 3rem !important;
+}
+
+// Padding on x axis
+.px-0 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.px-1 {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+}
+
+.px-2 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+.px-3 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+.px-4 {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
+.px-5 {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+}
+
+// Padding on y axis
+
+.py-0 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+.py-1 {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+.py-2 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+.py-3 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+}
+
+.py-4 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+
+.py-5 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
+

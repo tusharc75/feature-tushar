@@ -66,7 +66,7 @@ const ProductCategory = () => {
                 _field_data.fieldId = _field_data.fieldId.toString();
                 _field_data.sectionName = _section.sectionName
                 if (!isNaN(_field.fieldId)) {
-                    _field_data.fieldName = camelCase(_field.fieldLabel)
+                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z ]/g, ""))
                 }
                 _field_data.order = ++order
                 fields.push(_field_data)
@@ -116,7 +116,7 @@ const ProductCategory = () => {
         {initialValues ?
             <Fragment>
                 <Grid container direction="row">
-                    <Grid item xs={12} className="pl-2">
+                    <Grid item xs={12}>
                         <CustomBreadCrumbs routes={[{ title: "Product Category", path: productCategoryPage.path }, { title: id === "0" ? "New" : initialValues.name }]} />
                     </Grid>
                 </Grid>

@@ -44,7 +44,7 @@ const Roles = ({ unassignRole, data, permissions }) => {
                     primary={
                       <Typography className={classes.text}>
                         <Link
-                          className="accountNameLink"
+                          className="link"
                           to={`/role/detail/${obj._id}`}
                         >
                           {obj.name || ""}

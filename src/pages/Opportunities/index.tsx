@@ -251,7 +251,7 @@ const Opportunities = () => {
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <Link className="accountNameLink" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
+        <Link className="link" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
           {params?.row?.accountName?.optionLabel ? params.row.accountName.optionLabel : ''}
         </Link>
       )
@@ -494,7 +494,7 @@ const Opportunities = () => {
           <Grid item md={6} sm={12} xs={12}>
             <CustomBreadCrumbs routes={[routes.opportunity]} />
           </Grid>
-          <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center">
+          <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center bg-white">
             <Grid container direction="row">
               <Grid item xs={12} sm={12} className="pr-3">
                 <Grid container justify="flex-end">
@@ -658,6 +658,7 @@ const Opportunities = () => {
           onClose={() => { setShowCreateOpportunityDialog(false) }}
           isNew={true}
           dataToUpdate={null}
+          resource={null}
         />
       }
     </>
