@@ -68,7 +68,7 @@ export default function CustomDataGridNoDataFound() {
                         </g>
                     </g>
                 </svg>
-                <div className={classes.label}>No Data found!</div>
+                <div className={classes.label}>No Data Found!</div>
             </GridOverlay>
         </React.Fragment>
     );
