@@ -141,6 +141,7 @@ function App() {
           <PrivateRoute key="customer-contact" exact path="/customer-contact">
             <Contact
               contact={customerContact}
+              account={customerAccount}
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
@@ -171,6 +172,7 @@ function App() {
           <PrivateRoute key="supplier-contact" exact path="/supplier-contact">
             <Contact
               contact={supplierContact}
+              account={supplierAccount}
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>

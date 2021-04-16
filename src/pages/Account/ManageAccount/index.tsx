@@ -9,7 +9,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 export default function ManageAccountMain(props) {
   const toastConfig = useContext(CustomToastContext);
 
-  const { open, onClose, id, accountResource, accountApi } = props;
+  const { open, onClose, id, accountResource, accountApi, isGetAccountData, onGetAddedAccount } = props;
   const {
     state: { user },
   }: any = useData();
@@ -76,6 +76,7 @@ export default function ManageAccountMain(props) {
       .post(`/${accountApi}`, values)
       .then(({ data }) => {
         onClose({ fetch: true });
+        if (isGetAccountData) onGetAddedAccount(data)
         toastConfig.setToastConfig({
           open: true,
           type: "success",

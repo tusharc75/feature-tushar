@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
-import { commonStyle } from '../CommonStyles'
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -13,12 +13,13 @@ import Dialog from '@material-ui/core/Dialog'
 import _ from 'lodash'
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { AddOutlined } from '@material-ui/icons';
 
 const arr = [...Array(9).keys()]
 
 export default function ManageContact(props) {
 
-    const { entityData, handleSubmit, onClose, open, isNew, loading } = props
+    const { entityData, handleSubmit, onClose, open, isNew, loading, onCreateAccount, accountSource } = props
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user } }: any = useData();
@@ -29,6 +30,7 @@ export default function ManageContact(props) {
     const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+
 
     useEffect(() => {
         if (entityData.fields.length > 0) {
@@ -83,7 +85,9 @@ export default function ManageContact(props) {
         }
 
     }
-
+    let customAccountSource = [...accountSource,
+    { isCreateNew: true, optionValue: "", optionLabel: "", default: false }
+    ]
     return (<>
         <Dialog
             disableBackdropClick={true}
@@ -159,21 +163,40 @@ export default function ManageContact(props) {
                                                                                         isTooltip={true}
                                                                                         size="small"
                                                                                         onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
-                                                                                    /> : <FormTypes
-                                                                                        // {...rest}
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={field.option}
-                                                                                        setFieldValue={setFieldValue}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={true}
-                                                                                        size="small"
-                                                                                    />
+                                                                                    /> : field.fieldName == "accountName" ?
+                                                                                        <FormTypes
+                                                                                            values={values}
+                                                                                            errors={errors}
+                                                                                            touched={touched}
+                                                                                            label={field.fieldLabel}
+                                                                                            name={field.fieldName}
+                                                                                            type={field.type}
+                                                                                            options={customAccountSource}
+                                                                                            setFieldValue={setFieldValue}
+                                                                                            required={field.required}
+                                                                                            fullWidth
+                                                                                            isTooltip={true}
+                                                                                            size="small"
+                                                                                            renderOption={(option) => option ? option.isCreateNew ? (<span>
+                                                                                                <Button startIcon={<AddOutlined />}
+                                                                                                    onClick={onCreateAccount} >Create Account</Button>
+                                                                                            </span>) : <Typography>{option.optionLabel || ""}</Typography> : ""
+                                                                                            }
+                                                                                        />
+                                                                                        : <FormTypes
+                                                                                            values={values}
+                                                                                            errors={errors}
+                                                                                            touched={touched}
+                                                                                            label={field.fieldLabel}
+                                                                                            name={field.fieldName}
+                                                                                            type={field.type}
+                                                                                            options={field.option}
+                                                                                            setFieldValue={setFieldValue}
+                                                                                            required={field.required}
+                                                                                            fullWidth
+                                                                                            isTooltip={true}
+                                                                                            size="small"
+                                                                                        />
                                                                         }
 
                                                                     </Grid>
@@ -183,8 +206,6 @@ export default function ManageContact(props) {
                                                     </div>
                                                 ))
                                             }
-
-
                                         </Form>
                                     </CustomDialogContent>
                                     <CustomDialogFooter>

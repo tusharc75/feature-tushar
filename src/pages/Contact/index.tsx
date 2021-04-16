@@ -74,7 +74,9 @@ export default function Contact(props) {
     const classes = useStyles();
 
     const { state: { user } }: any = useData();
-    const { contact: { contactApi, contactResource, contactPermission, contactRoute }, contactBreadcrumb } = props;
+    const { contact: { contactApi, contactResource, contactPermission, contactRoute }, contactBreadcrumb,
+        account
+    } = props;
     const [selectedType, setselectedType] = useState(1)
     const [contactData, setContactData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -654,13 +656,6 @@ export default function Contact(props) {
 
                     {
                         showCreateContactDialog && <ManageContactDialog
-                            // open={showCreateContactDialog}
-                            // onClose={() => setShowCreateContactDialog(false)}
-                            // onSuccess={() => {
-                            //     setShowCreateContactDialog(false);
-                            //     getContacts();
-                            // }}
-                            // entityDetails={createContactEntityDetails}
                             open={showCreateContactDialog}
                             onClose={() => setShowCreateContactDialog(false)}
                             onSuccess={() => {
@@ -669,6 +664,7 @@ export default function Contact(props) {
                             }}
                             contactResource={contactResource}
                             contactApi={contactApi}
+                            account={account}
                         />
                     }
 
