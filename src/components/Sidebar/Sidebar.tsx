@@ -10,6 +10,7 @@ import {
   ListItemText,
   Toolbar,
   Collapse,
+  ListItemIcon,
 } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
 import Header from "../Header/Header";
@@ -22,6 +23,9 @@ import {
   ExpandLess,
 } from "@material-ui/icons";
 import _ from "lodash";
+import { FaUserTie, FaDatabase, FaHandshake } from 'react-icons/fa';
+import { BsCalendarFill, BsFillPuzzleFill } from 'react-icons/bs';
+import { MdDashboard, MdLocalActivity } from 'react-icons/md';
 
 const drawerWidth = 240;
 
@@ -89,7 +93,28 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split("/").filter((x) => x);
-
+  const iconMapping = [
+    {
+      key: 'Brand Admin',
+      icon: <FaUserTie size={15} className="sidebar-icon" />
+    },
+    {
+      key: 'Master Data',
+      icon: <FaDatabase size={15} className="sidebar-icon" />
+    },
+    {
+      key: 'Admin Portal',
+      icon: <BsCalendarFill size={15} className="sidebar-icon" />
+    },
+    {
+      key: 'CRM',
+      icon: <FaHandshake size={15} className="sidebar-icon" />
+    },
+    {
+      key: 'Activities Management',
+      icon: <BsFillPuzzleFill size={15} className="sidebar-icon" />
+    }
+  ]
   const handleToggleDrawer = () => {
     setToggleDrawer(!toggleDrawer);
   };
@@ -131,7 +156,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             (list) => list.sectionName === section
           );
         }
-
         const items = [...lists, ...enitityList].filter(
           (item) => item.isRead === true
         );
@@ -175,25 +199,36 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             [classes.hide]: !toggleDrawer,
           })}
         >
-          <List>
+          <List className="sidebar-list">
             <Link to="/">
-              <ListItem button selected={location.pathname === "/"}>
+              <ListItem button selected={location.pathname === "/"} className="list-item">
+                <ListItemIcon>
+                  <MdDashboard size={15} className="sidebar-icon" />
+                </ListItemIcon>
                 <ListItemText primary="Dashboard" />
               </ListItem>
             </Link>
             <Link to="/activity">
-              <ListItem button selected={pathnames[0] === "activity"}>
+              <ListItem button selected={pathnames[0] === "activity"} className="list-item">
+                <ListItemIcon>
+                  <MdLocalActivity size={15} className="sidebar-icon" />
+                </ListItemIcon>
                 <ListItemText primary="Activities" />
               </ListItem>
             </Link>
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>
-                  <ListItem
+                  <ListItem className="list-item"
                     button
                     key={listItem.section + "" + i}
-                    onClick={() => handleCollapse(listItem.section)}
-                  >
+                    onClick={() => handleCollapse(listItem.section)} >
+                    <ListItemIcon >
+                      {iconMapping.find((mapping) => {
+                        return (mapping.key === listItem.section)
+                      })?.icon
+                      }
+                    </ListItemIcon>
                     <ListItemText primary={listItem.section} />
                     {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                   </ListItem>
@@ -202,19 +237,17 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     timeout="auto"
                     unmountOnExit
                   >
-                    <List component="div" disablePadding>
+                    <List component="div" disablePadding className="list-item">
                       {listItem.items.map((item, j) => (
-                        <Link
+                        <Link className="sub-list"
                           key={j}
-                          to={`/${_.kebabCase(_.lowerCase(item.name))}`}
-                        >
+                          to={`/${_.kebabCase(_.lowerCase(item.name))}`}>
                           <ListItem
                             button
                             selected={pathnames.includes(
                               _.lowerCase(item.name)
                             )}
-                            className={classes.nested}
-                          >
+                            className={classes.nested}>
                             <ListItemText primary={item.name} />
                           </ListItem>
                         </Link>
