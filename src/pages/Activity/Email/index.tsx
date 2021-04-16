@@ -11,7 +11,7 @@ import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import DataGridCustomToolbar from "../../../components/Helpers/DataGridCustomToolbar";
-
+import CustomDataGridNoDataFound from "../../../components/Helpers/CustomDataGridNoDataFound";
 
 const Email = () => {
 
@@ -84,10 +84,11 @@ const Email = () => {
                     </Grid>
                 </Grid>
             </Box>
-            <Box height={500}>
+            <div className="listing-grid">
                 <DataGrid
                     components={{
                         Toolbar: DataGridCustomToolbar,
+                        NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
                     rows={emails}
@@ -97,7 +98,7 @@ const Email = () => {
                     pageSize={10}
                     density="compact"
                 />
-            </Box>
+            </div>
         </Box>
     </Layout>
     );

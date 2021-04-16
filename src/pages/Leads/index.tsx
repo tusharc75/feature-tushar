@@ -31,7 +31,7 @@ import { lead } from '../../constants/helpers'
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import { SiConvertio } from 'react-icons/si';
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import "./style.scss";
 
 const useStyles = makeStyles((theme) => ({
@@ -574,6 +574,7 @@ const Leads = () => {
           <DataGrid
             components={{
               Toolbar: DataGridCustomToolbar,
+              NoRowsOverlay: CustomDataGridNoDataFound,
             }}
             rows={loading ? [] : dataRows}
             columns={columns}
