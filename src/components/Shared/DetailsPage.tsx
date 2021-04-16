@@ -73,7 +73,6 @@ const Details = (props: DetailProps) => {
         },
       })
       .then(({ data }) => {
-        console.log(data);
         setToastConfig({
           message: "File Downloaded",
           type: "success",
@@ -86,7 +85,6 @@ const Details = (props: DetailProps) => {
         setToastConfig(err);
         setDownloading(false);
         setProgress(0);
-        console.log(err);
       });
   };
 
