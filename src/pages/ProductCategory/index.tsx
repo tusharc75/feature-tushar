@@ -16,7 +16,7 @@ import { productCategoryPage } from '../../routes/ProductCategory'
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const ProductCategory = () => {
 
@@ -113,6 +113,7 @@ const ProductCategory = () => {
                 <DataGrid
                     components={{
                         Toolbar: DataGridCustomToolbar,
+                        NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
                     rows={productCategory}

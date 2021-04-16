@@ -12,6 +12,7 @@ import moment from "moment";
 import ActivityModelHandler from "../../../components/Activity/ActivityModelHandler";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import DataGridCustomToolbar from "../../../components/Helpers/DataGridCustomToolbar";
+import CustomDataGridNoDataFound from "../../../components/Helpers/CustomDataGridNoDataFound";
 
 const Note = () => {
 
@@ -110,6 +111,7 @@ const Note = () => {
                 <DataGrid
                     components={{
                         Toolbar: DataGridCustomToolbar,
+                        NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
                     rows={notes}

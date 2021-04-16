@@ -29,6 +29,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -509,6 +510,7 @@ const User: FC = () => {
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingUsers}
               rows={loadingUsers ? [] : dataRows}

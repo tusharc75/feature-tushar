@@ -5,7 +5,7 @@ import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import { useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { DataGrid } from "@material-ui/data-grid";
+import { DataGrid, GridOverlay } from "@material-ui/data-grid";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -17,10 +17,10 @@ import axiosInstance from "../../axios/axiosInstance";
 import CreateProduct from "../../components/Product/CreateProduct";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-
+import { GiAbstract055 } from 'react-icons/gi';
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const Product = () => {
-
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const [loading, setLoading] = useState(true);
@@ -157,30 +157,32 @@ const Product = () => {
                 <CustomBreadCrumbs routes={[{ title: "Product" }]} />
             </Grid>
         </Grid>
-        <Box mt={1} p={2} pt={1} pl={1} bgcolor="white" >
-            <Box mb={2} mt={1}>
-                <Grid container>
-                    <Grid xs={12} container justify="flex-end">
-                        <Button onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                    </Grid>
+        <div className="header-panel">
+            <Grid container>
+                <Grid item xs={6} className="d-flex align-items-center gap-1">
+                    <GiAbstract055 /> <span className="listingHeader">Products </span>
                 </Grid>
-            </Box>
-            <Box height={window.innerHeight - 200}>
-                <DataGrid
-                    components={{
-                        Toolbar: DataGridCustomToolbar,
-                    }}
-                    loading={loading}
-                    rows={product}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={25}
-                    density="compact"
-                />
-            </Box>
-            {open && <CreateProduct productId={productId} handleClose={handleClose} />}
+                <Grid xs={6} container justify="flex-end">
+                    <Button onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                </Grid>
+            </Grid>
+        </div>
+        <Box height={window.innerHeight - 200}>
+            <DataGrid
+                components={{
+                    Toolbar: DataGridCustomToolbar,
+                    NoRowsOverlay: CustomDataGridNoDataFound,
+                }}
+                loading={loading}
+                rows={product}
+                disableSelectionOnClick
+                disableMultipleSelection
+                columns={columns}
+                pageSize={25}
+                density="compact"
+            />
         </Box>
+        {open && <CreateProduct productId={productId} handleClose={handleClose} />}
     </Layout>
     );
 }
