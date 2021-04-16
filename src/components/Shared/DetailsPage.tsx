@@ -10,8 +10,11 @@ import {
   Avatar,
   IconButton,
   CircularProgress,
+  Link as MuiLink,
 } from "@material-ui/core";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
+import { Link } from "react-router-dom";
+import { kebabCase } from "lodash";
 
 import { getObjKeysWithValues, yyyyMMDD } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";
@@ -111,9 +114,7 @@ const Details = (props: DetailProps) => {
     } else if (input.type === "switch") {
       text = values[input.fieldName] ? "Inactive" : "Active";
     } else if (input.type === "checkBox") {
-      text = values[input.fieldName] == true
-        ? "Yes"
-        : "No"
+      text = values[input.fieldName] == true ? "Yes" : "No";
     } else if (input.type === "date") {
       text = yyyyMMDD(values[input.fieldName]);
     } else {
@@ -143,6 +144,62 @@ const Details = (props: DetailProps) => {
 
   const dynamicSize = (size, type) =>
     type === "imageUpload" || type === "fileUpload" ? 12 : size;
+
+  const renderData = (val: any, fieldData: any) => {
+    if (fieldData.hasOwnProperty("lookup") && fieldData.lookup) {
+      const redirectLink = (link) =>
+        val[fieldData.fieldName]
+          ? `/${kebabCase(fieldData.lookupResource)}/detail/${link}`
+          : "!#";
+
+      if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
+        return (
+          <Typography className={classes.fieldText} variant="body2">
+            {Array.isArray(data[fieldData.fieldName]) ? (
+              data[fieldData.fieldName].length ? (
+                data[fieldData.fieldName].map((_val) => (
+                  <>
+                    <MuiLink
+                      component={Link}
+                      to={redirectLink(_val.optionValue)}
+                    >
+                      {_val.optionLabel}
+                    </MuiLink>
+                    <Box component="span" marginX={1} />
+                  </>
+                ))
+              ) : (
+                "_ _ _"
+              )
+            ) : data[fieldData.fieldName] ? (
+              <MuiLink
+                component={Link}
+                to={redirectLink(data[fieldData.fieldName].optionValue)}
+              >
+                {data[fieldData.fieldName].optionLabel}
+              </MuiLink>
+            ) : (
+              "_ _ _"
+            )}
+          </Typography>
+        );
+      }
+    } else {
+      return (
+        <Typography
+          title={
+            normalizeValues(val, fieldData) === "_ _ _"
+              ? ""
+              : normalizeValues(val, fieldData)
+          }
+          className={classes.fieldText}
+          variant="body2"
+        >
+          {normalizeValues(val, fieldData)}
+        </Typography>
+      );
+    }
+  };
 
   return (
     <>
@@ -202,70 +259,60 @@ const Details = (props: DetailProps) => {
                     ) : (
                       <Box display="flex" alignItems="center">
                         {field.fieldData.type === "fileUpload" &&
-                          initialVals[field.fieldData.fieldName] ? (
+                        initialVals[field.fieldData.fieldName] ? (
                           <InsertDriveFile />
                         ) : null}{" "}
-                        <Typography
-                          title={
-                            normalizeValues(initialVals, field.fieldData) ===
-                              "_ _ _"
-                              ? ""
-                              : normalizeValues(initialVals, field.fieldData)
-                          }
-                          className={classes.fieldText}
-                          variant="body2"
-                        >
-                          {normalizeValues(initialVals, field.fieldData)}
-                        </Typography>
+                        {renderData(initialVals, field.fieldData)}
                         {field.fieldData.type === "fileUpload"
                           ? initialVals[field.fieldData.fieldName] && (
-                            <IconButton
-                              title={`Download ${initialVals[field.fieldData.fieldName]
+                              <IconButton
+                                title={`Download ${
+                                  initialVals[field.fieldData.fieldName]
                                 }`}
-                              disabled={isDownloading}
-                              size="small"
-                              onClick={() =>
-                                downloadFile(
-                                  normalizeValues(
-                                    initialVals,
-                                    field.fieldData
+                                disabled={isDownloading}
+                                size="small"
+                                onClick={() =>
+                                  downloadFile(
+                                    normalizeValues(
+                                      initialVals,
+                                      field.fieldData
+                                    )
                                   )
-                                )
-                              }
-                            >
-                              {isDownloading ? (
-                                <Box
-                                  position="relative"
-                                  display="inline-flex"
-                                >
-                                  <CircularProgress
-                                    variant="determinate"
-                                    value={progress}
-                                    size={30}
-                                    color="inherit"
-                                  />
+                                }
+                              >
+                                {isDownloading ? (
                                   <Box
-                                    top={0}
-                                    left={0}
-                                    bottom={0}
-                                    right={0}
-                                    position="absolute"
-                                    display="flex"
-                                    alignItems="center"
-                                    justifyContent="center"
+                                    position="relative"
+                                    display="inline-flex"
                                   >
-                                    <Typography
-                                      variant="caption"
-                                      component="div"
-                                      color="textSecondary"
-                                    >{`${Math.round(progress)}%`}</Typography>
+                                    <CircularProgress
+                                      variant="determinate"
+                                      value={progress}
+                                      size={30}
+                                      color="inherit"
+                                    />
+                                    <Box
+                                      top={0}
+                                      left={0}
+                                      bottom={0}
+                                      right={0}
+                                      position="absolute"
+                                      display="flex"
+                                      alignItems="center"
+                                      justifyContent="center"
+                                    >
+                                      <Typography
+                                        variant="caption"
+                                        component="div"
+                                        color="textSecondary"
+                                      >{`${Math.round(progress)}%`}</Typography>
+                                    </Box>
                                   </Box>
-                                </Box>
-                              ) : (
-                                <GetApp />
-                              )}
-                            </IconButton>
-                          )
+                                ) : (
+                                  <GetApp />
+                                )}
+                              </IconButton>
+                            )
                           : null}{" "}
                       </Box>
                     )}

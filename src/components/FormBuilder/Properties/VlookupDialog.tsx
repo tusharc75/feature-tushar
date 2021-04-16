@@ -176,8 +176,8 @@ export const VlookupDialog = ({ open, handleClose, fieldData, sectionId, section
               >
                 {section.map((_section) => (
                   _section.field.map((_field) => (_field.fieldId !== fieldData.fieldId &&
-                    <MenuItem key={_field.fieldName} value={_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)}>
-                      <Checkbox color="primary" checked={reletedTo.indexOf(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)) > -1} />
+                    <MenuItem key={_field.fieldName} value={_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel.replace(/[^a-zA-Z ]/g, ""))}>
+                      <Checkbox color="primary" checked={reletedTo.indexOf(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel.replace(/[^a-zA-Z ]/g, ""))) > -1} />
                       <ListItemText primary={_field.fieldLabel} />
                     </MenuItem>
                   ))
