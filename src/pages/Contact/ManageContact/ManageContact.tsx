@@ -51,7 +51,7 @@ export default function ManageContact(props) {
         }
     }, [entityData.fields]);
 
-   
+
 
     const sortArray = () => {
         const sections = [];
@@ -198,11 +198,14 @@ export default function ManageContact(props) {
                                                                                                     </IconButton>
                                                                                                 </Tooltip>
                                                                                             </Grid>
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip title={field?.tooltipMessage ?? ""}>
-                                                                                                    <InfoIcon color="disabled" />
-                                                                                                </Tooltip>
-                                                                                            </Grid>
+                                                                                            {
+                                                                                                field?.tooltipMessage ?
+                                                                                                    <Grid item xs={1} sm={1} md={1}>
+                                                                                                        <Tooltip title={field?.tooltipMessage ?? ""}>
+                                                                                                            <InfoIcon color="disabled" />
+                                                                                                        </Tooltip>
+                                                                                                    </Grid> : null
+                                                                                            }
                                                                                         </Grid>
                                                                                         : <FormTypes
                                                                                             values={values}
@@ -239,8 +242,8 @@ export default function ManageContact(props) {
                                             color="primary"
 
                                             disabled={
-                                                loading || Object.values(simplifyValues(entityData.initialValues,entityData.fields)).toString() ===
-                                                Object.values(simplifyValues(values,entityData.fields)).toString()
+                                                loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                                                Object.values(simplifyValues(values, entityData.fields)).toString()
                                                 // || Object.keys(errors).length > 0 ? true : false
 
                                             }
