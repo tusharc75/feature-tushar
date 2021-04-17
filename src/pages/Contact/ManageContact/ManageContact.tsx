@@ -38,7 +38,6 @@ export default function ManageContact(props) {
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
 
-
     useEffect(() => {
         if (entityData.fields.length > 0) {
             const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
@@ -172,7 +171,7 @@ export default function ManageContact(props) {
                                                                                         isTooltip={true}
                                                                                         size="small"
                                                                                         onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
-                                                                                    /> : field.fieldName == "accountName" ?
+                                                                                    /> : field.fieldName == "accountName" && accountSource !== undefined ?
                                                                                         <Grid container spacing={1} alignItems="center">
                                                                                             <Grid item xs={10} sm={10} md={10} >
                                                                                                 <FormTypes
@@ -186,7 +185,7 @@ export default function ManageContact(props) {
                                                                                                     setFieldValue={setFieldValue}
                                                                                                     required={field.required}
                                                                                                     fullWidth
-                                                                                                    isTooltip={false}
+                                                                                                    isTooltip={true}
                                                                                                     size="small"
                                                                                                     doNotShowInfoTooltip={true}
                                                                                                 />
@@ -198,14 +197,6 @@ export default function ManageContact(props) {
                                                                                                     </IconButton>
                                                                                                 </Tooltip>
                                                                                             </Grid>
-                                                                                            {
-                                                                                                field?.tooltipMessage ?
-                                                                                                    <Grid item xs={1} sm={1} md={1}>
-                                                                                                        <Tooltip title={field?.tooltipMessage ?? ""}>
-                                                                                                            <InfoIcon color="disabled" />
-                                                                                                        </Tooltip>
-                                                                                                    </Grid> : null
-                                                                                            }
                                                                                         </Grid>
                                                                                         : <FormTypes
                                                                                             values={values}
