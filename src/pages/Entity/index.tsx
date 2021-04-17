@@ -33,6 +33,7 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
@@ -513,6 +514,7 @@ const Entity: FC = () => {
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingEntities}
               rows={loadingEntities ? [] : dataRows}

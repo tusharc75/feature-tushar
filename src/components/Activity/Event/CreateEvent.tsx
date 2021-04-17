@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -24,6 +24,7 @@ import PropTypes from 'prop-types'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
 const EventSchema = Yup.object().shape({
     name: Yup.string()
@@ -59,6 +60,7 @@ const MenuProps = {
 export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
     const [initialValues, setInitialValues] = useState(null);
+    const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
         fetchEventDetail();
@@ -79,22 +81,38 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     };
 
     const handleSave = (values) => {
-        values.relatedTo = relatedTo;
-        if (eventId) {
-            UpdateEvent(eventId, values)
-                .then(({ data }) => {
-                    handleClose()
-                })
-                .catch((err) => {
-                });
+        if (Object.values(values.startDate).toString() ===
+            Object.values(values.endDate).toString()
+            && values.startTime == values.endTime
+        ) {
+            toastConfig.setToastConfig({
+                open: true,
+                type: "error",
+                message: "Start Time and End Time should be different",
+            });
+            handleClose()
+
         }
         else {
-            CreateNewEvent(values)
-                .then(({ data }) => {
-                    handleClose()
-                })
-                .catch((err) => {
-                });
+            values.relatedTo = relatedTo;
+            if (eventId) {
+                UpdateEvent(eventId, values)
+                    .then(({ data }) => {
+                        handleClose()
+                    })
+                    .catch((error) => {
+                        toastConfig.setToastConfig(error)
+                    });
+            }
+            else {
+                CreateNewEvent(values)
+                    .then(({ data }) => {
+                        handleClose()
+                    })
+                    .catch((error) => {
+                        toastConfig.setToastConfig(error)
+                    });
+            }
         }
     };
 
