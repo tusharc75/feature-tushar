@@ -44,7 +44,7 @@ export default function ManageContactMain(props) {
           .filter((d) => d.isCreate)
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
-            if (accountId) {
+            if (accountId && _f.fieldData.fieldName === "accountName") {
               _f = initializeDropdownById(_f, "accountName", accountId);
             }
 
