@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
@@ -13,14 +13,21 @@ import Dialog from '@material-ui/core/Dialog'
 import _ from 'lodash'
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { AddOutlined } from '@material-ui/icons';
+import AddIcon from '@material-ui/icons/AddCircle'
+import InfoIcon from "@material-ui/icons/Info";
+import { makeStyles } from "@material-ui/core/styles";
 
 const arr = [...Array(9).keys()]
 
+const useStyles = makeStyles((theme) => ({
+    createAccountTooltip: {
+        marginBottom: "6px"
+    }
+}));
 export default function ManageContact(props) {
 
     const { entityData, handleSubmit, onClose, open, isNew, loading, onCreateAccount, accountSource } = props
-
+    const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const { state: { user } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
@@ -85,9 +92,9 @@ export default function ManageContact(props) {
         }
 
     }
-    let customAccountSource = [...accountSource,
-    { isCreateNew: true, optionValue: "", optionLabel: "", default: false }
-    ]
+    // let customAccountSource = [...accountSource,
+    // { isCreateNew: true, optionValue: "", optionLabel: "", default: false }
+    // ]
     return (<>
         <Dialog
             disableBackdropClick={true}
@@ -164,25 +171,37 @@ export default function ManageContact(props) {
                                                                                         size="small"
                                                                                         onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
                                                                                     /> : field.fieldName == "accountName" ?
-                                                                                        <FormTypes
-                                                                                            values={values}
-                                                                                            errors={errors}
-                                                                                            touched={touched}
-                                                                                            label={field.fieldLabel}
-                                                                                            name={field.fieldName}
-                                                                                            type={field.type}
-                                                                                            options={customAccountSource}
-                                                                                            setFieldValue={setFieldValue}
-                                                                                            required={field.required}
-                                                                                            fullWidth
-                                                                                            isTooltip={true}
-                                                                                            size="small"
-                                                                                            renderOption={(option) => option ? option.isCreateNew ? (<span>
-                                                                                                <Button startIcon={<AddOutlined />}
-                                                                                                    onClick={onCreateAccount} >Create Account</Button>
-                                                                                            </span>) : <Typography>{option.optionLabel || ""}</Typography> : ""
-                                                                                            }
-                                                                                        />
+                                                                                        <Grid container spacing={1} alignItems="center">
+                                                                                            <Grid item xs={10} sm={10} md={10} >
+                                                                                                <FormTypes
+                                                                                                    values={values}
+                                                                                                    errors={errors}
+                                                                                                    touched={touched}
+                                                                                                    label={field.fieldLabel}
+                                                                                                    name={field.fieldName}
+                                                                                                    type={field.type}
+                                                                                                    options={accountSource}
+                                                                                                    setFieldValue={setFieldValue}
+                                                                                                    required={field.required}
+                                                                                                    fullWidth
+                                                                                                    isTooltip={false}
+                                                                                                    size="small"
+                                                                                                    doNotShowInfoTooltip={true}
+                                                                                                />
+                                                                                            </Grid>
+                                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                                <Tooltip title="Create Account" className={classes.createAccountTooltip} >
+                                                                                                    <IconButton onClick={onCreateAccount} size="small">
+                                                                                                        <AddIcon color="primary" />
+                                                                                                    </IconButton>
+                                                                                                </Tooltip>
+                                                                                            </Grid>
+                                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                                <Tooltip title={field?.tooltipMessage ?? ""}>
+                                                                                                    <InfoIcon color="disabled" />
+                                                                                                </Tooltip>
+                                                                                            </Grid>
+                                                                                        </Grid>
                                                                                         : <FormTypes
                                                                                             values={values}
                                                                                             errors={errors}
