@@ -9,6 +9,11 @@ export default (history = null) => {
         headers.Authorization = `Bearer ${localStorage.token}`;
     }
 
+    const entityId = localStorage.getItem("selectedEntity");
+    if (entityId) {
+        headers.entity = entityId;
+    }
+
     const axiosInstance = axios.create({
         baseURL: baseURL,
         headers

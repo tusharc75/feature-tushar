@@ -61,6 +61,7 @@ export default function ManageAccountMain(props) {
         data
           .filter((d) => d.isCreate)
           .map((_f) => newFields.push(_f.fieldData));
+          
         setEntityData({
           fields: newFields,
           initialValues: getObjKeys("", newFields),

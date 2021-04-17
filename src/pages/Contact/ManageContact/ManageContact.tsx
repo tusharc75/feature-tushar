@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Box, Button, Grid, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
 import { Formik, Form } from "formik";
-import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, yupSchema } from '../../../constants/helpers';
+import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, simplifyValues, yupSchema } from '../../../constants/helpers';
 import CustomButton from '../../../components/Helpers/Button'
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
@@ -50,6 +50,8 @@ export default function ManageContact(props) {
             sortArray();
         }
     }, [entityData.fields]);
+
+   
 
     const sortArray = () => {
         const sections = [];
@@ -232,18 +234,23 @@ export default function ManageContact(props) {
                                             Cancel
                                              </Button>
 
-                                        <CustomButton
-                                            loading={loading}
+                                        <Button
                                             variant="contained"
                                             color="primary"
-                                            disabled={loading || Object.keys(errors).length > 0 ? true : false}
+
+                                            disabled={
+                                                loading || Object.values(simplifyValues(entityData.initialValues,entityData.fields)).toString() ===
+                                                Object.values(simplifyValues(values,entityData.fields)).toString()
+                                                // || Object.keys(errors).length > 0 ? true : false
+
+                                            }
                                             onClick={(e) => {
                                                 e.preventDefault()
                                                 onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm, errors)
                                             }}
                                         >
                                             Save
-                                    </CustomButton>
+                                        </Button>
                                     </CustomDialogFooter>
                                 </>
                             )}

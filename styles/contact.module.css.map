@@ -1,9 +1,0 @@
-{
-    "version": 3,
-    "mappings": "AAEA,AAAA,YAAY,CAAC;EACX,gBAAgB,EAAE,gBAAgB;CACnC;;AACD,MAAM,MAAM,MAAM,MAAM,SAAS,EAAE,KAAK;EACtC,AAAA,YAAY,CAAA;IACV,KAAK,EAAE,eAAe;GACvB;;;AAIH,AAAA,iBAAiB,CAAC;EAChB,OAAO,EAAE,IAAI;EACb,gBAAgB,EAAE,YAAY;EAC9B,aAAa,EAAE,IAAI;EACnB,UAAU,EAAE,IAAI;EAChB,aAAa,EAAE,GAAG;EAClB,OAAO,EAAE,IAAI;EACb,cAAc,EAAE,MAAM;EACtB,GAAG,EAAE,GAAG;CACT",
-    "sources": [
-        "../src/pages/Contact/contact.module.scss"
-    ],
-    "names": [],
-    "file": "contact.module.css"
-}

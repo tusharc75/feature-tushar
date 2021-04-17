@@ -73,7 +73,6 @@ const Details = (props: DetailProps) => {
         },
       })
       .then(({ data }) => {
-        console.log(data);
         setToastConfig({
           message: "File Downloaded",
           type: "success",
@@ -86,7 +85,6 @@ const Details = (props: DetailProps) => {
         setToastConfig(err);
         setDownloading(false);
         setProgress(0);
-        console.log(err);
       });
   };
 
@@ -146,19 +144,19 @@ const Details = (props: DetailProps) => {
     type === "imageUpload" || type === "fileUpload" ? 12 : size;
 
   const renderData = (val: any, fieldData: any) => {
+    const values = normalizeValues(val, fieldData);
+
     if (fieldData.hasOwnProperty("lookup") && fieldData.lookup) {
-      const redirectLink = (link) =>
-        val[fieldData.fieldName]
-          ? `/${kebabCase(fieldData.lookupResource)}/detail/${link}`
-          : "!#";
+      const redirectLink = (link: string) =>
+        `/${kebabCase(fieldData.lookupResource)}/detail/${link}`;
 
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
         return (
           <Typography className={classes.fieldText} variant="body2">
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
-                data[fieldData.fieldName].map((_val) => (
-                  <>
+                data[fieldData.fieldName].map((_val: any) => (
+                  <React.Fragment key={_val.optionValue}>
                     <MuiLink
                       component={Link}
                       to={redirectLink(_val.optionValue)}
@@ -166,7 +164,7 @@ const Details = (props: DetailProps) => {
                       {_val.optionLabel}
                     </MuiLink>
                     <Box component="span" marginX={1} />
-                  </>
+                  </React.Fragment>
                 ))
               ) : (
                 "_ _ _"
@@ -187,15 +185,11 @@ const Details = (props: DetailProps) => {
     } else {
       return (
         <Typography
-          title={
-            normalizeValues(val, fieldData) === "_ _ _"
-              ? ""
-              : normalizeValues(val, fieldData)
-          }
+          title={values === "_ _ _" ? "" : values}
           className={classes.fieldText}
           variant="body2"
         >
-          {normalizeValues(val, fieldData)}
+          {values}
         </Typography>
       );
     }

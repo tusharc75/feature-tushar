@@ -3,11 +3,29 @@
   --primary-light: #003f57;
   --secondary: #dc004e;
   --error: #df2e18;
-  --info: #2196f3;
-  --success: #4caf50;
+  --info: #03afe2;
+  --success: #28a745;
   --link: #007bff;
   --white: #ffffff;
   --aliceblue: aliceblue;
+
+  --warning: #ffa200;
+  --white: #fff;
+  --warning-light: #ffc766;
+  --black: #000;
+  --success-light: #5dd879;
+  --success-dark: #1e7e34;
+  --skin: #ff937a;
+  --text: #fff;
+  --lightgray: #a5a3a3;
+  --brown: #865603;
+  --warning-darken: #cc8200;
+  --info-dark: #0288b0;
+  --info-darken: #02617d;
+  --danger-light: #ea5240;
+  --teal: #1e7682;
+  --theme-text: #fff;
+  --grey: #838485;
 }
 
 * {
@@ -21,7 +39,8 @@ html {
 }
 
 body {
-  font-family: Nunito Sans, sans-serif !important;
+  font-family: Nunito Sans,sans-serif!important;
+  background-color: var(--aliceblue) !important;
 }
 
 /* Let's get this party started */
@@ -318,4 +337,8 @@ body::-webkit-scrollbar-thumb {
 
 .text-center {
   text-align: center !important;
+}
+
+.bg-white {
+  background: var(--white) !important;
 }

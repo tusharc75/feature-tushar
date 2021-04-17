@@ -46,7 +46,6 @@ const CreateEntity = ({ open, close, fetchData }) => {
           values: getObjKeys("", fieldsData),
         });
         setLoading(false);
-        console.log(data);
       })
       .catch((err) => {
         setLoading(false);
@@ -58,7 +57,6 @@ const CreateEntity = ({ open, close, fetchData }) => {
     axiosInstance()
       .post("/entity", values)
       .then(({ data }) => {
-        console.log(data);
         setSubmitting(false);
         fetchData();
         close();

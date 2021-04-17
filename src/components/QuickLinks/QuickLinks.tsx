@@ -13,7 +13,7 @@ export interface IQuickLinks {
 
 export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
 
-    return quickLinks && Array.isArray(quickLinks) ? <div className="d-flex flex-column gap-2 m-1">
+    return quickLinks && Array.isArray(quickLinks) ? <div className="d-flex flex-column gap-2 px-3 pt-2 pb-3 bg-white">
         <Typography variant="h6" className="mb-1">{title}</Typography>
         {
             quickLinks.map((k, index) => {

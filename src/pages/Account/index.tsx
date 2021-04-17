@@ -38,6 +38,7 @@ import { getSearchQuery } from '../../services/util';
 import { accountTemplateFileName, downloadExcel, accountImportErrorFileName, sidebarResource } from '../../constants/helpers';
 import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
+import CustomDataGridNoDataFound from '../../components/Helpers/CustomDataGridNoDataFound';
 
 const AccTypes = [
     {
@@ -550,7 +551,7 @@ export default function Account(props) {
                     <Grid item md={6} sm={12} xs={12}>
                         <CustomBreadCrumbs routes={[{ title: accountBreadcrumb.title }]} />
                     </Grid>
-                    <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center">
+                    <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center bg-white">
                         <Grid container direction="row">
                             <Grid item xs={12} sm={12} className="pr-3">
                                 <Grid container justify="flex-end">
@@ -733,6 +734,7 @@ export default function Account(props) {
                             <DataGrid
                                 components={{
                                     Toolbar: DataGridCustomToolbar,
+                                    NoRowsOverlay: CustomDataGridNoDataFound,
                                 }}
                                 scrollbarSize={20}
                                 rows={loading ? [] : dataRows}

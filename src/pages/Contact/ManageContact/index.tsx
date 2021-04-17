@@ -50,7 +50,7 @@ export default function ManageContactMain(props) {
           .filter((d) => d.isCreate)
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
-            if (accountId) {
+            if (accountId && _f.fieldData.fieldName === "accountName") {
               _f = initializeDropdownById(_f, "accountName", accountId);
             }
             if (_f?.fieldData?.fieldName && _f.fieldData.fieldName === "accountName") {
@@ -58,7 +58,6 @@ export default function ManageContactMain(props) {
             }
             newFields.push(_f.fieldData);
           });
-
         setEntityData({
           fields: newFields,
           initialValues: getObjKeys("", newFields),
@@ -75,6 +74,7 @@ export default function ManageContactMain(props) {
       .then(({ data }) => {
         onClose({ fetch: true });
         onSuccess({ fetch: true });
+        debugger;
         toastConfig.setToastConfig({
           open: true,
           type: "success",

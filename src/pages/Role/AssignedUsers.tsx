@@ -41,7 +41,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                     primary={
                       <Typography>
                         <Link
-                          className="accountNameLink"
+                          className="link"
                           to={`/user/detail/${obj._id}`}
                         >
                           {`${obj.firstName} ${obj.lastName}` || ""}

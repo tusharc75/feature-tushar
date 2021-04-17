@@ -39,6 +39,7 @@ import { contactTemplateFileName, downloadExcel, sidebarResource, contactImportE
 import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { useHistory } from "react-router-dom";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const ContactTypes = [
     {
@@ -445,7 +446,7 @@ export default function Contact(props) {
                 <Grid item md={6} sm={12} xs={12}>
                     <CustomBreadCrumbs routes={[contactBreadcrumb]} />
                 </Grid>
-                <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center">
+                <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center bg-white">
                     <Grid container direction="row">
                         <Grid item xs={12} sm={12} className="pr-3">
                             <Grid container justify="flex-end">
@@ -608,6 +609,7 @@ export default function Contact(props) {
                         <DataGrid
                             components={{
                                 Toolbar: DataGridCustomToolbar,
+                                NoRowsOverlay: CustomDataGridNoDataFound,
                             }}
                             rows={loading ? [] : dataRows}
                             columns={columns}

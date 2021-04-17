@@ -16,7 +16,7 @@ import { productCategoryPage } from '../../routes/ProductCategory'
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const ProductCategory = () => {
 
@@ -97,7 +97,7 @@ const ProductCategory = () => {
 
     return (<Layout>
         <Grid container direction="row">
-            <Grid item xs={12} className="pl-2">
+            <Grid item xs={12}>
                 <CustomBreadCrumbs routes={[{ title: "Product Category" }]} />
             </Grid>
         </Grid>
@@ -109,10 +109,11 @@ const ProductCategory = () => {
                     </Grid>
                 </Grid>
             </Box>
-            <Box height={window.innerHeight - 200}>
+            <div className="listing-grid">
                 <DataGrid
                     components={{
                         Toolbar: DataGridCustomToolbar,
+                        NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
                     rows={productCategory}
@@ -122,7 +123,7 @@ const ProductCategory = () => {
                     pageSize={25}
                     density="compact"
                 />
-            </Box>
+            </div>
         </Box>
     </Layout>
     );

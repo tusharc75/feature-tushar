@@ -53,7 +53,7 @@ function OpportunitiesHeader(props) {
             {icon} <span className="listingHeader">{heading}
             </span>
             {
-                options && <ToggleButtonGroup size="small" className="ml-8"
+                options && <ToggleButtonGroup size="small" className="ml-2"
                     value={filter}
                     exclusive
                     onChange={handleFilter}>

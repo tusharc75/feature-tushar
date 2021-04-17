@@ -42,7 +42,7 @@ const Header = (props) => {
         {options && (
           <ToggleButtonGroup
             size="small"
-            className="ml-8"
+            className="ml-2"
             value={filter}
             exclusive
             onChange={handleFilter}

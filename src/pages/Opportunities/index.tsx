@@ -31,6 +31,7 @@ import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunity
 import { downloadExcel, opportunity, opportunityTemplateFileName, opportunityImportErrorFileName } from '../../constants/helpers'
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -247,12 +248,22 @@ const Opportunities = () => {
       )
     },
     {
-      field: "accountName", headerName: "Account Name", width: 300,
+      field: "supplierAccountName", headerName: "Supplier Account Name", width: 300,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <Link className="accountNameLink" to={`${accountDetailPage.path}/${params?.row?.accountName?.optionValue}`}>
-          {params?.row?.accountName?.optionLabel ? params.row.accountName.optionLabel : ''}
+        <Link className="link" to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName?.optionValue}`}>
+          {params?.row?.supplierAccountName?.optionLabel ? params.row.supplierAccountName.optionLabel : ''}
+        </Link>
+      )
+    },
+    {
+      field: "customerAccountName", headerName: "Customer Account Name", width: 300,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Link className="link" to={`${routes.customerAccount.path}/detail/${params?.row?.customerAccountName?.optionValue}`}>
+          {params?.row?.customerAccountName?.optionLabel ? params.row.customerAccountName.optionLabel : ''}
         </Link>
       )
     },
@@ -494,7 +505,7 @@ const Opportunities = () => {
           <Grid item md={6} sm={12} xs={12}>
             <CustomBreadCrumbs routes={[routes.opportunity]} />
           </Grid>
-          <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center">
+          <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center bg-white">
             <Grid container direction="row">
               <Grid item xs={12} sm={12} className="pr-3">
                 <Grid container justify="flex-end">
@@ -588,6 +599,7 @@ const Opportunities = () => {
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}
               columns={columns}
@@ -658,6 +670,7 @@ const Opportunities = () => {
           onClose={() => { setShowCreateOpportunityDialog(false) }}
           isNew={true}
           dataToUpdate={null}
+          resource={null}
         />
       }
     </>

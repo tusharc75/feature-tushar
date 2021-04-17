@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid, Typography, IconButton } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
-import _ from "lodash";
+import { reverse as _reverse } from "lodash";
 import { Skeleton } from "@material-ui/lab";
 import Container from "../../components/Container";
 import Layout from "../../components/Layout";
@@ -13,7 +13,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import RelatedContactsBox from "./RelatedContacts";
+import RelatedContacts from "./RelatedContacts";
 import axiosInstance from "./../../axios/axiosInstance";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -37,6 +37,9 @@ import QuickLinks, {
 } from "../../components/QuickLinks/QuickLinks";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import { TiFlowChildren } from "react-icons/ti";
+import { RiContactsBook2Fill } from "react-icons/ri";
+import { HiPresentationChartLine } from "react-icons/hi";
+import { MdLocalLibrary } from "react-icons/md";
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 
 const useStyles = makeStyles((theme) => ({
@@ -56,7 +59,7 @@ export default function AccountDetailPage(props) {
   const {
     account: { accountApi, accountResource, accountPermission, accountRoute },
     accountBreadcrumb,
-    contact: { contactResource, contactRoute },
+    contact: { contactResource, contactRoute, contactApi },
   } = props;
 
   const {
@@ -110,8 +113,8 @@ export default function AccountDetailPage(props) {
             : []
         );
         setOpportunities(
-          data.Opportunity && data.Opportunity["Account_Name"]
-            ? data.Opportunity["Account_Name"]
+          data.Opportunity && data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
+            ? data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
             : []
         );
         setRelatedContactsLoading(false);
@@ -238,13 +241,14 @@ export default function AccountDetailPage(props) {
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
-      icon: <TiFlowChildren />,
+      // icon: <RiOrganizationChart />,
       show: true,
     },
     {
       label: "Projects",
       count: 0,
       show: true,
+      icon: <HiPresentationChartLine />
     },
     {
       label: "Opportunity",
@@ -260,10 +264,12 @@ export default function AccountDetailPage(props) {
       label: "Accounts Teams",
       count: 0,
       show: true,
+      icon: <MdLocalLibrary />
     },
     {
       label: "Contacts",
       count: relatedContacts ? relatedContacts.length : 0,
+      icon: <RiContactsBook2Fill />,
       onClick: () => {
         history.push({
           pathname: `/${contactRoute}`,
@@ -434,7 +440,7 @@ export default function AccountDetailPage(props) {
             </DetailsPageHeader>
           }
 
-          <Grid container spacing={2}>
+          <Grid container spacing={2} className="mt-2">
             <Grid item xs={12} sm={12} md={8} lg={8}>
               <Container padding="8px">
                 <BoxWithBorder padding="8px">
@@ -506,6 +512,7 @@ export default function AccountDetailPage(props) {
                       }}
                       accountId={accountData._id}
                       recordsPerLine={2}
+                      resource={accountResource}
                     />
                   </Container>
                 )}
@@ -519,83 +526,78 @@ export default function AccountDetailPage(props) {
               lg={4}
               className={`${accountClass.account_activities_div}`}
             >
-              <Container
+              {/* <Container
                 styles={{ padding: "8px", minHeight: "auto", width: "100%" }}
-              >
-                <Grid container>
-                  <Grid item xs={12}>
-                    {accountData && (
-                      <div>
-                        <Activity
-                          relatedTo={[
-                            {
-                              type: accountResource,
-                              referenceId: accountData._id,
-                              access: true,
-                            },
-                          ]}
-                          handleActivityRefresh={() => { }}
-                        />
-                      </div>
-                    )}
-                  </Grid>
-                  <Grid item xs={12}>
-                    <div className="m-3">
-                      <QuickLinks quickLinks={quickLinks} />
+              > */}
+              <Grid container spacing={1}>
+                <Grid item xs={12}>
+                  {accountData && (
+                    <div>
+                      <Activity
+                        relatedTo={[
+                          {
+                            type: accountResource,
+                            referenceId: accountData._id,
+                            access: true,
+                          },
+                        ]}
+                        handleActivityRefresh={() => { }}
+                      />
                     </div>
-                  </Grid>
+                  )}
+                </Grid>
+                <Grid item xs={12}>
+                  <QuickLinks quickLinks={quickLinks} />
+                </Grid>
 
-                  {permissions &&
-                    permissions[contactResource] &&
-                    permissions[contactResource].isRead && (
-                      <Grid item xs={12}>
-                        <BoxWithBorder
-                          style={{ marginTop: "3%", padding: "0px" }}
-                        >
-                          <div className={`${accountClass.detail_page_div3}`}>
-                            <div className={`${accountClass.related_contacts}`}>
-                              <Typography
-                                color="primary"
-                                variant="h6"
-                                style={{ margin: "0 10px" }}
-                              >
-                                Related Contacts
+                {permissions &&
+                  permissions[contactResource] &&
+                  permissions[contactResource].isRead && (
+                    <Grid item xs={12}>
+                      <BoxWithBorder
+                        style={{ marginTop: "3%", padding: "0px" }}
+                      >
+                        <div className={`${accountClass.detail_page_div3}`}>
+                          <div className={`${accountClass.related_contacts}`}>
+                            <Typography
+                              color="primary"
+                              variant="h6"
+                              style={{ margin: "0 10px" }}
+                            >
+                              Related Contacts
                               </Typography>
-                              {permissions[contactResource].isCreate && (
-                                <span>
-                                  <IconButton
-                                    onClick={handleCreateContact}
-                                    color="primary"
-                                    size="small"
-                                  >
-                                    <ControlPointIcon />
-                                  </IconButton>
-                                </span>
-                              )}
-                            </div>
-                            {relatedContactsLoading ? (
-                              <CommonSkeleton lenArray={[...Array(4).keys()]} />
-                            ) : (
-                              <>
-                                <Box className={`${accountClass.custom_box1}`}>
-                                  <RelatedContactsBox
-                                    contacts={relatedContacts}
-                                    accountName={accountData.accountName}
-                                  />
-                                </Box>
-                                {/* <div className={`${accountClass.view_all_btn}`}>
-                                                            <Button
-                                                                variant="outlined"
-                                                                className={`${accountClass.btn}`}
-                                                            >View All</Button></div> */}
-                              </>
+                            {permissions[contactResource].isCreate && (
+                              <span>
+                                <IconButton
+                                  onClick={handleCreateContact}
+                                  color="primary"
+                                  size="small"
+                                >
+                                  <ControlPointIcon />
+                                </IconButton>
+                              </span>
                             )}
                           </div>
-                        </BoxWithBorder>
-                      </Grid>
-                    )}
-                </Grid>
-              </Container>
+                          {relatedContactsLoading ? (
+                            <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                          ) : (
+                            <>
+                              <Box className={`${accountClass.custom_box1}`}>
+                                <RelatedContacts
+                                  contacts={_reverse(relatedContacts.slice(0, 2))}
+                                  accountName={accountData.accountName}
+                                  contactApi={contactApi}
+                                  contactRoute={contactRoute}
+                                />
+                              </Box>
+                            </>
+                          )}
+                        </div>
+                      </BoxWithBorder>
+                    </Grid>
+                  )}
+              </Grid>
+              {/* </Container> */}
             </Grid>
           </Grid>
           {showConfirmBox ? (
@@ -643,9 +645,10 @@ export default function AccountDetailPage(props) {
               onClose={() => setShowCreateOpportunityDialog(false)}
               onSuccess={() => {
                 setShowCreateOpportunityDialog(false);
-                // fetchOpportunities()
+                fetchRelatedData();
               }}
               accountId={accountData._id}
+              resource={accountResource}
             />
           )}
           {showCreateContactDialog && (
@@ -653,10 +656,11 @@ export default function AccountDetailPage(props) {
               open={showCreateContactDialog}
               onClose={() => {
                 setShowCreateContactDialog(false);
-                // fetchRelatedContacts();
+                fetchRelatedData();
               }}
               contactResource={contactResource}
               accountId={accountData._id}
+              contactApi={contactApi}
             />
           )}
           {showAccountHierarchyInFullScreenDialog && (

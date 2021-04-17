@@ -38,8 +38,6 @@ import { green, red } from "@material-ui/core/colors";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import { getFormulaValue } from "../../constants/formulaUtility";
 import NumberFormat from "react-number-format";
-import moment from "moment";
-import { yyyyMMDD } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 
@@ -74,7 +72,7 @@ const CustomFormat = (props: NumberFormatCustomProps) => {
 };
 
 const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false }) =>
-  isTooltip ? (
+  isTooltip && info ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
         {children}
@@ -915,15 +913,14 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDatePicker
-          clearable
           {...rest}
+          clearable="true"
           required={required}
           variant="inline"
           inputVariant="outlined"
           value={values[name]}
           name={name}
           label={label}
-          defaultValue={new Date()}
           onChange={(date) => setFieldValue(name, date)}
           format="MM/dd/yyyy"
           error={touched[name] && Boolean(errors[name])}
@@ -943,10 +940,9 @@ const FormTypes = (props) => {
           variant="inline"
           inputVariant="outlined"
           ampm={false}
-          value={values[name]}
+          value={values[name] || new Date("2018-01-01T00:00:00.000Z")}
           name={name}
           label={label}
-          defaultValue={new Date("2018-01-01T00:00:00.000Z")}
           onChange={(date) => setFieldValue(name, date)}
           onError={console.log}
           disablePast

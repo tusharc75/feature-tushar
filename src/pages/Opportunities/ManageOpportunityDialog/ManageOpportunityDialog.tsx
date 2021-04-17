@@ -10,7 +10,9 @@ import {
   yupSchema,
   getObjKeysWithValues,
   initializeDropdownById,
-  opportunity
+  opportunity,
+  supplierAccount,
+  customerAccount
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -30,7 +32,8 @@ export default function ManageOpportunityDialog({
   onClose,
   isNew,
   dataToUpdate,
-  accountId
+  accountId,
+  resource, // either called from customer account or supplier account
 }) {
   const { opportunityResource, opportunityApi } = opportunity
   const toastConfig = useContext(CustomToastContext);
@@ -107,38 +110,32 @@ export default function ManageOpportunityDialog({
       .then(({ data: { data } }) => {
         const newFields = [];
 
-        if (isNew) {
-          data
-            .filter((d) => d.isCreate)
-            .map((_f) => {
-              //  If this dialog opens from account details screen, make that account preselected
-              if (accountId) {
-                _f = initializeDropdownById(_f, "accountName", accountId);
+        const filterData = isNew ? data.filter((d) => d.isCreate) : data.filter((d) => d.isUpdate);
+
+
+        filterData
+          .filter((d) => d.isCreate)
+          .map((_f) => {
+            //  If this dialog opens from account details screen, make that account preselected
+
+            if (accountId && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
+            }
+
+            if (resource && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
+              if ((resource === customerAccount.accountResource && _f.fieldData.fieldName == "customerAccountName") ||
+                (resource === supplierAccount.accountResource && _f.fieldData.fieldName == "supplierAccountName")) {
+                newFields.push(_f.fieldData);
               }
-
+            } else {
               newFields.push(_f.fieldData);
-            });
-
-          setEntityData({
-            fields: newFields,
-            initialValues: getObjKeys("", newFields),
+            }
           });
-        } else {
-          data
-            .filter((d) => d.isUpdate)
-            .map((_f) => {
-              //  If this dialog opens from account details screen, make that account preselected
-              if (accountId) {
-                _f = initializeDropdownById(_f, "accountName", accountId);
-              }
 
-              newFields.push(_f.fieldData);
-            });
-          setEntityData({
-            fields: newFields,
-            initialValues: getObjKeysWithValues(dataToUpdate, newFields),
-          });
-        }
+        setEntityData({
+          fields: newFields,
+          initialValues: isNew ? getObjKeys("", newFields) : getObjKeysWithValues(dataToUpdate, newFields)
+        });
       });
   };
 
@@ -298,6 +295,79 @@ export default function ManageOpportunityDialog({
                                       );
                                     }}
                                   />
+                                ) : (field.fieldName == "customerAccountName" && resource === customerAccount.accountResource) ? (
+                                  <FormTypes
+                                    // {...rest}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={setFieldValue}
+                                    required={resource ? resource === customerAccount.accountResource : false}
+                                    fullWidth
+                                    isTooltip={true}
+                                    size="small"
+                                  />
+                                ) : (field.fieldName == "supplierAccountName" && resource === supplierAccount.accountResource) ? (
+                                  <FormTypes
+                                    // {...rest}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={setFieldValue}
+                                    required={resource ? resource === supplierAccount.accountResource : true}
+                                    fullWidth
+                                    isTooltip={true}
+                                    size="small"
+                                  />
+                                ) : field.fieldName == "probability" ? (
+                                  <FormTypes
+                                    // {...rest}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={setFieldValue}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={true}
+                                    size="small"
+                                    onChange={(e) => {
+                                      if (e.target.value && parseFloat(e.target.value) > 100) {
+                                        setFieldValue("probability", "100")
+                                      }
+                                      else {
+                                        setFieldValue("probability", e.target.value)
+                                      }
+                                    }}
+                                  />
+                                ) : (field.fieldName == "lostReason") ? (
+                                  values["stage"] === "Closed Lost" ?
+                                    <FormTypes
+                                      // {...rest}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={true}
+                                      size="small"
+                                    /> : null
                                 ) : (
                                   <FormTypes
                                     // {...rest}
@@ -314,7 +384,8 @@ export default function ManageOpportunityDialog({
                                     isTooltip={true}
                                     size="small"
                                   />
-                                )}
+                                )
+                                }
                               </Grid>
                             ))}
                           </Grid>

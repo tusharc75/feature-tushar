@@ -28,7 +28,6 @@ export const checkFormula = (formula, inputFields) => {
         let result = fs['f1'].apply(null, values);
     }
     catch (e) {
-        console.log(e)
         isValid = false
     }
     return isValid
@@ -52,7 +51,6 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
         }
     }
     catch (e) {
-        console.log(e)
     }
     return value
 }
