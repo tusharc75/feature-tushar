@@ -31,6 +31,7 @@ import { getSearchQuery } from '../../services/util';
 import { termsAndCondition } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import _ from 'lodash'
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -369,6 +370,7 @@ export default function TermsAndCondition(props) {
                             <DataGrid
                                 components={{
                                     Toolbar: DataGridCustomToolbar,
+                                    NoRowsOverlay: CustomDataGridNoDataFound,
                                 }}
                                 scrollbarSize={20}
                                 rows={loading ? [] : dataRows}

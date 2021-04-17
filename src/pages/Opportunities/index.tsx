@@ -31,6 +31,7 @@ import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunity
 import { downloadExcel, opportunity, opportunityTemplateFileName, opportunityImportErrorFileName } from '../../constants/helpers'
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 let opportunityTimeout
 const useStyles = makeStyles((theme) => ({
@@ -598,6 +599,7 @@ const Opportunities = () => {
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}
               columns={columns}

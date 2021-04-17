@@ -38,6 +38,7 @@ import { getSearchQuery } from '../../services/util';
 import { accountTemplateFileName, downloadExcel, accountImportErrorFileName, sidebarResource } from '../../constants/helpers';
 import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
+import CustomDataGridNoDataFound from '../../components/Helpers/CustomDataGridNoDataFound';
 
 const AccTypes = [
     {
@@ -733,6 +734,7 @@ export default function Account(props) {
                             <DataGrid
                                 components={{
                                     Toolbar: DataGridCustomToolbar,
+                                    NoRowsOverlay: CustomDataGridNoDataFound,
                                 }}
                                 scrollbarSize={20}
                                 rows={loading ? [] : dataRows}
