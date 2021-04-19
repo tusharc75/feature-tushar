@@ -351,6 +351,23 @@ export default function ManageOpportunityDialog({
                                       }
                                     }}
                                   />
+                                ) : (field.fieldName == "lostReason") ? (
+                                  values["stage"] === "Closed Lost" ?
+                                    <FormTypes
+                                      // {...rest}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={true}
+                                      size="small"
+                                    /> : null
                                 ) : (
                                   <FormTypes
                                     // {...rest}
