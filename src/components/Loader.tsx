@@ -1,8 +1,7 @@
-import React from "react";
 import { Box, Typography } from "@material-ui/core";
 import { CircularProgress } from "@material-ui/core";
 
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const Loader = ({ text, ...rest }) => {
   return (
@@ -21,7 +20,7 @@ const Loader = ({ text, ...rest }) => {
 };
 
 Loader.propTypes = {
-  text: PropTypes.any
-}
+  text: PropTypes.any,
+};
 
 export default Loader;

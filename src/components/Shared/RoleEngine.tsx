@@ -1,35 +1,35 @@
-import React from 'react';
-import { Checkbox, Typography } from '@material-ui/core';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
+import React from "react";
+import { Checkbox, Typography } from "@material-ui/core";
+import TableCell from "@material-ui/core/TableCell";
+import TableRow from "@material-ui/core/TableRow";
 
 const RoleEngine = (props) => {
   const { field, resource, setField, setResource, isDisable } = props;
 
   const handleChange = (type, id, access) => (event) => {
     //Checking for the type if it is resource or field
-    if (type === 'resource') {
+    if (type === "resource") {
       const newResource = [...resource];
       const newField = [...field];
       newResource.forEach((_resource) => {
         if (_resource.resourceId === id) {
           const isCreateUpdateSelected = newField
             .filter((_field) => _field.fieldData.resource === _resource.name)
-            .some((_field) => _field['isCreate'] || _field['isUpdate']);
+            .some((_field) => _field["isCreate"] || _field["isUpdate"]);
 
-          if (access === 'isRead' && isCreateUpdateSelected) {
+          if (access === "isRead" && isCreateUpdateSelected) {
           } else {
             _resource[access] = event.target.checked;
           }
           if (event.target.checked) {
-            _resource['isRead'] = event.target.checked;
+            _resource["isRead"] = event.target.checked;
           }
 
-          if (access !== 'isDelete') {
+          if (access !== "isDelete") {
             newField.forEach((_field) => {
               if (_field.fieldData.resource === _resource.name) {
                 if (
-                  access === 'isRead' &&
+                  access === "isRead" &&
                   !event.target.value &&
                   isCreateUpdateSelected
                 ) {
@@ -38,20 +38,20 @@ const RoleEngine = (props) => {
                 }
 
                 if (event.target.checked) {
-                  _field['isRead'] = event.target.checked;
+                  _field["isRead"] = event.target.checked;
                 }
               }
             });
           }
 
-          if (access === 'isDelete') {
+          if (access === "isDelete") {
             newField.forEach((_field) => {
               if (
                 _field.fieldData.resource === _resource.name &&
                 _field.fieldData.required
               ) {
                 if (event.target.checked) {
-                  _field['isRead'] = event.target.checked;
+                  _field["isRead"] = event.target.checked;
                 }
               }
             });
@@ -69,13 +69,13 @@ const RoleEngine = (props) => {
         if (_field.fieldData._id === id) {
           if (
             !event.target.checked &&
-            access === 'isRead' &&
-            (_field['isUpdate'] || _field['isCreate'])
+            access === "isRead" &&
+            (_field["isUpdate"] || _field["isCreate"])
           ) {
             // _field[access] = event.target.checked;
           } else if (
             !event.target.checked &&
-            access === 'isCreate' &&
+            access === "isCreate" &&
             _field.fieldData.required
           ) {
           } else {
@@ -83,10 +83,10 @@ const RoleEngine = (props) => {
           }
 
           if (
-            ['isUpdate', 'isCreate'].includes(access) &&
+            ["isUpdate", "isCreate"].includes(access) &&
             event.target.checked
           ) {
-            _field['isRead'] = true;
+            _field["isRead"] = true;
           }
 
           selectedResource = _field.fieldData.resource;
@@ -96,10 +96,10 @@ const RoleEngine = (props) => {
               if (_field.fieldData.resource === _resource.name) {
                 _resource[access] = true;
                 if (
-                  ['isUpdate', 'isCreate'].includes(access) &&
+                  ["isUpdate", "isCreate"].includes(access) &&
                   event.target.checked
                 ) {
-                  _resource['isRead'] = true;
+                  _resource["isRead"] = true;
                 }
               }
             });
@@ -122,14 +122,14 @@ const RoleEngine = (props) => {
         }
       });
 
-      if (access === 'isCreate' && event.target.checked) {
+      if (access === "isCreate" && event.target.checked) {
         newField.forEach((_field) => {
           if (
             _field.fieldData.resource === selectedResource &&
             _field.fieldData.required
           ) {
-            _field['isCreate'] = true;
-            _field['isRead'] = true;
+            _field["isCreate"] = true;
+            _field["isRead"] = true;
           }
         });
       }
@@ -152,16 +152,16 @@ const RoleEngine = (props) => {
           <TableRow key={innerIndex}>
             <TableCell>
               <Typography variant="body1">
-                &emsp;{' '}
+                &emsp;{" "}
                 {_field.fieldData.fieldLabel +
-                  (_field.fieldData.required ? ' *' : '')}
+                  (_field.fieldData.required ? " *" : "")}
               </Typography>
             </TableCell>
             <TableCell>
               <Checkbox
                 disabled={isDisable}
                 checked={_field.isRead}
-                onChange={handleChange('field', _field.fieldData._id, 'isRead')}
+                onChange={handleChange("field", _field.fieldData._id, "isRead")}
               />
             </TableCell>
             <TableCell>
@@ -169,9 +169,9 @@ const RoleEngine = (props) => {
                 disabled={isDisable}
                 checked={_field.isCreate}
                 onChange={handleChange(
-                  'field',
+                  "field",
                   _field.fieldData._id,
-                  'isCreate'
+                  "isCreate"
                 )}
               />
             </TableCell>
@@ -180,9 +180,9 @@ const RoleEngine = (props) => {
                 disabled={isDisable}
                 checked={_field.isUpdate}
                 onChange={handleChange(
-                  'field',
+                  "field",
                   _field.fieldData._id,
-                  'isUpdate'
+                  "isUpdate"
                 )}
               />
             </TableCell>
@@ -192,8 +192,8 @@ const RoleEngine = (props) => {
         ));
 
         return (
-          <React.Fragment>
-            <TableRow key={outerIndex}>
+          <React.Fragment key={outerIndex}>
+            <TableRow>
               <TableCell style={{ minWidth: 300 }}>
                 <Typography variant="h6">{_resource.name}</Typography>
               </TableCell>
@@ -202,9 +202,9 @@ const RoleEngine = (props) => {
                   disabled={isDisable}
                   checked={_resource.isRead}
                   onChange={handleChange(
-                    'resource',
+                    "resource",
                     _resource.resourceId,
-                    'isRead'
+                    "isRead"
                   )}
                 />
               </TableCell>
@@ -213,9 +213,9 @@ const RoleEngine = (props) => {
                   disabled={isDisable}
                   checked={_resource.isCreate}
                   onChange={handleChange(
-                    'resource',
+                    "resource",
                     _resource.resourceId,
-                    'isCreate'
+                    "isCreate"
                   )}
                 />
               </TableCell>
@@ -224,9 +224,9 @@ const RoleEngine = (props) => {
                   disabled={isDisable}
                   checked={_resource.isUpdate}
                   onChange={handleChange(
-                    'resource',
+                    "resource",
                     _resource.resourceId,
-                    'isUpdate'
+                    "isUpdate"
                   )}
                 />
               </TableCell>
@@ -235,9 +235,9 @@ const RoleEngine = (props) => {
                   disabled={isDisable}
                   checked={_resource.isDelete}
                   onChange={handleChange(
-                    'resource',
+                    "resource",
                     _resource.resourceId,
-                    'isDelete'
+                    "isDelete"
                   )}
                 />
               </TableCell>

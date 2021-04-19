@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import { useContext } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -31,17 +31,15 @@ import Entity from "./pages/Entity";
 import EntityDetailPage from "./pages/Entity/EntityDetailPage";
 import UserDetailsPage from "./pages/User/UserDetailsPage";
 
-import { makeStyles } from "@material-ui/core/styles";
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 import Roles from "./pages/Role";
 import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
 import Product from "./pages/Product";
-import TermsAndConditions from './pages/TermsAndConditions'
+import TermsAndConditions from "./pages/TermsAndConditions";
 import {
   termsAndCondition,
   customerAccount,
   customerContact,
-  sidebarResource,
   supplierAccount,
   supplierContact,
 } from "./constants/helpers";
@@ -145,7 +143,11 @@ function App() {
               contactBreadcrumb={routes.customerContact}
             />
           </PrivateRoute>
-          <PrivateRoute key="customer-contact-edit" exact path="/customer-contact/detail/:id">
+          <PrivateRoute
+            key="customer-contact-edit"
+            exact
+            path="/customer-contact/detail/:id"
+          >
             <ContactDetailPage
               account={customerAccount}
               contact={customerContact}
@@ -176,7 +178,11 @@ function App() {
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
-          <PrivateRoute key="supplier-contact-edit" exact path="/supplier-contact/detail/:id" >
+          <PrivateRoute
+            key="supplier-contact-edit"
+            exact
+            path="/supplier-contact/detail/:id"
+          >
             <ContactDetailPage
               account={supplierAccount}
               contact={supplierContact}
@@ -226,7 +232,10 @@ function App() {
           <PrivateRoute exact path={routes.formBuilder.path}>
             <FormBuilder />
           </PrivateRoute>
-          <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
+          <PrivateRoute
+            exact
+            path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}
+          >
             <CreateFormBuilder />
           </PrivateRoute>
           <PrivateRoute exact path={termsAndCondition.route}>
