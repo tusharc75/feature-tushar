@@ -1,7 +1,6 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 import reducer, { initialState } from "./reducer";
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from "./actionTypes";
-// import { UserMe } from "../axios";
 import axiosInstance from "./../axios/axiosInstance";
 
 const StateContext = createContext(null);
@@ -11,7 +10,6 @@ export const Provider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    
     if (token) {
       dispatch({ type: USER_LOADING, payload: true });
       axiosInstance()
@@ -20,7 +18,10 @@ export const Provider = ({ children }) => {
           const { data } = response;
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
-            dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+            dispatch({
+              type: SET_SELECTED_ENTITY,
+              payload: data.role.selectedEntity._id,
+            });
           }
           dispatch({ type: USER_LOADING, payload: false });
         })
@@ -29,11 +30,11 @@ export const Provider = ({ children }) => {
           dispatch({ type: USER_LOADING, payload: false });
         });
     }
-  }, []);
+  }, [token]);
 
   return (
     <StateContext.Provider value={{ state, dispatch }}>
-      { token ? (state.user ? children : null) : children}
+      {token ? (state.user ? children : null) : children}
     </StateContext.Provider>
   );
 };
