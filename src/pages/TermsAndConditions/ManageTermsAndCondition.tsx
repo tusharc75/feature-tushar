@@ -16,6 +16,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from "../../axios/axiosInstance";
 import CustomButton from "../../components/Helpers/Button";
+import FormTypes from '../../components/Helpers/FormTypes'
 
 
 const termsAndConditionSchema = Yup.object().shape({
@@ -28,19 +29,26 @@ const useStyles = makeStyles((theme) => ({
     textEditor: {
         fontFamily: "inherit",
         minHeight: 250
+    },
+    termAndConditionDialog: {
+        height: "100%"
+    },
+    fileUpload: {
+        width: '50%'
     }
 }));
 
 const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) => {
 
-    const [initialValues, setInitialValues] = useState({ TACName: "", description: RichTextEditor.createEmptyValue() });
+    const [initialValues, setInitialValues] = useState({ TACName: "", file: "", description: RichTextEditor.createEmptyValue() });
 
     useEffect(() => {
         if (editRecord && editRecord?._id) {
             editRecord.description = RichTextEditor.createValueFromString(editRecord.description, 'html')
             setInitialValues({
                 description: editRecord.description,
-                TACName: editRecord.TACName
+                TACName: editRecord.TACName,
+                file: ""
             })
         }
     }, [])
@@ -71,10 +79,10 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         disableBackdropClick={true}
         open={open}
         aria-labelledby="customized-dialog-title"
-        maxWidth="md"
+        maxWidth="lg"
         onClose={handleClose}
         fullWidth
-
+        className={classes.termAndConditionDialog}
     >
         {
             (initialValues && <Formik initialValues={initialValues} validationSchema={termsAndConditionSchema} onSubmit={handleSave}>
@@ -99,6 +107,19 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                 value={values["TACName"]}
                                                 onChange={(e) => setFieldValue("TACName", e.target.value.trimStart())}
                                             />
+                                            <Box mt={2} className={classes.fileUpload}>
+                                                <FormTypes
+                                                    label="File"
+                                                    name="file"
+                                                    isTooltip={true}
+                                                    required={false}
+                                                    type="fileUpload"
+                                                    values={values}
+                                                    errors={errors}
+                                                    size="small"
+
+                                                />
+                                            </Box>
                                             <Box mt={2}>
                                                 <RichTextEditor
                                                     className={classes.textEditor}
