@@ -71,7 +71,7 @@ const CustomFormat = (props: NumberFormatCustomProps) => {
   );
 };
 
-const InfoLabel = ({ children, info, isTooltip }) =>
+const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false }) =>
   isTooltip && info ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
@@ -83,16 +83,19 @@ const InfoLabel = ({ children, info, isTooltip }) =>
         </Tooltip>
       </Grid>
     </Grid>
-  ) : (
-    <Grid container spacing={1} alignItems="center">
-      <Grid item xs={11} sm={11} md={11}>
-        {children}
+  ) : doNotShowInfoTooltip ?
+    <>
+      {children}
+    </> : (
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={11} sm={11} md={11}>
+          {children}
+        </Grid>
+        <Grid item xs={1} sm={1} md={1}>
+          <InfoIcon style={{ opacity: 0 }} color="disabled" />
+        </Grid>
       </Grid>
-      <Grid item xs={1} sm={1} md={1}>
-        <InfoIcon style={{ opacity: 0 }} color="disabled" />
-      </Grid>
-    </Grid>
-  );
+    );
 
 const autocompleteService = { current: null };
 
@@ -140,6 +143,7 @@ const FormTypes = (props) => {
     isTooltip,
     tooltipMessage,
     fields,
+    doNotShowInfoTooltip,
     ...rest
   } = props;
 
@@ -162,8 +166,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -409,11 +413,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? null : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? null : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -442,11 +446,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? null : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? null : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -516,7 +520,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "dropDown" || type === "lookup" || type === "vlookupDropdown" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
         options={options}
@@ -531,10 +535,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                handleChange(
-                  name,
-                  val && val.optionValue ? val.optionValue : ""
-                )
+              handleChange(
+                name,
+                val && val.optionValue ? val.optionValue : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -558,8 +562,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-                (data) => data.currencyCode === values[name]
-              )[0]
+              (data) => data.currencyCode === values[name]
+            )[0]
             : ""
         }
         options={currencyData}
@@ -620,10 +624,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -724,9 +728,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+              setValue(newValue);
+            }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -871,8 +875,8 @@ const FormTypes = (props) => {
             {values[name]
               ? values[name]
               : isUploading
-              ? "Uploading..."
-              : "No file choosen"}
+                ? "Uploading..."
+                : "No file choosen"}
           </p>
         </Box>
         <IconButton

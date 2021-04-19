@@ -156,17 +156,17 @@ const Header = ({ toggleDrawer }) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  const openSupportMenu = (event) => {
-    setSupportAnchorEl(event.currentTarget);
-  };
+  // const openSupportMenu = (event) => {
+  //   setSupportAnchorEl(event.currentTarget);
+  // };
 
   const supportMenuClose = () => {
     setSupportAnchorEl(null);
   };
 
-  const openServicesMenu = (event) => {
-    setServicesAnchorEl(event.currentTarget);
-  };
+  // const openServicesMenu = (event) => {
+  //   setServicesAnchorEl(event.currentTarget);
+  // };
 
   const closeServicesMenu = () => {
     setServicesAnchorEl(null);

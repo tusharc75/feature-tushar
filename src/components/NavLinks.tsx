@@ -1,7 +1,6 @@
-import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Grid, Link, Box, Button, Divider } from "@material-ui/core";
-import PropTypes from 'prop-types'
+import PropTypes from "prop-types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -11,13 +10,13 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
   },
   links: {
-    color: theme.palette.primary.main,  //  textDark
+    color: theme.palette.primary.main, //  textDark
     [theme.breakpoints.down("sm")]: {
       display: "none",
     },
   },
   linkDivider: {
-    backgroundColor: theme.palette.primary.main,  //  darkBg
+    backgroundColor: theme.palette.primary.main, //  darkBg
     margin: "0 1rem",
   },
   headButtons: {
@@ -169,7 +168,7 @@ const OpportunityNavLinks = ({ OpportunityDashboard, ButtonProps }) => {
 
 OpportunityNavLinks.propTypes = {
   OpportunityDashboard: PropTypes.any,
-  ButtonProps: PropTypes.any
-}
+  ButtonProps: PropTypes.any,
+};
 
 export default OpportunityNavLinks;

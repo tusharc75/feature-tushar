@@ -1,35 +1,13 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  Box,
-  Grid,
-  Typography,
-  Select,
-  MenuItem,
-  Chip,
-  Badge,
-} from "@material-ui/core";
-
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import { Grid } from "@material-ui/core";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 
 import "./customheader.scss";
 
 const CustomHeader = (props) => {
-  const {
-    total,
-    active,
-    inactive,
-    heading,
-    children,
-    options,
-    onTypeChange,
-    selectedType,
-    icon,
-    secondHeading
-  } = props;
-
+  const { heading, children, options, onTypeChange, icon } = props;
 
   const [filter, setFilter] = useState("All Accounts");
 
@@ -42,23 +20,31 @@ const CustomHeader = (props) => {
 
   return (
     <React.Fragment>
-      <Grid container className="header-panel" justify="space-between" alignContent="center">
+      <Grid
+        container
+        className="header-panel"
+        justify="space-between"
+        alignContent="center"
+      >
         <Grid item className="d-flex align-items-center gap-1">
-          {icon} <span className="listingHeader">{heading}
-          </span>
-          {
-            options && <ToggleButtonGroup size="small" className="ml-8"
+          {icon} <span className="listingHeader">{heading}</span>
+          {options && (
+            <ToggleButtonGroup
+              size="small"
+              className="ml-8"
               value={filter}
               exclusive
-              onChange={handleFilter}>
+              onChange={handleFilter}
+            >
               {options.map((k, index) => {
                 return (
-                  <ToggleButton value={k.key} key={index}>{k.key}
+                  <ToggleButton value={k.key} key={index}>
+                    {k.key}
                   </ToggleButton>
                 );
               })}
             </ToggleButtonGroup>
-          }
+          )}
         </Grid>
         {/* <Box className="ml-2">
           {icon} */}
@@ -150,7 +136,7 @@ CustomHeader.propTypes = {
   onTypeChange: PropTypes.any,
   options: PropTypes.any,
   icon: PropTypes.any,
-  secondHeading: PropTypes.string
+  secondHeading: PropTypes.string,
 };
 
 export default CustomHeader;

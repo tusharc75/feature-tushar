@@ -1,13 +1,5 @@
 import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import {
-  Checkbox,
-  Grid,
-  Divider,
-  Tooltip,
-  IconButton,
-  makeStyles,
-  Link as MuiLink,
-} from "@material-ui/core";
+import { Checkbox, Tooltip, IconButton } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
@@ -31,34 +23,18 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
-const useStyles = makeStyles((theme) => ({
-  linksContainer: {
-    display: "flex",
-  },
-  links: {
-    color: theme.palette.primary.main, //  textDark
-  },
-  linkDivider: {
-    backgroundColor: theme.palette.primary.main, //  darkBg
-    margin: "0 1rem",
-  },
-}));
-
 let userTimeout;
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
-  const classes = useStyles();
   const {
     state: { user, permissions },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [users, setUsers] = useState<any[]>([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
-  const [renderCount, setRenderCount] = useState(0);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllUsers, setCheckAllUsers] = useState(false);
@@ -85,7 +61,6 @@ const User: FC = () => {
       axiosInstance()
         .get(api)
         .then(({ data: { data, count } }) => {
-          setUsers(data);
           getRows(data);
           setRowCount(count);
           setLoadingUsers(false);
@@ -95,7 +70,7 @@ const User: FC = () => {
           setLoadingUsers(false);
         });
     }, 600);
-  }, [searchVal, query]);
+  }, [searchVal, query, toastConfig]);
 
   useEffect(() => {
     fetchUsers();
@@ -104,15 +79,15 @@ const User: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        isChecked: false,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-        createdBy: user.createdBy,
-        updatedBy: user.updatedBy,
-        status: user.blocked ? user.blocked : false,
-      }))
+          id: user._id,
+          isChecked: false,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+          createdBy: user.createdBy,
+          updatedBy: user.updatedBy,
+          status: user.blocked ? user.blocked : false,
+        }))
       : [];
 
     setDataRows(rows);
@@ -311,7 +286,7 @@ const User: FC = () => {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked && d.allowToDelete === false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -441,56 +416,7 @@ const User: FC = () => {
       )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.user]} />
-        {/* <Grid container direction="row" className="header-links">
-          <Grid item xs={12} sm={12} className="pr-3">
-            <Grid container justify="flex-end">
-              <MuiLink
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Import from Excel
-              </MuiLink>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <MuiLink
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Export to Excel
-              </MuiLink>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <MuiLink
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Download Template
-              </MuiLink>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <MuiLink
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Email a Link
-              </MuiLink>
-            </Grid>
-          </Grid>
-        </Grid>
-       */}
+
         <Container>
           <div className="header-panel">
             <Header
@@ -501,7 +427,7 @@ const User: FC = () => {
               showConfirmBox={showConfirmBox}
               openRolesDialog={handleOpenDialog}
               rolesActionDiabled={Boolean(!selectedUsers.length)}
-              canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
             />
           </div>
         </Container>
@@ -541,8 +467,9 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete user ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
