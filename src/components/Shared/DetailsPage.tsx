@@ -112,7 +112,7 @@ const Details = (props: DetailProps) => {
     } else if (input.type === "switch") {
       text = values[input.fieldName] ? "Inactive" : "Active";
     } else if (input.type === "checkBox") {
-      text = values[input.fieldName] == true ? "Yes" : "No";
+      text = values[input.fieldName] === true ? "Yes" : "No";
     } else if (input.type === "date") {
       text = yyyyMMDD(values[input.fieldName]);
     } else {

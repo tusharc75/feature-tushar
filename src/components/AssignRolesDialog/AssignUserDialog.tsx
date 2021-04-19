@@ -41,6 +41,7 @@ const AssignRolesDialog = ({
         setLoadingUsers(false);
         toastConfig.setToastConfig(error);
       });
+    // eslint-disable-next-line
   }, []);
 
   const handleUserSelection = (e, id) => {

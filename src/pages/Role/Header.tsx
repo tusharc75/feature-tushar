@@ -10,7 +10,6 @@ import styles from "../Leads/Header.module.scss";
 
 const Header = (props) => {
   const {
-    selectedType,
     onTypeChange,
     options,
     onSearch,

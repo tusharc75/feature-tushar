@@ -24,7 +24,14 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
 
-const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selectedEntity }) => {
+const CreateRole = ({
+  open,
+  close,
+  fetchData,
+  roleType,
+  setToastConfig,
+  selectedEntity,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -35,12 +42,13 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
 
   useEffect(() => {
     getInitialData();
+    // eslint-disable-next-line
   }, []);
 
   const getInitialData = () => {
     setLoading(true);
     let api =
-      roleType == 1
+      roleType === 1
         ? "/field?resource=Role"
         : `/field?resource=Role&entity=${selectedEntity}`;
     axiosInstance()
@@ -61,9 +69,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
       resource.some(
         (d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete
       ) ||
-      field.some(
-        (d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete
-      )
+      field.some((d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete)
     ) {
       setSubmitting(true);
       axiosInstance()
@@ -82,15 +88,14 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
           setSubmitting(false);
           setToastConfig(err);
         });
-    }
-    else {
+    } else {
       setToastConfig({
         open: true,
-        type: 'error',
-        message: 'Please check atleast one permission',
+        type: "error",
+        message: "Please check atleast one permission",
       });
     }
-  }
+  };
 
   return (
     <Dialog
