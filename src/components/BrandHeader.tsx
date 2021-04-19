@@ -1,14 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, Box, Select, Menu, MenuItem } from "@material-ui/core";
-import { Autocomplete } from '@material-ui/lab'
+import { Grid, Typography, Box, Select, MenuItem } from "@material-ui/core";
 import Container from "./Container";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100%!important",
-    marginTop: 5
+    marginTop: 5,
   },
   box: {
     backgroundColor: "#E6F4FF",
@@ -20,8 +19,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BrandHeader = (props) => {
-  const { total, totalHeading, active, activeHeading, inActive,
-    inActiveHeading, heading, children, showHeading, showDropDown, onChange, values, options, placeholder } = props;
+  const {
+    total,
+    totalHeading,
+    active,
+    activeHeading,
+    inActive,
+    inActiveHeading,
+    heading,
+    children,
+    showHeading,
+    showDropDown,
+    onChange,
+    values,
+    options,
+    placeholder,
+  } = props;
   const classes = useStyles();
 
   return (
@@ -29,72 +42,78 @@ const BrandHeader = (props) => {
       <Container>
         <Grid container justify="space-between">
           <Grid item>
-            {
-              showHeading ?
-                <Typography variant="h6" component="h2">
-                  {heading}
-                </Typography> : null
-            }
-            {
-              showDropDown && Object.keys(options).length ? <Select
-                style={{ width: '160px' }}
+            {showHeading ? (
+              <Typography variant="h6" component="h2">
+                {heading}
+              </Typography>
+            ) : null}
+            {showDropDown && Object.keys(options).length ? (
+              <Select
+                style={{ width: "160px" }}
                 labelId="demo-simple-select-outlined-label"
                 id="demo-simple-select-outlined"
                 MenuProps={{
                   anchorOrigin: {
                     vertical: "bottom",
-                    horizontal: "left"
+                    horizontal: "left",
                   },
-                  getContentAnchorEl: null
+                  getContentAnchorEl: null,
                 }}
                 value={values}
                 onChange={onChange}
                 label="Select Type"
               >
-                {
-                  Object.keys(options).map((k, index) => {
-                    return <MenuItem key={index} value={options[k]}>{k}</MenuItem>
-                  })
-                }
+                {Object.keys(options).map((k, index) => {
+                  return (
+                    <MenuItem key={index} value={options[k]}>
+                      {k}
+                    </MenuItem>
+                  );
+                })}
               </Select>
-                : null
-            }
+            ) : null}
           </Grid>
           <Grid item>{children}</Grid>
         </Grid>
         <Box display="flex" id="tapleen2">
           {total ? (
             <Box className={classes.box}>
-              <Typography>{`${totalHeading ? totalHeading : "Total " + heading}`}</Typography>
+              <Typography>{`${
+                totalHeading ? totalHeading : "Total " + heading
+              }`}</Typography>
               <Typography style={{ color: "#0068AB", fontWeight: "bold" }}>
                 {total}
               </Typography>
             </Box>
           ) : (
-              ""
-            )}
+            ""
+          )}
           <Box component="span" marginX={1} />
           {active ? (
             <Box className={classes.box}>
-              <Typography>{`${activeHeading ? activeHeading : "Active " + heading}`}</Typography>
+              <Typography>{`${
+                activeHeading ? activeHeading : "Active " + heading
+              }`}</Typography>
               <Typography style={{ color: "#1A7C1B", fontWeight: "bold" }}>
                 {active}
               </Typography>
             </Box>
           ) : (
-              ""
-            )}
+            ""
+          )}
           <Box component="span" marginX={1} />
           {inActive ? (
             <Box className={classes.box}>
-              <Typography>{`${inActiveHeading ? inActiveHeading : "Inactive " + heading}`}</Typography>
+              <Typography>{`${
+                inActiveHeading ? inActiveHeading : "Inactive " + heading
+              }`}</Typography>
               <Typography style={{ color: "#D63F19", fontWeight: "bold" }}>
                 {inActive}
               </Typography>
             </Box>
           ) : (
-              ""
-            )}
+            ""
+          )}
         </Box>
       </Container>
     </React.Fragment>
