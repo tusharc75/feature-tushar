@@ -189,7 +189,13 @@ const Details = (props: DetailProps) => {
           className={classes.fieldText}
           variant="body2"
         >
-          {values}
+          {fieldData.type === "url" ? (
+            <MuiLink href={values} target="_blank">
+              {values}
+            </MuiLink>
+          ) : (
+            values
+          )}
         </Typography>
       );
     }
