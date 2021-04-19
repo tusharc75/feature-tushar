@@ -43,7 +43,6 @@ import {
 } from "../../StateProvider/actionTypes";
 import { PERMISSION } from "../../constants/Roles";
 
-const permissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -76,6 +75,7 @@ const RoleDetailsPage = () => {
     if (id) {
       fetchRoleData();
     }
+    // eslint-disable-next-line
   }, [id]);
 
   useEffect(() => {

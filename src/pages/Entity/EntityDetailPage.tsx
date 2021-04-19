@@ -61,6 +61,7 @@ const EntityDetailsPage = () => {
       fetchEntityRoles();
       fetchEntityUser();
     }
+    // eslint-disable-next-line
   }, [id]);
 
   const fetchEntityData = async () => {

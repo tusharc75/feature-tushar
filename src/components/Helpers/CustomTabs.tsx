@@ -1,5 +1,5 @@
 import React from "react";
-import { makeStyles, withStyles, Theme, createStyles } from '@material-ui/core/styles';
+import { withStyles, Theme, createStyles } from "@material-ui/core/styles";
 import { Typography, Tabs, Tab } from "@material-ui/core";
 
 const AntTabs = withStyles((theme) => ({
@@ -7,10 +7,9 @@ const AntTabs = withStyles((theme) => ({
     // borderBottom: "1px solid #e8e8e8",
   },
   indicator: {
-    backgroundColor: theme.palette.primary.main,  //  dargBg
+    backgroundColor: theme.palette.primary.main, //  dargBg
   },
 }))(Tabs);
-
 
 const AntTab = withStyles((theme: Theme) =>
   createStyles({
@@ -21,21 +20,20 @@ const AntTab = withStyles((theme: Theme) =>
       marginRight: theme.spacing(4),
 
       "&:hover": {
-        color: theme.palette.primary.main,  //  dargBg
+        color: theme.palette.primary.main, //  dargBg
         opacity: 1,
       },
       "&$selected": {
-        color: theme.palette.primary.main,  //  dargBg
+        color: theme.palette.primary.main, //  dargBg
         fontWeight: theme.typography.fontWeightMedium,
       },
       "&:focus": {
-        color: theme.palette.primary.main,  //  darkBg
+        color: theme.palette.primary.main, //  darkBg
       },
     },
     selected: {},
-  }),
+  })
 )((props: StyledTabProps) => <Tab disableRipple {...props} />);
-
 
 interface StyledTabProps {
   label: string;
