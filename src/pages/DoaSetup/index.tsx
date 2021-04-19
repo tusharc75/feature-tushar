@@ -522,6 +522,7 @@ export default function Doa() {
             userSelected={userSingleSelect}
             open={open}
             setOpen={setOpen}
+            onSuccess={fetchDoa}
           />
         )}
         {/* <BrandHeader

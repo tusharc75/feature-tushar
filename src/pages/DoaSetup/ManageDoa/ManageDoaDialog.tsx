@@ -22,7 +22,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import { removeEmptyKeys } from "../../../constants/helpers";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 
-const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
+const DoaDialog = ({ userSelected, onSuccess, user, doa, open, setOpen }) => {
 
     const useStyles = makeStyles((theme) => ({
         btnPadding: {
@@ -65,13 +65,14 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
                     amount: Number(item.amount)
                 };
         });
-        const userDoa = { _id: userSelected.id, doa: doaArray };
+        const userDoa = { _id: userSelected, doa: doaArray };
         setLoading(true)
         axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
                 setOpen(false)
+                onSuccess()
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 setLoading(false);
@@ -91,6 +92,8 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
             open={open}
             onClose={setOpen}
             scroll="body"
+            maxWidth="sm"
+            fullWidth
         >
             {!loading &&
                 <>
@@ -120,9 +123,9 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
                                                         >
                                                             <Grid item md={1}> Sr </Grid>
                                                             <Grid item md={4}> Users </Grid>
-                                                            <Grid item md={2}> Currency </Grid>
+                                                            <Grid item md={3}> Currency </Grid>
                                                             <Grid item md={3}> Amount </Grid>
-                                                            <Grid item md={2}></Grid>
+                                                            <Grid item md={1}></Grid>
                                                         </Grid>
                                                     </Box>
                                                     <Box>
@@ -148,7 +151,6 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
                                                                                         value={user.find(v => v.name == userVal.name)}
                                                                                         options={user.filter(element => !values.users.map(e => e.name).includes(element.name))}
                                                                                         getOptionLabel={(option: any) => option.name}
-                                                                                        style={{ width: 160 }}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
@@ -162,13 +164,12 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
                                                                                     />
 
                                                                                 </Grid>
-                                                                                <Grid item md={2}>
+                                                                                <Grid item md={3}>
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
                                                                                         value={currencies.find(v => v.label == userVal.currency)}
                                                                                         options={currencies}
                                                                                         getOptionLabel={(option: any) => option.label}
-                                                                                        style={{ width: 80 }}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],

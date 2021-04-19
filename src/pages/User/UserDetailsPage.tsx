@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Grid,
   Box,
@@ -19,7 +19,7 @@ import {
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
@@ -37,6 +37,8 @@ import UserRoles from "./UserRoles";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import RoleEngine from "../../components/Shared/RoleEngine";
+import NewStepper from "../../components/Helpers/NewStepper";
+import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -46,6 +48,7 @@ const UserDetailsPage = () => {
   const {
     state: { user, permissions },
   }: any = useData();
+  const location = useLocation();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
@@ -64,6 +67,9 @@ const UserDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
+  const [doa, setDoa] = useState<any[]>([]);
+  const [doaDialogOpen, setDoaDialogOpen] = useState(false);
+  const [userList, setUserList] = useState<any[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -71,8 +77,10 @@ const UserDetailsPage = () => {
       fetchUserData();
       getRoleUnion();
       fetchUserRoles();
+      fetchDoa();
     }
     // eslint-disable-next-line
+    setUserList(location.state.userList)
   }, [id]);
 
   const fetchUserData = async () => {
@@ -97,6 +105,29 @@ const UserDetailsPage = () => {
       toastConfig.setToastConfig(error);
     }
   };
+
+  const fetchDoa = async () => {
+    setDoa([])
+    axiosInstance()
+      .get(`/doa/${id}`)
+      .then(({ data: { data, count } }) => {
+        setDoa(data?.doa.map(item => {
+          return {
+            id: item.user?._id,
+            name: `${item.user.firstName} ${item.user.lastName}`,
+            firstName: item.user.firstName,
+            lastName: item.user.lastName,
+            currency: item.currency ? item.currency : "USD",
+            amount: item.amount
+          };
+        })
+        );
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoading(false);
+      });
+  }
 
   const fetchUserRoles = () => {
     setRolesLoading(true);
@@ -525,6 +556,58 @@ const UserDetailsPage = () => {
             </Grid>
           </Box>
         </Container>
+        <Container styles={{ borderRadius: 8 }}>
+          <Box style={{ padding: "0px" }}>
+            <Box display="flex" padding={1} bgcolor="grey.200">
+              <Grid container>
+                <Grid item xs={8}>
+                  <Box display="flex">
+                    <Box padding="5px">
+                      <Typography variant="subtitle2">
+                        {"DOA Details of " + userData?.firstName + " " + userData?.lastName}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={4} container justify="flex-end">
+                  {permissions.user.isUpdate && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => setDoaDialogOpen(true)}
+                    >
+                      {doa.length > 0 ? 'Edit Doa' : 'Add Doa'}
+                    </Button>
+                  )}
+                </Grid>
+              </Grid>
+            </Box>
+          </Box>
+          <Grid container style={{ padding: "8px" }} spacing={1}>
+            <Grid item xs={12} sm={12} >
+              <BoxWithBorder
+                style={{
+                  padding: "0px",
+                }}
+              >
+
+                {doa.length > 0
+                  ? (
+                    <NewStepper
+                      heading={" "}
+                      steps={doa}
+                    />
+                  ) : (
+                    <Box textAlign="center" marginTop={2}>
+                      <Typography variant="body2">
+                        User doesn't have any DOA
+                      </Typography>
+                    </Box>
+                  )}
+              </BoxWithBorder>
+            </Grid>
+          </Grid>
+        </Container>
       </Layout>
       {showConfirmBox ? (
         <ConfirmationDialog
@@ -536,8 +619,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
-              : ""
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -549,6 +632,16 @@ const UserDetailsPage = () => {
           }
         />
       ) : null}
+      {doaDialogOpen && (
+        <DoaDialog
+          user={userList}
+          doa={doa}
+          userSelected={id}
+          open={doaDialogOpen}
+          onSuccess={fetchDoa}
+          setOpen={setDoaDialogOpen}
+        />
+      ) }
     </>
   );
 };
