@@ -2,7 +2,6 @@ import { useContext } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
 import Leads from "./pages/Leads";
@@ -42,12 +41,14 @@ import {
   customerContact,
   supplierAccount,
   supplierContact,
+  profilePage
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
+import UserProfilePage from './pages/ProfilePage/index'
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -191,6 +192,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/user">
             <User />
+          </PrivateRoute>
+          <PrivateRoute exact path={profilePage.profilePageRoute}>
+            <UserProfilePage profileBreadCrumbs={routes.profilePage} />
           </PrivateRoute>
           <PrivateRoute exact path="/user/detail/:id">
             <UserDetailsPage />

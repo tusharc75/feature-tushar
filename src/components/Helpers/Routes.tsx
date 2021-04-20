@@ -1,3 +1,5 @@
+import { profilePage } from "../../constants/helpers"
+
 export default {
   account: {
     title: "Account",
@@ -119,5 +121,9 @@ export default {
   termsAndConditions: {
     title: "Terms and Conditions",
     path: "/terms-conditions"
+  },
+  profilePage: {
+    title: "Profile",
+    path: profilePage.profilePageRoute
   }
 };

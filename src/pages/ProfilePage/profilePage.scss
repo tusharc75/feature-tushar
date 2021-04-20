@@ -1,0 +1,27 @@
+.profileSidebarLink{
+    .menu-link {
+        color: var(--primary) !important;
+        display: contents;
+        font-weight: 400;
+      }
+      .menu-link:hover {
+        cursor: pointer !important;
+        color: var(--link) !important;
+      }
+}
+.userDetail{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 7% 11%;
+}
+.editProfileContainer{
+  display:flex;
+  justify-content: flex-end;
+}
+.profileAvatarContainer{
+        width: "100%";
+        display: flex;
+        justify-content: center;
+        margin-top: 6%;
+}

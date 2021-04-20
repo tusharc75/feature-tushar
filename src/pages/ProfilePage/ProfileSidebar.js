@@ -1,0 +1,60 @@
+import React from 'react'
+import { Grid, Typography, Icon } from '@material-ui/core'
+import { BsShieldShaded, BsFillGearFill } from 'react-icons/bs'
+import { HiSpeakerphone, HiUserCircle, HiUsers } from 'react-icons/hi'
+import { profileMenuItems } from '../../constants/helpers'
+import ManageProfile from './ManageProfile'
+import "./profilePage.scss"
+
+export default function Sidebar({ onItemClick, ...rest }) {
+
+    const userMenu = [
+        {
+            label: "My Profile",
+            show: true,
+            icon: <HiUserCircle />,
+            id: profileMenuItems.profile
+        },
+        {
+            label: "Notification Preference",
+            show: true,
+            icon: <HiSpeakerphone />,
+            id: profileMenuItems.notification
+        },
+        {
+            label: "Security and Privacy",
+            show: true,
+            icon: <BsShieldShaded />,
+            id: profileMenuItems.securityPrivacy
+        },
+        {
+            label: "Users",
+            show: true,
+            icon: <HiUsers />,
+            id: profileMenuItems.users
+        },
+        {
+            label: "Setting",
+            show: true,
+            icon: <BsFillGearFill />,
+            id: profileMenuItems.setting
+        },
+    ]
+    return <Grid container spacing="4" >
+        <ManageProfile displayUserProfileImage={true} />
+        <Grid sm={8} lg={12} md={8}>
+            <div className="d-flex flex-column gap-4 px-5 pt-2 pb-3">
+                {
+                    userMenu.map((k, index) => {
+                        return <div key={index} className="font-size-3 link d-flex justify-content-center align-items-center gap-1 profileSidebarLink">
+                            <span className={`menu-link`}>
+                                <Icon >{k.icon}</Icon>
+                                <Typography key={index} onClick={() => onItemClick(k)}>{k.label} </Typography>
+                            </span>
+                        </div>
+                    })
+                }
+            </div>
+        </Grid>
+    </Grid>
+}
