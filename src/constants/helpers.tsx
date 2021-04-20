@@ -350,54 +350,56 @@ export const getPermissions = (
   user,
   selectedEntity = undefined
 ): IPermission | null => {
-  let permissions = {};
-  let data = [...user?.role?.sideBar];
+  if (user) {
+    let permissions = {};
+    let data = [...user?.role?.sideBar];
 
-  if (selectedEntity) {
-    if (user?.entity && user.entity.length && selectedEntity) {
-      data = [
-        ...data,
-        ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
-          ?.resource,
-      ];
-    }
-  } else {
-    if (user?.role?.selectedEntity) {
-      data = [...data, ...user?.role?.selectedEntity?.resource];
-    }
-  }
-
-  if (data) {
-    const hasApproveAccountPermission = user.user.permissions.approveAccount;
-    const accounts = [
-      sidebarResource.customerAccount,
-      sidebarResource.supplierAccount,
-    ];
-
-    const sidebarFieldsKeys = Object.keys(sidebarResource);
-    const sidebarFieldsValues = Object.values(sidebarResource);
-
-    data.forEach((d) => {
-      const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
-
-      if (indexOfPermission > -1) {
-        let permission = {
-          isCreate: d.isCreate,
-          isRead: d.isRead,
-          isUpdate: d.isUpdate,
-          isDelete: d.isDelete,
-        };
-
-        if (accounts.some((acountType) => acountType === d.name)) {
-          permission["approveAccount"] = hasApproveAccountPermission;
-        }
-
-        permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+    if (selectedEntity) {
+      if (user?.entity && user.entity.length && selectedEntity) {
+        data = [
+          ...data,
+          ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
+            ?.resource,
+        ];
       }
-    });
-  }
+    } else {
+      if (user?.role?.selectedEntity) {
+        data = [...data, ...user?.role?.selectedEntity?.resource];
+      }
+    }
 
-  return permissions;
+    if (data) {
+      const hasApproveAccountPermission = user.user.permissions.approveAccount;
+      const accounts = [
+        sidebarResource.customerAccount,
+        sidebarResource.supplierAccount,
+      ];
+
+      const sidebarFieldsKeys = Object.keys(sidebarResource);
+      const sidebarFieldsValues = Object.values(sidebarResource);
+
+      data.forEach((d) => {
+        const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
+
+        if (indexOfPermission > -1) {
+          let permission = {
+            isCreate: d.isCreate,
+            isRead: d.isRead,
+            isUpdate: d.isUpdate,
+            isDelete: d.isDelete,
+          };
+
+          if (accounts.some((acountType) => acountType === d.name)) {
+            permission["approveAccount"] = hasApproveAccountPermission;
+          }
+
+          permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+        }
+      });
+    }
+
+    return permissions;
+  }
 };
 
 export const downloadExcel = (fileDetails, fileName) => {
