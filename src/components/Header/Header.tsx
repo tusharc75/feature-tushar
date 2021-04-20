@@ -14,6 +14,7 @@ import {
   InputBase,
   Chip,
   Typography,
+  useMediaQuery,
 } from "@material-ui/core";
 import {
   Search,
@@ -94,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
 
   sectionDesktop: {
     display: "none",
-    [theme.breakpoints.up("md")]: {
+    [theme.breakpoints.up("sm")]: {
       display: "flex",
       alignItems: "center",
     },
@@ -135,6 +136,7 @@ const Header = ({ toggleDrawer }) => {
   }: any = useData();
   const classes = useStyles();
   const history = useHistory();
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [isSearch, setSearch] = useState(false);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
@@ -185,18 +187,13 @@ const Header = ({ toggleDrawer }) => {
     setOpen((prevOpen) => !prevOpen);
   };
 
-  const handleClose = async (event, option) => {
+  const handleClose = (event, option) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
       return;
     }
 
     if (option && option.logout) {
-      await axiosInstance().get("/user/logout");
-      dispatch({ type: SET_USER, payload: null });
-      localStorage.removeItem("token");
-      history.push({
-        pathname: "/login",
-      });
+      logoutUser();
     }
 
     // if (option && option.profile) {
@@ -205,6 +202,15 @@ const Header = ({ toggleDrawer }) => {
     //   });
     // }
     setOpen(false);
+  };
+
+  const logoutUser = async () => {
+    await axiosInstance().get("/user/logout");
+    dispatch({ type: SET_USER, payload: null });
+    localStorage.removeItem("token");
+    history.push({
+      pathname: "/login",
+    });
   };
 
   function handleListKeyDown(event) {
@@ -317,9 +323,22 @@ const Header = ({ toggleDrawer }) => {
           "No Entity"
         )}
       </MenuItem>
-      {/* <MenuItem onClick={openSupportMenu}>
-        <p>Support</p> <ExpandMore />
-      </MenuItem> */}
+      {isMobile && (
+        <>
+          <MenuItem>
+            <Badge badgeContent={1} color="secondary">
+              <Notifications />
+            </Badge>
+            <Box component="span" mx={1} />
+            <p>Notifications</p>
+          </MenuItem>
+          <MenuItem>
+            <HelpOutline />
+            <Box component="span" mx={1} />
+            <p>Help</p>
+          </MenuItem>{" "}
+        </>
+      )}
     </Menu>
   );
 
@@ -440,15 +459,17 @@ const Header = ({ toggleDrawer }) => {
             ></img>
           ) : null}
 
-          <IconButton aria-label="settings" color="inherit">
-            <Badge badgeContent={1} color="secondary">
-              <Notifications />
-            </Badge>
-          </IconButton>
+          <div className={classes.sectionDesktop}>
+            <IconButton aria-label="settings" color="inherit">
+              <Badge badgeContent={1} color="secondary">
+                <Notifications />
+              </Badge>
+            </IconButton>
 
-          <IconButton aria-label="help" color="inherit">
-            <HelpOutline />
-          </IconButton>
+            <IconButton aria-label="help" color="inherit">
+              <HelpOutline />
+            </IconButton>
+          </div>
 
           <div className={classes.sectionMobile}>
             <IconButton
