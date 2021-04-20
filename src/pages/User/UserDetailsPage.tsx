@@ -72,6 +72,7 @@ const UserDetailsPage = () => {
       getRoleUnion();
       fetchUserRoles();
     }
+    // eslint-disable-next-line
   }, [id]);
 
   const fetchUserData = async () => {
@@ -93,7 +94,7 @@ const UserDetailsPage = () => {
       setUserPermissions(data.permissions);
       setLoading(false);
     } catch (error) {
-      toastConfig.setToastConfig(error)
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -107,7 +108,7 @@ const UserDetailsPage = () => {
       })
       .catch((error) => {
         setRolesLoading(false);
-        toastConfig.setToastConfig(error)
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -187,7 +188,7 @@ const UserDetailsPage = () => {
   const getRoleUnion = () => {
     axiosInstance()
       .get(`/user/union-role/${id}`)
-      .then(({ data: { data: data } }) => {
+      .then(({ data: { data } }) => {
         setUnionRoleData(data);
       })
       .catch((err) => {
@@ -329,7 +330,7 @@ const UserDetailsPage = () => {
             {permissions.user.isDelete ? (
               <DeleteButton
                 text="Delete"
-                disabled={user?.user?._id == id}
+                disabled={user?.user?._id === id}
                 onClick={() => handleDeleteUser(id)}
               />
             ) : null}

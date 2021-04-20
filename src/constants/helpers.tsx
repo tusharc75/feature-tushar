@@ -1,5 +1,4 @@
 import { forwardRef } from "react";
-import { checkEmailExist } from "../axios/index";
 import {
   AddBox,
   ArrowDownward,
@@ -139,9 +138,10 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
         ? dataObj[key.fieldName]
         : false;
     } else if (key.type === "multiSelect") {
-      const values = dataObj[key.fieldName].length
-        ? dataObj[key.fieldName].map((val: any) => filterValues(val))
-        : [];
+      const values =
+        dataObj[key.fieldName] && dataObj[key.fieldName].length
+          ? dataObj[key.fieldName].map((val: any) => filterValues(val))
+          : [];
       obj[key.fieldName] = values;
     } else if (key.type === "dropDown") {
       const value = filterValues(dataObj[key.fieldName]);
@@ -157,16 +157,6 @@ export const removeEmptyKeys = (obj: object) => {
   return Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v !== "" || null || undefined)
   );
-};
-
-const isEmailExist = async (email) => {
-  const { data } = await checkEmailExist(email);
-
-  if (data === true) {
-    return true;
-  } else {
-    return false;
-  }
 };
 
 /**
@@ -229,7 +219,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 export const camelCase = (str) => {
   return str
     .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-      return index == 0 ? word.toLowerCase() : word.toUpperCase();
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
     })
     .replace(/\s+/g, "");
 };
@@ -259,7 +249,7 @@ export const getOwnerDropdownDataSource = (
 
     mainDataSource.map((d) => {
       const isCollaboratorSelected = selectedCollaborator.find(
-        (collaboratorId) => collaboratorId == d.optionValue
+        (collaboratorId) => collaboratorId === d.optionValue
       );
       if (!isCollaboratorSelected) {
         ownerDataSource.push(d);
@@ -275,7 +265,7 @@ export const getCollaboratorDropdownDataSource = (
   mainDataSource
 ) => {
   return selectedOwnerId
-    ? mainDataSource.filter((d) => d.optionValue != selectedOwnerId)
+    ? mainDataSource.filter((d) => d.optionValue !== selectedOwnerId)
     : mainDataSource;
 };
 
@@ -287,7 +277,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
   ) {
     let options = field.fieldData.option;
 
-    options.map((d) => {
+    options.forEach((d) => {
       d.default = d.optionValue === id;
     });
 
@@ -360,54 +350,56 @@ export const getPermissions = (
   user,
   selectedEntity = undefined
 ): IPermission | null => {
-  let permissions = {};
-  let data = [...user?.role?.sideBar];
+  if (user) {
+    let permissions = {};
+    let data = [...user?.role?.sideBar];
 
-  if (selectedEntity) {
-    if (user?.entity && user.entity.length && selectedEntity) {
-      data = [
-        ...data,
-        ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
-          ?.resource,
-      ];
-    }
-  } else {
-    if (user?.role?.selectedEntity) {
-      data = [...data, ...user?.role?.selectedEntity?.resource];
-    }
-  }
-
-  if (data) {
-    const hasApproveAccountPermission = user.user.permissions.approveAccount;
-    const accounts = [
-      sidebarResource.customerAccount,
-      sidebarResource.supplierAccount,
-    ];
-
-    const sidebarFieldsKeys = Object.keys(sidebarResource);
-    const sidebarFieldsValues = Object.values(sidebarResource);
-
-    data.forEach((d) => {
-      const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
-
-      if (indexOfPermission > -1) {
-        let permission = {
-          isCreate: d.isCreate,
-          isRead: d.isRead,
-          isUpdate: d.isUpdate,
-          isDelete: d.isDelete,
-        };
-
-        if (accounts.some((acountType) => acountType === d.name)) {
-          permission["approveAccount"] = hasApproveAccountPermission;
-        }
-
-        permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+    if (selectedEntity) {
+      if (user?.entity && user.entity.length && selectedEntity) {
+        data = [
+          ...data,
+          ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
+            ?.resource,
+        ];
       }
-    });
-  }
+    } else {
+      if (user?.role?.selectedEntity) {
+        data = [...data, ...user?.role?.selectedEntity?.resource];
+      }
+    }
 
-  return permissions;
+    if (data) {
+      const hasApproveAccountPermission = user.user.permissions.approveAccount;
+      const accounts = [
+        sidebarResource.customerAccount,
+        sidebarResource.supplierAccount,
+      ];
+
+      const sidebarFieldsKeys = Object.keys(sidebarResource);
+      const sidebarFieldsValues = Object.values(sidebarResource);
+
+      data.forEach((d) => {
+        const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
+
+        if (indexOfPermission > -1) {
+          let permission = {
+            isCreate: d.isCreate,
+            isRead: d.isRead,
+            isUpdate: d.isUpdate,
+            isDelete: d.isDelete,
+          };
+
+          if (accounts.some((acountType) => acountType === d.name)) {
+            permission["approveAccount"] = hasApproveAccountPermission;
+          }
+
+          permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+        }
+      });
+    }
+
+    return permissions;
+  }
 };
 
 export const downloadExcel = (fileDetails, fileName) => {

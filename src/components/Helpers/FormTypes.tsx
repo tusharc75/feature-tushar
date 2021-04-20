@@ -71,7 +71,7 @@ const CustomFormat = (props: NumberFormatCustomProps) => {
   );
 };
 
-const InfoLabel = ({ children, info, isTooltip }) =>
+const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false }) =>
   isTooltip && info ? (
     <Grid container spacing={1} alignItems="center">
       <Grid item xs={11} sm={11} md={11}>
@@ -83,16 +83,19 @@ const InfoLabel = ({ children, info, isTooltip }) =>
         </Tooltip>
       </Grid>
     </Grid>
-  ) : (
-    <Grid container spacing={1} alignItems="center">
-      <Grid item xs={11} sm={11} md={11}>
-        {children}
+  ) : doNotShowInfoTooltip ?
+    <>
+      {children}
+    </> : (
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={11} sm={11} md={11}>
+          {children}
+        </Grid>
+        <Grid item xs={1} sm={1} md={1}>
+          <InfoIcon style={{ opacity: 0 }} color="disabled" />
+        </Grid>
       </Grid>
-      <Grid item xs={1} sm={1} md={1}>
-        <InfoIcon style={{ opacity: 0 }} color="disabled" />
-      </Grid>
-    </Grid>
-  );
+    );
 
 const autocompleteService = { current: null };
 
@@ -142,6 +145,7 @@ const FormTypes = (props) => {
     fields,
     decimalPlaces,
     isvlookupReverse,
+    doNotShowInfoTooltip,
     ...rest
   } = props;
 
@@ -541,7 +545,7 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : type === "dropDown" || type === "lookup" || (type === "vlookupDropdown" && !isvlookupReverse) ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+    <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
         options={options}
@@ -870,20 +874,20 @@ const FormTypes = (props) => {
                   type="file"
                 />
               </IconButton>
-              {
-                <IconButton
-                  disabled={Boolean(!values[name])}
-                  title="Remove picture"
-                  color="secondary"
-                  size="small"
-                  aria-label="delete picture"
-                  component="span"
-                  onClick={() => setFieldValue(name, "")}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              }
             </label>
+            {
+              <IconButton
+                disabled={Boolean(!values[name])}
+                title="Remove picture"
+                color="secondary"
+                size="small"
+                aria-label="delete picture"
+                component="span"
+                onClick={() => setFieldValue(name, "")}
+              >
+                <DeleteIcon />
+              </IconButton>
+            }
           </Box>
         </Box>
       </Fragment>
@@ -906,7 +910,7 @@ const FormTypes = (props) => {
               component="span"
             >
               Upload File
-          </Button>
+            </Button>
           </label>
           <Box marginX={1} />
 

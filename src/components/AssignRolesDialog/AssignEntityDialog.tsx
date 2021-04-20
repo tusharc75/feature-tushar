@@ -47,6 +47,7 @@ const AssignEntityDialog = ({
         setLoadingData(false);
         toastConfig.setToastConfig(error);
       });
+    // eslint-disable-next-line
   }, []);
 
   const handleEntitySelection = (e, id) => {

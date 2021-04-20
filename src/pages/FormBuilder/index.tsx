@@ -11,6 +11,7 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const FormBuilder = () => {
 
@@ -58,6 +59,7 @@ const FormBuilder = () => {
           <DataGrid
             components={{
               Toolbar: DataGridCustomToolbar,
+              NoRowsOverlay: CustomDataGridNoDataFound,
             }}
             rows={brandResource}
             columns={columns.map((column) => ({

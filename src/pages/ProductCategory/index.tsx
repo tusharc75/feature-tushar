@@ -17,7 +17,8 @@ import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import moment from "moment";
-
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import { GiAbstract055 } from 'react-icons/gi';
 
 const ProductCategory = () => {
 
@@ -142,29 +143,31 @@ const ProductCategory = () => {
                 <CustomBreadCrumbs routes={[{ title: "Product Category" }]} />
             </Grid>
         </Grid>
-        <Box mt={1} p={2} pt={1} pl={1} bgcolor="white" >
-            <Box mb={2} mt={1}>
-                <Grid container>
-                    <Grid xs={12} container justify="flex-end">
-                        <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                    </Grid>
+        <div className="header-panel">
+            <Grid container>
+                <Grid item xs={6} className="d-flex align-items-center gap-1">
+                    <GiAbstract055 /> <span className="listingHeader">Product Category </span>
                 </Grid>
-            </Box>
-            <Box height={window.innerHeight - 200}>
-                <DataGrid
-                    components={{
-                        Toolbar: DataGridCustomToolbar,
-                    }}
-                    loading={loading}
-                    rows={productCategory}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={25}
-                    density="compact"
-                />
-            </Box>
-        </Box>
+                <Grid xs={6} container justify="flex-end">
+                    <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                </Grid>
+            </Grid>
+        </div>
+        <div className="listing-grid">
+            <DataGrid
+                components={{
+                    Toolbar: DataGridCustomToolbar,
+                    NoRowsOverlay: CustomDataGridNoDataFound,
+                }}
+                loading={loading}
+                rows={productCategory}
+                disableSelectionOnClick
+                disableMultipleSelection
+                columns={columns}
+                pageSize={25}
+                density="compact"
+            />
+        </div>
     </Layout>
     );
 }

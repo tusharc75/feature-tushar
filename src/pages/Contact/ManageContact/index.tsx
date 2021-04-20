@@ -4,11 +4,13 @@ import {
   getObjKeys,
   initializeDropdownById,
   sidebarResource,
+
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import _ from "lodash";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageAccountDialog from '../../Account/ManageAccount/index'
 
 export default function ManageContactMain(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -20,7 +22,9 @@ export default function ManageContactMain(props) {
     accountId,
     contactResource,
     contactApi,
+    account = {}
   } = props;
+  const { accountApi, accountResource, accountPermission, accountRoute } = account
   const {
     state: { user, selectedEntity },
   }: any = useData();
@@ -29,6 +33,8 @@ export default function ManageContactMain(props) {
     initialValues: {},
   });
   const [loading, setLoading] = useState(false);
+  const [showAccountDialog, setShowAccountDialog] = useState(false);
+  const [accountSource, setAccountSource] = useState([])
 
   useEffect(() => {
     getContactFields();
@@ -44,10 +50,12 @@ export default function ManageContactMain(props) {
           .filter((d) => d.isCreate)
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
-            if (accountId) {
+            if (accountId && _f.fieldData.fieldName === "accountName") {
               _f = initializeDropdownById(_f, "accountName", accountId);
             }
-
+            if (_f?.fieldData?.fieldName && _f.fieldData.fieldName === "accountName") {
+              setAccountSource(_f.fieldData.option)
+            }
             newFields.push(_f.fieldData);
           });
         setEntityData({
@@ -95,14 +103,45 @@ export default function ManageContactMain(props) {
 
   // }
 
+  const handleDialogClose = () => {
+    setShowAccountDialog(false)
+  }
+  const handleGetAddedAccount = ({ data }) => {
+    if (data?._id) {
+      setAccountSource(prevState => {
+        return [...prevState, {
+          optionValue: data._id, optionLabel: data.accountName,
+          order: accountSource.length, default: false
+        }]
+      })
+    }
+  }
+
   return (
-    <ManageContact
-      loading={loading}
-      open={open}
-      isNew={true}
-      onClose={onClose}
-      entityData={entityData}
-      handleSubmit={handleCreateContact}
-    />
+    <>
+      <ManageContact
+        loading={loading}
+        open={open}
+        isNew={true}
+        onClose={onClose}
+        entityData={entityData}
+        handleSubmit={handleCreateContact}
+        accountSource={accountSource}
+        onCreateAccount={() => setShowAccountDialog(true)}
+      />
+      {
+        showAccountDialog ?
+          <ManageAccountDialog
+            open={showAccountDialog}
+            onClose={handleDialogClose}
+            id={null}
+            accountResource={accountResource}
+            accountApi={accountApi}
+            isGetAccountData={true}
+            onGetAddedAccount={handleGetAddedAccount}
+
+          /> : null
+      }
+    </>
   );
 }

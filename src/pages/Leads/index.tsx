@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
@@ -31,22 +31,10 @@ import { lead } from '../../constants/helpers'
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import { SiConvertio } from 'react-icons/si';
 import "./style.scss";
-
-const useStyles = makeStyles((theme) => ({
-  linksContainer: {
-    display: "flex",
-  },
-  links: {
-    color: theme.palette.primary.main,   //  textDark
-    fontSize: "0.90rem"
-  },
-  linkDivider: {
-    backgroundColor: theme.palette.primary.main,  //  darkBg
-    margin: "0 1rem",
-  },
-}));
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
 const LeadTypes = [
   {
@@ -62,7 +50,7 @@ const LeadTypes = [
 let leadTimeout
 const Leads = () => {
   const toastConfig = useContext(CustomToastContext);
-  const classes = useStyles();
+  
   const { state: { user, selectedEntity, permissions } }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -82,6 +70,7 @@ const Leads = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
 
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({ open: false, id: null, leadName: null, message: null });
+  const hasPermissionToConvertInOpportunity = user?.user?.permissions?.convertLeadToOpportunity;
 
   const { leadResource, leadApi } = lead
 
@@ -168,6 +157,47 @@ const Leads = () => {
   const handleClose = () => {
     setIsOpen(false);
     fetchLeads();
+  }
+
+  const generateLeadToOpportunityButton = ({ _id, firstName, middleName, lastName, isAlreadyConverted }) => {
+
+    let dontHavePermissions = [];
+
+    if (!permissions["customerAccount"].isCreate) {
+      dontHavePermissions.push("Customer Account");
+    }
+    if (!permissions["customerContact"].isCreate) {
+      dontHavePermissions.push("Customer Contact");
+    }
+    if (!permissions["opportunity"].isCreate) {
+      dontHavePermissions.push("Opportunity");
+    }
+
+    return dontHavePermissions.length > 0 ? <>
+      <Tooltip title={`To convert lead to opportunity, you must need create permission of ${dontHavePermissions.join(", ")}`}>
+        <IconButton aria-label="Convert to opportunity">
+          <SiConvertio size={18} />
+        </IconButton>
+      </Tooltip>
+    </> : (
+      isAlreadyConverted ? <>
+        <Tooltip title="This lead is already converted to opportunity">
+          <IconButton aria-label="Convert to opportunity">
+            <SiConvertio size={18} />
+          </IconButton>
+        </Tooltip>
+      </> : <Tooltip title="Convert to opportunity">
+        <IconButton aria-label="Convert to opportunity" onClick={() => {
+          const leadName = [firstName, middleName, lastName].filter(d => d).join(" ");
+          setConvertLeadToOpportunityConfirmationDialog({
+            open: true, id: _id, leadName: leadName,
+            message: `Are you sure, You want to convert ${leadName} to opportunity ?`
+          })
+        }}>
+          <SiConvertio size={18} />
+        </IconButton>
+      </Tooltip>
+    )
   }
 
   const columns = [
@@ -299,17 +329,9 @@ const Leads = () => {
       filterable: false,
       renderCell: (params) => (
         <>
-          {/* <Tooltip title="Convert this lead to opportunity" >
-            <IconButton aria-label="Convert to opportunity" onClick={() => {
-              const leadName = [params.row.firstName, params.row.lastName].filter(d => d).join(" ");
-              setConvertLeadToOpportunityConfirmationDialog({
-                open: true, id: params.row._id, leadName: leadName,
-                message: `Are you sure, You want to convert ${leadName} to opportunity ?`
-              })
-            }}>
-              <SiConvertio size={18} />
-            </IconButton>
-          </Tooltip> */}
+          {
+            hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(params.row)
+          }
 
           <GridDeleteIcon
             hasDeletePermission={leadsPermissions.isDelete}
@@ -411,47 +433,18 @@ const Leads = () => {
   }
 
   const convertLeadToOpportunity = () => {
-    //  TODO: need to think about which records to pick
     const ids = convertLeadToOpportunityConfirmationDialog.id ? [convertLeadToOpportunityConfirmationDialog.id] :
       dataRows.filter(d => d.isChecked == true).map(m => m._id);
 
-    //  TODO: api needed
-    axiosInstance().put("", ids).then(({ data }) => {
-
+    axiosInstance().post(`${leadApi}/to-opportunity`, { ids: ids }).then(({ data }) => {
       toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
       setConvertLeadToOpportunityConfirmationDialog({ open: false, id: null, leadName: null, message: null })
+      fetchLeads();
     }).catch((error) => {
       toastConfig.setToastConfig(error);
       setOkButtonLoading(false);
     })
   }
-
-  const uploadLeads = (event) => {
-    if (event.target.files && event.target.files.length) {
-      toastConfig.setToastConfig({ open: true, type: "info", message: "Uploading lead(s), Please wait..." });
-      const file = event.target.files[0];
-
-      let formData = new FormData();
-      formData.append("file", file);
-      axiosInstance()
-        .post(`/${leadApi}/import`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-        .then(({ data }) => {
-          if (data.message) {
-            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-            fetchLeads();
-          }
-          else {
-            downloadExcel(data, leadImportErrorFileName);
-            toastConfig.setToastConfig({ open: true, type: "error", message: "Found some issue(s) while importing lead(s)" });
-          }
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error)
-        });
-    }
-  };
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
@@ -464,6 +457,7 @@ const Leads = () => {
       setQuery({ page: 0, limit: 25 });
     }
   }, []);
+
   return (
     <Layout>
       <Grid container>
@@ -474,67 +468,7 @@ const Leads = () => {
           <Grid container direction="row">
             <Grid item xs={12} sm={12} className="pr-3">
               <Grid container justify="flex-end">
-                <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`}>
-                  <input
-                    id="importFromExcel"
-                    name="importFromExcel"
-                    onChange={uploadLeads}
-                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                    style={{
-                      opacity: "0",
-                      position: "absolute",
-                      zIndex: -1,
-                    }}
-                    type="file"
-                  />
-              Import from Excel
-             </label>
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  className={classes.linkDivider}
-                />
-                <label
-                  onClick={(e) => {
-                    axiosInstance().get(`/${leadApi}/template?export=true`, { responseType: "arraybuffer" })
-                      .then((response) => {
-                        downloadExcel(response.data, leadTemplateFileName)
-                      }).catch((error) => {
-                        toastConfig.setToastConfig(error);
-                      });
-                  }}
-                  className={`${classes.links} cursor-pointer`}
-                >
-                  Export to Excel
-            </label>
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  className={classes.linkDivider}
-                />
-                <label
-                  onClick={(e) => {
-                    axiosInstance().get(`/${leadApi}/template`, { responseType: "arraybuffer" }).then((response) => {
-                      downloadExcel(response.data, leadTemplateFileName)
-                    }).catch((error) => {
-                      toastConfig.setToastConfig(error);
-                    });
-                  }}
-                  className={`${classes.links} cursor-pointer`}
-                >
-                  Download Template
-            </label>
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  className={classes.linkDivider}
-                />
-                <label
-                  onClick={(e) => e.preventDefault()}
-                  className={`${classes.links} cursor-pointer`}
-                >
-                  Email a Link
-            </label>
+                <ImportExportLinks module="lead(s)" api={leadApi} onSuccessfulImport={() => { fetchLeads() }} />
               </Grid>
             </Grid>
           </Grid>
@@ -555,6 +489,15 @@ const Leads = () => {
             allowToDelete={!dataRows.some((d) => d.isChecked && d.owner != user?.user?._id)}
             icon={<HiUserGroup className="headerLogo" />}
             heading="Leads"
+            allowToConvertLeadToOpportunity={
+              permissions["customerAccount"].isCreate && permissions["customerContact"].isCreate && permissions["opportunity"].isCreate
+            }
+            showLeadToOpportunityConfirmationDialog={() => {
+              setConvertLeadToOpportunityConfirmationDialog({
+                open: true, id: null, leadName: null,
+                message: `Are you sure, You want to convert selected leads to opportunity ?`
+              })
+            }}
           />
         </div>
         {
@@ -574,6 +517,7 @@ const Leads = () => {
           <DataGrid
             components={{
               Toolbar: DataGridCustomToolbar,
+              NoRowsOverlay: CustomDataGridNoDataFound,
             }}
             rows={loading ? [] : dataRows}
             columns={columns}
@@ -622,7 +566,6 @@ const Leads = () => {
               message={convertLeadToOpportunityConfirmationDialog.message}
               onClose={() => {
                 setConvertLeadToOpportunityConfirmationDialog({ open: false, id: null, leadName: null, message: null })
-                fetchLeads();
               }}
               okBtnLoading={okButtonLoading}
               onOk={convertLeadToOpportunity}

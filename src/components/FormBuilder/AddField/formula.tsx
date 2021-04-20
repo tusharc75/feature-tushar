@@ -24,9 +24,9 @@ export const Formula = ({ fields, values, setFieldValue }) => {
     const [formulaError, setFormulaError] = useState(null);
     const handleCheckSyntax = () => {
         if (values["formula"] && values["formula"] !== "") {
-            let values = {}
-            values["inputFields"].forEach(_input => {
-                values[_input] = 1;
+            let inputValues = {}
+            values["inputFields"] && values["inputFields"].forEach(_input => {
+                inputValues[_input] = 1;
             })
             if (checkFormula(values["formula"], values)) {
                 setFormulaError("Valid Formula")

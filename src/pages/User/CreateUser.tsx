@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import {
   Dialog,
   Button,
@@ -23,7 +23,7 @@ interface InitialData {
 }
 
 const CreateUser = ({ open, close, fetchData }) => {
-  const toastConfig = useContext(CustomToastContext);
+  const { setToastConfig } = useContext(CustomToastContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -33,11 +33,7 @@ const CreateUser = ({ open, close, fetchData }) => {
     values: {},
   });
 
-  useEffect(() => {
-    getInitialData();
-  }, []);
-
-  const getInitialData = () => {
+  const getInitialData = useCallback(() => {
     setLoading(true);
     axiosInstance()
       .get("/field?resource=User")
@@ -50,17 +46,22 @@ const CreateUser = ({ open, close, fetchData }) => {
         setLoading(false);
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err);
+        setToastConfig(err);
         setLoading(false);
       });
-  };
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    getInitialData();
+  }, [getInitialData]);
 
   const handleSubmit = (values) => {
     setSubmitting(true);
     axiosInstance()
       .post("/user", values)
       .then(({ data }) => {
-        toastConfig.setToastConfig({
+        setToastConfig({
           open: true,
           type: "success",
           message: data.message,
@@ -70,7 +71,7 @@ const CreateUser = ({ open, close, fetchData }) => {
         close();
       })
       .catch((error) => {
-        toastConfig.setToastConfig(error);
+        setToastConfig(error);
         setSubmitting(false);
       });
   };

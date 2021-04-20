@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
   Divider,
@@ -7,42 +7,47 @@ import {
   Tooltip,
   Checkbox,
 } from "@material-ui/core";
-import { Link } from 'react-router-dom'
-import { accountDetailPage } from '../../routes/Accounts'
-import DeleteIcon from '@material-ui/icons/Delete';
-import BlockIcon from '@material-ui/icons/Block';
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
-import { useData } from '../../StateProvider/Provider';
+import { Link } from "react-router-dom";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { DataGrid } from "@material-ui/data-grid";
+import { useData } from "../../StateProvider/Provider";
 import Layout from "../../components/Layout";
 import Container from "../../components/Container";
-import axiosInstance from '../../axios/axiosInstance'
-import { getSearchQuery, displayDate } from '../../services/util'
+import axiosInstance from "../../axios/axiosInstance";
+import { getSearchQuery, displayDate } from "../../services/util";
 import OpportunitiesHeader from "./OpportunitiesHeader";
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import MessageDialog from '../../components/Helpers/MessageDialog'
+import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
+import MessageDialog from "../../components/Helpers/MessageDialog";
 import "./style.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
+import routes from "./../../components/Helpers/Routes";
+import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { GiHiveMind } from 'react-icons/gi';
+import { GiHiveMind } from "react-icons/gi";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
-import { downloadExcel, opportunity, opportunityTemplateFileName, opportunityImportErrorFileName } from '../../constants/helpers'
+import {
+  downloadExcel,
+  opportunity,
+  opportunityTemplateFileName,
+  opportunityImportErrorFileName,
+} from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
-let opportunityTimeout
+let opportunityTimeout;
 const useStyles = makeStyles((theme) => ({
   linksContainer: {
     display: "flex",
   },
   links: {
-    color: theme.palette.primary.main,   //  textDark
-    fontSize: "0.90rem"
+    color: theme.palette.primary.main, //  textDark
+    fontSize: "0.90rem",
   },
   linkDivider: {
-    backgroundColor: theme.palette.primary.main,  //  darkBg
+    backgroundColor: theme.palette.primary.main, //  darkBg
     margin: "0 1rem",
   },
 }));
@@ -50,23 +55,23 @@ const useStyles = makeStyles((theme) => ({
 const OpportunityTypes = [
   {
     key: "All Opportunities",
-    value: 1
+    value: 1,
   },
   {
     key: "My Opportunities",
-    value: 2
-  }
-]
+    value: 2,
+  },
+];
 
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
-  const { state: { user, selectedEntity, permissions } }: any = useData();
+  const {
+    state: { user, selectedEntity, permissions },
+  }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedType, setSelectedType] = useState(1)
-  const [isOpen, setIsOpen] = useState(false)
+  const [selectedType, setSelectedType] = useState(1);
   const [checkAllOpprtunities, setCheckAllOpportunities] = useState(false);
   const [dataRows, setDataRows] = useState([]);
   const [rowCount, setRowCount] = useState(0);
@@ -74,19 +79,35 @@ const Opportunities = () => {
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [opportunityData, setOpportunityData] = useState([]);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
-  const [deleteRec, setDeleteRec] = useState<any>({})
-  const [opportunityPermissions, setOpportunityPermissions] = useState({ isCreate: false, isUpdate: false, isRead: false, isDelete: false });
-  const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
-  const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({ id: null, show: false, opportunityName: "" })
+  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+  const [deleteRec, setDeleteRec] = useState<any>({});
+  const [opportunityPermissions, setOpportunityPermissions] = useState({
+    isCreate: false,
+    isUpdate: false,
+    isRead: false,
+    isDelete: false,
+  });
+  const [
+    showCreateOpportunityDialog,
+    setShowCreateOpportunityDialog,
+  ] = useState(false);
+  const [
+    showDeleteWarningConfirmBox,
+    setShowDeleteWarningConfirmBox,
+  ] = useState(false);
+  const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({
+    id: null,
+    show: false,
+    opportunityName: "",
+  });
 
-  const { opportunityResource, opportunityApi } = opportunity
+  const { opportunityResource, opportunityApi } = opportunity;
 
   useEffect(() => {
     if (permissions && permissions[opportunityResource]) {
       setOpportunityPermissions(permissions[opportunityResource]);
     }
+    // eslint-disable-next-line
   }, [permissions]);
 
   useEffect(() => {
@@ -98,13 +119,14 @@ const Opportunities = () => {
     opportunityTimeout = setTimeout(() => {
       fetchOpportunities();
     }, millisec);
-
+    // eslint-disable-next-line
   }, [searchVal]);
 
   useEffect(() => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
+    // eslint-disable-next-line
   }, [query, selectedType, selectedEntity]);
 
   useEffect(() => {
@@ -114,49 +136,60 @@ const Opportunities = () => {
         isChecked: false,
         id: u._id,
         canDelete: u.owner?.optionValue === user?.user._id,
-        owner: u.owner?.optionLabel ? u.owner.optionLabel : '',
-        stage: u.stage ? u.stage : '',
-        closeDate: u?.closeDate ? displayDate(u.closeDate) : '',
+        owner: u.owner?.optionLabel ? u.owner.optionLabel : "",
+        stage: u.stage ? u.stage : "",
+        closeDate: u?.closeDate ? displayDate(u.closeDate) : "",
         // accountName: u?.accountName?.optionLabel || ''
-      }
-      return res
+      };
+      return res;
     });
     setDataRows([...rows]);
-  }, [opportunityData])
+    // eslint-disable-next-line
+  }, [opportunityData]);
 
   const handleSingleDeleteOpportunity = async () => {
     setLoading(true);
 
     axiosInstance()
-      .put(`${opportunityApi}/remove?entity=${selectedEntity}`, { ids: [singleOpportunityDelete.id] }).then(({ data }) => {
-        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+      .put(`${opportunityApi}/remove?entity=${selectedEntity}`, {
+        ids: [singleOpportunityDelete.id],
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
         fetchOpportunities();
         setLoading(false);
-      })
-    setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" })
-  }
+      });
+    setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" });
+  };
   const fetchOpportunities = async () => {
     if (selectedEntity) {
       setLoading(true);
-      let searchParams: any = { ...query, entity: selectedEntity, filterOpportunities: selectedType }
+      let searchParams: any = {
+        ...query,
+        entity: selectedEntity,
+        filterOpportunities: selectedType,
+      };
       searchParams = searchVal
         ? { ...searchParams, search: searchVal }
         : { ...searchParams };
-      let api = getSearchQuery(opportunityApi, searchParams)
+      let api = getSearchQuery(opportunityApi, searchParams);
       try {
         axiosInstance()
-          .get(api).then(({ data }) => {
-            setRowCount(data.count)
-            setOpportunityData(data.data)
+          .get(api)
+          .then(({ data }) => {
+            setRowCount(data.count);
+            setOpportunityData(data.data);
             setLoading(false);
-          })
-
-      }
-      catch (err) {
+          });
+      } catch (err) {
         setLoading(false);
       }
     }
-  }
+  };
 
   const handleSearch = (e) => {
     if (query.page !== 0) {
@@ -165,25 +198,14 @@ const Opportunities = () => {
     setSearchVal(e.target.value);
   };
 
-
-
-  // ****** ACTIONS BUTTON STUFF *********
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const handleOpportunityTypeSel = (filterValues) => {
     setSelectedType(filterValues);
   };
 
   const onSuccess = () => {
-    setShowCreateOpportunityDialog(false)
+    setShowCreateOpportunityDialog(false);
     fetchOpportunities();
-  }
+  };
 
   const columns = [
     {
@@ -241,30 +263,44 @@ const Opportunities = () => {
       width: 75,
     },
     {
-      field: "opportunityName", headerName: "Opportunity Name", width: 400,
-      renderCell: (params) => (
-        getFirstName(params.row)
-      )
+      field: "opportunityName",
+      headerName: "Opportunity Name",
+      width: 400,
+      renderCell: (params) => getFirstName(params.row),
     },
     {
-      field: "supplierAccountName", headerName: "Supplier Account Name", width: 300,
+      field: "supplierAccountName",
+      headerName: "Supplier Account Name",
+      width: 300,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <Link className="link" to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName?.optionValue}`}>
-          {params?.row?.supplierAccountName?.optionLabel ? params.row.supplierAccountName.optionLabel : ''}
+        <Link
+          className="link"
+          to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName?.optionValue}`}
+        >
+          {params?.row?.supplierAccountName?.optionLabel
+            ? params.row.supplierAccountName.optionLabel
+            : ""}
         </Link>
-      )
+      ),
     },
     {
-      field: "customerAccountName", headerName: "Customer Account Name", width: 300,
+      field: "customerAccountName",
+      headerName: "Customer Account Name",
+      width: 300,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <Link className="link" to={`${routes.customerAccount.path}/detail/${params?.row?.customerAccountName?.optionValue}`}>
-          {params?.row?.customerAccountName?.optionLabel ? params.row.customerAccountName.optionLabel : ''}
+        <Link
+          className="link"
+          to={`${routes.customerAccount.path}/detail/${params?.row?.customerAccountName?.optionValue}`}
+        >
+          {params?.row?.customerAccountName?.optionLabel
+            ? params.row.customerAccountName.optionLabel
+            : ""}
         </Link>
-      )
+      ),
     },
     {
       field: "createdBy",
@@ -281,14 +317,14 @@ const Opportunities = () => {
               className="createdAtTime"
               title={`${params.value.user.firstName} • ${moment(
                 params?.value?.date?.slice(0, 10)
-              ).format('MMM Do, YYYY')}`}
+              ).format("MMM Do, YYYY")}`}
             >
-              {moment(params?.value?.date?.slice(0, 10)).format(
-                'MMM Do, YYYY'
-              )}
+              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
-        ) : <NoDataCell />
+        ) : (
+          <NoDataCell />
+        ),
       // renderCell: (params) => <CustomRenderCell value={params?.value?.createdBy?.optionLabel} />
     },
     {
@@ -301,110 +337,127 @@ const Opportunities = () => {
         params?.value?.user ? (
           <h5 className="updateBy">
             {params.value.user.firstName}
-            <span
-              title={params.value.date}
-              className="updatedAtTime"
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format(
-                'MMM Do, YYYY'
-              )}
+            <span title={params.value.date} className="updatedAtTime">
+              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
-        ) :
+        ) : (
           <NoDataCell />
+        ),
 
       // renderCell: (params) => <CustomRenderCell value={params?.value?.updatedBy?.optionLabel} />
     },
     {
-      field: "stage", headerName: "Stage", width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />
+      field: "stage",
+      headerName: "Stage",
+      width: 250,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />,
     },
     {
-      field: "closeDate", headerName: "Close Date", width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />
+      field: "closeDate",
+      headerName: "Close Date",
+      width: 250,
+      renderCell: (params) => <CustomRenderCell value={params?.value} />,
     },
     // { field: "status", headerName: "Lead Status", width: 200 },
     {
-      field: "owner", headerName: "Opportunity Owner", width: 250,
+      field: "owner",
+      headerName: "Opportunity Owner",
+      width: 250,
       sortable: false,
       filterable: false,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />
+      renderCell: (params) => <CustomRenderCell value={params?.value} />,
     },
     {
-      field: "actions", headerName: "Actions ",
+      field: "actions",
+      headerName: "Actions ",
       renderCell: (params) => (
         <>
-          {
-            opportunityPermissions.isDelete ?
-              params.row.canDelete ?
-                <Tooltip
-                  title="Delete" >
-                  <IconButton aria-label="Delete" onClick={() => setSingleOpportunityDelete({ show: true, id: params.row._id, opportunityName: `${params.row.opportunityName}` })} >
-                    <DeleteIcon
-                      fontSize="small" color="error" />
-                  </IconButton>
-                </Tooltip > :
-                <Tooltip className="cursor-stop" title="You must be the owner of this opportunity to get the delete functionality">
-                  <IconButton aria-label="Delete">
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                </Tooltip> :
-              <Tooltip className="cursor-stop" title="You do not have permission to delete opportunity">
+          {opportunityPermissions.isDelete ? (
+            params.row.canDelete ? (
+              <Tooltip title="Delete">
+                <IconButton
+                  aria-label="Delete"
+                  onClick={() =>
+                    setSingleOpportunityDelete({
+                      show: true,
+                      id: params.row._id,
+                      opportunityName: `${params.row.opportunityName}`,
+                    })
+                  }
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                className="cursor-stop"
+                title="You must be the owner of this opportunity to get the delete functionality"
+              >
                 <IconButton aria-label="Delete">
                   <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
               </Tooltip>
-          }
-
+            )
+          ) : (
+            <Tooltip
+              className="cursor-stop"
+              title="You do not have permission to delete opportunity"
+            >
+              <IconButton aria-label="Delete">
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </Tooltip>
+          )}
         </>
       ),
       disableColumnMenu: true,
       sortable: false,
       filterable: false,
-      width: 200
+      width: 200,
     },
   ];
 
   const showConfirmBox = (row) => {
     if (row) {
-      setIsConformDialogVisible(true)
+      setIsConformDialogVisible(true);
       if (row && row._id) {
-        setDeleteRec(row)
+        setDeleteRec(row);
       }
-    }
-    else {
-      if (dataRows.find((d) => d.isChecked && d.canDelete == false)) {
+    } else {
+      if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
-        setIsConformDialogVisible(true)
+        setIsConformDialogVisible(true);
       }
     }
-  }
-  const getFirstName = tData => {
-    return <Link className="nameLink"
-      to={`${routes.opportunityDetail.path}/${tData._id}`}
-    >
-      <span className="text-capitalize">{tData.opportunityName}</span>
-    </Link>
-  }
-
-  const updateCheckedStatus = (params, ev) => {
-    const gridData = [...dataRows];
-    const indexOfRecord = gridData.findIndex(
-      (d) => d.id === params.row.id
+  };
+  const getFirstName = (tData) => {
+    return (
+      <Link
+        className="nameLink"
+        to={`${routes.opportunityDetail.path}/${tData._id}`}
+      >
+        <span className="text-capitalize">{tData.opportunityName}</span>
+      </Link>
     );
-    gridData[indexOfRecord].isChecked = ev.target.checked;
+  };
 
-    setDataRows([...gridData]);
+  // const updateCheckedStatus = (params, ev) => {
+  //   const gridData = [...dataRows];
+  //   const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
+  //   gridData[indexOfRecord].isChecked = ev.target.checked;
 
-    const checkedRecords = gridData.filter((d) => d.isChecked === true);
+  //   setDataRows([...gridData]);
 
-    if (checkedRecords.length === gridData.length) {
-      setCheckAllOpportunities(true);
-    } else {
-      setCheckAllOpportunities(false);
-    }
-  }
+  //   const checkedRecords = gridData.filter((d) => d.isChecked === true);
+
+  //   if (checkedRecords.length === gridData.length) {
+  //     setCheckAllOpportunities(true);
+  //   } else {
+  //     setCheckAllOpportunities(false);
+  //   }
+  // };
 
   const handlePage = (params) => {
     if (query.page !== params.page) {
@@ -428,40 +481,51 @@ const Opportunities = () => {
         orderBy: temp.sort,
       }));
     }
-  }
+  };
 
   const clickCreateNew = () => {
     setShowCreateOpportunityDialog(true);
-  }
+  };
 
   const handleDeleteOpportunity = async () => {
-    setDeleteLoading(true)
-    let recs = []
+    setDeleteLoading(true);
+    let recs = [];
     if (deleteRec?._id) {
-      recs.push(deleteRec?._id)
-    }
-    else {
-      recs = dataRows.filter(obj => obj.isChecked).map(o => o._id)
+      recs.push(deleteRec?._id);
+    } else {
+      recs = dataRows.filter((obj) => obj.isChecked).map((o) => o._id);
     }
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`${opportunityApi}/remove?entity=${selectedEntity}`, { ids: [...recs] }).then(({ data }) => {
-          toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-          setIsConformDialogVisible(false)
-          setDeleteLoading(false)
-          if (deleteRec) setDeleteRec({})
-          fetchOpportunities()
-        }).catch(error => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false)
-          setDeleteLoading(false)
+        .put(`${opportunityApi}/remove?entity=${selectedEntity}`, {
+          ids: [...recs],
         })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          setIsConformDialogVisible(false);
+          setDeleteLoading(false);
+          if (deleteRec) setDeleteRec({});
+          fetchOpportunities();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsConformDialogVisible(false);
+          setDeleteLoading(false);
+        });
     }
-  }
+  };
 
   const uploadOpportunities = (event) => {
     if (event.target.files && event.target.files.length) {
-      toastConfig.setToastConfig({ open: true, type: "info", message: "Uploading opportunities, Please wait..." });
+      toastConfig.setToastConfig({
+        open: true,
+        type: "info",
+        message: "Uploading opportunities, Please wait...",
+      });
       const file = event.target.files[0];
 
       let formData = new FormData();
@@ -472,16 +536,23 @@ const Opportunities = () => {
         })
         .then(({ data }) => {
           if (data.message) {
-            toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
+            toastConfig.setToastConfig({
+              open: true,
+              type: "success",
+              message: data.message,
+            });
             fetchOpportunities();
-          }
-          else {
+          } else {
             downloadExcel(data, opportunityImportErrorFileName);
-            toastConfig.setToastConfig({ open: true, type: "error", message: "Found some issue(s) while importing opportunities" });
+            toastConfig.setToastConfig({
+              open: true,
+              type: "error",
+              message: "Found some issue(s) while importing opportunities",
+            });
           }
         })
         .catch((error) => {
-          toastConfig.setToastConfig(error)
+          toastConfig.setToastConfig(error);
         });
     }
   };
@@ -504,71 +575,17 @@ const Opportunities = () => {
           <Grid item md={6} sm={12} xs={12}>
             <CustomBreadCrumbs routes={[routes.opportunity]} />
           </Grid>
-          <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center bg-white">
+          <Grid
+            item
+            md={6}
+            sm={12}
+            xs={12}
+            className="d-flex align-items-center bg-white"
+          >
             <Grid container direction="row">
               <Grid item xs={12} sm={12} className="pr-3">
                 <Grid container justify="flex-end">
-                  <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`}>
-                    <input
-                      id="importFromExcel"
-                      name="importFromExcel"
-                      onChange={uploadOpportunities}
-                      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                      style={{
-                        opacity: "0",
-                        position: "absolute",
-                        zIndex: -1,
-                      }}
-                      type="file"
-                    />
-                Import from Excel
-              </label>
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    className={classes.linkDivider}
-                  />
-                  <label
-                    onClick={(e) => {
-                      axiosInstance().get(`/${opportunityApi}/template?export=true`, { responseType: "arraybuffer" })
-                        .then((response) => {
-                          downloadExcel(response.data, opportunityTemplateFileName)
-                        }).catch((error) => {
-                          toastConfig.setToastConfig(error);
-                        });
-                    }}
-                    className={`${classes.links} cursor-pointer`}
-                  >
-                    Export to Excel
-              </label>
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    className={classes.linkDivider}
-                  />
-                  <label
-                    onClick={(e) => {
-                      axiosInstance().get(`/${opportunityApi}/template`, { responseType: "arraybuffer" }).then((response) => {
-                        downloadExcel(response.data, opportunityTemplateFileName)
-                      }).catch((error) => {
-                        toastConfig.setToastConfig(error);
-                      });
-                    }}
-                    className={`${classes.links} cursor-pointer`}
-                  >
-                    Download Template
-              </label>
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    className={classes.linkDivider}
-                  />
-                  <label
-                    onClick={(e) => e.preventDefault()}
-                    className={`${classes.links} cursor-pointer`}
-                  >
-                    Email a Link
-              </label>
+                  <ImportExportLinks module="opportunities" api={opportunityApi} onSuccessfulImport={() => { fetchOpportunities() }} />
                 </Grid>
               </Grid>
             </Grid>
@@ -587,17 +604,18 @@ const Opportunities = () => {
               opportunityPermissions={opportunityPermissions}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
-              canDelete={dataRows.filter((d) => d.isChecked).length == 0}
+              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
               icon={<GiHiveMind className="headerLogo" />}
               heading="Opportunities"
             />
           </div>
         </Container>
-        <Container >
+        <Container>
           <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}
               columns={columns}
@@ -618,27 +636,26 @@ const Opportunities = () => {
             />
           </div>
 
-          {
-            showDeleteWarningConfirmBox ?
-              <MessageDialog
-                open={showDeleteWarningConfirmBox}
-                message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-                onClose={() => setShowDeleteWarningConfirmBox(false)}
-              /> : null
-          }
-          {
-            isConfirmDialogVisible ?
-              <ConfirmationDialog
-                open={isConfirmDialogVisible}
-                message={`Are you sure, you want to delete ${deleteRec?.opportunityName ? "Opportunity" : "Opportunities"}   ${deleteRec.opportunityName || ''}?`}
-                onClose={() => {
-                  if (deleteRec) setDeleteRec({})
-                  setIsConformDialogVisible(false)
-                }}
-                okBtnLoading={deleteLoading}
-                onOk={handleDeleteOpportunity}
-              /> : null
-          }
+          {showDeleteWarningConfirmBox ? (
+            <MessageDialog
+              open={showDeleteWarningConfirmBox}
+              message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+              onClose={() => setShowDeleteWarningConfirmBox(false)}
+            />
+          ) : null}
+          {isConfirmDialogVisible ? (
+            <ConfirmationDialog
+              open={isConfirmDialogVisible}
+              message={`Are you sure, you want to delete ${deleteRec?.opportunityName ? "Opportunity" : "Opportunities"
+                }   ${deleteRec.opportunityName || ""}?`}
+              onClose={() => {
+                if (deleteRec) setDeleteRec({});
+                setIsConformDialogVisible(false);
+              }}
+              okBtnLoading={deleteLoading}
+              onOk={handleDeleteOpportunity}
+            />
+          ) : null}
           {/* {
             showCreateOpportunityDialog && <ManageOpportunityMain
               open={showCreateOpportunityDialog}
@@ -649,28 +666,35 @@ const Opportunities = () => {
               }}
             />
           } */}
-          {
-            singleOpportunityDelete.show ?
-              <ConfirmationDialog
-                open={singleOpportunityDelete.show}
-                message={`Are you sure, you want to delete contact: ${singleOpportunityDelete.opportunityName} ?`}
-                onClose={() => setSingleOpportunityDelete({ id: null, show: false, opportunityName: "" })}
-                onOk={handleSingleDeleteOpportunity}
-              /> : null
-          }
+          {singleOpportunityDelete.show ? (
+            <ConfirmationDialog
+              open={singleOpportunityDelete.show}
+              message={`Are you sure, you want to delete contact: ${singleOpportunityDelete.opportunityName} ?`}
+              onClose={() =>
+                setSingleOpportunityDelete({
+                  id: null,
+                  show: false,
+                  opportunityName: "",
+                })
+              }
+              onOk={handleSingleDeleteOpportunity}
+            />
+          ) : null}
         </Container>
       </Layout>
 
-      {
-        showCreateOpportunityDialog && <ManageOpportunityDialog
+      {showCreateOpportunityDialog && (
+        <ManageOpportunityDialog
           open={showCreateOpportunityDialog}
           onSuccess={onSuccess}
-          onClose={() => { setShowCreateOpportunityDialog(false) }}
+          onClose={() => {
+            setShowCreateOpportunityDialog(false);
+          }}
           isNew={true}
           dataToUpdate={null}
           resource={null}
         />
-      }
+      )}
     </>
   );
 };

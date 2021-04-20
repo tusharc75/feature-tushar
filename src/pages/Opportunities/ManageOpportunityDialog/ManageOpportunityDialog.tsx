@@ -122,14 +122,7 @@ export default function ManageOpportunityDialog({
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
             }
 
-            if (resource && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
-              if ((resource === customerAccount.accountResource && _f.fieldData.fieldName == "customerAccountName") ||
-                (resource === supplierAccount.accountResource && _f.fieldData.fieldName == "supplierAccountName")) {
-                newFields.push(_f.fieldData);
-              }
-            } else {
-              newFields.push(_f.fieldData);
-            }
+            newFields.push(_f.fieldData);
           });
 
         setEntityData({
@@ -295,38 +288,6 @@ export default function ManageOpportunityDialog({
                                       );
                                     }}
                                   />
-                                ) : (field.fieldName == "customerAccountName" && resource === customerAccount.accountResource) ? (
-                                  <FormTypes
-                                    // {...rest}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={setFieldValue}
-                                    required={resource ? resource === customerAccount.accountResource : false}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                  />
-                                ) : (field.fieldName == "supplierAccountName" && resource === supplierAccount.accountResource) ? (
-                                  <FormTypes
-                                    // {...rest}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={setFieldValue}
-                                    required={resource ? resource === supplierAccount.accountResource : true}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                  />
                                 ) : field.fieldName == "probability" ? (
                                   <FormTypes
                                     // {...rest}
@@ -351,6 +312,23 @@ export default function ManageOpportunityDialog({
                                       }
                                     }}
                                   />
+                                ) : (field.fieldName == "lostReason") ? (
+                                  values["stage"] === "Closed Lost" ?
+                                    <FormTypes
+                                      // {...rest}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={true}
+                                      size="small"
+                                    /> : null
                                 ) : (
                                   <FormTypes
                                     // {...rest}

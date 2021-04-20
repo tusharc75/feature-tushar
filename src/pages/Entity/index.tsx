@@ -1,11 +1,8 @@
 import { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
-  Grid,
-  Divider,
   Tooltip,
   IconButton,
-  makeStyles,
   Link as MuiLink,
 } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
@@ -33,30 +30,16 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-
-const useStyles = makeStyles((theme) => ({
-  linksContainer: {
-    display: "flex",
-  },
-  links: {
-    color: theme.palette.primary.main, //  textDark
-  },
-  linkDivider: {
-    backgroundColor: theme.palette.primary.main, //  darkBg
-    margin: "0 1rem",
-  },
-}));
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const Entity: FC = () => {
   const toastConfig = useContext(CustomToastContext);
-  const classes = useStyles();
   const {
     state: { permissions },
     dispatch,
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [entities, setEntities] = useState<any[]>([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [selectedEntities, setSelectedEntities] = useState<any[]>([]);
 
@@ -84,7 +67,6 @@ const Entity: FC = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
-        setEntities(data);
         getRows(data);
         setRowCount(count);
         setLoadingEntities(false);
@@ -93,6 +75,7 @@ const Entity: FC = () => {
         toastConfig.setToastConfig(err);
         setLoadingEntities(false);
       });
+    // eslint-disable-next-line
   }, [searchVal, query]);
 
   useEffect(() => {
@@ -102,14 +85,14 @@ const Entity: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((entity: any) => ({
-        id: entity._id,
-        isChecked: false,
-        name: entity.entityName,
-        address: entity.address,
-        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-        createdBy: entity?.createdBy,
-        updatedBy: entity?.updatedBy,
-      }))
+          id: entity._id,
+          isChecked: false,
+          name: entity.entityName,
+          address: entity.address,
+          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
+          createdBy: entity?.createdBy,
+          updatedBy: entity?.updatedBy,
+        }))
       : [];
     setDataRows(rows);
   };
@@ -421,6 +404,7 @@ const Entity: FC = () => {
       setQuery({ page: 0, limit: 25 });
     }
   }, []);
+
   return (
     <>
       {isOpen && (
@@ -444,56 +428,7 @@ const Entity: FC = () => {
       )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.entity]} />
-        {/* <Grid container direction="row" className="header-links">
-          <Grid item xs={12} sm={12} className="pr-3">
-            <Grid container justify="flex-end">
-              <Link
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Import from Excel
-              </Link>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <Link
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Export to Excel
-              </Link>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <Link
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Download Template
-              </Link>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <Link
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Email a Link
-              </Link>
-            </Grid>
-          </Grid>
-        </Grid>
-         */}
+
         <Container>
           <div className="header-panel">
             <Header
@@ -513,6 +448,7 @@ const Entity: FC = () => {
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingEntities}
               rows={loadingEntities ? [] : dataRows}
@@ -544,8 +480,9 @@ const Entity: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete entity ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

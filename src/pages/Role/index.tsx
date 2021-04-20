@@ -1,14 +1,5 @@
 import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import {
-  Checkbox,
-  Chip,
-  Grid,
-  Divider,
-  Tooltip,
-  IconButton,
-  makeStyles,
-  Link as MuiLink,
-} from "@material-ui/core";
+import { Checkbox, Tooltip, IconButton } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
@@ -29,20 +20,9 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CreateRole from "./CreateRole";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { PERMISSION } from "../../constants/Roles";
+import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
-const useStyles = makeStyles((theme) => ({
-  linksContainer: {
-    display: "flex",
-  },
-  links: {
-    color: theme.palette.primary.main, //  textDark
-  },
-  linkDivider: {
-    backgroundColor: theme.palette.primary.main, //  darkBg
-    margin: "0 1rem",
-  },
-}));
 
 const RoleTypes = [
   {
@@ -57,17 +37,14 @@ const RoleTypes = [
 
 const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
-  const classes = useStyles();
   const {
     state: { permissions, selectedEntity },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [selectedType, setSelectedType] = useState(1);
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [roles, setRoles] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
-  const [renderCount, setRenderCount] = useState(0);
   const [loadingRoles, setLoadingRoles] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllRoles, setCheckAllRoles] = useState(false);
@@ -89,7 +66,6 @@ const Roles: FC = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
-        setRoles(data);
         getRows(data);
         setRowCount(count);
         setLoadingRoles(false);
@@ -98,6 +74,7 @@ const Roles: FC = () => {
         toastConfig.setToastConfig(err);
         setLoadingRoles(false);
       });
+    // eslint-disable-next-line
   }, [searchVal, query, selectedType]);
 
   useEffect(() => {
@@ -107,16 +84,16 @@ const Roles: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((role: any) => ({
-        ...role,
-        id: role._id,
-        isChecked: false,
-        name: role.name,
-        description: role.description,
-        type: `${role.type === 1 ? "Global" : "Regional"} Role`,
-        createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
-        createdBy: role.createdBy,
-        updatedBy: role.updatedBy,
-      }))
+          ...role,
+          id: role._id,
+          isChecked: false,
+          name: role.name,
+          description: role.description,
+          type: `${role.type === 1 ? "Global" : "Regional"} Role`,
+          createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
+          createdBy: role.createdBy,
+          updatedBy: role.updatedBy,
+        }))
       : [];
 
     setDataRows(rows);
@@ -253,7 +230,7 @@ const Roles: FC = () => {
       renderCell: (params: any) => (
         <>
           {permissions.role.isDelete ? (
-            <Tooltip title="Delete">
+            <span title="Delete Role">
               <IconButton
                 aria-label="Delete"
                 onClick={() => showConfirmBox(params.row)}
@@ -267,7 +244,7 @@ const Roles: FC = () => {
                   <DeleteIcon fontSize="small" color="error" />
                 )}
               </IconButton>
-            </Tooltip>
+            </span>
           ) : (
             <Tooltip
               className="cursor-stop"
@@ -308,7 +285,7 @@ const Roles: FC = () => {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete == false)) {
+      if (dataRows.find((d) => d.isChecked && d.allowToDelete === false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -403,7 +380,9 @@ const Roles: FC = () => {
     }
   }, []);
 
-  const disableDelete = dataRows.some(o => o.isChecked && rolePermissionArray.indexOf(o?.permission) >= 0)
+  const disableDelete = dataRows.some(
+    (o) => o.isChecked && rolePermissionArray.indexOf(o?.permission) >= 0
+  );
 
   return (
     <>
@@ -419,56 +398,6 @@ const Roles: FC = () => {
       )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.role]} />
-        {/* <Grid container direction="row" className="header-links">
-          <Grid item xs={12} sm={12} className="pr-3">
-            <Grid container justify="flex-end">
-              <Link
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Import from Excel
-              </Link>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <Link
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Export to Excel
-              </Link>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <Link
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Download Template
-              </Link>
-              <Divider
-                orientation="vertical"
-                flexItem
-                className={classes.linkDivider}
-              />
-              <Link
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={classes.links}
-              >
-                Email a Link
-              </Link>
-            </Grid>
-          </Grid>
-        </Grid>
-        */}
         <Container>
           <div className="header-panel">
             <Header
@@ -489,6 +418,7 @@ const Roles: FC = () => {
             <DataGrid
               components={{
                 Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingRoles}
               rows={loadingRoles ? [] : dataRows}
@@ -519,8 +449,9 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete role ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
