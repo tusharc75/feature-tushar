@@ -12,7 +12,8 @@ import {
   initializeDropdownById,
   opportunity,
   supplierAccount,
-  customerAccount
+  customerAccount,
+  simplifyValues
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -366,13 +367,12 @@ export default function ManageOpportunityDialog({
                   Cancel
                 </Button>
 
-                <CustomButton
-                  loading={loading}
+                <Button
                   variant="contained"
                   color="primary"
                   disabled={
-                    loading || Object.keys(errors).length > 0 ? true : false
-                  }
+                    loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                    Object.values(simplifyValues(values, entityData.fields)).toString()}
                   onClick={(e) => {
                     e.preventDefault();
                     handleSubmit(
@@ -385,7 +385,7 @@ export default function ManageOpportunityDialog({
                   }}
                 >
                   Save
-                </CustomButton>
+                </Button>
               </CustomDialogFooter>
             </>
           )}

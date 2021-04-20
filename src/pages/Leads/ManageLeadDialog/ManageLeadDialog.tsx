@@ -11,6 +11,7 @@ import {
   getObjKeys,
   yupSchema,
   getObjKeysWithValues,
+  simplifyValues,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -322,12 +323,13 @@ export default function ManageLeadDialog({
                   Cancel
                 </Button>
 
-                <CustomButton
-                  loading={loading}
+                <Button
                   variant="contained"
                   color="primary"
                   disabled={
-                    loading || Object.keys(errors).length > 0 ? true : false
+                    // loading || Object.keys(errors).length > 0 ? true : false
+                    loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                    Object.values(simplifyValues(values, entityData.fields)).toString()
                   }
                   onClick={(e) => {
                     e.preventDefault();
@@ -341,7 +343,7 @@ export default function ManageLeadDialog({
                   }}
                 >
                   Save
-                </CustomButton>
+                </Button>
               </CustomDialogFooter>
             </>
           )}
