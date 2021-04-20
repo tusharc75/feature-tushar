@@ -271,7 +271,8 @@ const Details = (props: DetailProps) => {
     const img =
       lookupResource === "user"
         ? popoverData?.avatar
-        : lookupResource === "contact-account"
+        : lookupResource === "contact-account" ||
+          lookupResource === "supplier-account"
         ? popoverData?.accountLogo
         : lookupResource === "contact-contact"
         ? popoverData?.contactLogo
@@ -279,27 +280,33 @@ const Details = (props: DetailProps) => {
     const name =
       lookupResource === "user"
         ? `${popoverData?.firstName} ${popoverData?.lastName}`
-        : lookupResource === "customer-account"
+        : lookupResource === "customer-account" ||
+          lookupResource === "supplier-account"
         ? popoverData?.accountName
-        : lookupResource === "customer-contact"
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
         ? `${popoverData?.firstName} ${popoverData?.middleName} ${popoverData?.lastName}`
         : "";
 
     const subInfo =
       lookupResource === "user"
         ? popoverData?.email
-        : lookupResource === "customer-account"
+        : lookupResource === "customer-account" ||
+          lookupResource === "supplier-account"
         ? popoverData?.description
-        : lookupResource === "customer-contact"
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
         ? popoverData?.email
         : "";
 
     const subInfo1 =
       lookupResource === "user"
         ? popoverData?.mobileNo
-        : lookupResource === "customer-account"
+        : lookupResource === "customer-account" ||
+          lookupResource === "supplier-account"
         ? popoverData?.owner?.optionLabel
-        : lookupResource === "customer-contact"
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
         ? popoverData?.phone
         : "";
 
