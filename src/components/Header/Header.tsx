@@ -15,6 +15,7 @@ import {
   Chip,
   Typography,
   useMediaQuery,
+  ButtonBase,
 } from "@material-ui/core";
 import {
   Search,
@@ -116,7 +117,13 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "3px",
   },
   entitySelect: {
-    minWidth: "200px",
+    fontWeight: "bold",
+    fontSize: "16px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    minWidth: "150px",
+    padding: theme.spacing(1, 0, 1, 1),
   },
   entityName: {
     textOverflow: "ellipsis",
@@ -320,22 +327,19 @@ const Header = ({ toggleDrawer }) => {
           "No Entity"
         )}
       </MenuItem>
-      {isMobile && (
-        <>
-          <MenuItem>
-            <Badge badgeContent={1} color="secondary">
-              <Notifications />
-            </Badge>
-            <Box component="span" mx={1} />
-            <p>Notifications</p>
-          </MenuItem>
-          <MenuItem>
-            <HelpOutline />
-            <Box component="span" mx={1} />
-            <p>Help</p>
-          </MenuItem>{" "}
-        </>
-      )}
+
+      <MenuItem>
+        <Badge badgeContent={1} color="secondary">
+          <Notifications />
+        </Badge>
+        <Box component="span" mx={1} />
+        <p>Notifications</p>
+      </MenuItem>
+      <MenuItem>
+        <HelpOutline />
+        <Box component="span" mx={1} />
+        <p>Help</p>
+      </MenuItem>
     </Menu>
   );
 
@@ -409,16 +413,21 @@ const Header = ({ toggleDrawer }) => {
                 Services <ExpandMore />
               </Button> */}
               {selectedEntity && (
-                <Button
-                  aria-controls={entitiesMenuId}
-                  color="inherit"
-                  onClick={openEntitiesMenu}
-                  title={`Selected entity - ${curEntity.entityName}`}
-                  className={classes.entitySelect}
-                >
-                  <span>{curEntity && curEntity.entityName}</span>{" "}
-                  <ExpandMore />
-                </Button>
+                <ButtonBase>
+                  <Box
+                    aria-controls={entitiesMenuId}
+                    color="inherit"
+                    onClick={openEntitiesMenu}
+                    title={
+                      curEntity && `Selected entity - ${curEntity.entityName}`
+                    }
+                    className={classes.entitySelect}
+                  >
+                    <span>{curEntity && curEntity.entityName}</span>
+                    <Box component="span" mr={1} />
+                    <ExpandMore />
+                  </Box>
+                </ButtonBase>
               )}
             </Box>
             <div className={classes.search}>
@@ -486,7 +495,8 @@ const Header = ({ toggleDrawer }) => {
             onClose={handleClose}
             onListKeyDown={handleListKeyDown}
           />
-          <div className={classes.sectionMobile}>
+
+          {isMobile && (
             <IconButton
               aria-label="show more"
               aria-controls={mobileMenuId}
@@ -497,7 +507,7 @@ const Header = ({ toggleDrawer }) => {
             >
               <MoreIcon />
             </IconButton>
-          </div>
+          )}
         </Toolbar>
       </AppBar>
       {renderMobileMenu}
