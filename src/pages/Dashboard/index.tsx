@@ -8,15 +8,13 @@ import { kebabCase } from "lodash";
 
 function Dashboard() {
   const {
-    state: { user, permissions },
+    state: { user },
   } = useData();
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
     const arr = [];
-    let allData = [
-      ...user?.role.sideBar
-    ];
+    let allData = user && [...user?.role.sideBar];
     if (user?.role?.selectedEntity) {
       allData = [...allData, ...user?.role?.selectedEntity?.resource];
     }
@@ -41,7 +39,7 @@ function Dashboard() {
         <Box marginY={2}>
           <Grid container spacing={2}>
             {sections.map((section) => {
-              return section.items.length > 0 ?
+              return section.items.length > 0 ? (
                 <Grid key={section.head} item xs={12} sm={6} md={4}>
                   <Paper>
                     <Box padding={2}>
@@ -61,7 +59,8 @@ function Dashboard() {
                       </Box>
                     </Box>
                   </Paper>
-                </Grid> : null
+                </Grid>
+              ) : null;
             })}
           </Grid>
         </Box>

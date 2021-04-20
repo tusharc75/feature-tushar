@@ -28,8 +28,9 @@ import { useHistory } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
-import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
+import axiosInstance from "../../axios/axiosInstance";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -184,13 +185,14 @@ const Header = ({ toggleDrawer }) => {
     setOpen((prevOpen) => !prevOpen);
   };
 
-  const handleClose = (event, option) => {
+  const handleClose = async (event, option) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
       return;
     }
 
     if (option && option.logout) {
-      window.location.reload();
+      await axiosInstance().get("/user/logout");
+      dispatch({ type: SET_USER, payload: null });
       localStorage.removeItem("token");
       history.push({
         pathname: "/login",
