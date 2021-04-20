@@ -69,7 +69,7 @@ const UserDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
-  const [userList, setUserList] = useState<any[]>([]);
+  const userList = location.state.userList;
 
   useEffect(() => {
     if (id) {
@@ -80,7 +80,6 @@ const UserDetailsPage = () => {
       fetchDoa();
     }
     // eslint-disable-next-line
-    setUserList(location.state.userList)
   }, [id]);
 
   const fetchUserData = async () => {
