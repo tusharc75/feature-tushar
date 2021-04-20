@@ -418,7 +418,9 @@ const Header = ({ toggleDrawer }) => {
                     aria-controls={entitiesMenuId}
                     color="inherit"
                     onClick={openEntitiesMenu}
-                    title={`Selected entity - ${curEntity.entityName}`}
+                    title={
+                      curEntity && `Selected entity - ${curEntity.entityName}`
+                    }
                     className={classes.entitySelect}
                   >
                     <span>{curEntity && curEntity.entityName}</span>
