@@ -52,10 +52,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   logo: {
-    width: "120px",
-    [theme.breakpoints.down("sm")]: {
-      width: "80px",
-    },
+    width: "110px",
   },
 
   search: {
