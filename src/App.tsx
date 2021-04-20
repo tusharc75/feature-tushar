@@ -52,6 +52,18 @@ import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 function App() {
   const toast = useContext(CustomToastContext);
 
+  window["OneSignal"] = window["OneSignal"] || [];
+  const OneSignal = window["OneSignal"];
+
+  OneSignal.push(function () {
+    OneSignal.init({
+      appId: "53e16e5d-0a6d-4e0d-85ea-8f6bbbc4fd5e",
+      notifyButton: {
+        enable: true,
+      },
+    });
+  });
+
   const location = useLocation();
   const {
     state: { user },
