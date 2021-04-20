@@ -57,7 +57,9 @@ function LeadsHeader(props) {
         showConfirmBox,
         allowToDelete,
         icon,
-        heading
+        heading,
+        allowToConvertLeadToOpportunity,
+        showLeadToOpportunityConfirmationDialog
     } = props
     return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6} className="d-flex align-items-center gap-1">
@@ -131,11 +133,14 @@ function LeadsHeader(props) {
                                 disabled={allowToDelete}
                             >Delete</MenuItem>
 
-                            {/* <MenuItem
-                                onClick={() => {
-                                    
-                                }}
-                            >Convert To Opportunity</MenuItem> */}
+                            {
+                                allowToConvertLeadToOpportunity && <MenuItem
+                                    onClick={() => {
+                                        closeActions();
+                                        showLeadToOpportunityConfirmationDialog();
+                                    }}
+                                >Convert To Opportunity</MenuItem>
+                            }
                         </Menu>
                     </>
                 }
