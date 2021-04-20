@@ -14,6 +14,8 @@ import {
   InputBase,
   Chip,
   Typography,
+  useMediaQuery,
+  ButtonBase,
 } from "@material-ui/core";
 import {
   Search,
@@ -28,8 +30,9 @@ import { useHistory } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
-import { SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
+import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
+import axiosInstance from "../../axios/axiosInstance";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -50,10 +53,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   logo: {
-    width: "120px",
-    [theme.breakpoints.down("sm")]: {
-      width: "80px",
-    },
+    width: "110px",
   },
 
   search: {
@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
 
   sectionDesktop: {
     display: "none",
-    [theme.breakpoints.up("md")]: {
+    [theme.breakpoints.up("sm")]: {
       display: "flex",
       alignItems: "center",
     },
@@ -117,7 +117,13 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "3px",
   },
   entitySelect: {
-    minWidth: "200px",
+    fontWeight: "bold",
+    fontSize: "16px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    minWidth: "150px",
+    padding: theme.spacing(1, 0, 1, 1),
   },
   entityName: {
     textOverflow: "ellipsis",
@@ -134,6 +140,7 @@ const Header = ({ toggleDrawer }) => {
   }: any = useData();
   const classes = useStyles();
   const history = useHistory();
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [isSearch, setSearch] = useState(false);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
@@ -190,11 +197,7 @@ const Header = ({ toggleDrawer }) => {
     }
 
     if (option && option.logout) {
-      window.location.reload();
-      localStorage.removeItem("token");
-      history.push({
-        pathname: "/login",
-      });
+      logoutUser();
     }
 
     // if (option && option.profile) {
@@ -203,6 +206,14 @@ const Header = ({ toggleDrawer }) => {
     //   });
     // }
     setOpen(false);
+  };
+
+  const logoutUser = async () => {
+    await axiosInstance().get("/user/logout");
+    history.push("/");
+    dispatch({ type: SET_USER, payload: null });
+    localStorage.removeItem("token");
+    history.push("/login");
   };
 
   function handleListKeyDown(event) {
@@ -315,9 +326,19 @@ const Header = ({ toggleDrawer }) => {
           "No Entity"
         )}
       </MenuItem>
-      {/* <MenuItem onClick={openSupportMenu}>
-        <p>Support</p> <ExpandMore />
-      </MenuItem> */}
+
+      <MenuItem>
+        <Badge badgeContent={1} color="secondary">
+          <Notifications />
+        </Badge>
+        <Box component="span" mx={1} />
+        <p>Notifications</p>
+      </MenuItem>
+      <MenuItem>
+        <HelpOutline />
+        <Box component="span" mx={1} />
+        <p>Help</p>
+      </MenuItem>
     </Menu>
   );
 
@@ -391,16 +412,21 @@ const Header = ({ toggleDrawer }) => {
                 Services <ExpandMore />
               </Button> */}
               {selectedEntity && (
-                <Button
-                  aria-controls={entitiesMenuId}
-                  color="inherit"
-                  onClick={openEntitiesMenu}
-                  title={`Selected entity - ${curEntity.entityName}`}
-                  className={classes.entitySelect}
-                >
-                  <span>{curEntity && curEntity.entityName}</span>{" "}
-                  <ExpandMore />
-                </Button>
+                <ButtonBase>
+                  <Box
+                    aria-controls={entitiesMenuId}
+                    color="inherit"
+                    onClick={openEntitiesMenu}
+                    title={
+                      curEntity && `Selected entity - ${curEntity.entityName}`
+                    }
+                    className={classes.entitySelect}
+                  >
+                    <span>{curEntity && curEntity.entityName}</span>
+                    <Box component="span" mr={1} />
+                    <ExpandMore />
+                  </Box>
+                </ButtonBase>
               )}
             </Box>
             <div className={classes.search}>
@@ -438,15 +464,17 @@ const Header = ({ toggleDrawer }) => {
             ></img>
           ) : null}
 
-          <IconButton aria-label="settings" color="inherit">
-            <Badge badgeContent={1} color="secondary">
-              <Notifications />
-            </Badge>
-          </IconButton>
+          <div className={classes.sectionDesktop}>
+            <IconButton aria-label="settings" color="inherit">
+              <Badge badgeContent={1} color="secondary">
+                <Notifications />
+              </Badge>
+            </IconButton>
 
-          <IconButton aria-label="help" color="inherit">
-            <HelpOutline />
-          </IconButton>
+            <IconButton aria-label="help" color="inherit">
+              <HelpOutline />
+            </IconButton>
+          </div>
 
           <div className={classes.sectionMobile}>
             <IconButton
@@ -466,7 +494,8 @@ const Header = ({ toggleDrawer }) => {
             onClose={handleClose}
             onListKeyDown={handleListKeyDown}
           />
-          <div className={classes.sectionMobile}>
+
+          {isMobile && (
             <IconButton
               aria-label="show more"
               aria-controls={mobileMenuId}
@@ -477,7 +506,7 @@ const Header = ({ toggleDrawer }) => {
             >
               <MoreIcon />
             </IconButton>
-          </div>
+          )}
         </Toolbar>
       </AppBar>
       {renderMobileMenu}

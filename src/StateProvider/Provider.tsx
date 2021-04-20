@@ -34,7 +34,7 @@ export const Provider = ({ children }) => {
 
   return (
     <StateContext.Provider value={{ state, dispatch }}>
-      {token ? (state.user ? children : null) : children}
+      {children}
     </StateContext.Provider>
   );
 };
