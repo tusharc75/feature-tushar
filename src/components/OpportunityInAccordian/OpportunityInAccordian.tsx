@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Grid, Box, IconButton, Typography, Card, CardContent } from '@material-ui/core'
 import CommonSkeleton from '../Helpers/CommonSkeleton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -95,6 +95,14 @@ export default function OpportunityInAccordian({ opportunities, onNewOpportunity
     const [expandOpportunity, setExpandOpportunity] = useState(expanded);
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
 
+    useEffect(() => {
+        let isExpanded = expandOpportunity
+        if (opportunities.length === 0 && isExpanded) isExpanded = false
+        else if (opportunities.length > 0 && !isExpanded) isExpanded = true
+
+        setExpandOpportunity(isExpanded)
+
+    }, [opportunities])
     return <>
         <Accordion expanded={expandOpportunity}>
             <AccordionSummary
