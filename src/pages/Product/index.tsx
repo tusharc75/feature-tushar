@@ -77,44 +77,47 @@ const Product = () => {
         {
             field: "createdBy",
             headerName: "Created By",
-            width: 300,
+            width: 150,
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
-            renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
-                {params.row.createdBy.user.firstName}
-                <span
-                    className="createdAtTime"
-                    title={`${params.row.createdBy.user.firstName} • ${moment(
-                        params.row.createdBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
-                >
-                    {moment(params.row.createdBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
-                    )}
-                </span>
-            </h5>) : <NoDataCell />
+            renderCell: (params: any) =>
+                params?.value && params?.value?.user ? (
+                    <h5 className="createBy">
+                        {params?.value?.user?.firstName}
+                        <span
+                            className="createdAtTime"
+                            title={`${params?.value?.user?.firstName} • ${moment(
+                                params?.value?.date?.slice(0, 10)
+                            ).format("MMM Do, YYYY")}`}
+                        >
+                            {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
+                        </span>
+                    </h5>
+                ) : (
+                    <NoDataCell />
+                ),
         },
         {
             field: "updatedBy",
             headerName: "Updated By",
-            width: 300,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => params?.row && params?.row?.updatedBy ? (<h5 className="createBy">
-                {params.row.updatedBy.user.firstName}
-                <span
-                    className="updatedAtTime"
-                    title={`${params.row.updatedBy.user.firstName} • ${moment(
-                        params.row.updatedBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
-                >
-                    {moment(params.row.updatedBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
-                    )}
-                </span>
-            </h5>) : <NoDataCell />
+            width: 150,
+            renderCell: (params: any) =>
+                params?.value && params?.value?.user ? (
+                    <h5 className="updateBy">
+                        {params.value.user.firstName}
+                        <span
+                            className="updatedAtTime"
+                            title={`${params.value.user.firstName} • ${moment(
+                                params.value.date.slice(0, 10)
+                            ).format("MMM Do, YYYY")}`}
+                        >
+                            {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+                        </span>
+                    </h5>
+                ) : (
+                    <NoDataCell />
+                )
         },
         {
             field: "description",
