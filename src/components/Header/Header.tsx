@@ -210,11 +210,10 @@ const Header = ({ toggleDrawer }) => {
 
   const logoutUser = async () => {
     await axiosInstance().get("/user/logout");
+    history.push("/");
     dispatch({ type: SET_USER, payload: null });
     localStorage.removeItem("token");
-    history.push({
-      pathname: "/login",
-    });
+    history.push("/login");
   };
 
   function handleListKeyDown(event) {
