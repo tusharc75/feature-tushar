@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from "react";
-import { Box, Button, Grid } from "@material-ui/core";
+import React, { useEffect, useState, useContext } from "react";
+import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import { useHistory } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
@@ -11,6 +11,7 @@ import {
   getObjKeys,
   yupSchema,
   getObjKeysWithValues,
+  simplifyValues,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -323,11 +324,12 @@ export default function ManageLeadDialog({
                 </Button>
 
                 <CustomButton
-                  loading={loading}
                   variant="contained"
                   color="primary"
-                  disabled={
-                    loading || Object.keys(errors).length > 0 ? true : false
+                  loading={
+                    // loading || Object.keys(errors).length > 0 ? true : false
+                    Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                    Object.values(simplifyValues(values, entityData.fields)).toString()
                   }
                   onClick={(e) => {
                     e.preventDefault();
