@@ -9,11 +9,7 @@ import Container from "../../../components/Container";
 import DetailsPage from "../../../components/Shared/DetailsPage";
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from "@material-ui/icons/Delete";
-import {
-    SET_USER,
-    USER_LOADING,
-    SET_SELECTED_ENTITY,
-} from "../../../StateProvider/actionTypes";
+import { SET_USER } from "../../../StateProvider/actionTypes";
 import "../profilePage.scss"
 
 export default function ManageProfile(props) {
