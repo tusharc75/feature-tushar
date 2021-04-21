@@ -68,6 +68,7 @@ const Roles: FC = () => {
       .then(({ data: { data, count } }) => {
         getRows(data);
         setRowCount(count);
+        setCheckAllRoles(false);
         setLoadingRoles(false);
       })
       .catch((err) => {

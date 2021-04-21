@@ -63,6 +63,7 @@ const User: FC = () => {
         .then(({ data: { data, count } }) => {
           getRows(data);
           setRowCount(count);
+          setCheckAllUsers(false)
           setLoadingUsers(false);
         })
         .catch((err) => {
