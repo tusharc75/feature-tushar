@@ -15,7 +15,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from "../../axios/axiosInstance";
-import CustomButton from "../../components/Helpers/Button";
+import CustomButton from "../../components/Helpers/CustomButton";
 
 
 const termsAndConditionSchema = Yup.object().shape({
