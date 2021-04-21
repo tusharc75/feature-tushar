@@ -368,9 +368,10 @@ export default function ManageOpportunityDialog({
                 </Button>
 
                 <CustomButton
+                  loading={loading}
                   variant="contained"
                   color="primary"
-                  loading={
+                  disabled={
                     Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                     Object.values(simplifyValues(values, entityData.fields)).toString()}
                   onClick={(e) => {

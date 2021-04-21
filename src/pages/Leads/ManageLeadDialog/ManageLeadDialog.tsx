@@ -324,9 +324,10 @@ export default function ManageLeadDialog({
                 </Button>
 
                 <CustomButton
+                  loading={loading}
                   variant="contained"
                   color="primary"
-                  loading={
+                  disabled={
                     // loading || Object.keys(errors).length > 0 ? true : false
                     Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                     Object.values(simplifyValues(values, entityData.fields)).toString()
