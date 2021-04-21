@@ -49,8 +49,8 @@ const RenderCheckBox = ({ name, val, id, onChange }) => (
 )
 
 const PreferenceOptions = ({ icon, heading, subtitle }) => (
-    <Grid item sm={4} container>
-        <Grid item sm={4} style={{ marginTop: '7px' }}>
+    <Grid item sm={12} md={6} lg={4} container>
+        <Grid item sm={3} style={{ marginTop: '7px' }}>
             {icon}
         </Grid>
         <Grid item sm={7} container>
@@ -108,15 +108,15 @@ export default function NotifiationPreference(props) {
     return <Container>
         <div className="preferenceHeader">
             <Typography variant="h5">Your Notification Preference</Typography>
-            <Tooltip title="Save">
+            {/* <Tooltip title="Save">
                 <IconButton>
                     <SaveButton color="primary" variant="contained" onClick={handleSubmit}>Save</SaveButton>
                 </IconButton>
-            </Tooltip>
+            </Tooltip> */}
         </div>
         <Box style={{ padding: "8px" }}>
             <Box className="preferenceOptionsBox">
-                <Grid container spacing={6} className={classes.preferenceOptions} >
+                <Grid container spacing={3} className={classes.preferenceOptions} >
                     {
                         options.map(curPreference => (
                             <PreferenceOptions

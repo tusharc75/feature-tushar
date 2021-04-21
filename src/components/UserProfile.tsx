@@ -54,9 +54,9 @@ export default function UserProfile(props) {
                                     autoFocusItem={open}
                                     id="menu-list-grow"
                                     onKeyDown={onListKeyDown}>
-                                    <MenuItem onClick={(e) => onClose(e, { logout: true })}>
-                                        <ListItemIcon style={{ minWidth: '30px' }}><FiLogOut /></ListItemIcon>
-                                        <Typography className="logoutProfile">Logout</Typography>
+                                    <MenuItem onClick={(e) => onClose(e, { profile: true })}>
+                                        <ListItemIcon style={{ minWidth: '30px' }}><FiUser /></ListItemIcon>
+                                        <Typography className="logoutProfile"> Profile</Typography>
                                     </MenuItem>
                                 </MenuList>
                             </ClickAwayListener>
@@ -65,9 +65,9 @@ export default function UserProfile(props) {
                                     autoFocusItem={open}
                                     id="menu-list-grow"
                                     onKeyDown={onListKeyDown}>
-                                    <MenuItem onClick={(e) => onClose(e, { profile: true })}>
-                                        <ListItemIcon style={{ minWidth: '30px' }}><FiUser /></ListItemIcon>
-                                        <Typography className="logoutProfile"> Profile</Typography>
+                                    <MenuItem onClick={(e) => onClose(e, { logout: true })}>
+                                        <ListItemIcon style={{ minWidth: '30px' }}><FiLogOut /></ListItemIcon>
+                                        <Typography className="logoutProfile">Logout</Typography>
                                     </MenuItem>
                                 </MenuList>
                             </ClickAwayListener>

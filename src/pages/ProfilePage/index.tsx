@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     },
     profileContainer: {
         width: '90%',
-        height: '85%',
+        height: '87%',
         margin: theme.spacing(4),
         borderRadius: '8px',
         textAlign: 'center',

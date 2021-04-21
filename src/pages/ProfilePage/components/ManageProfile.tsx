@@ -21,7 +21,9 @@ export default function ManageProfile(props) {
     const { state: { user }, dispatch }: any = useData();
     const [userFields, setUserFields] = useState([]);
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+    const [userData, setUserData] = useState(null)
     const [loading, setLoading] = useState(false);
+    const [userLoading, setUserLoading] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
     const [isUploading, setUploading] = useState(false);
     const toastConfig = useContext(CustomToastContext);
@@ -29,9 +31,26 @@ export default function ManageProfile(props) {
     useEffect(() => {
         if (userFields.length == 0) {
             getUserFields()
+            fetchUserData()
         }
     }, [])
+    const fetchUserData = () => {
+        setUserLoading(true)
+        axiosInstance()
+            .get(`/user/${user?.user?._id}`)
+            .then(({ data }) => {
+                if (data?.data) {
+                    delete data.data["updatedBy"]
+                    setUserData(data.data)
+                }
+                setUserLoading(false)
+            }).catch((error) => {
+                setUserLoading(false)
+                toastConfig.setToastConfig(error);
+            });
+    }
     const getUserFields = () => {
+
         setLoading(true)
         axiosInstance()
             .get("/field?resource=User")
@@ -54,16 +73,19 @@ export default function ManageProfile(props) {
     };
 
     const handleUpdateUser = (values) => {
-        if (user?.user?._id) {
+        if (userData?._id) {
             setUpdating(true);
             axiosInstance()
-                .put(`/user`, { ...values, _id: user.user._id })
+                .put(`/user`, { ...values, _id: userData?._id })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
                         message: data.message,
                     });
+
+                    let updatedUserDetails = { ...user, user: { ...user.user, ...values } }
+                    dispatch({ type: SET_USER, payload: updatedUserDetails });
                     fetchUserData()
                     setUpdating(false);
                     closeUpdateDialog();
@@ -83,7 +105,7 @@ export default function ManageProfile(props) {
                 headers: { "Content-Type": "multipart/form-data" },
             })
             .then(({ data }) => {
-                handleUpdateUser({ ...user.user, avatar: data.fileUrl })
+                handleUpdateUser({ ...userData, avatar: data.fileUrl })
                 setUploading(false);
             })
             .catch((err) => {
@@ -97,26 +119,6 @@ export default function ManageProfile(props) {
             getImageUrl(file);
         }
     };
-    const fetchUserData = () => {
-        dispatch({ type: USER_LOADING, payload: true });
-        axiosInstance()
-            .get("/user/me")
-            .then(({ data: response }) => {
-                const { data } = response;
-                dispatch({ type: SET_USER, payload: data });
-                if (data?.role?.selectedEntity?._id) {
-                    dispatch({
-                        type: SET_SELECTED_ENTITY,
-                        payload: data.role.selectedEntity._id,
-                    });
-                }
-                dispatch({ type: USER_LOADING, payload: false });
-            })
-            .catch((err) => {
-                localStorage.setItem("token", "");
-                dispatch({ type: USER_LOADING, payload: false });
-            });
-    };
     let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image") : []
     return <>
         {openUpdateDialog && (
@@ -124,7 +126,7 @@ export default function ManageProfile(props) {
                 title="Update"
                 openDialog={openUpdateDialog}
                 onClose={closeUpdateDialog}
-                data={user.user}
+                data={userData}
                 fields={userFields}
                 isUpdating={isUpdating}
                 handleUpdate={handleUpdateUser}
@@ -139,12 +141,12 @@ export default function ManageProfile(props) {
                                 <Box display="flex" flexDirection="row">
                                     <Box position="relative">
                                         <Avatar
-                                            src={user.user.avatar}
+                                            src={userData?.avatar}
                                             style={{ width: 100, height: 100 }}
-                                            alt={user?.user?.firstName ?? ''}
+                                            alt={userData?.firstName ?? ''}
                                         />
                                         <Box
-                                            title={user?.user?.avatar ?? "No picture selected"}
+                                            title={userData?.avatar ?? "No picture selected"}
                                             display="flex"
                                             justifyContent="center"
                                             alignItems="center"
@@ -152,23 +154,28 @@ export default function ManageProfile(props) {
                                             {isUploading && <CircularProgress size={22} />}
                                         </Box>
                                     </Box>
-                                    <Box>
-                                        <IconButton
-                                            disabled={Boolean(!user?.user?.avatar)}
-                                            title="Remove picture"
-                                            color="secondary"
-                                            size="small"
-                                            aria-label="delete picture"
-                                            component="span"
-                                        >
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Box>
+                                    {
+                                        userData?.avatar ?
+                                            <Box>
+                                                <IconButton
+                                                    disabled={Boolean(!userData?.avatar)}
+                                                    title="Remove picture"
+                                                    color="secondary"
+                                                    size="small"
+                                                    aria-label="delete picture"
+                                                    component="span"
+                                                    onClick={() => handleUpdateUser({ ...userData, avatar: '' })}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Box> : null
+                                    }
+
                                 </Box>
                             </>
 
                         </div>
-                        <Typography variant="h5"><strong>{`${user?.user?.firstName ?? ""} ${user?.user?.lastName ?? ""}`}</strong></Typography>
+                        <Typography variant="h5"><strong>{`${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`}</strong></Typography>
                         <label htmlFor="avatar">
                             <IconButton
                                 title="Add picture"
@@ -196,7 +203,7 @@ export default function ManageProfile(props) {
                     </div>
                     : null
             }
-            <Container styles={{ borderRadius: 8 }}>
+            <Container styles={{ borderRadius: 8, minWidth: "300px" }}>
                 {
                     displayUserDetails ?
                         <>
@@ -208,13 +215,13 @@ export default function ManageProfile(props) {
                                 </Tooltip>
                             </div>
                             <Box style={{ padding: "8px" }}>
-                                {loading ? (
+                                {loading || userLoading ? (
                                     <Grid container spacing={2} style={{ padding: "8px" }}>
                                         <CommonSkeleton lenArray={[...Array(7).keys()]} />
                                     </Grid>
                                 ) : !userFields.length ? <Typography>No Data Found</Typography>
                                     : (
-                                        <DetailsPage data={user.user} fields={filteredUserFields} />
+                                        <DetailsPage data={userData} fields={filteredUserFields} />
                                     )}
                             </Box>
                         </> : null

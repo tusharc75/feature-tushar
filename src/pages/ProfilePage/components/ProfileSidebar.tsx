@@ -48,7 +48,7 @@ export default function Sidebar({ onItemClick, activeLink, ...rest }) {
                         return <div key={index} className="font-size-3 link d-flex justify-content-center align-items-center gap-1 profileSidebarLink">
                             <span className={`menu-link ${activeLink === k.id ? "active" : ""}`}>
                                 <Icon >{k.icon}</Icon>
-                                <Typography key={index} onClick={() => onItemClick(k)}>{k.label} </Typography>
+                                <Typography className="linkLabel" align="left" key={index} onClick={() => onItemClick(k)}>{k.label} </Typography>
                             </span>
                         </div>
                     })
