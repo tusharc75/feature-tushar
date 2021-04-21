@@ -33,7 +33,7 @@ export const leadImportErrorFileName = "Leads-Errors.xlsx";
 export const opportunityTemplateFileName = "Opportunities-Template.xlsx";
 export const opportunityImportErrorFileName = "Opportunities-Errors.xlsx";
 
-export const RoleTypes = [
+export const roleTypes = [
   {
     key: "Global",
     value: 1,
