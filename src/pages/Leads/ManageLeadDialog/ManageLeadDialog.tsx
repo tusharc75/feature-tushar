@@ -17,7 +17,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import FormTypes from "../../../components/Helpers/FormTypes";
-import CustomButton from "../../../components/Helpers/Button";
+import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";

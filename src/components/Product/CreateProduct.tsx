@@ -11,7 +11,7 @@ import FormTypes from "../Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
 import _ from 'lodash';
 import { getObjKeys, simplifyValues, yupSchema } from '../../constants/helpers';
-import CustomButton from '../../components/Helpers/Button'
+import CustomButton from '../Helpers/CustomButton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import IconButton from '@material-ui/core/IconButton';
