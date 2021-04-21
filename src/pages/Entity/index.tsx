@@ -69,6 +69,7 @@ const Entity: FC = () => {
       .then(({ data: { data, count } }) => {
         getRows(data);
         setRowCount(count);
+        setCheckAllEntities(false);
         setLoadingEntities(false);
       })
       .catch((err) => {

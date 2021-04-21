@@ -178,6 +178,7 @@ export default function Doa() {
         setUsers(data);
         getRows(data);
         setRowCount(count);
+        setCheckAllUsers(false);
         setLoading(false);
       })
       .catch((err) => {

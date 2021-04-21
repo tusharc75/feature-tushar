@@ -305,6 +305,7 @@ export default function Contact(props) {
                 setContactData(data);
                 // getRows(data);
                 setRowCount(count);
+                setCheckAllContacts(false)
                 setLoading(false);
             })
             .catch((err) => {

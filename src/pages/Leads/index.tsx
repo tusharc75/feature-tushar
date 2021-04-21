@@ -128,6 +128,7 @@ const Leads = () => {
           .get(api).then(({ data }) => {
             setRowCount(data.count)
             setLeadData(data.data)
+            setCheckAllLeads(false)
             setLoading(false);
           })
 

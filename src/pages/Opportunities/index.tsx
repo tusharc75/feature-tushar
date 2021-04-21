@@ -183,6 +183,7 @@ const Opportunities = () => {
           .then(({ data }) => {
             setRowCount(data.count);
             setOpportunityData(data.data);
+            setCheckAllOpportunities(false);
             setLoading(false);
           });
       } catch (err) {
