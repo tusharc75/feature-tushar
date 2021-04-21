@@ -40,10 +40,8 @@ let titlesArray = ['Activity in all unassigned conversation', 'Activity in any o
 
 const RenderCheckBox = ({ name, val, id, onChange }) => (
     <FormControlLabel
-        control={<Checkbox size="small" checked={val} onChange={(e) => {
-            console.log('eee', e);
-            onChange(e.target.checked, id, name);
-        }} name={name} />}
+        control={<Checkbox size="small" checked={val}
+            onChange={(e) => onChange(e.target.checked, id, name)} name={name} />}
         label={name}
     />
 )
@@ -86,7 +84,6 @@ export default function NotifiationPreference(props) {
         setRows(tempRows)
     }
     const handleSubmit = () => {
-        console.log('rows', rows)
     }
     const options = [
         {
