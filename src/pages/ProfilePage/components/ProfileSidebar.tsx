@@ -2,12 +2,11 @@ import React from 'react'
 import { Grid, Typography, Icon } from '@material-ui/core'
 import { BsShieldShaded, BsFillGearFill } from 'react-icons/bs'
 import { HiSpeakerphone, HiUserCircle, HiUsers } from 'react-icons/hi'
-import { profileMenuItems } from '../../constants/helpers'
+import { profileMenuItems } from '../../../constants/helpers'
 import ManageProfile from './ManageProfile'
-import "./profilePage.scss"
+import "../profilePage.scss"
 
-export default function Sidebar({ onItemClick, ...rest }) {
-
+export default function Sidebar({ onItemClick, activeLink, ...rest }) {
     const userMenu = [
         {
             label: "My Profile",
@@ -40,14 +39,14 @@ export default function Sidebar({ onItemClick, ...rest }) {
             id: profileMenuItems.setting
         },
     ]
-    return <Grid container spacing="4" >
+    return <Grid container spacing={4} >
         <ManageProfile displayUserProfileImage={true} />
-        <Grid sm={8} lg={12} md={8}>
-            <div className="d-flex flex-column gap-4 px-5 pt-2 pb-3">
+        <Grid sm={12} lg={12} md={12}>
+            <div className="d-flex flex-column gap-4 px-5 pt-2 pb-3" >
                 {
                     userMenu.map((k, index) => {
                         return <div key={index} className="font-size-3 link d-flex justify-content-center align-items-center gap-1 profileSidebarLink">
-                            <span className={`menu-link`}>
+                            <span className={`menu-link ${activeLink === k.id ? "active" : ""}`}>
                                 <Icon >{k.icon}</Icon>
                                 <Typography key={index} onClick={() => onItemClick(k)}>{k.label} </Typography>
                             </span>
@@ -56,5 +55,5 @@ export default function Sidebar({ onItemClick, ...rest }) {
                 }
             </div>
         </Grid>
-    </Grid>
+    </Grid >
 }

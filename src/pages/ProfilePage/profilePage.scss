@@ -1,12 +1,15 @@
 .profileSidebarLink{
     .menu-link {
+        text-decoration: none;    
         color: var(--primary) !important;
         display: contents;
         font-weight: 400;
       }
-      .menu-link:hover {
+      .active, .menu-link:hover {
+        text-decoration: none;    
         cursor: pointer !important;
         color: var(--link) !important;
+        font-weight: bolder;
       }
 }
 .userDetail{
@@ -20,8 +23,17 @@
   justify-content: flex-end;
 }
 .profileAvatarContainer{
-        width: "100%";
         display: flex;
         justify-content: center;
-        margin-top: 6%;
+}
+.preferenceHeader{
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 10px;
+}
+.notificationIcon{
+  color: var(--link);
+}
+.preferenceOptionsBox{
+  background-color: #d3d3d373;
 }

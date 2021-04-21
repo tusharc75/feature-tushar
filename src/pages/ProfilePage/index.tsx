@@ -1,12 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import Layout from "../../components/Layout";
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import "./profilePage.scss"
-import ProfileSidebar from './ProfileSidebar'
+import ProfileSidebar from './components/ProfileSidebar'
 import { profileMenuItems } from '../../constants/helpers'
-import ManageProfile from './ManageProfile'
+import ManageProfile from './components/ManageProfile'
+import NotifiationPreference from './components/NotifiationPreference'
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -18,8 +19,8 @@ const useStyles = makeStyles((theme) => ({
     },
     profileContainer: {
         width: '90%',
-        height: '80%',
-        margin: '50px',
+        height: '85%',
+        margin: theme.spacing(4),
         borderRadius: '8px',
         textAlign: 'center',
         backgroundColor: theme.palette.common.white,
@@ -40,16 +41,16 @@ export default function ProfilePage(props) {
 
     return <Layout>
         <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
-        <Grid container className={classes.profileContainer} spacing="2">
+        <Grid container className={classes.profileContainer} spacing={2}>
             <Grid item sm={3} lg={3} md={3} className={classes.profileSidebar} >
-                <ProfileSidebar onItemClick={handleItemClick} />
+                <ProfileSidebar onItemClick={handleItemClick} activeLink={activeItem} />
             </Grid>
-            <Grid item sm={6} md={6} lg={9} >
+            <Grid item sm={9} md={9} lg={9} >
                 {
                     activeItem === profileMenuItems.profile ?
                         <ManageProfile displayUserDetails={true} /> :
                         activeItem === profileMenuItems.notification ?
-                            <Paper className={classes.paper}>notifications</Paper>
+                            <NotifiationPreference />
                             : activeItem === profileMenuItems.setting ?
                                 <Paper className={classes.paper}>setting</Paper>
                                 : activeItem === profileMenuItems.users ?

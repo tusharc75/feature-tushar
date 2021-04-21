@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider } from '@material-ui/core'
-import { useData } from "../../StateProvider/Provider";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
-import Container from "../../components/Container";
-import DetailsPage from "../../components/Shared/DetailsPage";
+import { useData } from "../../../StateProvider/Provider";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../../axios/axiosInstance";
+import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
+import UpdateDetailsDialog from "../../../components/Shared/UpdateDetailsDialog";
+import Container from "../../../components/Container";
+import DetailsPage from "../../../components/Shared/DetailsPage";
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from "@material-ui/icons/Delete";
 import {
     SET_USER,
     USER_LOADING,
     SET_SELECTED_ENTITY,
-} from "../../StateProvider/actionTypes";
-import "./profilePage.scss"
+} from "../../../StateProvider/actionTypes";
+import "../profilePage.scss"
 
 export default function ManageProfile(props) {
     const { displayUserDetails, displayUserProfileImage } = props
@@ -207,14 +207,15 @@ export default function ManageProfile(props) {
                                     </IconButton>
                                 </Tooltip>
                             </div>
-                            <Box style={{ padding: "8px", minHeight: "500px" }}>
-                                {loading || !userFields.length ? (
+                            <Box style={{ padding: "8px" }}>
+                                {loading ? (
                                     <Grid container spacing={2} style={{ padding: "8px" }}>
                                         <CommonSkeleton lenArray={[...Array(7).keys()]} />
                                     </Grid>
-                                ) : (
-                                    <DetailsPage data={user.user} fields={filteredUserFields} />
-                                )}
+                                ) : !userFields.length ? <Typography>No Data Found</Typography>
+                                    : (
+                                        <DetailsPage data={user.user} fields={filteredUserFields} />
+                                    )}
                             </Box>
                         </> : null
                 }
