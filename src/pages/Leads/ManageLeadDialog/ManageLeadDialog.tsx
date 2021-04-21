@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from "react";
-import { Box, Button, Grid } from "@material-ui/core";
+import React, { useEffect, useState, useContext } from "react";
+import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import { useHistory } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
@@ -342,7 +342,7 @@ export default function ManageLeadDialog({
                     );
                   }}
                 >
-                  Save
+                  {loading ? <CircularProgress size={20} /> : "Save"}
                 </Button>
               </CustomDialogFooter>
             </>

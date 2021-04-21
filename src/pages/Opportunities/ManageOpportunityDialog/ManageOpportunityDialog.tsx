@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from "react";
-import { Box, Button, Grid } from "@material-ui/core";
+import React, { useEffect, useState, useContext } from "react";
+import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import Dialog from "@material-ui/core/Dialog";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -384,7 +384,8 @@ export default function ManageOpportunityDialog({
                     );
                   }}
                 >
-                  Save
+                  {loading ? <CircularProgress size={20} /> : "Save"}
+
                 </Button>
               </CustomDialogFooter>
             </>
