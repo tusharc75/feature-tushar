@@ -11,6 +11,7 @@ import {
   IconButton,
   CircularProgress,
   Link as MuiLink,
+  Popover,
 } from "@material-ui/core";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { Link } from "react-router-dom";
@@ -20,6 +21,7 @@ import { getObjKeysWithValues, yyyyMMDD } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -32,6 +34,17 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up("md")]: {
       whiteSpace: "nowrap",
     },
+  },
+  popover: {
+    pointerEvents: "none",
+  },
+  paper: {
+    padding: theme.spacing(1),
+  },
+  popoverText: {
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
   },
 }));
 
@@ -50,6 +63,11 @@ const Details = (props: DetailProps) => {
   const [progress, setProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
+  const [anchorPopoverEl, setAnchorPopoverEl] = useState(null);
+  const [popoverData, setPopoverData] = useState(null);
+  const [loadingPopoverData, setLoadingPopoverData] = useState(false);
+  const [lookupResource, setLookupResource] = useState(null);
+  const cancelTokenSource = axios.CancelToken.source();
 
   useEffect(() => {
     sortArray();
@@ -143,8 +161,40 @@ const Details = (props: DetailProps) => {
   const dynamicSize = (size, type) =>
     type === "imageUpload" || type === "fileUpload" ? 12 : size;
 
+  const handlePopoverOpen = (event) => {
+    setAnchorPopoverEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    cancelTokenSource.cancel();
+    setAnchorPopoverEl(null);
+    setLookupResource(null);
+    setPopoverData(null);
+  };
+
+  const getPopoverData = (e: React.MouseEvent, field: any, value: string) => {
+    handlePopoverOpen(e);
+    setLookupResource(kebabCase(field));
+    setLoadingPopoverData(true);
+    axiosInstance()
+      .get(`/${kebabCase(field)}/${value}`, {
+        cancelToken: cancelTokenSource.token,
+      })
+      .then(({ data }) => {
+        setPopoverData(data.data);
+        setLoadingPopoverData(false);
+      })
+      .catch((err) => {
+        setToastConfig(err);
+        setLoadingPopoverData(false);
+      });
+  };
+
+  /**
+   * Render Link  or Typography component
+   */
   const renderData = (val: any, fieldData: any) => {
-    const values = normalizeValues(val, fieldData);
+    const value = normalizeValues(val, fieldData);
 
     if (fieldData.hasOwnProperty("lookup") && fieldData.lookup) {
       const redirectLink = (link: string) =>
@@ -158,6 +208,14 @@ const Details = (props: DetailProps) => {
                 data[fieldData.fieldName].map((_val: any) => (
                   <React.Fragment key={_val.optionValue}>
                     <MuiLink
+                      onMouseEnter={(e) =>
+                        getPopoverData(
+                          e,
+                          fieldData.lookupResource,
+                          val[fieldData.fieldName]
+                        )
+                      }
+                      onMouseLeave={handlePopoverClose}
                       component={Link}
                       to={redirectLink(_val.optionValue)}
                     >
@@ -171,6 +229,14 @@ const Details = (props: DetailProps) => {
               )
             ) : data[fieldData.fieldName] ? (
               <MuiLink
+                onMouseEnter={(e) =>
+                  getPopoverData(
+                    e,
+                    fieldData.lookupResource,
+                    val[fieldData.fieldName]
+                  )
+                }
+                onMouseLeave={handlePopoverClose}
                 component={Link}
                 to={redirectLink(data[fieldData.fieldName].optionValue)}
               >
@@ -185,24 +251,125 @@ const Details = (props: DetailProps) => {
     } else {
       return (
         <Typography
-          title={values === "_ _ _" ? "" : values}
+          title={value === "_ _ _" ? "" : value}
           className={classes.fieldText}
           variant="body2"
         >
           {fieldData.type === "url" ? (
-            <MuiLink href={values} target="_blank">
-              {values}
+            <MuiLink href={value} target="_blank">
+              {value}
             </MuiLink>
           ) : (
-            values
+            value
           )}
         </Typography>
       );
     }
   };
 
+  const renderPopoverData = () => {
+    const img =
+      lookupResource === "user"
+        ? popoverData?.avatar
+        : lookupResource === "contact-account" ||
+          lookupResource === "supplier-account"
+        ? popoverData?.accountLogo
+        : lookupResource === "contact-contact"
+        ? popoverData?.contactLogo
+        : "";
+    const name =
+      lookupResource === "user"
+        ? `${popoverData?.firstName} ${popoverData?.lastName}`
+        : lookupResource === "customer-account" ||
+          lookupResource === "supplier-account"
+        ? popoverData?.accountName
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
+        ? `${popoverData?.firstName} ${popoverData?.middleName} ${popoverData?.lastName}`
+        : "";
+
+    const subInfo =
+      lookupResource === "user"
+        ? popoverData?.email
+        : lookupResource === "customer-account" ||
+          lookupResource === "supplier-account"
+        ? popoverData?.description
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
+        ? popoverData?.email
+        : "";
+
+    const subInfo1 =
+      lookupResource === "user"
+        ? popoverData?.mobileNo
+        : lookupResource === "customer-account" ||
+          lookupResource === "supplier-account"
+        ? popoverData?.owner?.optionLabel
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
+        ? popoverData?.phone
+        : "";
+
+    return (
+      <Box width="200px">
+        {loadingPopoverData ? (
+          <Box display="flex" justifyContent="center">
+            <CircularProgress size={20} />
+          </Box>
+        ) : (
+          <Box display="flex" alignItems="start">
+            <Avatar src={img}>{name.charAt(0)}</Avatar>
+            <Box
+              marginLeft={2}
+              display="flex"
+              flexDirection="column"
+              justifyContent="start"
+            >
+              <Typography className={classes.popoverText}>{name}</Typography>
+              <Typography
+                color="textSecondary"
+                variant="body2"
+                className={classes.popoverText}
+              >
+                {subInfo}
+              </Typography>
+              <Typography
+                color="textSecondary"
+                variant="body2"
+                className={classes.popoverText}
+              >
+                {subInfo1}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <>
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorPopoverEl)}
+        anchorEl={anchorPopoverEl}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        {renderPopoverData()}
+      </Popover>
       {formsData?.map((form) => (
         <React.Fragment key={form.name}>
           <h3 className="form-label-style" title={form.name}>

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Layout from "../../components/Layout";
 import { useData } from '../../StateProvider/Provider';
 import {
@@ -39,6 +39,7 @@ import { accountTemplateFileName, downloadExcel, accountImportErrorFileName, sid
 import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import CustomDataGridNoDataFound from '../../components/Helpers/CustomDataGridNoDataFound';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 
 const AccTypes = [
     {
@@ -50,33 +51,11 @@ const AccTypes = [
         value: 2
     }
 ]
-const useStyles = makeStyles((theme) => ({
-    root: {
-        width: "100%",
-        border: "none",
-        borderRadius: 8,
-        padding: theme.spacing(3, 2),
-    },
-    linksContainer: {
-        display: "flex",
-    },
-    links: {
-        color: theme.palette.primary.main,   //  textDark
-        fontSize: "0.90rem"
-    },
-    linkDivider: {
-        backgroundColor: theme.palette.primary.main,  //  darkBg
-        margin: "0 1rem",
-    },
-    delBtn: {
-        color: 'red'
-    }
-}));
 
 let accountTimeout
 export default function Account(props) {
     const toastConfig = useContext(CustomToastContext);
-    const classes = useStyles();
+    
     const { account: { accountApi, accountResource, accountPermission, accountRoute }, accountBreadcrumb } = props;
     const { state: { user, permissions } }: any = useData();
     const [accountData, setAccountData] = useState([]);
@@ -387,6 +366,7 @@ export default function Account(props) {
                 // getRows(data);
                 setRowCount(count);
                 setLoading(false);
+                setCheckAllAccounts(false)
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -506,33 +486,6 @@ export default function Account(props) {
         setCheckAllAccounts(false)
     }
 
-    const uploadAccounts = (event) => {
-        if (event.target.files && event.target.files.length) {
-            toastConfig.setToastConfig({ open: true, type: "info", message: "Uploading account(s), Please wait..." });
-            const file = event.target.files[0];
-
-            let formData = new FormData();
-            formData.append("file", file);
-            axiosInstance()
-                .post(`/${accountApi}/import`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                })
-                .then(({ data }) => {
-                    if (data.message) {
-                        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-                        fetchAccounts();
-                    }
-                    else {
-                        downloadExcel(data, accountImportErrorFileName);
-                        toastConfig.setToastConfig({ open: true, type: "error", message: "Found some issue(s) while importing account(s)" });
-                    }
-                })
-                .catch((error) => {
-                    toastConfig.setToastConfig(error)
-                });
-        }
-    };
-
     const onFilterChange = useCallback((params) => {
         if (params.filterModel.items[0].value) {
             setQuery((prevState) => ({
@@ -544,6 +497,7 @@ export default function Account(props) {
             setQuery({ page: 0, limit: 25 });
         }
     }, []);
+
     return (
         <>
             <Layout>
@@ -555,67 +509,7 @@ export default function Account(props) {
                         <Grid container direction="row">
                             <Grid item xs={12} sm={12} className="pr-3">
                                 <Grid container justify="flex-end">
-                                    <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`}>
-                                        <input
-                                            id="importFromExcel"
-                                            name="importFromExcel"
-                                            onChange={uploadAccounts}
-                                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                            style={{
-                                                opacity: "0",
-                                                position: "absolute",
-                                                zIndex: -1,
-                                            }}
-                                            type="file"
-                                        />
-                                Import from Excel
-                            </label>
-                                    <Divider
-                                        orientation="vertical"
-                                        flexItem
-                                        className={classes.linkDivider}
-                                    />
-                                    <label
-                                        onClick={(e) => {
-                                            axiosInstance().get(`/${accountApi}/template?export=true`, { responseType: "arraybuffer" })
-                                                .then((response) => {
-                                                    downloadExcel(response.data, accountTemplateFileName)
-                                                }).catch((error) => {
-                                                    toastConfig.setToastConfig(error);
-                                                });
-                                        }}
-                                        className={`${classes.links} cursor-pointer`}
-                                    >
-                                        Export to Excel
-                            </label>
-                                    <Divider
-                                        orientation="vertical"
-                                        flexItem
-                                        className={classes.linkDivider}
-                                    />
-                                    <label
-                                        onClick={(e) => {
-                                            axiosInstance().get(`/${accountApi}/template`, { responseType: "arraybuffer" }).then((response) => {
-                                                downloadExcel(response.data, accountTemplateFileName)
-                                            }).catch((error) => {
-                                                toastConfig.setToastConfig(error);
-                                            });
-                                        }}
-                                        className={`${classes.links} cursor-pointer`}
-                                    >
-                                        Download Template
-                            </label>
-                                    <Divider
-                                        orientation="vertical"
-                                        flexItem
-                                        className={classes.linkDivider}
-                                    />
-                                    <label
-                                        onClick={(e) => e.preventDefault()}
-                                        className={`${classes.links} cursor-pointer`}
-                                    >
-                                        Email a Link
-                            </label>
+                                    <ImportExportLinks module="account(s)" api={accountApi} onSuccessfulImport={() => { fetchAccounts() }} />
                                 </Grid>
                             </Grid>
                         </Grid>

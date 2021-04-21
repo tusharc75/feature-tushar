@@ -17,6 +17,9 @@ import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 import axiosInstance from './../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import firebase from 'firebase';
+import { vapidKey } from "../../constants/helpers";
+
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -78,6 +81,22 @@ const Login = () => {
         if (data?.role?.selectedEntity?._id) {
           dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
         }
+
+        // const messaging = firebase.messaging();
+        // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
+        //   if (token) {
+        //     localStorage.setItem("notificationToken", token)
+        //   } else {
+        //     toastConfig.setToastConfig({
+        //       open: true,
+        //       type: "error",
+        //       message: "No registration token available. Request permission to generate one."
+        //     })
+        //   }
+        // }).catch((err) => {
+        //   console.log('An error occurred while retrieving token. ', err);
+        //   // catch error while creating client token
+        // });
       })
       .catch((error) => {
         setSubmitting(false);

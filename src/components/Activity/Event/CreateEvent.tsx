@@ -81,43 +81,47 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     };
 
     const handleSave = (values) => {
-        if (Object.values(values.startDate).toString() ===
-            Object.values(values.endDate).toString()
-            && values.startTime == values.endTime
-        ) {
-            toastConfig.setToastConfig({
-                open: true,
-                type: "error",
-                message: "Start Time and End Time should be different",
-            });
-            handleClose()
 
+        values.relatedTo = relatedTo;
+        if (eventId) {
+            UpdateEvent(eventId, values)
+                .then(({ data }) => {
+                    handleClose()
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
         }
         else {
-            values.relatedTo = relatedTo;
-            if (eventId) {
-                UpdateEvent(eventId, values)
-                    .then(({ data }) => {
-                        handleClose()
-                    })
-                    .catch((error) => {
-                        toastConfig.setToastConfig(error)
-                    });
-            }
-            else {
-                CreateNewEvent(values)
-                    .then(({ data }) => {
-                        handleClose()
-                    })
-                    .catch((error) => {
-                        toastConfig.setToastConfig(error)
-                    });
-            }
+            CreateNewEvent(values)
+                .then(({ data }) => {
+                    handleClose()
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error)
+                });
         }
+
     };
 
     let times = TimeList()
-    return (initialValues && <Formik initialValues={initialValues} validationSchema={EventSchema} onSubmit={handleSave}>
+    return (initialValues && <Formik initialValues={initialValues} validationSchema={EventSchema}
+        onSubmit={(values, { setSubmitting }) => {
+            if (Object.values(values.startDate).toString() ===
+                Object.values(values.endDate).toString()
+                && values.startTime == values.endTime
+            ) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: "Start Time and End Time should be different",
+                });
+                setSubmitting(false);
+            }
+            else {
+                handleSave(values)
+            }
+        }}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate >
                 <CustomDialogHeader title={`${eventId ? "Edit" : "New"} Event`} onClose={handleClose}></CustomDialogHeader>

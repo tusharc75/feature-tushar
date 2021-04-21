@@ -40,6 +40,7 @@ import moment from 'moment';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { useHistory } from "react-router-dom";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 
 const ContactTypes = [
     {
@@ -52,27 +53,8 @@ const ContactTypes = [
     }
 ]
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        width: "100%",
-    },
-    linksContainer: {
-        display: "flex",
-    },
-    links: {
-        color: theme.palette.primary.main,   //  textDark
-        fontSize: "0.90rem"
-    },
-    linkDivider: {
-        backgroundColor: theme.palette.primary.main,  //  darkBg
-        margin: "0 1rem",
-    },
-}));
-
-
 export default function Contact(props) {
     const toastConfig = useContext(CustomToastContext);
-    const classes = useStyles();
 
     const { state: { user } }: any = useData();
     const { contact: { contactApi, contactResource, contactPermission, contactRoute }, contactBreadcrumb,
@@ -323,6 +305,7 @@ export default function Contact(props) {
                 setContactData(data);
                 // getRows(data);
                 setRowCount(count);
+                setCheckAllContacts(false)
                 setLoading(false);
             })
             .catch((err) => {
@@ -413,33 +396,6 @@ export default function Contact(props) {
         setselectedType(filterValues)
     }
 
-    const uploadContacts = (event) => {
-        if (event.target.files && event.target.files.length) {
-            toastConfig.setToastConfig({ open: true, type: "info", message: "Uploading contact(s), Please wait..." });
-            const file = event.target.files[0];
-
-            let formData = new FormData();
-            formData.append("file", file);
-            axiosInstance()
-                .post(`/${contactApi}/import`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                })
-                .then(({ data }) => {
-                    if (data.message) {
-                        toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-                        getContacts();
-                    }
-                    else {
-                        downloadExcel(data, contactImportErrorFileName);
-                        toastConfig.setToastConfig({ open: true, type: "error", message: "Found some issue(s) while importing contact(s)" });
-                    }
-                })
-                .catch((error) => {
-                    toastConfig.setToastConfig(error)
-                });
-        }
-    };
-
     return (
         <Layout>
             <Grid container>
@@ -450,67 +406,7 @@ export default function Contact(props) {
                     <Grid container direction="row">
                         <Grid item xs={12} sm={12} className="pr-3">
                             <Grid container justify="flex-end">
-                                <label htmlFor="importFromExcel" className={`${classes.links} cursor-pointer`} style={{ marginTop: 1 }}>
-                                    <input
-                                        id="importFromExcel"
-                                        name="importFromExcel"
-                                        onChange={uploadContacts}
-                                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                        style={{
-                                            opacity: "0",
-                                            position: "absolute",
-                                            zIndex: -1,
-                                        }}
-                                        type="file"
-                                    />
-                                Import from Excel
-                            </label>
-                                <Divider
-                                    orientation="vertical"
-                                    flexItem
-                                    className={classes.linkDivider}
-                                />
-                                <label
-                                    onClick={(e) => {
-                                        axiosInstance().get(`/${contactApi}/template?export=true`, { responseType: "arraybuffer" })
-                                            .then((response) => {
-                                                downloadExcel(response.data, contactTemplateFileName)
-                                            }).catch((error) => {
-                                                toastConfig.setToastConfig(error);
-                                            });
-                                    }}
-                                    className={`${classes.links} cursor-pointer`}
-                                >
-                                    Export to Excel
-                            </label>
-                                <Divider
-                                    orientation="vertical"
-                                    flexItem
-                                    className={classes.linkDivider}
-                                />
-                                <label
-                                    onClick={(e) => {
-                                        axiosInstance().get(`/${contactApi}/template`, { responseType: "arraybuffer" }).then((response) => {
-                                            downloadExcel(response.data, contactTemplateFileName)
-                                        }).catch((error) => {
-                                            toastConfig.setToastConfig(error);
-                                        });
-                                    }}
-                                    className={`${classes.links} cursor-pointer`}
-                                >
-                                    Download Template
-                        </label>
-                                <Divider
-                                    orientation="vertical"
-                                    flexItem
-                                    className={classes.linkDivider}
-                                />
-                                <label
-                                    onClick={(e) => e.preventDefault()}
-                                    className={`${classes.links} cursor-pointer`}
-                                >
-                                    Email a Link
-                            </label>
+                                <ImportExportLinks module="contact(s)" api={contactApi} onSuccessfulImport={() => { getContacts() }} />
                             </Grid>
                         </Grid>
                     </Grid>

@@ -35,6 +35,7 @@ import {
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
 let opportunityTimeout;
 const useStyles = makeStyles((theme) => ({
@@ -182,6 +183,7 @@ const Opportunities = () => {
           .then(({ data }) => {
             setRowCount(data.count);
             setOpportunityData(data.data);
+            setCheckAllOpportunities(false);
             setLoading(false);
           });
       } catch (err) {
@@ -584,85 +586,7 @@ const Opportunities = () => {
             <Grid container direction="row">
               <Grid item xs={12} sm={12} className="pr-3">
                 <Grid container justify="flex-end">
-                  <label
-                    htmlFor="importFromExcel"
-                    className={`${classes.links} cursor-pointer`}
-                  >
-                    <input
-                      id="importFromExcel"
-                      name="importFromExcel"
-                      onChange={uploadOpportunities}
-                      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                      style={{
-                        opacity: "0",
-                        position: "absolute",
-                        zIndex: -1,
-                      }}
-                      type="file"
-                    />
-                    Import from Excel
-                  </label>
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    className={classes.linkDivider}
-                  />
-                  <label
-                    onClick={(e) => {
-                      axiosInstance()
-                        .get(`/${opportunityApi}/template?export=true`, {
-                          responseType: "arraybuffer",
-                        })
-                        .then((response) => {
-                          downloadExcel(
-                            response.data,
-                            opportunityTemplateFileName
-                          );
-                        })
-                        .catch((error) => {
-                          toastConfig.setToastConfig(error);
-                        });
-                    }}
-                    className={`${classes.links} cursor-pointer`}
-                  >
-                    Export to Excel
-                  </label>
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    className={classes.linkDivider}
-                  />
-                  <label
-                    onClick={(e) => {
-                      axiosInstance()
-                        .get(`/${opportunityApi}/template`, {
-                          responseType: "arraybuffer",
-                        })
-                        .then((response) => {
-                          downloadExcel(
-                            response.data,
-                            opportunityTemplateFileName
-                          );
-                        })
-                        .catch((error) => {
-                          toastConfig.setToastConfig(error);
-                        });
-                    }}
-                    className={`${classes.links} cursor-pointer`}
-                  >
-                    Download Template
-                  </label>
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    className={classes.linkDivider}
-                  />
-                  <label
-                    onClick={(e) => e.preventDefault()}
-                    className={`${classes.links} cursor-pointer`}
-                  >
-                    Email a Link
-                  </label>
+                  <ImportExportLinks module="opportunities" api={opportunityApi} onSuccessfulImport={() => { fetchOpportunities() }} />
                 </Grid>
               </Grid>
             </Grid>
@@ -723,9 +647,8 @@ const Opportunities = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete ${
-                deleteRec?.opportunityName ? "Opportunity" : "Opportunities"
-              }   ${deleteRec.opportunityName || ""}?`}
+              message={`Are you sure, you want to delete ${deleteRec?.opportunityName ? "Opportunity" : "Opportunities"
+                }   ${deleteRec.opportunityName || ""}?`}
               onClose={() => {
                 if (deleteRec) setDeleteRec({});
                 setIsConformDialogVisible(false);
