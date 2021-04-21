@@ -34,7 +34,7 @@ const AssignRolesDialog = ({
     axiosInstance()
       .get(`/role`)
       .then(({ data: { data } }) => {
-        setRoles(data);
+        setRoles(data.filter((d)=> d.type === 1));
         setLoadingRoles(false);
       })
       .catch((error) => {
