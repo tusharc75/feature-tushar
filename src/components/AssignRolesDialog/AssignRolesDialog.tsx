@@ -16,6 +16,7 @@ import Loader from "../Loader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { roleTypes } from "../../constants/helpers";
 
 const AssignRolesDialog = ({
   rolesDialogOpen,
@@ -28,14 +29,14 @@ const AssignRolesDialog = ({
   const [loadingRoles, setLoadingRoles] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
-
+  const globalRole = roleTypes.filter((obj) => obj.key === "Global")[0].value;
   useEffect(() => {
     setLoadingRoles(true);
     axiosInstance()
       .get(`/role`)
       .then(({ data: { data } }) => {
-        setRoles(data.filter((d)=> d.type === 1));
-        setLoadingRoles(false);
+        setRoles(data.filter((d) => d.type === globalRole))
+        setLoadingRoles(false)
       })
       .catch((error) => {
         setLoadingRoles(false);
