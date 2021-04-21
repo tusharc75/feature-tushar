@@ -367,11 +367,11 @@ export default function ManageOpportunityDialog({
                   Cancel
                 </Button>
 
-                <Button
+                <CustomButton
                   variant="contained"
                   color="primary"
-                  disabled={
-                    loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                  loading={
+                    Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                     Object.values(simplifyValues(values, entityData.fields)).toString()}
                   onClick={(e) => {
                     e.preventDefault();
@@ -384,9 +384,8 @@ export default function ManageOpportunityDialog({
                     );
                   }}
                 >
-                  {loading ? <CircularProgress size={20} /> : "Save"}
-
-                </Button>
+                  Save
+                </CustomButton>
               </CustomDialogFooter>
             </>
           )}

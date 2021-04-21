@@ -323,12 +323,12 @@ export default function ManageLeadDialog({
                   Cancel
                 </Button>
 
-                <Button
+                <CustomButton
                   variant="contained"
                   color="primary"
-                  disabled={
+                  loading={
                     // loading || Object.keys(errors).length > 0 ? true : false
-                    loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                    Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                     Object.values(simplifyValues(values, entityData.fields)).toString()
                   }
                   onClick={(e) => {
@@ -342,8 +342,8 @@ export default function ManageLeadDialog({
                     );
                   }}
                 >
-                  {loading ? <CircularProgress size={20} /> : "Save"}
-                </Button>
+                  Save
+                </CustomButton>
               </CustomDialogFooter>
             </>
           )}
