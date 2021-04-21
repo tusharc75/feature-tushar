@@ -14,6 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import FieldList from './FieldList';
 import { DragBox } from './DragBox'
 import { DropMaster } from './DropMaster'
+import { CustomField } from './CustomField/index'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -31,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export const FormBuilder = ({ section, setSection, deleteField, setDeleteField }) => {
+export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField }) => {
 
     const addSection = (sectionHoverIndex) => {
         let data = [...section];
@@ -77,6 +78,9 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField }
                             <Divider />
                         </Box>
                         <DragBox name="New Section" label="New Section" type="master"></DragBox>
+                        {isCustomField && <Box mt={2} >
+                            <CustomField />
+                        </Box>}
                     </Box>
                 </Grid>
                 <Grid item xs={9} >

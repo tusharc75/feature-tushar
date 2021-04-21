@@ -193,6 +193,7 @@ const CreateProduct = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    decimalPlaces={field.decimalPlaces}
                                                                     disableClearable
                                                                     onChange={(e, val) => {
                                                                         setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
@@ -214,6 +215,8 @@ const CreateProduct = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    decimalPlaces={field.decimalPlaces}
+                                                                    isvlookupReverse={field.isvlookupReverse}
                                                                     size="small"
                                                                 />
                                                             }
@@ -243,7 +246,7 @@ const CreateProduct = (props) => {
             <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
-        {isAddField && <AddField handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
+        {isAddField && <AddField fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
     </Dialog>
     );
 }
