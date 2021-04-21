@@ -49,8 +49,8 @@ const CreateRole = ({
     setLoading(true);
     let api =
       roleType === 1
-        ? "/field?resource=Role"
-        : `/field?resource=Role&entity=${selectedEntity}`;
+        ? `/field?resource=Role&roleType=${roleType}`
+        : `/field?resource=Role&roleType=${roleType}&entity=${selectedEntity}`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
