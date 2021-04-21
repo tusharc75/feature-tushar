@@ -66,6 +66,21 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
         setSection(data);
     };
 
+    const addCustomField = (sectionId, fieldData) => {
+        let data = [...section];
+        data.forEach((row) => {
+            row.field = row.field.filter(i => i.fieldId)
+            if (row.sectionId.toString() === sectionId.toString()) {
+                delete fieldData.brand
+                delete fieldData.createdBy
+                delete fieldData.updatedBy
+                delete fieldData._id
+                row.field.push({ fieldId: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 })
+            }
+        })
+        setSection(data);
+    }
+
     const [{ }, drop] = useDrop({
         accept: ["section", "master"],
         hover: (item: any, monitor) => {
@@ -126,7 +141,10 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
     const [{ }, drop_field] = useDrop({
         accept: ["field", "fieldmove"],
         drop: (data: any) => {
-            if (data.type === "field") {
+            if (data.data) {
+                addCustomField(sectionId, data.data)
+            }
+            else if (data.type === "field") {
                 addField(sectionId, data.name, data.index)
             }
             else {

@@ -143,6 +143,8 @@ const FormTypes = (props) => {
     isTooltip,
     tooltipMessage,
     fields,
+    decimalPlaces,
+    isvlookupReverse,
     doNotShowInfoTooltip,
     ...rest
   } = props;
@@ -267,6 +269,7 @@ const FormTypes = (props) => {
     } else {
       handleFormula(name, value);
     }
+    handleCheckVlookupReverse(name, value);
   };
 
   const handleFormula = (name, value) => {
@@ -290,7 +293,7 @@ const FormTypes = (props) => {
               _data.decimalPlaces
             );
             setFieldValue(_data.fieldName, calValue);
-            handleFormula(_data.fieldName, calValue);
+            //handleFormula(_data.fieldName, calValue);
           }
         });
     }
@@ -309,6 +312,25 @@ const FormTypes = (props) => {
     }
   };
 
+  const handleCheckVlookupReverse = (name, value) => {
+    if (fields && fields.filter((_f) => _f.type === "vlookupDropdown" && _f.isvlookupReverse === true).length) {
+      fields.filter((_f) => _f.type === "vlookupDropdown" && _f.isvlookupReverse === true).forEach((_data) => {
+        if (_data.reletedTo.includes(name)) {
+          let result = _data.option && _data.option.filter(function (val) {
+            for (var i = 0; i < _data.reletedTo.length; i++)
+              if ((_data.reletedTo[i] === name ? value.toString() : values[_data.reletedTo[i]].toString()) !== val[_data.reletedTo[i].toString()])
+                return false;
+            return true;
+          })
+          if (result.length) {
+            setFieldValue(_data.fieldName, result[0].optionLabel);
+          }
+        }
+      })
+    }
+  };
+
+
   return type === "singleLine" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
@@ -324,7 +346,7 @@ const FormTypes = (props) => {
         onChange={
           onChange
             ? onChange
-            : (e) => setFieldValue(name, e.target.value.trimStart())
+            : (e) => handleChange(name, e.target.value.trimStart())
         }
       />
     </InfoLabel>
@@ -380,7 +402,7 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          onChange ? onChange : (e) => handleChange(name, e.target.value)
         }
         InputProps={{
           inputComponent: CustomFormat as any,
@@ -404,7 +426,7 @@ const FormTypes = (props) => {
         InputProps={{
           inputComponent: CustomFormat as any,
           inputProps: {
-            decimalScale: 2,
+            decimalScale: decimalPlaces ? decimalPlaces : 2,
             onValueChange: (values: any) =>
               setFieldValue(name, values.formattedValue),
           },
@@ -466,6 +488,9 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
+        onChange={
+          onChange ? onChange : (e) => handleChange(name, e.target.value)
+        }
       />
     </InfoLabel>
   ) : type === "email" ? (
@@ -519,7 +544,7 @@ const FormTypes = (props) => {
         helperText={touched[name] && errors[name]}
       />
     </InfoLabel>
-  ) : type === "dropDown" || type === "lookup" || type === "vlookupDropdown" ? (
+  ) : type === "dropDown" || type === "lookup" || (type === "vlookupDropdown" && !isvlookupReverse) ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} doNotShowInfoTooltip={doNotShowInfoTooltip}>
       <Autocomplete
         {...rest}
@@ -553,351 +578,12 @@ const FormTypes = (props) => {
         )}
       />
     </InfoLabel>
-  ) : type === "currency" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <Autocomplete
-        {...rest}
-        fullWidth
-        value={
-          currencyData.filter((data) => data.currencyCode === values[name])
-            .length
-            ? currencyData.filter(
-              (data) => data.currencyCode === values[name]
-            )[0]
-            : ""
-        }
-        options={currencyData}
-        getOptionLabel={(option: any) =>
-          option ? `${option.currencyCode} - ${option.name}` : ""
-        }
-        getOptionSelected={(option: any, val) => option.currencyCode === val}
-        onChange={(e, val) =>
-          setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
-        }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            name={name}
-            label={label}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
-          />
-        )}
-        renderOption={(option) => {
-          const { currencyCode, name, countryCode } = option;
-          return (
-            <Grid container alignItems="center">
-              <Grid item>
-                <Avatar
-                  variant="rounded"
-                  src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                  style={{ marginRight: 20, width: "40px", height: "30px" }}
-                />
-              </Grid>
-              <Grid item xs>
-                <Typography>{currencyCode}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {name}
-                </Typography>
-              </Grid>
-            </Grid>
-          );
-        }}
-      />
-    </InfoLabel>
-  ) : type === "multiSelect" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <Autocomplete
-        {...rest}
-        multiple
-        options={options}
-        getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-        value={options.filter((data: any) =>
-          values[name].includes(data.optionValue)
-        )}
-        getOptionSelected={(option: any, val: any) =>
-          option.optionValue === val.optionValue
-        }
-        onChange={
-          onChange
-            ? onChange
-            : (e, value: any[]) =>
-              setFieldValue(
-                name,
-                value.map((val) => val.optionValue)
-              )
-        }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            label={label}
-            name={name}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
-          />
-        )}
-      />
-    </InfoLabel>
-  ) : type === "switch" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <FormControlLabel
-        control={
-          values[name] ? (
-            <RedSwitch
-              name={name}
-              checked={values[name]}
-              onChange={
-                onChange
-                  ? onChange
-                  : (e) => setFieldValue(name, e.target.checked)
-              }
-            />
-          ) : (
-            <GreenSwitch
-              name={name}
-              checked={values[name]}
-              onChange={
-                onChange
-                  ? onChange
-                  : (e) => setFieldValue(name, e.target.checked)
-              }
-            />
-          )
-        }
-        label={label}
-      />
-    </InfoLabel>
-  ) : type === "checkBox" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <FormControlLabel
-        control={
-          <Checkbox
-            required={required}
-            name={name}
-            checked={values[name]}
-            onChange={
-              onChange ? onChange : (e) => setFieldValue(name, e.target.checked)
-            }
-            color="secondary"
-          />
-        }
-        label={label}
-      />
-    </InfoLabel>
-  ) : type === "radio" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <FormControl component="fieldset" required={required}>
-        <FormLabel component="legend">{label}</FormLabel>
-        <RadioGroup
-          aria-label="gender"
-          name={name}
-          value={values[name]}
-          onChange={
-            onChange ? onChange : (e) => setFieldValue(name, e.target.value)
-          }
-        >
-          {options.map((opt) => (
-            <FormControlLabel
-              key={opt.order}
-              value={opt.optionLabel}
-              control={<Radio />}
-              label={opt.optionLabel}
-            />
-          ))}
-        </RadioGroup>
-      </FormControl>
-    </InfoLabel>
-  ) : type === "location" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <Autocomplete
-        {...rest}
-        getOptionLabel={(option: any) =>
-          typeof option === "string" ? option : option.description
-        }
-        filterOptions={(x) => x}
-        options={optionsList}
-        autoComplete
-        includeInputInList
-        filterSelectedOptions
-        value={values[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (event, newValue) => {
-              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-              setValue(newValue);
-            }
-        }
-        onInputChange={(event, newInputValue) => {
-          setFieldValue(name, newInputValue);
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            name={name}
-            label={label}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
-          />
-        )}
-        renderOption={(option: any) => {
-          const matches =
-            option.structured_formatting.main_text_matched_substrings;
-          const parts = parse(
-            option.structured_formatting.main_text,
-            matches.map((match) => [match.offset, match.offset + match.length])
-          );
-
-          return (
-            <Grid container alignItems="center">
-              <Grid item>
-                <LocationOnIcon
-                  style={{
-                    color: theme.palette.text.secondary,
-                    marginRight: theme.spacing(2),
-                  }}
-                />
-              </Grid>
-              <Grid item xs>
-                {parts.map((part, index) => (
-                  <span
-                    key={index}
-                    style={{ fontWeight: part.highlight ? 700 : 400 }}
-                  >
-                    {part.text}
-                  </span>
-                ))}
-
-                <Typography variant="body2" color="textSecondary">
-                  {option.structured_formatting.secondary_text}
-                </Typography>
-              </Grid>
-            </Grid>
-          );
-        }}
-      />
-    </InfoLabel>
-  ) : type === "imageUpload" ? (
-    <Fragment>
-      <Box display="flex" flexDirection="row">
-        <Box position="relative">
-          <Avatar
-            src={values[name]}
-            style={{ width: 70, height: 70 }}
-            alt="org_logo"
-          />
-          <Box
-            title={values[name] ? values[name] : "No picture selected"}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            position="absolute"
-            top="0"
-            right="0"
-            width="100%"
-            height="100%"
-          >
-            {isUploading && <CircularProgress size={22} />}
-          </Box>
-        </Box>
-        <Box>
-          <label htmlFor={name}>
-            <IconButton
-              title="Add picture"
-              color="primary"
-              size="small"
-              aria-label="upload picture"
-              component="span"
-            >
-              <AddCircleIcon />
-              <input
-                disabled={isUploading}
-                id={name}
-                name={name}
-                onChange={handleUploadImage}
-                accept="image/x-png,image/gif,image/jpeg"
-                style={{
-                  opacity: "0",
-                  position: "absolute",
-                  zIndex: -1,
-                }}
-                type="file"
-              />
-            </IconButton>
-          </label>
-          {
-            <IconButton
-              disabled={Boolean(!values[name])}
-              title="Remove picture"
-              color="secondary"
-              size="small"
-              aria-label="delete picture"
-              component="span"
-              onClick={() => setFieldValue(name, "")}
-            >
-              <DeleteIcon />
-            </IconButton>
-          }
-        </Box>
-      </Box>
-    </Fragment>
-  ) : type === "fileUpload" ? (
-    <Fragment>
-      <Box display="flex" alignItems="center">
-        <input
-          disabled={isUploading}
-          id={name}
-          name={name}
-          onChange={handleUploadFile}
-          style={{ display: "none" }}
-          type="file"
-        />
-        <label htmlFor={name}>
-          <Button
-            disabled={isUploading}
-            variant="contained"
-            color="primary"
-            component="span"
-          >
-            Upload File
-          </Button>
-        </label>
-        <Box marginX={1} />
-
-        <Box flex="1">
-          <p className="text-truncate">
-            {values[name]
-              ? values[name]
-              : isUploading
-                ? "Uploading..."
-                : "No file choosen"}
-          </p>
-        </Box>
-        <IconButton
-          disabled={Boolean(!values[name])}
-          title="Remove File"
-          color="secondary"
-          size="small"
-          aria-label="delete picture"
-          component="span"
-          onClick={() => setFieldValue(name, "")}
-        >
-          <DeleteIcon />
-        </IconButton>
-      </Box>
-    </Fragment>
-  ) : type === "url" ? (
+  ) : (type === "vlookupDropdown" && isvlookupReverse) ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
         variant="outlined"
-        type="url"
+        type="text"
         label={label}
         required={required}
         name={name}
@@ -905,57 +591,415 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          onChange
+            ? onChange
+            : (e) => setFieldValue(name, e.target.value.trimStart())
         }
       />
-    </InfoLabel>
-  ) : type === "date" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <MuiPickersUtilsProvider utils={DateUtils}>
-        <KeyboardDatePicker
+    </InfoLabel>) :
+    type === "currency" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <Autocomplete
           {...rest}
-          clearable="true"
-          required={required}
-          variant="inline"
-          inputVariant="outlined"
+          fullWidth
+          value={
+            currencyData.filter((data) => data.currencyCode === values[name])
+              .length
+              ? currencyData.filter(
+                (data) => data.currencyCode === values[name]
+              )[0]
+              : ""
+          }
+          options={currencyData}
+          getOptionLabel={(option: any) =>
+            option ? `${option.currencyCode} - ${option.name}` : ""
+          }
+          getOptionSelected={(option: any, val) => option.currencyCode === val}
+          onChange={(e, val) =>
+            setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              name={name}
+              label={label}
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              required={required}
+            />
+          )}
+          renderOption={(option) => {
+            const { currencyCode, name, countryCode } = option;
+            return (
+              <Grid container alignItems="center">
+                <Grid item>
+                  <Avatar
+                    variant="rounded"
+                    src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+                    style={{ marginRight: 20, width: "40px", height: "30px" }}
+                  />
+                </Grid>
+                <Grid item xs>
+                  <Typography>{currencyCode}</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {name}
+                  </Typography>
+                </Grid>
+              </Grid>
+            );
+          }}
+        />
+      </InfoLabel>
+    ) : type === "multiSelect" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <Autocomplete
+          {...rest}
+          multiple
+          options={options}
+          getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
+          value={options.filter((data: any) =>
+            values[name].includes(data.optionValue)
+          )}
+          getOptionSelected={(option: any, val: any) =>
+            option.optionValue === val.optionValue
+          }
+          onChange={
+            onChange
+              ? onChange
+              : (e, value: any[]) =>
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              label={label}
+              name={name}
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              required={required}
+            />
+          )}
+        />
+      </InfoLabel>
+    ) : type === "switch" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <FormControlLabel
+          control={
+            values[name] ? (
+              <RedSwitch
+                name={name}
+                checked={values[name]}
+                onChange={
+                  onChange
+                    ? onChange
+                    : (e) => setFieldValue(name, e.target.checked)
+                }
+              />
+            ) : (
+              <GreenSwitch
+                name={name}
+                checked={values[name]}
+                onChange={
+                  onChange
+                    ? onChange
+                    : (e) => setFieldValue(name, e.target.checked)
+                }
+              />
+            )
+          }
+          label={label}
+        />
+      </InfoLabel>
+    ) : type === "checkBox" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              required={required}
+              name={name}
+              checked={values[name]}
+              onChange={
+                onChange ? onChange : (e) => setFieldValue(name, e.target.checked)
+              }
+              color="secondary"
+            />
+          }
+          label={label}
+        />
+      </InfoLabel>
+    ) : type === "radio" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <FormControl component="fieldset" required={required}>
+          <FormLabel component="legend">{label}</FormLabel>
+          <RadioGroup
+            aria-label="gender"
+            name={name}
+            value={values[name]}
+            onChange={
+              onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+            }
+          >
+            {options.map((opt) => (
+              <FormControlLabel
+                key={opt.order}
+                value={opt.optionLabel}
+                control={<Radio />}
+                label={opt.optionLabel}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </InfoLabel>
+    ) : type === "location" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <Autocomplete
+          {...rest}
+          getOptionLabel={(option: any) =>
+            typeof option === "string" ? option : option.description
+          }
+          filterOptions={(x) => x}
+          options={optionsList}
+          autoComplete
+          includeInputInList
+          filterSelectedOptions
           value={values[name]}
-          name={name}
-          label={label}
-          onChange={(date) => setFieldValue(name, date)}
-          format="MM/dd/yyyy"
-          error={touched[name] && Boolean(errors[name])}
-          helperText={touched[name] && errors[name]}
-          InputLabelProps={{
-            shrink: true,
+          onChange={
+            onChange
+              ? onChange
+              : (event, newValue) => {
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
+          }
+          onInputChange={(event, newInputValue) => {
+            setFieldValue(name, newInputValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              name={name}
+              label={label}
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              required={required}
+            />
+          )}
+          renderOption={(option: any) => {
+            const matches =
+              option.structured_formatting.main_text_matched_substrings;
+            const parts = parse(
+              option.structured_formatting.main_text,
+              matches.map((match) => [match.offset, match.offset + match.length])
+            );
+
+            return (
+              <Grid container alignItems="center">
+                <Grid item>
+                  <LocationOnIcon
+                    style={{
+                      color: theme.palette.text.secondary,
+                      marginRight: theme.spacing(2),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs>
+                  {parts.map((part, index) => (
+                    <span
+                      key={index}
+                      style={{ fontWeight: part.highlight ? 700 : 400 }}
+                    >
+                      {part.text}
+                    </span>
+                  ))}
+
+                  <Typography variant="body2" color="textSecondary">
+                    {option.structured_formatting.secondary_text}
+                  </Typography>
+                </Grid>
+              </Grid>
+            );
           }}
         />
-      </MuiPickersUtilsProvider>
-    </InfoLabel>
-  ) : type === "dateTime" ? (
-    <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-      <MuiPickersUtilsProvider utils={DateUtils}>
-        <KeyboardDateTimePicker
+      </InfoLabel>
+    ) : type === "imageUpload" ? (
+      <Fragment>
+        <Box display="flex" flexDirection="row">
+          <Box position="relative">
+            <Avatar
+              src={values[name]}
+              style={{ width: 70, height: 70 }}
+              alt="org_logo"
+            />
+            <Box
+              title={values[name] ? values[name] : "No picture selected"}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              position="absolute"
+              top="0"
+              right="0"
+              width="100%"
+              height="100%"
+            >
+              {isUploading && <CircularProgress size={22} />}
+            </Box>
+          </Box>
+          <Box>
+            <label htmlFor={name}>
+              <IconButton
+                title="Add picture"
+                color="primary"
+                size="small"
+                aria-label="upload picture"
+                component="span"
+              >
+                <AddCircleIcon />
+                <input
+                  disabled={isUploading}
+                  id={name}
+                  name={name}
+                  onChange={handleUploadImage}
+                  accept="image/x-png,image/gif,image/jpeg"
+                  style={{
+                    opacity: "0",
+                    position: "absolute",
+                    zIndex: -1,
+                  }}
+                  type="file"
+                />
+              </IconButton>
+            </label>
+            {
+              <IconButton
+                disabled={Boolean(!values[name])}
+                title="Remove picture"
+                color="secondary"
+                size="small"
+                aria-label="delete picture"
+                component="span"
+                onClick={() => setFieldValue(name, "")}
+              >
+                <DeleteIcon />
+              </IconButton>
+            }
+          </Box>
+        </Box>
+      </Fragment>
+    ) : type === "fileUpload" ? (
+      <Fragment>
+        <Box display="flex" alignItems="center">
+          <input
+            disabled={isUploading}
+            id={name}
+            name={name}
+            onChange={handleUploadFile}
+            style={{ display: "none" }}
+            type="file"
+          />
+          <label htmlFor={name}>
+            <Button
+              disabled={isUploading}
+              variant="contained"
+              color="primary"
+              component="span"
+            >
+              Upload File
+            </Button>
+          </label>
+          <Box marginX={1} />
+
+          <Box flex="1">
+            <p className="text-truncate">
+              {values[name]
+                ? values[name]
+                : isUploading
+                  ? "Uploading..."
+                  : "No file choosen"}
+            </p>
+          </Box>
+          <IconButton
+            disabled={Boolean(!values[name])}
+            title="Remove File"
+            color="secondary"
+            size="small"
+            aria-label="delete picture"
+            component="span"
+            onClick={() => setFieldValue(name, "")}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      </Fragment>
+    ) : type === "url" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <TextField
           {...rest}
-          required={required}
-          variant="inline"
-          inputVariant="outlined"
-          ampm={false}
-          value={values[name] || new Date("2018-01-01T00:00:00.000Z")}
-          name={name}
+          variant="outlined"
+          type="url"
           label={label}
-          onChange={(date) => setFieldValue(name, date)}
-          onError={console.log}
-          disablePast
-          format="yyyy/MM/dd HH:mm"
+          required={required}
+          name={name}
+          value={values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          InputLabelProps={{
-            shrink: true,
-          }}
+          onChange={
+            onChange ? onChange : (e) => setFieldValue(name, e.target.value)
+          }
         />
-      </MuiPickersUtilsProvider>
-    </InfoLabel>
-  ) : null;
+      </InfoLabel>
+    ) : type === "date" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <MuiPickersUtilsProvider utils={DateUtils}>
+          <KeyboardDatePicker
+            {...rest}
+            clearable="true"
+            required={required}
+            variant="inline"
+            inputVariant="outlined"
+            value={values[name]}
+            name={name}
+            label={label}
+            onChange={(date) => setFieldValue(name, date)}
+            format="MM/dd/yyyy"
+            error={touched[name] && Boolean(errors[name])}
+            helperText={touched[name] && errors[name]}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </MuiPickersUtilsProvider>
+      </InfoLabel>
+    ) : type === "dateTime" ? (
+      <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+        <MuiPickersUtilsProvider utils={DateUtils}>
+          <KeyboardDateTimePicker
+            {...rest}
+            required={required}
+            variant="inline"
+            inputVariant="outlined"
+            ampm={false}
+            value={values[name] || new Date("2018-01-01T00:00:00.000Z")}
+            name={name}
+            label={label}
+            onChange={(date) => setFieldValue(name, date)}
+            onError={console.log}
+            disablePast
+            format="yyyy/MM/dd HH:mm"
+            error={touched[name] && Boolean(errors[name])}
+            helperText={touched[name] && errors[name]}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </MuiPickersUtilsProvider>
+      </InfoLabel>
+    ) : null;
 };
 
 export default FormTypes;
