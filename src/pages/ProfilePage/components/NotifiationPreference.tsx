@@ -28,11 +28,12 @@ const useStyles = makeStyles((theme) => ({
     },
     preferenceOptions: {
         color: "primary",
-        marginBottom: '12px'
+        marginBottom: '12px',
+        marginLeft: "5px",
     }
 }));
 
-let titlesArray = ['Activity in all unassigned conversation', 'Activity in any of your Teams',
+let notificationPreferenceTitles = ['Activity in all unassigned conversation', 'Activity in any of your Teams',
     'Activity in conversations assigned to other teams or teammates', 'Any mentions of you in a conversation',
     'Activity on conversation started from messages you sent', 'Activity in anything assigned to you',
     'New conversation with Leads and users you own'
@@ -70,7 +71,7 @@ export default function NotifiationPreference(props) {
     const classes = useStyles();
 
     useEffect(() => {
-        let rows = titlesArray.map((str, i) => {
+        let rows = notificationPreferenceTitles.map((str, i) => {
             return { id: "preference" + i, title: str, Desktop: false, Mobile: false, Email: false }
         })
         setRows(rows)
