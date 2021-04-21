@@ -323,13 +323,13 @@ function OpportunityDetailsPage() {
                     <Activity
                       relatedTo={[
                         {
-                          type: opportunityData.customerAccountName ?  customerAccount.accountResource : supplierAccount.accountResource,
-                          referenceId: opportunityData.customerAccountName ? opportunityData.customerAccountName.optionValue :  opportunityData.supplierAccountName.optionValue,
+                          type: opportunityData?.customerAccountName ?  customerAccount?.accountResource : supplierAccount?.accountResource,
+                          referenceId: opportunityData?.customerAccountName ? opportunityData?.customerAccountName?.optionValue :  opportunityData?.supplierAccountName?.optionValue,
                           access: false,
                         },
                         {
                           type: "opportunity",
-                          referenceId: opportunityData._id,
+                          referenceId: opportunityData?._id,
                           access: true,
                         },
                       ]}
