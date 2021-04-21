@@ -12,11 +12,13 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { productCategoryPage } from '../../routes/ProductCategory'
-
+import NoDataCell from "../../components/Helpers/NoDataCell";
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
+import moment from "moment";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import { GiAbstract055 } from 'react-icons/gi';
 
 const ProductCategory = () => {
 
@@ -51,13 +53,11 @@ const ProductCategory = () => {
 
     const handleDelete = (id) => {
         setLoading(true)
-
         axiosInstance().delete(`/productcategory/` + id).then(() => {
             fetchProductCategory();
         }).catch((error) => {
             toastConfig.setToastConfig(error)
         });
-
     }
 
 
@@ -72,6 +72,48 @@ const ProductCategory = () => {
                     {params.row.name}
                 </Link>
             )
+        },
+        {
+            field: "createdBy",
+            headerName: "Created By",
+            width: 300,
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
+                {params.row.createdBy.user.firstName}
+                <span
+                    className="createdAtTime"
+                    title={`${params.row.createdBy.user.firstName} • ${moment(
+                        params.row.createdBy.date.slice(0, 10)
+                    ).format('MMM Do, YYYY')}`}
+                >
+                    {moment(params.row.createdBy.date.slice(0, 10)).format(
+                        'MMM Do, YYYY'
+                    )}
+                </span>
+            </h5>) : <NoDataCell />
+        },
+        {
+            field: "updatedBy",
+            headerName: "Updated By",
+            width: 300,
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => params?.row && params?.row?.updatedBy ? (<h5 className="createBy">
+                {params.row.updatedBy.user.firstName}
+                <span
+                    className="updatedAtTime"
+                    title={`${params.row.updatedBy.user.firstName} • ${moment(
+                        params.row.updatedBy.date.slice(0, 10)
+                    ).format('MMM Do, YYYY')}`}
+                >
+                    {moment(params.row.updatedBy.date.slice(0, 10)).format(
+                        'MMM Do, YYYY'
+                    )}
+                </span>
+            </h5>) : <NoDataCell />
         },
         {
             field: "actions", headerName: "Actions ",
@@ -101,30 +143,31 @@ const ProductCategory = () => {
                 <CustomBreadCrumbs routes={[{ title: "Product Category" }]} />
             </Grid>
         </Grid>
-        <Box mt={1} p={2} pt={1} pl={1} bgcolor="white" >
-            <Box mb={2} mt={1}>
-                <Grid container>
-                    <Grid xs={12} container justify="flex-end">
-                        <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                    </Grid>
+        <div className="header-panel">
+            <Grid container>
+                <Grid item xs={6} className="d-flex align-items-center gap-1">
+                    <GiAbstract055 /> <span className="listingHeader">Product Category </span>
                 </Grid>
-            </Box>
-            <div className="listing-grid">
-                <DataGrid
-                    components={{
-                        Toolbar: DataGridCustomToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    loading={loading}
-                    rows={productCategory}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={25}
-                    density="compact"
-                />
-            </div>
-        </Box>
+                <Grid xs={6} container justify="flex-end">
+                    <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                </Grid>
+            </Grid>
+        </div>
+        <div className="listing-grid">
+            <DataGrid
+                components={{
+                    Toolbar: DataGridCustomToolbar,
+                    NoRowsOverlay: CustomDataGridNoDataFound,
+                }}
+                loading={loading}
+                rows={productCategory}
+                disableSelectionOnClick
+                disableMultipleSelection
+                columns={columns}
+                pageSize={25}
+                density="compact"
+            />
+        </div>
     </Layout>
     );
 }

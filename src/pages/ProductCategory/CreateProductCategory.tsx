@@ -75,40 +75,24 @@ const ProductCategory = () => {
         data.fields = fields;
         setIsUpdating(true)
         if (id === "0") {
-
             axiosInstance().post("/productcategory", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
                 history.push({ pathname: productCategoryPage.path });
             }).catch((error) => {
+                setIsUpdating(false)
                 toastConfig.setToastConfig(error);
             });
-
-            // CreateProductCategory(data)
-            //     .then(({ data }) => {
-            //         setIsUpdating(false)
-            //         history.push({ pathname: productCategoryPage.path });
-            //     })
-            //     .catch((err) => {
-            //     });
         }
         else {
             data.categoryId = id;
             data.deleteField = deleteField;
-
             axiosInstance().put("/productcategory", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
                 history.push({ pathname: productCategoryPage.path });
             }).catch((error) => {
+                setIsUpdating(false)
                 toastConfig.setToastConfig(error);
             });
-
-            // UpdateProductCategory(data)
-            //     .then(({ data }) => {
-            //         setIsUpdating(false)
-            //         history.push({ pathname: productCategoryPage.path });
-            //     })
-            //     .catch((err) => {
-            //     });
         }
     }
 
@@ -155,7 +139,8 @@ const ProductCategory = () => {
                                     section={section}
                                     setSection={setSection}
                                     deleteField={deleteField}
-                                    setDeleteField={setDeleteField} />
+                                    setDeleteField={setDeleteField}
+                                    isCustomField={true} />
                             </Box>
                         </Form>)}
                 </Formik>
