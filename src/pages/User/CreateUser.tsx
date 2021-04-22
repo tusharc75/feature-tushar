@@ -162,7 +162,7 @@ const CreateUser = ({ open, close, fetchData }) => {
                 <Route
                   exact
                   path="/user"
-                  render={({ location }) => <Redirect to={{ pathname: `/user/detail/${createdUserId}`, state: { from: location } }} />}
+                  render={ () => <Redirect to={`/user/detail/${createdUserId}`} />}
                 />
               }
 

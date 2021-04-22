@@ -23,6 +23,7 @@ import CustomButton from "../../../components/Helpers/Button";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
+import { Redirect, Route, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const arr = [...Array(9).keys()];
@@ -56,6 +57,9 @@ export default function ManageOpportunityDialog({
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [createdOpportunityId, setCreatedOppotunityId] = useState("");
+  const location = useLocation();
 
   useEffect(() => {
     const ownerCollabOptions = entityData.fields.filter(
@@ -158,11 +162,13 @@ export default function ManageOpportunityDialog({
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
+        setCreatedOppotunityId(data.data._id)
         toastConfig.setToastConfig({
           open: true,
           type: "success",
           message: data.message,
         });
+        setRedirecting(true);
         setLoading(false);
         onSuccess();
       })
@@ -387,6 +393,13 @@ export default function ManageOpportunityDialog({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
+              {
+                redirecting && <Route
+                  exact
+                  path="/opportunity"
+                  render={() => <Redirect to={`${opportunityApi}/detail/${createdOpportunityId}`} />}
+                />
+              }
             </>
           )}
         </Formik>
