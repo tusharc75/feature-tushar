@@ -5,7 +5,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
 import Container from "../../../components/Container";
-import SaveButton from '../../../components/Helpers/Button'
+import SaveButton from '../../../components/Helpers/CustomButton'
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
