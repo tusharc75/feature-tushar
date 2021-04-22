@@ -505,6 +505,7 @@ export default function AccountDetailPage(props) {
                     fetchRelatedData();
                   }}
                   accountId={accountData._id}
+                  accountName={accountData.accountName}
                   recordsPerLine={2}
                   resource={accountResource}
                 />
@@ -512,77 +513,77 @@ export default function AccountDetailPage(props) {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-          <Paper>
-            <Grid container>
-              <Grid item xs={12}>
-                {accountData && (
-                  <div>
-                    <Activity
-                      relatedTo={[
-                        {
-                          type: accountResource,
-                          referenceId: accountData._id,
-                          access: true,
-                        },
-                      ]}
-                      handleActivityRefresh={() => { }}
-                    />
-                  </div>
-                )}
-              </Grid>
-              <Grid item xs={12}>
-                <QuickLinks quickLinks={quickLinks} />
-              </Grid>
+            <Paper>
+              <Grid container>
+                <Grid item xs={12}>
+                  {accountData && (
+                    <div>
+                      <Activity
+                        relatedTo={[
+                          {
+                            type: accountResource,
+                            referenceId: accountData._id,
+                            access: true,
+                          },
+                        ]}
+                        handleActivityRefresh={() => { }}
+                      />
+                    </div>
+                  )}
+                </Grid>
+                <Grid item xs={12}>
+                  <QuickLinks quickLinks={quickLinks} />
+                </Grid>
 
-              {permissions &&
-                permissions[contactResource] &&
-                permissions[contactResource].isRead && (
-                  <Grid item xs={12}>
-                    <BoxWithBorder
-                      style={{ marginTop: "3%", padding: "0px" }}
-                    >
-                      <div className={`${accountClass.detail_page_div3}`}>
-                        <div className={`${accountClass.related_contacts}`}>
-                          <Typography
-                            color="primary"
-                            variant="h6"
-                            style={{ margin: "0 10px" }}
-                          >
-                            Related Contacts
+                {permissions &&
+                  permissions[contactResource] &&
+                  permissions[contactResource].isRead && (
+                    <Grid item xs={12}>
+                      <BoxWithBorder
+                        style={{ marginTop: "3%", padding: "0px" }}
+                      >
+                        <div className={`${accountClass.detail_page_div3}`}>
+                          <div className={`${accountClass.related_contacts}`}>
+                            <Typography
+                              color="primary"
+                              variant="h6"
+                              style={{ margin: "0 10px" }}
+                            >
+                              Related Contacts
                               </Typography>
-                          {permissions[contactResource].isCreate && (
-                            <span>
-                              <IconButton
-                                onClick={handleCreateContact}
-                                color="primary"
-                                size="small"
-                              >
-                                <ControlPointIcon />
-                              </IconButton>
-                            </span>
+                            {permissions[contactResource].isCreate && (
+                              <span>
+                                <IconButton
+                                  onClick={handleCreateContact}
+                                  color="primary"
+                                  size="small"
+                                >
+                                  <ControlPointIcon />
+                                </IconButton>
+                              </span>
+                            )}
+                          </div>
+                          {relatedContactsLoading ? (
+                            <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                          ) : (
+                            <>
+                              <Box className={`${accountClass.custom_box1}`}>
+                                <RelatedContacts
+                                  contacts={_reverse(relatedContacts.slice(0, 2))}
+                                  accountId={accountData._id}
+                                  accountName={accountData.accountName}
+                                  contactApi={contactApi}
+                                  contactRoute={contactRoute}
+                                />
+                              </Box>
+                            </>
                           )}
                         </div>
-                        {relatedContactsLoading ? (
-                          <CommonSkeleton lenArray={[...Array(4).keys()]} />
-                        ) : (
-                          <>
-                            <Box className={`${accountClass.custom_box1}`}>
-                              <RelatedContacts
-                                contacts={_reverse(relatedContacts.slice(0, 2))}
-				accountId={accountData._id}
-                                accountName={accountData.accountName}
-                                contactApi={contactApi}
-                                contactRoute={contactRoute}
-                              />
-                            </Box>
-                          </>
-                        )}
-                      </div>
-                    </BoxWithBorder>
-                  </Grid>
-                )}
-            </Grid>
-          </Paper>
+                      </BoxWithBorder>
+                    </Grid>
+                  )}
+              </Grid>
+            </Paper>
           </Grid>
         </Grid>
         <div>

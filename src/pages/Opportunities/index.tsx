@@ -574,7 +574,7 @@ const Opportunities = () => {
                 accountDetails.accountId && <Chip
                   className="ml-3"
                   color="primary"
-                  label={accountDetails.accountName}
+                  label={`Account: ${accountDetails.accountName}`}
                   onDelete={() => {
                     setAccountDetails({ accountId: null, accountName: null });
                     fetchOpportunities();
