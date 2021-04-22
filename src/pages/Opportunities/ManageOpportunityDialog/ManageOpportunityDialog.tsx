@@ -19,7 +19,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import FormTypes from "../../../components/Helpers/FormTypes";
-import CustomButton from "../../../components/Helpers/Button";
+import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
@@ -368,9 +368,10 @@ export default function ManageOpportunityDialog({
                 </Button>
 
                 <CustomButton
+                  loading={loading}
                   variant="contained"
                   color="primary"
-                  loading={
+                  disabled={
                     Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                     Object.values(simplifyValues(values, entityData.fields)).toString()}
                   onClick={(e) => {

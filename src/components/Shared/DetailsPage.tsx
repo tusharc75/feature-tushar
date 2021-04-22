@@ -311,14 +311,16 @@ const Details = (props: DetailProps) => {
         : "";
 
     return (
-      <Box width="200px">
+      <Box width="250px">
         {loadingPopoverData ? (
           <Box display="flex" justifyContent="center">
             <CircularProgress size={20} />
           </Box>
         ) : (
-          <Box display="flex" alignItems="start">
-            <Avatar src={img}>{name.charAt(0)}</Avatar>
+          <Box p={1} display="flex" alignItems="start">
+            <Avatar style={{ width: 50, height: 50 }} src={img}>
+              {name.charAt(0)}
+            </Avatar>
             <Box
               marginLeft={2}
               display="flex"
@@ -333,13 +335,13 @@ const Details = (props: DetailProps) => {
               >
                 {subInfo}
               </Typography>
-              <Typography
+              {/* <Typography
                 color="textSecondary"
                 variant="body2"
                 className={classes.popoverText}
               >
                 {subInfo1}
-              </Typography>
+              </Typography> */}
             </Box>
           </Box>
         )}
