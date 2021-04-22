@@ -449,6 +449,7 @@ export default function Account(props) {
         // getRows(data);
         setRowCount(count);
         setLoading(false);
+        setCheckAllAccounts(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

@@ -368,6 +368,7 @@ export default function Contact(props) {
         setContactData(data);
         // getRows(data);
         setRowCount(count);
+        setCheckAllContacts(false);
         setLoading(false);
       })
       .catch((err) => {
@@ -470,7 +471,7 @@ export default function Contact(props) {
 
   return (
     <Layout>
-      <Grid container justify="space-between">
+      <Grid container>
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[contactBreadcrumb]} />
         </Grid>

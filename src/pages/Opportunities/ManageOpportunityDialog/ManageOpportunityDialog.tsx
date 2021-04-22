@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from "react";
-import { Box, Button, Grid } from "@material-ui/core";
+import React, { useEffect, useState, useContext } from "react";
+import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import Dialog from "@material-ui/core/Dialog";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -12,13 +12,14 @@ import {
   initializeDropdownById,
   opportunity,
   supplierAccount,
-  customerAccount
+  customerAccount,
+  simplifyValues
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import FormTypes from "../../../components/Helpers/FormTypes";
-import CustomButton from "../../../components/Helpers/Button";
+import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
@@ -371,8 +372,8 @@ export default function ManageOpportunityDialog({
                   variant="contained"
                   color="primary"
                   disabled={
-                    loading || Object.keys(errors).length > 0 ? true : false
-                  }
+                    Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                    Object.values(simplifyValues(values, entityData.fields)).toString()}
                   onClick={(e) => {
                     e.preventDefault();
                     handleSubmit(

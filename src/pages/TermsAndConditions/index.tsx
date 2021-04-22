@@ -67,7 +67,7 @@ export default function TermsAndCondition(props) {
     const [loading, setLoading] = useState(false);
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
-    const [checkAllAccounts, setCheckAllRecords] = useState(false);
+    const [checkAllAccounts, setCheckAllAccounts] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [query, setQuery] = useState({ page: 0, limit: 25 });
@@ -105,7 +105,7 @@ export default function TermsAndCondition(props) {
                     color="primary"
                     checked={checkAllAccounts}
                     onChange={(ev) => {
-                        setCheckAllRecords(ev.target.checked);
+                        setCheckAllAccounts(ev.target.checked);
                         const gridData = dataRows;
                         gridData.map((d) => {
                             d.isChecked = ev.target.checked
@@ -132,9 +132,9 @@ export default function TermsAndCondition(props) {
                         const checkedRecords = gridData.filter((d) => d.isChecked === true);
 
                         if (checkedRecords.length === gridData.length) {
-                            setCheckAllRecords(true);
+                            setCheckAllAccounts(true);
                         } else {
-                            setCheckAllRecords(false);
+                            setCheckAllAccounts(false);
                         }
                     }}
                 />
@@ -211,6 +211,7 @@ export default function TermsAndCondition(props) {
                 .then(({ data }) => {
                     setData(data.data);
                     setRowCount(data.count);
+                    setCheckAllAccounts(false);
                     setLoading(false);
                 })
                 .catch((err) => {

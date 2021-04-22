@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -42,27 +42,51 @@ import {
   customerContact,
   supplierAccount,
   supplierContact,
+  vapidKey,
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
+import firebase, { onMessageListener } from "./firebase";
+import CustomNotification from "./components/CustomNotification/CustomNotification";
 
 function App() {
   const toast = useContext(CustomToastContext);
+  const [notification, setNotification] = useState({ open: false, title: null, message: null })
 
-  window["OneSignal"] = window["OneSignal"] || [];
-  const OneSignal = window["OneSignal"];
+  // const messaging = firebase.messaging();
+  // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
+  //   if (token) {
+  //     localStorage.setItem("notificationToken", token)
+  //   } else {
+  //     toast.setToastConfig({
+  //       open: true,
+  //       type: "error",
+  //       message: "No registration token available. Request permission to generate one."
+  //     })
+  //   }
+  // }).catch((err) => {
+  //   console.log('An error occurred while retrieving token. ', err);
+  //   // catch error while creating client token
+  // });
 
-  OneSignal.push(function () {
-    OneSignal.init({
-      appId: "53e16e5d-0a6d-4e0d-85ea-8f6bbbc4fd5e",
-      notifyButton: {
-        enable: true,
-      },
-    });
-  });
+  onMessageListener().then((payload: any) => {
+    setNotification({
+      open: true,
+      title: payload.notification.title,
+      message: payload.notification.body
+    })
+
+    // toast.setToastConfig({
+    //   open: true,
+    //   type: "success",
+    //   message: payload.notification.body
+    // });
+    // setNotification({ title: payload.notification.title, body: payload.notification.body })
+    console.log(payload);
+  }).catch(err => console.log('failed: ', err));
 
   const location = useLocation();
   const {
@@ -269,6 +293,12 @@ function App() {
           }}
         />
       )}
+
+      {
+        notification.open && <CustomNotification open={notification.open}
+          title={notification.title} message={notification.message}
+          close={() => { setNotification({ open: false, title: null, message: null }) }} />
+      }
     </ThemeProvider>
   );
 }

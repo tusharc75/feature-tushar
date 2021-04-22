@@ -151,6 +151,7 @@ const Leads = () => {
           .then(({ data }) => {
             setRowCount(data.count);
             setLeadData(data.data);
+            setCheckAllLeads(false);
             setLoading(false);
           });
       } catch (err) {
