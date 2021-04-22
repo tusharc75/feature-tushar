@@ -5,7 +5,7 @@ import { Tabs, Tab, Paper, useTheme } from "@material-ui/core";
 import Layout from "../../components/Layout";
 import NewOpportunityStepper from "../../components/NewOpportunityStepper";
 import OpportunityNavLinks from "../../components/NavLinks";
-import Container from "../../components/Container";
+import Container from "../../components/CustomContainer";
 import TabPanel from "../../components/TabPanel";
 import { OpportunityInformation, Contacts } from "../../components/Tabs";
 

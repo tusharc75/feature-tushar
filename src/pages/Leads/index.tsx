@@ -12,7 +12,7 @@ import { DataGrid } from "@material-ui/data-grid";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import Layout from "../../components/Layout";
-import Container from "../../components/Container";
+import Container from "../../components/CustomContainer";
 import LeadsHeader from "./LeadsHeader";
 import axiosInstance from "../../axios/axiosInstance";
 import { getSearchQuery } from "../../services/util";
@@ -39,7 +39,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { SiConvertio } from "react-icons/si";
 import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import CustomContainer from "../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 
 const LeadTypes = [
   {

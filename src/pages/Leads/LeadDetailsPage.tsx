@@ -3,7 +3,7 @@ import { Box, Button, Grid } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { Skeleton } from "@material-ui/lab";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import Container from "../../components/Container";
+import Container from "../../components/CustomContainer";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";

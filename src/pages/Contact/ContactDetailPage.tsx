@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid, Typography } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
-import Container from "../../components/Container";
+import Container from "../../components/CustomContainer";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
 import DetailsPageHeader from "../../components/DetailsPageHeader";

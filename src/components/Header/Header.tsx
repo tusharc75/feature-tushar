@@ -117,7 +117,6 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "3px",
   },
   entitySelect: {
-    fontWeight: "bold",
     fontSize: "16px",
     display: "flex",
     alignItems: "center",

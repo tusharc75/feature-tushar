@@ -39,6 +39,7 @@
         background: #f7f7f7;
         border-color: #d0dbe6!important;
         border-top: 1px solid;
+        padding: 0;
       }
   
       .MuiDataGrid-colCellTitle {
@@ -58,6 +59,7 @@
         .MuiDataGrid-footer{
           background: #f7f7f7;
           border: 1px solid #e7e7e7;
+          height: 38px !important;
         }
   
         .MuiDataGrid-row {
@@ -120,19 +122,15 @@
   }
   
   .MuiDataGrid-window::-webkit-scrollbar-track {
-    background-color: #eee;
-    border-radius: 16px;
+    background-color: #fff;
+    border-radius: 0;
     margin: 2px 0;
   }
   
   .MuiDataGrid-window::-webkit-scrollbar-thumb {
-    background-color: #babac0;
+    background-color: #ceced1;
     border-radius: 16px;
     border: 1px solid transparent;
-  }
-  
-  .MuiPaper-rounded{
-    border-radius: 0 !important;
   }
   .MuiCollapse-container{
     background: white;

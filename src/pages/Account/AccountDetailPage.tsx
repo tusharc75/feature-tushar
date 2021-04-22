@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton } from "@material-ui/core";
+import { Box, Button, Grid, Typography, IconButton, Container, Paper } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
 import { Skeleton } from "@material-ui/lab";
-import Container from "../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 import Layout from "../../components/Layout";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { accountPage } from "../../routes/Accounts";
@@ -380,226 +380,211 @@ export default function AccountDetailPage(props) {
         <Grid container direction="row">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div>
-          {
-            <DetailsPageHeader
-              loading={loading}
-              heading={headingLbl}
-              logo={
-                accountData?.accountLogo ? accountData.accountLogo : undefined
-              }
-              mainPoints={mainPoints}
-              showHeading={true}
-            >
-              {permissions &&
-                permissions[accountResource] &&
-                permissions[accountResource].approveAccount && (
-                  <>
-                    <Button
-                      variant="contained"
-                      color={
-                        accountData.static?.approved ? "secondary" : "primary"
-                      }
-                      onClick={() => {
-                        setShowApproveDisapproveConfirmBox(true);
-                      }}
-                    >
-                      {accountData.static?.approved ? "Disapprove" : "Approve"}
-                    </Button>
-                    <Box component="span" marginX={1} />
-                  </>
-                )}
-
-              {permissions &&
-                permissions[accountResource] &&
-                permissions[accountResource].isUpdate &&
-                canEdit && (
-                  <>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleOpneUpdateDialog}
-                    >
-                      Edit
-                    </Button>
-                    <Box component="span" marginX={1} />
-                  </>
-                )}
-
-              {permissions &&
-                permissions[accountResource] &&
-                permissions[accountResource].isDelete &&
-                accountData?.owner?.optionValue &&
-                user?.user?._id &&
-                accountData.owner.optionValue === user.user._id ? (
-                <DeleteButton
-                  text="Delete"
-                  onClick={() => setShowConfirmBox(true)}
-                />
-              ) : null}
-            </DetailsPageHeader>
-          }
-
-          <Grid container spacing={2} className="mt-2">
-            <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Container padding="8px">
-                <BoxWithBorder padding="8px">
-                  {loading ? (
-                    <Grid container spacing={2}>
-                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                        <Grid item sm={6} md={6}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="16px"
-                          />
-                          <Box marginY={1} />
-                          <Skeleton width="100%" height="50px" />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Box>
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+            <Paper>
+              {
+                <DetailsPageHeader
+                  loading={loading}
+                  heading={headingLbl}
+                  logo={
+                    accountData?.accountLogo ? accountData.accountLogo : undefined
+                  }
+                  mainPoints={mainPoints}
+                  showHeading={true}
+                >
+                  {permissions &&
+                    permissions[accountResource] &&
+                    permissions[accountResource].approveAccount && (
                       <>
-                        <Tabs
-                          className="mb-4"
-                          value={currentTabIndex}
-                          onChange={(index, newValue) => {
-                            setCurrentTabIndex(newValue);
+                        <Button
+                          variant="contained"
+                          color={
+                            accountData.static?.approved ? "secondary" : "primary"
+                          }
+                          onClick={() => {
+                            setShowApproveDisapproveConfirmBox(true);
                           }}
-                          indicatorColor="primary"
-                          textColor="primary"
-                          aria-label="icon tabs example"
                         >
-                          <Tab
-                            label="Details"
-                            aria-controls="a11y-tabpanel-0"
-                            id="a11y-tab-0"
-                          />
-                          <Tab
-                            label="Account Hierarchy"
-                            aria-controls="a11y-tabpanel-1"
-                            id="a11y-tab-1"
-                          />
-                        </Tabs>
-                        <Box hidden={currentTabIndex !== 0}>
-                          <DetailsPage
-                            data={accountData}
-                            fields={accountFields}
-                          />
-                        </Box>
-
-                        <Box hidden={currentTabIndex !== 1}>
-                          <AccountHierarchy
-                            data={accountHierarchyData}
-                            currentAccountId={accountData._id}
-                            accountRoute={accountRoute}
-                          />
-                        </Box>
+                          {accountData.static?.approved ? "Disapprove" : "Approve"}
+                        </Button>
+                        <Box component="span" marginX={1} />
                       </>
-                    </Box>
-                  )}
-                </BoxWithBorder>
-                <Box marginY={2} />
+                    )}
 
-                {permissions?.opportunity?.isRead && (
-                  <Container styles={{ padding: "0px", minHeight: "auto" }}>
-                    <OpportunityInAccordian
-                      opportunityPermissions={permissions.opportunity}
-                      opportunities={opportunities}
-                      onNewOpportunityAdd={() => {
-                        fetchRelatedData();
-                      }}
-                      accountId={accountData._id}
-                      recordsPerLine={2}
-                      resource={accountResource}
+                  {permissions &&
+                    permissions[accountResource] &&
+                    permissions[accountResource].isUpdate &&
+                    canEdit && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleOpneUpdateDialog}
+                        >
+                          Edit
+                    </Button>
+                        <Box component="span" marginX={1} />
+                      </>
+                    )}
+
+                  {permissions &&
+                    permissions[accountResource] &&
+                    permissions[accountResource].isDelete &&
+                    accountData?.owner?.optionValue &&
+                    user?.user?._id &&
+                    accountData.owner.optionValue === user.user._id ? (
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => setShowConfirmBox(true)}
                     />
-                  </Container>
-                )}
-              </Container>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={12}
-              md={4}
-              lg={4}
-              className={`${accountClass.account_activities_div}`}
-            >
-              {/* <Container
-                styles={{ padding: "8px", minHeight: "auto", width: "100%" }}
-              > */}
-              <Grid container spacing={1}>
-                <Grid item xs={12}>
-                  {accountData && (
-                    <div>
-                      <Activity
-                        relatedTo={[
-                          {
-                            type: accountResource,
-                            referenceId: accountData._id,
-                            access: true,
-                          },
-                        ]}
-                        handleActivityRefresh={() => { }}
-                      />
-                    </div>
-                  )}
-                </Grid>
-                <Grid item xs={12}>
-                  <QuickLinks quickLinks={quickLinks} />
-                </Grid>
-
-                {permissions &&
-                  permissions[contactResource] &&
-                  permissions[contactResource].isRead && (
-                    <Grid item xs={12}>
-                      <BoxWithBorder
-                        style={{ marginTop: "3%", padding: "0px" }}
+                  ) : null}
+                </DetailsPageHeader>
+              }
+              <BoxWithBorder padding="8px">
+                {loading ? (
+                  <Grid container spacing={2}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                      <Grid item sm={6} md={6}>
+                        <Skeleton
+                          variant="text"
+                          width="100px"
+                          height="16px"
+                        />
+                        <Box marginY={1} />
+                        <Skeleton width="100%" height="50px" />
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <Box>
+                    <>
+                      <Tabs
+                        className="mb-4"
+                        value={currentTabIndex}
+                        onChange={(index, newValue) => {
+                          setCurrentTabIndex(newValue);
+                        }}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="icon tabs example"
                       >
-                        <div className={`${accountClass.detail_page_div3}`}>
-                          <div className={`${accountClass.related_contacts}`}>
-                            <Typography
-                              color="primary"
-                              variant="h6"
-                              style={{ margin: "0 10px" }}
-                            >
-                              Related Contacts
+                        <Tab
+                          label="Details"
+                          aria-controls="a11y-tabpanel-0"
+                          id="a11y-tab-0"
+                        />
+                        <Tab
+                          label="Account Hierarchy"
+                          aria-controls="a11y-tabpanel-1"
+                          id="a11y-tab-1"
+                        />
+                      </Tabs>
+                      <Box hidden={currentTabIndex !== 0}>
+                        <DetailsPage
+                          data={accountData}
+                          fields={accountFields}
+                        />
+                      </Box>
+                      <Box hidden={currentTabIndex !== 1}>
+                        <AccountHierarchy
+                          data={accountHierarchyData}
+                          currentAccountId={accountData._id}
+                          accountRoute={accountRoute}
+                        />
+                      </Box>
+                    </>
+                  </Box>
+                )}
+              </BoxWithBorder>
+              {permissions?.opportunity?.isRead && (
+                <OpportunityInAccordian
+                  opportunityPermissions={permissions.opportunity}
+                  opportunities={opportunities}
+                  onNewOpportunityAdd={() => {
+                    fetchRelatedData();
+                  }}
+                  accountId={accountData._id}
+                  recordsPerLine={2}
+                  resource={accountResource}
+                />
+              )}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+          <Paper>
+            <Grid container>
+              <Grid item xs={12}>
+                {accountData && (
+                  <div>
+                    <Activity
+                      relatedTo={[
+                        {
+                          type: accountResource,
+                          referenceId: accountData._id,
+                          access: true,
+                        },
+                      ]}
+                      handleActivityRefresh={() => { }}
+                    />
+                  </div>
+                )}
+              </Grid>
+              <Grid item xs={12}>
+                <QuickLinks quickLinks={quickLinks} />
+              </Grid>
+
+              {permissions &&
+                permissions[contactResource] &&
+                permissions[contactResource].isRead && (
+                  <Grid item xs={12}>
+                    <BoxWithBorder
+                      style={{ marginTop: "3%", padding: "0px" }}
+                    >
+                      <div className={`${accountClass.detail_page_div3}`}>
+                        <div className={`${accountClass.related_contacts}`}>
+                          <Typography
+                            color="primary"
+                            variant="h6"
+                            style={{ margin: "0 10px" }}
+                          >
+                            Related Contacts
                               </Typography>
-                            {permissions[contactResource].isCreate && (
-                              <span>
-                                <IconButton
-                                  onClick={handleCreateContact}
-                                  color="primary"
-                                  size="small"
-                                >
-                                  <ControlPointIcon />
-                                </IconButton>
-                              </span>
-                            )}
-                          </div>
-                          {relatedContactsLoading ? (
-                            <CommonSkeleton lenArray={[...Array(4).keys()]} />
-                          ) : (
-                            <>
-                              <Box className={`${accountClass.custom_box1}`}>
-                                <RelatedContacts
-                                  contacts={_reverse(relatedContacts.slice(0, 2))}
-                                  accountName={accountData.accountName}
-                                  contactApi={contactApi}
-                                  contactRoute={contactRoute}
-                                />
-                              </Box>
-                            </>
+                          {permissions[contactResource].isCreate && (
+                            <span>
+                              <IconButton
+                                onClick={handleCreateContact}
+                                color="primary"
+                                size="small"
+                              >
+                                <ControlPointIcon />
+                              </IconButton>
+                            </span>
                           )}
                         </div>
-                      </BoxWithBorder>
-                    </Grid>
-                  )}
-              </Grid>
-              {/* </Container> */}
+                        {relatedContactsLoading ? (
+                          <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                        ) : (
+                          <>
+                            <Box className={`${accountClass.custom_box1}`}>
+                              <RelatedContacts
+                                contacts={_reverse(relatedContacts.slice(0, 2))}
+                                accountName={accountData.accountName}
+                                contactApi={contactApi}
+                                contactRoute={contactRoute}
+                              />
+                            </Box>
+                          </>
+                        )}
+                      </div>
+                    </BoxWithBorder>
+                  </Grid>
+                )}
             </Grid>
+          </Paper>
           </Grid>
+        </Grid>
+        <div>
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}

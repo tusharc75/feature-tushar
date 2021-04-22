@@ -25,7 +25,7 @@ import ManageAccountDialog from "./ManageAccount/index";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from "../../axios/axiosInstance";
-import CustomContainer from "./../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 import CancelIcon from "@material-ui/icons/Cancel";
 import accountClass from "./account.module.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";

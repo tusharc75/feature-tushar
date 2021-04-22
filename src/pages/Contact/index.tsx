@@ -24,7 +24,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import SearchBox from "../../components/Helpers/SearchBox";
 import DeleteIcon from "@material-ui/icons/Delete";
-import CustomContainer from "./../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";

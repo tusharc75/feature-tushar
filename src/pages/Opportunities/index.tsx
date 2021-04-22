@@ -12,7 +12,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { DataGrid } from "@material-ui/data-grid";
 import { useData } from "../../StateProvider/Provider";
 import Layout from "../../components/Layout";
-import Container from "../../components/Container";
+import Container from "../../components/CustomContainer";
 import axiosInstance from "../../axios/axiosInstance";
 import { getSearchQuery, displayDate } from "../../services/util";
 import OpportunitiesHeader from "./OpportunitiesHeader";
@@ -36,7 +36,7 @@ import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import CustomContainer from "../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 
 let opportunityTimeout;
 const OpportunityTypes = [
