@@ -17,9 +17,6 @@ import { BsEnvelopeOpen, BsPhone, BsDisplay } from 'react-icons/bs'
 import styles from "../profilePage.module.scss"
 
 const useStyles = makeStyles((theme) => ({
-    table: {
-        minWidth: 650,
-    },
     tableCell: {
         fontSize: "medium"
     },
@@ -127,7 +124,7 @@ export default function NotifiationPreference(props) {
                 </Grid>
             </Box>
             <TableContainer component={Paper}>
-                <Table className={classes.table} aria-label="simple table">
+                <Table aria-label="simple table">
                     <TableBody>
                         {rows.map((row) => (
                             <TableRow key={row.title}>
