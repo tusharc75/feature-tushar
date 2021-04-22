@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
         width: '50%'
     }
 }));
-function RelatedContacts({ contacts, accountName, contactApi, contactRoute }) {
+function RelatedContacts({ contacts, accountId, accountName, contactApi, contactRoute }) {
 
     const classes = useStyles();
     const history = useHistory();
@@ -76,7 +76,10 @@ function RelatedContacts({ contacts, accountName, contactApi, contactRoute }) {
                     variant="contained"
                     color="primary"
                     size="small"
-                    onClick={() => history.push(`/${contactRoute}`)}
+                    onClick={() => history.push(`/${contactRoute}`, {
+                        accountId: accountId,
+                        accountName: accountName
+                    })}
                 >
                     View All
                 </Button>
