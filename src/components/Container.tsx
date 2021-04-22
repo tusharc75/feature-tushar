@@ -8,9 +8,9 @@ const CustomContainer = (props) => {
     <>
       <CssBaseline />
       {!maxWidth ? (
-        <Paper elevation={0} style={{ ...styles }}>
+        <div style={{ ...styles }}>
           {children}
-        </Paper>
+        </div>
       ) : (
         <Container
           maxWidth={maxWidth}

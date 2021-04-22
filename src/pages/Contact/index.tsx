@@ -402,7 +402,7 @@ export default function Contact(props) {
                 <Grid item md={6} sm={12} xs={12}>
                     <CustomBreadCrumbs routes={[contactBreadcrumb]} />
                 </Grid>
-                <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center bg-white">
+                <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center breadcrumbbox">
                     <Grid container direction="row">
                         <Grid item xs={12} sm={12} className="pr-3">
                             <Grid container justify="flex-end">
@@ -412,7 +412,7 @@ export default function Contact(props) {
                     </Grid>
                 </Grid>
             </Grid>
-
+        <div className="main-container">
             <CustomContainer>
                 <div className="header-panel">
                     <Grid className={styles.filter_side_container} container justify="space-between">
@@ -497,9 +497,7 @@ export default function Contact(props) {
                     </Grid>
                 </div>
             </CustomContainer>
-
-            <Paper>
-                <Box component="div" >
+            <Box component="div" >
                     {/* <Box component="div" marginY={1}> */}
                     <div className="listing-grid">
                         <DataGrid
@@ -576,7 +574,7 @@ export default function Contact(props) {
                             /> : null
                     }
                 </Box>
-            </Paper>
+        </div>
         </Layout >
     )
 }

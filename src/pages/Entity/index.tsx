@@ -134,7 +134,7 @@ const Entity: FC = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 200,
+      width: 250,
       renderCell: (params: any) => (
         <MuiLink
           title={params.value}
@@ -149,7 +149,7 @@ const Entity: FC = () => {
     {
       field: "address",
       headerName: "Address",
-      width: 200,
+      width: 300,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
           {params.value}
@@ -169,7 +169,7 @@ const Entity: FC = () => {
     {
       field: "createdBy",
       headerName: "Created By",
-      width: 150,
+      width: 250,
       disableColumnMenu: true,
       sortable: false,
       filterable: false,
@@ -178,7 +178,7 @@ const Entity: FC = () => {
           <h5 className="createBy">
             {params?.value?.user?.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params?.value?.user?.firstName} • ${moment(
                 params?.value?.date?.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -193,7 +193,7 @@ const Entity: FC = () => {
     {
       field: "updatedBy",
       headerName: "Updated By",
-      width: 150,
+      width: 250,
       renderCell: (params: any) =>
         params?.value && params?.value?.user ? (
           <h5 className="updateBy">
@@ -429,8 +429,7 @@ const Entity: FC = () => {
       )}
       <Layout>
         <CustomBreadCrumbs routes={[routes.entity]} />
-
-        <Container>
+        <div className="main-container">
           <div className="header-panel">
             <Header
               onSearch={handleSearch}
@@ -443,8 +442,6 @@ const Entity: FC = () => {
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
             />
           </div>
-        </Container>
-        <Container>
           <div className="listing-grid">
             <DataGrid
               components={{
@@ -469,7 +466,7 @@ const Entity: FC = () => {
               onFilterModelChange={onFilterChange}
             />
           </div>
-        </Container>
+        </div>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

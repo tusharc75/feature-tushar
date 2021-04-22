@@ -26,9 +26,10 @@ import _ from "lodash";
 import { FaUserTie, FaDatabase, FaHandshake } from 'react-icons/fa';
 import { BsCalendarFill, BsFillPuzzleFill } from 'react-icons/bs';
 import { MdDashboard, MdLocalActivity } from 'react-icons/md';
+import SidebarImage from '../../assets/header-bg.png';
+import Avatar from '@material-ui/core/Avatar';
 
 const drawerWidth = 240;
-
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -45,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
   },
   drawerOpen: {
-    overflowY: "scroll",
+    overflowY: "auto",
     width: drawerWidth,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
@@ -58,17 +59,17 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: "hidden",
-    width: theme.spacing(6) - 1,
+    width: "3rem",
     [theme.breakpoints.down("sm")]: {
       width: 0,
     },
   },
   toolbar: {
-    background: "#dcdcdc",
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
     padding: theme.spacing(0),
+    borderBottom: "2px solid #f5f8f9"
   },
   menuIcon: {
     width: 22,
@@ -80,9 +81,17 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "normal",
     marginLeft: theme.spacing(2),
   },
-
   nested: {
     paddingLeft: theme.spacing(4),
+  },
+  sidebarUser: {
+    padding: "1.5rem 1rem 1rem",
+    background: "#fff",
+    color: "#153d77",
+    textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    height: "8rem"
   },
 }));
 
@@ -189,16 +198,18 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       >
         <Toolbar />
         <div className={classes.toolbar}>
+          <div className={classes.sidebarUser}>
+            <Avatar className="d-flex align-items-center gap-1"></Avatar>
+            {/* <Avatar className={classes.avatar}>{element.firstName[0] + element.lastName[0]}</Avatar> */}
+            <div className="d-flex align-items-center gap-1">Linda Miller</div>
+            <small className="d-flex align-items-center gap-1">Front-end Developer</small>
+          </div>
           <IconButton onClick={handleToggleDrawer}>
             {toggleDrawer ? <ChevronLeft /> : <ChevronRight />}
           </IconButton>
         </div>
 
-        <div
-          className={clsx({
-            [classes.hide]: !toggleDrawer,
-          })}
-        >
+        <div>
           <List className="sidebar-list">
             <Link to="/">
               <ListItem button selected={location.pathname === "/"} className="list-item">

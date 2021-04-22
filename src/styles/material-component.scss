@@ -62,7 +62,7 @@
   
         .MuiDataGrid-row {
           &.Mui-odd {
-              background-color: #fcfcfc;
+              background-color: #f7f7f7;
           }
           &:hover{
             background-color: #e4e4e4 !important;
@@ -109,7 +109,6 @@
       font-size: 0.9rem !important;
   }
   Button.MuiButtonBase-root {
-    font-weight: bold;
     border-radius: 0.2rem;
     // text-transform: capitalize !important;
   }

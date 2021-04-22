@@ -1,15 +1,15 @@
 :root {
   --primary: #003f57;
   --primary-light: #003f57;
-  --secondary: #dc004e;
-  --error: #df2e18;
+  --secondary: #DD5451;
+  --error: #dc3545;
   --info: #03afe2;
   --success: #28a745;
   --link: #007bff;
   --white: #ffffff;
   --aliceblue: aliceblue;
 
-  --warning: #ffa200;
+  --warning: #fd7e14;
   --white: #fff;
   --warning-light: #ffc766;
   --black: #000;
@@ -40,7 +40,7 @@ html {
 
 body {
   font-family: Nunito Sans,sans-serif!important;
-  background-color: var(--aliceblue) !important;
+  // background-color: var(--aliceblue) !important;
 }
 
 /* Let's get this party started */
@@ -306,20 +306,20 @@ body::-webkit-scrollbar-thumb {
   right: 0;
 }
 .header-panel {
-  color: var(--primary);
-  background-color: #f7f7f7 !important;
+  color: var(--secondary);
+  background-color: #ffffff !important;
   border-bottom: 1px solid #ecf1f3 !important;
-  border-top: 1px solid #ecf1f3 !important;
   padding: 8px 10px;
+  border-radius: 6px 6px 0 0;
 }
 .listingHeader {
   font-size: 1.35rem;
   font-weight: bold;
-  color: var(--primary);
+  color: var(--secondary);
 }
 .headerLogo {
   font-size: 1.35rem;
-  color: var(--primary);
+  color: var(--secondary);
   margin-left: 4px;
 }
 
@@ -341,4 +341,35 @@ body::-webkit-scrollbar-thumb {
 
 .bg-white {
   background: var(--white) !important;
+}
+
+
+.main-container{
+  margin: 0 1.5rem;
+  position: absolute;
+  top: 99px;
+  width: calc(100% - 6rem); //3rem sidebar + 1.5rem*2 margin from left and right = 6rem
+  background: white;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 2px 3px 5px #6f6d6d;
+}
+
+.badge-date{
+    background: #fff0e4;
+    padding: 2px 6px;
+    border-radius: 2px;
+    float: right;
+    margin-left: 6px;
+    color: #984408;
+    float: right;
+    text-align: right;
+    align-items: inherit;
+    display: flex;
+    font-weight: 500;
+}
+.export-import-link{
+  position: absolute;
+  top: 4.2rem;
+  color: white;
+  right: 2rem;
 }

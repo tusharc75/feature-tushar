@@ -74,7 +74,6 @@ export default function ManageContactMain(props) {
       .then(({ data }) => {
         onClose({ fetch: true });
         onSuccess({ fetch: true });
-        debugger;
         toastConfig.setToastConfig({
           open: true,
           type: "success",

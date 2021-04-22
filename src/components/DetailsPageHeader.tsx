@@ -36,7 +36,7 @@ const DetailsPageHeader = (props) => {
   const classes = useStyles();
   return (
     <>
-      <Paper className={`${classes.customHeaderPaper} my-2`} elevation={0}>
+      <Paper className={`${classes.customHeaderPaper} header-panel`} elevation={0}>
         <Grid container justify="space-between">
           <Grid item>
             {loading ? (

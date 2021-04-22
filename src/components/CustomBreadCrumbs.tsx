@@ -5,7 +5,7 @@ const CustomBreadCrumbs = ({ routes = [] }) => {
   return (
     <div className="breadcrumbbox">
       <Breadcrumbs separator="›" aria-label="breadcrumb">
-        <Link color="inherit" to="/" className="cursor-pointer">
+        <Link to="/" className="cursor-pointer">
           Home
         </Link>
 
@@ -13,14 +13,12 @@ const CustomBreadCrumbs = ({ routes = [] }) => {
           return index !== routes.length - 1 ? (
             <Link
               key={index}
-              color="inherit"
               to={route.path}
-              className="cursor-pointer"
-            >
+              className="cursor-pointer">
               {route.title}
             </Link>
           ) : (
-            <Typography key={index} color="textPrimary">
+            <Typography key={index}>
               {route.title}
             </Typography>
           );
