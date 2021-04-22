@@ -13,12 +13,28 @@
   border: 1px solid transparent;
 }
 
-.breadcrumbbox {
-  padding: 10px 10px 112px 32px;
+.headerbox {
+  padding: 10px 26px 112px 26px;;
   background: #003f57;
   width: 100%;
   background-image: url("../../assets/header-bg.png");
   background-blend-mode: overlay;
+
+  ol {
+    li {
+       color: #ffffffad  !important;
+      a {
+        margin: 0px 4px;
+        font-size: 1rem;
+        color: #ffffffad !important;
+      }
+      p {
+        margin: 0px 4px;
+        font-size: 1rem;
+        color: #ffffffad !important;
+      }
+    }
+  }
 }
 .breadcrumb ol li a,
 .breadcrumb ol li p {
@@ -26,25 +42,6 @@
   font-size: 18px;
   color: white !important;
 }
-
-.breadcrumbbox {
-  ol {
-    li {
-       color: white !important;
-      a {
-        margin: 0px 4px;
-        font-size: 1rem;
-        color: white !important;
-      }
-      p {
-        margin: 0px 4px;
-        font-size: 1rem;
-        color: white !important;
-      }
-    }
-  }
-}
-
 .sidebar-list {
   .MuiListItemIcon-root {
     min-width: auto !important;

@@ -36,22 +36,9 @@ import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import CustomContainer from "../../components/Container";
 
 let opportunityTimeout;
-const useStyles = makeStyles((theme) => ({
-  linksContainer: {
-    display: "flex",
-  },
-  links: {
-    color: theme.palette.primary.main, //  textDark
-    fontSize: "0.90rem",
-  },
-  linkDivider: {
-    backgroundColor: theme.palette.primary.main, //  darkBg
-    margin: "0 1rem",
-  },
-}));
-
 const OpportunityTypes = [
   {
     key: "All Opportunities",
@@ -65,7 +52,6 @@ const OpportunityTypes = [
 
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
-  const classes = useStyles();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
@@ -573,20 +559,24 @@ const Opportunities = () => {
     <>
       <Layout>
         <Grid container>
-          <Grid item md={6} sm={12} xs={12}>
+          <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.opportunity]} />
           </Grid>
           <Grid
             item
-            md={6}
-            sm={12}
-            xs={12}
-            className="d-flex align-items-center bg-white"
-          >
+            md={8}
+            sm={1}
+            xs={2}>
             <Grid container direction="row">
-              <Grid item xs={12} sm={12} className="pr-3">
+              <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
-                  <ImportExportLinks module="opportunities" api={opportunityApi} onSuccessfulImport={() => { fetchOpportunities() }} />
+                  <ImportExportLinks
+                    module="opportunities"
+                    api={opportunityApi}
+                    onSuccessfulImport={() => {
+                      fetchOpportunities();
+                    }}
+                  />
                 </Grid>
               </Grid>
             </Grid>
@@ -594,7 +584,7 @@ const Opportunities = () => {
         </Grid>
 
         {/* Tables Begins Here */}
-        <Container>
+    <CustomContainer>
           <div className="header-panel">
             <OpportunitiesHeader
               selectedType={selectedType}
@@ -610,8 +600,8 @@ const Opportunities = () => {
               heading="Opportunities"
             />
           </div>
-        </Container>
-        <Container>
+       
+       
           <div className="listing-grid">
             <DataGrid
               components={{
@@ -681,7 +671,7 @@ const Opportunities = () => {
               onOk={handleSingleDeleteOpportunity}
             />
           ) : null}
-        </Container>
+        </CustomContainer>
       </Layout>
 
       {showCreateOpportunityDialog && (

@@ -33,6 +33,17 @@ export const leadImportErrorFileName = "Leads-Errors.xlsx";
 export const opportunityTemplateFileName = "Opportunities-Template.xlsx";
 export const opportunityImportErrorFileName = "Opportunities-Errors.xlsx";
 
+export const roleTypes = [
+  {
+    key: "Global",
+    value: 1,
+  },
+  {
+    key: "Regional",
+    value: 2,
+  },
+];
+
 export const sidebarResource = {
   brand: "Brand",
   role: "Role",

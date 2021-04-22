@@ -8,11 +8,11 @@ const CustomContainer = (props) => {
     <>
       <CssBaseline />
       {!maxWidth ? (
-        <div style={{ ...styles }}>
+        <div className="main-container" style={{ ...styles }}>
           {children}
         </div>
       ) : (
-        <Container
+        <Container className="main-container"
           maxWidth={maxWidth}
           style={{
             minHeight: minHeight ? "100%" : "calc(100vh - 65px)",

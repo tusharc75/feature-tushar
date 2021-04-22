@@ -71,13 +71,13 @@ const Product = () => {
         {
             field: "productCategory",
             headerName: "Product Category",
-            width: 200,
+            width: 250,
             renderCell: (params) => (params.row.productCategory?.productCategory)
         },
         {
             field: "createdBy",
             headerName: "Created By",
-            width: 150,
+            width: 200,
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
@@ -101,7 +101,7 @@ const Product = () => {
         {
             field: "updatedBy",
             headerName: "Updated By",
-            width: 150,
+            width: 200,
             renderCell: (params: any) =>
                 params?.value && params?.value?.user ? (
                     <h5 className="updateBy">

@@ -21,19 +21,9 @@ import CreateRole from "./CreateRole";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { PERMISSION } from "../../constants/Roles";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import { roleTypes } from "../../constants/helpers";
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
-
-const RoleTypes = [
-  {
-    key: "Global",
-    value: 1,
-  },
-  {
-    key: "Regional",
-    value: 2,
-  },
-];
 
 const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -404,7 +394,7 @@ const Roles: FC = () => {
             <Header
               selectedType={selectedType}
               onTypeChange={handleRoleTypeSel}
-              options={RoleTypes}
+              options={roleTypes}
               onSearch={handleSearch}
               searchVal={searchVal}
               rolePermissions={permissions.role}

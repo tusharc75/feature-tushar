@@ -40,19 +40,6 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 8,
         padding: theme.spacing(3, 2),
     },
-    linksContainer: {
-        display: "flex",
-    },
-    links: {
-        color: theme.palette.primary.main   //  textDark
-    },
-    linkDivider: {
-        backgroundColor: theme.palette.primary.main,  //  darkBg
-        margin: "0 1rem",
-    },
-    delBtn: {
-        color: 'red'
-    }
 }));
 
 let termsTimeout

@@ -429,7 +429,7 @@ const Header = ({ toggleDrawer }) => {
                 </ButtonBase>
               )}
             </Box>
-            <div className={classes.search}>
+            {/* <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <Search />
               </div>
@@ -443,7 +443,7 @@ const Header = ({ toggleDrawer }) => {
                 }}
                 inputProps={{ "aria-label": "search" }}
               />
-            </div>
+            </div> */}
           </Box>
 
           {/* <div className={classes.sectionDesktop}>

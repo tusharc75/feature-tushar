@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const CustomBreadCrumbs = ({ routes = [] }) => {
   return (
-    <div className="breadcrumbbox">
+    <div className="headerbox">
       <Breadcrumbs separator="›" aria-label="breadcrumb">
         <Link to="/" className="cursor-pointer">
           Home

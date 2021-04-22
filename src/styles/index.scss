@@ -373,3 +373,16 @@ body::-webkit-scrollbar-thumb {
   color: white;
   right: 2rem;
 }
+.updatedAtTime,
+.createdAtTime {
+  font-size: 0.6 rem;
+  line-height: 1 rem;
+  display: block;
+}
+.updateBy,
+.createBy {
+  font-size: 0.8rem;
+  line-height: 1rem;
+  display: block;
+  font-weight: normal;
+}

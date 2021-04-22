@@ -108,11 +108,6 @@ const useStyles = makeStyles((theme) => ({
     height: 18,
     margin: 2
   },
-
-
-  linksContainer: {
-    display: "flex",
-  },
   links: {
     color: theme.palette.primary.main,  //  textDark
   },
