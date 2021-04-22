@@ -3,7 +3,6 @@ import { Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import "./profilePage.scss"
 import ProfileSidebar from './components/ProfileSidebar'
 import { profileMenuItems } from '../../constants/helpers'
 import ManageProfile from './components/ManageProfile'
@@ -19,7 +18,6 @@ const useStyles = makeStyles((theme) => ({
     },
     profileContainer: {
         width: '90%',
-        height: '87%',
         margin: theme.spacing(4),
         borderRadius: '8px',
         textAlign: 'center',

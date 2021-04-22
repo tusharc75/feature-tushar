@@ -14,7 +14,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { BsEnvelopeOpen, BsPhone, BsDisplay } from 'react-icons/bs'
-import "../profilePage.scss"
+import styles from "../profilePage.module.scss"
 
 const useStyles = makeStyles((theme) => ({
     table: {
@@ -104,7 +104,7 @@ export default function NotifiationPreference(props) {
         }
     ]
     return <Container>
-        <div className="preferenceHeader">
+        <div className={styles.preferenceHeader}>
             <Typography variant="h5">Your Notification Preference</Typography>
             {/* <Tooltip title="Save">
                 <IconButton>
@@ -113,7 +113,7 @@ export default function NotifiationPreference(props) {
             </Tooltip> */}
         </div>
         <Box style={{ padding: "8px" }}>
-            <Box className="preferenceOptionsBox">
+            <Box className={styles.preferenceOptionsBox}>
                 <Grid container spacing={3} className={classes.preferenceOptions} >
                     {
                         options.map(curPreference => (

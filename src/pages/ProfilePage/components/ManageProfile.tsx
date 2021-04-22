@@ -10,7 +10,7 @@ import DetailsPage from "../../../components/Shared/DetailsPage";
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from "@material-ui/icons/Delete";
 import { SET_USER } from "../../../StateProvider/actionTypes";
-import "../profilePage.scss"
+import styles from "../profilePage.module.scss"
 
 export default function ManageProfile(props) {
     const { displayUserDetails, displayUserProfileImage } = props
@@ -131,8 +131,8 @@ export default function ManageProfile(props) {
         <>
             {
                 displayUserProfileImage ?
-                    <div className="userDetail">
-                        <div className="profileAvatarContainer">
+                    <div className={styles.userDetail}>
+                        <div className={styles.profileAvatarContainer}>
                             <>
                                 <Box display="flex" flexDirection="row">
                                     <Box position="relative">
@@ -203,7 +203,7 @@ export default function ManageProfile(props) {
                 {
                     displayUserDetails ?
                         <>
-                            <div className="editProfileContainer">
+                            <div className={styles.editProfileContainer}>
                                 <Tooltip title="Edit">
                                     <IconButton onClick={handleOpenUpdateDialog} style={{ float: 'right', marginBottom: '5px' }}>
                                         <EditIcon color="primary" />

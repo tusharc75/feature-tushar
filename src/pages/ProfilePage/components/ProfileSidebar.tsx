@@ -4,7 +4,7 @@ import { BsShieldShaded, BsFillGearFill } from 'react-icons/bs'
 import { HiSpeakerphone, HiUserCircle, HiUsers } from 'react-icons/hi'
 import { profileMenuItems } from '../../../constants/helpers'
 import ManageProfile from './ManageProfile'
-import "../profilePage.scss"
+import styles from "../profilePage.module.scss"
 
 export default function Sidebar({ onItemClick, activeLink, ...rest }) {
     const userMenu = [
@@ -45,10 +45,10 @@ export default function Sidebar({ onItemClick, activeLink, ...rest }) {
             <div className="d-flex flex-column gap-4 px-5 pt-2 pb-3" >
                 {
                     userMenu.map((k, index) => {
-                        return <div key={index} className="font-size-3 link d-flex justify-content-center align-items-center gap-1 profileSidebarLink">
-                            <span className={`menu-link ${activeLink === k.id ? "active" : ""}`}>
+                        return <div key={index} className={`font-size-3 link d-flex justify-content-center align-items-center gap-1 ${styles.profileSidebarLink}`}>
+                            <span className={`${styles.menuLink} ${activeLink === k.id ? styles.active : ""}`}>
                                 <Icon >{k.icon}</Icon>
-                                <Typography className="linkLabel" align="left" key={index} onClick={() => onItemClick(k)}>{k.label} </Typography>
+                                <Typography className={styles.linkLabel} align="left" key={index} onClick={() => onItemClick(k)}>{k.label} </Typography>
                             </span>
                         </div>
                     })

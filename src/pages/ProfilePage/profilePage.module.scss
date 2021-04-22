@@ -1,11 +1,11 @@
 .profileSidebarLink{
-    .menu-link {
+    .menuLink {
         text-decoration: none;    
         color: var(--primary) !important;
         display: contents;
         font-weight: 400;
       }
-      .active, .menu-link:hover {
+      .active, .menuLink:hover {
         text-decoration: none;    
         cursor: pointer !important;
         color: var(--link) !important;
@@ -37,4 +37,9 @@
 }
 .preferenceOptionsBox{
   background-color: #d3d3d373;
+}
+@media only screen and (max-width: 300px) {
+  .preferenceOptionsBox{
+    margin-right: 50%;
+  }
 }
