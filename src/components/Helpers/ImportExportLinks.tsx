@@ -23,13 +23,14 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
-    margin: 10,
+    margin: 12,
     ["@media (max-width: 960px)"]: {
       display: "none",
     },
   },
   links: {
     color: theme.palette.primary.main, //  textDark
+    fontSize: 15,
   },
   linkDivider: {
     backgroundColor: theme.palette.primary.main, //  darkBg
