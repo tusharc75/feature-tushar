@@ -41,8 +41,8 @@ export default function Sidebar({ onItemClick, activeLink, ...rest }) {
     ]
     return <Grid container spacing={4} >
         <ManageProfile displayUserProfileImage={true} />
-        <Grid sm={12} lg={12} md={12}>
-            <div className="d-flex flex-column gap-4 px-5 pt-2 pb-3" >
+        <Grid item sm={12} lg={12} md={12}>
+            <div className="d-flex flex-column gap-4 px-4 pt-2 pb-3" >
                 {
                     userMenu.map((k, index) => {
                         return <div key={index} className={`font-size-3 link d-flex justify-content-center align-items-center gap-1 ${styles.profileSidebarLink}`}>

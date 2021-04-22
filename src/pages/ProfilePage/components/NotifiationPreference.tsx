@@ -124,10 +124,10 @@ export default function NotifiationPreference(props) {
                 </Grid>
             </Box>
             <TableContainer component={Paper}>
-                <Table aria-label="simple table">
+                <Table>
                     <TableBody>
                         {rows.map((row) => (
-                            <TableRow key={row.title}>
+                            <TableRow key={row?.id}>
                                 <TableCell component="th" scope="row" className={classes.tableCell}>
                                     {row.title}
                                 </TableCell>
