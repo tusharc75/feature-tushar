@@ -557,7 +557,7 @@ const UserDetailsPage = () => {
         </Container>
         <Container styles={{ borderRadius: 8 }}>
           <Box style={{ padding: "0px" }}>
-            <Box display="flex" padding={1} bgcolor="grey.200">
+            <Box display="flex" padding={1} >
               <Grid container>
                 <Grid item xs={8}>
                   <Box display="flex">
@@ -640,7 +640,7 @@ const UserDetailsPage = () => {
           onSuccess={fetchDoa}
           setOpen={setDoaDialogOpen}
         />
-      ) }
+      )}
     </>
   );
 };

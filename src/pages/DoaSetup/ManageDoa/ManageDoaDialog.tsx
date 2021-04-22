@@ -25,9 +25,7 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 const DoaDialog = ({ userSelected, onSuccess, user, doa, open, setOpen }) => {
 
     const useStyles = makeStyles((theme) => ({
-        btnPadding: {
-            padding: theme.spacing(0, 2)
-        },
+
         addIcon: {
             width: 18,
             height: 20,
