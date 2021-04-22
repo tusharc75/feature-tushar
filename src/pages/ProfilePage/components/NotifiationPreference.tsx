@@ -44,8 +44,8 @@ const RenderCheckBox = ({ name, val, id, onChange }) => (
     />
 )
 
-const PreferenceOptions = ({ icon, heading, subtitle }) => (
-    <Grid item sm={12} md={6} lg={4} container>
+const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
+    <Grid item key={id} sm={12} md={6} lg={4} container>
         <Grid item sm={3} style={{ marginTop: '7px' }}>
             {icon}
         </Grid>
@@ -88,16 +88,19 @@ export default function NotifiationPreference(props) {
             icon: <BsDisplay size={60} className={classes.notificationIcon} />,
             heading: "Desktop",
             subtitle: "A banner in corner of your screen",
+            id: "Desktop1"
         },
         {
             icon: <BsPhone size={60} className={classes.notificationIcon} />,
             heading: "Mobile",
             subtitle: "A Notification on your phone",
+            id: "Mobil2"
         },
         {
             icon: <BsEnvelopeOpen size={50} className={classes.notificationIcon} />,
             heading: "Email",
             subtitle: "Conversation sent to your mail",
+            id: "Email3"
         }
     ]
     return <Container>
@@ -115,6 +118,8 @@ export default function NotifiationPreference(props) {
                     {
                         options.map(curPreference => (
                             <PreferenceOptions
+                                key={curPreference.id}
+                                id={curPreference.id}
                                 icon={curPreference.icon}
                                 heading={curPreference.heading}
                                 subtitle={curPreference.subtitle}
