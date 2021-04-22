@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import Layout from "../../components/Layout";
@@ -7,6 +7,10 @@ import ProfileSidebar from './components/ProfileSidebar'
 import { profileMenuItems } from '../../constants/helpers'
 import ManageProfile from './components/ManageProfile'
 import NotifiationPreference from './components/NotifiationPreference'
+import axiosInstance from "../../axios/axiosInstance";
+import { useData } from "../../StateProvider/Provider";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+const _ = require('lodash')
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -30,12 +34,62 @@ const useStyles = makeStyles((theme) => ({
 export default function ProfilePage(props) {
 
     const { profileBreadCrumbs } = props
+    const { state: { user }, dispatch }: any = useData();
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
+    const [userData, setUserData] = useState(null)
+    const [loading, setLoading] = useState(false);
+    const [userLoading, setUserLoading] = useState(false);
+    const [userFields, setUserFields] = useState([]);
     const classes = useStyles();
+    const toastConfig = useContext(CustomToastContext);
 
     const handleItemClick = obj => {
         if (obj.id) setActiveItem(obj.id)
     }
+
+    useEffect(() => {
+        if (userFields.length == 0) {
+            getUserFields()
+            fetchUserData()
+        }
+    }, [])
+
+    const fetchUserData = () => {
+        setUserLoading(true)
+        axiosInstance()
+            .get(`/user/${user?.user?._id}`)
+            .then(({ data }) => {
+                if (data?.data) {
+                    delete data.data["updatedBy"]
+                    setUserData(data.data)
+                }
+                setUserLoading(false)
+            }).catch((error) => {
+                setUserLoading(false)
+                toastConfig.setToastConfig(error);
+            });
+    }
+
+    const getUserFields = () => {
+
+        setLoading(true)
+        axiosInstance()
+            .get("/field?resource=User")
+            .then(({ data }) => {
+                data.data = _.cloneDeep(data.data).map(obj => {
+                    if (obj?.fieldData?.type && obj.fieldData.type === "email") {
+                        obj.allowUpdate = true
+                    }
+                    return obj
+                })
+                setUserFields(data.data)
+                setLoading(false)
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+                setLoading(false)
+            });
+    };
 
     return <Layout>
         <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
@@ -46,7 +100,13 @@ export default function ProfilePage(props) {
             <Grid item sm={9} md={9} lg={9} >
                 {
                     activeItem === profileMenuItems.profile ?
-                        <ManageProfile displayUserDetails={true} /> :
+                        <ManageProfile displayUserDetails={true}
+                            userFields={userFields}
+                            userData={userData}
+                            loading={loading}
+                            userLoading={userLoading}
+                            onFetchUserData={fetchUserData}
+                        /> :
                         activeItem === profileMenuItems.notification ?
                             <NotifiationPreference />
                             : activeItem === profileMenuItems.setting ?

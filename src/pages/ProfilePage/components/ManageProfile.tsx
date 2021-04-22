@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider } from '@material-ui/core'
+import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -11,54 +11,19 @@ import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from "@material-ui/icons/Delete";
 import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
+import UpdateEmailPasswordDialog from './UpdateEmailAndPassword'
+const _ = require('lodash')
 
 export default function ManageProfile(props) {
-    const { displayUserDetails, displayUserProfileImage } = props
+    const { displayUserDetails, displayUserProfileImage, userFields,
+        userData, loading, userLoading, onFetchUserData } = props
     const { state: { user }, dispatch }: any = useData();
-    const [userFields, setUserFields] = useState([]);
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-    const [userData, setUserData] = useState(null)
-    const [loading, setLoading] = useState(false);
-    const [userLoading, setUserLoading] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
     const [isUploading, setUploading] = useState(false);
+    const [isEmailUpdate, setEmailUpdate] = useState(false)
+    const [isPasswordUpdate, setPasswordUpdate] = useState(false)
     const toastConfig = useContext(CustomToastContext);
-
-    useEffect(() => {
-        if (userFields.length == 0) {
-            getUserFields()
-            fetchUserData()
-        }
-    }, [])
-    const fetchUserData = () => {
-        setUserLoading(true)
-        axiosInstance()
-            .get(`/user/${user?.user?._id}`)
-            .then(({ data }) => {
-                if (data?.data) {
-                    delete data.data["updatedBy"]
-                    setUserData(data.data)
-                }
-                setUserLoading(false)
-            }).catch((error) => {
-                setUserLoading(false)
-                toastConfig.setToastConfig(error);
-            });
-    }
-    const getUserFields = () => {
-
-        setLoading(true)
-        axiosInstance()
-            .get("/field?resource=User")
-            .then(({ data }) => {
-                setUserFields(data.data);
-                setLoading(false)
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-                setLoading(false)
-            });
-    };
 
     const handleOpenUpdateDialog = () => {
         setOpenUpdateDialog(true);
@@ -72,17 +37,16 @@ export default function ManageProfile(props) {
         if (userData?._id) {
             setUpdating(true);
             axiosInstance()
-                .put(`/user`, { ...values, _id: userData?._id })
+                .put(`/user/me`, { ...values, _id: userData?._id })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
                         message: data.message,
                     });
-
                     let updatedUserDetails = { ...user, user: { ...user.user, ...values } }
                     dispatch({ type: SET_USER, payload: updatedUserDetails });
-                    fetchUserData()
+                    onFetchUserData()
                     setUpdating(false);
                     closeUpdateDialog();
                 })
@@ -220,9 +184,40 @@ export default function ManageProfile(props) {
                                         <DetailsPage data={userData} fields={filteredUserFields} />
                                     )}
                             </Box>
+                            <Grid container spacing={6}>
+                                <Grid item sm={6}>
+                                    <Button color="primary"
+                                        fullWidth
+                                        variant="outlined"
+                                        onClick={() => setEmailUpdate(true)}>Update Email</Button>
+                                </Grid>
+                                <Grid item sm={6}>
+                                    <Button color="primary"
+                                        fullWidth
+                                        variant="outlined"
+                                        onClick={() => setPasswordUpdate(true)}>Update Password</Button>
+                                </Grid>
+                            </Grid>
                         </> : null
                 }
 
+                {
+                    isPasswordUpdate ?
+                        <UpdateEmailPasswordDialog
+                            isUpdatePassword={true}
+                            open={isPasswordUpdate}
+                            onClose={() => setPasswordUpdate(false)}
+                        /> : null
+                }
+                {
+                    isEmailUpdate ?
+                        <UpdateEmailPasswordDialog
+                            isUpdateEmail={true}
+                            userData={userData}
+                            open={isEmailUpdate}
+                            onClose={() => setEmailUpdate(false)}
+                        /> : null
+                }
             </Container>
         </>
     </>

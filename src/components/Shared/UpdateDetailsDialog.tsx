@@ -130,8 +130,9 @@ const UpdateDetailsDialog = (props) => {
                               size="small"
                               fullWidth
                               disabled={
-                                field.fieldData.type === "email" ||
-                                !field.isUpdate
+                                field.allowUpdate ? false :
+                                  field.fieldData.type === "email" ||
+                                  !field.isUpdate
                               }
                               values={values}
                               errors={errors}
@@ -169,7 +170,7 @@ const UpdateDetailsDialog = (props) => {
                 onClick={submitForm}
                 disabled={
                   Object.values(simplifyValues(initialVals)).toString() ===
-                    Object.values(simplifyValues(values)).toString() ||
+                  Object.values(simplifyValues(values)).toString() ||
                   isUpdating
                 }
               >
