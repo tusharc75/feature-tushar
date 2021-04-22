@@ -1,55 +1,49 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
     Box,
     Button,
     TextField,
     Grid,
-    MenuItem,
     Container,
     Dialog,
     DialogContent,
-    DialogTitle,
-    DialogActions,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { Formik, Form, Field, FieldArray } from 'formik';
 import { Add, Delete } from "@material-ui/icons";
-import NumberFormat from "react-number-format";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { removeEmptyKeys } from "../../../constants/helpers";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 
-const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
+const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) => {
 
     const useStyles = makeStyles((theme) => ({
-        btnPadding: {
-            padding: theme.spacing(0, 2)
-        },
+
         addIcon: {
             width: 18,
             height: 20,
-            color: "#09445A",
+            color: theme.palette.info.main,
             cursor: "pointer"
         },
 
         deleteIcon: {
             width: 18,
             height: 20,
-            color: "#91A2A9",
+            color: theme.palette.info.main,
             cursor: "pointer"
         }
     }));
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
-    const [users, setUsers] = useState<any[]>([{ id: user[0].id, name: user[0].name, currency: "USD", amount: 0 }]);
+    const [users, setUsers] = useState<any[]>([{ id: userList[0].id, name: userList[0].name, currency: "USD", amount: 0 }]);
     const fetchDoa = useCallback(() => {
         doa.length > 0 ?
             setUsers(doa) :
-            setUsers(([{ id: user[0].id, name: user[0].name, currency: "USD", amount: 0 }]))
+            setUsers(([{ id: userList[0].id, name: userList[0].name, currency: "USD", amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
@@ -65,13 +59,13 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
                     amount: Number(item.amount)
                 };
         });
-        const userDoa = { _id: userSelected.id, doa: doaArray };
+        const userDoa = { _id: userSelected, doa: doaArray };
         setLoading(true)
         axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
             .then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setLoading(false)
-                setOpen(false)
+                onSuccess()
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 setLoading(false);
@@ -89,8 +83,10 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
     return (
         <Dialog
             open={open}
-            onClose={setOpen}
+            onClose={onClose}
             scroll="body"
+            maxWidth="sm"
+            fullWidth
         >
             {!loading &&
                 <>
@@ -120,9 +116,9 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
                                                         >
                                                             <Grid item md={1}> Sr </Grid>
                                                             <Grid item md={4}> Users </Grid>
-                                                            <Grid item md={2}> Currency </Grid>
+                                                            <Grid item md={3}> Currency </Grid>
                                                             <Grid item md={3}> Amount </Grid>
-                                                            <Grid item md={2}></Grid>
+                                                            <Grid item md={1}></Grid>
                                                         </Grid>
                                                     </Box>
                                                     <Box>
@@ -145,10 +141,9 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
 
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
-                                                                                        value={user.find(v => v.name == userVal.name)}
-                                                                                        options={user.filter(element => !values.users.map(e => e.name).includes(element.name))}
+                                                                                        value={userList.find(v => v.name == userVal.name)}
+                                                                                        options={userList.filter(element => !values.users.map(e => e.name).includes(element.name))}
                                                                                         getOptionLabel={(option: any) => option.name}
-                                                                                        style={{ width: 160 }}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
@@ -162,13 +157,12 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
                                                                                     />
 
                                                                                 </Grid>
-                                                                                <Grid item md={2}>
+                                                                                <Grid item md={3}>
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
                                                                                         value={currencies.find(v => v.label == userVal.currency)}
                                                                                         options={currencies}
                                                                                         getOptionLabel={(option: any) => option.label}
-                                                                                        style={{ width: 80 }}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
@@ -227,7 +221,7 @@ const DoaDialog = ({ userSelected, user, doa, open, setOpen }) => {
                                 <CustomDialogFooter>
 
                                     <Button
-                                        onClick={() => setOpen(false)}
+                                        onClick={onClose}
                                         variant="contained"
                                     >
                                         Cancel
