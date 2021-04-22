@@ -241,7 +241,7 @@ export default function AccountDetailPage(props) {
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
-      // icon: <RiOrganizationChart />,
+      icon: <TiFlowChildren />,
       show: true,
     },
     {
@@ -569,6 +569,7 @@ export default function AccountDetailPage(props) {
                             <Box className={`${accountClass.custom_box1}`}>
                               <RelatedContacts
                                 contacts={_reverse(relatedContacts.slice(0, 2))}
+				accountId={accountData._id}
                                 accountName={accountData.accountName}
                                 contactApi={contactApi}
                                 contactRoute={contactRoute}

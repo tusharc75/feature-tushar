@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
-  Divider,
   IconButton,
   Tooltip,
   Checkbox,
+  Chip,
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -27,16 +27,14 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { GiHiveMind } from "react-icons/gi";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import {
-  downloadExcel,
   opportunity,
-  opportunityTemplateFileName,
-  opportunityImportErrorFileName,
 } from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
+import { useHistory } from "react-router-dom";
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -52,6 +50,7 @@ const OpportunityTypes = [
 
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
@@ -86,6 +85,10 @@ const Opportunities = () => {
     show: false,
     opportunityName: "",
   });
+  const [accountDetails, setAccountDetails] = useState({
+    accountId: history.location?.state?.accountId,
+    accountName: history.location?.state?.accountName
+  })
 
   const { opportunityResource, opportunityApi } = opportunity;
 
@@ -162,6 +165,12 @@ const Opportunities = () => {
       searchParams = searchVal
         ? { ...searchParams, search: searchVal }
         : { ...searchParams };
+
+
+      if (accountDetails.accountId) {
+        searchParams["accountId"] = accountDetails.accountId;
+      }
+
       let api = getSearchQuery(opportunityApi, searchParams);
       try {
         axiosInstance()
@@ -506,44 +515,6 @@ const Opportunities = () => {
     }
   };
 
-  const uploadOpportunities = (event) => {
-    if (event.target.files && event.target.files.length) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: "info",
-        message: "Uploading opportunities, Please wait...",
-      });
-      const file = event.target.files[0];
-
-      let formData = new FormData();
-      formData.append("file", file);
-      axiosInstance()
-        .post(`/${opportunityApi}/import`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-        .then(({ data }) => {
-          if (data.message) {
-            toastConfig.setToastConfig({
-              open: true,
-              type: "success",
-              message: data.message,
-            });
-            fetchOpportunities();
-          } else {
-            downloadExcel(data, opportunityImportErrorFileName);
-            toastConfig.setToastConfig({
-              open: true,
-              type: "error",
-              message: "Found some issue(s) while importing opportunities",
-            });
-          }
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
       setQuery((prevState) => ({
@@ -598,7 +569,19 @@ const Opportunities = () => {
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
               icon={<GiHiveMind className="headerLogo" />}
               heading="Opportunities"
-            />
+            >
+              {
+                accountDetails.accountId && <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={accountDetails.accountName}
+                  onDelete={() => {
+                    setAccountDetails({ accountId: null, accountName: null });
+                    fetchOpportunities();
+                  }}
+                />
+              }
+            </OpportunitiesHeader>
           </div>
        
        
