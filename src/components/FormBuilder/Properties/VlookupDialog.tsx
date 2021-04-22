@@ -37,6 +37,7 @@ export const VlookupDialog = ({ open, handleClose, fieldData, sectionId, section
     required: fieldData.required,
     isTooltip: fieldData.isTooltip,
     tooltipMessage: fieldData.tooltipMessage,
+    isvlookupReverse: fieldData.isvlookupReverse ? true : false,
   });
   const [option, setOption] = useState(fieldData.option ? fieldData.option : []);
   const [reletedTo, setReletedTo] = React.useState(fieldData.reletedTo ? fieldData.reletedTo : []);
@@ -90,6 +91,7 @@ export const VlookupDialog = ({ open, handleClose, fieldData, sectionId, section
             ele.tooltipMessage = state.tooltipMessage
             ele.reletedTo = reletedTo
             ele.option = option
+            ele.isvlookupReverse = state.isvlookupReverse
           }
         })
       }
@@ -240,7 +242,19 @@ export const VlookupDialog = ({ open, handleClose, fieldData, sectionId, section
                   </Box>
                 </Box>
               ))}
+
             </Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="isvlookupReverse"
+                  checked={state.isvlookupReverse}
+                  onChange={handleChecked}
+                  color="primary"
+                />
+              }
+              label="Vlookup Reverse"
+            />
           </Box>
         </CustomDialogContent>
         <CustomDialogFooter>

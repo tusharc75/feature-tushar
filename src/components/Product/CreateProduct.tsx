@@ -10,8 +10,8 @@ import Dialog from '@material-ui/core/Dialog'
 import FormTypes from "../Helpers/FormTypes";
 import axiosInstance from '../../axios/axiosInstance'
 import _ from 'lodash';
-import { getObjKeys, yupSchema } from '../../constants/helpers';
-import CustomButton from '../../components/Helpers/Button'
+import { getObjKeys, simplifyValues, yupSchema } from '../../constants/helpers';
+import CustomButton from '../Helpers/CustomButton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import IconButton from '@material-ui/core/IconButton';
@@ -193,6 +193,7 @@ const CreateProduct = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    decimalPlaces={field.decimalPlaces}
                                                                     disableClearable
                                                                     onChange={(e, val) => {
                                                                         setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
@@ -214,6 +215,8 @@ const CreateProduct = (props) => {
                                                                     fullWidth
                                                                     isTooltip={field.isTooltip}
                                                                     tooltipMessage={field.tooltipMessage}
+                                                                    decimalPlaces={field.decimalPlaces}
+                                                                    isvlookupReverse={field.isvlookupReverse}
                                                                     size="small"
                                                                 />
                                                             }
@@ -233,7 +236,8 @@ const CreateProduct = (props) => {
                                 variant="contained"
                                 color="primary"
                                 type="submit"
-                                disabled={loading}
+                                disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
+                                    Object.values(simplifyValues(values, initialData.fields)).toString()}
                                 onClick={submitForm}
                             > Save</CustomButton>
                         </CustomDialogFooter>
@@ -243,7 +247,7 @@ const CreateProduct = (props) => {
             <Box p={2} height={500} bgcolor="white">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
-        {isAddField && <AddField handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
+        {isAddField && <AddField fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
     </Dialog>
     );
 }

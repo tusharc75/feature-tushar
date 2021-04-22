@@ -4,7 +4,7 @@ import '../sidebar.scss'
 function CustomButton(props) {
     const { loading, children, disabled, ...rest } = props
     return <Button  {...rest}
-        disabled={loading}
+        disabled={disabled}
     >
         {loading ? <CircularProgress
             style={{ marginRight: "8px" }}

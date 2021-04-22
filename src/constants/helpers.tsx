@@ -19,6 +19,8 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 
+export const vapidKey = "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
+
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
 
@@ -30,6 +32,17 @@ export const leadImportErrorFileName = "Leads-Errors.xlsx";
 
 export const opportunityTemplateFileName = "Opportunities-Template.xlsx";
 export const opportunityImportErrorFileName = "Opportunities-Errors.xlsx";
+
+export const roleTypes = [
+  {
+    key: "Global",
+    value: 1,
+  },
+  {
+    key: "Regional",
+    value: 2,
+  },
+];
 
 export const sidebarResource = {
   brand: "Brand",
@@ -138,9 +151,10 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
         ? dataObj[key.fieldName]
         : false;
     } else if (key.type === "multiSelect") {
-      const values = dataObj[key.fieldName].length
-        ? dataObj[key.fieldName].map((val: any) => filterValues(val))
-        : [];
+      const values =
+        dataObj[key.fieldName] && dataObj[key.fieldName].length
+          ? dataObj[key.fieldName].map((val: any) => filterValues(val))
+          : [];
       obj[key.fieldName] = values;
     } else if (key.type === "dropDown") {
       const value = filterValues(dataObj[key.fieldName]);
@@ -349,54 +363,56 @@ export const getPermissions = (
   user,
   selectedEntity = undefined
 ): IPermission | null => {
-  let permissions = {};
-  let data = [...user?.role?.sideBar];
+  if (user) {
+    let permissions = {};
+    let data = [...user?.role?.sideBar];
 
-  if (selectedEntity) {
-    if (user?.entity && user.entity.length && selectedEntity) {
-      data = [
-        ...data,
-        ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
-          ?.resource,
-      ];
-    }
-  } else {
-    if (user?.role?.selectedEntity) {
-      data = [...data, ...user?.role?.selectedEntity?.resource];
-    }
-  }
-
-  if (data) {
-    const hasApproveAccountPermission = user.user.permissions.approveAccount;
-    const accounts = [
-      sidebarResource.customerAccount,
-      sidebarResource.supplierAccount,
-    ];
-
-    const sidebarFieldsKeys = Object.keys(sidebarResource);
-    const sidebarFieldsValues = Object.values(sidebarResource);
-
-    data.forEach((d) => {
-      const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
-
-      if (indexOfPermission > -1) {
-        let permission = {
-          isCreate: d.isCreate,
-          isRead: d.isRead,
-          isUpdate: d.isUpdate,
-          isDelete: d.isDelete,
-        };
-
-        if (accounts.some((acountType) => acountType === d.name)) {
-          permission["approveAccount"] = hasApproveAccountPermission;
-        }
-
-        permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+    if (selectedEntity) {
+      if (user?.entity && user.entity.length && selectedEntity) {
+        data = [
+          ...data,
+          ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
+            ?.resource,
+        ];
       }
-    });
-  }
+    } else {
+      if (user?.role?.selectedEntity) {
+        data = [...data, ...user?.role?.selectedEntity?.resource];
+      }
+    }
 
-  return permissions;
+    if (data) {
+      const hasApproveAccountPermission = user.user.permissions.approveAccount;
+      const accounts = [
+        sidebarResource.customerAccount,
+        sidebarResource.supplierAccount,
+      ];
+
+      const sidebarFieldsKeys = Object.keys(sidebarResource);
+      const sidebarFieldsValues = Object.values(sidebarResource);
+
+      data.forEach((d) => {
+        const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
+
+        if (indexOfPermission > -1) {
+          let permission = {
+            isCreate: d.isCreate,
+            isRead: d.isRead,
+            isUpdate: d.isUpdate,
+            isDelete: d.isDelete,
+          };
+
+          if (accounts.some((acountType) => acountType === d.name)) {
+            permission["approveAccount"] = hasApproveAccountPermission;
+          }
+
+          permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+        }
+      });
+    }
+
+    return permissions;
+  }
 };
 
 export const downloadExcel = (fileDetails, fileName) => {
