@@ -518,12 +518,15 @@ export default function Doa() {
       <Box component="div">
         {(userSingleSelect) && (
           <DoaDialog
-            user={dataRows}
+            userList={dataRows}
             doa={doa}
             userSelected={userSingleSelect}
             open={open}
-            setOpen={setOpen}
-            onSuccess={fetchDoa}
+            onClose={() => setOpen(false)}
+            onSuccess={() => {
+              setOpen(false)
+              fetchDoa(userSingleSelect.id)
+            }}
           />
         )}
         {/* <BrandHeader

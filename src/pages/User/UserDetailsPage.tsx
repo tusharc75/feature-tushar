@@ -633,12 +633,18 @@ const UserDetailsPage = () => {
       ) : null}
       {doaDialogOpen && (
         <DoaDialog
-          user={userList}
+          userList={userList}
           doa={doa}
           userSelected={id}
           open={doaDialogOpen}
-          onSuccess={fetchDoa}
-          setOpen={setDoaDialogOpen}
+          onSuccess={
+            () => {
+              setDoaDialogOpen(false)
+              fetchDoa()
+            }}
+          onClose={() => {
+            setDoaDialogOpen(false)
+          }}
         />
       )}
     </>
