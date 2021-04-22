@@ -70,7 +70,6 @@ const CreateUser = ({ open, close, fetchData }) => {
       .post("/user", values)
       .then(({ data }) => {
         setCreatedUserId(data.data[0]._id);
-        console.log(createdUserId)
         setToastConfig({
           open: true,
           type: "success",
@@ -78,13 +77,14 @@ const CreateUser = ({ open, close, fetchData }) => {
         });
         setSubmitting(false);
         fetchData();
-        setRedirecting(true);
+        setRedirecting(true); 
         close();
       })
       .catch((error) => {
         setToastConfig(error);
         setSubmitting(false);
       });
+
   };
 
   return (
