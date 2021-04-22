@@ -19,6 +19,8 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 
+export const vapidKey = "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
+
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
 
@@ -30,6 +32,17 @@ export const leadImportErrorFileName = "Leads-Errors.xlsx";
 
 export const opportunityTemplateFileName = "Opportunities-Template.xlsx";
 export const opportunityImportErrorFileName = "Opportunities-Errors.xlsx";
+
+export const roleTypes = [
+  {
+    key: "Global",
+    value: 1,
+  },
+  {
+    key: "Regional",
+    value: 2,
+  },
+];
 
 export const sidebarResource = {
   brand: "Brand",

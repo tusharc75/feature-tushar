@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, simplifyValues, yupSchema } from '../../../constants/helpers';
-import CustomButton from '../../../components/Helpers/Button'
+import CustomButton from '../../../components/Helpers/CustomButton'
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';

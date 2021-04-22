@@ -183,6 +183,7 @@ const Opportunities = () => {
           .then(({ data }) => {
             setRowCount(data.count);
             setOpportunityData(data.data);
+            setCheckAllOpportunities(false);
             setLoading(false);
           });
       } catch (err) {
@@ -572,20 +573,26 @@ const Opportunities = () => {
     <>
       <Layout>
         <Grid container>
-          <Grid item md={6} sm={12} xs={12}>
+          <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.opportunity]} />
           </Grid>
           <Grid
             item
-            md={6}
-            sm={12}
-            xs={12}
+            md={8}
+            sm={1}
+            xs={2}
             className="d-flex align-items-center bg-white"
           >
             <Grid container direction="row">
               <Grid item xs={12} sm={12} className="pr-3">
                 <Grid container justify="flex-end">
-                  <ImportExportLinks module="opportunities" api={opportunityApi} onSuccessfulImport={() => { fetchOpportunities() }} />
+                  <ImportExportLinks
+                    module="opportunities"
+                    api={opportunityApi}
+                    onSuccessfulImport={() => {
+                      fetchOpportunities();
+                    }}
+                  />
                 </Grid>
               </Grid>
             </Grid>
@@ -646,8 +653,9 @@ const Opportunities = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete ${deleteRec?.opportunityName ? "Opportunity" : "Opportunities"
-                }   ${deleteRec.opportunityName || ""}?`}
+              message={`Are you sure, you want to delete ${
+                deleteRec?.opportunityName ? "Opportunity" : "Opportunities"
+              }   ${deleteRec.opportunityName || ""}?`}
               onClose={() => {
                 if (deleteRec) setDeleteRec({});
                 setIsConformDialogVisible(false);
