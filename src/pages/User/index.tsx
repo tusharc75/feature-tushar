@@ -135,7 +135,7 @@ const User: FC = () => {
         <Link
           title={params.value}
           className="text-truncate LeadNameLink"
-          to={ { pathname: `${routes.userDetails.path}/${params.row.id}`, state: { userList: dataRows} }}
+          to={`${routes.userDetails.path}/${params.row.id}`}
         >
           {params.value}
         </Link>

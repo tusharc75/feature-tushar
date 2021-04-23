@@ -19,7 +19,7 @@ import {
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory, useLocation } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
@@ -48,7 +48,6 @@ const UserDetailsPage = () => {
   const {
     state: { user, permissions },
   }: any = useData();
-  const location = useLocation();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
@@ -69,7 +68,7 @@ const UserDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
-  const userList = location.state.userList;
+  const [userList, setUserList] = useState<any[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -78,6 +77,7 @@ const UserDetailsPage = () => {
       getRoleUnion();
       fetchUserRoles();
       fetchDoa();
+      fetchUsers()
     }
     // eslint-disable-next-line
   }, [id]);
@@ -127,6 +127,28 @@ const UserDetailsPage = () => {
         setLoading(false);
       });
   }
+
+  const fetchUsers = () => {
+    axiosInstance()
+      .get("/user")
+      .then(({ data: { data, count } }) => {
+        getRows(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
+
+  const getRows = (data: []) => {
+    const rows = data.length
+      ? data.map((user: any) => ({
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+      }))
+      : [];
+
+    setUserList(rows);
+  };
 
   const fetchUserRoles = () => {
     setRolesLoading(true);
@@ -557,7 +579,7 @@ const UserDetailsPage = () => {
         </Container>
         <Container styles={{ borderRadius: 8 }}>
           <Box style={{ padding: "0px" }}>
-            <Box display="flex" padding={1} >
+            <Box display="flex" padding={1} bgcolor="grey.200" >
               <Grid container>
                 <Grid item xs={8}>
                   <Box display="flex">
