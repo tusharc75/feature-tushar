@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
   Grid,
   makeStyles,
@@ -35,12 +35,6 @@ const useStyles = makeStyles((theme) => ({
       whiteSpace: "nowrap",
     },
   },
-  popover: {
-    pointerEvents: "none",
-  },
-  paper: {
-    padding: theme.spacing(1),
-  },
   popoverText: {
     textOverflow: "ellipsis",
     overflow: "hidden",
@@ -58,6 +52,7 @@ const Details = (props: DetailProps) => {
   const classes = useStyles();
   const theme = useTheme();
   const { data, fields } = props;
+  const containerRef = useRef(null);
 
   const [isDownloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -202,25 +197,28 @@ const Details = (props: DetailProps) => {
 
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
         return (
-          <Typography className={classes.fieldText} variant="body2">
+          <Typography
+            className={classes.fieldText}
+            variant="body2"
+            component="div"
+          >
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any) => (
                   <React.Fragment key={_val.optionValue}>
-                    <MuiLink
+                    <Box
+                      style={{ cursor: "pointer" }}
+                      component="span"
                       onMouseEnter={(e) =>
                         getPopoverData(
                           e,
                           fieldData.lookupResource,
-                          val[fieldData.fieldName]
+                          _val.optionValue
                         )
                       }
-                      onMouseLeave={handlePopoverClose}
-                      component={Link}
-                      to={redirectLink(_val.optionValue)}
                     >
                       {_val.optionLabel}
-                    </MuiLink>
+                    </Box>
                     <Box component="span" marginX={1} />
                   </React.Fragment>
                 ))
@@ -228,7 +226,9 @@ const Details = (props: DetailProps) => {
                 "_ _ _"
               )
             ) : data[fieldData.fieldName] ? (
-              <MuiLink
+              <Box
+                style={{ cursor: "pointer" }}
+                component="span"
                 onMouseEnter={(e) =>
                   getPopoverData(
                     e,
@@ -236,12 +236,9 @@ const Details = (props: DetailProps) => {
                     val[fieldData.fieldName]
                   )
                 }
-                onMouseLeave={handlePopoverClose}
-                component={Link}
-                to={redirectLink(data[fieldData.fieldName].optionValue)}
               >
                 {data[fieldData.fieldName].optionLabel}
-              </MuiLink>
+              </Box>
             ) : (
               "_ _ _"
             )}
@@ -319,7 +316,7 @@ const Details = (props: DetailProps) => {
         ) : (
           <Box p={1} display="flex" alignItems="start">
             <Avatar style={{ width: 50, height: 50 }} src={img}>
-              {name.charAt(0)}
+              {name && name.charAt(0)}
             </Avatar>
             <Box
               marginLeft={2}
@@ -350,27 +347,30 @@ const Details = (props: DetailProps) => {
   };
 
   return (
-    <>
+    <div>
       <Popover
-        id="mouse-over-popover"
-        className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        ref={containerRef}
+        style={{ pointerEvents: "none" }}
         open={Boolean(anchorPopoverEl)}
         anchorEl={anchorPopoverEl}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "left",
+          horizontal: "center",
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "left",
+          horizontal: "center",
         }}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
-        {renderPopoverData()}
+        <Box
+          padding={1}
+          style={{ pointerEvents: "all" }}
+          onMouseLeave={handlePopoverClose}
+        >
+          {renderPopoverData()}
+        </Box>
       </Popover>
       {formsData?.map((form) => (
         <React.Fragment key={form.name}>
@@ -501,7 +501,7 @@ const Details = (props: DetailProps) => {
           <Box marginY={4} />
         </React.Fragment>
       ))}
-    </>
+    </div>
   );
 };
 
