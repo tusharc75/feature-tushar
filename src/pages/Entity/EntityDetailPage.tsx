@@ -25,6 +25,7 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignedUsers from "./AssignedUsers";
 
 const EntityDetailsPage = () => {
@@ -47,7 +48,9 @@ const EntityDetailsPage = () => {
   const [entityFields, setEntityFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [deleteRoleRec, setDeleteRoleRec] = useState(null);
+  const [userDeleteRec, setUserDeleteRec] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
   const [openRolesDialog, setOpenRolesDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
@@ -86,7 +89,7 @@ const EntityDetailsPage = () => {
     axiosInstance()
       .get(`/role?entity=${id}`)
       .then(({ data: { data } }) => {
-        setRoles(data.slice(0, 4));
+        setRoles(data);
         setRolesLoading(false);
       })
       .catch((err) => {
@@ -216,6 +219,34 @@ const EntityDetailsPage = () => {
     }
   };
 
+  const handleUnassignUser = (rec) => {
+    setUserDeleteRec(rec);
+    setShowConfirmBox(true);
+  };
+
+  const unassignUserRole = () => {
+    if (userDeleteRec?._id) {
+      const data = {
+        user: userDeleteRec?._id,
+        roles: roles.map((r) => r._id),
+      };
+      axiosInstance()
+        .post("/role/un-assign-role", data)
+        .then(() => {
+          setShowConfirmBox(false);
+          fetchEntityUser();
+          toastConfig.setToastConfig({
+            message: "Successfully unassigned user",
+            type: "success",
+            open: true,
+          });
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  };
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -232,8 +263,27 @@ const EntityDetailsPage = () => {
     setOpenRolesDialog(false);
   };
 
+  const userDialogOpen = () => {
+    setShowAssignUserDialog(true);
+  };
+
+  const userDialogClose = () => {
+    setShowAssignUserDialog(false);
+  };
+
   return (
     <>
+      {showAssignUserDialog && (
+        <AssignUserDialog
+          usersDialogOpen={showAssignUserDialog}
+          handleCloseDialog={userDialogClose}
+          roleIds={roles.map((r) => r._id)}
+          onSuccess={() => {
+            fetchEntityUser();
+            userDialogClose();
+          }}
+        />
+      )}
       {openUpdateDialog && (
         <UpdateDetailsDialog
           title="Update"
@@ -253,6 +303,7 @@ const EntityDetailsPage = () => {
           ids={[id]}
           onSuccess={() => {
             fetchEntityRoles();
+            fetchEntityUser();
             closeRolesDIalog();
           }}
         />
@@ -341,7 +392,12 @@ const EntityDetailsPage = () => {
                   Assigned Users ({users.length || 0})
                 </Typography>
                 {permissions.entity.isUpdate && (
-                  <IconButton title="Assign users" color="primary" size="small">
+                  <IconButton
+                    title="Assign users"
+                    color="primary"
+                    size="small"
+                    onClick={userDialogOpen}
+                  >
                     <ControlPoint />
                   </IconButton>
                 )}
@@ -375,7 +431,7 @@ const EntityDetailsPage = () => {
                     <AssignedUsers
                       permissions={permissions}
                       data={users.slice(0, 2)}
-                      unassignUser={() => {}}
+                      unassignUser={handleUnassignUser}
                     />
 
                     <Box marginY={1} />
@@ -439,7 +495,7 @@ const EntityDetailsPage = () => {
                     <>
                       <Roles
                         permissions={permissions}
-                        data={roles}
+                        data={roles.slice(0, 4)}
                         unassignRole={handleUnassignRole}
                       />
                       <Box marginY={1} />
@@ -470,13 +526,21 @@ const EntityDetailsPage = () => {
           message={
             deleteRoleRec
               ? `Are you sure you want to un-assign role ${deleteRoleRec.name} from entity ${entityData.entityName}`
+              : userDeleteRec
+              ? `Are you sure you want to un-assign user ${userDeleteRec.firstName} ${userDeleteRec.lastName}?`
               : `Are you sure you want to delete this entity ?`
           }
           onClose={() => {
             setDeleteRoleRec(null);
             setShowConfirmBox(false);
           }}
-          onOk={deleteRoleRec ? unassignRole : handleDeleteEntity}
+          onOk={
+            deleteRoleRec
+              ? unassignRole
+              : userDeleteRec
+              ? unassignUserRole
+              : handleDeleteEntity
+          }
         />
       ) : null}
     </>
