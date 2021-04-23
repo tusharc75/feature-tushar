@@ -36,7 +36,7 @@ export default function MessageDialog({ onClose, open, message }) {
             id="confirmation-dialog"
             keepMounted
         >
-            <DialogTitle id="confirmation-dialog-title">Message</DialogTitle>
+            <DialogTitle id="confirmation-dialog-title" className="text-white">Message</DialogTitle>
             <DialogContent dividers>
                 {
                     message ? <Typography>{message}</Typography> : null

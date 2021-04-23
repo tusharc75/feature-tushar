@@ -56,6 +56,8 @@ const EntityDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.entity,
   ]);
+  const [showUsers, setShowUsers] = useState(2);
+  const [showRegionalRoles, setShowRegionalRoles] = useState(2);
 
   useEffect(() => {
     if (id) {
@@ -430,7 +432,7 @@ const EntityDetailsPage = () => {
                   <>
                     <AssignedUsers
                       permissions={permissions}
-                      data={users.slice(0, 2)}
+                      data={users.slice(0, showUsers)}
                       unassignUser={handleUnassignUser}
                     />
 
@@ -440,9 +442,9 @@ const EntityDetailsPage = () => {
                       variant="contained"
                       color="primary"
                       size="small"
-                      onClick={() => history.push("/user")}
+                      onClick={() => setShowUsers(users.length)}
                     >
-                      View All
+                      View All ({users.length})
                     </Button>
                   </>
                 ) : (
@@ -495,7 +497,7 @@ const EntityDetailsPage = () => {
                     <>
                       <Roles
                         permissions={permissions}
-                        data={roles.slice(0, 4)}
+                        data={roles.slice(0, showRegionalRoles)}
                         unassignRole={handleUnassignRole}
                       />
                       <Box marginY={1} />
@@ -504,9 +506,9 @@ const EntityDetailsPage = () => {
                         variant="contained"
                         color="primary"
                         size="small"
-                        onClick={() => history.push("/role")}
+                        onClick={() => setShowRegionalRoles(roles.length)}
                       >
-                        View All
+                        View All ({roles.length})
                       </Button>
                     </>
                   ) : (
