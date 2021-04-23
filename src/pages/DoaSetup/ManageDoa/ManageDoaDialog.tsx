@@ -191,12 +191,14 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
 
                                                                                     />
                                                                                 </Grid>
-                                                                                <span><Add className={classes.addIcon} onClick={() => {
-                                                                                    values.users.sort((a, b) => a.amount - b.amount)
-                                                                                    arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
-                                                                                }
-                                                                                } /></span>
-                                                                                <span><Delete className={classes.deleteIcon} onClick={() => arrayHelpers.remove(index)} /></span>
+                                                                                <Grid item md={3}>
+                                                                                    <span><Add className={classes.addIcon} onClick={() => {
+                                                                                        values.users.sort((a, b) => a.amount - b.amount)
+                                                                                        arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
+                                                                                    }
+                                                                                    } /></span>
+                                                                                    <span><Delete className={classes.deleteIcon} onClick={() => arrayHelpers.remove(index)} /></span>
+                                                                                </Grid>
                                                                             </Grid>
                                                                         ))
                                                                     ) : (
