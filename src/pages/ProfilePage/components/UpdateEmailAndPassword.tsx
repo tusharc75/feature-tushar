@@ -35,7 +35,8 @@ export default function ManageUpdatePassword({
     isUpdatePassword = false,
     isUpdateEmail = false,
     userData = null,
-    onFetchUserData
+    onFetchUserData,
+    logoutUser
 }) {
     const toastConfig = useContext(CustomToastContext);
     const [loading, setLoading] = useState(false)
@@ -53,7 +54,7 @@ export default function ManageUpdatePassword({
                         message: data.message,
                     });
                     setLoading(false)
-                    onClose()
+                    logoutUser()
                 })
                 .catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -70,9 +71,8 @@ export default function ManageUpdatePassword({
                         type: "success",
                         message: data.message,
                     });
+                    logoutUser()
                     setLoading(false)
-                    onClose()
-                    onFetchUserData()
                 })
                 .catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -93,8 +93,8 @@ export default function ManageUpdatePassword({
                 onClose={onClose}
             />
             <Formik
-                validateOnMount
-                onSubmit={handleSubmit}
+                // onSubmit={handleSubmit}
+                onSubmit={() => { }}
                 initialValues={isUpdateEmail ? { email: userData?.email ?? '' } :
                     { oldPassword: "", newPassword: "", confirmPassword: "" }}
                 validationSchema={isUpdateEmail ? updateEmailSchema : updatePassWordSchema}
@@ -104,7 +104,9 @@ export default function ManageUpdatePassword({
                     setFieldValue,
                     setFieldError,
                     setFieldTouched,
-                    submitForm
+                    submitForm,
+                    errors,
+                    setErrors
                 }) => (
                     <>
                         <CustomDialogContent>
@@ -194,15 +196,23 @@ export default function ManageUpdatePassword({
                                 loading={loading}
                                 variant="contained"
                                 color="primary"
-                                type="submit"
-                                disabled={isUpdateEmail && values.email === userData.email || false}
-                                onClick={() => {
+                                disabled={loading ? true : (isUpdateEmail && values.email === userData.email || false)}
+                                onClick={(e) => {
+                                    if (Object.keys(errors).length) {
+                                        Object.keys(errors).forEach(key => {
+                                            setFieldTouched(key, true)
+                                        })
+                                        return
+                                    }
                                     if (values.newPassword !== values.confirmPassword) {
                                         setFieldError("confirmPassword", "new and confirm password should be same")
                                         setFieldTouched("confirmPassword", true)
                                         return
-                                    } else submitForm()
-                                }}>
+                                    } else {
+                                        handleSubmit(values)
+                                    }
+                                }}
+                            >
                                 Update
                             </CustomButton>
                         </CustomDialogFooter>

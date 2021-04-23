@@ -100,7 +100,7 @@ export default function ProfilePage(props) {
         <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
         <Grid container className={classes.profileContainer} spacing={2}>
             <Grid item sm={3} lg={3} md={3} className={classes.profileSidebar} >
-                <ProfileSidebar onItemClick={handleItemClick} activeLink={activeItem} />
+                <ProfileSidebar onItemClick={handleItemClick} activeLink={activeItem} userData={userData} />
             </Grid>
             <Grid item sm={9} md={9} lg={9} >
                 {

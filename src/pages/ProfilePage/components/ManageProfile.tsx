@@ -13,6 +13,7 @@ import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
 import UpdateEmailPasswordDialog from './UpdateEmailAndPassword'
 import _ from 'lodash'
+import { useHistory } from "react-router-dom";
 
 export default function ManageProfile(props) {
     const { displayUserDetails, displayUserProfileImage, userFields,
@@ -25,6 +26,7 @@ export default function ManageProfile(props) {
     const [isPasswordUpdate, setPasswordUpdate] = useState(false)
     const toastConfig = useContext(CustomToastContext);
     const theme = useTheme();
+    const history = useHistory();
 
     const handleOpenUpdateDialog = () => {
         setOpenUpdateDialog(true);
@@ -74,6 +76,12 @@ export default function ManageProfile(props) {
                 setUploading(false);
                 toastConfig.setToastConfig(err);
             });
+    };
+    const logoutUser = async () => {
+        history.push("/");
+        dispatch({ type: SET_USER, payload: null });
+        localStorage.removeItem("token");
+        history.push("/login");
     };
     const handleUploadImage = (event) => {
         if (event.target.files && event.target.files.length) {
@@ -137,7 +145,7 @@ export default function ManageProfile(props) {
                             </>
 
                         </div>
-                        <Typography variant="h5"><strong>{`${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`}</strong></Typography>
+                        <Typography variant="h5" className="text-capitalize" ><strong>{`${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`}</strong></Typography>
                         <label htmlFor="avatar">
                             <IconButton
                                 title="Add picture"
@@ -188,7 +196,7 @@ export default function ManageProfile(props) {
                                 {
                                     <Grid container spacing={2}>
                                         {otherDetails ? Object.keys(otherDetails).map((k, i) => (
-                                            <Grid item xs={12} md={6} sm={6}>
+                                            <Grid item xs={12} md={6} sm={6} key={i}>
                                                 <Grid container alignItems="center">
                                                     <Grid item xs={6} md={5} sm={5}>
                                                         <Box height="100%" display="flex" alignItems="center">
@@ -243,6 +251,7 @@ export default function ManageProfile(props) {
                             open={isPasswordUpdate}
                             onFetchUserData={onFetchUserData}
                             onClose={() => setPasswordUpdate(false)}
+                            logoutUser={logoutUser}
                         /> : null
                 }
                 {
@@ -253,6 +262,7 @@ export default function ManageProfile(props) {
                             open={isEmailUpdate}
                             onFetchUserData={onFetchUserData}
                             onClose={() => setEmailUpdate(false)}
+                            logoutUser={logoutUser}
                         /> : null
                 }
             </Container>
