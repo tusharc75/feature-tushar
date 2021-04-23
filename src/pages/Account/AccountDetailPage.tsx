@@ -673,6 +673,7 @@ export default function AccountDetailPage(props) {
               contactResource={contactResource}
               accountId={accountData._id}
               contactApi={contactApi}
+              account={props?.account}
             />
           )}
           {showAccountHierarchyInFullScreenDialog && (

@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { ThemeProvider } from "@material-ui/core";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
 import Leads from "./pages/Leads";
@@ -42,6 +41,7 @@ import {
   customerContact,
   supplierAccount,
   supplierContact,
+  profilePage,
   vapidKey,
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
@@ -49,6 +49,7 @@ import Dashboard from "./pages/Dashboard";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
+import UserProfilePage from './pages/ProfilePage/index'
 import firebase, { onMessageListener } from "./firebase";
 import CustomNotification from "./components/CustomNotification/CustomNotification";
 
@@ -227,6 +228,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/user">
             <User />
+          </PrivateRoute>
+          <PrivateRoute exact path="/profile">
+            <UserProfilePage profileBreadCrumbs={routes.profilePage} />
           </PrivateRoute>
           <PrivateRoute exact path="/user/detail/:id">
             <UserDetailsPage />
