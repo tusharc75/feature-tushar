@@ -46,6 +46,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import { Chip } from "@material-ui/core";
 
 const ContactTypes = [
   {
@@ -97,7 +98,11 @@ export default function Contact(props) {
   });
 
   const history = useHistory();
-  const accountName = history.location?.state?.accountName;
+
+  const [accountDetails, setAccountDetails] = useState({
+    accountId: history.location?.state?.accountId,
+    accountName: history.location?.state?.accountName
+  })
 
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
@@ -351,6 +356,10 @@ export default function Contact(props) {
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
 
+    if (accountDetails.accountId) {
+      searchParams["accountId"] = accountDetails.accountId;
+    }
+
     //     GetContacts(searchParams).then(({ data, count }) => {
     //         setContactData(data);
     //         setRowCount(count)
@@ -521,6 +530,19 @@ export default function Contact(props) {
                   })}
                 </ToggleButtonGroup>
               )}
+
+              {
+                accountDetails.accountId && <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={accountDetails.accountName}
+                  onDelete={() => {
+                    setAccountDetails({ accountId: null, accountName: null });
+                    getContacts();
+                  }}
+                />
+              }
+
             </Grid>
             <Grid className={styles.filter_side} item>
               <Box className={styles.filter_side_header} component="div">
@@ -626,11 +648,11 @@ export default function Contact(props) {
               density="compact"
               filterMode="server"
               onFilterModelChange={onFilterChange}
-              // filterModel={{
-              //     items: [
-              //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
-              //     ],
-              // }}
+            // filterModel={{
+            //     items: [
+            //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
+            //     ],
+            // }}
             />
           </div>
           {/* </Box> */}
