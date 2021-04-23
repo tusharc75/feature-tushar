@@ -16,7 +16,7 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import InputField from "../../components/Helpers/InputField";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
-import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 
 
 interface InitialData {
@@ -34,9 +34,8 @@ const CreateUser = ({ open, close, fetchData }) => {
     fields: [],
     values: {},
   });
-  const [redirecting, setRedirecting] = useState(false);
-  const [createdUserId, setCreatedUserId] = useState("");
   const location = useLocation();
+  const history = useHistory();
 
 
   const getInitialData = useCallback(() => {
@@ -69,7 +68,7 @@ const CreateUser = ({ open, close, fetchData }) => {
     axiosInstance()
       .post("/user", values)
       .then(({ data }) => {
-        setCreatedUserId(data.data[0]._id);
+        const newId = data.data[0]._id;
         setToastConfig({
           open: true,
           type: "success",
@@ -77,7 +76,10 @@ const CreateUser = ({ open, close, fetchData }) => {
         });
         setSubmitting(false);
         fetchData();
-        setRedirecting(true);
+        history.push({
+          pathname: `/user/detail/${newId}`,
+          state: { location: location }
+        });       
         close();
       })
       .catch((error) => {
@@ -157,18 +159,6 @@ const CreateUser = ({ open, close, fetchData }) => {
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
-              {
-                redirecting &&
-                <Route
-                  exact
-                  path="/user"
-                  render={({ location }) => <Redirect to={{ pathname: `/user/detail/${createdUserId}`, state: { from: location } }} />
-                  }
-                />
-              }
-
-
-
             </>
           )}
         </Formik>

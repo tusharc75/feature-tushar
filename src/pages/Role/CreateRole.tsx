@@ -16,7 +16,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@material-ui/core";
-import { Redirect, Route } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Skeleton } from "@material-ui/lab";
 import axiosInstance from "../../axios/axiosInstance";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -34,6 +34,7 @@ const CreateRole = ({
   selectedEntity,
 }) => {
   const theme = useTheme();
+  const history = useHistory();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -83,10 +84,10 @@ const CreateRole = ({
           type: roleType,
         })
         .then(({ data }) => {
-          setCreatedRoleId(data.data._id);
+          const newId = data.data._id;
           fetchData();
           setSubmitting(false);
-          setIsRedirect(true);
+          history.push(`/role/detail/${newId}`);
           close();
         })
         .catch((err) => {
@@ -227,13 +228,6 @@ const CreateRole = ({
               {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
             </Button>
           </CustomDialogFooter>
-          {
-            isRedirect && <Route
-              exact
-              path="/role"
-              render={() => <Redirect to={`/role/detail/${createdRoleId}`} />}
-            />
-          }
         </>
       )}
     </Dialog>

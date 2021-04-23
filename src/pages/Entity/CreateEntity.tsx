@@ -14,7 +14,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import InputField from "../../components/Helpers/InputField";
-import { Redirect, Route, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
 
 interface InitialData {
@@ -27,12 +27,11 @@ const CreateEntity = ({ open, close, fetchData }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isRedirect, setIsRedirect] = useState(false);
-  const [createdEntityId, setCreatedEntityId] = useState("");
   const [initialData, setInitialData] = useState<InitialData>({
     fields: [],
     values: {},
   });
+  const history = useHistory();
 
   useEffect(() => {
     getInitialData();
@@ -60,10 +59,10 @@ const CreateEntity = ({ open, close, fetchData }) => {
     axiosInstance()
       .post("/entity", values)
       .then(({ data }) => {
-        setCreatedEntityId(data.data._id);
+        const newId = data.data._id;
         setSubmitting(false);
         fetchData();
-        setIsRedirect(true);
+        history.push(`/entity/detail/${newId}`);
         close();
       })
       .catch((err) => {
@@ -141,14 +140,6 @@ const CreateEntity = ({ open, close, fetchData }) => {
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
-              {
-              isRedirect && <Route
-              exact
-              path="/entity"
-              render={() => <Redirect to={`entity/detail/${createdEntityId}`} />}
-              />
-              
-            }
             </>
            
           )}
