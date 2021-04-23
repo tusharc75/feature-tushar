@@ -4,6 +4,7 @@ import { Formik, Form } from "formik";
 import { useHistory } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
+import {Redirect, Route} from 'react-router-dom';
 import axiosInstance from "../../../axios/axiosInstance";
 import {
   getOwnerDropdownDataSource,
@@ -51,6 +52,8 @@ export default function ManageLeadDialog({
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isRedirect, setIsRedirect] = useState(false);
+  const [createdLeadId, setCreatedLeadId] = useState("");
 
   useEffect(() => {
     const ownerCollabOptions = entityData.fields.filter(
@@ -155,11 +158,13 @@ export default function ManageLeadDialog({
     axiosInstance()
       .post(`${leadApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
+        setCreatedLeadId(data.data._id);
         toastConfig.setToastConfig({
           open: true,
           type: "success",
           message: data.message,
         });
+        setIsRedirect(true);
         setLoading(false);
         onSuccess();
       })
@@ -346,6 +351,13 @@ export default function ManageLeadDialog({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
+              {
+                isRedirect && <Route
+                  exact
+                  path={leadApi}
+                  render={() => <Redirect to={`${leadApi}/detail/${createdLeadId}`} />}
+                />
+              }
             </>
           )}
         </Formik>
