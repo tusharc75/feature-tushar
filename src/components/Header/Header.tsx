@@ -32,6 +32,7 @@ import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
 import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
+import { profilePage } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 
 const useStyles = makeStyles((theme) => ({
@@ -41,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
   },
-
   toolbar: {
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
@@ -199,11 +199,11 @@ const Header = ({ toggleDrawer }) => {
       logoutUser();
     }
 
-    // if (option && option.profile) {
-    //   history.push({
-    //     pathname: Profile.path,
-    //   });
-    // }
+    if (option && option.profile) {
+      history.push({
+        pathname: profilePage.profilePageRoute,
+      });
+    }
     setOpen(false);
   };
 
@@ -276,24 +276,24 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-              }}
-            >
-              <Typography className={classes.entityName}>
-                {curEntity.entityName}
-              </Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && (
-                <Chip size="small" label="Current" color="primary" />
-              )}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+            }}
+          >
+            <Typography className={classes.entityName}>
+              {curEntity.entityName}
+            </Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && (
+              <Chip size="small" label="Current" color="primary" />
+            )}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );

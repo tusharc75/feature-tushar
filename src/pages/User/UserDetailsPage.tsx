@@ -19,7 +19,7 @@ import {
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
-import { useParams, useHistory, useLocation } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
@@ -48,7 +48,6 @@ const UserDetailsPage = () => {
   const {
     state: { user, permissions },
   }: any = useData();
-  const location = useLocation();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
@@ -69,7 +68,7 @@ const UserDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
-  const userList = location.state.userList;
+  const [userList, setUserList] = useState<any[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -78,6 +77,7 @@ const UserDetailsPage = () => {
       getRoleUnion();
       fetchUserRoles();
       fetchDoa();
+      fetchUsers()
     }
     // eslint-disable-next-line
   }, [id]);
@@ -106,27 +106,50 @@ const UserDetailsPage = () => {
   };
 
   const fetchDoa = async () => {
-    setDoa([])
+    setDoa([]);
     axiosInstance()
       .get(`/doa/${id}`)
       .then(({ data: { data, count } }) => {
-        setDoa(data?.doa.map(item => {
-          return {
-            id: item.user?._id,
-            name: `${item.user.firstName} ${item.user.lastName}`,
-            firstName: item.user.firstName,
-            lastName: item.user.lastName,
-            currency: item.currency ? item.currency : "USD",
-            amount: item.amount
-          };
-        })
+        setDoa(
+          data?.doa.map((item) => {
+            return {
+              id: item.user?._id,
+              name: `${item.user.firstName} ${item.user.lastName}`,
+              firstName: item.user.firstName,
+              lastName: item.user.lastName,
+              currency: item.currency ? item.currency : "USD",
+              amount: item.amount,
+            };
+          })
         );
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setLoading(false);
       });
+  };
+
+  const fetchUsers = () => {
+    axiosInstance()
+      .get("/user")
+      .then(({ data: { data, count } }) => {
+        getRows(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   }
+
+  const getRows = (data: []) => {
+    const rows = data.length
+      ? data.map((user: any) => ({
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+      }))
+      : [];
+
+    setUserList(rows);
+  };
 
   const fetchUserRoles = () => {
     setRolesLoading(true);
@@ -371,7 +394,7 @@ const UserDetailsPage = () => {
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Container styles={{ borderRadius: 8 }}>
               <Box style={{ padding: "8px", minHeight: "450px" }}>
-                {loading || !userFields.length ? (
+                {loading || !userFields.length || !userData ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
@@ -557,13 +580,16 @@ const UserDetailsPage = () => {
         </Container>
         <Container styles={{ borderRadius: 8 }}>
           <Box style={{ padding: "0px" }}>
-            <Box display="flex" padding={1} >
+            <Box display="flex" padding={1}>
               <Grid container>
                 <Grid item xs={8}>
                   <Box display="flex">
                     <Box padding="5px">
                       <Typography variant="subtitle2">
-                        {"DOA Details of " + userData?.firstName + " " + userData?.lastName}
+                        {"DOA Details of " +
+                          userData?.firstName +
+                          " " +
+                          userData?.lastName}
                       </Typography>
                     </Box>
                   </Box>
@@ -575,7 +601,7 @@ const UserDetailsPage = () => {
                       color="primary"
                       onClick={() => setDoaDialogOpen(true)}
                     >
-                      {doa.length > 0 ? 'Edit Doa' : 'Add Doa'}
+                      {doa.length > 0 ? "Edit Doa" : "Add Doa"}
                     </Button>
                   )}
                 </Grid>
@@ -583,26 +609,21 @@ const UserDetailsPage = () => {
             </Box>
           </Box>
           <Grid container style={{ padding: "8px" }} spacing={1}>
-            <Grid item xs={12} sm={12} >
+            <Grid item xs={12} sm={12}>
               <BoxWithBorder
                 style={{
                   padding: "0px",
                 }}
               >
-
-                {doa.length > 0
-                  ? (
-                    <NewStepper
-                      heading={" "}
-                      steps={doa}
-                    />
-                  ) : (
-                    <Box textAlign="center" marginTop={2}>
-                      <Typography variant="body2">
-                        User doesn't have any DOA
-                      </Typography>
-                    </Box>
-                  )}
+                {doa.length > 0 ? (
+                  <NewStepper heading={" "} steps={doa} />
+                ) : (
+                  <Box textAlign="center" marginTop={2}>
+                    <Typography variant="body2">
+                      User doesn't have any DOA
+                    </Typography>
+                  </Box>
+                )}
               </BoxWithBorder>
             </Grid>
           </Grid>
@@ -618,8 +639,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
-                : ""
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -637,13 +658,12 @@ const UserDetailsPage = () => {
           doa={doa}
           userSelected={id}
           open={doaDialogOpen}
-          onSuccess={
-            () => {
-              setDoaDialogOpen(false)
-              fetchDoa()
-            }}
+          onSuccess={() => {
+            setDoaDialogOpen(false);
+            fetchDoa();
+          }}
           onClose={() => {
-            setDoaDialogOpen(false)
+            setDoaDialogOpen(false);
           }}
         />
       )}

@@ -254,6 +254,15 @@ export default function AccountDetailPage(props) {
       label: "Opportunity",
       count: opportunities ? opportunities.length : 0,
       show: permissions?.opportunity?.isRead ?? false,
+      onClick: () => {
+        history.push({
+          pathname: `/opportunity`,
+          state: {
+            accountId: accountData._id,
+            accountName: accountData.accountName,
+          },
+        });
+      },
     },
     {
       label: "Quotes",
@@ -274,6 +283,7 @@ export default function AccountDetailPage(props) {
         history.push({
           pathname: `/${contactRoute}`,
           state: {
+            accountId: accountData._id,
             accountName: accountData.accountName,
           },
         });
@@ -648,6 +658,7 @@ export default function AccountDetailPage(props) {
               contactResource={contactResource}
               accountId={accountData._id}
               contactApi={contactApi}
+              account={props?.account}
             />
           )}
           {showAccountHierarchyInFullScreenDialog && (

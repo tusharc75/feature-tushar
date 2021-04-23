@@ -186,7 +186,7 @@ const Leads = () => {
     firstName,
     middleName,
     lastName,
-    isAlreadyConverted,
+    convertedToOpportunity,
   }) => {
     let dontHavePermissions = [];
 
@@ -212,7 +212,7 @@ const Leads = () => {
           </IconButton>
         </Tooltip>
       </>
-    ) : isAlreadyConverted ? (
+    ) : convertedToOpportunity ? (
       <>
         <Tooltip title="This lead is already converted to opportunity">
           <IconButton aria-label="Convert to opportunity">
@@ -236,7 +236,7 @@ const Leads = () => {
             });
           }}
         >
-          <SiConvertio size={18} />
+          <SiConvertio size={18} className="text-primary" />
         </IconButton>
       </Tooltip>
     );
@@ -567,6 +567,7 @@ const Leads = () => {
               permissions["customerContact"].isCreate &&
               permissions["opportunity"].isCreate
             }
+            isAnyAlreadyConvertedLeadIncluded={dataRows.some((d) => d.isChecked && d.convertedToOpportunity)}
             showLeadToOpportunityConfirmationDialog={() => {
               setConvertLeadToOpportunityConfirmationDialog({
                 open: true,
@@ -623,9 +624,8 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete Lead ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete Lead ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

@@ -515,7 +515,7 @@ export default function Doa() {
           <DoaDialog
             userList={dataRows}
             doa={doa}
-            userSelected={userSingleSelect}
+            userSelected={userSingleSelect.id}
             open={open}
             onClose={() => setOpen(false)}
             onSuccess={() => {

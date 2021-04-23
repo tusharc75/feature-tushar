@@ -23,6 +23,7 @@ import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
+import { useLocation, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const arr = [...Array(9).keys()];
@@ -38,6 +39,7 @@ export default function ManageOpportunityDialog({
 }) {
   const { opportunityResource, opportunityApi } = opportunity
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
   const {
     state: { user, selectedEntity },
@@ -56,6 +58,7 @@ export default function ManageOpportunityDialog({
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     const ownerCollabOptions = entityData.fields.filter(
@@ -158,11 +161,13 @@ export default function ManageOpportunityDialog({
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
+        const newId = data.data._id;
         toastConfig.setToastConfig({
           open: true,
           type: "success",
           message: data.message,
         });
+        history.push(`${opportunityApi}/detail/${newId}`);
         setLoading(false);
         onSuccess();
       })
@@ -388,6 +393,7 @@ export default function ManageOpportunityDialog({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
+
             </>
           )}
         </Formik>

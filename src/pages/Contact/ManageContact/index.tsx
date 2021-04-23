@@ -8,6 +8,7 @@ import {
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import _ from "lodash";
+import {useHistory} from 'react-router-dom';
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAccountDialog from '../../Account/ManageAccount/index'
@@ -35,6 +36,7 @@ export default function ManageContactMain(props) {
   const [loading, setLoading] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
   const [accountSource, setAccountSource] = useState([])
+  const history = useHistory();
 
   useEffect(() => {
     getContactFields();
@@ -72,6 +74,7 @@ export default function ManageContactMain(props) {
     axiosInstance()
       .post(`/${contactApi}`, values)
       .then(({ data }) => {
+        const newId = data.data._id;
         onClose({ fetch: true });
         onSuccess({ fetch: true });
         toastConfig.setToastConfig({
@@ -79,6 +82,7 @@ export default function ManageContactMain(props) {
           type: "success",
           message: data.message,
         });
+        history.push(`${contactApi}/detail/${newId}`)
         setLoading(false);
       })
       .catch((error) => {
