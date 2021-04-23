@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Grid, Box, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button } from '@material-ui/core'
+import { Grid, Box, useTheme, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -16,7 +16,7 @@ import _ from 'lodash'
 
 export default function ManageProfile(props) {
     const { displayUserDetails, displayUserProfileImage, userFields,
-        userData, loading, userLoading, onFetchUserData } = props
+        userData, loading, userLoading, onFetchUserData, otherDetails } = props
     const { state: { user }, dispatch }: any = useData();
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
@@ -24,6 +24,7 @@ export default function ManageProfile(props) {
     const [isEmailUpdate, setEmailUpdate] = useState(false)
     const [isPasswordUpdate, setPasswordUpdate] = useState(false)
     const toastConfig = useContext(CustomToastContext);
+    const theme = useTheme();
 
     const handleOpenUpdateDialog = () => {
         setOpenUpdateDialog(true);
@@ -37,9 +38,8 @@ export default function ManageProfile(props) {
         if (userData?._id) {
             setUpdating(true);
             let clonedValues = _.cloneDeep(values)
-            if (clonedValues?.email) delete clonedValues["email"]
             axiosInstance()
-                .put(`/user/me`, { ...clonedValues, _id: userData?._id })
+                .put(`/user/me`, { ...clonedValues })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
@@ -185,8 +185,41 @@ export default function ManageProfile(props) {
                                     : (
                                         <DetailsPage data={userData} fields={filteredUserFields} />
                                     )}
+                                {
+                                    <Grid container spacing={2}>
+                                        {otherDetails ? Object.keys(otherDetails).map((k, i) => (
+                                            <Grid item xs={12} md={6} sm={6}>
+                                                <Grid container alignItems="center">
+                                                    <Grid item xs={6} md={5} sm={5}>
+                                                        <Box height="100%" display="flex" alignItems="center">
+                                                            <Box marginX="2px" />
+                                                            <h4
+                                                                title={k}
+                                                                style={{
+                                                                    color: theme.palette.text.secondary,
+                                                                    fontWeight: "normal",
+                                                                }}>
+                                                                {k}
+                                                            </h4>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={6} md={7} sm={7}><Typography
+                                                        title={otherDetails[k] || "_ _ _"}
+                                                        className={styles.userProfileFieldText}
+                                                        variant="body2"
+                                                    >{otherDetails[k] || "_ _ _"}</Typography> </Grid>
+                                                </Grid>
+                                                <Box marginY={1} />
+                                                <Divider
+                                                    style={{ color: "gray" }}
+                                                    orientation="horizontal"
+                                                />
+                                            </Grid>)) : null
+                                        }
+                                    </Grid>
+                                }
                             </Box>
-                            <Grid container spacing={6}>
+                            <Grid container spacing={6} style={{ marginTop: '10px' }}>
                                 <Grid item sm={6}>
                                     <Button color="primary"
                                         fullWidth

@@ -37,6 +37,7 @@ export default function ProfilePage(props) {
     const { state: { user }, dispatch }: any = useData();
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
     const [userData, setUserData] = useState(null)
+    const [otherDetails, setOtherDetails] = useState(null)
     const [loading, setLoading] = useState(false);
     const [userLoading, setUserLoading] = useState(false);
     const [userFields, setUserFields] = useState([]);
@@ -60,11 +61,16 @@ export default function ProfilePage(props) {
             .get(`/user/${user?.user?._id}`)
             .then(({ data }) => {
                 if (data?.data) {
+                    setOtherDetails({
+                        Email: data?.data?.email ?? '',
+                        EmployeeNumber: data?.data?.employeeNumber ?? ''
+                    })
                     Object.keys(data.data).forEach(k => {
-                        if (["blocked", "updatedBy"].indexOf(data.data[k]) > 0) {
+                        if (["blocked", "updatedBy", "email", "employeeNumber"].indexOf(data.data[k]) > 0) {
                             delete data.data[k]
                         }
                     })
+
                     setUserData(data.data)
                 }
                 setUserLoading(false)
@@ -80,7 +86,7 @@ export default function ProfilePage(props) {
         axiosInstance()
             .get("/field?resource=User")
             .then(({ data }) => {
-                data.data = data.data && data.data.length ? data.data.filter(field => ["blocked"].indexOf(field?.fieldData?.fieldName) < 0) : []
+                data.data = data.data && data.data.length ? data.data.filter(field => ["blocked", "email", "employeeNumber"].indexOf(field?.fieldData?.fieldName) < 0) : []
                 setUserFields(data.data)
                 setLoading(false)
             })
@@ -105,6 +111,7 @@ export default function ProfilePage(props) {
                             loading={loading}
                             userLoading={userLoading}
                             onFetchUserData={fetchUserData}
+                            otherDetails={otherDetails}
                         /> :
                         activeItem === profileMenuItems.notification ?
                             <NotifiationPreference />

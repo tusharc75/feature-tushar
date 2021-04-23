@@ -38,4 +38,11 @@
 .preferenceOptionsBox{
   background-color: #d3d3d373;
 }
+.userProfileFieldText {
+  width: 100%;
+  border-radius: 4;
+  cursor: normal;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
 
