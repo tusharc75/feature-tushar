@@ -8,6 +8,8 @@ import {
     Container,
     Dialog,
     DialogContent,
+    IconButton,
+    ButtonGroup
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { Formik, Form, Field, FieldArray } from 'formik';
@@ -39,7 +41,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
     const [loading, setLoading] = useState(false);
-    const [users, setUsers] = useState<any[]>([{ id: userList[0].id, name: userList[0].name, currency: "USD", amount: 0 }]);
+    const [users, setUsers] = useState<any[]>([]);
     const fetchDoa = useCallback(() => {
         doa.length > 0 ?
             setUsers(doa) :
@@ -115,10 +117,10 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                             alignItems="center"
                                                         >
                                                             <Grid item md={1}> Sr </Grid>
-                                                            <Grid item md={4}> Users </Grid>
+                                                            <Grid item md={3}> Users </Grid>
                                                             <Grid item md={3}> Currency </Grid>
                                                             <Grid item md={3}> Amount </Grid>
-                                                            <Grid item md={1}></Grid>
+                                                            <Grid item md={2}></Grid>
                                                         </Grid>
                                                     </Box>
                                                     <Box>
@@ -137,7 +139,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                 key={index}
                                                                             >
                                                                                 <Grid item md={1}>{index + 1}</Grid>
-                                                                                <Grid item md={4}>
+                                                                                <Grid item md={3}>
 
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
@@ -191,22 +193,36 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
 
                                                                                     />
                                                                                 </Grid>
-                                                                                <Grid item md={3}>
-                                                                                    <span><Add className={classes.addIcon} onClick={() => {
-                                                                                        values.users.sort((a, b) => a.amount - b.amount)
-                                                                                        arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
-                                                                                    }
-                                                                                    } /></span>
-                                                                                    <span><Delete className={classes.deleteIcon} onClick={() => arrayHelpers.remove(index)} /></span>
+                                                                                <Grid item md={2}>
+                                                                                    <ButtonGroup size="small" aria-label="small outlined button group">
+                                                                                        <IconButton size="small" aria-label="add" onClick={() => {
+                                                                                            values.users.sort((a, b) => a.amount - b.amount)
+                                                                                            arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
+                                                                                        }
+                                                                                        } >
+                                                                                            <Add />
+                                                                                        </IconButton>
+                                                                                        <IconButton size="small" aria-label="delete" onClick={() => arrayHelpers.remove(index)} >
+                                                                                            <Delete />
+                                                                                        </IconButton>
+                                                                                    </ButtonGroup>
                                                                                 </Grid>
                                                                             </Grid>
                                                                         ))
                                                                     ) : (
                                                                         <Grid item md={2}>
-                                                                            <div>
-                                                                                <span><Add className={classes.addIcon} /></span>
-                                                                                <span><Delete className={classes.deleteIcon} /></span>
-                                                                            </div>
+                                                                            <ButtonGroup size="small" aria-label="small outlined button group">
+                                                                                <IconButton size="small" aria-label="add" onClick={() => {
+                                                                                    values.users.sort((a, b) => a.amount - b.amount)
+                                                                                    arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
+                                                                                }
+                                                                                } >
+                                                                                    <Add />
+                                                                                </IconButton>
+                                                                                <IconButton size="small" aria-label="delete" >
+                                                                                    <Delete />
+                                                                                </IconButton>
+                                                                            </ButtonGroup>
                                                                         </Grid>
                                                                     )}
                                                                 </div>
