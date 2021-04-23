@@ -62,6 +62,7 @@ const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
 )
 
 export default function NotifiationPreference(props) {
+
     const { state: { user } } = useData();
     const [rows, setRows] = useState([])
     const toastConfig = useContext(CustomToastContext);

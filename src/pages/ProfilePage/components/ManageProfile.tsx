@@ -16,8 +16,10 @@ import _ from 'lodash'
 import { useHistory } from "react-router-dom";
 
 export default function ManageProfile(props) {
+
     const { displayUserDetails, displayUserProfileImage, userFields,
         userData, loading, userLoading, onFetchUserData, otherDetails } = props
+
     const { state: { user }, dispatch }: any = useData();
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
@@ -89,7 +91,9 @@ export default function ManageProfile(props) {
             getImageUrl(file);
         }
     };
+
     let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image") : []
+
     return <>
         {openUpdateDialog && (
             <UpdateDetailsDialog

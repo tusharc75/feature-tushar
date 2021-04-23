@@ -112,7 +112,7 @@ export const customerContact = {
 };
 
 export const profilePage = {
-  profilePageRoute: "/profile"
+  profilePageRoute: "profile"
 }
 
 export const profileMenuItems = {

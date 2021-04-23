@@ -124,6 +124,6 @@ export default {
   },
   profilePage: {
     title: "Profile",
-    path: profilePage.profilePageRoute
+    path: "/profile"
   }
 };
