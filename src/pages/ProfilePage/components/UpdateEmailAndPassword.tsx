@@ -40,13 +40,7 @@ export default function ManageUpdatePassword({
     const toastConfig = useContext(CustomToastContext);
     const [loading, setLoading] = useState(false)
 
-    const handleSubmit = (values, setFieldError, setFieldTouched) => {
-
-        if (values.newPassword !== values.confirmPassword) {
-            setFieldError("confirmPassword", "new and confirm password should be same")
-            setFieldTouched("confirmPassword", true)
-        }
-
+    const handleSubmit = (values) => {
         if (isUpdatePassword) {
             delete values["confirmPassword"]
             setLoading(true)
@@ -100,24 +94,21 @@ export default function ManageUpdatePassword({
             />
             <Formik
                 validateOnMount
-                onSubmit={() => { }}
+                onSubmit={handleSubmit}
                 initialValues={isUpdateEmail ? { email: userData?.email ?? '' } :
                     { oldPassword: "", newPassword: "", confirmPassword: "" }}
                 validationSchema={isUpdateEmail ? updateEmailSchema : updatePassWordSchema}
             >
                 {({
                     values,
-                    errors,
-                    touched,
                     setFieldValue,
                     setFieldError,
                     setFieldTouched,
-                    setErrors,
-                    setValues,
+                    submitForm
                 }) => (
                     <>
                         <CustomDialogContent>
-                            <Form>
+                            <Form noValidate>
                                 <div>
                                     <Box marginY={2}>
                                         <Grid spacing={3} container>
@@ -205,7 +196,13 @@ export default function ManageUpdatePassword({
                                 color="primary"
                                 type="submit"
                                 disabled={isUpdateEmail && values.email === userData.email || false}
-                                onClick={() => handleSubmit(values, setFieldError, setFieldTouched)}>
+                                onClick={() => {
+                                    if (values.newPassword !== values.confirmPassword) {
+                                        setFieldError("confirmPassword", "new and confirm password should be same")
+                                        setFieldTouched("confirmPassword", true)
+                                        return
+                                    } else submitForm()
+                                }}>
                                 Update
                             </CustomButton>
                         </CustomDialogFooter>
