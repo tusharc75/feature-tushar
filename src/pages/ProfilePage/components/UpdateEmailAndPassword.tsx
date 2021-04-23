@@ -152,7 +152,7 @@ export default function ManageUpdatePassword({
                                                                 onChange={(e) => setFieldValue("newPassword", e.target.value.trimStart())}
                                                             />
                                                         </Grid>
-                                                        <Grid item sm={12}>
+                                                        <Grid item sm={8}>
                                                             <Field
                                                                 component={TextFieldFormik}
                                                                 fullWidth
@@ -174,6 +174,7 @@ export default function ManageUpdatePassword({
                                                 isUpdateEmail ? <Grid item sm={12}>
                                                     <Field
                                                         component={TextFieldFormik}
+                                                        style={{ width: '400px' }}
                                                         fullWidth
                                                         margin="dense"
                                                         type="email"
