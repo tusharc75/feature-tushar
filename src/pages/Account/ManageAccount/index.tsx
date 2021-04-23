@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import {useHistory} from 'react-router-dom';
 import ManageAccount from "./ManageAccount";
 import { getObjKeys, sidebarResource } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
@@ -18,6 +19,7 @@ export default function ManageAccountMain(props) {
     initialValues: {},
   });
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     if (id) {
@@ -76,6 +78,7 @@ export default function ManageAccountMain(props) {
     axiosInstance()
       .post(`/${accountApi}`, values)
       .then(({ data }) => {
+        const newId = data.data._id;
         onClose({ fetch: true });
         if (isGetAccountData) onGetAddedAccount(data)
         toastConfig.setToastConfig({
@@ -83,6 +86,7 @@ export default function ManageAccountMain(props) {
           type: "success",
           message: data.message,
         });
+        history.push(`${accountApi}/detail/${newId}`);
         setLoading(false);
       })
       .catch((error) => {
