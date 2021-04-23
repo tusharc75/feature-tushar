@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { makeStyles } from "@material-ui/core/styles";
 import { AddOutlined } from "@material-ui/icons";
@@ -17,6 +17,7 @@ import styles from "./Header.module.scss"
 
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import MessageDialog from '../../components/Helpers/MessageDialog';
 
 const useStyles = makeStyles((theme) => ({
     filter_side: {
@@ -28,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
 function LeadsHeader(props) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
+    const [showMessageDialog, setShowMessageDialog] = useState(false);
 
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -57,7 +59,10 @@ function LeadsHeader(props) {
         showConfirmBox,
         allowToDelete,
         icon,
-        heading
+        heading,
+        allowToConvertLeadToOpportunity,
+        showLeadToOpportunityConfirmationDialog,
+        isAnyAlreadyConvertedLeadIncluded
     } = props
     return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6} className="d-flex align-items-center gap-1">
@@ -131,16 +136,30 @@ function LeadsHeader(props) {
                                 disabled={allowToDelete}
                             >Delete</MenuItem>
 
-                            {/* <MenuItem
-                                onClick={() => {
-                                    
-                                }}
-                            >Convert To Opportunity</MenuItem> */}
+                            {
+                                allowToConvertLeadToOpportunity && <MenuItem
+                                    onClick={() => {
+                                        closeActions();
+                                        if (isAnyAlreadyConvertedLeadIncluded) {
+                                            setShowMessageDialog(true)
+                                        } else {
+                                            showLeadToOpportunityConfirmationDialog();
+                                        }
+                                    }}
+                                >Convert To Opportunity</MenuItem>
+                            }
                         </Menu>
                     </>
                 }
             </Box>
-
+            {
+                showMessageDialog && isAnyAlreadyConvertedLeadIncluded ? (
+                    <MessageDialog
+                        open={showMessageDialog}
+                        message={`You are trying to convert already converted lead, Please unselect those records and try again.`}
+                        onClose={() => setShowMessageDialog(false)}
+                    />
+                ) : null}
         </Grid>
     </Grid>
 }

@@ -63,6 +63,7 @@ const User: FC = () => {
         .then(({ data: { data, count } }) => {
           getRows(data);
           setRowCount(count);
+          setCheckAllUsers(false)
           setLoadingUsers(false);
         })
         .catch((err) => {
@@ -79,15 +80,15 @@ const User: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          isChecked: false,
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-          createdBy: user.createdBy,
-          updatedBy: user.updatedBy,
-          status: user.blocked ? user.blocked : false,
-        }))
+        id: user._id,
+        isChecked: false,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+        createdBy: user.createdBy,
+        updatedBy: user.updatedBy,
+        status: user.blocked ? user.blocked : false,
+      }))
       : [];
 
     setDataRows(rows);
@@ -154,9 +155,17 @@ const User: FC = () => {
       renderCell: (params: any) => (
         <div style={{ width: 150 }}>
           {params.value ? (
-            <FaUserCheck className="text-success" />
+            <Tooltip title="Inactive">
+              <IconButton>
+                <FaUserAltSlash className="text-error" />
+              </IconButton>
+            </Tooltip>
           ) : (
-            <FaUserAltSlash className="text-error" />
+            <Tooltip title="Active">
+              <IconButton>
+                <FaUserCheck className="text-success" />
+              </IconButton>
+            </Tooltip>
           )}{" "}
         </div>
       ),
@@ -467,9 +476,8 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete user ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

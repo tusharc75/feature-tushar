@@ -71,7 +71,7 @@ export default function AssignedUsers({ data, unassignUser, permissions }) {
                   className="text-capitalize"
                 >
                   <Link
-                    className="accountNameLink"
+                    className="link"
                     to={`/user/detail/${obj._id}`}
                   >
                     {`${obj?.firstName} ${obj?.lastName}` ?? ""}

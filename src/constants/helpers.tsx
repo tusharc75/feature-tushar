@@ -19,6 +19,8 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 
+export const vapidKey = "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
+
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
 
@@ -30,6 +32,17 @@ export const leadImportErrorFileName = "Leads-Errors.xlsx";
 
 export const opportunityTemplateFileName = "Opportunities-Template.xlsx";
 export const opportunityImportErrorFileName = "Opportunities-Errors.xlsx";
+
+export const roleTypes = [
+  {
+    key: "Global",
+    value: 1,
+  },
+  {
+    key: "Regional",
+    value: 2,
+  },
+];
 
 export const sidebarResource = {
   brand: "Brand",
@@ -98,6 +111,18 @@ export const customerContact = {
   contactPermission: "Customer Contact",
 };
 
+export const profilePage = {
+  profilePageRoute: "profile"
+}
+
+export const profileMenuItems = {
+  profile: 1,
+  notification: 2,
+  setting: 3,
+  users: 4,
+  securityPrivacy: 5
+}
+
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
   for (const key of arr) {
@@ -129,8 +154,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-      ? data.optionValue
-      : "";
+        ? data.optionValue
+        : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -138,9 +163,10 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
         ? dataObj[key.fieldName]
         : false;
     } else if (key.type === "multiSelect") {
-      const values = dataObj[key.fieldName].length
-        ? dataObj[key.fieldName].map((val: any) => filterValues(val))
-        : [];
+      const values =
+        dataObj[key.fieldName] && dataObj[key.fieldName].length
+          ? dataObj[key.fieldName].map((val: any) => filterValues(val))
+          : [];
       obj[key.fieldName] = values;
     } else if (key.type === "dropDown") {
       const value = filterValues(dataObj[key.fieldName]);
@@ -171,30 +197,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .url("Enter valid url eg. https://www.hostname.com")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .url("Enter valid url eg. https://www.hostname.com")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-            .array()
-            .required(`${input.fieldLabel} is required`)
-            .length(1, "Select at least one service access")
+          .array()
+          .required(`${input.fieldLabel} is required`)
+          .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -349,54 +375,56 @@ export const getPermissions = (
   user,
   selectedEntity = undefined
 ): IPermission | null => {
-  let permissions = {};
-  let data = [...user?.role?.sideBar];
+  if (user) {
+    let permissions = {};
+    let data = [...user?.role?.sideBar];
 
-  if (selectedEntity) {
-    if (user?.entity && user.entity.length && selectedEntity) {
-      data = [
-        ...data,
-        ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
-          ?.resource,
-      ];
-    }
-  } else {
-    if (user?.role?.selectedEntity) {
-      data = [...data, ...user?.role?.selectedEntity?.resource];
-    }
-  }
-
-  if (data) {
-    const hasApproveAccountPermission = user.user.permissions.approveAccount;
-    const accounts = [
-      sidebarResource.customerAccount,
-      sidebarResource.supplierAccount,
-    ];
-
-    const sidebarFieldsKeys = Object.keys(sidebarResource);
-    const sidebarFieldsValues = Object.values(sidebarResource);
-
-    data.forEach((d) => {
-      const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
-
-      if (indexOfPermission > -1) {
-        let permission = {
-          isCreate: d.isCreate,
-          isRead: d.isRead,
-          isUpdate: d.isUpdate,
-          isDelete: d.isDelete,
-        };
-
-        if (accounts.some((acountType) => acountType === d.name)) {
-          permission["approveAccount"] = hasApproveAccountPermission;
-        }
-
-        permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+    if (selectedEntity) {
+      if (user?.entity && user.entity.length && selectedEntity) {
+        data = [
+          ...data,
+          ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
+            ?.resource,
+        ];
       }
-    });
-  }
+    } else {
+      if (user?.role?.selectedEntity) {
+        data = [...data, ...user?.role?.selectedEntity?.resource];
+      }
+    }
 
-  return permissions;
+    if (data) {
+      const hasApproveAccountPermission = user.user.permissions.approveAccount;
+      const accounts = [
+        sidebarResource.customerAccount,
+        sidebarResource.supplierAccount,
+      ];
+
+      const sidebarFieldsKeys = Object.keys(sidebarResource);
+      const sidebarFieldsValues = Object.values(sidebarResource);
+
+      data.forEach((d) => {
+        const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
+
+        if (indexOfPermission > -1) {
+          let permission = {
+            isCreate: d.isCreate,
+            isRead: d.isRead,
+            isUpdate: d.isUpdate,
+            isDelete: d.isDelete,
+          };
+
+          if (accounts.some((acountType) => acountType === d.name)) {
+            permission["approveAccount"] = hasApproveAccountPermission;
+          }
+
+          permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+        }
+      });
+    }
+
+    return permissions;
+  }
 };
 
 export const downloadExcel = (fileDetails, fileName) => {

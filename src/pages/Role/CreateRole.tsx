@@ -16,6 +16,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@material-ui/core";
+import { useHistory } from 'react-router-dom';
 import { Skeleton } from "@material-ui/lab";
 import axiosInstance from "../../axios/axiosInstance";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -33,9 +34,12 @@ const CreateRole = ({
   selectedEntity,
 }) => {
   const theme = useTheme();
+  const history = useHistory();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isRedirect, setIsRedirect] = useState(false);
+  const [createdRoleId, setCreatedRoleId] = useState("");
   const [values, setValues] = useState({ name: "", description: "" });
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
@@ -49,8 +53,8 @@ const CreateRole = ({
     setLoading(true);
     let api =
       roleType === 1
-        ? "/field?resource=Role"
-        : `/field?resource=Role&entity=${selectedEntity}`;
+        ? `/field?resource=Role&roleType=${roleType}`
+        : `/field?resource=Role&roleType=${roleType}&entity=${selectedEntity}`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
@@ -79,9 +83,11 @@ const CreateRole = ({
           resource,
           type: roleType,
         })
-        .then(() => {
+        .then(({ data }) => {
+          const newId = data.data._id;
           fetchData();
           setSubmitting(false);
+          history.push(`/role/detail/${newId}`);
           close();
         })
         .catch((err) => {

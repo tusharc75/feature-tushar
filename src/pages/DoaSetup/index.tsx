@@ -178,6 +178,7 @@ export default function Doa() {
         setUsers(data);
         getRows(data);
         setRowCount(count);
+        setCheckAllUsers(false);
         setLoading(false);
       })
       .catch((err) => {
@@ -517,11 +518,15 @@ export default function Doa() {
       <Box component="div">
         {(userSingleSelect) && (
           <DoaDialog
-            user={dataRows}
+            userList={dataRows}
             doa={doa}
-            userSelected={userSingleSelect}
+            userSelected={userSingleSelect.id}
             open={open}
-            setOpen={setOpen}
+            onClose={() => setOpen(false)}
+            onSuccess={() => {
+              setOpen(false)
+              fetchDoa(userSingleSelect.id)
+            }}
           />
         )}
         {/* <BrandHeader

@@ -69,6 +69,7 @@ const Entity: FC = () => {
       .then(({ data: { data, count } }) => {
         getRows(data);
         setRowCount(count);
+        setCheckAllEntities(false);
         setLoadingEntities(false);
       })
       .catch((err) => {
@@ -222,25 +223,21 @@ const Entity: FC = () => {
       filterable: false,
       renderCell: (params: any) => (
         <>
-          {permissions?.entity?.isDelete ? (
-            <Tooltip title="Delete">
-              <IconButton
-                aria-label="Delete"
-                onClick={() => showConfirmBox(params.row)}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip
-              className="cursor-stop"
-              title="You do not have permission to delete entity"
+          <span
+            title={
+              permissions?.entity.isDelete
+                ? "Delete"
+                : "You can't do this action"
+            }
+          >
+            <IconButton
+              disabled={!permissions?.entity.isDelete}
+              aria-label="Delete"
+              onClick={() => showConfirmBox(params.row)}
             >
-              <IconButton aria-label="Delete">
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </span>
         </>
       ),
       width: 200,
@@ -266,17 +263,9 @@ const Entity: FC = () => {
   };
 
   const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row.id) {
-        setDeleteRec(row);
-      }
-    } else {
-      if (dataRows.find((d) => d.isChecked)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
+    setIsConformDialogVisible(true);
+    if (row && row.id) {
+      setDeleteRec(row);
     }
   };
 

@@ -175,11 +175,11 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     placeholder="Email" />
                                             )}
                                             value={values["to"]}
-                                            onBlur={(e: any) => {
-                                                if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
-                                                    setFieldValue("to", [...values["to"], e.target.value])
-                                                }
-                                            }}
+                                            // onBlur={(e: any) => {
+                                            //     if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
+                                            //         setFieldValue("to", [...values["to"], e.target.value])
+                                            //     }
+                                            // }}
                                             onChange={(e, value) => {
                                                 let val = []
                                                 for (var email of value) {
@@ -210,11 +210,11 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     placeholder="Email" />
                                             )}
                                             value={values["cc"]}
-                                            onBlur={(e: any) => {
-                                                if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
-                                                    setFieldValue("cc", [...values["cc"], e.target.value])
-                                                }
-                                            }}
+                                            // onBlur={(e: any) => {
+                                            //     if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
+                                            //         setFieldValue("cc", [...values["cc"], e.target.value])
+                                            //     }
+                                            // }}
                                             onChange={(e, value) => {
                                                 let val = []
                                                 for (var email of value) {

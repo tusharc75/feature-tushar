@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from "react";
-import { Box, Button, Grid } from "@material-ui/core";
+import React, { useEffect, useState, useContext } from "react";
+import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import { useHistory } from "react-router-dom";
 import { withStyles } from "@material-ui/core/styles";
@@ -11,12 +11,13 @@ import {
   getObjKeys,
   yupSchema,
   getObjKeysWithValues,
+  simplifyValues,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import FormTypes from "../../../components/Helpers/FormTypes";
-import CustomButton from "../../../components/Helpers/Button";
+import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
@@ -32,6 +33,7 @@ export default function ManageLeadDialog({
   leadApi
 }) {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
   const {
     state: { user, selectedEntity },
@@ -154,11 +156,13 @@ export default function ManageLeadDialog({
     axiosInstance()
       .post(`${leadApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
+        const newId = data.data._id;
         toastConfig.setToastConfig({
           open: true,
           type: "success",
           message: data.message,
         });
+        history.push(`${leadApi}/detail/${newId}`);
         setLoading(false);
         onSuccess();
       })
@@ -327,7 +331,9 @@ export default function ManageLeadDialog({
                   variant="contained"
                   color="primary"
                   disabled={
-                    loading || Object.keys(errors).length > 0 ? true : false
+                    // loading || Object.keys(errors).length > 0 ? true : false
+                    Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                    Object.values(simplifyValues(values, entityData.fields)).toString()
                   }
                   onClick={(e) => {
                     e.preventDefault();
@@ -343,6 +349,7 @@ export default function ManageLeadDialog({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
+
             </>
           )}
         </Formik>
