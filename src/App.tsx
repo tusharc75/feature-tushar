@@ -229,7 +229,7 @@ function App() {
           <PrivateRoute exact path="/user">
             <User />
           </PrivateRoute>
-          <PrivateRoute exact path={profilePage.profilePageRoute}>
+          <PrivateRoute exact path="/profile">
             <UserProfilePage profileBreadCrumbs={routes.profilePage} />
           </PrivateRoute>
           <PrivateRoute exact path="/user/detail/:id">
