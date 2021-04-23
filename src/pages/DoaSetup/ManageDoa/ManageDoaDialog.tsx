@@ -1,5 +1,4 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
     Box,
     Button,
@@ -21,25 +20,7 @@ import { removeEmptyKeys } from "../../../constants/helpers";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 
 const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) => {
-
-    const useStyles = makeStyles((theme) => ({
-
-        addIcon: {
-            width: 18,
-            height: 20,
-            color: theme.palette.info.main,
-            cursor: "pointer"
-        },
-
-        deleteIcon: {
-            width: 18,
-            height: 20,
-            color: theme.palette.info.main,
-            cursor: "pointer"
-        }
-    }));
     const toastConfig = useContext(CustomToastContext);
-    const classes = useStyles();
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
     const fetchDoa = useCallback(() => {
