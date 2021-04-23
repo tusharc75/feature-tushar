@@ -70,6 +70,8 @@ const RoleDetailsPage = () => {
     description: "",
   });
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.role]);
+  const [showUsers, setShowUsers] = useState(2);
+  const [showEntities, setShowEntities] = useState(2);
 
   useEffect(() => {
     if (id) {
@@ -463,7 +465,7 @@ const RoleDetailsPage = () => {
                       <AssignedEntities
                         selectedEntity={selectedEntity}
                         permissions={permissions}
-                        data={roleData && roleData.entity.slice(0, 2)}
+                        data={roleData && roleData.entity.slice(0, showEntities)}
                         unassignEntity={handleUnassignEntity}
                       />
 
@@ -473,9 +475,9 @@ const RoleDetailsPage = () => {
                         variant="contained"
                         color="primary"
                         size="small"
-                        onClick={() => history.push("/entity")}
+                        onClick={() => setShowEntities(roleData.entity.length)}
                       >
-                        View All
+                        View All ({roleData.entity.length})
                       </Button>
                     </>
                   ) : (
@@ -537,7 +539,7 @@ const RoleDetailsPage = () => {
                       <AssignedUsers
                         permissions={permissions}
                         unassignRole={handleUnassignUser}
-                        data={roleData && roleData.user.slice(0, 4)}
+                        data={roleData && roleData.user.slice(0, showUsers)}
                         currentUser={user?.user._id}
                       />
                       <Box marginY={1} />
@@ -546,9 +548,9 @@ const RoleDetailsPage = () => {
                         variant="contained"
                         color="primary"
                         size="small"
-                        onClick={() => history.push("/user")}
+                        onClick={() => setShowUsers(roleData.user.length)}
                       >
-                        View All
+                        View All ({roleData.user.length})
                       </Button>
                     </>
                   ) : (
@@ -569,10 +571,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ""
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                  : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -584,8 +586,8 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? handleDeleteRole
               : entityDeleteRec
-              ? unassignEntity
-              : unassignUserRole
+                ? unassignEntity
+                : unassignUserRole
           }
         />
       )}
