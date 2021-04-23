@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useCallback } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import {
   Dialog,
   Button,
@@ -16,6 +16,8 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import InputField from "../../components/Helpers/InputField";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
+import { useLocation, useHistory } from "react-router-dom";
+
 
 interface InitialData {
   fields: any[];
@@ -32,6 +34,9 @@ const CreateUser = ({ open, close, fetchData }) => {
     fields: [],
     values: {},
   });
+  const location = useLocation();
+  const history = useHistory();
+
 
   const getInitialData = useCallback(() => {
     setLoading(true);
@@ -56,11 +61,14 @@ const CreateUser = ({ open, close, fetchData }) => {
     getInitialData();
   }, [getInitialData]);
 
+
+
   const handleSubmit = (values) => {
     setSubmitting(true);
     axiosInstance()
       .post("/user", values)
       .then(({ data }) => {
+        const newId = data.data[0]._id;
         setToastConfig({
           open: true,
           type: "success",
@@ -68,12 +76,17 @@ const CreateUser = ({ open, close, fetchData }) => {
         });
         setSubmitting(false);
         fetchData();
+        history.push({
+          pathname: `/user/detail/${newId}`,
+          state: { location: location }
+        });       
         close();
       })
       .catch((error) => {
         setToastConfig(error);
         setSubmitting(false);
       });
+
   };
 
   return (

@@ -33,6 +33,7 @@ export default function ManageLeadDialog({
   leadApi
 }) {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
   const {
     state: { user, selectedEntity },
@@ -155,11 +156,13 @@ export default function ManageLeadDialog({
     axiosInstance()
       .post(`${leadApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
+        const newId = data.data._id;
         toastConfig.setToastConfig({
           open: true,
           type: "success",
           message: data.message,
         });
+        history.push(`${leadApi}/detail/${newId}`);
         setLoading(false);
         onSuccess();
       })
@@ -346,6 +349,7 @@ export default function ManageLeadDialog({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
+
             </>
           )}
         </Formik>
