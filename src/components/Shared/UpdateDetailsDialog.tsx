@@ -130,9 +130,8 @@ const UpdateDetailsDialog = (props) => {
                               size="small"
                               fullWidth
                               disabled={
-                                field.allowUpdate ? false :
-                                  field.fieldData.type === "email" ||
-                                  !field.isUpdate
+                                field.fieldData.type === "email" ||
+                                !field.isUpdate
                               }
                               values={values}
                               errors={errors}

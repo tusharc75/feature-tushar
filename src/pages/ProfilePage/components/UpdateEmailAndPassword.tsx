@@ -34,7 +34,8 @@ export default function ManageUpdatePassword({
     onClose,
     isUpdatePassword = false,
     isUpdateEmail = false,
-    userData = null
+    userData = null,
+    onFetchUserData
 }) {
     const toastConfig = useContext(CustomToastContext);
     const [loading, setLoading] = useState(false)
@@ -50,7 +51,7 @@ export default function ManageUpdatePassword({
             delete values["confirmPassword"]
             setLoading(true)
             axiosInstance()
-                .put(`/me/password`, { ...values })
+                .put(`/user/me/password`, { ...values })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
@@ -58,6 +59,7 @@ export default function ManageUpdatePassword({
                         message: data.message,
                     });
                     setLoading(false)
+                    onClose()
                 })
                 .catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -75,6 +77,8 @@ export default function ManageUpdatePassword({
                         message: data.message,
                     });
                     setLoading(false)
+                    onClose()
+                    onFetchUserData()
                 })
                 .catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -169,7 +173,6 @@ export default function ManageUpdatePassword({
                                             {
                                                 isUpdateEmail ? <Grid item sm={12}>
                                                     <Field
-                                                        style={{ width: '400px' }}
                                                         component={TextFieldFormik}
                                                         fullWidth
                                                         margin="dense"

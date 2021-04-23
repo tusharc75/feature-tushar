@@ -12,7 +12,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
 import UpdateEmailPasswordDialog from './UpdateEmailAndPassword'
-const _ = require('lodash')
+import _ from 'lodash'
 
 export default function ManageProfile(props) {
     const { displayUserDetails, displayUserProfileImage, userFields,
@@ -36,8 +36,10 @@ export default function ManageProfile(props) {
     const handleUpdateUser = (values) => {
         if (userData?._id) {
             setUpdating(true);
+            let clonedValues = _.cloneDeep(values)
+            if (clonedValues?.email) delete clonedValues["email"]
             axiosInstance()
-                .put(`/user/me`, { ...values, _id: userData?._id })
+                .put(`/user/me`, { ...clonedValues, _id: userData?._id })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
@@ -87,7 +89,7 @@ export default function ManageProfile(props) {
                 openDialog={openUpdateDialog}
                 onClose={closeUpdateDialog}
                 data={userData}
-                fields={userFields}
+                fields={filteredUserFields}
                 isUpdating={isUpdating}
                 handleUpdate={handleUpdateUser}
             />
@@ -206,6 +208,7 @@ export default function ManageProfile(props) {
                         <UpdateEmailPasswordDialog
                             isUpdatePassword={true}
                             open={isPasswordUpdate}
+                            onFetchUserData={onFetchUserData}
                             onClose={() => setPasswordUpdate(false)}
                         /> : null
                 }
@@ -215,6 +218,7 @@ export default function ManageProfile(props) {
                             isUpdateEmail={true}
                             userData={userData}
                             open={isEmailUpdate}
+                            onFetchUserData={onFetchUserData}
                             onClose={() => setEmailUpdate(false)}
                         /> : null
                 }

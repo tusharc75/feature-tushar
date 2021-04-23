@@ -60,7 +60,11 @@ export default function ProfilePage(props) {
             .get(`/user/${user?.user?._id}`)
             .then(({ data }) => {
                 if (data?.data) {
-                    delete data.data["updatedBy"]
+                    Object.keys(data.data).forEach(k => {
+                        if (["blocked", "updatedBy"].indexOf(data.data[k]) > 0) {
+                            delete data.data[k]
+                        }
+                    })
                     setUserData(data.data)
                 }
                 setUserLoading(false)
@@ -76,12 +80,7 @@ export default function ProfilePage(props) {
         axiosInstance()
             .get("/field?resource=User")
             .then(({ data }) => {
-                data.data = _.cloneDeep(data.data).map(obj => {
-                    if (obj?.fieldData?.type && obj.fieldData.type === "email") {
-                        obj.allowUpdate = true
-                    }
-                    return obj
-                })
+                data.data = data.data && data.data.length ? data.data.filter(field => ["blocked"].indexOf(field?.fieldData?.fieldName) < 0) : []
                 setUserFields(data.data)
                 setLoading(false)
             })
