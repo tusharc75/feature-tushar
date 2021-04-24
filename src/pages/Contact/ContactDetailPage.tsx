@@ -108,7 +108,7 @@ const Roles = (props) => {
 
         setCustomizedRoutes([
           contactBreadcrumb,
-          { title: `${data.firstName} ${data.lastName}` },
+          { title: [data.firstName, data.lastName].filter(d => d).join(" ") },
         ]);
       })
       .catch((err) => {
