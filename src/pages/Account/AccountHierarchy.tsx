@@ -3,6 +3,9 @@ import Chip from '@material-ui/core/Chip';
 import routes from './../../components/Helpers/Routes';
 import { Link } from 'react-router-dom'
 import { materialTableIcons } from './../../constants/helpers';
+import classes from '*.module.css';
+import React from 'react';
+import { Box } from '@material-ui/core';
 
 export default function AccountHierarchy({ data, currentAccountId, accountRoute }) {
 
@@ -78,13 +81,15 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
                     columns={columns}
                     options={options}
                 /> :
-                    <MaterialTable
-                        icons={materialTableIcons}
-                        data={data}
-                        columns={columns}
-                        parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
-                        options={options}
-                    />
+                    <Box margin={10}>
+                        <MaterialTable
+                            icons={materialTableIcons}
+                            data={data}
+                            columns={columns}
+                            parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
+                            options={options}
+                        />
+                    </Box>
             }
         </>
     );

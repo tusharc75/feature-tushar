@@ -75,17 +75,17 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
     }
 
     return (task &&
-        <Box>
+        <Box className="activityDetailBox">
             {task.length ?
                 <Fragment>
                     {task.map((_task, index) => (
-                        <Box key={_task._id} mb={1} border={1} p={1} borderColor="grey.300">
+                        <Box className="activity" key={_task._id}>
                             <Box>
                                 <Grid container>
-                                    <Grid item xs={8} >
-                                        <Typography variant="subtitle2">{_task.name}</Typography>
+                                    <Grid item xs={10}  className="d-flex align-items-center gap-1">
+                                        <Typography variant="subtitle2">{_task.name} </Typography> <span className="badge-date"> Due On : {moment(_task.dueDate).format("MMM DD YYYY")}</span>
                                     </Grid>
-                                    <Grid item xs={4} container justify="flex-end" >
+                                    <Grid item xs={2} container justify="flex-end" >
                                         <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _task._id)} >
                                             <MoreHorizIcon />
                                         </IconButton>
@@ -94,12 +94,12 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
                             </Box>
                             <Box pt={1}>
                                 <Grid container>
-                                    <Grid item xs={6} >
+                                    <Grid item xs={12} >
                                         <ListRelatedTo relatedTo={_task.relatedTo} />
                                         {/* <Chip label={_task.status} size="small" color="primary" /> */}
                                     </Grid>
                                     <Grid item xs={6} container justify="flex-end">
-                                        <Typography variant="caption" >Due Date : {moment(_task.dueDate).format("MMM DD YYYY")}</Typography>
+                                        
                                     </Grid>
                                 </Grid>
                             </Box>

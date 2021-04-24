@@ -10,7 +10,6 @@ import contactClass from "./contact.module.scss";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { useData } from "../../StateProvider/Provider";
 import { contactPage } from "../../routes/Contacts";
-import DetailsPage from "../../components/Shared/DetailsPage";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import routes from "../../components/Helpers/Routes";
 import axiosInstance from "./../../axios/axiosInstance";
@@ -23,6 +22,7 @@ import {
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageContact from "./ManageContact/ManageContact";
+import DetailsPage from "../../components/Shared/DetailsPage";
 
 const Roles = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -289,7 +289,7 @@ const Roles = (props) => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
 
-        <div>
+        <div className="detail-box">
           <DetailsPageHeader
             heading={headingLbl}
             logo={

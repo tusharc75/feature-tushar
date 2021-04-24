@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton, Container, Paper } from "@material-ui/core";
+import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton, TabPanel } from "@material-ui/lab";
 import CustomContainer from "../../components/CustomContainer";
 import Layout from "../../components/Layout";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -38,10 +38,9 @@ import QuickLinks, {
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import { TiFlowChildren } from "react-icons/ti";
 import { RiContactsBook2Fill } from "react-icons/ri";
-import { HiPresentationChartLine } from "react-icons/hi";
+import { HiOutlinePencilAlt, HiPresentationChartLine } from "react-icons/hi";
 import { MdLocalLibrary } from "react-icons/md";
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
-
 const useStyles = makeStyles((theme) => ({
   container: {
     padding: "0px",
@@ -94,7 +93,6 @@ export default function AccountDetailPage(props) {
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
   ] = useState(false);
-
   let { id } = useParams();
 
   useEffect(() => {
@@ -410,6 +408,7 @@ export default function AccountDetailPage(props) {
                       <>
                         <Button
                           variant="contained"
+                          size="small"
                           color={
                             accountData.static?.approved ? "secondary" : "primary"
                           }
@@ -431,6 +430,7 @@ export default function AccountDetailPage(props) {
                         <Button
                           variant="contained"
                           color="primary"
+                          size="small"
                           onClick={handleOpneUpdateDialog}
                         >
                           Edit
@@ -452,7 +452,7 @@ export default function AccountDetailPage(props) {
                   ) : null}
                 </DetailsPageHeader>
               }
-              <BoxWithBorder padding="8px">
+              <Box>
                 {loading ? (
                   <Grid container spacing={2}>
                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
@@ -468,46 +468,42 @@ export default function AccountDetailPage(props) {
                     ))}
                   </Grid>
                 ) : (
-                  <Box>
-                    <>
-                      <Tabs
-                        className="mb-4"
-                        value={currentTabIndex}
-                        onChange={(index, newValue) => {
-                          setCurrentTabIndex(newValue);
-                        }}
-                        indicatorColor="primary"
-                        textColor="primary"
-                        aria-label="icon tabs example"
-                      >
-                        <Tab
-                          label="Details"
-                          aria-controls="a11y-tabpanel-0"
-                          id="a11y-tab-0"
-                        />
-                        <Tab
-                          label="Account Hierarchy"
-                          aria-controls="a11y-tabpanel-1"
-                          id="a11y-tab-1"
-                        />
-                      </Tabs>
-                      <Box hidden={currentTabIndex !== 0}>
-                        <DetailsPage
-                          data={accountData}
-                          fields={accountFields}
-                        />
-                      </Box>
-                      <Box hidden={currentTabIndex !== 1}>
-                        <AccountHierarchy
-                          data={accountHierarchyData}
-                          currentAccountId={accountData._id}
-                          accountRoute={accountRoute}
-                        />
-                      </Box>
-                    </>
-                  </Box>
+                  <>
+                    <Tabs className="oms-tab" value={currentTabIndex}
+                      onChange={(index, newValue) => {
+                        setCurrentTabIndex(newValue);
+                      }}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      aria-label="icon tabs example"
+                    >
+                      <Tab
+                        label="Details"
+                        aria-controls="a11y-tabpanel-0"
+                        id="a11y-tab-0"
+                      />
+                      <Tab
+                        label="Account Hierarchy"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                    </Tabs>
+                    <Box hidden={currentTabIndex !== 0}>
+                      <DetailsPage
+                        data={accountData}
+                        fields={accountFields}
+                      />
+                    </Box>
+                    <Box hidden={currentTabIndex !== 1}>
+                      <AccountHierarchy
+                        data={accountHierarchyData}
+                        currentAccountId={accountData._id}
+                        accountRoute={accountRoute}
+                      />
+                    </Box>
+                  </>
                 )}
-              </BoxWithBorder>
+              </Box>
               {permissions?.opportunity?.isRead && (
                 <OpportunityInAccordian
                   opportunityPermissions={permissions.opportunity}

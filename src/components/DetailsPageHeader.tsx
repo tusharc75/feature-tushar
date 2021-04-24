@@ -9,17 +9,21 @@ const useStyles = makeStyles((theme) => ({
   root: {
     marginTop: 0,
   },
-  box: {
-    backgroundColor: "#E6F4FF",
-    borderRadius: 6,
-    padding: theme.spacing(0.6, 1.8),
+  detailHeader: {
+    borderBottom: "1px solid #e9e9e9",
+    padding: "4px 11px",
+    background: "#f5f5f5",
+    borderRadius: "6px 6px 0 0"
   },
-  customHeaderPaper: {
-    marginBottom: "16px",
-    padding: "10px",
+  box: {
+    padding: theme.spacing(0.5, 1.5),
+    borderRadius: "4px",
+    margin: theme.spacing(1.5),
+    boxShadow: "2px 2px 4px #2e0607",
+    background: "linear-gradient(to bottom right, #570305 0%, #c54e52 100%);"
   },
   labelColor: {
-    color: "#1a91b5",
+    color: "#fff",
   },
   avatar: {
     width: 20,
@@ -37,9 +41,9 @@ const DetailsPageHeader = (props) => {
   const classes = useStyles();
   return (
     <>
-      <Paper className={`${classes.customHeaderPaper} header-panel`} elevation={0}>
-        <Grid container justify="space-between">
-          <Grid item>
+      <Paper elevation={0}>
+        <Grid container justify="space-between" className="detailHeader">
+          <Grid item className="d-flex align-items-center gap-1">
             {loading ? (
               <Skeleton width={100} />
             ) : showHeading ? (
@@ -58,9 +62,11 @@ const DetailsPageHeader = (props) => {
                       alt="acc_logo"
                     />
                   ) : null}
-                  <span className="d-flex align-items-center gap-2">{heading} {
+                  <span className="d-flex align-items-center gap-2"><span className="listingHeader">{heading}</span> {
                     isApproved && <Tooltip title="Approved"><CheckCircleIcon color="primary" /></Tooltip>
                   }</span>
+
+
                 </Typography>
               </>
             ) : null}
@@ -87,25 +93,24 @@ const DetailsPageHeader = (props) => {
               return (
                 <React.Fragment key={i}>
                   {mainPoints[key] ? (
-                    <React.Fragment>
-                      <Box className={classes.box}>
-                        <Typography
-                          align="center"
-                          variant="subtitle1"
-                          className={`text-capitalize ${classes.labelColor}`}
-                        >
-                          {key}
-                        </Typography>
-                        <Typography
-                          align="center"
-                          color="primary"
-                          style={{ fontWeight: 500 }}
-                        >
-                          {mainPoints[key] || ""}
-                        </Typography>
-                      </Box>
-                      <Box component="span" marginX={1} />
-                    </React.Fragment>
+
+                    <Box className={classes.box}>
+                      <Typography
+                        align="center"
+                        variant="subtitle1"
+                        style={{ opacity: 0.9 }}
+                        className={`text-capitalize ${classes.labelColor}`}
+                      >
+                        {key}
+                      </Typography>
+                      <Typography
+                        align="center"
+                        className={classes.labelColor}
+                        style={{ fontWeight: 500 }}
+                      >
+                        {mainPoints[key] || ""}
+                      </Typography>
+                    </Box>
                   ) : null}
                 </React.Fragment>
               );
