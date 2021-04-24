@@ -39,7 +39,7 @@ export default function ManageLeadDialog({
     state: { user, selectedEntity },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate.owner
+    !isNew && user.user._id !== dataToUpdate.owner.optionValue
   );
 
   const [entityData, setEntityData] = useState({
