@@ -400,6 +400,7 @@ export default function AccountDetailPage(props) {
               }
               mainPoints={mainPoints}
               showHeading={true}
+              isApproved={accountData?.static?.approved}
             >
               {permissions &&
                 permissions[accountResource] &&
