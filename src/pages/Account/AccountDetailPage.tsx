@@ -400,6 +400,7 @@ export default function AccountDetailPage(props) {
                   logo={
                     accountData?.accountLogo ? accountData.accountLogo : undefined
                   }
+                  isApproved={accountData?.static?.approved}
                   mainPoints={mainPoints}
                   showHeading={true}
                 >

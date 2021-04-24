@@ -39,6 +39,7 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
+import { userType } from "../../constants/helpers";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -57,7 +58,7 @@ const UserDetailsPage = () => {
   const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
 
-  const [isChangingPermission, setChangingPermission] = useState(false);
+  const [isChangingPermission, setIsChangingPermission] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
   const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
@@ -292,11 +293,11 @@ const UserDetailsPage = () => {
       ...userPermissions,
       [e.target.name]: e.target.checked,
     };
-    setChangingPermission(true);
+    setIsChangingPermission(true);
     axiosInstance()
       .post("/user/permission-setup", newData)
       .then(({ data }) => {
-        setChangingPermission(false);
+        setIsChangingPermission(false);
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -304,7 +305,7 @@ const UserDetailsPage = () => {
         });
       })
       .catch((err) => {
-        setChangingPermission(false);
+        setIsChangingPermission(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -444,8 +445,8 @@ const UserDetailsPage = () => {
                                 checked={userPermissions[key]}
                                 name={key}
                                 disabled={
-                                  isChangingPermission ||
-                                  !permissions.user.isUpdate
+                                  (isChangingPermission || !permissions.user.isUpdate) && 
+                                  !(user?.user?.userType == userType.brandAdmin)
                                 }
                                 onChange={handleChangePermissions}
                               />
@@ -639,8 +640,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName}`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
-              : ""
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

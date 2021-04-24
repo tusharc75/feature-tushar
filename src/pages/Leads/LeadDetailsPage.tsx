@@ -43,6 +43,14 @@ const LeadDetailsPage = () => {
     isDelete: false,
   });
 
+  const [hasPermissionToConvertToOpportunity, setHasPermissionToConvertToOpportunity] = useState(false);
+  const [isLeadAlreadyConvertedToOpportunity, setIsLeadAlreadyConvertedToOpportunity] = useState(false);
+  const [okButtonLoading, setOkButtonLoading] = useState(false);
+  const [
+    convertLeadToOpportunityConfirmationDialog,
+    setConvertLeadToOpportunityConfirmationDialog,
+  ] = useState({ open: false, id: null, leadName: null, message: null });
+
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
 
@@ -68,16 +76,34 @@ const LeadDetailsPage = () => {
       axiosInstance()
         .get(`${leadApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+          const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName]
             .filter((d) => d)
             .join(" ");
 
+          let dontHavePermissions = [];
+
+          if (!permissions["customerAccount"].isCreate) {
+            dontHavePermissions.push("Customer Account");
+          }
+          if (!permissions["customerContact"].isCreate) {
+            dontHavePermissions.push("Customer Contact");
+          }
+          if (!permissions["opportunity"].isCreate) {
+            dontHavePermissions.push("Opportunity");
+          }
+
+          const isAllowedToUpdate = [...data.collaborator, data.owner].some(
+            (d) => d?.optionValue == userId
+          );
+          setHasPermissionToConvertToOpportunity(dontHavePermissions.length == 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate);
+          setIsLeadAlreadyConvertedToOpportunity(data.convertedToOpportunity);
+
           if (data?.salutation?.optionLabel) {
             name = data.salutation.optionLabel + name;
           }
           setHeadingLbl(name);
-          const userId = user?.user?._id;
 
           setAllowedToEdit(
             [...data.collaborator, data.owner].some(
@@ -151,6 +177,29 @@ const LeadDetailsPage = () => {
     setOpenUpdateDialog(true);
   };
 
+  const convertLeadToOpportunity = () => {
+    axiosInstance()
+      .post(`${leadApi}/to-opportunity`, { ids: [leadData._id] })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
+        setConvertLeadToOpportunityConfirmationDialog({
+          open: false,
+          id: null,
+          leadName: null,
+          message: null,
+        });
+        fetchLeadData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setOkButtonLoading(false);
+      });
+  };
+
   return (
     <>
       {openUpdateDialog && (
@@ -202,6 +251,26 @@ const LeadDetailsPage = () => {
               </Button>
             )}
             <Box component="span" marginX={1} />
+            {
+              !isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter(d => d).join(" ")
+                    setConvertLeadToOpportunityConfirmationDialog({
+                      open: true,
+                      id: leadData._id,
+                      leadName: leadName,
+                      message: `Are you sure, You want to convert ${leadName} to opportunity ?`,
+                    });
+                  }}
+                >
+                  Convert Lead To Opportunity
+                </Button>
+                <Box component="span" marginX={1} />
+              </>
+            }
             {leadsPermissions.isDelete && allowedToDelete && (
               <DeleteButton
                 text="Delete"
@@ -275,7 +344,7 @@ const LeadDetailsPage = () => {
                           access: true,
                         },
                       ]}
-                      handleActivityRefresh={() => {}}
+                      handleActivityRefresh={() => { }}
                     />
                   </div>
                 )}
@@ -288,6 +357,23 @@ const LeadDetailsPage = () => {
               message={`Are you sure you want to delete this Lead ?`}
               onClose={() => setShowConfirmBox(false)}
               onOk={handleDeleteLead}
+            />
+          ) : null}
+
+          {convertLeadToOpportunityConfirmationDialog.open ? (
+            <ConfirmationDialog
+              open={convertLeadToOpportunityConfirmationDialog.open}
+              message={convertLeadToOpportunityConfirmationDialog.message}
+              onClose={() => {
+                setConvertLeadToOpportunityConfirmationDialog({
+                  open: false,
+                  id: null,
+                  leadName: null,
+                  message: null,
+                });
+              }}
+              okBtnLoading={okButtonLoading}
+              onOk={convertLeadToOpportunity}
             />
           ) : null}
         </div>

@@ -1,8 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, Box, Avatar, Paper } from "@material-ui/core";
+import { Grid, Typography, Box, Avatar, Paper, Tooltip } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const DetailsPageHeader = (props) => {
-  const { mainPoints, heading, children, showHeading, logo, loading } = props;
+  const { mainPoints, heading, children, showHeading, logo, loading, isApproved } = props;
   const classes = useStyles();
   return (
     <>
@@ -57,7 +58,9 @@ const DetailsPageHeader = (props) => {
                       alt="acc_logo"
                     />
                   ) : null}
-                  <span>{heading}</span>
+                  <span className="d-flex align-items-center gap-2">{heading} {
+                    isApproved && <Tooltip title="Approved"><CheckCircleIcon color="primary" /></Tooltip>
+                  }</span>
                 </Typography>
               </>
             ) : null}
@@ -124,6 +127,7 @@ DetailsPageHeader.propTypes = {
   logo: PropTypes.any,
   mainPoints: PropTypes.any,
   showHeading: PropTypes.any,
+  isApproved: PropTypes.any
 };
 
 export default DetailsPageHeader;
