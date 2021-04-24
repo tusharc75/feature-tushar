@@ -44,6 +44,10 @@ export const roleTypes = [
   },
 ];
 
+export const userType = {
+  brandAdmin: 2
+}
+
 export const sidebarResource = {
   brand: "Brand",
   role: "Role",
