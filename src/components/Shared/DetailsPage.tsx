@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Grid,
   makeStyles,
@@ -13,6 +13,7 @@ import {
   Link as MuiLink,
   Popover,
 } from "@material-ui/core";
+import { Link } from "react-router-dom";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { kebabCase } from "lodash";
 import axios from "axios";
@@ -51,15 +52,13 @@ const Details = (props: DetailProps) => {
   const classes = useStyles();
   const theme = useTheme();
   const { data, fields } = props;
-  const containerRef = useRef(null);
-
   const [isDownloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [anchorPopoverEl, setAnchorPopoverEl] = useState(null);
   const [popoverData, setPopoverData] = useState(null);
-  const [loadingPopoverData, setLoadingPopoverData] = useState(false);
+  const [loadingPopoverData, setLoadingPopoverData] = useState(true);
   const [lookupResource, setLookupResource] = useState(null);
   const cancelTokenSource = axios.CancelToken.source();
 
@@ -308,7 +307,7 @@ const Details = (props: DetailProps) => {
 
     return (
       <Box width="250px">
-        {loadingPopoverData ? (
+        {loadingPopoverData || !popoverData ? (
           <Box display="flex" justifyContent="center">
             <CircularProgress size={20} />
           </Box>
@@ -323,7 +322,14 @@ const Details = (props: DetailProps) => {
               flexDirection="column"
               justifyContent="start"
             >
-              <Typography className={classes.popoverText}>{name}</Typography>
+              <Typography className={classes.popoverText}>
+                <MuiLink
+                  component={Link}
+                  to={`/${lookupResource}/detail/${popoverData?._id}`}
+                >
+                  {name}
+                </MuiLink>
+              </Typography>
               <Typography
                 color="textSecondary"
                 variant="body2"
@@ -348,8 +354,7 @@ const Details = (props: DetailProps) => {
   return (
     <div>
       <Popover
-        ref={containerRef}
-        style={{ pointerEvents: "none" }}
+        onClick={handlePopoverClose}
         open={Boolean(anchorPopoverEl)}
         anchorEl={anchorPopoverEl}
         anchorOrigin={{
@@ -364,8 +369,9 @@ const Details = (props: DetailProps) => {
         disableRestoreFocus
       >
         <Box
+          id="#popover_container"
           padding={1}
-          style={{ pointerEvents: "all" }}
+          style={{ pointerEvents: "all", overflow: "hidden" }}
           onMouseLeave={handlePopoverClose}
         >
           {renderPopoverData()}
