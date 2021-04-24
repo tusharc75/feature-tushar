@@ -124,14 +124,15 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
 
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
+                                                                                        size="small"
                                                                                         value={userList.find(v => v.name == userVal.name)}
                                                                                         options={userList.filter(element => !values.users.map(e => e.name).includes(element.name))}
                                                                                         getOptionLabel={(option: any) => option.name}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
-                                                                                                ["name"]: newValue.name,
-                                                                                                ["id"]: newValue.id,
+                                                                                                ["name"]: newValue?.name,
+                                                                                                ["id"]: newValue?.id,
                                                                                             });
                                                                                         }}
 
@@ -143,6 +144,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                 <Grid item md={3}>
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
+                                                                                        size="small"
                                                                                         value={currencies.find(v => v.label == userVal.currency)}
                                                                                         options={currencies}
                                                                                         getOptionLabel={(option: any) => option.label}
@@ -163,6 +165,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                         fullWidth
                                                                                         variant="outlined"
                                                                                         type="text"
+                                                                                        size="small"
                                                                                         component={TextField}
                                                                                         name="amount"
                                                                                         placeholder="Enter Amount"
