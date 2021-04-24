@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 function LeadsHeader(props) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
-    const [showMessageDialog, setShowMessageDialog] = useState(false);
+    const [messageDialog, setMessageDialog] = useState({ open: false, message: "" });
 
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -49,6 +49,7 @@ function LeadsHeader(props) {
     };
 
     const {
+        userId,
         selectedType,
         onTypeChange,
         options,
@@ -62,8 +63,9 @@ function LeadsHeader(props) {
         heading,
         allowToConvertLeadToOpportunity,
         showLeadToOpportunityConfirmationDialog,
-        isAnyAlreadyConvertedLeadIncluded
+        selectedLeads
     } = props
+
     return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6} className="d-flex align-items-center gap-1">
             {icon} <span className="listingHeader">{heading}
@@ -140,10 +142,15 @@ function LeadsHeader(props) {
                                 allowToConvertLeadToOpportunity && <MenuItem
                                     onClick={() => {
                                         closeActions();
-                                        if (isAnyAlreadyConvertedLeadIncluded) {
-                                            setShowMessageDialog(true)
+                                        if (selectedLeads.some((d) => d.isChecked && d.convertedToOpportunity)) {
+                                            setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
                                         } else {
-                                            showLeadToOpportunityConfirmationDialog();
+                                            if (selectedLeads.some(d => d.isAllowedToUpdate == false)) {
+                                                setMessageDialog({ open: true, message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.` })
+                                            }
+                                            else {
+                                                showLeadToOpportunityConfirmationDialog();
+                                            }
                                         }
                                     }}
                                 >Convert To Opportunity</MenuItem>
@@ -153,11 +160,11 @@ function LeadsHeader(props) {
                 }
             </Box>
             {
-                showMessageDialog && isAnyAlreadyConvertedLeadIncluded ? (
+                messageDialog.open ? (
                     <MessageDialog
-                        open={showMessageDialog}
-                        message={`You are trying to convert already converted lead, Please unselect those records and try again.`}
-                        onClose={() => setShowMessageDialog(false)}
+                        open={messageDialog.open}
+                        message={messageDialog.message}
+                        onClose={() => setMessageDialog({ open: false, message: null })}
                     />
                 ) : null}
         </Grid>

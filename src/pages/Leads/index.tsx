@@ -126,7 +126,10 @@ const Leads = () => {
         isChecked: false,
         id: u._id,
         name: name,
-        owner: u.owner?.optionLabel ? u.owner.optionLabel : "",
+        owner: u.owner,
+        isAllowedToUpdate: [...u.collaborator, u.owner].some(
+          (d) => d?.optionValue == user?.user?._id
+        )
       };
       return res;
     });
@@ -186,6 +189,7 @@ const Leads = () => {
     middleName,
     lastName,
     convertedToOpportunity,
+    isAllowedToUpdate
   }) => {
     let dontHavePermissions = [];
 
@@ -214,6 +218,14 @@ const Leads = () => {
     ) : convertedToOpportunity ? (
       <>
         <Tooltip title="This lead is already converted to opportunity">
+          <IconButton aria-label="Convert to opportunity">
+            <SiConvertio size={18} />
+          </IconButton>
+        </Tooltip>
+      </>
+    ) : !isAllowedToUpdate ? (
+      <>
+        <Tooltip title="You are not allowed to convert as you are neither owner nor collaborator">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
@@ -386,7 +398,7 @@ const Leads = () => {
           <GridDeleteIcon
             hasDeletePermission={leadsPermissions.isDelete}
             ownerId={params.row.owner.optionValue}
-            userId={user._id}
+            userId={user?.user?._id}
             onDelete={() => showConfirmBox(params.row)}
             entity="lead"
           />
@@ -550,6 +562,7 @@ const Leads = () => {
       <Container>
         <div className="header-panel">
           <LeadsHeader
+            userId={user?.user?._id}
             selectedType={selectedType}
             onTypeChange={handleLeadTypeSel}
             options={LeadTypes}
@@ -568,7 +581,7 @@ const Leads = () => {
               permissions["customerContact"].isCreate &&
               permissions["opportunity"].isCreate
             }
-            isAnyAlreadyConvertedLeadIncluded={dataRows.some((d) => d.isChecked && d.convertedToOpportunity)}
+            selectedLeads={dataRows.filter((d) => d.isChecked)}
             showLeadToOpportunityConfirmationDialog={() => {
               setConvertLeadToOpportunityConfirmationDialog({
                 open: true,
