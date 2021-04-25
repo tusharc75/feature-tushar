@@ -1,9 +1,8 @@
-import { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid } from "@material-ui/core";
+import React, { useState, useEffect, useContext } from "react";
+import { Box, Button, Grid, Paper } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { Skeleton } from "@material-ui/lab";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import Container from "../../components/CustomContainer";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -215,168 +214,136 @@ const LeadDetailsPage = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={customizedRoutes} />
 
-        {!leadData ? (
-          <Container>
-            <Skeleton variant="text" width="150px" height="40px" />
-            <Box display="flex">
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-              <Box marginX={1} />
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-            </Box>
-          </Container>
-        ) : (
-          <DetailsPageHeader
-            heading={headingLbl}
-            logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
-            mainPoints={mainPoints}
-            showHeading={true}
-          >
-            {leadsPermissions.isUpdate && allowedToEdit && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpneUpdateDialog}
-              >
-                Edit
-              </Button>
-            )}
-            <Box component="span" marginX={1} />
-            {
-              !isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && <>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter(d => d).join(" ")
-                    setConvertLeadToOpportunityConfirmationDialog({
-                      open: true,
-                      id: leadData._id,
-                      leadName: leadName,
-                      message: `Are you sure, You want to convert ${leadName} to opportunity ?`,
-                    });
-                  }}
-                >
-                  Convert Lead To Opportunity
-                </Button>
-                <Box component="span" marginX={1} />
-              </>
-            }
-            {leadsPermissions.isDelete && allowedToDelete && (
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)}
-              />
-            )}
-          </DetailsPageHeader>
-        )}
-        <div>
-          <Grid
-            container
-            spacing={2}
-            style={{ minHeight: "calc(100vh - 200px)" }}
-          >
-            <Grid item sm={8} md={8} lg={8}>
-              <Container styles={{ height: "100%" }}>
-                {loading ? (
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
-                      (i, index) => (
-                        <Grid key={index} item sm={6} md={6}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="16px"
-                          />
-                          <Box marginY={1} />
-                          <Skeleton width="100%" height="50px" />
-                        </Grid>
-                      )
-                    )}
-                  </Grid>
-                ) : !leadFields.length ? (
-                  <Box
-                    height="100%"
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <img src={SVG("Contacts Placeholder")} alt="No Data" />
-                  </Box>
-                ) : (
-                  <DetailsPage data={leadData} fields={leadFields} />
-                )}
-              </Container>
-            </Grid>
-            <Grid
-              className={styles.activityContainer}
-              item
-              sm={4}
-              md={4}
-              lg={4}
-            >
-              <Container>
-                {!leadData ? (
-                  <Box>
-                    <Skeleton variant="text" width="100px" height="25px" />
-                    <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i, index) => (
-                      <Skeleton key={index} width="100%" height="50px" />
-                    ))}
-                  </Box>
-                ) : (
-                  <div>
-                    <Activity
-                      relatedTo={[
-                        {
-                          type: "lead",
-                          referenceId: leadData._id,
-                          access: true,
-                        },
-                      ]}
-                      handleActivityRefresh={() => { }}
+        <Grid container direction="row">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Grid>
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+            <Paper>
+              {!leadData ? (
+                <div>
+                  <Skeleton variant="text" width="150px" height="40px" />
+                  <Box display="flex">
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
                     />
-                  </div>
-                )}
-              </Container>
-            </Grid>
-          </Grid>
-          {showConfirmBox ? (
-            <ConfirmationDialog
-              open={showConfirmBox}
-              message={`Are you sure you want to delete this Lead ?`}
-              onClose={() => setShowConfirmBox(false)}
-              onOk={handleDeleteLead}
-            />
-          ) : null}
+                    <Box marginX={1} />
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                  </Box>
+                </div>
+              ) : (
+                <DetailsPageHeader
+                  heading={headingLbl}
+                  logo={leadData?.leadLogo ? leadData.leadLogo : undefined}
+                  mainPoints={mainPoints}
+                  showHeading={true}
+                >
+                  {leadsPermissions.isUpdate && allowedToEdit && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleOpneUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+                  )}
+                  <Box component="span" marginX={1} />
+                  {
+                    !isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && <>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                          const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter(d => d).join(" ")
+                          setConvertLeadToOpportunityConfirmationDialog({
+                            open: true,
+                            id: leadData._id,
+                            leadName: leadName,
+                            message: `Are you sure, You want to convert ${leadName} to opportunity ?`,
+                          });
+                        }}
+                      >
+                        Convert Lead To Opportunity
+                </Button>
+                      <Box component="span" marginX={1} />
+                    </>
+                  }
+                  {leadsPermissions.isDelete && allowedToDelete && (
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => setShowConfirmBox(true)}
+                    />
+                  )}
+                </DetailsPageHeader>
+              )}
 
-          {convertLeadToOpportunityConfirmationDialog.open ? (
-            <ConfirmationDialog
-              open={convertLeadToOpportunityConfirmationDialog.open}
-              message={convertLeadToOpportunityConfirmationDialog.message}
-              onClose={() => {
-                setConvertLeadToOpportunityConfirmationDialog({
-                  open: false,
-                  id: null,
-                  leadName: null,
-                  message: null,
-                });
-              }}
-              okBtnLoading={okButtonLoading}
-              onOk={convertLeadToOpportunity}
-            />
-          ) : null}
-        </div>
+              {loading ? (
+                <Grid container spacing={2}>
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
+                    (i, index) => (
+                      <Grid key={index} item sm={6} md={6}>
+                        <Skeleton
+                          variant="text"
+                          width="100px"
+                          height="16px"
+                        />
+                        <Box marginY={1} />
+                        <Skeleton width="100%" height="50px" />
+                      </Grid>
+                    )
+                  )}
+                </Grid>
+              ) : !leadFields.length ? (
+                <Box
+                  height="100%"
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <img src={SVG("Contacts Placeholder")} alt="No Data" />
+                </Box>
+              ) : (
+                <DetailsPage data={leadData} fields={leadFields} />
+              )}
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper>
+
+              {!leadData ? (
+                <Box>
+                  <Skeleton variant="text" width="100px" height="25px" />
+                  <Box marginY={1} />
+                  {[0, 1, 2, 3, 4].map((i, index) => (
+                    <Skeleton key={index} width="100%" height="50px" />
+                  ))}
+                </Box>
+              ) : (
+                <div>
+                  <Activity
+                    relatedTo={[
+                      {
+                        type: "lead",
+                        referenceId: leadData._id,
+                        access: true,
+                      },
+                    ]}
+                    handleActivityRefresh={() => { }}
+                  />
+                </div>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
       </Layout>
     </>
   );

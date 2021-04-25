@@ -1,12 +1,11 @@
-import { useState, useEffect, useContext } from "react";
-import { Grid, Box, Button, Typography, IconButton } from "@material-ui/core";
+import React, { useState, useEffect, useContext } from "react";
+import { Grid, Box, Button, Typography, IconButton, Container, Paper } from "@material-ui/core";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
 
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
-import Container from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -311,152 +310,166 @@ const EntityDetailsPage = () => {
         />
       )}
       <Layout>
+
         <Grid container direction="row">
-          <Grid item xs={12}>
-            <CustomBreadCrumbs routes={customizedRoutes} />
-          </Grid>
+          <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        {!entityData ? (
-          <Container>
-            <Skeleton variant="text" width="150px" height="40px" />
-            <Box display="flex">
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-              <Box marginX={1} />
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-            </Box>
-          </Container>
-        ) : (
-          <DetailsPageHeader
-            heading={headingLbl}
-            mainPoints={mainPoints}
-            showHeading={true}
-          >
-            {permissions?.entity?.isUpdate && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpenUpdateDialog}
-              >
-                Edit
-              </Button>
-            )}
-            <Box component="span" marginX={1} />
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+            <Paper>
+              {!entityData ? (
+                <div>
+                  <Skeleton variant="text" width="150px" height="40px" />
+                  <Box display="flex">
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                    <Box marginX={1} />
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                  </Box>
+                </div>
+              ) : (
 
-            {permissions?.entity?.isDelete && (
-              <span
-                title={
-                  selectedEntity === id
-                    ? "Primarily selected entity can't be deleted"
-                    : "Permanently delete this entity"
-                }
-              >
-                <DeleteButton
-                  disabled={selectedEntity === id}
-                  text="Delete"
-                  onClick={() => setShowConfirmBox(true)}
-                />
-              </span>
-            )}
-          </DetailsPageHeader>
-        )}
+                <DetailsPageHeader
+                  heading={headingLbl}
+                  mainPoints={mainPoints}
+                  showHeading={true}
+                >
+                  {permissions?.entity?.isUpdate && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+                  )}
+                  <Box component="span" marginX={1} />
+                  {permissions?.entity?.isDelete && (
+                    <span
+                      title={
+                        selectedEntity === id
+                          ? "Primarily selected entity can't be deleted"
+                          : "Permanently delete this entity"
+                      }
+                    >
+                      <DeleteButton
+                        disabled={selectedEntity === id}
+                        text="Delete"
+                        onClick={() => setShowConfirmBox(true)}
+                      />
+                    </span>
+                  )}
+                </DetailsPageHeader>
+              )}
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Container styles={{ borderRadius: "8px" }}>
-              <Box style={{ padding: "8px", minHeight: "450px" }}>
+
+              <Box>
                 {loading || !entityFields.length ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
-                  <DetailsPage data={entityData} fields={entityFields} />
-                )}
-              </Box>
-            </Container>
-            <Box marginY={2} />
-            <Container>
-              <Box
-                width="100%"
-                padding={1}
-                bgcolor="grey.200"
-                display="flex"
-                justifyContent="space-between"
-              >
-                <Typography variant="subtitle2">
-                  Assigned Users ({users.length || 0})
-                </Typography>
-                {permissions.entity.isUpdate && (
-                  <IconButton
-                    title="Assign users"
-                    color="primary"
-                    size="small"
-                    onClick={userDialogOpen}
-                  >
-                    <ControlPoint />
-                  </IconButton>
-                )}
-              </Box>
-              <Box padding={1}>
-                {usersLoading ? (
-                  <Box display="flex">
-                    {[1, 2].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        style={{
-                          padding: "8px",
-                          margin: "8px",
-                          width: "100%",
-                        }}
-                      >
-                        <Box padding={1}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="20px"
-                          />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
-                        </Box>
-                      </BoxWithBorder>
-                    ))}
-                  </Box>
-                ) : users.length ? (
                   <>
-                    <AssignedUsers
-                      permissions={permissions}
-                      data={users.slice(0, showUsers)}
-                      unassignUser={handleUnassignUser}
-                    />
-
-                    <Box marginY={1} />
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => setShowUsers(users.length)}
+                    <Box
+                      width="100%"
+                      padding={1}
+                      bgcolor="grey.200"
+                      display="flex"
+                      justifyContent="space-between"
                     >
-                      View All ({users.length})
-                    </Button>
+                      <Typography variant="subtitle2">
+                        Entity Detail
+                  </Typography>
+                    </Box>
+                    <DetailsPage data={entityData} fields={entityFields} />
                   </>
-                ) : (
-                  <Box textAlign="center" padding={2}>
-                    <Typography>No Users </Typography>
-                  </Box>
                 )}
               </Box>
-            </Container>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Box
+                    width="100%"
+                    padding={1}
+                    bgcolor="grey.200"
+                    display="flex"
+                    justifyContent="space-between"
+                  >
+                    <Typography variant="subtitle2">
+                      Assigned Users ({users.length || 0})
+                </Typography>
+                    {permissions.entity.isUpdate && (
+                      <IconButton
+                        title="Assign users"
+                        color="primary"
+                        size="small"
+                        onClick={userDialogOpen}
+                      >
+                        <ControlPoint />
+                      </IconButton>
+                    )}
+                  </Box>
+                  <Box padding={1}>
+                    {usersLoading ? (
+                      <Box display="flex">
+                        {[1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              padding: "8px",
+                              margin: "8px",
+                              width: "100%",
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton
+                                variant="text"
+                                width="100px"
+                                height="20px"
+                              />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))}
+                      </Box>
+                    ) : users.length ? (
+                      <>
+                        <AssignedUsers
+                          permissions={permissions}
+                          data={users.slice(0, showUsers)}
+                          unassignUser={handleUnassignUser}
+                        />
+
+                        <Box marginY={1} />
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => setShowUsers(users.length)}
+                        >
+                          View All ({users.length})
+                    </Button>
+                      </>
+                    ) : (
+                      <Box textAlign="center" padding={2}>
+                        <Typography>No Users </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+            </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Container styles={{ borderRadius: "8px" }}>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper>
               <Box style={{ padding: "0px", maxHeight: "450px" }}>
                 <Box
                   width="100%"
@@ -468,7 +481,6 @@ const EntityDetailsPage = () => {
                   <Typography variant="subtitle2">
                     Assigned Regional Roles ({roles.length || 0})
                   </Typography>
-
                   <IconButton
                     disabled={!permissions.role.isUpdate}
                     color="primary"
@@ -518,9 +530,11 @@ const EntityDetailsPage = () => {
                   )}
                 </Box>
               </Box>
-            </Container>
+
+            </Paper>
           </Grid>
         </Grid>
+
       </Layout>
       {showConfirmBox ? (
         <ConfirmationDialog
@@ -529,8 +543,8 @@ const EntityDetailsPage = () => {
             deleteRoleRec
               ? `Are you sure you want to un-assign role ${deleteRoleRec.name} from entity ${entityData.entityName}`
               : userDeleteRec
-              ? `Are you sure you want to un-assign user ${userDeleteRec.firstName} ${userDeleteRec.lastName}?`
-              : `Are you sure you want to delete this entity ?`
+                ? `Are you sure you want to un-assign user ${userDeleteRec.firstName} ${userDeleteRec.lastName}?`
+                : `Are you sure you want to delete this entity ?`
           }
           onClose={() => {
             setDeleteRoleRec(null);
@@ -540,8 +554,8 @@ const EntityDetailsPage = () => {
             deleteRoleRec
               ? unassignRole
               : userDeleteRec
-              ? unassignUserRole
-              : handleDeleteEntity
+                ? unassignUserRole
+                : handleDeleteEntity
           }
         />
       ) : null}

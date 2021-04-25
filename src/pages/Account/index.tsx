@@ -655,8 +655,7 @@ export default function Account(props) {
           </Grid>
         </Grid>
         <CustomContainer>
-          <div
-            className={`${accountClass["account_header_inner_container"]}`}
+          <div className={`${accountClass["account_header_inner_container"]}`}
           >
             <CustomHeader
               total={rowCount}

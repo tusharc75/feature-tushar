@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Paper, Typography } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
-import Container from "../../components/CustomContainer";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -285,115 +284,97 @@ const Roles = (props) => {
           // contactApi={contactApi}
           />
         )}
+
         <Grid container direction="row">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+            <Paper>
 
-        <div className="detail-box">
-          <DetailsPageHeader
-            heading={headingLbl}
-            logo={
-              contactData?.contactLogo ? contactData.contactLogo : undefined
-            }
-            mainPoints={mainPoints}
-            // style={{ marginTop: "150px", minHeight: "200px" }}
-            showHeading={true}
-          >
-            {contactPermissions.isUpdate && canEdit ? (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpneUpdateDialog}
+              <DetailsPageHeader
+                heading={headingLbl}
+                logo={
+                  contactData?.contactLogo ? contactData.contactLogo : undefined
+                }
+                mainPoints={mainPoints}
+                // style={{ marginTop: "150px", minHeight: "200px" }}
+                showHeading={true}
               >
-                Edit
-              </Button>
-            ) : null}
-
-            <Box component="span" marginX={1} />
-            {contactPermissions.isDelete &&
-              contactData?.owner?.optionValue &&
-              user?.user?._id &&
-              contactData.owner.optionValue === user.user._id ? (
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)}
-              />
-            ) : null}
-          </DetailsPageHeader>
-
-          <div className={`${contactClass.detail_page_container}`}>
-            <Container>
-              <Grid container spacing={3}>
-                <Grid item sm={8} md={8} lg={8}>
-                  <div
-                    className={`${contactClass.detail_page_div1}`}
-                  // style={{ pointerEvents: allowedToEdit ? "" : "none" }}
+                {contactPermissions.isUpdate && canEdit ? (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpneUpdateDialog}
                   >
-                    {
-                      loading ? (
-                        <Grid container spacing={2}>
-                          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
-                            (i) => (
-                              <Grid item sm={6} md={6}>
-                                <Skeleton
-                                  variant="text"
-                                  width="100px"
-                                  height="16px"
-                                />
-                                <Box marginY={1} />
-                                <Skeleton width="100%" height="50px" />
-                              </Grid>
-                            )
-                          )}
+                    Edit
+                  </Button>
+                ) : null}
+
+                <Box component="span" marginX={1} />
+                {contactPermissions.isDelete &&
+                  contactData?.owner?.optionValue &&
+                  user?.user?._id &&
+                  contactData.owner.optionValue === user.user._id ? (
+                  <DeleteButton
+                    text="Delete"
+                    onClick={() => setShowConfirmBox(true)}
+                  />
+                ) : null}
+              </DetailsPageHeader>
+
+              {
+                loading ? (
+                  <Grid container spacing={2}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
+                      (i) => (
+                        <Grid item sm={6} md={6}>
+                          <Skeleton
+                            variant="text"
+                            width="100px"
+                            height="16px"
+                          />
+                          <Box marginY={1} />
+                          <Skeleton width="100%" height="50px" />
                         </Grid>
-                      ) : (
-                        <DetailsPage
-                          data={contactData}
-                          fields={contactFields}
-                        />
                       )
+                    )}
+                  </Grid>
+                ) : (
+                  <DetailsPage
+                    data={contactData}
+                    fields={contactFields}
+                  />
+                )
+              }
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper>
+              {!isObjectEmpty(contactData) && (
+                <div>
+                  <Activity
+                    relatedTo={[
+                      {
+                        type: accountResource,
+                        referenceId: contactData?.accountName?.optionValue,
+                        access: false,
+                      },
+                      {
+                        type: contactResource,
+                        referenceId: contactData._id,
+                        access: true,
+                      },
+                    ]}
+                    handleActivityRefresh={() => { }}
+                  />
+                </div>
+              )}
 
-                      // <DetailsPage
-                      //     data={contactData}
 
-                      //     fields={contactFields}
-                      //     isUpdating={isUpdating}
-                      //     canEdit={allowedToEdit}
-                      //     handleUpdate={handleUpdateContact}
-                      //     sourceComponent="contact"
-                      // />
-                    }
-                  </div>
-                </Grid>
-                <Grid
-                  item
-                  sm={4}
-                  md={4}
-                  lg={4}
-                  className={`${contactClass.custom_grid}`}
-                >
-                  {!isObjectEmpty(contactData) && (
-                    <div>
-                      <Activity
-                        relatedTo={[
-                          {
-                            type: accountResource,
-                            referenceId: contactData?.accountName?.optionValue,
-                            access: false,
-                          },
-                          {
-                            type: contactResource,
-                            referenceId: contactData._id,
-                            access: true,
-                          },
-                        ]}
-                        handleActivityRefresh={() => { }}
-                      />
-                    </div>
-                  )}
-                  {/* <QuickLinks quickLinks={quickLinks} /> */}
+              {/* <QuickLinks quickLinks={quickLinks} /> */}
 
-                  {/* <div className={`${contactClass.detail_page_div2}`}>
+              {/* <div className={`${contactClass.detail_page_div2}`}>
                     {quickLinks && quickLinks.length
                       ? quickLinks.map((k, index) => {
                         return (
@@ -404,25 +385,23 @@ const Roles = (props) => {
                       })
                       : null}
                   </div> */}
-                  {/* <div className={`${contactClass.detail_page_div3}`}>
+              {/* <div className={`${contactClass.detail_page_div3}`}>
                     <Typography color="primary" variant="h6">
                       Related Accounts
                     </Typography>
                     <Box className={`${contactClass.custom_box1}`}></Box>
                   </div> */}
-                </Grid>
-              </Grid>
-              {showConfirmBox ? (
-                <ConfirmationDialog
-                  open={showConfirmBox}
-                  message={`Are you sure you want to delete this Contact ?`}
-                  onClose={() => setShowConfirmBox(false)}
-                  onOk={handleDeleteContact}
-                />
-              ) : null}
-            </Container>
-          </div>
-        </div>
+            </Paper>
+          </Grid>
+        </Grid>
+        {showConfirmBox ? (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this Contact ?`}
+            onClose={() => setShowConfirmBox(false)}
+            onOk={handleDeleteContact}
+          />
+        ) : null}
       </Layout>
     </>
   );

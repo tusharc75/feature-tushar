@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
-  Divider,
   Tooltip,
   IconButton,
   Checkbox,
@@ -12,7 +10,6 @@ import { DataGrid } from "@material-ui/data-grid";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import Layout from "../../components/Layout";
-import Container from "../../components/CustomContainer";
 import LeadsHeader from "./LeadsHeader";
 import axiosInstance from "../../axios/axiosInstance";
 import { getSearchQuery } from "../../services/util";

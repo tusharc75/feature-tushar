@@ -15,6 +15,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  Paper,
 } from "@material-ui/core";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
@@ -23,7 +24,6 @@ import { useParams, useHistory } from "react-router-dom";
 import { startCase } from "lodash";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
-import Container from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -344,56 +344,58 @@ const UserDetailsPage = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={customizedRoutes} />
 
-        {!userData ? (
-          <Container>
-            <Skeleton variant="text" width="150px" height="40px" />
-            <Box display="flex">
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-              <Box marginX={1} />
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-            </Box>
-          </Container>
-        ) : (
-          <DetailsPageHeader
-            heading={headingLbl}
-            logo={userData?.avatar ? userData.avatar : undefined}
-            mainPoints={mainPoints}
-            showHeading={true}
-          >
-            {permissions.user.isUpdate ? (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpenUpdateDialog}
-              >
-                Edit
-              </Button>
-            ) : null}
-            <Box component="span" marginX={1} />
+        <Grid container direction="row">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Grid>
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+            <Paper>
+              {!userData ? (
+                <div>
+                  <Skeleton variant="text" width="150px" height="40px" />
+                  <Box display="flex">
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                    <Box marginX={1} />
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                  </Box>
+                </div>
+              ) : (
+                <DetailsPageHeader
+                  heading={headingLbl}
+                  logo={userData?.avatar ? userData.avatar : undefined}
+                  mainPoints={mainPoints}
+                  showHeading={true}
+                >
+                  {permissions.user.isUpdate ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+                  ) : null}
+                  <Box component="span" marginX={1} />
 
-            {permissions.user.isDelete ? (
-              <DeleteButton
-                text="Delete"
-                disabled={user?.user?._id === id}
-                onClick={() => handleDeleteUser(id)}
-              />
-            ) : null}
-          </DetailsPageHeader>
-        )}
+                  {permissions.user.isDelete ? (
+                    <DeleteButton
+                      text="Delete"
+                      disabled={user?.user?._id === id}
+                      onClick={() => handleDeleteUser(id)}
+                    />
+                  ) : null}
+                </DetailsPageHeader>
+              )}
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Container styles={{ borderRadius: 8 }}>
               <Box style={{ padding: "8px", minHeight: "450px" }}>
                 {loading || !userFields.length || !userData ? (
                   <Grid container spacing={2} style={{ padding: "8px" }}>
@@ -403,232 +405,225 @@ const UserDetailsPage = () => {
                   <DetailsPage data={userData} fields={userFields} />
                 )}
               </Box>
-            </Container>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Container styles={{ borderRadius: 8 }}>
-              <Box style={{ padding: "0px", minHeight: "450px" }}>
-                <Box width="100%" padding={1} bgcolor="grey.200">
-                  <Typography color="primary">Approval Process</Typography>
-                </Box>
-
-                <Box padding={1}>
-                  <FormControl component="fieldset" fullWidth>
-                    <FormGroup>
-                      {loading ? (
-                        [1, 2, 3, 4].map((i) => (
-                          <Box
-                            padding={1}
-                            marginBottom={2}
-                            display="flex"
-                            key={i}
-                          >
-                            <Skeleton
-                              style={{ borderRadius: 16 }}
-                              width="30px"
-                              height="30px"
-                            />
-                            <Box marginX={1} />
-                            <Skeleton
-                              variant="text"
-                              width="80%"
-                              height="30px"
-                            />
-                          </Box>
-                        ))
-                      ) : userPermissions ? (
-                        Object.keys(userPermissions).map((key) => (
-                          <FormControlLabel
-                            key={key}
-                            control={
-                              <Switch
-                                checked={userPermissions[key]}
-                                name={key}
-                                disabled={
-                                  (isChangingPermission || !permissions.user.isUpdate) && 
-                                  !(user?.user?.userType == userType.brandAdmin)
-                                }
-                                onChange={handleChangePermissions}
-                              />
-                            }
-                            label={startCase(key)}
-                          />
-                        ))
-                      ) : (
-                        <Typography>There are no permissions</Typography>
-                      )}
-                    </FormGroup>
-                  </FormControl>
-                </Box>
-              </Box>
-            </Container>
-          </Grid>
-        </Grid>
-        <Box marginY={2} />
-        <Container styles={{ borderRadius: 8 }}>
-          <Box style={{ padding: "0px", minHeight: "300px" }}>
-            <Box display="flex" padding={1} bgcolor="grey.200">
-              <Grid container>
-                <Grid item xs={8}>
-                  <Box display="flex">
-                    <Box padding="5px">
-                      <Typography variant="subtitle2">
-                        Assigned Global Roles ({globalRoles.length || "0"})
+              <Box style={{ padding: "0px", minHeight: "300px" }}>
+                <Box display="flex" padding={1} bgcolor="grey.200">
+                  <Grid container>
+                    <Grid item xs={8}>
+                      <Box display="flex">
+                        <Box padding="5px">
+                          <Typography variant="subtitle2">
+                            Assigned Global Roles ({globalRoles.length || "0"})
                       </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={4} container justify="flex-end">
-                  {permissions.user.isUpdate && (
-                    <IconButton
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenDialog}
-                    >
-                      <ControlPoint />
-                    </IconButton>
-                  )}
-                </Grid>
-              </Grid>
-            </Box>
-
-            <Grid container style={{ padding: "8px" }} spacing={1}>
-              <Grid item xs={12} sm={12} md={4}>
-                <BoxWithBorder
-                  style={{
-                    padding: "0px",
-                    height: "352px",
-                  }}
-                >
-                  {rolesLoading ? (
-                    [1, 2].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        style={{ padding: "0px", margin: "8px" }}
-                      >
-                        <Box padding={1}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="20px"
-                          />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
                         </Box>
-                      </BoxWithBorder>
-                    ))
-                  ) : !globalRoles.length ? (
-                    <Box textAlign="center" marginTop={2}>
-                      <Typography variant="body2">
-                        User doesn't have any roles
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Box
+                      </Box>
+                    </Grid>
+                    <Grid item xs={4} container justify="flex-end">
+                      {permissions.user.isUpdate && (
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenDialog}
+                        >
+                          <ControlPoint />
+                        </IconButton>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                <Grid container style={{ padding: "8px" }} spacing={1}>
+                  <Grid item xs={12} sm={12} md={4}>
+                    <BoxWithBorder
                       style={{
-                        width: "100%",
-                        height: "100%",
-                        overflowY: "auto",
+                        padding: "0px",
+                        height: "352px",
                       }}
                     >
-                      {userData && (
-                        <UserRoles
-                          permissions={permissions}
-                          data={globalRoles}
-                          unassignRole={handleUnassignRole}
-                        />
-                      )}
-                    </Box>
-                  )}
-                </BoxWithBorder>
-              </Grid>
-              <Grid item xs={12} sm={12} md={8} lg={8}>
-                <BoxWithBorder
-                  style={{
-                    padding: "0px",
-                    height: "352px",
-                  }}
-                >
-                  <TableContainer style={{ height: "352px" }}>
-                    <Table
-                      stickyHeader
-                      aria-label="roles"
-                      className="roles-table"
-                    >
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Names</TableCell>
-                          <TableCell>Read</TableCell>
-                          <TableCell>Create</TableCell>
-                          <TableCell>Update</TableCell>
-                          <TableCell>Delete</TableCell>
-                        </TableRow>
-                      </TableHead>
-
-                      <TableBody>
-                        <RoleEngine
-                          field={unionRoleData ? unionRoleData.field : []}
-                          resource={unionRoleData ? unionRoleData.resource : []}
-                          isDisable={true}
-                        />
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </BoxWithBorder>
-              </Grid>
-            </Grid>
-          </Box>
-        </Container>
-        <Container styles={{ borderRadius: 8 }}>
-          <Box style={{ padding: "0px" }}>
-            <Box display="flex" padding={1}>
-              <Grid container>
-                <Grid item xs={8}>
-                  <Box display="flex">
-                    <Box padding="5px">
-                      <Typography variant="subtitle2">
-                        {"DOA Details of " +
-                          userData?.firstName +
-                          " " +
-                          userData?.lastName}
+                      {rolesLoading ? (
+                        [1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{ padding: "0px", margin: "8px" }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton
+                                variant="text"
+                                width="100px"
+                                height="20px"
+                              />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))
+                      ) : !globalRoles.length ? (
+                        <Box textAlign="center" marginTop={2}>
+                          <Typography variant="body2">
+                            User doesn't have any roles
                       </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={4} container justify="flex-end">
-                  {permissions.user.isUpdate && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => setDoaDialogOpen(true)}
+                        </Box>
+                      ) : (
+                        <Box
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            overflowY: "auto",
+                          }}
+                        >
+                          {userData && (
+                            <UserRoles
+                              permissions={permissions}
+                              data={globalRoles}
+                              unassignRole={handleUnassignRole}
+                            />
+                          )}
+                        </Box>
+                      )}
+                    </BoxWithBorder>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={8} lg={8}>
+                    <BoxWithBorder
+                      style={{
+                        padding: "0px",
+                        height: "352px",
+                      }}
                     >
-                      {doa.length > 0 ? "Edit Doa" : "Add Doa"}
-                    </Button>
-                  )}
+                      <TableContainer style={{ height: "352px" }}>
+                        <Table
+                          stickyHeader
+                          aria-label="roles"
+                          className="roles-table"
+                        >
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Names</TableCell>
+                              <TableCell>Read</TableCell>
+                              <TableCell>Create</TableCell>
+                              <TableCell>Update</TableCell>
+                              <TableCell>Delete</TableCell>
+                            </TableRow>
+                          </TableHead>
+
+                          <TableBody>
+                            <RoleEngine
+                              field={unionRoleData ? unionRoleData.field : []}
+                              resource={unionRoleData ? unionRoleData.resource : []}
+                              isDisable={true}
+                            />
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </BoxWithBorder>
+                  </Grid>
+                </Grid>
+              </Box>
+              <Box style={{ padding: "0px" }}>
+                <Box display="flex" padding={1}>
+                  <Grid container>
+                    <Grid item xs={8}>
+                      <Box display="flex">
+                        <Box padding="5px">
+                          <Typography variant="subtitle2">
+                            {"DOA Details of " +
+                              userData?.firstName +
+                              " " +
+                              userData?.lastName}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={4} container justify="flex-end">
+                      {permissions.user.isUpdate && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => setDoaDialogOpen(true)}
+                        >
+                          {doa.length > 0 ? "Edit Doa" : "Add Doa"}
+                        </Button>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Box>
+              <Grid container style={{ padding: "8px" }} spacing={1}>
+                <Grid item xs={12} sm={12}>
+                  <BoxWithBorder
+                    style={{
+                      padding: "0px",
+                    }}
+                  >
+                    {doa.length > 0 ? (
+                      <NewStepper heading={" "} steps={doa} />
+                    ) : (
+                      <Box textAlign="center" marginTop={2}>
+                        <Typography variant="body2">
+                          User doesn't have any DOA
+                    </Typography>
+                      </Box>
+                    )}
+                  </BoxWithBorder>
                 </Grid>
               </Grid>
-            </Box>
-          </Box>
-          <Grid container style={{ padding: "8px" }} spacing={1}>
-            <Grid item xs={12} sm={12}>
-              <BoxWithBorder
-                style={{
-                  padding: "0px",
-                }}
-              >
-                {doa.length > 0 ? (
-                  <NewStepper heading={" "} steps={doa} />
-                ) : (
-                  <Box textAlign="center" marginTop={2}>
-                    <Typography variant="body2">
-                      User doesn't have any DOA
-                    </Typography>
-                  </Box>
-                )}
-              </BoxWithBorder>
-            </Grid>
+            </Paper>
           </Grid>
-        </Container>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper>
+              <Box width="100%" padding={1} bgcolor="grey.200">
+                <Typography color="primary">Approval Process</Typography>
+              </Box>
+
+              <Box padding={1}>
+                <FormControl component="fieldset" fullWidth>
+                  <FormGroup>
+                    {loading ? (
+                      [1, 2, 3, 4].map((i) => (
+                        <Box
+                          padding={1}
+                          marginBottom={2}
+                          display="flex"
+                          key={i}
+                        >
+                          <Skeleton
+                            style={{ borderRadius: 16 }}
+                            width="30px"
+                            height="30px"
+                          />
+                          <Box marginX={1} />
+                          <Skeleton
+                            variant="text"
+                            width="80%"
+                            height="30px"
+                          />
+                        </Box>
+                      ))
+                    ) : userPermissions ? (
+                      Object.keys(userPermissions).map((key) => (
+                        <FormControlLabel
+                          key={key}
+                          control={
+                            <Switch
+                              checked={userPermissions[key]}
+                              name={key}
+                              disabled={
+                                (isChangingPermission || !permissions.user.isUpdate) &&
+                                !(user?.user?.userType == userType.brandAdmin)
+                              }
+                              onChange={handleChangePermissions}
+                            />
+                          }
+                          label={startCase(key)}
+                        />
+                      ))
+                    ) : (
+                      <Typography>There are no permissions</Typography>
+                    )}
+                  </FormGroup>
+                </FormControl>
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
       </Layout>
       {showConfirmBox ? (
         <ConfirmationDialog

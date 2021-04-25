@@ -12,7 +12,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { DataGrid } from "@material-ui/data-grid";
 import { useData } from "../../StateProvider/Provider";
 import Layout from "../../components/Layout";
-import Container from "../../components/CustomContainer";
 import axiosInstance from "../../axios/axiosInstance";
 import { getSearchQuery, displayDate } from "../../services/util";
 import OpportunitiesHeader from "./OpportunitiesHeader";
