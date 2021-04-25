@@ -7,9 +7,13 @@ import {
     MenuList,
     ClickAwayListener,
     Popper,
+    ListItemIcon,
+    Typography,
 } from "@material-ui/core";
 import { useData } from "./../StateProvider/Provider";
 import { AccountCircle } from "@material-ui/icons";
+import { FiLogOut, FiUser } from 'react-icons/fi'
+import "./sidebar.scss"
 
 export default function UserProfile(props) {
     const {
@@ -44,19 +48,26 @@ export default function UserProfile(props) {
                                 placement === "bottom" ? "center top" : "center bottom",
                         }}
                     >
-                        <Paper>
+                        <Paper className="userLinks">
                             <ClickAwayListener onClickAway={onClose}>
                                 <MenuList
                                     autoFocusItem={open}
                                     id="menu-list-grow"
-                                    onKeyDown={onListKeyDown}
-                                >
-                                    {/* <MenuItem onClick={onClose}>My account</MenuItem> */}
-                                    {/* <MenuItem onClick={(e) => onClose(e, { profile: true })}>
-                                        Profile
-                                    </MenuItem> */}
+                                    onKeyDown={onListKeyDown}>
+                                    <MenuItem onClick={(e) => onClose(e, { profile: true })}>
+                                        <ListItemIcon style={{ minWidth: '30px' }}><FiUser /></ListItemIcon>
+                                        <Typography className="logoutProfile"> Profile</Typography>
+                                    </MenuItem>
+                                </MenuList>
+                            </ClickAwayListener>
+                            <ClickAwayListener onClickAway={onClose}>
+                                <MenuList
+                                    autoFocusItem={open}
+                                    id="menu-list-grow"
+                                    onKeyDown={onListKeyDown}>
                                     <MenuItem onClick={(e) => onClose(e, { logout: true })}>
-                                        Logout
+                                        <ListItemIcon style={{ minWidth: '30px' }}><FiLogOut /></ListItemIcon>
+                                        <Typography className="logoutProfile">Logout</Typography>
                                     </MenuItem>
                                 </MenuList>
                             </ClickAwayListener>

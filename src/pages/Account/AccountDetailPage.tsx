@@ -400,6 +400,7 @@ export default function AccountDetailPage(props) {
               }
               mainPoints={mainPoints}
               showHeading={true}
+              isApproved={accountData?.static?.approved}
             >
               {permissions &&
                 permissions[accountResource] &&
@@ -673,6 +674,7 @@ export default function AccountDetailPage(props) {
               contactResource={contactResource}
               accountId={accountData._id}
               contactApi={contactApi}
+              account={props?.account}
             />
           )}
           {showAccountHierarchyInFullScreenDialog && (
