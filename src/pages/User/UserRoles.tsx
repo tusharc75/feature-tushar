@@ -83,16 +83,16 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
                           edge="end"
                           aria-label="delete"
                           onClick={() => unassignRole(obj)}
-                          disabled={
-                            rolesPermissions.indexOf(obj?.permission) >= 0
-                          }
+                          // disabled={
+                          //   rolesPermissions.indexOf(obj?.permission) >= 0
+                          // }
                         >
-                          <DeleteIcon
-                            color={
-                              rolesPermissions.indexOf(obj?.permission) >= 0
-                                ? "disabled"
-                                : "error"
-                            }
+                          <DeleteIcon color="error"
+                            // color={
+                            //   rolesPermissions.indexOf(obj?.permission) >= 0
+                            //     ? "disabled"
+                            //     : "error"
+                            // }
                           />
                         </IconButton>
                       </ListItemSecondaryAction>
