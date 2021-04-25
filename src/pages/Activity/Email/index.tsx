@@ -59,11 +59,11 @@ const Email = () => {
         { field: 'id', headerName: 'id', hide: true },
         { field: 'name', headerName: 'Subject', width: 300 },
         {
-            field: 'createdAt',
+            field: 'createdBy',
             headerName: 'Send At',
             width: 200,
             renderCell: (params) =>
-                <span>{moment(params.row.createdAt).format("DD/MM/YYYY hh:mm A")}</span>,
+                <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>,
         },
     ];
 

@@ -95,10 +95,10 @@ export const Note = ({ relatedTo, handleActivityRefresh }) => {
                             <Box pt={1}>
                                 <Grid container>
                                     <Grid item xs={6} >
-                                        <ListRelatedTo relatedTo={_note.relatedTo} />
+                                        <ListRelatedTo relatedTo={_note.relatedTo} originRelatedTo={relatedTo} />
                                     </Grid>
                                     <Grid item xs={6} container justify="flex-end">
-                                        <Typography variant="caption" >Created : {moment(_note.createdAt).format("MMM DD YYYY")}</Typography>
+                                        <Typography variant="caption" >Created : {moment(_note.createdBy.date).format("MMM DD YYYY")}</Typography>
                                     </Grid>
                                 </Grid>
                             </Box>

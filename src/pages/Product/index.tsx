@@ -19,6 +19,8 @@ import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { GiAbstract055 } from 'react-icons/gi';
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 
 const Product = () => {
     const toastConfig = useContext(CustomToastContext)
@@ -27,6 +29,9 @@ const Product = () => {
     const [product, setProduct] = useState([]);
     const [open, setOpen] = useState(false);
     const [productId, setProductId] = useState(null);
+    const [isClone, setIsClone] = useState(false);
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [deleteRecord, setDeleteRecord] = useState(null)
 
     useEffect(() => {
         fetchProduct();
@@ -46,15 +51,16 @@ const Product = () => {
         });
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = () => {
         setLoading(true)
-        axiosInstance().delete(`/product/` + id).then(() => {
+        axiosInstance().delete(`/product/` + deleteRecord._id).then(() => {
             fetchProduct();
+            setShowDeleteConfirmBox(false)
+            setDeleteRecord(null)
         }).catch((error) => {
             toastConfig.setToastConfig(error)
         });
     }
-
 
     const columns = [
         { field: 'id', headerName: 'id', hide: true },
@@ -63,7 +69,7 @@ const Product = () => {
             headerName: "Product Name",
             width: 300,
             renderCell: (params) => (
-                <Link className="LeadNameLink" onClick={() => OpenProduct(params.row.id)}  >
+                <Link className="LeadNameLink" onClick={() => { OpenProduct(params.row.id); setIsClone(false) }}  >
                     {params.row.productName}
                 </Link>
             )
@@ -129,8 +135,13 @@ const Product = () => {
             field: "actions", headerName: "Actions ",
             renderCell: (params) => (
                 <Fragment>
+                    <Tooltip title="Clone">
+                        <IconButton aria-label="Clone" onClick={() => { OpenProduct(params.row._id); setIsClone(true) }}>
+                            <FileCopyIcon fontSize="small" color="primary" />
+                        </IconButton>
+                    </Tooltip>
                     <Tooltip title="Delete" >
-                        <IconButton aria-label="Delete" onClick={() => handleDelete(params.row.id)} >
+                        <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }} >
                             <DeleteIcon fontSize="small" color="error" />
                         </IconButton>
                     </Tooltip >
@@ -187,7 +198,15 @@ const Product = () => {
                 />
             </div>
         </div>
-        {open && <CreateProduct productId={productId} handleClose={handleClose} />}
+        {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} />}
+        {showDeleteConfirmBox &&
+            <ConfirmationDialog
+                open={showDeleteConfirmBox}
+                message={`Are you sure, you want to delete product ${deleteRecord?.productName} ?`}
+                onClose={() => setShowDeleteConfirmBox(false)}
+                onOk={handleDelete}
+            />
+        }
     </Layout>
     );
 }

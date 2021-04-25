@@ -9,9 +9,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import { PropertieDialog } from './Properties/PropertieDialog';
-import { FormulaDialog } from './Properties/FormulaDialog';
-import { VlookupDialog } from './Properties/VlookupDialog';
+import { Properties } from './Properties';
 
 import FieldList from './FieldList';
 
@@ -204,28 +202,12 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
                                 <MenuItem onClick={() => handleClickOpenPropertie(data)}  >Edit Properties</MenuItem>
                                 <MenuItem onClick={() => deleteField(data.fieldId)} >Delete</MenuItem>
                             </Menu>
-                            {propertie_open ?
-                                data.type === FieldList.FORMULA.type ? <FormulaDialog
-                                    open={propertie_open}
-                                    handleClose={handleClosePropertie}
-                                    fieldData={field_data}
-                                    sectionId={sectionId}
-                                    section={section}
-                                    setSection={setSection} />
-                                    : data.type === FieldList.VLOOKUPDROPDOWN.type ? <VlookupDialog
-                                        open={propertie_open}
-                                        handleClose={handleClosePropertie}
-                                        fieldData={field_data}
-                                        sectionId={sectionId}
-                                        section={section}
-                                        setSection={setSection} /> :
-                                        <PropertieDialog
-                                            open={propertie_open}
-                                            handleClose={handleClosePropertie}
-                                            fieldData={field_data}
-                                            sectionId={sectionId}
-                                            section={section}
-                                            setSection={setSection} /> : null}
+                            {propertie_open ? <Properties
+                                handleClose={handleClosePropertie}
+                                fieldData={field_data}
+                                sectionId={sectionId}
+                                section={section}
+                                setSection={setSection} /> : null}
                         </Grid>
                     </Grid>
                 </Box>

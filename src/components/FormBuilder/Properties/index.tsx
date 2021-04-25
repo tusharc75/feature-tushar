@@ -1,9 +1,6 @@
 import React, { useState, Fragment, useRef } from 'react';
-import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -13,8 +10,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -22,90 +17,117 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { camelCase } from "./../../../constants/helpers";
-import ListItemText from '@material-ui/core/ListItemText';
-import { Vlokup } from "./vlokup";
-import { Formula } from "./formula";
-import { Converter } from "./converter";
-
-import Divider from '@material-ui/core/Divider';
+import { Vlokup } from "../AddField/vlokup";
+import { Formula } from "../AddField/formula";
+import { Converter } from "../AddField/converter";
+import { Option } from "../AddField/option";
 
 const FieldSchema = Yup.object().shape({
-  type: Yup.string()
-    .required("please select field type"),
   fieldLabel: Yup.string()
     .required("please enter field label"),
 });
 
+const LookupResource = [
+  { name: "Supplier Account", value: "Supplier Account" },
+  { name: "Customer Account", value: "Customer Account" },
+  { name: "User", value: "User" },
+  { name: "Supplier Contact", value: "Supplier Contact" },
+  { name: "Customer Contact", value: "Customer Contact" },
+  { name: "Brand", value: "Brand" },
+  { name: "Entity", value: "Entity" },
+  { name: "Role", value: "Role" },
+  { name: "Lead", value: "Lead" },
+  { name: "Opportunity", value: "Opportunity" },
+  { name: "Product Category", value: "ProductCategory" },
+]
 
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: 300,
-    },
-  },
-};
+export const Properties = ({ handleClose, fieldData, sectionId, section, setSection }) => {
 
-export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => {
+  const [initialValues, setInitialValues] = useState(fieldData);
 
+  const fields = [];
+  section.forEach(_section => {
+    _section.field.forEach(_field => {
+      let fid = { ..._field }
+      if (!fid.fieldName) {
+        fid.fieldName = camelCase(fid.fieldLabel.replace(/[^a-zA-Z ]/g, ""));
+      }
+      if (fid.type === "converter") {
+        fid.displayUnits && fid.displayUnits.forEach(_unit => {
+          fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + _unit.toLowerCase() })
+        })
+      }
+      else {
+        fields.push(fid)
+      }
+    })
+  })
 
-  const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
-    type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
-    tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "" }], formula: "", isvlookupReverse: false
-  });
-  const ref = useRef(null);
 
   const handleSave = (values) => {
-    values.fieldName = camelCase(values.fieldLabel.replace(/[^a-zA-Z ]/g, ""))
-    if (values.type !== "formula") {
-      delete values.inputFields
-      delete values.formula
-      delete values.returnType
-    }
-    if (values.type !== "formula" && values.type !== "decimal") {
-      delete values.decimalPlaces
-    }
-    if (values.type !== "vlookupDropdown" && values.type !== "converter") {
-      delete values.option
-      delete values.inputFields
-      delete values.isvlookupReverse
-    }
-    if (values.option) {
-      values.option.forEach((ele) => {
-        if (ele.optionValue) {
-          ele.optionValue = ele.optionLabel
-        }
-      })
-    }
-    handleAddField(values)
+    let data = [...section]
+    data.forEach((row) => {
+      if (row.sectionId.toString() === sectionId.toString()) {
+        row.field.forEach((ele) => {
+          if (ele.fieldId.toString() === fieldData.fieldId.toString()) {
+            ele.fieldLabel = values.fieldLabel
+            ele.required = values.required
+            ele.isTooltip = values.isTooltip
+            ele.tooltipMessage = values.tooltipMessage
+
+            if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio") {
+              values.option.forEach((ele, index) => {
+                ele.order = index + 1
+                ele.default = false
+                if (index === 0) {
+                  ele.default = true
+                }
+              })
+              ele.option = values.option
+            }
+            if (fieldData.type === "decimal") {
+              ele.decimalPlaces = values.decimalPlaces
+            }
+            if (values.lookup) {
+              ele.lookup = values.lookup
+              ele.lookupResource = values.lookupResource
+            }
+            if (fieldData.type === "formula") {
+              ele.formula = values.formula
+              ele.inputFields = values.inputFields
+              ele.returnType = values.returnType
+              ele.decimalPlaces = values.decimalPlaces
+            }
+            if (fieldData.type === "vlookupDropdown") {
+              values.option.forEach((ele) => {
+                ele.optionValue = ele.optionLabel
+              })
+              ele.inputFields = values.inputFields
+              ele.option = values.option
+              ele.isvlookupReverse = values.isvlookupReverse
+            }
+            if (fieldData.type === "converter") {
+              ele.units = values.units
+              ele.displayUnits = values.displayUnits
+              ele.option = values.option
+            }
+          }
+        })
+      }
+    });
+    setSection(data)
+    handleClose()
   }
 
 
-  return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
-    <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
+
+  return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={initialValues["type"] === "formula" ||
+    initialValues["type"] === "vlookupDropdown" || initialValues["type"] === "converter" ? "md" : "sm"} open={true}>
+    <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
       {({ submitForm, touched, errors, setFieldValue, values }) => (
         <Form autoComplete="off" autoCorrect="off" noValidate >
-          <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"} onClose={handleClose}></CustomDialogHeader>
+          <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`} onClose={handleClose}></CustomDialogHeader>
           <CustomDialogContent>
-            <FormControl fullWidth margin="dense" variant="outlined">
-              <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
-              <Select
-                labelId="demo-simple-select-outlined-label"
-                id="demo-simple-select-outlined"
-                value={values["type"]}
-                onChange={(e) => setFieldValue("type", e.target.value)}
-                label="Type"
-                name="type"
-                error={touched["type"] && Boolean(errors["type"])}
-              >
-                <MenuItem value={"singleLine"}>Single Line</MenuItem>
-                <MenuItem value={"multiLine"}>Multi-Line</MenuItem>
-                <MenuItem value={"decimal"}>Decimal</MenuItem>
-                <MenuItem value={"percent"}>Percent</MenuItem>
-                <MenuItem value={"formula"}>Formula</MenuItem>
-                <MenuItem value={"vlookupDropdown"}>Vlookup Dropdown</MenuItem>
-                <MenuItem value={"converter"}>Converter</MenuItem>
-              </Select>
-            </FormControl>
             <TextField
               variant="outlined"
               type="text"
@@ -119,7 +141,6 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
               helperText={touched["fieldLabel"] && errors["fieldLabel"]}
               onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
             />
-
             {(values["type"] === "decimal" || values["type"] === "formula") &&
               <Grid spacing={3} container>
                 {values["type"] === "formula" && <Grid item xs={12} sm={6} md={6}>
@@ -161,7 +182,45 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
                     </FormControl>
                   </Grid>}
               </Grid>}
+            {(values["type"] === "dropDown" || values["type"] === "multiSelect") &&
+              <Fragment>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="lookup"
+                      checked={values["lookup"]}
+                      onChange={(e) => setFieldValue("lookup", e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Lookup"
+                />
+                {values["lookup"] &&
+                  <Box pt={1} pb={1}>
+                    <FormControl fullWidth margin="dense" variant="outlined">
+                      <InputLabel id="demo-simple-select-outlined-label">Lookup Resource</InputLabel>
+                      <Select
+                        labelId="demo-simple-select-outlined-label"
+                        id="demo-simple-select-outlined"
+                        value={values["lookupResource"]}
+                        onChange={(e) => setFieldValue("lookupResource", e.target.value)}
+                        label="Lookup Resource"
+                        name="lookupResource"
+                      >
+                        {LookupResource.map((_data) => (
+                          <MenuItem value={_data.value}>{_data.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>}
+              </Fragment>}
 
+
+            {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio") && !values["lookup"]) &&
+              <Option
+                values={values}
+                setFieldValue={setFieldValue}
+              />}
 
             {values["type"] === "formula" && <Formula
               fields={fields}
@@ -224,7 +283,7 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
           </CustomDialogContent>
           <CustomDialogFooter>
             <Button onClick={handleClose} color="primary">Cancel</Button>
-            <Button type="submit" color="primary" variant="contained">{fieldData ? "Update" : "Add"}</Button>
+            <Button type="submit" color="primary" variant="contained">Save</Button>
           </CustomDialogFooter>
         </Form>)}
     </Formik>

@@ -95,10 +95,10 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
                             <Box pt={1}>
                                 <Grid container>
                                     <Grid item xs={12} >
-                                        <ListRelatedTo relatedTo={_task.relatedTo} />
+                                        <ListRelatedTo relatedTo={_task.relatedTo} originRelatedTo={relatedTo} />
                                         {/* <Chip label={_task.status} size="small" color="primary" /> */}
                                     </Grid>
-                                    <Grid item xs={6} container justify="flex-end">
+                                    <Grid item xs={12} container justify="flex-end">
                                         
                                     </Grid>
                                 </Grid>

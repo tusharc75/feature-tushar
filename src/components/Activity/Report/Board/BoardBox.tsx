@@ -126,7 +126,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
                 </Grid>
             </Box>
             <Box pt={2}>
-                <ListRelatedTo relatedTo={data.relatedTo} />
+                <ListRelatedTo relatedTo={data.relatedTo} originRelatedTo={[]} />
             </Box>
             <Menu
                 id="simple-menu"
