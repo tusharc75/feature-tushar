@@ -16,6 +16,7 @@ import {
   TableCell,
   TableBody,
   Paper,
+  Tooltip,
 } from "@material-ui/core";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
@@ -59,6 +60,7 @@ const UserDetailsPage = () => {
   const [unionRoleData, setUnionRoleData] = useState(null);
 
   const [isChangingPermission, setIsChangingPermission] = useState(false);
+  const [hasPermissionToUpdateApprovalProcess, setHasPermissionToUpdateApprovalProcess] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
   const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
@@ -293,11 +295,11 @@ const UserDetailsPage = () => {
       ...userPermissions,
       [e.target.name]: e.target.checked,
     };
-    setIsChangingPermission(true);
+    setHasPermissionToUpdateApprovalProcess(false);
     axiosInstance()
       .post("/user/permission-setup", newData)
       .then(({ data }) => {
-        setIsChangingPermission(false);
+        setHasPermissionToUpdateApprovalProcess(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -305,7 +307,7 @@ const UserDetailsPage = () => {
         });
       })
       .catch((err) => {
-        setIsChangingPermission(false);
+        setHasPermissionToUpdateApprovalProcess(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -599,21 +601,20 @@ const UserDetailsPage = () => {
                       ))
                     ) : userPermissions ? (
                       Object.keys(userPermissions).map((key) => (
-                        <FormControlLabel
-                          key={key}
-                          control={
-                            <Switch
-                              checked={userPermissions[key]}
-                              name={key}
-                              disabled={
-                                (isChangingPermission || !permissions.user.isUpdate) &&
-                                !(user?.user?.userType == userType.brandAdmin)
-                              }
-                              onChange={handleChangePermissions}
-                            />
-                          }
-                          label={startCase(key)}
-                        />
+                        <Tooltip title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ""}>
+                          <FormControlLabel
+                            key={key}
+                            control={
+                              <Switch
+                                checked={userPermissions[key]}
+                                name={key}
+                                disabled={!hasPermissionToUpdateApprovalProcess}
+                                onChange={handleChangePermissions}
+                              />
+                            }
+                            label={startCase(key)}
+                          />
+                        </Tooltip>
                       ))
                     ) : (
                       <Typography>There are no permissions</Typography>
