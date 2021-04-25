@@ -60,7 +60,7 @@ const UserDetailsPage = () => {
   const [unionRoleData, setUnionRoleData] = useState(null);
 
   const [isChangingPermission, setIsChangingPermission] = useState(false);
-  const [hasPermissionToUpdateApprovalProcess, setHasPermissionToUpdateApprovalProcess] = useState(false);
+  const [hasPermissionToUpdateApprovalProcess, setHasPermissionToUpdateApprovalProcess] = useState(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
   const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
