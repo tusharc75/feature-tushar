@@ -32,8 +32,8 @@ import { FiPlusSquare } from 'react-icons/fi';
 
 const useStyles = makeStyles((theme) => ({
     activityBox: {
-        padding:"1px 1px 9px 1px",
-        background:"#ddd"
+        padding: "1px 1px 9px 1px",
+        background: "#f6f6f6"
     },
     activitySubBox: {
         display: "flex",
@@ -103,38 +103,38 @@ const Activity = (props) => {
             <h2 className="listingHeader single">Activity</h2>
         </Box>
         <Box className={classes.activityBox}>
-        {tabs.map((data, index) => (
-            <Fragment key={index} >
-                <Box className={classes.activitySubBox} onClick={(event) => handleChangeType(event, data)}>
-                    <Grid container>
-                        <Grid item xs={8} >
-                            <Box display="flex">
-                                <Box >
-                                    <IconButton size="small">
-                                        {type === data ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                                    </IconButton>
+            {tabs.map((data, index) => (
+                <Fragment key={index} >
+                    <Box className={classes.activitySubBox} onClick={(event) => handleChangeType(event, data)}>
+                        <Grid container>
+                            <Grid item xs={8} >
+                                <Box display="flex">
+                                    <Box >
+                                        <IconButton size="small">
+                                            {type === data ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                        </IconButton>
+                                    </Box>
+                                    <Box ml={1} mt={0.5}>
+                                        <Typography variant="subtitle2" color="primary" className="d-flex align-items-center gap-2">{getIcon(data)} {data}</Typography>
+                                    </Box>
                                 </Box>
-                                <Box ml={1} mt={0.5}>
-                                    <Typography variant="subtitle2" color="primary" className="d-flex align-items-center gap-2">{getIcon(data)} {data}</Typography>
-                                </Box>
-                            </Box>
+                            </Grid>
+                            <Grid item xs={4} container justify="flex-end" >
+                                <IconButton color="primary" size="small" onClick={(event) => handleCreateActivity(event, data)}>
+                                    <FiPlusSquare />
+                                </IconButton>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={4} container justify="flex-end" >
-                            <IconButton color="primary" size="small" onClick={(event) => handleCreateActivity(event, data)}>
-                                <FiPlusSquare />
-                            </IconButton>
-                        </Grid>
-                    </Grid>
-                </Box>
-                <Box>
-                    {type === "Task" && data === "Task" ? <Task relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
-                    {type === "Event" && data === "Event" ? <Event relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
-                    {type === "Case" && data === "Case" ? <Case relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
-                    {type === "Note" && data === "Note" ? <Note relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
-                    {type === "Email" && data === "Email" ? <Email relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
-                </Box>
-            </Fragment>
-        ))}
+                    </Box>
+                    <Box>
+                        {type === "Task" && data === "Task" ? <Task relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
+                        {type === "Event" && data === "Event" ? <Event relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
+                        {type === "Case" && data === "Case" ? <Case relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
+                        {type === "Note" && data === "Note" ? <Note relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
+                        {type === "Email" && data === "Email" ? <Email relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} /> : null}
+                    </Box>
+                </Fragment>
+            ))}
         </Box>
         <Dialog
             open={open}

@@ -36,10 +36,8 @@ import QuickLinks, {
   IQuickLinks,
 } from "../../components/QuickLinks/QuickLinks";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
-import { TiFlowChildren } from "react-icons/ti";
-import { RiContactsBook2Fill } from "react-icons/ri";
-import { HiOutlinePencilAlt, HiPresentationChartLine } from "react-icons/hi";
-import { MdLocalLibrary } from "react-icons/md";
+import { BsChatSquareQuoteFill } from "react-icons/bs";
+import { FcFlowChart, FcContacts, FcBinoculars, FcConferenceCall, FcMultipleSmartphones } from 'react-icons/fc';
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -239,19 +237,24 @@ export default function AccountDetailPage(props) {
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
-      icon: <TiFlowChildren />,
+      icon: <FcFlowChart />,
+      // icon: <TiFlowChildren />,
       show: true,
+      class: "account"
     },
     {
       label: "Projects",
       count: 0,
       show: true,
-      icon: <HiPresentationChartLine />
+      icon: <FcMultipleSmartphones />,
+      class: "project"
     },
     {
       label: "Opportunity",
       count: opportunities ? opportunities.length : 0,
       show: permissions?.opportunity?.isRead ?? false,
+      icon: <FcBinoculars />,
+      class: "opportunity",
       onClick: () => {
         history.push({
           pathname: `/opportunity`,
@@ -266,17 +269,21 @@ export default function AccountDetailPage(props) {
       label: "Quotes",
       count: 0,
       show: true,
+      icon: <BsChatSquareQuoteFill />,
+      class: "quotes"
     },
     {
       label: "Accounts Teams",
       count: 0,
       show: true,
-      icon: <MdLocalLibrary />
+      icon: <FcConferenceCall />,
+      class: "teams"
     },
     {
       label: "Contacts",
       count: relatedContacts ? relatedContacts.length : 0,
-      icon: <RiContactsBook2Fill />,
+      icon: <FcContacts />,
+      class: "contact",
       onClick: () => {
         history.push({
           pathname: `/${contactRoute}`,
