@@ -19,7 +19,8 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 
-export const vapidKey = "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
+export const vapidKey =
+  "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
 
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
@@ -116,16 +117,16 @@ export const customerContact = {
 };
 
 export const profilePage = {
-  profilePageRoute: "profile"
-}
+  profilePageRoute: "/profile",
+};
 
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
   setting: 3,
   users: 4,
-  securityPrivacy: 5
-}
+  securityPrivacy: 5,
+};
 
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
@@ -143,6 +144,10 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       obj[key.fieldName] = val ? val : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = val ? val : false;
+    } else if (key.type === "converter") {
+      key.displayUnits.forEach((_unit) => {
+        obj[key.fieldName + _unit.toLowerCase()] = val
+      })
     } else {
       obj[key.fieldName] = val;
     }
@@ -235,6 +240,12 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)
         : yup.boolean();
+    } else if (input.type === "converter") {
+      input.displayUnits.forEach((_unit) => {
+        schema[input.fieldName + _unit.toLowerCase()] = input.required
+          ? yup.string().required(`${input.fieldLabel} is required`)
+          : yup.string();
+      })
     } else {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`)

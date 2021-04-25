@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import { Grid, Typography, Box, Select, MenuItem } from "@material-ui/core";
-import Container from "./Container";
+import Container from "./CustomContainer";
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
-  Divider,
   Tooltip,
   IconButton,
   Checkbox,
@@ -12,7 +10,6 @@ import { DataGrid } from "@material-ui/data-grid";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import Layout from "../../components/Layout";
-import Container from "../../components/Container";
 import LeadsHeader from "./LeadsHeader";
 import axiosInstance from "../../axios/axiosInstance";
 import { getSearchQuery } from "../../services/util";
@@ -39,6 +36,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { SiConvertio } from "react-icons/si";
 import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import CustomContainer from "../../components/CustomContainer";
 
 const LeadTypes = [
   {
@@ -546,9 +544,7 @@ const Leads = () => {
           item
           md={8}
           sm={1}
-          xs={2}
-          className="d-flex align-items-center bg-white"
-        >
+          xs={2}>
           <ImportExportLinks
             module="lead(s)"
             api={leadApi}
@@ -559,7 +555,7 @@ const Leads = () => {
         </Grid>
       </Grid>
 
-      <Container>
+      <CustomContainer>
         <div className="header-panel">
           <LeadsHeader
             userId={user?.user?._id}
@@ -604,8 +600,6 @@ const Leads = () => {
             leadApi={leadApi}
           />
         )}
-      </Container>
-      <Container>
         <div className="listing-grid">
           <DataGrid
             components={{
@@ -667,7 +661,7 @@ const Leads = () => {
             onOk={convertLeadToOpportunity}
           />
         ) : null}
-      </Container>
+      </CustomContainer>
     </Layout>
   );
 };

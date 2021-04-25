@@ -34,6 +34,10 @@ const CaseSchema = Yup.object().shape({
         .required("please select assignee"),
     reporter: Yup.string()
         .required("please select reporter"),
+    startDate: Yup.string()
+        .required("please enter start date"),
+    dueDate: Yup.string()
+        .required("please enter due date"),
 });
 
 
@@ -83,7 +87,16 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
         }
     };
 
-    return (initialValues && <Formik initialValues={initialValues} validationSchema={CaseSchema} onSubmit={handleSave}>
+    function validate(values) {
+        const errors = {};
+        if (moment(values.startDate) > moment(values.dueDate)) {
+            errors["dueDate"] = 'Due date must greater then start date';
+        }
+        return errors;
+    };
+
+
+    return (initialValues && <Formik initialValues={initialValues} validationSchema={CaseSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate >
                 <CustomDialogHeader title={`${id ? "Edit" : "New"} Case`} onClose={handleClose}></CustomDialogHeader>
@@ -228,12 +241,12 @@ export const CreateCase = ({ relatedTo, caseId, handleClose }) => {
                                         />
                                     </Box>
                                     {id && <Fragment>
-                                        <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Created {moment(initialValues.createdAt).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>
-                                        <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Updated {moment(initialValues.updatedAt).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>
+                                        {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
+                                            <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        </Box>}
+                                        {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
+                                            <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        </Box>}
                                     </Fragment>}
                                 </Grid>
                             </Grid>

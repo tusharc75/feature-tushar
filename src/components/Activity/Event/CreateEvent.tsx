@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button';
 import { UserDropdown } from '../Helpers/userDropdown';
 import statusList from '../Helpers/statusList';
 import Typography from '@material-ui/core/Typography';
-import { TextField as TextFieldFormik, Select } from "formik-material-ui";
+import { TextField as TextFieldFormik } from "formik-material-ui";
 import TextField from '@material-ui/core/TextField';
 import { Formik, Form, Field } from "formik";
 import MenuItem from '@material-ui/core/MenuItem';
@@ -25,6 +25,8 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import Select from '@material-ui/core/Select';
+import FormHelperText from '@material-ui/core/FormHelperText';
 
 const EventSchema = Yup.object().shape({
     name: Yup.string()
@@ -104,24 +106,19 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
     };
 
+    function validate(values) {
+        const errors = {};
+        if (moment(values.startDate) > moment(values.endDate)) {
+            errors["dueDate"] = 'End date must greater then start date';
+        }
+        if (moment(values.startDate).format("YYYY-MM-DD") === moment(values.endDate).format("YYYY-MM-DD") && values.startTime === values.endTime) {
+            errors["endTime"] = 'Start Time and End Time should be different';
+        }
+        return errors;
+    };
+
     let times = TimeList()
-    return (initialValues && <Formik initialValues={initialValues} validationSchema={EventSchema}
-        onSubmit={(values, { setSubmitting }) => {
-            if (Object.values(values.startDate).toString() ===
-                Object.values(values.endDate).toString()
-                && values.startTime == values.endTime
-            ) {
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: "error",
-                    message: "Start Time and End Time should be different",
-                });
-                setSubmitting(false);
-            }
-            else {
-                handleSave(values)
-            }
-        }}>
+    return (initialValues && <Formik initialValues={initialValues} validationSchema={EventSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate >
                 <CustomDialogHeader title={`${eventId ? "Edit" : "New"} Event`} onClose={handleClose}></CustomDialogHeader>
@@ -178,23 +175,23 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                     </Fragment>}
                                 </Grid>
                                 <Grid item xs={5}>
-                                    <Box pt={1}>
-                                        <FormControl variant="outlined" fullWidth >
-                                            <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
-                                            <Field
-                                                component={Select}
-                                                labelId="demo-simple-select-outlined-label"
-                                                id="demo-simple-select-outlined"
-                                                margin="dense"
-                                                label="Status"
-                                                name="status"
-                                            >
-                                                {statusList.map((_status, index) => (
-                                                    <MenuItem key={index} value={_status.status}>{_status.status}</MenuItem>
-                                                ))}
-                                            </Field>
-                                        </FormControl>
-                                    </Box>
+                                    <FormControl fullWidth margin="dense" variant="outlined">
+                                        <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-outlined-label"
+                                            id="demo-simple-select-outlined"
+                                            value={values["status"]}
+                                            onChange={(e) => setFieldValue("status", e.target.value)}
+                                            label="Status"
+                                            name="status"
+                                            error={touched["status"] && Boolean(errors["status"])}
+                                            MenuProps={MenuProps}
+                                        >
+                                            {statusList.map((_status, index) => (
+                                                <MenuItem key={index} value={_status.status}>{_status.status}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
                                     <Box pt={1}>
                                         <UserDropdown
                                             name="participant"
@@ -223,22 +220,23 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                                 />
                                             </Grid>
                                             <Grid item xs={6}>
-                                                <Box mt={1}>
-                                                    <FormControl variant="outlined" fullWidth >
+                                                <Box>
+                                                    <FormControl fullWidth margin="dense" variant="outlined">
                                                         <InputLabel id="demo-simple-select-outlined-label">Start Time</InputLabel>
-                                                        <Field
-                                                            component={Select}
+                                                        <Select
                                                             labelId="demo-simple-select-outlined-label"
                                                             id="demo-simple-select-outlined"
-                                                            margin="dense"
+                                                            value={values["startTime"]}
+                                                            onChange={(e) => setFieldValue("startTime", e.target.value)}
                                                             label="Start Time"
                                                             name="startTime"
+                                                            error={touched["startTime"] && Boolean(errors["startTime"])}
                                                             MenuProps={MenuProps}
                                                         >
                                                             {times.map((_time, index) => (
                                                                 <MenuItem key={index} value={_time}>{_time}</MenuItem>
                                                             ))}
-                                                        </Field>
+                                                        </Select>
                                                     </FormControl>
                                                 </Box>
                                             </Grid>
@@ -257,37 +255,41 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                                     fullWidth
                                                     margin="dense"
                                                     format="yyyy/MM/DD"
+                                                    minDate={values["startDate"]}
                                                 />
                                             </Grid>
                                             <Grid item xs={6}>
-                                                <Box mt={1}>
-                                                    <FormControl variant="outlined" fullWidth >
+                                                <Box >
+                                                    <FormControl fullWidth margin="dense" variant="outlined" error={touched["endTime"] && Boolean(errors["endTime"])}>
                                                         <InputLabel id="demo-simple-select-outlined-label">End Time</InputLabel>
-                                                        <Field
-                                                            component={Select}
+                                                        <Select
                                                             labelId="demo-simple-select-outlined-label"
                                                             id="demo-simple-select-outlined"
-                                                            margin="dense"
+                                                            value={values["endTime"]}
+                                                            onChange={(e) => setFieldValue("endTime", e.target.value)}
                                                             label="End Time"
                                                             name="endTime"
+                                                            error={touched["endTime"] && Boolean(errors["endTime"])}
                                                             MenuProps={MenuProps}
                                                         >
                                                             {times.map((_time, index) => (
                                                                 <MenuItem key={index} value={_time}>{_time}</MenuItem>
                                                             ))}
-                                                        </Field>
+
+                                                        </Select>
+                                                        <FormHelperText>{touched["endTime"] && errors["endTime"]}</FormHelperText>
                                                     </FormControl>
                                                 </Box>
                                             </Grid>
                                         </Grid>
                                     </Box>
                                     {eventId && <Fragment>
-                                        <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Created {moment(initialValues.createdAt).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>
-                                        <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Updated {moment(initialValues.updatedAt).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>
+                                        {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
+                                            <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        </Box>}
+                                        {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
+                                            <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        </Box>}
                                     </Fragment>}
                                 </Grid>
                             </Grid>

@@ -50,26 +50,26 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
 
 
     return (
-        <Box marginTop={2}> 
+        <Box marginTop={2}>
             <FormControl variant="outlined" fullWidth margin="dense">
-                <InputLabel htmlFor="filled-age-native-simple">Releted To</InputLabel>
+                <InputLabel htmlFor="filled-age-native-simple">Input Parameters</InputLabel>
                 <Select
                     inputProps={{
-                        name: 'reletedTo',
+                        name: 'inputFields',
                         id: "demo-simple-select-outlined"
                     }}
                     margin="dense"
-                    label="Releted To"
+                    label="Input Parameters"
                     multiple
-                    name="reletedTo"
-                    value={values["reletedTo"]}
-                    onChange={(e) => setFieldValue("reletedTo", e.target.value)}
+                    name="inputFields"
+                    value={values["inputFields"]}
+                    onChange={(e) => setFieldValue("inputFields", e.target.value)}
                     renderValue={(selected: any) => selected.join(', ')}
                     MenuProps={MenuProps}
                 >
                     {fields && fields.map((_field) => (
                         <MenuItem key={_field.fieldName} value={_field.fieldName}>
-                            <Checkbox color="primary" checked={values["reletedTo"].indexOf(_field.fieldName) > -1} />
+                            <Checkbox color="primary" checked={values["inputFields"].indexOf(_field.fieldName) > -1} />
                             <ListItemText primary={_field.fieldLabel} />
                         </MenuItem>
                     ))}
@@ -86,7 +86,7 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
                             <Box minWidth={200} pl={1}>
                                 <Typography variant="body2">Option Label</Typography>
                             </Box>
-                            {values["reletedTo"] && values["reletedTo"].map((_row) => (
+                            {values["inputFields"] && values["inputFields"].map((_row) => (
                                 <Box minWidth={200} pl={1}>
                                     <Typography variant="body2">{UnCamelCase(_row)}</Typography>
                                 </Box>
@@ -115,7 +115,7 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
                                         onChange={(event) => onChangeValue(index, "optionLabel", event.target.value)}
                                     />
                                 </Box>
-                                {values["reletedTo"] && values["reletedTo"].map((_row) => (
+                                {values["inputFields"] && values["inputFields"].map((_row) => (
                                     <Box minWidth={200} maxWidth={200} pl={1}>
                                         <TextField
                                             id="standard-basic"

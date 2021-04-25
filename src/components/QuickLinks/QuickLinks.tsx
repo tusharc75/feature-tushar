@@ -1,6 +1,7 @@
 import React from 'react'
-import { Icon, Typography } from '@material-ui/core'
+import { Grid, Icon, Paper, Typography } from '@material-ui/core'
 import { Link } from "react-router-dom";
+
 
 export interface IQuickLinks {
     label: string,
@@ -9,28 +10,39 @@ export interface IQuickLinks {
     onClick?: Function,
     to?: string,
     icon?: any,
+    class: string
 }
+// const useStyles = makeStyles((theme) => ({
 
+// }));
+
+// const classes = useStyles();
 export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
-
     return quickLinks && Array.isArray(quickLinks) ? <div className="d-flex flex-column gap-2 px-3 pt-2 pb-3 bg-white">
         <Typography variant="h6" className="mb-1">{title}</Typography>
-        {
-            quickLinks.map((k, index) => {
-                return <div key={index} className="font-size-3 link d-flex justify-content-center align-items-center gap-1">
-                    {
-                        k.to ? <>
-                            <Link key={index} to={k.to}
-                                className={`link`}>{k.label} {k.count != null ? `(${k.count})` : null}</Link>
-                        </> :
-                            <>
-                                <Icon>{k.icon}</Icon>
-                                <Typography key={index} onClick={k.onClick}>{k.label} {k.count != null ? `(${k.count})` : null}</Typography>
-                            </>
-                    }
-                </div>
-            })
-        }
+        <Grid container spacing={1}>
+            {
+                quickLinks.map((k, index) => {
+                    return <React.Fragment>
+                        <Grid item xs={6} sm={4} md={3} lg={3} spacing={2}>
+                            <Paper className={`quickLinks ${k.class}`}>
+                                {k.to ? <>
+                                    <Link key={index} to={k.to}
+                                        className={`link`}>{k.label} {k.count != null ? `(${k.count})` : null}</Link>
+                                </> :
+                                    <>
+                                        <Icon>{k.icon}</Icon>
+                                        <Typography key={index} onClick={k.onClick}>{k.label} {k.count != null ? `(${k.count})` : null}</Typography>
+                                    </>}</Paper>
+                        </Grid>
+                    </React.Fragment>
+                })
+            }
+        </Grid>
     </div> : <Typography color="error">Quick Links are passed in incorrect format</Typography>
+}
+
+function makeStyles(arg0: (theme: any) => { label: { fontSize: string; fontWeight: string; }; }) {
+    throw new Error('Function not implemented.');
 }
 

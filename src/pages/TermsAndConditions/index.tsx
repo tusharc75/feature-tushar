@@ -21,7 +21,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from '../../axios/axiosInstance'
-import CustomContainer from "./../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 import styles from "./terms.module.scss"
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomHeader from '../../components/Helpers/CustomHeader'
@@ -40,19 +40,6 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 8,
         padding: theme.spacing(3, 2),
     },
-    linksContainer: {
-        display: "flex",
-    },
-    links: {
-        color: theme.palette.primary.main   //  textDark
-    },
-    linkDivider: {
-        backgroundColor: theme.palette.primary.main,  //  darkBg
-        margin: "0 1rem",
-    },
-    delBtn: {
-        color: 'red'
-    }
 }));
 
 let termsTimeout

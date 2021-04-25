@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Grid,
   makeStyles,
@@ -13,6 +13,7 @@ import {
   Link as MuiLink,
   Popover,
 } from "@material-ui/core";
+import { Link } from "react-router-dom";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { kebabCase } from "lodash";
 import axios from "axios";
@@ -25,7 +26,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 const useStyles = makeStyles((theme) => ({
   fieldText: {
     width: "100%",
-    padding: theme.spacing(1, 1, 1, 0.5),
+    padding: theme.spacing(0.5,0.5,0.5,1),
     borderRadius: 4,
     cursor: "normal",
     textOverflow: "ellipsis",
@@ -39,6 +40,15 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     whiteSpace: "nowrap",
   },
+  dataValue:{
+    fontWeight:500,
+    color:theme.palette.primary.main
+  },
+  detailLabel:{
+    fontSize:"0.8rem",
+    fontWeight:"normal",
+    color:'#656464'
+  }
 }));
 
 interface DetailProps {
@@ -51,15 +61,13 @@ const Details = (props: DetailProps) => {
   const classes = useStyles();
   const theme = useTheme();
   const { data, fields } = props;
-  const containerRef = useRef(null);
-
   const [isDownloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [anchorPopoverEl, setAnchorPopoverEl] = useState(null);
   const [popoverData, setPopoverData] = useState(null);
-  const [loadingPopoverData, setLoadingPopoverData] = useState(false);
+  const [loadingPopoverData, setLoadingPopoverData] = useState(true);
   const [lookupResource, setLookupResource] = useState(null);
   const cancelTokenSource = axios.CancelToken.source();
 
@@ -109,18 +117,18 @@ const Details = (props: DetailProps) => {
       const value = filterOptions.length
         ? filterOptions.map((d) => d.optionLabel).join(", ")
         : "";
-      text = value ? value : "_ _ _";
+      text = value ? value : "-";
     } else if (input.type === "dropDown") {
       const opt = input.option?.find(
         (o) => o.optionValue === values[input.fieldName]
       );
       const value = opt && Object.keys(opt).length ? opt.optionLabel : "";
-      text = value ? value : "_ _ _";
+      text = value ? value : "-";
     } else if (input.type === "currency") {
       const opt = currencies.find(
         (c) => c.currencyCode === values[input.fieldName]
       );
-      text = opt ? `${opt.currencyCode} - ${opt.name}` : "_ _ _";
+      text = opt ? `${opt.currencyCode} - ${opt.name}` : "-";
     } else if (input.type === "switch") {
       text = values[input.fieldName] ? "Inactive" : "Active";
     } else if (input.type === "checkBox") {
@@ -128,7 +136,7 @@ const Details = (props: DetailProps) => {
     } else if (input.type === "date") {
       text = yyyyMMDD(values[input.fieldName]);
     } else {
-      text = values[input.fieldName] ? values[input.fieldName] : "_ _ _";
+      text = values[input.fieldName] ? values[input.fieldName] : "-";
     }
     return text;
   };
@@ -216,13 +224,12 @@ const Details = (props: DetailProps) => {
                         )
                       }
                     >
-                      {_val.optionLabel}
+                     <span className={classes.dataValue}> {_val.optionLabel}</span>
                     </Box>
-                    <Box component="span" marginX={1} />
                   </React.Fragment>
                 ))
               ) : (
-                "_ _ _"
+                "-"
               )
             ) : data[fieldData.fieldName] ? (
               <Box
@@ -236,10 +243,10 @@ const Details = (props: DetailProps) => {
                   )
                 }
               >
-                {data[fieldData.fieldName].optionLabel}
+               <span className={classes.dataValue}>{data[fieldData.fieldName].optionLabel}</span> 
               </Box>
             ) : (
-              "_ _ _"
+              "-"
             )}
           </Typography>
         );
@@ -247,16 +254,16 @@ const Details = (props: DetailProps) => {
     } else {
       return (
         <Typography
-          title={value === "_ _ _" ? "" : value}
+          title={value === "-" ? "" : value}
           className={classes.fieldText}
           variant="body2"
         >
           {fieldData.type === "url" ? (
             <MuiLink href={value} target="_blank">
-              {value}
+             <span className={classes.dataValue}> {value} </span>
             </MuiLink>
           ) : (
-            value
+           <span className={classes.dataValue}> {value} </span>
           )}
         </Typography>
       );
@@ -308,7 +315,7 @@ const Details = (props: DetailProps) => {
 
     return (
       <Box width="250px">
-        {loadingPopoverData ? (
+        {loadingPopoverData || !popoverData ? (
           <Box display="flex" justifyContent="center">
             <CircularProgress size={20} />
           </Box>
@@ -323,7 +330,14 @@ const Details = (props: DetailProps) => {
               flexDirection="column"
               justifyContent="start"
             >
-              <Typography className={classes.popoverText}>{name}</Typography>
+              <Typography className={classes.popoverText}>
+                <MuiLink
+                  component={Link}
+                  to={`/${lookupResource}/detail/${popoverData?._id}`}
+                >
+                  {name}
+                </MuiLink>
+              </Typography>
               <Typography
                 color="textSecondary"
                 variant="body2"
@@ -348,8 +362,7 @@ const Details = (props: DetailProps) => {
   return (
     <div>
       <Popover
-        ref={containerRef}
-        style={{ pointerEvents: "none" }}
+        onClick={handlePopoverClose}
         open={Boolean(anchorPopoverEl)}
         anchorEl={anchorPopoverEl}
         anchorOrigin={{
@@ -364,8 +377,9 @@ const Details = (props: DetailProps) => {
         disableRestoreFocus
       >
         <Box
+          id="#popover_container"
           padding={1}
-          style={{ pointerEvents: "all" }}
+          style={{ pointerEvents: "all", overflow: "hidden" }}
           onMouseLeave={handlePopoverClose}
         >
           {renderPopoverData()}
@@ -373,11 +387,11 @@ const Details = (props: DetailProps) => {
       </Popover>
       {formsData?.map((form) => (
         <React.Fragment key={form.name}>
+          <div className="detail-box">
           <h3 className="form-label-style" title={form.name}>
             {form.name}
           </h3>
-          <Box marginY={2} />
-          <Grid container spacing={2}>
+          <Grid container>
             {form.sectionFields.map((field, i) => (
               <Grid
                 key={i}
@@ -405,12 +419,9 @@ const Details = (props: DetailProps) => {
                       <Box marginX="2px" />
                       <h4
                         title={field.fieldData.fieldLabel}
-                        style={{
-                          color: theme.palette.text.secondary,
-                          fontWeight: "normal",
-                        }}
+                        className={classes.detailLabel}
                       >
-                        {field.fieldData.fieldLabel}
+                       {field.fieldData.fieldLabel}
                       </h4>
                     </Box>
                   </Grid>
@@ -421,7 +432,7 @@ const Details = (props: DetailProps) => {
                     md={dynamicSize(7, field.fieldData.type)}
                   >
                     {field.fieldData.type === "imageUpload" ? (
-                      <Box paddingLeft={1} marginTop={1}>
+                      <Box paddingLeft={2} marginTop={1} marginBottom={4}>
                         <Avatar src={initialVals[field.fieldData.fieldName]} />
                       </Box>
                     ) : (
@@ -486,18 +497,13 @@ const Details = (props: DetailProps) => {
                     )}
                   </Grid>
                 </Grid>
-                <Box marginY={1} />
                 {field.fieldData.type !== "imageUpload" &&
-                  field.fieldData.type !== "fileUpload" && (
-                    <Divider
-                      style={{ color: "gray" }}
-                      orientation="horizontal"
-                    />
-                  )}
+                  field.fieldData.type !== "fileUpload"
+                 }
               </Grid>
             ))}
           </Grid>
-          <Box marginY={4} />
+         </div>
         </React.Fragment>
       ))}
     </div>

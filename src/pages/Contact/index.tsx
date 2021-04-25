@@ -24,7 +24,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import SearchBox from "../../components/Helpers/SearchBox";
 import DeleteIcon from "@material-ui/icons/Delete";
-import CustomContainer from "./../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
@@ -484,13 +484,10 @@ export default function Contact(props) {
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[contactBreadcrumb]} />
         </Grid>
-        <Grid
-          item
+        <Grid item 
           md={8}
           sm={1}
-          xs={2}
-          className="d-flex align-items-center bg-white"
-        >
+          xs={2}>
           <ImportExportLinks
             module="contact(s)"
             api={contactApi}
@@ -535,7 +532,7 @@ export default function Contact(props) {
                 accountDetails.accountId && <Chip
                   className="ml-3"
                   color="primary"
-                  label={accountDetails.accountName}
+                  label={`Account: ${accountDetails.accountName}`}
                   onDelete={() => {
                     setAccountDetails({ accountId: null, accountName: null });
                     getContacts();
@@ -620,10 +617,7 @@ export default function Contact(props) {
             </Grid>
           </Grid>
         </div>
-      </CustomContainer>
-
-      <Paper>
-        <Box component="div">
+         <Box component="div">
           {/* <Box component="div" marginY={1}> */}
           <div className="listing-grid">
             <DataGrid
@@ -702,7 +696,7 @@ export default function Contact(props) {
             />
           ) : null}
         </Box>
-      </Paper>
+        </CustomContainer>
     </Layout>
   );
 }

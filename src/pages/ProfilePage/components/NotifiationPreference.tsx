@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
-import Container from "../../../components/Container";
+import CustomContainer from "../../../components/CustomContainer";
 import SaveButton from '../../../components/Helpers/CustomButton'
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -104,7 +104,7 @@ export default function NotifiationPreference(props) {
             id: "Email3"
         }
     ]
-    return <Container>
+    return <>
         <div className={styles.preferenceHeader}>
             <Typography variant="h5">Your Notification Preference</Typography>
             {/* <Tooltip title="Save">
@@ -152,6 +152,6 @@ export default function NotifiationPreference(props) {
                 </Table>
             </TableContainer>
         </Box>
-    </Container>
+    </>
 
 }

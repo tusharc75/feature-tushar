@@ -25,7 +25,7 @@ import ManageAccountDialog from "./ManageAccount/index";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from "../../axios/axiosInstance";
-import CustomContainer from "./../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 import CancelIcon from "@material-ui/icons/Cancel";
 import accountClass from "./account.module.scss";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
@@ -644,9 +644,7 @@ export default function Account(props) {
             item
             md={8}
             sm={1}
-            xs={2}
-            className="d-flex align-items-center bg-white"
-          >
+            xs={2} >
             <ImportExportLinks
               module="account(s)"
               api={accountApi}
@@ -656,47 +654,44 @@ export default function Account(props) {
             />
           </Grid>
         </Grid>
-
-        <Box component="div">
-          <CustomContainer>
-            <div
-              className={`${accountClass["account_header_inner_container"]}`}
+        <CustomContainer>
+          <div className={`${accountClass["account_header_inner_container"]}`}
+          >
+            <CustomHeader
+              total={rowCount}
+              heading={sidebarResource[accountResource]}
+              selectedType={selectedType}
+              onTypeChange={handleAccountSel}
+              options={AccTypes}
+              secondHeading="Account"
+              icon={<MdAccountCircle className="headerLogo" />}
             >
-              <CustomHeader
-                total={rowCount}
-                heading={sidebarResource[accountResource]}
-                selectedType={selectedType}
-                onTypeChange={handleAccountSel}
-                options={AccTypes}
-                secondHeading="Account"
-                icon={<MdAccountCircle className="headerLogo" />}
+              <div
+                className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`}
               >
+                <SearchBox
+                  onSearch={handleSearch}
+                  searchbox="account_header_search_bar"
+                  width="300px"
+                  value={searchVal}
+                />
                 <div
-                  className={`${accountClass.account_header} ${accountClass["account_header-mobile"]}`}
+                  className={`${accountClass.account_header_add_btn_action_btn_group}`}
                 >
-                  <SearchBox
-                    onSearch={handleSearch}
-                    searchbox="account_header_search_bar"
-                    width="300px"
-                    value={searchVal}
-                  />
-                  <div
-                    className={`${accountClass.account_header_add_btn_action_btn_group}`}
-                  >
-                    {accountPermissions.isCreate && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        className={`px-3 ${accountClass.account_header_add_btn}`}
-                        onClick={clickCreateNew}
-                        startIcon={<AddOutlined />}
-                      >
-                        Add
-                      </Button>
-                    )}
+                  {accountPermissions.isCreate && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      className={`px-3 ${accountClass.account_header_add_btn}`}
+                      onClick={clickCreateNew}
+                      startIcon={<AddOutlined />}
+                    >
+                      Add
+                    </Button>
+                  )}
 
-                    {(accountPermissions.isDelete ||
-                      accountPermissions.approveAccount) && (
+                  {(accountPermissions.isDelete ||
+                    accountPermissions.approveAccount) && (
                       <Button
                         disabled={
                           dataRows.filter((d) => d.isChecked).length === 0
@@ -710,210 +705,206 @@ export default function Account(props) {
                         Actions <ExpandMore />
                       </Button>
                     )}
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {accountPermissions.isUpdate &&
-                        accountPermissions.approveAccount && (
-                          <MenuItem
-                            disabled={
-                              dataRows.filter((d) => d.isChecked && !d.approved)
-                                .length === 0
-                            }
-                            onClick={() => {
-                              closeActions();
-                              setMultipleApproveDisapproveAccount({
-                                show: true,
-                                approved: true,
-                                selectedRecords: dataRows.filter(
-                                  (d) => d.isChecked && !d.approved
-                                ).length,
-                              });
-                            }}
-                          >
-                            Approve Accounts &nbsp;{" "}
-                            <Chip
-                              size="small"
-                              label={
-                                dataRows.filter(
-                                  (d) => d.isChecked && !d.approved
-                                ).length
-                              }
-                            />
-                          </MenuItem>
-                        )}
-                      {accountPermissions.isUpdate &&
-                        accountPermissions.approveAccount && (
-                          <MenuItem
-                            disabled={
-                              dataRows.filter((d) => d.isChecked && d.approved)
-                                .length === 0
-                            }
-                            onClick={() => {
-                              closeActions();
-                              setMultipleApproveDisapproveAccount({
-                                show: true,
-                                approved: false,
-                                selectedRecords: dataRows.filter(
-                                  (d) => d.isChecked && d.approved
-                                ).length,
-                              });
-                            }}
-                          >
-                            Disapprove Accounts &nbsp;{" "}
-                            <Chip
-                              size="small"
-                              label={
-                                dataRows.filter(
-                                  (d) => d.isChecked && d.approved
-                                ).length
-                              }
-                            />
-                          </MenuItem>
-                        )}
-                      {accountPermissions.isDelete && (
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    {accountPermissions.isUpdate &&
+                      accountPermissions.approveAccount && (
                         <MenuItem
                           disabled={
-                            dataRows.filter((d) => d.isChecked).length === 0
+                            dataRows.filter((d) => d.isChecked && !d.approved)
+                              .length === 0
                           }
                           onClick={() => {
-                            if (
-                              dataRows.find(
-                                (d) => d.isChecked && d.canDelete === false
-                              )
-                            ) {
-                              closeActions();
-                              setShowDeleteWarningConfirmBox(true);
-                            } else {
-                              closeActions();
-                              setShowDeleteConfirmBox(true);
-                            }
+                            closeActions();
+                            setMultipleApproveDisapproveAccount({
+                              show: true,
+                              approved: true,
+                              selectedRecords: dataRows.filter(
+                                (d) => d.isChecked && !d.approved
+                              ).length,
+                            });
                           }}
                         >
-                          Delete
+                          Approve Accounts &nbsp;{" "}
+                          <Chip
+                            size="small"
+                            label={
+                              dataRows.filter(
+                                (d) => d.isChecked && !d.approved
+                              ).length
+                            }
+                          />
                         </MenuItem>
                       )}
-                    </Menu>
-                  </div>
+                    {accountPermissions.isUpdate &&
+                      accountPermissions.approveAccount && (
+                        <MenuItem
+                          disabled={
+                            dataRows.filter((d) => d.isChecked && d.approved)
+                              .length === 0
+                          }
+                          onClick={() => {
+                            closeActions();
+                            setMultipleApproveDisapproveAccount({
+                              show: true,
+                              approved: false,
+                              selectedRecords: dataRows.filter(
+                                (d) => d.isChecked && d.approved
+                              ).length,
+                            });
+                          }}
+                        >
+                          Disapprove Accounts &nbsp;{" "}
+                          <Chip
+                            size="small"
+                            label={
+                              dataRows.filter(
+                                (d) => d.isChecked && d.approved
+                              ).length
+                            }
+                          />
+                        </MenuItem>
+                      )}
+                    {accountPermissions.isDelete && (
+                      <MenuItem
+                        disabled={
+                          dataRows.filter((d) => d.isChecked).length === 0
+                        }
+                        onClick={() => {
+                          if (
+                            dataRows.find(
+                              (d) => d.isChecked && d.canDelete === false
+                            )
+                          ) {
+                            closeActions();
+                            setShowDeleteWarningConfirmBox(true);
+                          } else {
+                            closeActions();
+                            setShowDeleteConfirmBox(true);
+                          }
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    )}
+                  </Menu>
                 </div>
-              </CustomHeader>
-            </div>
+              </div>
+            </CustomHeader>
+          </div>
 
-            <div className="listing-grid">
-              <DataGrid
-                components={{
-                  Toolbar: DataGridCustomToolbar,
-                  NoRowsOverlay: CustomDataGridNoDataFound,
-                }}
-                scrollbarSize={20}
-                rows={loading ? [] : dataRows}
-                columns={columns}
-                loading={loading}
-                disableSelectionOnClick
-                disableMultipleSelection
-                paginationMode="server"
-                pagination
-                onPageChange={handlePage}
-                onPageSizeChange={handlePageSize}
-                pageSize={query.limit}
-                page={query.page}
-                rowCount={rowCount}
-                rowsPerPageOptions={[25, 50, 75]}
-                onSortModelChange={handleSortModelChange}
-                // onRowClick={handleRowClick}
-                density="compact"
-                onFilterModelChange={onFilterChange}
-              />
-            </div>
-            {showDeleteWarningConfirmBox ? (
-              <MessageDialog
-                open={showDeleteWarningConfirmBox}
-                message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-                onClose={() => setShowDeleteWarningConfirmBox(false)}
-              />
-            ) : null}
-            {showDeleteConfirmBox ? (
-              <ConfirmationDialog
-                open={showDeleteConfirmBox}
-                message={`Are you sure, you want to delete selected account(s) ?`}
-                onClose={() => setShowDeleteConfirmBox(false)}
-                onOk={handleDeleteAccounts}
-              />
-            ) : null}
-            {singleAccountDelete.show ? (
-              <ConfirmationDialog
-                open={singleAccountDelete.show}
-                message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
-                onClose={() =>
-                  setSingleAccountDelete({
-                    id: null,
-                    show: false,
-                    accountName: "",
-                  })
-                }
-                onOk={handleSingleDeleteAccounts}
-              />
-            ) : null}
+          <div className="listing-grid">
+            <DataGrid
+              components={{
+                Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
+              }}
+              scrollbarSize={20}
+              rows={loading ? [] : dataRows}
+              columns={columns}
+              loading={loading}
+              disableSelectionOnClick
+              disableMultipleSelection
+              paginationMode="server"
+              pagination
+              onPageChange={handlePage}
+              onPageSizeChange={handlePageSize}
+              pageSize={query.limit}
+              page={query.page}
+              rowCount={rowCount}
+              rowsPerPageOptions={[25, 50, 75]}
+              onSortModelChange={handleSortModelChange}
+              // onRowClick={handleRowClick}
+              density="compact"
+              onFilterModelChange={onFilterChange}
+            />
+          </div>
+          {showDeleteWarningConfirmBox ? (
+            <MessageDialog
+              open={showDeleteWarningConfirmBox}
+              message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+              onClose={() => setShowDeleteWarningConfirmBox(false)}
+            />
+          ) : null}
+          {showDeleteConfirmBox ? (
+            <ConfirmationDialog
+              open={showDeleteConfirmBox}
+              message={`Are you sure, you want to delete selected account(s) ?`}
+              onClose={() => setShowDeleteConfirmBox(false)}
+              onOk={handleDeleteAccounts}
+            />
+          ) : null}
+          {singleAccountDelete.show ? (
+            <ConfirmationDialog
+              open={singleAccountDelete.show}
+              message={`Are you sure, you want to delete account: ${singleAccountDelete.accountName} ? `}
+              onClose={() =>
+                setSingleAccountDelete({
+                  id: null,
+                  show: false,
+                  accountName: "",
+                })
+              }
+              onOk={handleSingleDeleteAccounts}
+            />
+          ) : null}
 
-            {singleApproveDisapproveAccount.show ? (
-              <ConfirmationDialog
-                open={singleApproveDisapproveAccount.show}
-                message={`Are you sure, you want to ${
-                  singleApproveDisapproveAccount.approved
-                    ? "approve"
-                    : "disapprove"
+          {singleApproveDisapproveAccount.show ? (
+            <ConfirmationDialog
+              open={singleApproveDisapproveAccount.show}
+              message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved
+                  ? "approve"
+                  : "disapprove"
                 } account: ${singleApproveDisapproveAccount.accountName} ? `}
-                onClose={() =>
-                  setSingleApproveDisapproveAccount({
-                    id: null,
-                    show: false,
-                    accountName: "",
-                  })
-                }
-                onOk={handleSingleApproveDisapproveAccount}
-              />
-            ) : null}
+              onClose={() =>
+                setSingleApproveDisapproveAccount({
+                  id: null,
+                  show: false,
+                  accountName: "",
+                })
+              }
+              onOk={handleSingleApproveDisapproveAccount}
+            />
+          ) : null}
 
-            {multipleApproveDisapproveAccount.show ? (
-              <ConfirmationDialog
-                open={multipleApproveDisapproveAccount.show}
-                message={`Are you sure, you want to ${
-                  multipleApproveDisapproveAccount.approved
-                    ? "approve"
-                    : "disapprove"
-                } selected ${
-                  multipleApproveDisapproveAccount.selectedRecords
+          {multipleApproveDisapproveAccount.show ? (
+            <ConfirmationDialog
+              open={multipleApproveDisapproveAccount.show}
+              message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved
+                  ? "approve"
+                  : "disapprove"
+                } selected ${multipleApproveDisapproveAccount.selectedRecords
                 } account(s) ? `}
-                onClose={() =>
-                  setMultipleApproveDisapproveAccount({
-                    show: false,
-                    approved: false,
-                    selectedRecords: 0,
-                  })
-                }
-                onOk={approveDisapproveAccounts}
-              />
-            ) : null}
-            {isAccDialogVisible ? (
-              <ManageAccountDialog
-                open={isAccDialogVisible}
-                onClose={handleDialogClose}
-                id={cloneId}
-                accountResource={accountResource}
-                accountApi={accountApi}
-              />
-            ) : null}
-          </CustomContainer>
-        </Box>
+              onClose={() =>
+                setMultipleApproveDisapproveAccount({
+                  show: false,
+                  approved: false,
+                  selectedRecords: 0,
+                })
+              }
+              onOk={approveDisapproveAccounts}
+            />
+          ) : null}
+          {isAccDialogVisible ? (
+            <ManageAccountDialog
+              open={isAccDialogVisible}
+              onClose={handleDialogClose}
+              id={cloneId}
+              accountResource={accountResource}
+              accountApi={accountApi}
+            />
+          ) : null}
+        </CustomContainer>
       </Layout>
     </>
   );
