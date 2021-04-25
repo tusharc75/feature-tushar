@@ -136,7 +136,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                         <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                     </Box>
                                     <Box mt={1} color="text.secondary">
-                                        <Typography variant="body2">Sended {moment(initialValues.createdAt).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
                                     </Box>
                                 </Fragment> :
                                 <Grid container spacing={3}>

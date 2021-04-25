@@ -19,6 +19,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import moment from "moment";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import { GiAbstract055 } from 'react-icons/gi';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 
 const ProductCategory = () => {
 
@@ -26,6 +27,8 @@ const ProductCategory = () => {
     const history = useHistory();
     const [loading, setLoading] = useState(true);
     const [productCategory, setProductCategory] = useState([]);
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [deleteRecord, setDeleteRecord] = useState(null)
 
     useEffect(() => {
         fetchProductCategory();
@@ -33,28 +36,19 @@ const ProductCategory = () => {
 
     const fetchProductCategory = () => {
         setLoading(true)
-
         axiosInstance().get(`/productcategory`).then(({ data: { data } }) => {
             setProductCategory(data);
             setLoading(false)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
-
-
-        // await GetProductCategory()
-        //     .then(({ data }) => {
-        //         setProductCategory(data);
-        //         setLoading(false)
-        //     })
-        //     .catch((err) => {
-        //     });
     };
 
-    const handleDelete = (id) => {
-        setLoading(true)
-        axiosInstance().delete(`/productcategory/` + id).then(() => {
+    const handleDelete = () => {
+        axiosInstance().delete(`/productcategory/` + deleteRecord._id).then(() => {
             fetchProductCategory();
+            setShowDeleteConfirmBox(false)
+            setDeleteRecord(null)
         }).catch((error) => {
             toastConfig.setToastConfig(error)
         });
@@ -120,7 +114,7 @@ const ProductCategory = () => {
             renderCell: (params) => (
                 <Fragment>
                     <Tooltip title="Delete" >
-                        <IconButton aria-label="Delete" onClick={() => handleDelete(params.row.id)} >
+                        <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}  >
                             <DeleteIcon fontSize="small" color="error" />
                         </IconButton>
                     </Tooltip >
@@ -168,6 +162,14 @@ const ProductCategory = () => {
                 density="compact"
             />
         </div>
+        {showDeleteConfirmBox &&
+            <ConfirmationDialog
+                open={showDeleteConfirmBox}
+                message={`Are you sure, you want to delete product ${deleteRecord?.name} ?`}
+                onClose={() => setShowDeleteConfirmBox(false)}
+                onOk={handleDelete}
+            />
+        }
     </Layout>
     );
 }
