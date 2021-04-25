@@ -34,6 +34,10 @@ const TaskSchema = Yup.object().shape({
         .required("please select assignee"),
     reporter: Yup.string()
         .required("please select reporter"),
+    startDate: Yup.string()
+        .required("please enter start date"),
+    dueDate: Yup.string()
+        .required("please enter due date"),
 });
 
 
@@ -63,6 +67,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
     };
 
     const handleSave = (values) => {
+        console.log(values)
         values.relatedTo = relatedTo;
         if (id) {
             UpdateTask(id, values)
@@ -83,7 +88,16 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
         }
     };
 
-    return (initialValues && <Formik initialValues={initialValues} validationSchema={TaskSchema} onSubmit={handleSave}>
+    function validate(values) {
+        const errors = {};
+        if (moment(values.startDate) > moment(values.dueDate)) {
+            errors["dueDate"] = 'Due date must greater then start date';
+        }
+        return errors;
+    };
+
+
+    return (initialValues && <Formik initialValues={initialValues} validationSchema={TaskSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate >
                 <CustomDialogHeader title={`${id ? "Edit" : "New"} Task`} onClose={handleClose}></CustomDialogHeader>
@@ -228,12 +242,12 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
                                         />
                                     </Box>
                                     {id && <Fragment>
-                                        <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Created {moment(initialValues.createdAt).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>
-                                        <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Updated {moment(initialValues.updatedAt).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>
+                                        {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
+                                            <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        </Box>}
+                                        {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
+                                            <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        </Box>}
                                     </Fragment>}
                                 </Grid>
                             </Grid>

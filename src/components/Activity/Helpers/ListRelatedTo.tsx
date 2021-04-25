@@ -6,12 +6,22 @@ export const capitalize = (string) => {
     return string && typeof string === "string" ? string.charAt(0).toUpperCase() + string.slice(1) : string;
 };
 
-export const ListRelatedTo = ({ relatedTo }) => {
-    return <Box>
+export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
+
+    let filter = originRelatedTo.filter((_relatedTo) => _relatedTo.access === true);
+
+    return filter.length ? <Box>
         {relatedTo && relatedTo.map((_element, index) => (
-            <Box mr={1} mb={1}>
+            _element.type === filter[0].type && <Box mr={1} mb={1}>
                 <Chip key={index} label={capitalize(UnCamelCase(_element.type)) + " - " + _element.name} size="small" />
             </Box>
         ))}
-    </Box>
+    </Box> :
+        <Box>
+            {relatedTo && relatedTo.map((_element, index) => (
+                <Box mr={1} mb={1}>
+                    <Chip key={index} label={capitalize(UnCamelCase(_element.type)) + " - " + _element.name} size="small" />
+                </Box>
+            ))}
+        </Box>
 }

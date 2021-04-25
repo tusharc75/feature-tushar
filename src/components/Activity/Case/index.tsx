@@ -95,7 +95,7 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
                             <Box pt={1}>
                                 <Grid container>
                                     <Grid item xs={6} >
-                                        <ListRelatedTo relatedTo={_case.relatedTo} />
+                                        <ListRelatedTo relatedTo={_case.relatedTo} originRelatedTo={relatedTo} />
                                         {/* <Chip label={_case.status} size="small" color="primary" /> */}
                                     </Grid>
                                     <Grid item xs={6} container justify="flex-end">

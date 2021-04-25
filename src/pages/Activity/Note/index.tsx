@@ -74,11 +74,11 @@ const Note = () => {
                 <a onClick={() => handleActivityOpen(params.row.id)}>{params.row.name}</a>
         },
         {
-            field: 'createdAt',
+            field: 'createdBy',
             headerName: 'Created At',
             width: 200,
             renderCell: (params) =>
-                <span>{moment(params.row.createdAt).format("DD/MM/YYYY hh:mm A")}</span>
+                <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>
         },
         {
             field: 'updatedAt',

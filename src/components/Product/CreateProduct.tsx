@@ -22,7 +22,7 @@ import { AddField } from '../FormBuilder/AddField';
 const CreateProduct = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose } = props;
+    const { productId, handleClose, isClone } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -69,7 +69,7 @@ const CreateProduct = (props) => {
     const handleSubmit = (values) => {
         setLoading(true);
         values.fields = fields;
-        if (productId) {
+        if (productId && !isClone) {
             values._id = productId;
             axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
@@ -80,6 +80,8 @@ const CreateProduct = (props) => {
             });
         }
         else {
+            delete values._id
+            delete values.brand
             axiosInstance().post(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 handleClose()
@@ -161,7 +163,7 @@ const CreateProduct = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={`${productId ? "Edit" : "New"} Product`} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`} onClose={handleClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
@@ -177,8 +179,8 @@ const CreateProduct = (props) => {
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                            {field.fieldName === "productCategory" ?
+                                                        field.fieldName === "productCategory" ?
+                                                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 <FormTypes
                                                                     fields={initialData.fields}
                                                                     values={values}
@@ -200,7 +202,8 @@ const CreateProduct = (props) => {
                                                                         handleChangeCategory(val && val.optionValue ? val.optionValue : "")
                                                                     }}
                                                                     size="small"
-                                                                /> :
+                                                                />  </Grid> :
+                                                            field.type === "converter" ?
                                                                 <FormTypes
                                                                     fields={initialData.fields}
                                                                     values={values}
@@ -217,10 +220,30 @@ const CreateProduct = (props) => {
                                                                     tooltipMessage={field.tooltipMessage}
                                                                     decimalPlaces={field.decimalPlaces}
                                                                     isvlookupReverse={field.isvlookupReverse}
+                                                                    fieldData={field}
                                                                     size="small"
-                                                                />
-                                                            }
-                                                        </Grid>
+                                                                /> :
+                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <FormTypes
+                                                                        fields={initialData.fields}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field.isTooltip}
+                                                                        tooltipMessage={field.tooltipMessage}
+                                                                        decimalPlaces={field.decimalPlaces}
+                                                                        isvlookupReverse={field.isvlookupReverse}
+                                                                        fieldData={field}
+                                                                        size="small"
+                                                                    />
+                                                                </Grid>
                                                     ))}
                                                 </Grid>
                                             </Box>

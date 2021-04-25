@@ -53,7 +53,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                     insert_object.decimalPlaces = 2
                 }
                 if (type === FieldList.VLOOKUPDROPDOWN.type) {
-                    insert_object.reletedTo = []
+                    insert_object.inputFields = []
                 }
                 if (index !== null) {
                     row.field.splice(index, 0, insert_object);

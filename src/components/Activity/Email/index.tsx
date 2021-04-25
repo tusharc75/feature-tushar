@@ -95,7 +95,7 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
                             <Box pt={1}>
                                 <Grid container>
                                     <Grid item xs={6} >
-                                        <ListRelatedTo relatedTo={_email.relatedTo} />
+                                        <ListRelatedTo relatedTo={_email.relatedTo} originRelatedTo={relatedTo} />
                                         {/* <Chip label={_task.status} size="small" color="primary" /> */}
                                     </Grid>
                                     <Grid item xs={6} container justify="flex-end">
