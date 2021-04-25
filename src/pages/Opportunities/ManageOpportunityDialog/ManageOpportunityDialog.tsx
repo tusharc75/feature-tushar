@@ -19,10 +19,11 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import FormTypes from "../../../components/Helpers/FormTypes";
-import CustomButton from "../../../components/Helpers/Button";
+import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
+import { useLocation, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const arr = [...Array(9).keys()];
@@ -38,12 +39,13 @@ export default function ManageOpportunityDialog({
 }) {
   const { opportunityResource, opportunityApi } = opportunity
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
   const {
     state: { user, selectedEntity },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate.owner
+    !isNew && user.user._id !== dataToUpdate.owner.optionValue
   );
 
   const [entityData, setEntityData] = useState({
@@ -56,6 +58,7 @@ export default function ManageOpportunityDialog({
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     const ownerCollabOptions = entityData.fields.filter(
@@ -158,11 +161,13 @@ export default function ManageOpportunityDialog({
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
+        const newId = data.data._id;
         toastConfig.setToastConfig({
           open: true,
           type: "success",
           message: data.message,
         });
+        history.push(`${opportunityApi}/detail/${newId}`);
         setLoading(false);
         onSuccess();
       })
@@ -368,9 +373,10 @@ export default function ManageOpportunityDialog({
                 </Button>
 
                 <CustomButton
+                  loading={loading}
                   variant="contained"
                   color="primary"
-                  loading={
+                  disabled={
                     Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                     Object.values(simplifyValues(values, entityData.fields)).toString()}
                   onClick={(e) => {
@@ -387,6 +393,7 @@ export default function ManageOpportunityDialog({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
+
             </>
           )}
         </Formik>

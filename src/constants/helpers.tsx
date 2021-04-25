@@ -19,7 +19,8 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 
-export const vapidKey = "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
+export const vapidKey =
+  "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
 
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
@@ -43,6 +44,10 @@ export const roleTypes = [
     value: 2,
   },
 ];
+
+export const userType = {
+  brandAdmin: 2
+}
 
 export const sidebarResource = {
   brand: "Brand",
@@ -109,6 +114,18 @@ export const customerContact = {
   contactRoute: "customer-contact",
   contactResource: "customerContact", //  Key of sidebar object
   contactPermission: "Customer Contact",
+};
+
+export const profilePage = {
+  profilePageRoute: "/profile",
+};
+
+export const profileMenuItems = {
+  profile: 1,
+  notification: 2,
+  setting: 3,
+  users: 4,
+  securityPrivacy: 5,
 };
 
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {

@@ -26,12 +26,13 @@ import {
   HelpOutline,
   ExpandMore,
 } from "@material-ui/icons";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
 import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
+import { profilePage } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 
 const useStyles = makeStyles((theme) => ({
@@ -41,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
   },
-
   toolbar: {
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
@@ -122,14 +122,14 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
-    minWidth: "150px",
+    maxWidth: "195px",
     padding: theme.spacing(1, 0, 1, 1),
   },
   entityName: {
+    maxWidth: "200px",
     textOverflow: "ellipsis",
     overflow: "hidden",
     whiteSpace: "nowrap",
-    width: "150px",
   },
 }));
 
@@ -140,7 +140,7 @@ const Header = ({ toggleDrawer }) => {
   }: any = useData();
   const classes = useStyles();
   const history = useHistory();
-  const isMobile = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery("(max-width:599px)");
   const [isSearch, setSearch] = useState(false);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
@@ -200,11 +200,11 @@ const Header = ({ toggleDrawer }) => {
       logoutUser();
     }
 
-    // if (option && option.profile) {
-    //   history.push({
-    //     pathname: Profile.path,
-    //   });
-    // }
+    if (option && option.profile) {
+      history.push({
+        pathname: profilePage.profilePageRoute,
+      });
+    }
     setOpen(false);
   };
 
@@ -319,9 +319,9 @@ const Header = ({ toggleDrawer }) => {
       </MenuItem> */}
       <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu}>
         {selectedEntity ? (
-          <>
+          <span className={classes.entityName}>
             {curEntity && curEntity.entityName} <ExpandMore />
-          </>
+          </span>
         ) : (
           "No Entity"
         )}
@@ -395,12 +395,14 @@ const Header = ({ toggleDrawer }) => {
                 <MenuIcon />
               </IconButton>
             </div>
-            <img
-              className={classes.logo}
-              src={SVG("Logo")}
-              alt="equip logo"
-              title="eQuipt Logo"
-            />
+            <Link to="/">
+              <img
+                className={classes.logo}
+                src={SVG("Logo")}
+                alt="equip logo"
+                title="eQuipt Logo"
+              />
+            </Link>
             <Box marginLeft={2} className={classes.servicesButton}>
               {/* <Button
                 aria-controls={servicesMenuId}
@@ -422,7 +424,9 @@ const Header = ({ toggleDrawer }) => {
                     }
                     className={classes.entitySelect}
                   >
-                    <span>{curEntity && curEntity.entityName}</span>
+                    <span className={classes.entityName}>
+                      {curEntity && curEntity.entityName}
+                    </span>
                     <Box component="span" mr={1} />
                     <ExpandMore />
                   </Box>

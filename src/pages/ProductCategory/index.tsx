@@ -95,7 +95,7 @@ const ProductCategory = () => {
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
-            renderCell: (params) => params?.row && params?.row?.updatedBy && params?.row?.updatedBy.user ? (<h5 className="createBy">
+            renderCell: (params) => params?.row && params?.row?.updatedBy && params?.row?.updatedBy?.user ? (<h5 className="createBy">
                 {params.row.updatedBy.user.firstName}
                 <span
                     className="updatedAtTime"

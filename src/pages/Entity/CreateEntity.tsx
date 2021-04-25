@@ -14,6 +14,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import InputField from "../../components/Helpers/InputField";
+import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
 
 interface InitialData {
@@ -30,6 +31,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
     fields: [],
     values: {},
   });
+  const history = useHistory();
 
   useEffect(() => {
     getInitialData();
@@ -57,8 +59,10 @@ const CreateEntity = ({ open, close, fetchData }) => {
     axiosInstance()
       .post("/entity", values)
       .then(({ data }) => {
+        const newId = data.data._id;
         setSubmitting(false);
         fetchData();
+        history.push(`/entity/detail/${newId}`);
         close();
       })
       .catch((err) => {
@@ -137,6 +141,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
                 </Button>
               </CustomDialogFooter>
             </>
+           
           )}
         </Formik>
       )}

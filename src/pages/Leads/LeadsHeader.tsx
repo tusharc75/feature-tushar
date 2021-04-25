@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
 import { makeStyles } from "@material-ui/core/styles";
 import { AddOutlined } from "@material-ui/icons";
@@ -17,6 +17,7 @@ import styles from "./Header.module.scss"
 
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import MessageDialog from '../../components/Helpers/MessageDialog';
 
 const useStyles = makeStyles((theme) => ({
     filter_side: {
@@ -28,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
 function LeadsHeader(props) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
+    const [messageDialog, setMessageDialog] = useState({ open: false, message: "" });
 
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
@@ -47,6 +49,7 @@ function LeadsHeader(props) {
     };
 
     const {
+        userId,
         selectedType,
         onTypeChange,
         options,
@@ -59,8 +62,10 @@ function LeadsHeader(props) {
         icon,
         heading,
         allowToConvertLeadToOpportunity,
-        showLeadToOpportunityConfirmationDialog
+        showLeadToOpportunityConfirmationDialog,
+        selectedLeads
     } = props
+
     return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6} className="d-flex align-items-center gap-1">
             {icon} <span className="listingHeader">{heading}
@@ -137,7 +142,16 @@ function LeadsHeader(props) {
                                 allowToConvertLeadToOpportunity && <MenuItem
                                     onClick={() => {
                                         closeActions();
-                                        showLeadToOpportunityConfirmationDialog();
+                                        if (selectedLeads.some((d) => d.isChecked && d.convertedToOpportunity)) {
+                                            setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
+                                        } else {
+                                            if (selectedLeads.some(d => d.isAllowedToUpdate == false)) {
+                                                setMessageDialog({ open: true, message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.` })
+                                            }
+                                            else {
+                                                showLeadToOpportunityConfirmationDialog();
+                                            }
+                                        }
                                     }}
                                 >Convert To Opportunity</MenuItem>
                             }
@@ -145,7 +159,14 @@ function LeadsHeader(props) {
                     </>
                 }
             </Box>
-
+            {
+                messageDialog.open ? (
+                    <MessageDialog
+                        open={messageDialog.open}
+                        message={messageDialog.message}
+                        onClose={() => setMessageDialog({ open: false, message: null })}
+                    />
+                ) : null}
         </Grid>
     </Grid>
 }

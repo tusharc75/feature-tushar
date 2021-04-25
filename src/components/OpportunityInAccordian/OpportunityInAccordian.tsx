@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button } from '@material-ui/core'
 import CommonSkeleton from '../Helpers/CommonSkeleton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -12,6 +12,7 @@ import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
+import { useHistory } from 'react-router-dom';
 
 const Accordion = withStyles({
     root: {
@@ -70,8 +71,12 @@ function DisplayData({ label, value }) {
     </div>
 }
 
-export default function OpportunityInAccordian({ opportunities, onNewOpportunityAdd, accountId, expanded = true, recordsPerLine = 2, opportunityPermissions, resource }) {
+export default function OpportunityInAccordian({
+    opportunities, onNewOpportunityAdd, accountId, accountName,
+    expanded = true, recordsPerLine = 2, opportunityPermissions, resource
+}) {
 
+    const history = useHistory();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -183,6 +188,19 @@ export default function OpportunityInAccordian({ opportunities, onNewOpportunity
                     }
                 </>
             </AccordionDetails>
+
+            <Box marginY={1} />
+            <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => history.push(`/opportunity`, {
+                    accountId: accountId,
+                    accountName: accountName
+                })}>
+                View All
+             </Button>
         </Accordion>
 
         {
