@@ -25,19 +25,13 @@ const useStyles = makeStyles((theme) => ({
   labelColor: {
     color: "#fff",
   },
-  avatar: {
-    width: 20,
-    height: 20,
-    display: "inline-block",
-    marginRight: "10px",
-  },
   skeleton: {
     marginRight: "10px",
   },
 }));
 
 const DetailsPageHeader = (props) => {
-  const { mainPoints, heading, children, showHeading, logo, loading, isApproved } = props;
+  const { mainPoints, heading, children, showHeading, loading, isApproved } = props;
   const classes = useStyles();
   return (
     <>
@@ -55,13 +49,6 @@ const DetailsPageHeader = (props) => {
                   component="h2"
                   color="primary"
                 >
-                  {logo ? (
-                    <Avatar
-                      src={logo}
-                      className={classes.avatar}
-                      alt="acc_logo"
-                    />
-                  ) : null}
                   <span className="d-flex align-items-center gap-2"><span className="listingHeader">{heading}</span> {
                     isApproved && <Tooltip title="Approved"><CheckCircleIcon color="primary" /></Tooltip>
                   }</span>

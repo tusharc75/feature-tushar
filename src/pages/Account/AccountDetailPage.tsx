@@ -402,9 +402,6 @@ export default function AccountDetailPage(props) {
                 <DetailsPageHeader
                   loading={loading}
                   heading={headingLbl}
-                  logo={
-                    accountData?.accountLogo ? accountData.accountLogo : undefined
-                  }
                   isApproved={accountData?.static?.approved}
                   mainPoints={mainPoints}
                   showHeading={true}
