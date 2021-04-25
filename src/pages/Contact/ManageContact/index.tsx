@@ -77,7 +77,6 @@ export default function ManageContactMain(props) {
         const newId = data.data._id;
         onClose({ fetch: true });
         onSuccess({ fetch: true });
-        debugger;
         toastConfig.setToastConfig({
           open: true,
           type: "success",

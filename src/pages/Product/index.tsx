@@ -77,13 +77,13 @@ const Product = () => {
         {
             field: "productCategory",
             headerName: "Product Category",
-            width: 300,
+            width: 250,
             renderCell: (params) => (params.row.productCategory?.productCategory)
         },
         {
             field: "createdBy",
             headerName: "Created By",
-            width: 150,
+            width: 200,
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
@@ -92,7 +92,7 @@ const Product = () => {
                     <h5 className="createBy">
                         {params?.value?.user?.firstName}
                         <span
-                            className="createdAtTime"
+                            className="createdAtTime badge-date"
                             title={`${params?.value?.user?.firstName} • ${moment(
                                 params?.value?.date?.slice(0, 10)
                             ).format("MMM Do, YYYY")}`}
@@ -107,13 +107,13 @@ const Product = () => {
         {
             field: "updatedBy",
             headerName: "Updated By",
-            width: 150,
+            width: 200,
             renderCell: (params: any) =>
                 params?.value && params?.value?.user ? (
                     <h5 className="updateBy">
                         {params.value.user.firstName}
                         <span
-                            className="updatedAtTime"
+                            className="updatedAtTime badge-date"
                             title={`${params.value.user.firstName} • ${moment(
                                 params.value.date.slice(0, 10)
                             ).format("MMM Do, YYYY")}`}
@@ -147,7 +147,7 @@ const Product = () => {
                     </Tooltip >
                 </Fragment>
             ),
-            width: 200,
+            width: 100,
             disableColumnMenu: true,
             sortable: false,
             filterable: false,
@@ -171,30 +171,32 @@ const Product = () => {
                 <CustomBreadCrumbs routes={[{ title: "Product" }]} />
             </Grid>
         </Grid>
-        <div className="header-panel">
-            <Grid container>
-                <Grid item xs={6} className="d-flex align-items-center gap-1">
-                    <GiAbstract055 /> <span className="listingHeader">Products </span>
+        <div className="main-container">
+            <div className="header-panel">
+                <Grid container>
+                    <Grid item xs={6} className="d-flex align-items-center gap-1">
+                        <GiAbstract055 className="headerLogo"/> <span className="listingHeader">Products </span>
+                    </Grid>
+                    <Grid item xs={6} container justify="flex-end">
+                        <Button onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                    </Grid>
                 </Grid>
-                <Grid item xs={6} container justify="flex-end">
-                    <Button onClick={() => OpenProduct(null)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                </Grid>
-            </Grid>
-        </div>
-        <div className="listing-grid">
-            <DataGrid
-                components={{
-                    Toolbar: DataGridCustomToolbar,
-                    NoRowsOverlay: CustomDataGridNoDataFound,
-                }}
-                loading={loading}
-                rows={product}
-                disableSelectionOnClick
-                disableMultipleSelection
-                columns={columns}
-                pageSize={25}
-                density="compact"
-            />
+            </div>
+            <div className="listing-grid">
+                <DataGrid
+                    components={{
+                        Toolbar: DataGridCustomToolbar,
+                        NoRowsOverlay: CustomDataGridNoDataFound,
+                    }}
+                    loading={loading}
+                    rows={product}
+                    disableSelectionOnClick
+                    disableMultipleSelection
+                    columns={columns}
+                    pageSize={25}
+                    density="compact"
+                />
+            </div>
         </div>
         {open && <CreateProduct isClone={isClone} productId={productId} handleClose={handleClose} />}
         {showDeleteConfirmBox &&

@@ -12,7 +12,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { DataGrid } from "@material-ui/data-grid";
 import { useData } from "../../StateProvider/Provider";
 import Layout from "../../components/Layout";
-import Container from "../../components/Container";
 import axiosInstance from "../../axios/axiosInstance";
 import { getSearchQuery, displayDate } from "../../services/util";
 import OpportunitiesHeader from "./OpportunitiesHeader";
@@ -33,23 +32,10 @@ import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import CustomContainer from "../../components/CustomContainer";
 import { useHistory } from "react-router-dom";
 
 let opportunityTimeout;
-const useStyles = makeStyles((theme) => ({
-  linksContainer: {
-    display: "flex",
-  },
-  links: {
-    color: theme.palette.primary.main, //  textDark
-    fontSize: "0.90rem",
-  },
-  linkDivider: {
-    backgroundColor: theme.palette.primary.main, //  darkBg
-    margin: "0 1rem",
-  },
-}));
-
 const OpportunityTypes = [
   {
     key: "All Opportunities",
@@ -63,7 +49,6 @@ const OpportunityTypes = [
 
 const Opportunities = () => {
   const toastConfig = useContext(CustomToastContext);
-  const classes = useStyles();
   const history = useHistory();
   const {
     state: { user, selectedEntity, permissions },
@@ -551,11 +536,9 @@ const Opportunities = () => {
             item
             md={8}
             sm={1}
-            xs={2}
-            className="d-flex align-items-center bg-white"
-          >
+            xs={2}>
             <Grid container direction="row">
-              <Grid item xs={12} sm={12} className="pr-3">
+              <Grid item xs={12} sm={12}>
                 <Grid container justify="flex-end">
                   <ImportExportLinks
                     module="opportunities"
@@ -571,7 +554,7 @@ const Opportunities = () => {
         </Grid>
 
         {/* Tables Begins Here */}
-        <Container>
+    <CustomContainer>
           <div className="header-panel">
             <OpportunitiesHeader
               selectedType={selectedType}
@@ -590,7 +573,7 @@ const Opportunities = () => {
                 accountDetails.accountId && <Chip
                   className="ml-3"
                   color="primary"
-                  label={accountDetails.accountName}
+                  label={`Account: ${accountDetails.accountName}`}
                   onDelete={() => {
                     setAccountDetails({ accountId: null, accountName: null });
                     fetchOpportunities();
@@ -599,8 +582,8 @@ const Opportunities = () => {
               }
             </OpportunitiesHeader>
           </div>
-        </Container>
-        <Container>
+       
+       
           <div className="listing-grid">
             <DataGrid
               components={{
@@ -670,7 +653,7 @@ const Opportunities = () => {
               onOk={handleSingleDeleteOpportunity}
             />
           ) : null}
-        </Container>
+        </CustomContainer>
       </Layout>
 
       {showCreateOpportunityDialog && (

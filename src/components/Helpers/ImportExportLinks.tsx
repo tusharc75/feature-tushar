@@ -23,17 +23,16 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
-    margin: 12,
     ["@media (max-width: 960px)"]: {
       display: "none",
     },
   },
   links: {
-    color: theme.palette.primary.main, //  textDark
+    color: "#ffffffbd", //  textDark
     fontSize: 15,
   },
   linkDivider: {
-    backgroundColor: theme.palette.primary.main, //  darkBg
+    backgroundColor: "#ffffff42", //  darkBg
     margin: "0 10px",
   },
   delBtn: {
@@ -148,7 +147,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
   );
 
   return (
-    <div className={classes.root}>
+    <div className={`${classes.root} headerbox`}>
       <div className={classes.linksContainer}>
         <label
           htmlFor="importFromExcel"

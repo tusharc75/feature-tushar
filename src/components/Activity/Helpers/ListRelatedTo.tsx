@@ -13,7 +13,7 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
     return filter.length ? <Box>
         {relatedTo && relatedTo.map((_element, index) => (
             _element.type === filter[0].type && <Box mr={1} mb={1}>
-                <Chip key={index} label={capitalize(UnCamelCase(_element.type)) + " - " + _element.name} size="small" />
+                <Chip key={index}  className="custom-chip" label={capitalize(UnCamelCase(_element.type)) + " - " + _element.name} size="small" />
             </Box>
         ))}
     </Box> :

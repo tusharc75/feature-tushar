@@ -4,7 +4,8 @@ import { AddOutlined, ExpandMore } from "@material-ui/icons";
 
 import styles from "../Leads/Header.module.scss";
 import SearchBox from "../../components/Helpers/SearchBox";
-
+import { BiNetworkChart } from "react-icons/bi"
+;
 const Header = (props) => {
   const {
     onSearch,
@@ -29,6 +30,7 @@ const Header = (props) => {
   return (
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
+        <BiNetworkChart className="headerLogo"/>
         <span className="listingHeader">Entities</span>
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
@@ -46,6 +48,7 @@ const Header = (props) => {
               className={styles.add_submit_btn}
               variant="contained"
               color="primary"
+              size="small"
               onClick={onCreate}
               startIcon={<AddOutlined />}
             >
@@ -59,6 +62,7 @@ const Header = (props) => {
                 className={styles.action_submit_btn}
                 variant="outlined"
                 color="default"
+                size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
               >

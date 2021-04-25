@@ -117,7 +117,6 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "3px",
   },
   entitySelect: {
-    fontWeight: "bold",
     fontSize: "16px",
     display: "flex",
     alignItems: "center",
@@ -433,7 +432,7 @@ const Header = ({ toggleDrawer }) => {
                 </ButtonBase>
               )}
             </Box>
-            <div className={classes.search}>
+            {/* <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <Search />
               </div>
@@ -447,7 +446,7 @@ const Header = ({ toggleDrawer }) => {
                 }}
                 inputProps={{ "aria-label": "search" }}
               />
-            </div>
+            </div> */}
           </Box>
 
           {/* <div className={classes.sectionDesktop}>

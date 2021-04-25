@@ -15,7 +15,7 @@ import {
 import "./style.scss";
 
 import Layout from "../../components/Layout";
-import Container from "../../components/Container";
+import Container from "../../components/CustomContainer";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import NavLinks from "../../components/NavLinks";
 
