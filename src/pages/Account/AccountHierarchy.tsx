@@ -71,7 +71,7 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
 
     return (
         <>
-            {/* {
+            {
                 data.length == 1 ? <MaterialTable
                     icons={materialTableIcons}
                     data={data}
@@ -85,7 +85,7 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
                         parentChildData={(row, rows) => rows.find(a => a._id === row.parentAccountId)}
                         options={options}
                     />
-            } */}
+            }
         </>
     );
 }
