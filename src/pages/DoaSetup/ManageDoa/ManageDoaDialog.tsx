@@ -195,7 +195,6 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                         <Grid item md={2}>
                                                                             <ButtonGroup size="small" aria-label="small outlined button group">
                                                                                 <IconButton size="small" aria-label="add" onClick={() => {
-                                                                                    values.users.sort((a, b) => a.amount - b.amount)
                                                                                     arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
                                                                                 }
                                                                                 } >
