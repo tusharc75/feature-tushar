@@ -35,13 +35,10 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
 
     const handleSubmit = async (values) => {
         values.sort((a, b) => a.amount - b.amount)
-        const doaArray = values.map(item => {
-            if (item.amount != 0 && item.name != '')
-                return {
-                    user: item.id,
-                    amount: Number(item.amount)
-                };
-        });
+        const doaArray = values.map(item=>{ return {
+            user: item.id,
+            amount: Number(item.amount)
+        };});
         const userDoa = { _id: userSelected, doa: doaArray };
         setLoading(true)
         axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
@@ -231,9 +228,15 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        type="submit"
+                                        type="submit"                                        
+                                        disabled={
+                                            loading || Object.values(doa).toString() ===
+                                            Object.values(values.users.filter(item => item.amount != 0 && (item.name != ''||item.name != undefined))).toString()
+                                            // || Object.keys(errors).length > 0 ? true : false
+
+                                        }
                                         onClick={() => {
-                                            handleSubmit(values.users)
+                                            handleSubmit(values.users.filter(item => item.amount != 0 && (item.name != ''||item.name != undefined)))
                                         }}
                                     >
                                         Save
