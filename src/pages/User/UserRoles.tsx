@@ -71,12 +71,12 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
                       }
                     />
                     {permissions.user.isUpdate && (
-                      <ListItemSecondaryAction
-                        title={
-                          rolesPermissions.indexOf(obj?.permission) >= 0
-                            ? ""
-                            : "Unassign Role"
-                        }
+                      <ListItemSecondaryAction title="Unassign Role"
+                        // title={
+                        //   rolesPermissions.indexOf(obj?.permission) >= 0
+                        //     ? ""
+                        //     : "Unassign Role"
+                        // }
                       >
                         <IconButton
                           size="small"
