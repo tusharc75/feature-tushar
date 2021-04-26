@@ -14,6 +14,7 @@ import styles from "../profilePage.module.scss"
 import UpdateEmailPasswordDialog from './UpdateEmailAndPassword'
 import _ from 'lodash'
 import { useHistory } from "react-router-dom";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 
 export default function ManageProfile(props) {
 
@@ -26,6 +27,7 @@ export default function ManageProfile(props) {
     const [isUploading, setUploading] = useState(false);
     const [isEmailUpdate, setEmailUpdate] = useState(false)
     const [isPasswordUpdate, setPasswordUpdate] = useState(false)
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const toastConfig = useContext(CustomToastContext);
     const theme = useTheme();
     const history = useHistory();
@@ -104,6 +106,7 @@ export default function ManageProfile(props) {
             avatar: ""
         }
         handleUpdateUser({ ...values })
+        setShowDeleteConfirmBox(false)
     }
     let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image") : []
 
@@ -151,7 +154,7 @@ export default function ManageProfile(props) {
                                                     size="small"
                                                     aria-label="delete picture"
                                                     component="span"
-                                                    onClick={handleDeleteProfilePic}
+                                                    onClick={() => setShowDeleteConfirmBox(true)}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
@@ -282,6 +285,14 @@ export default function ManageProfile(props) {
                             logoutUser={logoutUser}
                         /> : null
                 }
+                {showDeleteConfirmBox ? (
+                    <ConfirmationDialog
+                        open={showDeleteConfirmBox}
+                        message={`Are you sure you want to remove profile picture ?`}
+                        onClose={() => setShowDeleteConfirmBox(false)}
+                        onOk={handleDeleteProfilePic}
+                    />
+                ) : null}
             </CustomContainer>
         </>
     </>
