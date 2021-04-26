@@ -519,54 +519,60 @@ const UserDetailsPage = () => {
                   </Grid>
                 </Grid>
               </Box>
-              <Box style={{ padding: "0px" }}>
-                <Box display="flex" padding={1}>
-                  <Grid container>
-                    <Grid item xs={8}>
-                      <Box display="flex">
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">
-                            {"DOA Details of " +
-                              userData?.firstName +
-                              " " +
-                              userData?.lastName}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={4} container justify="flex-end">
-                      {permissions.user.isUpdate && (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => setDoaDialogOpen(true)}
-                        >
-                          {doa.length > 0 ? "Edit Doa" : "Add Doa"}
-                        </Button>
-                      )}
+
+              {
+                user?.user?.permissions?.doaSetup && <>
+                  <Box style={{ padding: "0px" }}>
+                    <Box display="flex" padding={1}>
+                      <Grid container>
+                        <Grid item xs={8}>
+                          <Box display="flex">
+                            <Box padding="5px">
+                              <Typography variant="subtitle2">
+                                {"DOA Details of " +
+                                  userData?.firstName +
+                                  " " +
+                                  userData?.lastName}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={4} container justify="flex-end">
+                          {permissions.user.isUpdate && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => setDoaDialogOpen(true)}
+                            >
+                              {doa.length > 0 ? "Edit Doa" : "Add Doa"}
+                            </Button>
+                          )}
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Box>
+                  <Grid container style={{ padding: "8px" }} spacing={1}>
+                    <Grid item xs={12} sm={12}>
+                      <BoxWithBorder
+                        style={{
+                          padding: "0px",
+                        }}
+                      >
+                        {doa.length > 0 ? (
+                          <NewStepper heading={" "} steps={doa} />
+                        ) : (
+                          <Box textAlign="center" marginTop={2}>
+                            <Typography variant="body2">
+                              User doesn't have any DOA
+                    </Typography>
+                          </Box>
+                        )}
+                      </BoxWithBorder>
                     </Grid>
                   </Grid>
-                </Box>
-              </Box>
-              <Grid container style={{ padding: "8px" }} spacing={1}>
-                <Grid item xs={12} sm={12}>
-                  <BoxWithBorder
-                    style={{
-                      padding: "0px",
-                    }}
-                  >
-                    {doa.length > 0 ? (
-                      <NewStepper heading={" "} steps={doa} />
-                    ) : (
-                      <Box textAlign="center" marginTop={2}>
-                        <Typography variant="body2">
-                          User doesn't have any DOA
-                    </Typography>
-                      </Box>
-                    )}
-                  </BoxWithBorder>
-                </Grid>
-              </Grid>
+                </>
+              }
+
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
