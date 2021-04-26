@@ -116,6 +116,7 @@ const Details = (props: DetailProps) => {
         link.setAttribute("download", fileName);
         document.body.appendChild(link);
         link.click();
+        setTimeout(() => setDownloading(false), 2000);
       })
       .catch((err) => {
         setToastConfig(err);

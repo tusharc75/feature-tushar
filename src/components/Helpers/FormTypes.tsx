@@ -157,7 +157,8 @@ const FormTypes = (props) => {
   const [optionsList, setOptions] = React.useState([]);
   const [value, setValue] = React.useState(null);
   const [currencyData, setCurrencyData] = React.useState([]);
-  const [isUploading, setUploading] = React.useState(false);
+  const [isImgUploading, setImgUploading] = React.useState(false);
+  const [isFileUploading, setFileUploading] = React.useState(false);
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
   const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -220,6 +221,7 @@ const FormTypes = (props) => {
       const file = event.target.files[0];
 
       getImageUrl(file);
+      event.target.value = "";
     }
   };
 
@@ -227,6 +229,7 @@ const FormTypes = (props) => {
     if (ev.target.files && ev.target.files.length) {
       const file = ev.target.files[0];
       getFileUrl(file);
+      ev.target.value = "";
     }
   };
 
@@ -235,7 +238,7 @@ const FormTypes = (props) => {
     setImageUploadProgress(0);
     let formData = new FormData();
     formData.append("file", file);
-    setUploading(true);
+    setImgUploading(true);
     axiosInstance()
       .post("/user/upload-public", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -246,27 +249,27 @@ const FormTypes = (props) => {
           if (completedPercent === 100) {
             setTimeout(() => {
               setImageUploadProgress(0);
-              setUploading(false);
-            }, 2000);
+            }, 4000);
           }
         },
       })
       .then(({ data }) => {
         setFieldValue(name, data.fileUrl);
+        setImgUploading(false);
       })
       .catch((err) => {
-        setUploading(false);
+        setImgUploading(false);
         setToastConfig(err);
         setImageUploadProgress(0);
       });
   };
 
-  // for public upload
+  // for private upload
   const getFileUrl = (file) => {
     setFileUploadProgress(0);
     let formData = new FormData();
     formData.append("file", file);
-    setUploading(true);
+    setFileUploading(true);
     axiosInstance()
       .post("/user/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -277,16 +280,16 @@ const FormTypes = (props) => {
           if (completedPercent === 100) {
             setTimeout(() => {
               setFileUploadProgress(0);
-              setUploading(false);
-            }, 2000);
+            }, 4000);
           }
         },
       })
       .then(({ data }) => {
         setFieldValue(name, data.fileName);
+        setFileUploading(false);
       })
       .catch((err) => {
-        setUploading(false);
+        setFileUploading(false);
         setToastConfig(err);
         setFileUploadProgress(0);
       });
@@ -935,7 +938,6 @@ const FormTypes = (props) => {
             alt="org_logo"
           />
           <Box
-            title={values[name] ? values[name] : "No picture selected"}
             display="flex"
             justifyContent="center"
             alignItems="center"
@@ -945,7 +947,7 @@ const FormTypes = (props) => {
             width="100%"
             height="100%"
           >
-            {isUploading && (
+            {isImgUploading && (
               <>
                 <CircularProgress
                   variant="determinate"
@@ -982,7 +984,7 @@ const FormTypes = (props) => {
             >
               <AddCircleIcon />
               <input
-                disabled={isUploading}
+                disabled={isImgUploading}
                 id={name}
                 name={name}
                 onChange={handleUploadImage}
@@ -1016,7 +1018,7 @@ const FormTypes = (props) => {
     <Fragment>
       <Box display="flex" alignItems="center">
         <input
-          disabled={isUploading}
+          disabled={isFileUploading}
           id={name}
           name={name}
           onChange={handleUploadFile}
@@ -1025,7 +1027,7 @@ const FormTypes = (props) => {
         />
         <label htmlFor={name}>
           <Button
-            disabled={isUploading}
+            disabled={isFileUploading}
             variant="contained"
             color="primary"
             component="span"
@@ -1036,13 +1038,21 @@ const FormTypes = (props) => {
         <Box marginX={1} />
 
         <Box flex="1">
-          <p className="text-truncate">
-            {isUploading
+          <Typography
+            variant="body2"
+            className="text-truncate"
+            color={
+              touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
+            }
+          >
+            {isFileUploading
               ? `Uploading... ${fileUploadProgress}%`
               : values[name]
               ? values[name]
+              : touched[name] && Boolean(errors[name])
+              ? errors[name]
               : "No file choosen"}
-          </p>
+          </Typography>
         </Box>
         <IconButton
           disabled={Boolean(!values[name])}
