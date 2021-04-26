@@ -1,12 +1,18 @@
 import React from 'react';
 import { Editor, EditorState, RichUtils } from 'draft-js';
+import "./RichEditorStyle.scss";
 
-export class RichEditorExample extends React.Component {
+export class RichTextEditor extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.editorRef = React.createRef();
+  }
   onChange = editorState => {
     this.props.onChange('editorState', editorState);
   };
 
-  focus = () => this.refs.editor.focus();
+  focus = () => this.editorRef.current.focus();
 
   handleKeyCommand = command => {
     const { editorState } = this.props;
@@ -60,7 +66,8 @@ export class RichEditorExample extends React.Component {
             onChange={this.onChange}
             onTab={this.onTab}
             placeholder="Tell a story..."
-            ref="editor"
+            // ref="editor"
+            ref={this.editorRef}
             spellCheck={true}
           />
         </div>

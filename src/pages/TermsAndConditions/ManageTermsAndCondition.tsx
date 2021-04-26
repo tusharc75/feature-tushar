@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -8,7 +8,6 @@ import { Formik, Form, Field } from "formik";
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import * as Yup from "yup";
-import RichTextEditor from 'react-rte';
 import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -17,18 +16,13 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import axiosInstance from "../../axios/axiosInstance";
 import FormTypes from '../../components/Helpers/FormTypes'
 import CustomButton from "../../components/Helpers/CustomButton";
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
-    CompositeDecorator,
-    ContentBlock,
-    ContentState,
-    Editor,
     EditorState,
-    convertFromHTML,
     convertToRaw,
+    convertFromRaw
 } from 'draft-js'
-
-import { RichEditorExample } from './RichEditor';
-import "./RichEditorCss.css"
+import { RichTextEditor } from '../../components/RichEditor/RichEditor'
 
 const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string()
@@ -55,113 +49,52 @@ const useStyles = makeStyles((theme) => ({
 const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) => {
 
     const [initialValues, setInitialValues] = useState({ TACName: "", editorState: EditorState.createEmpty() });
+    const [loading, setLoading] = useState(false)
     const classes = useStyles();
-
-    function findLinkEntities(contentBlock, callback, contentState) {
-        contentBlock.findEntityRanges(
-            (character) => {
-                const entityKey = character.getEntity();
-                return (
-                    entityKey !== null &&
-                    contentState.getEntity(entityKey).getType() === 'LINK'
-                );
-            },
-            callback
-        );
-    }
-
-    const Link = (props) => {
-        const { url } = props.contentState.getEntity(props.entityKey).getData();
-        return (
-            <a href={url} className={classes.link}>
-                {props.children}
-            </a>
-        );
-    };
-
-    function findImageEntities(contentBlock, callback, contentState) {
-        contentBlock.findEntityRanges(
-            (character) => {
-                const entityKey = character.getEntity();
-                return (
-                    entityKey !== null &&
-                    contentState.getEntity(entityKey).getType() === 'IMAGE'
-                );
-            },
-            callback
-        );
-    }
-    const Image = (props) => {
-        const {
-            height,
-            src,
-            width,
-        } = props.contentState.getEntity(props.entityKey).getData();
-
-        return (
-            <img src={src} height={height} width={width} />
-        );
-    };
-    const decorator = new CompositeDecorator([
-        {
-            strategy: findLinkEntities,
-            component: Link,
-        },
-        {
-            strategy: findImageEntities,
-            component: Image,
-        },
-    ]);
-    // useEffect(() => {
-    //     const sampleMarkup =
-    //         '<b>Bold text</b>, <i>Italic text</i><br/ ><br />' +
-    //         '<a href="https://www.facebook.com">Example link</a><br /><br/ >' +
-    //         '<img src="https://raw.githubusercontent.com/facebook/draft-js/master/examples/draft-0-10-0/convertFromHTML/image.png" height="112" width="200" />';
-
-    //     const blocksFromHTML = convertFromHTML(sampleMarkup);
-    //     const state = ContentState.createFromBlockArray(
-    //         blocksFromHTML.contentBlocks,
-    //         blocksFromHTML.entityMap,
-    //     );
-    //     setInitialValues({
-    //         TACName: "", file: "", editorState: EditorState.createWithContent(state, decorator)
-    //     })
-    // }, [])
-
+    const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
         if (editRecord && editRecord?._id) {
-            const blocksFromHTML = convertFromHTML(editRecord.description);
-            const state = ContentState.createFromBlockArray(
-                blocksFromHTML.contentBlocks,
-                blocksFromHTML.entityMap,
-            );
+            let state = convertFromRaw(JSON.parse(editRecord.description))
             setInitialValues({
-                editorState: EditorState.createWithContent(state, decorator),
+                editorState: EditorState.createWithContent(state),
                 TACName: editRecord.TACName
             })
         }
     }, [])
-    const handleSave = (values) => {
-        console.log("line 147 ~ handleSave ~ values", values)
+
+    const handleSubmit = (values) => {
+
+        const description = convertToRaw(values.editorState.getCurrentContent())
         let request = {
-            description: values.editorState.toString('html'),
+            description: JSON.stringify(description),
             TACName: values.TACName
         }
+        setLoading(true)
         if (editRecord?._id) {
             axiosInstance()
                 .put(termsAndCondition.api, { ...request, _id: editRecord?._id })
                 .then(({ data }) => {
+                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()
                     fetchData()
+                    setLoading(false)
+                }).catch(error => {
+                    toastConfig.setToastConfig(error);
+                    setLoading(false)
                 })
         }
         else {
             axiosInstance()
                 .post(termsAndCondition.api, request)
                 .then(({ data }) => {
+                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()
                     fetchData()
+                    setLoading(false)
+                }).catch(error => {
+                    toastConfig.setToastConfig(error);
+                    setLoading(false)
                 })
         }
     };
@@ -177,11 +110,11 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         className={classes.termAndConditionDialog}
     >
         <CustomDialogHeader onClose={handleClose}
-            title={`${editRecord?._id ? "Edit" : "Create"} Terms and Condition`} ></CustomDialogHeader>
+            title={`${editRecord?._id ? `Edit ${editRecord?.TACName ?? ''}` : "Create Terms and Condition"}`} ></CustomDialogHeader>
         {
             (initialValues && <Formik initialValues={initialValues}
                 validationSchema={termsAndConditionSchema}
-                onSubmit={handleSave}>
+                onSubmit={handleSubmit}>
                 {({ submitForm, touched, errors, setFieldValue, values
                     , handleBlur
                 }) => (
@@ -214,11 +147,10 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         values={values}
                                                         errors={errors}
                                                         size="small"
-
                                                     />
                                                 </Box> */}
                                                 <Box mt={2}>
-                                                    <RichEditorExample
+                                                    <RichTextEditor
                                                         editorState={values.editorState}
                                                         onChange={setFieldValue}
                                                         onBlur={handleBlur}
@@ -235,7 +167,8 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                             <CustomButton
                                 variant="contained"
                                 color="primary"
-                                onClick={() => handleSave(values)} >
+                                loading={loading}
+                                onClick={submitForm} >
                                 Save
                             </CustomButton>
                         </CustomDialogFooter>
