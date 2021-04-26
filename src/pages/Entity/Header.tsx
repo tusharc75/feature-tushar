@@ -6,7 +6,7 @@ import styles from "../Leads/Header.module.scss";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi"
 ;
-const Header = (props) => {
+const EntityHeader = (props) => {
   const {
     onSearch,
     searchVal,
@@ -80,7 +80,7 @@ const Header = (props) => {
                 open={Boolean(anchorEl)}
                 onClose={closeActions}
               >
-                {entityPermissions.isDelete && (
+                {/* {entityPermissions.isDelete && (
                   <MenuItem
                     disabled={Boolean(canDelete)}
                     onClick={() => {
@@ -90,7 +90,7 @@ const Header = (props) => {
                   >
                     Delete
                   </MenuItem>
-                )}
+                )} */}
                 {entityPermissions.isUpdate && (
                   <MenuItem
                     disabled={rolesActionDiabled}
@@ -111,4 +111,4 @@ const Header = (props) => {
   );
 };
 
-export default Header;
+export default EntityHeader;

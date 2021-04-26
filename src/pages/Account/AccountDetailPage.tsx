@@ -129,7 +129,7 @@ export default function AccountDetailPage(props) {
         handleMainPonts(data);
         setAccountData(data);
         setCanEdit(
-          [...data?.collaborator, data?.owner].some(
+          [...data?.collaborator ?? [], data?.owner].some(
             (obj) => obj.optionValue === user.user._id
           )
         );
