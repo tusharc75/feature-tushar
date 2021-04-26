@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -8,15 +8,21 @@ import { Formik, Form, Field } from "formik";
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import * as Yup from "yup";
-import RichTextEditor from 'react-rte';
 import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from "../../axios/axiosInstance";
+import FormTypes from '../../components/Helpers/FormTypes'
 import CustomButton from "../../components/Helpers/CustomButton";
-
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import {
+    EditorState,
+    convertToRaw,
+    convertFromRaw
+} from 'draft-js'
+import { RichTextEditor } from '../../components/RichEditor/RichEditor'
 
 const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string()
@@ -28,99 +34,146 @@ const useStyles = makeStyles((theme) => ({
     textEditor: {
         fontFamily: "inherit",
         minHeight: 250
+    },
+    termAndConditionDialog: {
+        height: "100%"
+    },
+    fileUpload: {
+        width: '50%'
+    },
+    link: {
+
     }
 }));
 
 const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) => {
 
-    const [initialValues, setInitialValues] = useState({ TACName: "", description: RichTextEditor.createEmptyValue() });
+    const [initialValues, setInitialValues] = useState({ TACName: "", editorState: EditorState.createEmpty() });
+    const [loading, setLoading] = useState(false)
+    const classes = useStyles();
+    const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
         if (editRecord && editRecord?._id) {
-            editRecord.description = RichTextEditor.createValueFromString(editRecord.description, 'html')
+            let state = convertFromRaw(JSON.parse(editRecord.description))
             setInitialValues({
-                description: editRecord.description,
+                editorState: EditorState.createWithContent(state),
                 TACName: editRecord.TACName
             })
         }
     }, [])
-    const handleSave = (values) => {
-        const description = values.description.toString('html');
-        values.description = description;
 
+    const handleSubmit = (values) => {
+
+        const description = convertToRaw(values.editorState.getCurrentContent())
+        let request = {
+            description: JSON.stringify(description),
+            TACName: values.TACName
+        }
+        setLoading(true)
         if (editRecord?._id) {
             axiosInstance()
-                .put(termsAndCondition.api, { ...values, _id: editRecord?._id })
+                .put(termsAndCondition.api, { ...request, _id: editRecord?._id })
                 .then(({ data }) => {
+                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()
                     fetchData()
+                    setLoading(false)
+                }).catch(error => {
+                    toastConfig.setToastConfig(error);
+                    setLoading(false)
                 })
         }
         else {
             axiosInstance()
-                .post(termsAndCondition.api, values)
+                .post(termsAndCondition.api, request)
                 .then(({ data }) => {
+                    toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                     handleClose()
                     fetchData()
+                    setLoading(false)
+                }).catch(error => {
+                    toastConfig.setToastConfig(error);
+                    setLoading(false)
                 })
         }
     };
 
-    const classes = useStyles();
+
     return <Dialog
         disableBackdropClick={true}
         open={open}
         aria-labelledby="customized-dialog-title"
-        maxWidth="md"
+        maxWidth="lg"
         onClose={handleClose}
         fullWidth
-
+        className={classes.termAndConditionDialog}
     >
+        <CustomDialogHeader onClose={handleClose}
+            title={`${editRecord?._id ? `Edit ${editRecord?.TACName ?? ''}` : "Create Terms and Condition"}`} ></CustomDialogHeader>
         {
-            (initialValues && <Formik initialValues={initialValues} validationSchema={termsAndConditionSchema} onSubmit={handleSave}>
-                {({ submitForm, touched, errors, setFieldValue, values }) => (
-                    <Form noValidate>
-                        <CustomDialogHeader onClose={handleClose}
-                            title={`${editRecord?._id ? "Edit" : "Create"} Terms and Condition`} ></CustomDialogHeader>
+            (initialValues && <Formik initialValues={initialValues}
+                validationSchema={termsAndConditionSchema}
+                onSubmit={handleSubmit}>
+                {({ submitForm, touched, errors, setFieldValue, values
+                    , handleBlur
+                }) => (
+                    <>
                         <CustomDialogContent>
-                            <MuiPickersUtilsProvider utils={MomentUtils}>
-                                <Box padding={1}>
-                                    <Grid container spacing={3}>
-                                        <Grid item xs={12}>
-                                            <Field
-                                                component={TextFieldFormik}
-                                                fullWidth
-                                                margin="dense"
-                                                type="text"
-                                                label="Terms and Condition Name"
-                                                name="TACName"
-                                                variant="outlined"
-                                                required={true}
-                                                value={values["TACName"]}
-                                                onChange={(e) => setFieldValue("TACName", e.target.value.trimStart())}
-                                            />
-                                            <Box mt={2}>
-                                                <RichTextEditor
-                                                    className={classes.textEditor}
-                                                    value={values["description"]}
-                                                    onChange={(value) => setFieldValue("description", value)}
+                            <Form noValidate>
+                                <MuiPickersUtilsProvider utils={MomentUtils}>
+                                    <Box padding={1}>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={12}>
+                                                <Field
+                                                    component={TextFieldFormik}
+                                                    fullWidth
+                                                    margin="dense"
+                                                    type="text"
+                                                    label="Terms and Condition Name"
+                                                    name="TACName"
+                                                    variant="outlined"
+                                                    required={true}
+                                                    value={values["TACName"]}
+                                                    onChange={(e) => setFieldValue("TACName", e.target.value.trimStart())}
                                                 />
-                                            </Box>
+                                                {/* <Box mt={2} className={classes.fileUpload}>
+                                                    <FormTypes
+                                                        label="File"
+                                                        name="file"
+                                                        isTooltip={true}
+                                                        required={false}
+                                                        type="fileUpload"
+                                                        values={values}
+                                                        errors={errors}
+                                                        size="small"
+                                                    />
+                                                </Box> */}
+                                                <Box mt={2}>
+                                                    <RichTextEditor
+                                                        editorState={values.editorState}
+                                                        onChange={setFieldValue}
+                                                        onBlur={handleBlur}
+                                                    />
+                                                </Box>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </Box>
-                            </MuiPickersUtilsProvider>
+                                    </Box>
+                                </MuiPickersUtilsProvider>
+                            </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
                             <Button color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 variant="contained"
                                 color="primary"
-                                type="submit" >
+                                loading={loading}
+                                onClick={submitForm} >
                                 Save
                             </CustomButton>
                         </CustomDialogFooter>
-                    </Form>)}
+                    </>
+                )}
             </Formik>
             )
         }

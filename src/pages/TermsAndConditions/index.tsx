@@ -273,10 +273,6 @@ export default function TermsAndCondition(props) {
         setEditRecord({})
         if (params?.fetchData) fetchTermsAndConditions()
     }
-    const handleFetchData = () => {
-        toastConfig.setToastConfig({ open: true, type: "success", message: "Record created successfully." });
-        fetchTermsAndConditions()
-    }
     const onFilterChange = useCallback((params) => {
         if (params.filterModel.items[0].value) {
             setQuery((prevState) => ({
@@ -394,7 +390,7 @@ export default function TermsAndCondition(props) {
                                 termsAndCondition={termsAndCondition}
                                 open={showCreateDialog}
                                 handleClose={handleCloseCreateDialog}
-                                fetchData={handleFetchData}
+                                fetchData={fetchTermsAndConditions}
                                 editRecord={editRecord}
                             />
                         ) : null}
