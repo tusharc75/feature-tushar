@@ -17,7 +17,18 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import axiosInstance from "../../axios/axiosInstance";
 import FormTypes from '../../components/Helpers/FormTypes'
 import CustomButton from "../../components/Helpers/CustomButton";
+import {
+    CompositeDecorator,
+    ContentBlock,
+    ContentState,
+    Editor,
+    EditorState,
+    convertFromHTML,
+    convertToRaw,
+} from 'draft-js'
 
+import { RichEditorExample } from './RichEditor';
+import "./RichEditorCss.css"
 
 const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string()
@@ -35,30 +46,111 @@ const useStyles = makeStyles((theme) => ({
     },
     fileUpload: {
         width: '50%'
+    },
+    link: {
+
     }
 }));
 
 const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) => {
 
-    const [initialValues, setInitialValues] = useState({ TACName: "", file: "", description: RichTextEditor.createEmptyValue() });
+    const [initialValues, setInitialValues] = useState({ TACName: "", editorState: EditorState.createEmpty() });
+    const classes = useStyles();
+
+    function findLinkEntities(contentBlock, callback, contentState) {
+        contentBlock.findEntityRanges(
+            (character) => {
+                const entityKey = character.getEntity();
+                return (
+                    entityKey !== null &&
+                    contentState.getEntity(entityKey).getType() === 'LINK'
+                );
+            },
+            callback
+        );
+    }
+
+    const Link = (props) => {
+        const { url } = props.contentState.getEntity(props.entityKey).getData();
+        return (
+            <a href={url} className={classes.link}>
+                {props.children}
+            </a>
+        );
+    };
+
+    function findImageEntities(contentBlock, callback, contentState) {
+        contentBlock.findEntityRanges(
+            (character) => {
+                const entityKey = character.getEntity();
+                return (
+                    entityKey !== null &&
+                    contentState.getEntity(entityKey).getType() === 'IMAGE'
+                );
+            },
+            callback
+        );
+    }
+    const Image = (props) => {
+        const {
+            height,
+            src,
+            width,
+        } = props.contentState.getEntity(props.entityKey).getData();
+
+        return (
+            <img src={src} height={height} width={width} />
+        );
+    };
+    const decorator = new CompositeDecorator([
+        {
+            strategy: findLinkEntities,
+            component: Link,
+        },
+        {
+            strategy: findImageEntities,
+            component: Image,
+        },
+    ]);
+    // useEffect(() => {
+    //     const sampleMarkup =
+    //         '<b>Bold text</b>, <i>Italic text</i><br/ ><br />' +
+    //         '<a href="https://www.facebook.com">Example link</a><br /><br/ >' +
+    //         '<img src="https://raw.githubusercontent.com/facebook/draft-js/master/examples/draft-0-10-0/convertFromHTML/image.png" height="112" width="200" />';
+
+    //     const blocksFromHTML = convertFromHTML(sampleMarkup);
+    //     const state = ContentState.createFromBlockArray(
+    //         blocksFromHTML.contentBlocks,
+    //         blocksFromHTML.entityMap,
+    //     );
+    //     setInitialValues({
+    //         TACName: "", file: "", editorState: EditorState.createWithContent(state, decorator)
+    //     })
+    // }, [])
+
 
     useEffect(() => {
         if (editRecord && editRecord?._id) {
-            editRecord.description = RichTextEditor.createValueFromString(editRecord.description, 'html')
+            const blocksFromHTML = convertFromHTML(editRecord.description);
+            const state = ContentState.createFromBlockArray(
+                blocksFromHTML.contentBlocks,
+                blocksFromHTML.entityMap,
+            );
             setInitialValues({
-                description: editRecord.description,
-                TACName: editRecord.TACName,
-                file: ""
+                editorState: EditorState.createWithContent(state, decorator),
+                TACName: editRecord.TACName
             })
         }
     }, [])
     const handleSave = (values) => {
-        const description = values.description.toString('html');
-        values.description = description;
-
+        console.log("line 147 ~ handleSave ~ values", values)
+        let request = {
+            description: values.editorState.toString('html'),
+            TACName: values.TACName
+        }
         if (editRecord?._id) {
             axiosInstance()
-                .put(termsAndCondition.api, { ...values, _id: editRecord?._id })
+                .put(termsAndCondition.api, { ...request, _id: editRecord?._id })
                 .then(({ data }) => {
                     handleClose()
                     fetchData()
@@ -66,7 +158,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         }
         else {
             axiosInstance()
-                .post(termsAndCondition.api, values)
+                .post(termsAndCondition.api, request)
                 .then(({ data }) => {
                     handleClose()
                     fetchData()
@@ -74,7 +166,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         }
     };
 
-    const classes = useStyles();
+
     return <Dialog
         disableBackdropClick={true}
         open={open}
@@ -84,64 +176,71 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         fullWidth
         className={classes.termAndConditionDialog}
     >
+        <CustomDialogHeader onClose={handleClose}
+            title={`${editRecord?._id ? "Edit" : "Create"} Terms and Condition`} ></CustomDialogHeader>
         {
-            (initialValues && <Formik initialValues={initialValues} validationSchema={termsAndConditionSchema} onSubmit={handleSave}>
-                {({ submitForm, touched, errors, setFieldValue, values }) => (
-                    <Form noValidate>
-                        <CustomDialogHeader onClose={handleClose}
-                            title={`${editRecord?._id ? "Edit" : "Create"} Terms and Condition`} ></CustomDialogHeader>
+            (initialValues && <Formik initialValues={initialValues}
+                validationSchema={termsAndConditionSchema}
+                onSubmit={handleSave}>
+                {({ submitForm, touched, errors, setFieldValue, values
+                    , handleBlur
+                }) => (
+                    <>
                         <CustomDialogContent>
-                            <MuiPickersUtilsProvider utils={MomentUtils}>
-                                <Box padding={1}>
-                                    <Grid container spacing={3}>
-                                        <Grid item xs={12}>
-                                            <Field
-                                                component={TextFieldFormik}
-                                                fullWidth
-                                                margin="dense"
-                                                type="text"
-                                                label="Terms and Condition Name"
-                                                name="TACName"
-                                                variant="outlined"
-                                                required={true}
-                                                value={values["TACName"]}
-                                                onChange={(e) => setFieldValue("TACName", e.target.value.trimStart())}
-                                            />
-                                            <Box mt={2} className={classes.fileUpload}>
-                                                <FormTypes
-                                                    label="File"
-                                                    name="file"
-                                                    isTooltip={true}
-                                                    required={false}
-                                                    type="fileUpload"
-                                                    values={values}
-                                                    errors={errors}
-                                                    size="small"
+                            <Form noValidate>
+                                <MuiPickersUtilsProvider utils={MomentUtils}>
+                                    <Box padding={1}>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={12}>
+                                                <Field
+                                                    component={TextFieldFormik}
+                                                    fullWidth
+                                                    margin="dense"
+                                                    type="text"
+                                                    label="Terms and Condition Name"
+                                                    name="TACName"
+                                                    variant="outlined"
+                                                    required={true}
+                                                    value={values["TACName"]}
+                                                    onChange={(e) => setFieldValue("TACName", e.target.value.trimStart())}
+                                                />
+                                                {/* <Box mt={2} className={classes.fileUpload}>
+                                                    <FormTypes
+                                                        label="File"
+                                                        name="file"
+                                                        isTooltip={true}
+                                                        required={false}
+                                                        type="fileUpload"
+                                                        values={values}
+                                                        errors={errors}
+                                                        size="small"
 
-                                                />
-                                            </Box>
-                                            <Box mt={2}>
-                                                <RichTextEditor
-                                                    className={classes.textEditor}
-                                                    value={values["description"]}
-                                                    onChange={(value) => setFieldValue("description", value)}
-                                                />
-                                            </Box>
+                                                    />
+                                                </Box> */}
+                                                <Box mt={2}>
+                                                    <RichEditorExample
+                                                        editorState={values.editorState}
+                                                        onChange={setFieldValue}
+                                                        onBlur={handleBlur}
+                                                    />
+                                                </Box>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </Box>
-                            </MuiPickersUtilsProvider>
+                                    </Box>
+                                </MuiPickersUtilsProvider>
+                            </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
                             <Button color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 variant="contained"
                                 color="primary"
-                                type="submit" >
+                                onClick={() => handleSave(values)} >
                                 Save
                             </CustomButton>
                         </CustomDialogFooter>
-                    </Form>)}
+                    </>
+                )}
             </Formik>
             )
         }
