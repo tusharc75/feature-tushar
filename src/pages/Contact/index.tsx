@@ -394,7 +394,7 @@ export default function Contact(props) {
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
       accountName: u.accountName?.optionLabel,
-      name: `${u.firstName || ""} ${u.middleName || ""} ${u.lastName || ""}`,
+      name: [u.firstName, u.middleName, u.lastName].filter(f => f).join(" "),
     }));
     setDataRows([...rows]);
   }, [contactData]);
@@ -484,7 +484,7 @@ export default function Contact(props) {
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[contactBreadcrumb]} />
         </Grid>
-        <Grid item 
+        <Grid item
           md={8}
           sm={1}
           xs={2}>
@@ -617,7 +617,7 @@ export default function Contact(props) {
             </Grid>
           </Grid>
         </div>
-         <Box component="div">
+        <Box component="div">
           {/* <Box component="div" marginY={1}> */}
           <div className="listing-grid">
             <DataGrid
@@ -696,7 +696,7 @@ export default function Contact(props) {
             />
           ) : null}
         </Box>
-        </CustomContainer>
+      </CustomContainer>
     </Layout>
   );
 }

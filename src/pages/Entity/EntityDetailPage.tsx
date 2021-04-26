@@ -350,7 +350,7 @@ const EntityDetailsPage = () => {
                       Edit
                     </Button>
                   )}
-                  <Box component="span" marginX={1} />
+                  {/* <Box component="span" marginX={1} />
                   {permissions?.entity?.isDelete && (
                     <span
                       title={
@@ -365,7 +365,7 @@ const EntityDetailsPage = () => {
                         onClick={() => setShowConfirmBox(true)}
                       />
                     </span>
-                  )}
+                  )} */}
                 </DetailsPageHeader>
               )}
 

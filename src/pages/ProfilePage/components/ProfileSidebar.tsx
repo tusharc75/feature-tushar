@@ -6,7 +6,7 @@ import { profileMenuItems } from '../../../constants/helpers'
 import ManageProfile from './ManageProfile'
 import styles from "../profilePage.module.scss"
 
-export default function Sidebar({ onItemClick, activeLink, userData, ...rest }) {
+export default function Sidebar({ onItemClick, activeLink, userData, onFetchUserData, ...rest }) {
     const userMenu = [
         {
             label: "My Profile",
@@ -40,7 +40,9 @@ export default function Sidebar({ onItemClick, activeLink, userData, ...rest }) 
         },
     ]
     return <Grid container spacing={4} >
-        <ManageProfile displayUserProfileImage={true} userData={userData} />
+        <ManageProfile displayUserProfileImage={true} userData={userData}
+            onFetchUserData={onFetchUserData}
+        />
         <Grid item sm={12} lg={12} md={12}>
             <div className="d-flex flex-column gap-4 px-4 pt-2 pb-3" >
                 {

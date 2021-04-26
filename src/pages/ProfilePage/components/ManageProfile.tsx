@@ -50,9 +50,9 @@ export default function ManageProfile(props) {
                         type: "success",
                         message: data.message,
                     });
+                    onFetchUserData()
                     let updatedUserDetails = { ...user, user: { ...user.user, ...values } }
                     dispatch({ type: SET_USER, payload: updatedUserDetails });
-                    onFetchUserData()
                     setUpdating(false);
                     closeUpdateDialog();
                 })
@@ -71,7 +71,12 @@ export default function ManageProfile(props) {
                 headers: { "Content-Type": "multipart/form-data" },
             })
             .then(({ data }) => {
-                handleUpdateUser({ ...userData, avatar: data.fileUrl })
+                let values = {
+                    firstName: userData.firstName,
+                    lastName: userData.lastName,
+                    avatar: data.fileUrl
+                }
+                handleUpdateUser({ ...values })
                 setUploading(false);
             })
             .catch((err) => {
@@ -92,6 +97,14 @@ export default function ManageProfile(props) {
         }
     };
 
+    const handleDeleteProfilePic = () => {
+        let values = {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            avatar: ""
+        }
+        handleUpdateUser({ ...values })
+    }
     let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image") : []
 
     return <>
@@ -138,7 +151,7 @@ export default function ManageProfile(props) {
                                                     size="small"
                                                     aria-label="delete picture"
                                                     component="span"
-                                                    onClick={() => handleUpdateUser({ ...userData, avatar: '' })}
+                                                    onClick={handleDeleteProfilePic}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
