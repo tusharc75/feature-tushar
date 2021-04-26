@@ -5,7 +5,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from "../../../axios/axiosInstance";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import UpdateDetailsDialog from "../../../components/Shared/UpdateDetailsDialog";
-import Container from "../../../components/Container";
+import CustomContainer from "../../../components/CustomContainer";
 import DetailsPage from "../../../components/Shared/DetailsPage";
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -177,7 +177,7 @@ export default function ManageProfile(props) {
                     </div>
                     : null
             }
-            <Container styles={{ borderRadius: 8, minWidth: "300px" }}>
+            <CustomContainer styles={{ borderRadius: 8, minWidth: "300px" }}>
                 {
                     displayUserDetails ?
                         <>
@@ -269,7 +269,7 @@ export default function ManageProfile(props) {
                             logoutUser={logoutUser}
                         /> : null
                 }
-            </Container>
+            </CustomContainer>
         </>
     </>
 }

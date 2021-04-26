@@ -112,12 +112,12 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                                         <Box mt={2}>
                                             <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                         </Box>
-                                        <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Created {moment(initialValues.createdAt).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>
-                                        <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Updated {moment(initialValues.updatedAt).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>
+                                        {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
+                                            <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        </Box>}
+                                        {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
+                                            <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                        </Box>}
                                     </Fragment>}
                                 </Grid>
                             </Grid>

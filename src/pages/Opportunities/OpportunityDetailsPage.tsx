@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid } from "@material-ui/core";
+import { Box, Button, Grid, Paper } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { useHistory, useParams } from "react-router-dom";
 import TabPanel from "../../components/TabPanel";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import Container from "../../components/Container";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
@@ -210,145 +209,140 @@ function OpportunityDetailsPage() {
   return (
     <>
       <Layout>
+
         <Grid container direction="row">
-          <Grid item xs={12}>
-            <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Grid>
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+            <Paper>
+
+              {!opportunityData ? (
+                <div>
+                  <Skeleton variant="text" width="150px" height="40px" />
+                  <Box display="flex">
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                    <Box marginX={1} />
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                  </Box>
+                </div>
+              ) : (
+                <DetailsPageHeader
+                  heading={headingLbl}
+                  logo={
+                    opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
+                  }
+                  mainPoints={mainPoints}
+                  showHeading={true}
+                >
+                  {handleAllowToEditList ? (
+                    <Button
+                      disabled={
+                        opportunityData.owner.optionValue !== user.user._id &&
+                        opportunityData.collaborator.length === 0
+                      }
+                      variant="contained"
+                      color="primary"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+                  ) : null}
+                  <Box component="span" marginX={1} />
+                  {opportunityPermissions.isDelete &&
+                    opportunityData?.owner.optionValue &&
+                    user?.user?._id &&
+                    opportunityData.owner.optionValue === user.user._id ? (
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => setShowConfirmBox(true)}
+                    />
+                  ) : null}
+                </DetailsPageHeader>
+              )}
+
+              {loading ? (
+                <Box padding={2}>
+                  <Grid container spacing={2}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                      <Grid item sm={6} md={6}>
+                        <Skeleton
+                          variant="text"
+                          width="100px"
+                          height="16px"
+                        />
+                        <Box marginY={1} />
+                        <Skeleton width="100%" height="50px" />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              ) : (
+                <>
+                  <TabPanel value={currentTabIndex} index={0}>
+                    <Box padding="16px">
+                      <DetailsPage
+                        data={opportunityData}
+                        fields={opportunityFields}
+                      />
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value={currentTabIndex} index={1}>
+                    <Activity />
+                  </TabPanel>
+                </>
+              )}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper>
+              {!opportunityData ? (
+                <Box>
+                  <Skeleton variant="text" width="100px" height="25px" />
+                  <Box marginY={1} />
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Skeleton width="100%" height="50px" />
+                  ))}
+                </Box>
+              ) : (
+                <div>
+                  <Activity
+                    relatedTo={[
+                      {
+                        type: opportunityData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
+                        referenceId: opportunityData?.customerAccountName ? opportunityData?.customerAccountName?.optionValue : opportunityData?.supplierAccountName?.optionValue,
+                        access: false,
+                      },
+                      {
+                        type: "opportunity",
+                        referenceId: opportunityData?._id,
+                        access: true,
+                      },
+                    ]}
+                    handleActivityRefresh={() => { }}
+                  />
+                </div>
+              )}
+            </Paper>
           </Grid>
         </Grid>
-        {!opportunityData ? (
-          <Container>
-            <Skeleton variant="text" width="150px" height="40px" />
-            <Box display="flex">
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-              <Box marginX={1} />
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-            </Box>
-          </Container>
-        ) : (
-          <DetailsPageHeader
-            heading={headingLbl}
-            logo={
-              opportunityData?.leadLogo ? opportunityData.leadLogo : undefined
-            }
-            mainPoints={mainPoints}
-            showHeading={true}
-          >
-            {handleAllowToEditList ? (
-              <Button
-                disabled={
-                  opportunityData.owner.optionValue !== user.user._id &&
-                  opportunityData.collaborator.length === 0
-                }
-                variant="contained"
-                color="primary"
-                onClick={handleOpenUpdateDialog}
-              >
-                Edit
-              </Button>
-            ) : null}
-            <Box component="span" marginX={1} />
-            {opportunityPermissions.isDelete &&
-              opportunityData?.owner.optionValue &&
-              user?.user?._id &&
-              opportunityData.owner.optionValue === user.user._id ? (
-              <DeleteButton
-                text="Delete"
-                onClick={() => setShowConfirmBox(true)}
-              />
-            ) : null}
-          </DetailsPageHeader>
-        )}
-
-        <div>
-          <Grid
-            container
-            spacing={2}
-            style={{ minHeight: "calc(100vh - 200px)" }}
-          >
-            <Grid item sm={8} md={8} lg={8}>
-              <Container styles={{ height: "100%", padding: 0 }}>
-                {loading ? (
-                  <Box padding={2}>
-                    <Grid container spacing={2}>
-                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                        <Grid item sm={6} md={6}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="16px"
-                          />
-                          <Box marginY={1} />
-                          <Skeleton width="100%" height="50px" />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Box>
-                ) : (
-                  <>
-                    <TabPanel value={currentTabIndex} index={0}>
-                      <Box padding="16px">
-                        <DetailsPage
-                          data={opportunityData}
-                          fields={opportunityFields}
-                        />
-                      </Box>
-                    </TabPanel>
-                    <TabPanel value={currentTabIndex} index={1}>
-                      <Activity />
-                    </TabPanel>
-                  </>
-                )}
-              </Container>
-            </Grid>
-            <Grid item sm={4} md={4} lg={4}>
-              <Container>
-                {!opportunityData ? (
-                  <Box>
-                    <Skeleton variant="text" width="100px" height="25px" />
-                    <Box marginY={1} />
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <Skeleton width="100%" height="50px" />
-                    ))}
-                  </Box>
-                ) : (
-                  <div>
-                    <Activity
-                      relatedTo={[
-                        {
-                          type: opportunityData?.customerAccountName ?  customerAccount?.accountResource : supplierAccount?.accountResource,
-                          referenceId: opportunityData?.customerAccountName ? opportunityData?.customerAccountName?.optionValue :  opportunityData?.supplierAccountName?.optionValue,
-                          access: false,
-                        },
-                        {
-                          type: "opportunity",
-                          referenceId: opportunityData?._id,
-                          access: true,
-                        },
-                      ]}
-                      handleActivityRefresh={() => { }}
-                    />
-                  </div>
-                )}
-              </Container>
-            </Grid>
-          </Grid>
-          {showConfirmBox ? (
-            <ConfirmationDialog
-              open={showConfirmBox}
-              message={`Are you sure you want to delete this opportunity`}
-              onClose={() => setShowConfirmBox(false)}
-              onOk={handleDeleteOpportunity}
-            />
-          ) : null}
-          {/* {openUpdateDialog ? (
+        {showConfirmBox ? (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this opportunity`}
+            onClose={() => setShowConfirmBox(false)}
+            onOk={handleDeleteOpportunity}
+          />
+        ) : null}
+        {/* {openUpdateDialog ? (
             <ManageOpportunity
               isNew={false}
               open={openUpdateDialog}
@@ -358,23 +352,22 @@ function OpportunityDetailsPage() {
             />
           ): null} */}
 
-          {openUpdateDialog && (
-            <ManageOpportunityDialog
-              open={openUpdateDialog}
-              onSuccess={() => {
-                setOpenUpdateDialog(false);
-                fetchOpportunityData();
-              }}
-              onClose={() => {
-                setOpenUpdateDialog(false);
-              }}
-              isNew={false}
-              dataToUpdate={opportunityData}
-              resource={null}
-            // opportunityApi={opportunityApi}
-            />
-          )}
-        </div>
+        {openUpdateDialog && (
+          <ManageOpportunityDialog
+            open={openUpdateDialog}
+            onSuccess={() => {
+              setOpenUpdateDialog(false);
+              fetchOpportunityData();
+            }}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            isNew={false}
+            dataToUpdate={opportunityData}
+            resource={null}
+          // opportunityApi={opportunityApi}
+          />
+        )}
       </Layout>
     </>
   );

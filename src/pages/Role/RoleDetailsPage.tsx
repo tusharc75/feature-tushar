@@ -21,7 +21,7 @@ import { useParams, useHistory } from "react-router-dom";
 
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
-import Container from "../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -283,53 +283,55 @@ const RoleDetailsPage = () => {
       )}
 
       <Layout>
-        <CustomBreadCrumbs routes={customizedRoutes} />
-        {!roleData ? (
-          <Container>
-            <Skeleton variant="text" width="150px" height="40px" />
-            <Box display="flex">
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-              <Box marginX={1} />
-              <Skeleton
-                style={{ borderRadius: 6 }}
-                width="120px"
-                height="80px"
-              />
-            </Box>
-          </Container>
-        ) : (
-          <DetailsPageHeader heading={headingLbl} showHeading={true}>
-            {permissions.role.isUpdate && !isEditDeleteDisable ? (
-              <Button
-                disabled={currentData === updatedData || isUpdating}
-                variant="contained"
-                color="primary"
-                onClick={handleUpdateRole}
-              >
-                {isUpdating ? <CircularProgress size={22} /> : "Update"}
-              </Button>
-            ) : null}
-            <Box marginX={1} component="span" />
-            {permissions.role.isDelete && !isEditDeleteDisable ? (
-              <DeleteButton
-                text="Delete"
-                onClick={() => {
-                  setRoleDeleteRec(id);
-                  setShowConfirmBox(true);
-                }}
-              />
-            ) : null}
-          </DetailsPageHeader>
-        )}
+        <Grid container direction="row">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Grid>
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+            <Paper>
+              {!roleData ? (
+                <div>
+                  <Skeleton variant="text" width="150px" height="40px" />
+                  <Box display="flex">
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                    <Box marginX={1} />
+                    <Skeleton
+                      style={{ borderRadius: 6 }}
+                      width="120px"
+                      height="80px"
+                    />
+                  </Box>
+                </div>
+              ) : (
+                <DetailsPageHeader heading={headingLbl} showHeading={true}>
+                  {permissions.role.isUpdate && !isEditDeleteDisable ? (
+                    <Button
+                      disabled={currentData === updatedData || isUpdating}
+                      variant="contained"
+                      color="primary"
+                      onClick={handleUpdateRole}
+                    >
+                      {isUpdating ? <CircularProgress size={22} /> : "Update"}
+                    </Button>
+                  ) : null}
+                  <Box marginX={1} component="span" />
+                  {permissions.role.isDelete && !isEditDeleteDisable ? (
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => {
+                        setRoleDeleteRec(id);
+                        setShowConfirmBox(true);
+                      }}
+                    />
+                  ) : null}
+                </DetailsPageHeader>
+              )}
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} md={8}>
-            <Container>
-              <Box display="flex" marginBottom={2} gridGap={10}>
+              <Box display="flex" marginTop={2} marginBottom={2} gridGap={10}>
                 <TextField
                   disabled={!permissions.role.isUpdate}
                   required
@@ -404,93 +406,93 @@ const RoleDetailsPage = () => {
                   </Table>
                 </TableContainer>
               </Paper>
-            </Container>
-            <Box marginY={2} />
-            {roleData && roleData.type === 2 && (
-              <Container>
-                <Box
-                  padding={1}
-                  bgcolor="grey.200"
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography variant="subtitle2">
-                    Assigned Entities (
+              <Box marginY={2} />
+              {roleData && roleData.type === 2 && (
+                <div>
+                  <Box
+                    padding={1}
+                    bgcolor="grey.200"
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Typography variant="subtitle2">
+                      Assigned Entities (
                     {(roleData && roleData.entity.length) || 0})
                   </Typography>
 
-                  {permissions.role.isUpdate && (
-                    <IconButton
-                      title="Assign Entities"
-                      color="primary"
-                      size="small"
-                      onClick={entityDialogOpen}
-                    >
-                      <ControlPoint />
-                    </IconButton>
-                  )}
-                </Box>
-
-                <Box padding={1}>
-                  {loading ? (
-                    <Box display="flex">
-                      {[1, 2].map((i) => (
-                        <BoxWithBorder
-                          key={i}
-                          style={{
-                            padding: "8px",
-                            margin: "8px",
-                            width: "100%",
-                          }}
-                        >
-                          <Box padding={1}>
-                            <Skeleton
-                              variant="text"
-                              width="100px"
-                              height="20px"
-                            />
-                            <Box marginTop={1} />
-                            <Skeleton
-                              variant="text"
-                              width="100%"
-                              height="15px"
-                            />
-                          </Box>
-                        </BoxWithBorder>
-                      ))}
-                    </Box>
-                  ) : roleData.entity.length ? (
-                    <>
-                      <AssignedEntities
-                        selectedEntity={selectedEntity}
-                        permissions={permissions}
-                        data={roleData && roleData.entity.slice(0, showEntities)}
-                        unassignEntity={handleUnassignEntity}
-                      />
-
-                      <Box marginY={1} />
-                      <Button
-                        fullWidth
-                        variant="contained"
+                    {permissions.role.isUpdate && (
+                      <IconButton
+                        title="Assign Entities"
                         color="primary"
                         size="small"
-                        onClick={() => setShowEntities(roleData.entity.length)}
+                        onClick={entityDialogOpen}
                       >
-                        View All ({roleData.entity.length})
+                        <ControlPoint />
+                      </IconButton>
+                    )}
+                  </Box>
+
+                  <Box padding={1}>
+                    {loading ? (
+                      <Box display="flex">
+                        {[1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              padding: "8px",
+                              margin: "8px",
+                              width: "100%",
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton
+                                variant="text"
+                                width="100px"
+                                height="20px"
+                              />
+                              <Box marginTop={1} />
+                              <Skeleton
+                                variant="text"
+                                width="100%"
+                                height="15px"
+                              />
+                            </Box>
+                          </BoxWithBorder>
+                        ))}
+                      </Box>
+                    ) : roleData.entity.length ? (
+                      <>
+                        <AssignedEntities
+                          selectedEntity={selectedEntity}
+                          permissions={permissions}
+                          data={roleData && roleData.entity.slice(0, showEntities)}
+                          unassignEntity={handleUnassignEntity}
+                        />
+
+                        <Box marginY={1} />
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => setShowEntities(roleData.entity.length)}
+                        >
+                          View All ({roleData.entity.length})
                       </Button>
-                    </>
-                  ) : (
-                    <Box textAlign="center" padding={2}>
-                      <Typography>No entities has been assigned </Typography>
-                    </Box>
-                  )}
-                </Box>
-              </Container>
-            )}
+                      </>
+                    ) : (
+                      <Box textAlign="center" padding={2}>
+                        <Typography>No entities has been assigned </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </div>
+              )}
+            </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4}>
-            <Container>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper>
               <Box
                 padding={1}
                 bgcolor="grey.200"
@@ -560,7 +562,7 @@ const RoleDetailsPage = () => {
                   )}
                 </Box>
               )}
-            </Container>
+            </Paper>
           </Grid>
         </Grid>
       </Layout>

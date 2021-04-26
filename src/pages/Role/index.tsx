@@ -1,5 +1,5 @@
 import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton } from "@material-ui/core";
+import { Checkbox, Tooltip, IconButton, Grid } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
@@ -9,7 +9,7 @@ import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
-import Container from "../../components/Container";
+import CustomContainer from "../../components/CustomContainer";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
@@ -388,8 +388,14 @@ const Roles: FC = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={[routes.role]} />
-        <Container>
+
+      <Grid container>
+          <Grid item md={12} sm={12} xs={12}>
+          <CustomBreadCrumbs routes={[routes.role]} />
+          </Grid>
+     </Grid>
+     <CustomContainer>
+      
           <div className="header-panel">
             <Header
               selectedType={selectedType}
@@ -403,8 +409,6 @@ const Roles: FC = () => {
               canDelete={!disableDelete}
             />
           </div>
-        </Container>
-        <Container>
           <div className="listing-grid">
             <DataGrid
               components={{
@@ -429,7 +433,8 @@ const Roles: FC = () => {
               onFilterModelChange={onFilterChange}
             />
           </div>
-        </Container>
+
+          </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

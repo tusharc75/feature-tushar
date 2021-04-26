@@ -1,5 +1,5 @@
 import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton } from "@material-ui/core";
+import { Checkbox, Tooltip, IconButton, Grid } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
@@ -10,7 +10,6 @@ import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
-import Container from "../../components/Container";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
@@ -22,6 +21,7 @@ import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomContainer from "../../components/CustomContainer";
 
 let userTimeout;
 const User: FC = () => {
@@ -424,9 +424,11 @@ const User: FC = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={[routes.user]} />
 
-        <Container>
+        <Grid container direction="row">
+          <CustomBreadCrumbs routes={[routes.user]} />
+        </Grid>
+        <CustomContainer>
           <div className="header-panel">
             <Header
               onSearch={handleSearch}
@@ -439,8 +441,6 @@ const User: FC = () => {
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
             />
           </div>
-        </Container>
-        <Container>
           <div className="listing-grid">
             <DataGrid
               components={{
@@ -465,7 +465,7 @@ const User: FC = () => {
               onFilterModelChange={onFilterChange}
             />
           </div>
-        </Container>
+        </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

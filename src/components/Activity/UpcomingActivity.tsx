@@ -49,7 +49,7 @@ const UpcomingActivity = (props) => {
                         <Box pt={1}>
                             <Grid container>
                                 <Grid item xs={6} >
-                                    <ListRelatedTo relatedTo={_activity.relatedTo} />
+                                    <ListRelatedTo relatedTo={_activity.relatedTo} originRelatedTo={relatedTo} />
                                 </Grid>
                                 <Grid item xs={6} container justify="flex-end">
                                     <Typography variant="caption" > {_activity.dueDate ? moment(_activity.dueDate).format("MMM DD YYYY") : "No Due Date"}</Typography>

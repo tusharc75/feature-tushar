@@ -36,11 +36,10 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
     const handleSubmit = async (values) => {
         values.sort((a, b) => a.amount - b.amount)
         const doaArray = values.map(item => {
-            if (item.amount != 0 && item.name != '')
-                return {
-                    user: item.id,
-                    amount: Number(item.amount)
-                };
+            return {
+                user: item.id,
+                amount: Number(item.amount)
+            };
         });
         const userDoa = { _id: userSelected, doa: doaArray };
         setLoading(true)
@@ -124,14 +123,15 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
 
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
+                                                                                        size="small"
                                                                                         value={userList.find(v => v.name == userVal.name)}
                                                                                         options={userList.filter(element => !values.users.map(e => e.name).includes(element.name))}
                                                                                         getOptionLabel={(option: any) => option.name}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
-                                                                                                ["name"]: newValue.name,
-                                                                                                ["id"]: newValue.id,
+                                                                                                ["name"]: newValue?.name,
+                                                                                                ["id"]: newValue?.id,
                                                                                             });
                                                                                         }}
 
@@ -143,6 +143,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                 <Grid item md={3}>
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
+                                                                                        size="small"
                                                                                         value={currencies.find(v => v.label == userVal.currency)}
                                                                                         options={currencies}
                                                                                         getOptionLabel={(option: any) => option.label}
@@ -163,6 +164,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                         fullWidth
                                                                                         variant="outlined"
                                                                                         type="text"
+                                                                                        size="small"
                                                                                         component={TextField}
                                                                                         name="amount"
                                                                                         placeholder="Enter Amount"
@@ -177,7 +179,6 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                 <Grid item md={2}>
                                                                                     <ButtonGroup size="small" aria-label="small outlined button group">
                                                                                         <IconButton size="small" aria-label="add" onClick={() => {
-                                                                                            values.users.sort((a, b) => a.amount - b.amount)
                                                                                             arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
                                                                                         }
                                                                                         } >
@@ -194,7 +195,6 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                         <Grid item md={2}>
                                                                             <ButtonGroup size="small" aria-label="small outlined button group">
                                                                                 <IconButton size="small" aria-label="add" onClick={() => {
-                                                                                    values.users.sort((a, b) => a.amount - b.amount)
                                                                                     arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
                                                                                 }
                                                                                 } >
@@ -229,8 +229,14 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                         variant="contained"
                                         color="primary"
                                         type="submit"
+                                        disabled={
+                                            loading || Object.values(doa).toString() ===
+                                            Object.values(values.users.filter(item => item.amount != 0 && (item.name != '' || item.name != undefined))).toString()
+                                            // || Object.keys(errors).length > 0 ? true : false
+
+                                        }
                                         onClick={() => {
-                                            handleSubmit(values.users)
+                                            handleSubmit(values.users.filter(item => item.amount != 0 && (item.name != '' || item.name != undefined)))
                                         }}
                                     >
                                         Save

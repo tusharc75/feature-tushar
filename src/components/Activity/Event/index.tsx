@@ -95,7 +95,7 @@ export const Event = ({ relatedTo, handleActivityRefresh }) => {
                             <Box pt={1}>
                                 <Grid container>
                                     <Grid item xs={6} >
-                                        <ListRelatedTo relatedTo={_event.relatedTo} />
+                                        <ListRelatedTo relatedTo={_event.relatedTo} originRelatedTo={relatedTo} />
                                         {/* <Chip label={_event.status} size="small" color="primary" /> */}
                                     </Grid>
                                     <Grid item xs={6} container justify="flex-end">

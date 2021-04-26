@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton } from "@material-ui/core";
+import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
-import { Skeleton } from "@material-ui/lab";
-import Container from "../../components/Container";
+import { Skeleton, TabPanel } from "@material-ui/lab";
+import CustomContainer from "../../components/CustomContainer";
 import Layout from "../../components/Layout";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { accountPage } from "../../routes/Accounts";
@@ -36,12 +36,9 @@ import QuickLinks, {
   IQuickLinks,
 } from "../../components/QuickLinks/QuickLinks";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
-import { TiFlowChildren } from "react-icons/ti";
-import { RiContactsBook2Fill } from "react-icons/ri";
-import { HiPresentationChartLine } from "react-icons/hi";
-import { MdLocalLibrary } from "react-icons/md";
+import { BsChatSquareQuoteFill } from "react-icons/bs";
+import { FcFlowChart, FcContacts, FcBinoculars, FcConferenceCall, FcMultipleSmartphones } from 'react-icons/fc';
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
-
 const useStyles = makeStyles((theme) => ({
   container: {
     padding: "0px",
@@ -94,7 +91,6 @@ export default function AccountDetailPage(props) {
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
   ] = useState(false);
-
   let { id } = useParams();
 
   useEffect(() => {
@@ -241,19 +237,24 @@ export default function AccountDetailPage(props) {
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
-      icon: <TiFlowChildren />,
+      icon: <FcFlowChart />,
+      // icon: <TiFlowChildren />,
       show: true,
+      class: "account"
     },
     {
       label: "Projects",
       count: 0,
       show: true,
-      icon: <HiPresentationChartLine />
+      icon: <FcMultipleSmartphones />,
+      class: "project"
     },
     {
       label: "Opportunity",
       count: opportunities ? opportunities.length : 0,
       show: permissions?.opportunity?.isRead ?? false,
+      icon: <FcBinoculars />,
+      class: "opportunity",
       onClick: () => {
         history.push({
           pathname: `/opportunity`,
@@ -268,17 +269,21 @@ export default function AccountDetailPage(props) {
       label: "Quotes",
       count: 0,
       show: true,
+      icon: <BsChatSquareQuoteFill />,
+      class: "quotes"
     },
     {
       label: "Accounts Teams",
       count: 0,
       show: true,
-      icon: <MdLocalLibrary />
+      icon: <FcConferenceCall />,
+      class: "teams"
     },
     {
       label: "Contacts",
       count: relatedContacts ? relatedContacts.length : 0,
-      icon: <RiContactsBook2Fill />,
+      icon: <FcContacts />,
+      class: "contact",
       onClick: () => {
         history.push({
           pathname: `/${contactRoute}`,
@@ -390,157 +395,137 @@ export default function AccountDetailPage(props) {
         <Grid container direction="row">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <div>
-          {
-            <DetailsPageHeader
-              loading={loading}
-              heading={headingLbl}
-              logo={
-                accountData?.accountLogo ? accountData.accountLogo : undefined
-              }
-              mainPoints={mainPoints}
-              showHeading={true}
-            >
-              {permissions &&
-                permissions[accountResource] &&
-                permissions[accountResource].approveAccount && (
-                  <>
-                    <Button
-                      variant="contained"
-                      color={
-                        accountData.static?.approved ? "secondary" : "primary"
-                      }
-                      onClick={() => {
-                        setShowApproveDisapproveConfirmBox(true);
-                      }}
-                    >
-                      {accountData.static?.approved ? "Disapprove" : "Approve"}
-                    </Button>
-                    <Box component="span" marginX={1} />
-                  </>
-                )}
-
-              {permissions &&
-                permissions[accountResource] &&
-                permissions[accountResource].isUpdate &&
-                canEdit && (
-                  <>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleOpneUpdateDialog}
-                    >
-                      Edit
-                    </Button>
-                    <Box component="span" marginX={1} />
-                  </>
-                )}
-
-              {permissions &&
-                permissions[accountResource] &&
-                permissions[accountResource].isDelete &&
-                accountData?.owner?.optionValue &&
-                user?.user?._id &&
-                accountData.owner.optionValue === user.user._id ? (
-                <DeleteButton
-                  text="Delete"
-                  onClick={() => setShowConfirmBox(true)}
-                />
-              ) : null}
-            </DetailsPageHeader>
-          }
-
-          <Grid container spacing={2} className="mt-2">
-            <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Container padding="8px">
-                <BoxWithBorder padding="8px">
-                  {loading ? (
-                    <Grid container spacing={2}>
-                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                        <Grid item sm={6} md={6}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="16px"
-                          />
-                          <Box marginY={1} />
-                          <Skeleton width="100%" height="50px" />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Box>
+        <Grid container spacing={1} className="detail-container">
+          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+            <Paper>
+              {
+                <DetailsPageHeader
+                  loading={loading}
+                  heading={headingLbl}
+                  isApproved={accountData?.static?.approved}
+                  mainPoints={mainPoints}
+                  showHeading={true}
+                >
+                  {permissions &&
+                    permissions[accountResource] &&
+                    permissions[accountResource].approveAccount && (
                       <>
-                        <Tabs
-                          className="mb-4"
-                          value={currentTabIndex}
-                          onChange={(index, newValue) => {
-                            setCurrentTabIndex(newValue);
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color={
+                            accountData.static?.approved ? "secondary" : "primary"
+                          }
+                          onClick={() => {
+                            setShowApproveDisapproveConfirmBox(true);
                           }}
-                          indicatorColor="primary"
-                          textColor="primary"
-                          aria-label="icon tabs example"
                         >
-                          <Tab
-                            label="Details"
-                            aria-controls="a11y-tabpanel-0"
-                            id="a11y-tab-0"
-                          />
-                          <Tab
-                            label="Account Hierarchy"
-                            aria-controls="a11y-tabpanel-1"
-                            id="a11y-tab-1"
-                          />
-                        </Tabs>
-                        <Box hidden={currentTabIndex !== 0}>
-                          <DetailsPage
-                            data={accountData}
-                            fields={accountFields}
-                          />
-                        </Box>
-
-                        <Box hidden={currentTabIndex !== 1}>
-                          <AccountHierarchy
-                            data={accountHierarchyData}
-                            currentAccountId={accountData._id}
-                            accountRoute={accountRoute}
-                          />
-                        </Box>
+                          {accountData.static?.approved ? "Disapprove" : "Approve"}
+                        </Button>
+                        <Box component="span" marginX={1} />
                       </>
-                    </Box>
-                  )}
-                </BoxWithBorder>
-                <Box marginY={2} />
+                    )}
 
-                {permissions?.opportunity?.isRead && (
-                  <Container styles={{ padding: "0px", minHeight: "auto" }}>
-                    <OpportunityInAccordian
-                      opportunityPermissions={permissions.opportunity}
-                      opportunities={opportunities}
-                      onNewOpportunityAdd={() => {
-                        fetchRelatedData();
-                      }}
-                      accountId={accountData._id}
-                      accountName={accountData.accountName}
-                      recordsPerLine={2}
-                      resource={accountResource}
+                  {permissions &&
+                    permissions[accountResource] &&
+                    permissions[accountResource].isUpdate &&
+                    canEdit && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={handleOpneUpdateDialog}
+                        >
+                          Edit
+                    </Button>
+                        <Box component="span" marginX={1} />
+                      </>
+                    )}
+
+                  {permissions &&
+                    permissions[accountResource] &&
+                    permissions[accountResource].isDelete &&
+                    accountData?.owner?.optionValue &&
+                    user?.user?._id &&
+                    accountData.owner.optionValue === user.user._id ? (
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => setShowConfirmBox(true)}
                     />
-                  </Container>
+                  ) : null}
+                </DetailsPageHeader>
+              }
+              <Box>
+                {loading ? (
+                  <Grid container spacing={2}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                      <Grid item sm={6} md={6}>
+                        <Skeleton
+                          variant="text"
+                          width="100px"
+                          height="16px"
+                        />
+                        <Box marginY={1} />
+                        <Skeleton width="100%" height="50px" />
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <>
+                    <Tabs className="oms-tab" value={currentTabIndex}
+                      onChange={(index, newValue) => {
+                        setCurrentTabIndex(newValue);
+                      }}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      aria-label="icon tabs example"
+                    >
+                      <Tab
+                        label="Details"
+                        aria-controls="a11y-tabpanel-0"
+                        id="a11y-tab-0"
+                      />
+                      <Tab
+                        label="Account Hierarchy"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                    </Tabs>
+                    <Box hidden={currentTabIndex !== 0}>
+                      <DetailsPage
+                        data={accountData}
+                        fields={accountFields}
+                      />
+                    </Box>
+                    <Box hidden={currentTabIndex !== 1}>
+                      <AccountHierarchy
+                        data={accountHierarchyData}
+                        currentAccountId={accountData._id}
+                        accountRoute={accountRoute}
+                      />
+                    </Box>
+                  </>
                 )}
-              </Container>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={12}
-              md={4}
-              lg={4}
-              className={`${accountClass.account_activities_div}`}
-            >
-              {/* <Container
-                styles={{ padding: "8px", minHeight: "auto", width: "100%" }}
-              > */}
-              <Grid container spacing={1}>
+              </Box>
+              {permissions?.opportunity?.isRead && (
+                <OpportunityInAccordian
+                  opportunityPermissions={permissions.opportunity}
+                  opportunities={opportunities}
+                  onNewOpportunityAdd={() => {
+                    fetchRelatedData();
+                  }}
+                  accountId={accountData._id}
+                  accountName={accountData.accountName}
+                  recordsPerLine={2}
+                  resource={accountResource}
+                />
+              )}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <Paper>
+              <Grid container>
                 <Grid item xs={12}>
                   {accountData && (
                     <div>
@@ -609,9 +594,10 @@ export default function AccountDetailPage(props) {
                     </Grid>
                   )}
               </Grid>
-              {/* </Container> */}
-            </Grid>
+            </Paper>
           </Grid>
+        </Grid>
+        <div>
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}

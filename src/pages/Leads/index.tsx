@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
-  Divider,
   Tooltip,
   IconButton,
   Checkbox,
@@ -12,7 +10,6 @@ import { DataGrid } from "@material-ui/data-grid";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import Layout from "../../components/Layout";
-import Container from "../../components/Container";
 import LeadsHeader from "./LeadsHeader";
 import axiosInstance from "../../axios/axiosInstance";
 import { getSearchQuery } from "../../services/util";
@@ -39,6 +36,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { SiConvertio } from "react-icons/si";
 import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import CustomContainer from "../../components/CustomContainer";
 
 const LeadTypes = [
   {
@@ -126,7 +124,10 @@ const Leads = () => {
         isChecked: false,
         id: u._id,
         name: name,
-        owner: u.owner?.optionLabel ? u.owner.optionLabel : "",
+        owner: u.owner,
+        isAllowedToUpdate: [...u.collaborator, u.owner].some(
+          (d) => d?.optionValue == user?.user?._id
+        )
       };
       return res;
     });
@@ -186,6 +187,7 @@ const Leads = () => {
     middleName,
     lastName,
     convertedToOpportunity,
+    isAllowedToUpdate
   }) => {
     let dontHavePermissions = [];
 
@@ -214,6 +216,14 @@ const Leads = () => {
     ) : convertedToOpportunity ? (
       <>
         <Tooltip title="This lead is already converted to opportunity">
+          <IconButton aria-label="Convert to opportunity">
+            <SiConvertio size={18} />
+          </IconButton>
+        </Tooltip>
+      </>
+    ) : !isAllowedToUpdate ? (
+      <>
+        <Tooltip title="You are not allowed to convert as you are neither owner nor collaborator">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
@@ -386,7 +396,7 @@ const Leads = () => {
           <GridDeleteIcon
             hasDeletePermission={leadsPermissions.isDelete}
             ownerId={params.row.owner.optionValue}
-            userId={user._id}
+            userId={user?.user?._id}
             onDelete={() => showConfirmBox(params.row)}
             entity="lead"
           />
@@ -534,9 +544,7 @@ const Leads = () => {
           item
           md={8}
           sm={1}
-          xs={2}
-          className="d-flex align-items-center bg-white"
-        >
+          xs={2}>
           <ImportExportLinks
             module="lead(s)"
             api={leadApi}
@@ -547,9 +555,10 @@ const Leads = () => {
         </Grid>
       </Grid>
 
-      <Container>
+      <CustomContainer>
         <div className="header-panel">
           <LeadsHeader
+            userId={user?.user?._id}
             selectedType={selectedType}
             onTypeChange={handleLeadTypeSel}
             options={LeadTypes}
@@ -568,7 +577,7 @@ const Leads = () => {
               permissions["customerContact"].isCreate &&
               permissions["opportunity"].isCreate
             }
-            isAnyAlreadyConvertedLeadIncluded={dataRows.some((d) => d.isChecked && d.convertedToOpportunity)}
+            selectedLeads={dataRows.filter((d) => d.isChecked)}
             showLeadToOpportunityConfirmationDialog={() => {
               setConvertLeadToOpportunityConfirmationDialog({
                 open: true,
@@ -591,8 +600,6 @@ const Leads = () => {
             leadApi={leadApi}
           />
         )}
-      </Container>
-      <Container>
         <div className="listing-grid">
           <DataGrid
             components={{
@@ -654,7 +661,7 @@ const Leads = () => {
             onOk={convertLeadToOpportunity}
           />
         ) : null}
-      </Container>
+      </CustomContainer>
     </Layout>
   );
 };

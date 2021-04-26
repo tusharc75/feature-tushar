@@ -14,7 +14,7 @@ import {
 import { Link } from 'react-router-dom'
 import { DataGrid } from "@material-ui/data-grid";
 import Layout from "../../components/Layout";
-import Container from "../../components/Container";
+import Container from "../../components/CustomContainer";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import NewStepper from "../../components/Helpers/NewStepper";
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -107,11 +107,6 @@ const useStyles = makeStyles((theme) => ({
     width: 18,
     height: 18,
     margin: 2
-  },
-
-
-  linksContainer: {
-    display: "flex",
   },
   links: {
     color: theme.palette.primary.main,  //  textDark

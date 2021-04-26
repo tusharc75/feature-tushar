@@ -50,7 +50,7 @@ import Dashboard from "./pages/Dashboard";
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from './pages/ProfilePage/index'
-import firebase, { onMessageListener } from "./firebase";
+// import firebase, { onMessageListener } from "./firebase";
 import CustomNotification from "./components/CustomNotification/CustomNotification";
 
 function App() {
@@ -73,21 +73,14 @@ function App() {
   //   // catch error while creating client token
   // });
 
-  onMessageListener().then((payload: any) => {
-    setNotification({
-      open: true,
-      title: payload.notification.title,
-      message: payload.notification.body
-    })
-
-    // toast.setToastConfig({
-    //   open: true,
-    //   type: "success",
-    //   message: payload.notification.body
-    // });
-    // setNotification({ title: payload.notification.title, body: payload.notification.body })
-    console.log(payload);
-  }).catch(err => console.log('failed: ', err));
+  // onMessageListener().then((payload: any) => {
+  //   setNotification({
+  //     open: true,
+  //     title: payload.notification.title,
+  //     message: payload.notification.body
+  //   })
+  //   console.log(payload);
+  // }).catch(err => console.log('failed: ', err));
 
   const location = useLocation();
   const {
@@ -298,11 +291,11 @@ function App() {
         />
       )}
 
-      {
+      {/* {
         notification.open && <CustomNotification open={notification.open}
           title={notification.title} message={notification.message}
           close={() => { setNotification({ open: false, title: null, message: null }) }} />
-      }
+      } */}
     </ThemeProvider>
   );
 }

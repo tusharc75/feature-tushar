@@ -28,7 +28,7 @@ export const Formula = ({ fields, values, setFieldValue }) => {
             values["inputFields"] && values["inputFields"].forEach(_input => {
                 inputValues[_input] = 1;
             })
-            if (checkFormula(values["formula"], values)) {
+            if (checkFormula(values["formula"], inputValues)) {
                 setFormulaError("Valid Formula")
             }
             else {
@@ -42,7 +42,7 @@ export const Formula = ({ fields, values, setFieldValue }) => {
             <InputLabel htmlFor="filled-age-native-simple">Input Parameters</InputLabel>
             <Select
                 inputProps={{
-                    name: 'reletedTo',
+                    name: 'inputFields',
                     id: "demo-simple-select-outlined"
                 }}
                 margin="dense"
