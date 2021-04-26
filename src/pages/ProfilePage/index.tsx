@@ -70,7 +70,6 @@ export default function ProfilePage(props) {
                             delete data.data[k]
                         }
                     })
-
                     setUserData(data.data)
                 }
                 setUserLoading(false)
@@ -100,7 +99,11 @@ export default function ProfilePage(props) {
         <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
         <Grid container className={classes.profileContainer} spacing={2}>
             <Grid item sm={3} lg={3} md={3} className={classes.profileSidebar} >
-                <ProfileSidebar onItemClick={handleItemClick} activeLink={activeItem} userData={userData} />
+                <ProfileSidebar onItemClick={handleItemClick}
+                    activeLink={activeItem}
+                    userData={userData}
+                    onFetchUserData={fetchUserData}
+                />
             </Grid>
             <Grid item sm={9} md={9} lg={9} >
                 {
