@@ -100,7 +100,7 @@ const Roles = (props) => {
         getContactFields();
 
         setCanEdit(
-          [...data?.collaborator, data?.owner].some(
+          [...data?.collaborator ?? [], data?.owner].some(
             (obj) => obj.optionValue === user.user._id
           )
         );

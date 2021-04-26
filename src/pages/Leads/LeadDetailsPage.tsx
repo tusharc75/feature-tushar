@@ -93,7 +93,7 @@ const LeadDetailsPage = () => {
             dontHavePermissions.push("Opportunity");
           }
 
-          const isAllowedToUpdate = [...data.collaborator, data.owner].some(
+          const isAllowedToUpdate = [...data.collaborator ?? [], data.owner].some(
             (d) => d?.optionValue == userId
           );
           setHasPermissionToConvertToOpportunity(dontHavePermissions.length == 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate);
@@ -105,7 +105,7 @@ const LeadDetailsPage = () => {
           setHeadingLbl(name);
 
           setAllowedToEdit(
-            [...data.collaborator, data.owner].some(
+            [...data.collaborator ?? [], data.owner].some(
               (d) => d?.optionValue == userId
             )
           );

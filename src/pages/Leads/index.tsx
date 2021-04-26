@@ -125,7 +125,7 @@ const Leads = () => {
         id: u._id,
         name: name,
         owner: u.owner,
-        isAllowedToUpdate: [...u.collaborator, u.owner].some(
+        isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
           (d) => d?.optionValue == user?.user?._id
         )
       };

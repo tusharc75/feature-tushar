@@ -14,7 +14,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import Header from "./Header";
+import EntityHeader from "./Header";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
@@ -214,33 +214,33 @@ const Entity: FC = () => {
       filterable: false,
     },
 
-    {
-      field: "actions",
-      headerName: "Actions ",
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: any) => (
-        <>
-          <span
-            title={
-              permissions?.entity.isDelete
-                ? "Delete"
-                : "You can't do this action"
-            }
-          >
-            <IconButton
-              disabled={!permissions?.entity.isDelete}
-              aria-label="Delete"
-              onClick={() => showConfirmBox(params.row)}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </span>
-        </>
-      ),
-      width: 200,
-    },
+    // {
+    //   field: "actions",
+    //   headerName: "Actions ",
+    //   disableColumnMenu: true,
+    //   sortable: false,
+    //   filterable: false,
+    //   renderCell: (params: any) => (
+    //     <>
+    //       <span
+    //         title={
+    //           permissions?.entity.isDelete
+    //             ? "Delete"
+    //             : "You can't do this action"
+    //         }
+    //       >
+    //         <IconButton
+    //           disabled={!permissions?.entity.isDelete}
+    //           aria-label="Delete"
+    //           onClick={() => showConfirmBox(params.row)}
+    //         >
+    //           <DeleteIcon fontSize="small" color="error" />
+    //         </IconButton>
+    //       </span>
+    //     </>
+    //   ),
+    //   width: 200,
+    // },
   ];
 
   const updateCheckedStatus = (params, ev) => {
@@ -418,7 +418,7 @@ const Entity: FC = () => {
         <CustomBreadCrumbs routes={[routes.entity]} />
         <div className="main-container">
           <div className="header-panel">
-            <Header
+            <EntityHeader
               onSearch={handleSearch}
               searchVal={searchVal}
               entityPermissions={permissions?.entity}
