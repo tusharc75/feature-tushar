@@ -6,7 +6,6 @@ import {
   Box,
   Tooltip,
   useTheme,
-  Divider,
   Avatar,
   IconButton,
   CircularProgress,
@@ -26,7 +25,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 const useStyles = makeStyles((theme) => ({
   fieldText: {
     width: "100%",
-    padding: theme.spacing(0.5,0.5,0.5,1),
+    padding: theme.spacing(0.5, 0.5, 0.5, 1),
     borderRadius: 4,
     cursor: "normal",
     textOverflow: "ellipsis",
@@ -40,15 +39,15 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     whiteSpace: "nowrap",
   },
-  dataValue:{
-    fontWeight:500,
-    color:theme.palette.primary.main
+  dataValue: {
+    fontWeight: 500,
+    color: theme.palette.primary.main,
   },
-  detailLabel:{
-    fontSize:"0.8rem",
-    fontWeight:"normal",
-    color:'#656464'
-  }
+  detailLabel: {
+    fontSize: "0.8rem",
+    fontWeight: "normal",
+    color: "#656464",
+  },
 }));
 
 interface DetailProps {
@@ -62,7 +61,7 @@ const Details = (props: DetailProps) => {
   const theme = useTheme();
   const { data, fields } = props;
   const [isDownloading, setDownloading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [anchorPopoverEl, setAnchorPopoverEl] = useState(null);
@@ -81,33 +80,55 @@ const Details = (props: DetailProps) => {
     // eslint-disable-next-line
   }, []);
 
+  /**
+   * DOWNLOAD FILE
+   * @param fileName
+   */
   const downloadFile = (fileName) => {
+    setDownloadProgress(0);
     setDownloading(true);
     axiosInstance()
       .get(`user/download?fileName=${fileName}`, {
+        responseType: "blob",
         onDownloadProgress: (progressEvent) => {
           let percentCompleted = Math.floor(
-            (progressEvent.loaded / progressEvent.total) * 100
+            (progressEvent.loaded * 100) / progressEvent.total
           );
-          setProgress(percentCompleted);
+          setDownloadProgress(percentCompleted);
+
+          if (percentCompleted === 100) {
+            setToastConfig({
+              message: "File Downloaded Successfully",
+              open: true,
+              type: "success",
+            });
+            setTimeout(() => {
+              setDownloadProgress(0);
+              setDownloading(false);
+            }, 2000);
+          }
         },
       })
       .then(({ data }) => {
-        setToastConfig({
-          message: "File Downloaded",
-          type: "success",
-          open: true,
-        });
-        setDownloading(false);
-        setProgress(0);
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
       })
       .catch((err) => {
         setToastConfig(err);
         setDownloading(false);
-        setProgress(0);
       });
   };
 
+  /**
+   * NORMAILIZE ALL THE VALUES AS A SIMPLE TEXT FROM OBJECTS AND ID's
+   * @param values
+   * @param input
+   * @returns text
+   */
   const normalizeValues = (values, input) => {
     let text = "";
     if (input.type === "multiSelect") {
@@ -141,6 +162,9 @@ const Details = (props: DetailProps) => {
     return text;
   };
 
+  /**
+   * SORT FIELDS ARRAY WITH SECTiONS
+   */
   const sortArray = () => {
     const sections = [];
     fields.forEach((field) => {
@@ -160,9 +184,13 @@ const Details = (props: DetailProps) => {
     setFormsData(customData);
   };
 
+  // DYNAMIC GRID COLUMN SIZE
   const dynamicSize = (size, type) =>
     type === "imageUpload" || type === "fileUpload" ? 12 : size;
 
+  /**
+   *  POPOVER Open and Close Handle
+   */
   const handlePopoverOpen = (event) => {
     setAnchorPopoverEl(event.currentTarget);
   };
@@ -174,6 +202,12 @@ const Details = (props: DetailProps) => {
     setPopoverData(null);
   };
 
+  /**
+   * GET DATA FOR CURRENT HOVERED RESOURCE
+   * @param e
+   * @param field
+   * @param value
+   */
   const getPopoverData = (e: React.MouseEvent, field: any, value: string) => {
     handlePopoverOpen(e);
     setLookupResource(kebabCase(field));
@@ -224,7 +258,10 @@ const Details = (props: DetailProps) => {
                         )
                       }
                     >
-                     <span className={classes.dataValue}> {_val.optionLabel}</span>
+                      <span className={classes.dataValue}>
+                        {" "}
+                        {_val.optionLabel}
+                      </span>
                     </Box>
                   </React.Fragment>
                 ))
@@ -243,7 +280,9 @@ const Details = (props: DetailProps) => {
                   )
                 }
               >
-               <span className={classes.dataValue}>{data[fieldData.fieldName].optionLabel}</span> 
+                <span className={classes.dataValue}>
+                  {data[fieldData.fieldName].optionLabel}
+                </span>
               </Box>
             ) : (
               "-"
@@ -258,18 +297,25 @@ const Details = (props: DetailProps) => {
           className={classes.fieldText}
           variant="body2"
         >
-          {fieldData.type === "url" ? (
-            <MuiLink href={value} target="_blank">
-             <span className={classes.dataValue}> {value} </span>
+          {fieldData.type === "url" || fieldData.type === "email" ? (
+            <MuiLink
+              href={fieldData.type === "email" ? `mailto:${value}` : value}
+              target="_blank"
+            >
+              <span className={classes.dataValue}> {value} </span>
             </MuiLink>
           ) : (
-           <span className={classes.dataValue}> {value} </span>
+            <span className={classes.dataValue}> {value} </span>
           )}
         </Typography>
       );
     }
   };
 
+  /**
+   * RENDER DATA FOR POPOVER
+   * @returns Node
+   */
   const renderPopoverData = () => {
     const img =
       lookupResource === "user"
@@ -289,6 +335,8 @@ const Details = (props: DetailProps) => {
         : lookupResource === "customer-contact" ||
           lookupResource === "supplier-contact"
         ? `${popoverData?.firstName} ${popoverData?.middleName} ${popoverData?.lastName}`
+        : lookupResource === "role"
+        ? popoverData?.name
         : "";
 
     const subInfo =
@@ -300,6 +348,8 @@ const Details = (props: DetailProps) => {
         : lookupResource === "customer-contact" ||
           lookupResource === "supplier-contact"
         ? popoverData?.email
+        : lookupResource === "role"
+        ? popoverData?.description
         : "";
 
     const subInfo1 =
@@ -313,6 +363,7 @@ const Details = (props: DetailProps) => {
         ? popoverData?.phone
         : "";
 
+    const isRole = lookupResource === "role";
     return (
       <Box width="250px">
         {loadingPopoverData || !popoverData ? (
@@ -321,9 +372,11 @@ const Details = (props: DetailProps) => {
           </Box>
         ) : (
           <Box p={1} display="flex" alignItems="start">
-            <Avatar style={{ width: 50, height: 50 }} src={img}>
-              {name && name.charAt(0)}
-            </Avatar>
+            {!isRole && (
+              <Avatar style={{ width: 50, height: 50 }} src={img}>
+                {name && name.charAt(0)}
+              </Avatar>
+            )}
             <Box
               marginLeft={2}
               display="flex"
@@ -388,87 +441,79 @@ const Details = (props: DetailProps) => {
       {formsData?.map((form) => (
         <React.Fragment key={form.name}>
           <div className="detail-box">
-          <h3 className="form-label-style" title={form.name}>
-            {form.name}
-          </h3>
-          <Grid container>
-            {form.sectionFields.map((field, i) => (
-              <Grid
-                key={i}
-                item
-                xs={12}
-                sm={dynamicSize(6, field.fieldData.type)}
-                md={dynamicSize(6, field.fieldData.type)}
-              >
-                <Grid container alignItems="center">
-                  <Grid
-                    item
-                    xs={dynamicSize(6, field.fieldData.type)}
-                    sm={dynamicSize(5, field.fieldData.type)}
-                    md={dynamicSize(5, field.fieldData.type)}
-                  >
-                    <Box height="100%" display="flex" alignItems="center">
-                      {field.fieldData.isTooltip && (
-                        <Tooltip title={field.fieldData.tooltipMessage}>
-                          <InfoOutlined
-                            style={{ width: 18, height: 18 }}
-                            color="disabled"
-                          />
-                        </Tooltip>
-                      )}
-                      <Box marginX="2px" />
-                      <h4
-                        title={field.fieldData.fieldLabel}
-                        className={classes.detailLabel}
-                      >
-                       {field.fieldData.fieldLabel}
-                      </h4>
-                    </Box>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={dynamicSize(6, field.fieldData.type)}
-                    sm={dynamicSize(7, field.fieldData.type)}
-                    md={dynamicSize(7, field.fieldData.type)}
-                  >
-                    {field.fieldData.type === "imageUpload" ? (
-                      <Box paddingLeft={2} marginTop={1} marginBottom={4}>
-                        <Avatar src={initialVals[field.fieldData.fieldName]} />
+            <h3 className="form-label-style" title={form.name}>
+              {form.name}
+            </h3>
+            <Grid container>
+              {form.sectionFields.map((field, i) => (
+                <Grid
+                  key={i}
+                  item
+                  xs={12}
+                  sm={dynamicSize(6, field.fieldData.type)}
+                  md={dynamicSize(6, field.fieldData.type)}
+                >
+                  <Grid container alignItems="center">
+                    <Grid
+                      item
+                      xs={dynamicSize(6, field.fieldData.type)}
+                      sm={dynamicSize(5, field.fieldData.type)}
+                      md={dynamicSize(5, field.fieldData.type)}
+                    >
+                      <Box height="100%" display="flex" alignItems="center">
+                        {field.fieldData.isTooltip && (
+                          <Tooltip title={field.fieldData.tooltipMessage}>
+                            <InfoOutlined
+                              style={{ width: 18, height: 18 }}
+                              color="disabled"
+                            />
+                          </Tooltip>
+                        )}
+                        <Box marginX="2px" />
+                        <h4
+                          title={field.fieldData.fieldLabel}
+                          className={classes.detailLabel}
+                        >
+                          {field.fieldData.fieldLabel}
+                        </h4>
                       </Box>
-                    ) : (
-                      <Box display="flex" alignItems="center">
-                        {field.fieldData.type === "fileUpload" &&
-                        initialVals[field.fieldData.fieldName] ? (
-                          <InsertDriveFile />
-                        ) : null}{" "}
-                        {renderData(initialVals, field.fieldData)}
-                        {field.fieldData.type === "fileUpload"
-                          ? initialVals[field.fieldData.fieldName] && (
-                              <IconButton
-                                title={`Download ${
-                                  initialVals[field.fieldData.fieldName]
-                                }`}
-                                disabled={isDownloading}
-                                size="small"
-                                onClick={() =>
-                                  downloadFile(
-                                    normalizeValues(
-                                      initialVals,
-                                      field.fieldData
-                                    )
-                                  )
-                                }
-                              >
-                                {isDownloading ? (
+                    </Grid>
+                    <Grid
+                      item
+                      xs={dynamicSize(6, field.fieldData.type)}
+                      sm={dynamicSize(7, field.fieldData.type)}
+                      md={dynamicSize(7, field.fieldData.type)}
+                    >
+                      {field.fieldData.type === "imageUpload" ? (
+                        <Box paddingLeft={2} marginTop={1} marginBottom={4}>
+                          <Avatar
+                            src={initialVals[field.fieldData.fieldName]}
+                          />
+                        </Box>
+                      ) : (
+                        <Box display="flex" alignItems="center">
+                          {field.fieldData.type === "fileUpload" &&
+                          initialVals[field.fieldData.fieldName] ? (
+                            <InsertDriveFile />
+                          ) : null}{" "}
+                          {renderData(initialVals, field.fieldData)}
+                          {field.fieldData.type === "fileUpload"
+                            ? initialVals[field.fieldData.fieldName] &&
+                              (isDownloading ? (
+                                <Box display="flex" alignItems="center">
+                                  {downloadProgress === 100
+                                    ? "Downloaded"
+                                    : "Downloading"}
+
                                   <Box
+                                    marginLeft={1}
                                     position="relative"
                                     display="inline-flex"
                                   >
                                     <CircularProgress
-                                      variant="determinate"
-                                      value={progress}
                                       size={30}
-                                      color="inherit"
+                                      variant="determinate"
+                                      value={downloadProgress}
                                     />
                                     <Box
                                       top={0}
@@ -484,26 +529,40 @@ const Details = (props: DetailProps) => {
                                         variant="caption"
                                         component="div"
                                         color="textSecondary"
-                                      >{`${Math.round(progress)}%`}</Typography>
+                                      >{`${downloadProgress}%`}</Typography>
                                     </Box>
                                   </Box>
-                                ) : (
+                                </Box>
+                              ) : (
+                                <IconButton
+                                  title={`Download ${
+                                    initialVals[field.fieldData.fieldName]
+                                  }`}
+                                  disabled={isDownloading}
+                                  size="small"
+                                  onClick={() =>
+                                    downloadFile(
+                                      normalizeValues(
+                                        initialVals,
+                                        field.fieldData
+                                      )
+                                    )
+                                  }
+                                >
                                   <GetApp />
-                                )}
-                              </IconButton>
-                            )
-                          : null}{" "}
-                      </Box>
-                    )}
+                                </IconButton>
+                              ))
+                            : null}{" "}
+                        </Box>
+                      )}
+                    </Grid>
                   </Grid>
+                  {field.fieldData.type !== "imageUpload" &&
+                    field.fieldData.type !== "fileUpload"}
                 </Grid>
-                {field.fieldData.type !== "imageUpload" &&
-                  field.fieldData.type !== "fileUpload"
-                 }
-              </Grid>
-            ))}
-          </Grid>
-         </div>
+              ))}
+            </Grid>
+          </div>
         </React.Fragment>
       ))}
     </div>
