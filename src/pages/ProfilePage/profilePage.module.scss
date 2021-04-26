@@ -1,41 +1,42 @@
-.profileSidebarLink{
-    .menuLink {
-        text-decoration: none;    
-        color: var(--primary) !important;
-        display: contents;
-        font-weight: 400;
-      }
-      .active, .menuLink:hover {
-        text-decoration: none;    
-        cursor: pointer !important;
-        color: var(--link) !important;
-        font-weight: bolder;
-      }
+.profileSidebarLink {
+  .menuLink {
+    text-decoration: none;
+    color: var(--primary) !important;
+    display: contents;
+    font-weight: 400;
+  }
+  .active,
+  .menuLink:hover {
+    text-decoration: none;
+    cursor: pointer !important;
+    color: var(--link) !important;
+    font-weight: bolder;
+  }
 }
-.userDetail{
+.userDetail {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 7% 11%;
 }
-.editProfileContainer{
-  display:flex;
+.editProfileContainer {
+  display: flex;
   justify-content: flex-end;
 }
-.profileAvatarContainer{
-        display: flex;
-        justify-content: center;
+.profileAvatarContainer {
+  display: flex;
+  justify-content: center;
 }
-.preferenceHeader{
+.preferenceHeader {
   display: flex;
   justify-content: space-between;
   margin: 10px 10px;
   margin-bottom: 22px;
 }
-.notificationIcon{
+.notificationIcon {
   color: var(--link);
 }
-.preferenceOptionsBox{
+.preferenceOptionsBox {
   background-color: #d3d3d373;
 }
 .userProfileFieldText {
@@ -44,5 +45,6 @@
   cursor: normal;
   text-overflow: ellipsis;
   overflow: hidden;
+  font-weight: 500 !important;
+  color: var(--primary);
 }
-

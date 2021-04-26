@@ -5,7 +5,6 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from "../../../axios/axiosInstance";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import UpdateDetailsDialog from "../../../components/Shared/UpdateDetailsDialog";
-import CustomContainer from "../../../components/CustomContainer";
 import DetailsPage from "../../../components/Shared/DetailsPage";
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -193,7 +192,7 @@ export default function ManageProfile(props) {
                     </div>
                     : null
             }
-            <CustomContainer styles={{ borderRadius: 8, minWidth: "300px" }}>
+            <div style={{ borderRadius: 8, minWidth: "300px" }}>
                 {
                     displayUserDetails ?
                         <>
@@ -214,9 +213,9 @@ export default function ManageProfile(props) {
                                         <DetailsPage data={userData} fields={filteredUserFields} />
                                     )}
                                 {
-                                    <Grid container spacing={2}>
+                                    <Grid container spacing={2} style={{ padding: '10px 20px' }}>
                                         {otherDetails ? Object.keys(otherDetails).map((k, i) => (
-                                            <Grid item xs={12} md={6} sm={6} key={i}>
+                                            <Grid item xs={12} md={6} sm={6} key={i} >
                                                 <Grid container alignItems="center">
                                                     <Grid item xs={6} md={5} sm={5}>
                                                         <Box height="100%" display="flex" alignItems="center">
@@ -238,10 +237,6 @@ export default function ManageProfile(props) {
                                                     >{otherDetails[k] || "_ _ _"}</Typography> </Grid>
                                                 </Grid>
                                                 <Box marginY={1} />
-                                                <Divider
-                                                    style={{ color: "gray" }}
-                                                    orientation="horizontal"
-                                                />
                                             </Grid>)) : null
                                         }
                                     </Grid>
@@ -293,7 +288,7 @@ export default function ManageProfile(props) {
                         onOk={handleDeleteProfilePic}
                     />
                 ) : null}
-            </CustomContainer>
+            </div>
         </>
     </>
 }
