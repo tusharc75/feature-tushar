@@ -97,7 +97,7 @@ const LeadDetailsPage = () => {
             (d) => d?.optionValue == userId
           );
           setHasPermissionToConvertToOpportunity(dontHavePermissions.length == 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate);
-          setIsLeadAlreadyConvertedToOpportunity(data.convertedToOpportunity);
+          setIsLeadAlreadyConvertedToOpportunity(data.staticData && data.staticData["convertedToOpportunity"] ? data.staticData["convertedToOpportunity"] : false);
 
           if (data?.salutation?.optionLabel) {
             name = data.salutation.optionLabel + name;

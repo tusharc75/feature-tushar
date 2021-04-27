@@ -543,8 +543,8 @@ const Opportunities = () => {
                   <ImportExportLinks
                     module="opportunities"
                     api={opportunityApi}
-                    onSuccessfulImport={() => {
-                      fetchOpportunities();
+                    onSuccessfulImport={(isImportedSuccessfully) => {
+                      if (isImportedSuccessfully) { fetchOpportunities(); }
                     }}
                   />
                 </Grid>
@@ -554,7 +554,7 @@ const Opportunities = () => {
         </Grid>
 
         {/* Tables Begins Here */}
-    <CustomContainer>
+        <CustomContainer>
           <div className="header-panel">
             <OpportunitiesHeader
               selectedType={selectedType}

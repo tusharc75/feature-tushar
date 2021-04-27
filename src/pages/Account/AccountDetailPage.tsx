@@ -326,7 +326,7 @@ export default function AccountDetailPage(props) {
     axiosInstance()
       .post(`/${accountApi}/approve`, {
         ids: [accountData._id],
-        approved: !accountData.static?.approved,
+        approved: !accountData.staticData?.approved,
       })
       .then(() => {
         fetchAccountData();
@@ -402,7 +402,7 @@ export default function AccountDetailPage(props) {
                 <DetailsPageHeader
                   loading={loading}
                   heading={headingLbl}
-                  isApproved={accountData?.static?.approved}
+                  isApproved={accountData?.staticData?.approved}
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
@@ -414,13 +414,13 @@ export default function AccountDetailPage(props) {
                           variant="contained"
                           size="small"
                           color={
-                            accountData.static?.approved ? "secondary" : "primary"
+                            accountData.staticData?.approved ? "secondary" : "primary"
                           }
                           onClick={() => {
                             setShowApproveDisapproveConfirmBox(true);
                           }}
                         >
-                          {accountData.static?.approved ? "Disapprove" : "Approve"}
+                          {accountData.staticData?.approved ? "Disapprove" : "Approve"}
                         </Button>
                         <Box component="span" marginX={1} />
                       </>
@@ -610,7 +610,7 @@ export default function AccountDetailPage(props) {
           {showApproveDisapproveConfirmBox ? (
             <ConfirmationDialog
               open={showApproveDisapproveConfirmBox}
-              message={`Are you sure you want to ${accountData.static?.approved ? "disapprove" : "approve"
+              message={`Are you sure you want to ${accountData.staticData?.approved ? "disapprove" : "approve"
                 } this Account ?`}
               onClose={() => setShowApproveDisapproveConfirmBox(false)}
               onOk={handleApproveDisapprove}
