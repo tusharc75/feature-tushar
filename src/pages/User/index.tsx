@@ -295,7 +295,7 @@ const User: FC = () => {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete === false)) {
+      if (dataRows.find((d) => d.isChecked && d.id === user?.user._id)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
