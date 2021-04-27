@@ -184,6 +184,7 @@ export default function ManageProfile(props) {
                                         position: "absolute",
                                         zIndex: -1,
                                     }}
+                                    onClick={(e: any) => (e.target.value = null)}
                                     type="file"
                                 />
                             </IconButton>

@@ -146,7 +146,7 @@ export default function Account(props) {
       collaborator: u.collaborator || [],
       masterAccount:
         u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : "",
-      approved: u.static?.approved ? u.static?.approved : false,
+      approved: u.staticData?.approved ? u.staticData?.approved : false,
     }));
     setDataRows([...rows]);
   }, [accountData]);
@@ -648,8 +648,8 @@ export default function Account(props) {
             <ImportExportLinks
               module="account(s)"
               api={accountApi}
-              onSuccessfulImport={() => {
-                fetchAccounts();
+              onSuccessfulImport={(isImportedSuccessfully) => {
+                if (isImportedSuccessfully) { fetchAccounts(); }
               }}
             />
           </Grid>
@@ -863,8 +863,8 @@ export default function Account(props) {
             <ConfirmationDialog
               open={singleApproveDisapproveAccount.show}
               message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved
-                  ? "approve"
-                  : "disapprove"
+                ? "approve"
+                : "disapprove"
                 } account: ${singleApproveDisapproveAccount.accountName} ? `}
               onClose={() =>
                 setSingleApproveDisapproveAccount({
@@ -881,8 +881,8 @@ export default function Account(props) {
             <ConfirmationDialog
               open={multipleApproveDisapproveAccount.show}
               message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved
-                  ? "approve"
-                  : "disapprove"
+                ? "approve"
+                : "disapprove"
                 } selected ${multipleApproveDisapproveAccount.selectedRecords
                 } account(s) ? `}
               onClose={() =>

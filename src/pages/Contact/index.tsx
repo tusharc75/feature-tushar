@@ -491,8 +491,8 @@ export default function Contact(props) {
           <ImportExportLinks
             module="contact(s)"
             api={contactApi}
-            onSuccessfulImport={() => {
-              getContacts();
+            onSuccessfulImport={(isImportedSuccessfully) => {
+              if (isImportedSuccessfully) { getContacts(); }
             }}
           />
         </Grid>

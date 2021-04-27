@@ -67,16 +67,18 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
       formData.append("file", file);
       axiosInstance()
         .post(`/${api}/import`, formData, {
+          responseType: "blob",
           headers: { "Content-Type": "multipart/form-data" },
+
         })
         .then((response) => {
-          if (response.data.message) {
+          if (!response.headers["content-disposition"]) {
             toastConfig.setToastConfig({
               open: true,
               type: "success",
-              message: response.data.message,
+              message: "All Records Added Successfuly",
             });
-            onSuccessfulImport();
+            onSuccessfulImport(true);
           } else {
             const fileName = response.headers["content-disposition"].split(
               "filename="
@@ -87,6 +89,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
               type: "error",
               message: `Found some issue(s) while importing ${module}`,
             });
+            onSuccessfulImport(false);
           }
         })
         .catch((error) => {
@@ -124,6 +127,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
         const fileName = response.headers["content-disposition"].split(
           "filename="
         )[1];
+
         downloadExcel(response.data, fileName);
       })
       .catch((error) => {
@@ -133,6 +137,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
 
   const ImportInput = (
     <input
+      onClick={(e: any) => (e.target.value = null)}
       id="importFromExcel"
       name="importFromExcel"
       onChange={uploadData}
