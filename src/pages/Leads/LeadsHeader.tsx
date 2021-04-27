@@ -142,7 +142,7 @@ function LeadsHeader(props) {
                                 allowToConvertLeadToOpportunity && <MenuItem
                                     onClick={() => {
                                         closeActions();
-                                        if (selectedLeads.some((d) => d.isChecked && d.convertedToOpportunity)) {
+                                        if (selectedLeads.some((d) => d.isChecked && d.staticData["convertedToOpportunity"])) {
                                             setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
                                         } else {
                                             if (selectedLeads.some(d => d.isAllowedToUpdate == false)) {

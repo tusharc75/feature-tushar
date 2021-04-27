@@ -69,7 +69,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
         .post(`/${api}/import`, formData, {
           responseType: "blob",
           headers: { "Content-Type": "multipart/form-data" },
-          
+
         })
         .then((response) => {
           if (!response.headers["content-disposition"]) {
@@ -78,7 +78,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
               type: "success",
               message: "All Records Added Successfuly",
             });
-            onSuccessfulImport();
+            onSuccessfulImport(true);
           } else {
             const fileName = response.headers["content-disposition"].split(
               "filename="
@@ -89,7 +89,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
               type: "error",
               message: `Found some issue(s) while importing ${module}`,
             });
-            onSuccessfulImport();
+            onSuccessfulImport(false);
           }
         })
         .catch((error) => {
@@ -127,9 +127,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
         const fileName = response.headers["content-disposition"].split(
           "filename="
         )[1];
-        
-        console.log(response.data);
-        console.log(fileName);
+
         downloadExcel(response.data, fileName);
       })
       .catch((error) => {
@@ -139,6 +137,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
 
   const ImportInput = (
     <input
+      onClick={(e: any) => (e.target.value = null)}
       id="importFromExcel"
       name="importFromExcel"
       onChange={uploadData}
