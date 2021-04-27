@@ -544,7 +544,7 @@ const UserDetailsPage = () => {
                               color="primary"
                               onClick={() => setDoaDialogOpen(true)}
                             >
-                              {doa.length > 0 ? "Edit Doa" : "Add Doa"}
+                              {doa.length > 0 ? "Edit DOA" : "Add DOA"}
                             </Button>
                           )}
                         </Grid>

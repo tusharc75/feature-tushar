@@ -72,7 +72,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
         >
             {!loading &&
                 <>
-                    <CustomDialogHeader title="Add Doa" />
+                    <CustomDialogHeader title="Add DOA" />
                     <Formik
                         initialValues={{ users: users }}
                         onSubmit={() => { }}
