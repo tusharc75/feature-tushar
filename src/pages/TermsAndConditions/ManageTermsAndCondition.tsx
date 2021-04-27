@@ -149,8 +149,9 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         size="small"
                                                     />
                                                 </Box> */}
-                                                <Box mt={2}>
+                                                <Box mt={2} >
                                                     <RichTextEditor
+                                                        style={{ minHeight: '350px' }}
                                                         editorState={values.editorState}
                                                         onChange={setFieldValue}
                                                         onBlur={handleBlur}

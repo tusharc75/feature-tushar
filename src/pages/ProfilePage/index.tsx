@@ -58,22 +58,19 @@ export default function ProfilePage(props) {
     const fetchUserData = () => {
         setUserLoading(true)
         axiosInstance()
-            .get(`/user/${user?.user?._id}`)
-            .then(({ data }) => {
-                if (data?.data) {
+            .get(`/user/me`)
+            .then(({ data: { data } }) => {
+                if (data?.user) {
                     setOtherDetails({
-                        Email: data?.data?.email ?? '',
-                        EmployeeNumber: data?.data?.employeeNumber ?? ''
+                        Email: data.user.email ?? '',
+                        EmployeeNumber: data.user?.employeeNumber ?? ''
                     })
-                    Object.keys(data.data).forEach(k => {
-                        if (["blocked", "updatedBy", "email", "employeeNumber"].indexOf(data.data[k]) > 0) {
-                            delete data.data[k]
-                        }
-                    })
-                    setUserData(data.data)
+                    let { blocked, updatedBy, employeeNumber, ...userData } = data.user
+                    setUserData(userData)
                 }
                 setUserLoading(false)
-            }).catch((error) => {
+            })
+            .catch((error) => {
                 setUserLoading(false)
                 toastConfig.setToastConfig(error);
             });
