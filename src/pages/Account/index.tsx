@@ -248,7 +248,7 @@ export default function Account(props) {
           <h5 className="createBy">
             {params.value.user.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params?.value?.date?.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -271,7 +271,7 @@ export default function Account(props) {
         params?.value?.user ? (
           <h5 className="updateBy">
             {params.value.user.firstName}
-            <span title={params.value.date} className="updatedAtTime">
+            <span title={params.value.date} className="updatedAtTime badge-date">
               {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>

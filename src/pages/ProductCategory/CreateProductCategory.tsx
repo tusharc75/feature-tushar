@@ -16,6 +16,7 @@ import { productCategoryPage } from '../../routes/ProductCategory'
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
+import CustomContainer from "../../components/CustomContainer";
 
 const ProductCategorySchema = Yup.object().shape({
     name: Yup.string()
@@ -104,46 +105,48 @@ const ProductCategory = () => {
                         <CustomBreadCrumbs routes={[{ title: "Product Category", path: productCategoryPage.path }, { title: id === "0" ? "New" : initialValues.name }]} />
                     </Grid>
                 </Grid>
-                <Formik initialValues={initialValues} validationSchema={ProductCategorySchema} onSubmit={handleSave}>
-                    {({ submitForm }) => (
-                        <Form>
-                            <Box mt={1} p={2} bgcolor="white">
-                                <Grid container spacing={1}>
-                                    <Grid item xs={12} sm={3}  >
-                                        <Field
-                                            component={TextField}
-                                            fullWidth
-                                            margin="dense"
-                                            type="text"
-                                            label="Category Name"
-                                            name="name"
-                                            variant="outlined"
-                                        />
+                <CustomContainer>
+                    <Formik initialValues={initialValues} validationSchema={ProductCategorySchema} onSubmit={handleSave}>
+                        {({ submitForm }) => (
+                            <Form>
+                                <Box mt={1} p={2} bgcolor="white">
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={12} sm={3}  >
+                                            <Field
+                                                component={TextField}
+                                                fullWidth
+                                                margin="dense"
+                                                type="text"
+                                                label="Category Name"
+                                                name="name"
+                                                variant="outlined"
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={3}>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6} container justify="flex-end">
+                                            <Box>
+                                                <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
+                                                    Save{isUpdating && <CircularProgress size={24} />}
+                                                </Button>
+                                            </Box>
+                                            <Box ml={1} >
+                                                <Button color="primary" variant="contained" onClick={() => history.push({ pathname: "/product-category" })} >Close</Button>
+                                            </Box>
+                                        </Grid>
                                     </Grid>
-                                    <Grid item xs={12} sm={3}  >
-                                    </Grid>
-                                    <Grid item xs={12} sm={6} container justify="flex-end">
-                                        <Box>
-                                            <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
-                                                Save{isUpdating && <CircularProgress size={24} />}
-                                            </Button>
-                                        </Box>
-                                        <Box ml={1} >
-                                            <Button color="primary" variant="contained" onClick={() => history.push({ pathname: "/product-category" })} >Close</Button>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                            <Box >
-                                <FormBuilder
-                                    section={section}
-                                    setSection={setSection}
-                                    deleteField={deleteField}
-                                    setDeleteField={setDeleteField}
-                                    isCustomField={true} />
-                            </Box>
-                        </Form>)}
-                </Formik>
+                                </Box>
+                                <Box >
+                                    <FormBuilder
+                                        section={section}
+                                        setSection={setSection}
+                                        deleteField={deleteField}
+                                        setDeleteField={setDeleteField}
+                                        isCustomField={true} />
+                                </Box>
+                            </Form>)}
+                    </Formik>
+                </CustomContainer>
             </Fragment> : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
     </Layout>
     );

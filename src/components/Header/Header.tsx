@@ -112,7 +112,6 @@ const useStyles = makeStyles((theme) => ({
   },
   brandLogo: {
     maxWidth: "10%",
-    minWidth: "5%",
     height: "45px",
     borderRadius: "3px",
   },
@@ -326,16 +325,16 @@ const Header = ({ toggleDrawer }) => {
         )}
       </MenuItem>
 
-      <MenuItem>
+      {/* <MenuItem>
         <Badge badgeContent={1} color="secondary">
           <Notifications />
         </Badge>
         <Box component="span" mx={1} />
         <p>Notifications</p>
-      </MenuItem>
+      </MenuItem> */}
       <MenuItem>
         <HelpOutline />
-        <Box component="span" mx={1} />
+        <Box component="span" mx={1} my={2}/>
         <p>Help</p>
       </MenuItem>
     </Menu>
@@ -468,11 +467,11 @@ const Header = ({ toggleDrawer }) => {
           ) : null}
 
           <div className={classes.sectionDesktop}>
-            <IconButton aria-label="settings" color="inherit">
+            {/* <IconButton aria-label="settings" color="inherit">
               <Badge badgeContent={1} color="secondary">
                 <Notifications />
               </Badge>
-            </IconButton>
+            </IconButton> */}
 
             <IconButton aria-label="help" color="inherit">
               <HelpOutline />
