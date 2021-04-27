@@ -19,8 +19,9 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0.5, 1.5),
     borderRadius: "4px",
     margin: theme.spacing(1.5),
-    boxShadow: "2px 2px 4px #2e0607",
-    background: "linear-gradient(to bottom right, #570305 0%, #c54e52 100%);"
+    boxShadow: "2px 2px 4px #916d4d",
+    background: "linear-gradient(to bottom right, #005d7c  0%, #013445 100%)",
+    border: "#03232e"
   },
   labelColor: {
     color: "#fff",
