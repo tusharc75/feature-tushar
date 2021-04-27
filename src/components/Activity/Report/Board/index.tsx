@@ -50,7 +50,7 @@ const Board = ({ type, filter, activityId }) => {
         <Grid container>
             {statusList.map((data, index) => (
                 <Box key={index} width={300} height={window.innerHeight - 250} mr={2} style={{ overflow: "auto" }} display="block" border={1} borderColor="grey.300" bgcolor="grey.200">
-                    <Box p={2}>
+                    <Box p={1}>
                         <Typography variant="subtitle2" >{data.status.toUpperCase()}
                             {" (" + activity.filter(function (o) { return o.status === data.status }).length + ")"}
                         </Typography>

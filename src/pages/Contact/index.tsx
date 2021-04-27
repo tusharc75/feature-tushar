@@ -203,7 +203,7 @@ export default function Contact(props) {
           <h5 className="createBy">
             {params.value.user.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -226,7 +226,7 @@ export default function Contact(props) {
           <h5 className="updateBy">
             {params.value.user.firstName}
             <span
-              className="updatedAtTime"
+              className="updatedAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
               ).format("MMM Do, YYYY")}`}

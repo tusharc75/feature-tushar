@@ -198,7 +198,7 @@ const Entity: FC = () => {
           <h5 className="updateBy">
             {params.value.user.firstName}
             <span
-              className="updatedAtTime"
+              className="updatedAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
