@@ -40,7 +40,7 @@ function OpportunitiesHeader(props) {
     const [filter, setFilter] = useState("All Opportunities");
 
     const handleFilter = (event, newFilter) => {
-        if (filter != null) {
+        if (newFilter != null) {
             setFilter(newFilter);
             onTypeChange(options.find((d) => d.key === newFilter).value);
         }
