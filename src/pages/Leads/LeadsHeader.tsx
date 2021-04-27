@@ -42,7 +42,7 @@ function LeadsHeader(props) {
     const [filter, setFilter] = useState("All Leads");
 
     const handleFilter = (event, newFilter) => {
-        if (filter != null) {
+        if (newFilter != null) {
             setFilter(newFilter);
             onTypeChange(options.find((d) => d.key === newFilter).value);
         }

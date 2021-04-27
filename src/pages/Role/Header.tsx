@@ -23,8 +23,10 @@ const Header = (props) => {
   const [filter, setFilter] = useState("Global");
 
   const handleFilter = (event, newFilter) => {
-    setFilter(newFilter);
-    onTypeChange(options.find((d) => d.key === newFilter).value);
+    if (newFilter != null) {
+      setFilter(newFilter);
+      onTypeChange(options.find((d) => d.key === newFilter).value);
+    }
   };
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
