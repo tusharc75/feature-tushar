@@ -344,6 +344,15 @@ const LeadDetailsPage = () => {
             </Paper>
           </Grid>
         </Grid>
+
+        {convertLeadToOpportunityConfirmationDialog.open ? (
+          <ConfirmationDialog
+            open={convertLeadToOpportunityConfirmationDialog.open}
+            message={convertLeadToOpportunityConfirmationDialog.message}
+            onClose={() => setConvertLeadToOpportunityConfirmationDialog({ open: false, id: null, leadName: null, message: null, })}
+            onOk={convertLeadToOpportunity}
+          />
+        ) : null}
       </Layout>
     </>
   );
