@@ -58,19 +58,21 @@ export default function ProfilePage(props) {
     const fetchUserData = () => {
         setUserLoading(true)
         axiosInstance()
-            .get(`/user/${user?.user?._id}`)
+            .get(`/user/me`)
             .then(({ data }) => {
-                if (data?.data) {
+                let { user } = data.data
+                if (user) {
                     setOtherDetails({
-                        Email: data?.data?.email ?? '',
-                        EmployeeNumber: data?.data?.employeeNumber ?? ''
+                        Email: user?.email ?? '',
+                        EmployeeNumber: user?.employeeNumber ?? ''
                     })
-                    Object.keys(data.data).forEach(k => {
-                        if (["blocked", "updatedBy", "email", "employeeNumber"].indexOf(data.data[k]) > 0) {
-                            delete data.data[k]
+                    Object.keys(user).forEach(k => {
+                        if (["blocked", "updatedBy", "email", "employeeNumber"].indexOf(user[k]) > 0) {
+                            delete user[k]
                         }
                     })
-                    setUserData(data.data)
+
+                    setUserData(user)
                 }
                 setUserLoading(false)
             }).catch((error) => {
