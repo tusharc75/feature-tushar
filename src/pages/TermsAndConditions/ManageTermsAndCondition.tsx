@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
 
 const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, editRecord }) => {
 
-    const [initialValues, setInitialValues] = useState({ TACName: "", editorState: EditorState.createEmpty() });
+    const [initialValues, setInitialValues] = useState({ TACName: "", file: "", editorState: EditorState.createEmpty() });
     const [loading, setLoading] = useState(false)
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
@@ -58,7 +58,8 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
             let state = convertFromRaw(JSON.parse(editRecord.description))
             setInitialValues({
                 editorState: EditorState.createWithContent(state),
-                TACName: editRecord.TACName
+                TACName: editRecord.TACName,
+                file: editRecord?.file ?? ""
             })
         }
     }, [])
@@ -68,7 +69,8 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         const description = convertToRaw(values.editorState.getCurrentContent())
         let request = {
             description: JSON.stringify(description),
-            TACName: values.TACName
+            TACName: values.TACName,
+            file: values?.file ?? ""
         }
         setLoading(true)
         if (editRecord?._id) {
@@ -137,7 +139,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                     value={values["TACName"]}
                                                     onChange={(e) => setFieldValue("TACName", e.target.value.trimStart())}
                                                 />
-                                                {/* <Box mt={2} className={classes.fileUpload}>
+                                                <Box mt={2} className={classes.fileUpload}>
                                                     <FormTypes
                                                         label="File"
                                                         name="file"
@@ -146,15 +148,18 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         type="fileUpload"
                                                         values={values}
                                                         errors={errors}
+                                                        touched={touched}
                                                         size="small"
+                                                        setFieldValue={(name, file) => setFieldValue("file", file)}
                                                     />
-                                                </Box> */}
+                                                </Box>
                                                 <Box mt={2} >
                                                     <RichTextEditor
                                                         style={{ minHeight: '350px' }}
                                                         editorState={values.editorState}
                                                         onChange={setFieldValue}
                                                         onBlur={handleBlur}
+                                                        placeholder="Terms and Conditions"
                                                     />
                                                 </Box>
                                             </Grid>
