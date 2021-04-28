@@ -295,11 +295,11 @@ const UserDetailsPage = () => {
       ...userPermissions,
       [e.target.name]: e.target.checked,
     };
-    setHasPermissionToUpdateApprovalProcess(false);
+    // setHasPermissionToUpdateApprovalProcess(false);
     axiosInstance()
       .post("/user/permission-setup", newData)
       .then(({ data }) => {
-        setHasPermissionToUpdateApprovalProcess(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
+        // setHasPermissionToUpdateApprovalProcess(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -307,7 +307,7 @@ const UserDetailsPage = () => {
         });
       })
       .catch((err) => {
-        setHasPermissionToUpdateApprovalProcess(false);
+        // setHasPermissionToUpdateApprovalProcess(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -618,7 +618,7 @@ const UserDetailsPage = () => {
                                 onChange={handleChangePermissions}
                               />
                             }
-                            label={startCase(key)}
+                            label={key == "doaSetup" ? "DOA Setup" : startCase(key)}
                           />
                         </Tooltip>
                       ))
