@@ -43,7 +43,6 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                     contacts.map((obj, index) => {
                         return <Box key={index}
                             className={classes.box}
-                            borderRadius={16}
                             boxShadow={0.5}
                         >
                             <Link className={`${accountClass.account_name_link} f_size`}

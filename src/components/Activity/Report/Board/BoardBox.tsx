@@ -10,13 +10,26 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { useHistory } from "react-router-dom";
 import { ListRelatedTo } from '../../Helpers/ListRelatedTo'
 import { DeleteEvent, DeleteCase, DeleteTask } from "../../../../axios/activity";
+import classes from '*.module.css';
+import { makeStyles } from '@material-ui/core';
 
-const style = {
-    cursor: 'move',
-};
+const useStyles = makeStyles((theme) => ({
+    activitybox: {
+        cursor: "move",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        margin: "5px",
+        borderRadius: "3px",
+        boxShadow: "rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px",
+        backgroundColor: "rgb(255, 255, 255)",
+        color: "rgb(23, 43, 77)",
+        padding: "8px"
+    },
+}));
 
 export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
-
+    const classes = useStyles();
     const history = useHistory();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const ref = React.useRef(null);
@@ -112,7 +125,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
     drag(drop(ref));
 
     return <div ref={ref}>
-        <Box onClick={handleActivityOpen} p={2} bgcolor={"white"} m={1} style={{ ...style, opacity }}>
+        <Box onClick={handleActivityOpen} className={classes.activitybox} style={{ opacity }}>
             <Box>
                 <Grid container spacing={1}>
                     <Grid item xs={10}>

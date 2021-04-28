@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useContext } from "react";
+import React, { useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
@@ -20,6 +20,7 @@ import moment from "moment";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import CustomContainer from "../../components/CustomContainer";
 
 const ProductCategory = () => {
 
@@ -77,7 +78,7 @@ const ProductCategory = () => {
             renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
                 {params.row.createdBy.user.firstName}
                 <span
-                    className="createdAtTime"
+                    className="createdAtTime badge-date"
                     title={`${params.row.createdBy.user.firstName} • ${moment(
                         params.row.createdBy.date.slice(0, 10)
                     ).format('MMM Do, YYYY')}`}
@@ -132,44 +133,46 @@ const ProductCategory = () => {
     }
 
     return (<Layout>
-        <Grid container direction="row">
-            <Grid item xs={12}>
+        <Grid container>
+            <Grid item md={12} sm={12} xs={12}>
                 <CustomBreadCrumbs routes={[{ title: "Product Category" }]} />
             </Grid>
         </Grid>
-        <div className="header-panel">
-            <Grid container>
-                <Grid item xs={6} className="d-flex align-items-center gap-1">
-                    <GiAbstract055 /> <span className="listingHeader">Product Category </span>
+        <CustomContainer>
+            <div className="header-panel">
+                <Grid container>
+                    <Grid item xs={6} className="d-flex align-items-center gap-1">
+                        <GiAbstract055 /> <span className="listingHeader">Product Category </span>
+                    </Grid>
+                    <Grid xs={6} container justify="flex-end">
+                        <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                    </Grid>
                 </Grid>
-                <Grid xs={6} container justify="flex-end">
-                    <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                </Grid>
-            </Grid>
-        </div>
-        <div className="listing-grid">
-            <DataGrid
-                components={{
-                    Toolbar: DataGridCustomToolbar,
-                    NoRowsOverlay: CustomDataGridNoDataFound,
-                }}
-                loading={loading}
-                rows={productCategory}
-                disableSelectionOnClick
-                disableMultipleSelection
-                columns={columns}
-                pageSize={25}
-                density="compact"
-            />
-        </div>
-        {showDeleteConfirmBox &&
-            <ConfirmationDialog
-                open={showDeleteConfirmBox}
-                message={`Are you sure, you want to delete product ${deleteRecord?.name} ?`}
-                onClose={() => setShowDeleteConfirmBox(false)}
-                onOk={handleDelete}
-            />
-        }
+            </div>
+            <div className="listing-grid">
+                <DataGrid
+                    components={{
+                        Toolbar: DataGridCustomToolbar,
+                        NoRowsOverlay: CustomDataGridNoDataFound,
+                    }}
+                    loading={loading}
+                    rows={productCategory}
+                    disableSelectionOnClick
+                    disableMultipleSelection
+                    columns={columns}
+                    pageSize={25}
+                    density="compact"
+                />
+            </div>
+            {showDeleteConfirmBox &&
+                <ConfirmationDialog
+                    open={showDeleteConfirmBox}
+                    message={`Are you sure, you want to delete product ${deleteRecord?.name} ?`}
+                    onClose={() => setShowDeleteConfirmBox(false)}
+                    onOk={handleDelete}
+                />
+            }
+        </CustomContainer>
     </Layout>
     );
 }
