@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Paper, Typography } from "@material-ui/core";
+import { Box, Button, Grid, Paper, Tab, Tabs, Typography } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
@@ -22,6 +22,10 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageContact from "./ManageContact/ManageContact";
 import DetailsPage from "../../components/Shared/DetailsPage";
+import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
+import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
+import { FcFlowChart } from "react-icons/fc";
+import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 
 const Roles = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -51,6 +55,9 @@ const Roles = (props) => {
   });
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [orgChartData, setOrgChartData] = useState([])
+  const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   let { id } = useParams();
 
   // useEffect(() => {
@@ -109,11 +116,106 @@ const Roles = (props) => {
           contactBreadcrumb,
           { title: [data.firstName, data.lastName].filter(d => d).join(" ") },
         ]);
+
+        let orgChartData = [];
+
+        if (data.parentHierarchy && data.parentHierarchy.length > 0) {
+          data.parentHierarchy.map(d => {
+            orgChartData.push({
+              id: d._id,
+              name: [d.firstName, d.middleName, d.lastName]
+                .filter((d) => d)
+                .join(" "),
+              parentId: d.reportsTo ? d.reportsTo : 0,
+              current: false
+            })
+          })
+        }
+
+        orgChartData.push({
+          id: data._id,
+          name: [data.firstName, data.middleName, data.lastName]
+            .filter((d) => d)
+            .join(" "),
+          parentId: data.reportsTo ? data.reportsTo.optionValue : 0,
+          current: true
+        })
+
+        setOrgChartData(orgChartData);
       })
       .catch((err) => {
         setLoading(false);
       });
   };
+
+  const quickLinks: IQuickLinks[] = [
+    {
+      label: "Org Chart",
+      onClick: () => {
+        setOrgChartInFullScreenDialog(true);
+      },
+      icon: <FcFlowChart />,
+      // icon: <TiFlowChildren />,
+      show: true,
+      class: "account"
+    },
+    // {
+    //   label: "Projects",
+    //   count: 0,
+    //   show: true,
+    //   icon: <FcMultipleSmartphones />,
+    //   class: "project"
+    // },
+    // {
+    //   label: "Opportunity",
+    //   count: opportunities ? opportunities.length : 0,
+    //   show: permissions?.opportunity?.isRead ?? false,
+    //   icon: <FcBinoculars />,
+    //   class: "opportunity",
+    //   onClick: () => {
+    //     history.push({
+    //       pathname: `/opportunity`,
+    //       state: {
+    //         accountId: accountData._id,
+    //         accountName: accountData.accountName,
+    //       },
+    //     });
+    //   },
+    // },
+    // {
+    //   label: "Quotes",
+    //   count: 0,
+    //   show: true,
+    //   icon: <BsChatSquareQuoteFill />,
+    //   class: "quotes"
+    // },
+    // {
+    //   label: "Accounts Teams",
+    //   count: 0,
+    //   show: true,
+    //   icon: <FcConferenceCall />,
+    //   class: "teams"
+    // },
+    // {
+    //   label: "Contacts",
+    //   count: relatedContacts ? relatedContacts.length : 0,
+    //   icon: <FcContacts />,
+    //   class: "contact",
+    //   onClick: () => {
+    //     history.push({
+    //       pathname: `/${contactRoute}`,
+    //       state: {
+    //         accountId: accountData._id,
+    //         accountName: accountData.accountName,
+    //       },
+    //     });
+    //   },
+    //   show:
+    //     permissions && permissions[contactResource]
+    //       ? permissions[contactResource].isRead
+    //       : false,
+    // },
+  ].filter((d) => d.show);
 
   const handleMainPoints = (data) => {
     let tempMp = {
@@ -136,33 +238,6 @@ const Roles = (props) => {
         setLoading(false);
       });
   };
-
-  const quickLinks = [
-    {
-      label: "Account Heirarchy",
-      count: 0,
-    },
-    {
-      label: "Projects",
-      count: 0,
-    },
-    {
-      label: "Opportunity",
-      count: 0,
-    },
-    {
-      label: "Quotes",
-      count: 0,
-    },
-    {
-      label: "Accounts Teams",
-      count: 0,
-    },
-    {
-      label: "Contacts",
-      count: 0,
-    },
-  ];
 
   const handleDeleteContact = () => {
     if (contactData?._id) {
@@ -341,10 +416,37 @@ const Roles = (props) => {
                     )}
                   </Grid>
                 ) : (
-                  <DetailsPage
-                    data={contactData}
-                    fields={contactFields}
-                  />
+
+                  <>
+                    <Tabs className="oms-tab" value={currentTabIndex}
+                      onChange={(index, newValue) => {
+                        setCurrentTabIndex(newValue);
+                      }}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      aria-label="icon tabs example"
+                    >
+                      <Tab
+                        label="Details"
+                        aria-controls="a11y-tabpanel-0"
+                        id="a11y-tab-0"
+                      />
+                      <Tab
+                        label="Org Chart"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                    </Tabs>
+                    <Box hidden={currentTabIndex !== 0}>
+                      <DetailsPage
+                        data={contactData}
+                        fields={contactFields}
+                      />
+                    </Box>
+                    <Box hidden={currentTabIndex !== 1}>
+                      <OrgChartContainer data={orgChartData} />
+                    </Box>
+                  </>
                 )
               }
             </Paper>
@@ -372,7 +474,7 @@ const Roles = (props) => {
               )}
 
 
-              {/* <QuickLinks quickLinks={quickLinks} /> */}
+              <QuickLinks quickLinks={quickLinks} />
 
               {/* <div className={`${contactClass.detail_page_div2}`}>
                     {quickLinks && quickLinks.length
@@ -402,6 +504,18 @@ const Roles = (props) => {
             onOk={handleDeleteContact}
           />
         ) : null}
+
+        {
+          orgChartInFullScreenDialog && <FullScreenDialog
+            heading="Org Chart"
+            open={orgChartInFullScreenDialog}
+            close={() => {
+              setOrgChartInFullScreenDialog(false);
+            }}
+          >
+            <OrgChartContainer data={orgChartData} />
+          </FullScreenDialog>
+        }
       </Layout>
     </>
   );
