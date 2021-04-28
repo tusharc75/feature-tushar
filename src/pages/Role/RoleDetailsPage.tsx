@@ -397,7 +397,7 @@ const RoleDetailsPage = () => {
                                 ? isEditDeleteDisable
                                   ? true
                                   : false
-                                : false
+                                : true
                             }
                           />
                         )
