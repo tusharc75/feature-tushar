@@ -11,6 +11,7 @@ import './OrgChartContainer.scss';
 
 export default function OrgChartContainer({ data }) {
 
+    const chartId = `chart-${new Date().getMilliseconds()}`;
     const google = window.google;
     google.charts.load('current', { packages: ["orgchart"] });
 
@@ -164,6 +165,7 @@ export default function OrgChartContainer({ data }) {
                 <OrgChart
                     positions={positions}
                     getOrgChart={getOrgChart}
+                    chartId={chartId}
                     // update={update}
                     // edit={edit}
                     google={google}

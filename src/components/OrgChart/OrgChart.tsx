@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 const OrgChart = ({
     positions,
     getOrgChart,
+    chartId,
     // update,
     // edit,
     google
@@ -14,7 +15,7 @@ const OrgChart = ({
     const [orgChart, setOrgChart] = useState(positions || []);
 
     useEffect(() => {
-        getOrgChart();
+        getOrgChart()
     }, []);
 
     useEffect(() => {
@@ -114,7 +115,7 @@ const OrgChart = ({
               ${p.current ? "(Current)" : ""} 
             </h5>
           `;
-        const orgChartDiv = document.getElementById("org-chart");
+        const orgChartDiv = document.getElementById(chartId);
         if (orgChartDiv) {
             chart = new google.visualization.OrgChart(orgChartDiv);
 
@@ -163,7 +164,7 @@ const OrgChart = ({
     };
 
     return (
-        <div id="org-chart" className="org-chart" />
+        <div id={chartId} className="org-chart" />
     );
 };
 
