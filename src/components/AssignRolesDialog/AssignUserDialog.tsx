@@ -17,11 +17,12 @@ import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
-const AssignRolesDialog = ({
+const AssignUserDialog = ({
   usersDialogOpen,
   onSuccess,
   handleCloseDialog,
   roleIds,
+  assignedUsers
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [users, setUsers] = useState([]);
@@ -31,10 +32,11 @@ const AssignRolesDialog = ({
 
   useEffect(() => {
     setLoadingUsers(true);
+    console.log(JSON.stringify(assignedUsers))
     axiosInstance()
       .get(`/user`)
       .then(({ data: { data } }) => {
-        setUsers(data);
+        setUsers(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)))
         setLoadingUsers(false);
       })
       .catch((error) => {
@@ -140,4 +142,4 @@ const AssignRolesDialog = ({
   );
 };
 
-export default AssignRolesDialog;
+export default AssignUserDialog;

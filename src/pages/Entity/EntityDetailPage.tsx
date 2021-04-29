@@ -279,6 +279,7 @@ const EntityDetailsPage = () => {
           usersDialogOpen={showAssignUserDialog}
           handleCloseDialog={userDialogClose}
           roleIds={roles.map((r) => r._id)}
+          assignedUsers={users}
           onSuccess={() => {
             fetchEntityUser();
             userDialogClose();
@@ -302,6 +303,7 @@ const EntityDetailsPage = () => {
           handleCloseDialog={closeRolesDIalog}
           type="role"
           ids={[id]}
+          assignedEntity={roles}
           onSuccess={() => {
             fetchEntityRoles();
             fetchEntityUser();
