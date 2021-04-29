@@ -9,7 +9,7 @@ import OrgChart from './OrgChart';
 
 import './OrgChartContainer.scss';
 
-export default function OrgChartContainer({ data }) {
+export default function OrgChartContainer({ data, onClick }) {
 
     const chartId = `chart-${new Date().getMilliseconds()}`;
     const google = window.google;
@@ -98,6 +98,13 @@ export default function OrgChartContainer({ data }) {
     //     toggleModal();
     // }
 
+    const onClickNode = (id) => {
+        onClick(id);
+        // const selectedNode = positions.find(node => node.id === id);
+        // setNode(selectedNode);
+        // toggleModal();
+    }
+
     // const openAddModal = () => {
     //     setNode({
     //         id: '',
@@ -167,7 +174,7 @@ export default function OrgChartContainer({ data }) {
                     getOrgChart={getOrgChart}
                     chartId={chartId}
                     // update={update}
-                    // edit={edit}
+                    onClickNode={onClickNode}
                     google={google}
                 />
                 {/* <ToastContainer position="bottom-right" /> */}
