@@ -145,7 +145,7 @@ export default function Account(props) {
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
       masterAccount:
-        u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : "",
+        u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount == "").accountName : "",
       approved: u.staticData?.approved ? u.staticData?.approved : false,
     }));
     setDataRows([...rows]);
@@ -298,7 +298,7 @@ export default function Account(props) {
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <CustomRenderCell value={params?.value?.optionLabel} />
+        <CustomRenderCell value={params?.value} />
       ),
     },
     {
@@ -680,19 +680,19 @@ export default function Account(props) {
 
                   {(accountPermissions.isDelete ||
                     accountPermissions.approveAccount) && (
-                    <Button
-                      disabled={
-                        dataRows.filter((d) => d.isChecked).length === 0
-                      }
-                      variant="outlined"
-                      color="default"
-                      className={`${accountClass.account_header_action_btn}`}
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                    >
-                      Actions <ExpandMore />
-                    </Button>
-                  )}
+                      <Button
+                        disabled={
+                          dataRows.filter((d) => d.isChecked).length === 0
+                        }
+                        variant="outlined"
+                        color="default"
+                        className={`${accountClass.account_header_action_btn}`}
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                      >
+                        Actions <ExpandMore />
+                      </Button>
+                    )}
                   <Menu
                     anchorEl={anchorEl}
                     keepMounted
@@ -848,11 +848,10 @@ export default function Account(props) {
           {singleApproveDisapproveAccount.show ? (
             <ConfirmationDialog
               open={singleApproveDisapproveAccount.show}
-              message={`Are you sure, you want to ${
-                singleApproveDisapproveAccount.approved
+              message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved
                   ? "approve"
                   : "disapprove"
-              } account: ${singleApproveDisapproveAccount.accountName} ? `}
+                } account: ${singleApproveDisapproveAccount.accountName} ? `}
               onClose={() =>
                 setSingleApproveDisapproveAccount({
                   id: null,
@@ -867,13 +866,11 @@ export default function Account(props) {
           {multipleApproveDisapproveAccount.show ? (
             <ConfirmationDialog
               open={multipleApproveDisapproveAccount.show}
-              message={`Are you sure, you want to ${
-                multipleApproveDisapproveAccount.approved
+              message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved
                   ? "approve"
                   : "disapprove"
-              } selected ${
-                multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+                } selected ${multipleApproveDisapproveAccount.selectedRecords
+                } account(s) ? `}
               onClose={() =>
                 setMultipleApproveDisapproveAccount({
                   show: false,
