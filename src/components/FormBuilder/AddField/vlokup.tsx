@@ -18,6 +18,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { camelCase, UnCamelCase } from "../../../constants/helpers";
+import * as XLSX from 'xlsx';
 
 const MenuProps = {
     PaperProps: {
@@ -49,6 +50,32 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
     };
 
 
+    const handleUpload = (e) => {
+        e.preventDefault();
+        var files = e.target.files, f = files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var data = e.target.result;
+            let readedData = XLSX.read(data, { type: 'binary' });
+            const wsname = readedData.SheetNames[0];
+            const ws = readedData.Sheets[wsname];
+            const dataParse = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            if (dataParse.length) {
+                let option = []
+                dataParse.forEach((row) => {
+                    let rowInsert = {}
+                    rowInsert["optionLabel"] = row[0] ? row[0].toString() : ""
+                    values["inputFields"] && values["inputFields"].forEach((coloum, index) => {
+                        rowInsert[coloum] = row[index + 1] ? row[index + 1].toString() : ""
+                    })
+                    option.push(rowInsert)
+                })
+                setFieldValue("option", option)
+            }
+        };
+        reader.readAsBinaryString(f)
+    }
+
     return (
         <Box marginTop={2}>
             <FormControl variant="outlined" fullWidth margin="dense">
@@ -76,7 +103,29 @@ export const Vlokup = ({ fields, values, setFieldValue, }) => {
                 </Select>
             </FormControl>
             <Box marginTop={1} marginBottom={2}>
-                <Typography variant="body2">Options</Typography>
+                <Box>
+                    <Grid spacing={3} container>
+                        <Grid item xs={12} sm={6} md={6}>
+                            <Typography variant="body2">Options</Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={6} container justify="flex-end">
+                            <label htmlFor="importFromExcel" className={`cursor-pointer`}>Import from Excel</label>
+                            <input
+                                onClick={(e: any) => (e.target.value = null)}
+                                id="importFromExcel"
+                                name="importFromExcel"
+                                onChange={handleUpload}
+                                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                style={{
+                                    opacity: "0",
+                                    position: "absolute",
+                                    zIndex: -1,
+                                }}
+                                type="file"
+                            />
+                        </Grid>
+                    </Grid>
+                </Box>
                 <Box border={1} mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" maxHeight={300} style={{ overflow: "auto" }}>
                     <Box bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300" width={"100%"} >
                         <Box display="flex" flexDirection="row">

@@ -37,7 +37,8 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
             if (row.sectionId.toString() === sectionId.toString()) {
                 let count = row.field.filter(i => i.type === type).length
                 let option = []
-                if (type === FieldList.DROPDOWN.type || type === FieldList.MULTISELECT.type || type === FieldList.RADIO.type || type === FieldList.VLOOKUPDROPDOWN.type) {
+                if (type === FieldList.DROPDOWN.type || type === FieldList.MULTISELECT.type || type === FieldList.RADIO.type
+                    || type === FieldList.VLOOKUPDROPDOWN.type || type === FieldList.PROCESS.type) {
                     option = [{ optionLabel: "Option 1" }]
                 }
                 let insert_object: any = {
@@ -45,7 +46,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                     required: true, isTooltip: false, tooltipMessage: "", editAble: true, order: 0
                 }
                 if (type === FieldList.FORMULA.type) {
-                    insert_object.formula = ""
+                    insert_object.formula = "return "
                     insert_object.inputFields = []
                     insert_object.returnType = "decimal"
                 }
