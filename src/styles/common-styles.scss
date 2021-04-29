@@ -26,6 +26,10 @@
     justify-content: center !important;
 }
 
+.justify-content-end {
+    justify-content: flex-end;
+}
+
 .align-items-center {
     align-items: center !important;
 }
@@ -110,7 +114,6 @@ $sizes: 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 
 // Gap
 @include fixed-list-loop(".gap-", "gap", "rem");
-
 
 // Margin on x axis
 .mx-0 {
@@ -231,4 +234,3 @@ $sizes: 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
     padding-top: 3rem !important;
     padding-bottom: 3rem !important;
 }
-

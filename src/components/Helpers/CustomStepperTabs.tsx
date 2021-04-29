@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CustomStepper = ({ steps, value }) => {
+const CustomStepperTabs = ({ steps, value }) => {
   const classes = useStyles();
   return (
     <Box className={classes.container}>
@@ -51,4 +51,4 @@ const CustomStepper = ({ steps, value }) => {
   );
 };
 
-export default CustomStepper;
+export default CustomStepperTabs;
