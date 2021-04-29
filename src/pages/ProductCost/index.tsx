@@ -11,7 +11,6 @@ import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { productCategoryPage } from '../../routes/ProductCategory'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -20,24 +19,25 @@ import moment from "moment";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import routes from "../../components/Helpers/Routes";
 
-const ProductCategory = () => {
+const ProductCost = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const [loading, setLoading] = useState(true);
-    const [productCategory, setProductCategory] = useState([]);
+    const [productCost, setProductCost] = useState([]);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
 
     useEffect(() => {
-        fetchProductCategory();
+        fetchProductCost();
     }, []);
 
-    const fetchProductCategory = () => {
+    const fetchProductCost = () => {
         setLoading(true)
-        axiosInstance().get(`/productcategory`).then(({ data: { data } }) => {
-            setProductCategory(data);
+        axiosInstance().get(`/productcost`).then(({ data: { data } }) => {
+            setProductCost(data);
             setLoading(false)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -45,8 +45,8 @@ const ProductCategory = () => {
     };
 
     const handleDelete = () => {
-        axiosInstance().delete(`/productcategory/` + deleteRecord._id).then(() => {
-            fetchProductCategory();
+        axiosInstance().delete(`/productcost/` + deleteRecord._id).then(() => {
+            fetchProductCost();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
         }).catch((error) => {
@@ -59,13 +59,25 @@ const ProductCategory = () => {
         { field: 'id', headerName: 'id', hide: true },
         {
             field: "name",
-            headerName: "Product Category",
+            headerName: "Product Cost",
             width: 300,
             renderCell: (params) => (
-                <Link className="LeadNameLink" to={`${productCategoryPage.path}/${params.row.id}`} >
+                <Link className="LeadNameLink" to={`${routes.productCost.path}/${params.row.id}`} >
                     {params.row.name}
                 </Link>
             )
+        },
+        {
+            field: "incoTermsFrom",
+            headerName: "Inco Terms From",
+            width: 200,
+            renderCell: (params) => (params.row.incoTermsFrom)
+        },
+        {
+            field: "incoTermsTo",
+            headerName: "Inco Terms To",
+            width: 200,
+            renderCell: (params) => (params.row.incoTermsTo)
         },
         {
             field: "createdBy",
@@ -77,7 +89,7 @@ const ProductCategory = () => {
             renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
                 {params.row.createdBy.user.firstName}
                 <span
-                    className="createdAtTime"
+                    className="createdAtTime badge-date"
                     title={`${params.row.createdBy.user.firstName} • ${moment(
                         params.row.createdBy.date.slice(0, 10)
                     ).format('MMM Do, YYYY')}`}
@@ -98,7 +110,7 @@ const ProductCategory = () => {
             renderCell: (params) => params?.row && params?.row?.updatedBy && params?.row?.updatedBy?.user ? (<h5 className="createBy">
                 {params.row.updatedBy.user.firstName}
                 <span
-                    className="updatedAtTime"
+                    className="updatedAtTime badge-date"
                     title={`${params.row.updatedBy.user.firstName} • ${moment(
                         params.row.updatedBy.date.slice(0, 10)
                     ).format('MMM Do, YYYY')}`}
@@ -128,20 +140,20 @@ const ProductCategory = () => {
     ];
 
     const CreateNew = () => {
-        history.push({ pathname: "/product-category/0" })
+        history.push({ pathname: "/product-cost/0" })
     }
 
     return (<Layout>
         <Grid container direction="row">
             <Grid item xs={12}>
-                <CustomBreadCrumbs routes={[{ title: "Product Category" }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.productCost.title }]} />
             </Grid>
         </Grid>
         <div className="main-container">
             <div className="header-panel">
                 <Grid container>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">Product Category </span>
+                        <GiAbstract055 /> <span className="listingHeader">Product Cost</span>
                     </Grid>
                     <Grid xs={6} container justify="flex-end">
                         <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
@@ -155,7 +167,7 @@ const ProductCategory = () => {
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
-                    rows={productCategory}
+                    rows={productCost}
                     disableSelectionOnClick
                     disableMultipleSelection
                     columns={columns}
@@ -167,7 +179,7 @@ const ProductCategory = () => {
         {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure, you want to delete product ${deleteRecord?.name} ?`}
+                message={`Are you sure, you want to delete product cost ${deleteRecord?.name} ?`}
                 onClose={() => setShowDeleteConfirmBox(false)}
                 onOk={handleDelete}
             />
@@ -176,4 +188,4 @@ const ProductCategory = () => {
     );
 }
 
-export default ProductCategory;
+export default ProductCost;
