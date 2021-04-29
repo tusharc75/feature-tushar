@@ -61,6 +61,15 @@ function App() {
   const toast = useContext(CustomToastContext);
   const [notification, setNotification] = useState({ open: false, title: null, message: null })
 
+  const truepush = window["truepush"] || [];
+  truepush.push(function () {
+    truepush.Init({
+      id: "608a852cd4fd7034e72c1b43"
+    }, function (error) {
+      if (error) console.error(error);
+    })
+  })
+
   // const messaging = firebase.messaging();
   // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
   //   if (token) {

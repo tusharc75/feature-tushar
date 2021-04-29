@@ -13,14 +13,22 @@ import { useParams, useHistory } from "react-router-dom";
 import queryString from 'query-string';
 import { GetReferenceName } from "../../axios/activity";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-
+import CustomContainer from "../../components/CustomContainer";
+import { makeStyles } from "@material-ui/core";
 const capitalize = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
+const useStyles = makeStyles((theme) => ({
+    activityContainer: {
+        padding: "10px",
+        height: "calc(100vh - 11.4rem)",
+        overflow: "auto"
+    },
+}));
 
 const Activity = () => {
-
+    const classes = useStyles();
     const history = useHistory();
     const parsed = queryString.parse(history.location.search);
     const { referenceType, referenceId, activityType, activityId } = parsed;
@@ -51,23 +59,24 @@ const Activity = () => {
                 <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
             </Grid>
         </Grid>
-        <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
-            <Box mb={2}>
+        <CustomContainer>
+            <Box>
                 <Grid container>
+                    
                     <Grid item xs={8}>
                         <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
                     </Grid>
-                    <Grid xs={4} container justify="flex-end">
+                    <Grid xs={4} container>
                         <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
                     </Grid>
                 </Grid>
             </Box>
-            <Box mb={1}>
+            <Box className={classes.activityContainer}>
                 {viewType === 0 && <Board type={type} filter={filter} activityId={activityId} />}
                 {viewType === 1 && <Roadmap type={type} filter={filter} activityId={activityId} />}
                 {viewType === 2 && <Calendar type={type} filter={filter} activityId={activityId} />}
             </Box>
-        </Box>
+        </CustomContainer>
         {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
     </Layout>
     );

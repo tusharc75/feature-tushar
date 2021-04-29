@@ -145,7 +145,7 @@ export default function Account(props) {
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
       masterAccount:
-        u.parentHierarchy.length > 0 ? u.parentHierarchy[0].accountName : "",
+        u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount == "").accountName : "",
       approved: u.staticData?.approved ? u.staticData?.approved : false,
     }));
     setDataRows([...rows]);
@@ -248,7 +248,7 @@ export default function Account(props) {
           <h5 className="createBy">
             {params.value.user.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params?.value?.date?.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -271,7 +271,7 @@ export default function Account(props) {
         params?.value?.user ? (
           <h5 className="updateBy">
             {params.value.user.firstName}
-            <span title={params.value.date} className="updatedAtTime">
+            <span title={params.value.date} className="updatedAtTime badge-date">
               {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
@@ -298,7 +298,7 @@ export default function Account(props) {
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <CustomRenderCell value={params?.value?.optionLabel} />
+        <CustomRenderCell value={params?.value} />
       ),
     },
     {
@@ -431,15 +431,6 @@ export default function Account(props) {
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
-    // try {
-    //     let tdata = await GetAccounts(searchParams)
-    //     setRowCount(tdata.count)
-    //     setAccountData(tdata.data)
-    //     setLoading(false);
-    // }
-    // catch (err) {
-    //     setLoading(false);
-    // }
     let api = getSearchQuery(`/${accountApi}`, searchParams);
     setLoading(true);
     axiosInstance()
@@ -455,7 +446,7 @@ export default function Account(props) {
         toastConfig.setToastConfig(err);
         setLoading(false);
       });
-  }, [searchVal, query]);
+  }, [searchVal, query, selectedType]);
 
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
@@ -640,23 +631,20 @@ export default function Account(props) {
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[{ title: accountBreadcrumb.title }]} />
           </Grid>
-          <Grid
-            item
-            md={8}
-            sm={1}
-            xs={2} >
+          <Grid item md={8} sm={1} xs={2}>
             <ImportExportLinks
               module="account(s)"
               api={accountApi}
               onSuccessfulImport={(isImportedSuccessfully) => {
-                if (isImportedSuccessfully) { fetchAccounts(); }
+                if (isImportedSuccessfully) {
+                  fetchAccounts();
+                }
               }}
             />
           </Grid>
         </Grid>
         <CustomContainer>
-          <div className={`${accountClass["account_header_inner_container"]}`}
-          >
+          <div className={`${accountClass["account_header_inner_container"]}`}>
             <CustomHeader
               total={rowCount}
               heading={sidebarResource[accountResource]}
@@ -739,9 +727,8 @@ export default function Account(props) {
                           <Chip
                             size="small"
                             label={
-                              dataRows.filter(
-                                (d) => d.isChecked && !d.approved
-                              ).length
+                              dataRows.filter((d) => d.isChecked && !d.approved)
+                                .length
                             }
                           />
                         </MenuItem>
@@ -768,9 +755,8 @@ export default function Account(props) {
                           <Chip
                             size="small"
                             label={
-                              dataRows.filter(
-                                (d) => d.isChecked && d.approved
-                              ).length
+                              dataRows.filter((d) => d.isChecked && d.approved)
+                                .length
                             }
                           />
                         </MenuItem>
@@ -863,8 +849,8 @@ export default function Account(props) {
             <ConfirmationDialog
               open={singleApproveDisapproveAccount.show}
               message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved
-                ? "approve"
-                : "disapprove"
+                  ? "approve"
+                  : "disapprove"
                 } account: ${singleApproveDisapproveAccount.accountName} ? `}
               onClose={() =>
                 setSingleApproveDisapproveAccount({
@@ -881,8 +867,8 @@ export default function Account(props) {
             <ConfirmationDialog
               open={multipleApproveDisapproveAccount.show}
               message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved
-                ? "approve"
-                : "disapprove"
+                  ? "approve"
+                  : "disapprove"
                 } selected ${multipleApproveDisapproveAccount.selectedRecords
                 } account(s) ? `}
               onClose={() =>

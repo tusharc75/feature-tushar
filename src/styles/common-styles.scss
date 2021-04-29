@@ -6,6 +6,10 @@
     cursor: no-drop !important;
 }
 
+.w-100 {
+    width: 100% !important;
+}
+
 .text-capitalize {
     text-transform: capitalize !important;
 }
@@ -16,6 +20,14 @@
 
 .justify-content-space-between {
     justify-content: space-between !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.justify-content-end {
+    justify-content: flex-end;
 }
 
 .align-items-center {
@@ -102,7 +114,6 @@ $sizes: 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 
 // Gap
 @include fixed-list-loop(".gap-", "gap", "rem");
-
 
 // Margin on x axis
 .mx-0 {
@@ -223,4 +234,3 @@ $sizes: 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
     padding-top: 3rem !important;
     padding-bottom: 3rem !important;
 }
-
