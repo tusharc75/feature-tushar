@@ -91,13 +91,13 @@ function OpportunityDetailsPage() {
   };
 
   const handleMainPoints = (data) => {
-    let tempMainPoint = {};
-      tempMainPoint["Account Name"]= data?.accountName?.optionLabel || "";
-      tempMainPoint["Close Date"]= yyyyMMDD(data.closeDate);
-      tempMainPoint["Amount"]= data.amount || "";
-      tempMainPoint["Opportunity Owner"]= data?.owner?.optionLabel || "";
+    let mainPoint = {};
+      mainPoint["Account Name"]= data?.accountName?.optionLabel || "";
+      mainPoint["Close Date"]= yyyyMMDD(data.closeDate);
+      mainPoint["Amount"]= data.amount || "";
+      mainPoint["Opportunity Owner"]= data?.owner?.optionLabel || "";
     
-    setMainPoints(tempMainPoint);
+    setMainPoints(mainPoint);
   };
 
   const getOpportunityFields = () => {
