@@ -10,21 +10,22 @@ import {
   IconButton,
   CircularProgress,
   Link as MuiLink,
-  Popover,
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
-import { kebabCase } from "lodash";
+import { kebabCase, startCase } from "lodash";
 import axios from "axios";
+import { Popover, Whisper } from "rsuite";
+import "rsuite/dist/styles/rsuite-default.css";
 
 import { getObjKeysWithValues, yyyyMMDD } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { Skeleton } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
-    width: "100%",
     padding: theme.spacing(0.5, 0.5, 0.5, 1),
     borderRadius: 4,
     cursor: "normal",
@@ -58,13 +59,12 @@ interface DetailProps {
 const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
-  const theme = useTheme();
+
   const { data, fields } = props;
   const [isDownloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
-  const [anchorPopoverEl, setAnchorPopoverEl] = useState(null);
   const [popoverData, setPopoverData] = useState(null);
   const [loadingPopoverData, setLoadingPopoverData] = useState(true);
   const [lookupResource, setLookupResource] = useState(null);
@@ -190,15 +190,10 @@ const Details = (props: DetailProps) => {
     type === "imageUpload" || type === "fileUpload" ? 12 : size;
 
   /**
-   *  POPOVER Open and Close Handle
+   *  POPOVER
    */
-  const handlePopoverOpen = (event) => {
-    setAnchorPopoverEl(event.currentTarget);
-  };
-
   const handlePopoverClose = () => {
     cancelTokenSource.cancel();
-    setAnchorPopoverEl(null);
     setLookupResource(null);
     setPopoverData(null);
   };
@@ -210,7 +205,6 @@ const Details = (props: DetailProps) => {
    * @param value
    */
   const getPopoverData = (e: React.MouseEvent, field: any, value: string) => {
-    handlePopoverOpen(e);
     setLookupResource(kebabCase(field));
     setLoadingPopoverData(true);
     axiosInstance()
@@ -234,61 +228,62 @@ const Details = (props: DetailProps) => {
     const value = normalizeValues(val, fieldData);
 
     if (fieldData.hasOwnProperty("lookup") && fieldData.lookup) {
-      const redirectLink = (link: string) =>
-        `/${kebabCase(fieldData.lookupResource)}/detail/${link}`;
-
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
         return (
-          <Typography
-            className={classes.fieldText}
-            variant="body2"
-            component="div"
+          <Whisper
+            placement="right"
+            trigger="hover"
+            speaker={renderPopoverData()}
+            delay={1000}
+            enterable
+            onClose={handlePopoverClose}
           >
-            {Array.isArray(data[fieldData.fieldName]) ? (
-              data[fieldData.fieldName].length ? (
-                data[fieldData.fieldName].map((_val: any) => (
-                  <React.Fragment key={_val.optionValue}>
-                    <Box
-                      style={{ cursor: "pointer" }}
-                      component="span"
-                      onMouseEnter={(e) =>
-                        getPopoverData(
-                          e,
-                          fieldData.lookupResource,
-                          _val.optionValue
-                        )
-                      }
-                    >
-                      <span className={classes.dataValue}>
-                        {" "}
-                        {_val.optionLabel}
-                      </span>
-                    </Box>
-                  </React.Fragment>
-                ))
+            <Typography className={classes.fieldText} variant="body2">
+              {Array.isArray(data[fieldData.fieldName]) ? (
+                data[fieldData.fieldName].length ? (
+                  data[fieldData.fieldName].map((_val: any) => (
+                    <React.Fragment key={_val.optionValue}>
+                      <Box
+                        style={{ cursor: "pointer" }}
+                        component="span"
+                        onMouseEnter={(e) =>
+                          getPopoverData(
+                            e,
+                            fieldData.lookupResource,
+                            _val.optionValue
+                          )
+                        }
+                      >
+                        <span className={classes.dataValue}>
+                          {_val.optionLabel}
+                        </span>
+                      </Box>
+                    </React.Fragment>
+                  ))
+                ) : (
+                  "-"
+                )
+              ) : data[fieldData.fieldName] ? (
+                <Box
+                  style={{ cursor: "pointer" }}
+                  component="span"
+                  onMouseEnter={(e) =>
+                    getPopoverData(
+                      e,
+                      fieldData.lookupResource,
+                      val[fieldData.fieldName]
+                    )
+                  }
+                >
+                  <span className={classes.dataValue}>
+                    {data[fieldData.fieldName].optionLabel}
+                  </span>
+                </Box>
               ) : (
                 "-"
-              )
-            ) : data[fieldData.fieldName] ? (
-              <Box
-                style={{ cursor: "pointer" }}
-                component="span"
-                onMouseEnter={(e) =>
-                  getPopoverData(
-                    e,
-                    fieldData.lookupResource,
-                    val[fieldData.fieldName]
-                  )
-                }
-              >
-                <span className={classes.dataValue}>
-                  {data[fieldData.fieldName].optionLabel}
-                </span>
-              </Box>
-            ) : (
-              "-"
-            )}
-          </Typography>
+              )}
+            </Typography>
+          </Whisper>
         );
       }
     } else {
@@ -366,79 +361,66 @@ const Details = (props: DetailProps) => {
 
     const isRole = lookupResource === "role";
     return (
-      <Box width="250px">
-        {loadingPopoverData || !popoverData ? (
-          <Box display="flex" justifyContent="center">
-            <CircularProgress size={20} />
-          </Box>
-        ) : (
-          <Box p={1} display="flex" alignItems="start">
-            {!isRole && (
-              <Avatar style={{ width: 50, height: 50 }} src={img}>
-                {name && name.charAt(0)}
-              </Avatar>
-            )}
-            <Box
-              marginLeft={2}
-              display="flex"
-              flexDirection="column"
-              justifyContent="start"
-            >
-              <Typography className={classes.popoverText}>
-                <MuiLink
-                  component={Link}
-                  to={`/${lookupResource}/detail/${popoverData?._id}`}
-                >
-                  {name}
-                </MuiLink>
-              </Typography>
-              <Typography
-                color="textSecondary"
-                variant="body2"
-                className={classes.popoverText}
+      <Popover title={startCase(lookupResource)}>
+        <Box width="250px">
+          {loadingPopoverData || !popoverData ? (
+            <Box display="flex" justifyContent="start">
+              <Skeleton variant="circle" width="50px" height="50px" />
+              <Box
+                marginLeft={2}
+                display="flex"
+                flexDirection="column"
+                justifyContent="start"
               >
-                {subInfo}
-              </Typography>
-              {/* <Typography
+                <Skeleton variant="text" width="150px" />
+                <Skeleton variant="text" width="120px" />
+              </Box>
+            </Box>
+          ) : (
+            <Box display="flex" alignItems="start">
+              {!isRole && (
+                <Avatar style={{ width: 50, height: 50 }} src={img}>
+                  {name && name.charAt(0)}
+                </Avatar>
+              )}
+              <Box
+                marginLeft={2}
+                display="flex"
+                flexDirection="column"
+                justifyContent="start"
+              >
+                <Typography className={classes.popoverText}>
+                  <MuiLink
+                    component={Link}
+                    to={`/${lookupResource}/detail/${popoverData?._id}`}
+                  >
+                    <span className={classes.dataValue}>{name}</span>
+                  </MuiLink>
+                </Typography>
+                <Typography
+                  color="textSecondary"
+                  variant="body2"
+                  className={classes.popoverText}
+                >
+                  {subInfo}
+                </Typography>
+                {/* <Typography
                 color="textSecondary"
                 variant="body2"
                 className={classes.popoverText}
               >
                 {subInfo1}
               </Typography> */}
+              </Box>
             </Box>
-          </Box>
-        )}
-      </Box>
+          )}
+        </Box>
+      </Popover>
     );
   };
 
   return (
     <div>
-      <Popover
-        onClick={handlePopoverClose}
-        open={Boolean(anchorPopoverEl)}
-        anchorEl={anchorPopoverEl}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-        onClose={handlePopoverClose}
-        disableRestoreFocus
-      >
-        <Box
-          id="#popover_container"
-          padding={1}
-          style={{ pointerEvents: "all", overflow: "hidden" }}
-          onMouseLeave={handlePopoverClose}
-        >
-          {renderPopoverData()}
-        </Box>
-      </Popover>
       {formsData?.map((form) => (
         <React.Fragment key={form.name}>
           <div className="detail-box">
