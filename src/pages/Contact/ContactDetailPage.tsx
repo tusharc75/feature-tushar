@@ -36,7 +36,7 @@ const Roles = (props) => {
   } = props;
   const history = useHistory();
   const {
-    state: { user, selectedEntity },
+    state: { user, permissions, selectedEntity },
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [contactData, setContactData] = useState<any>({});
@@ -67,26 +67,20 @@ const Roles = (props) => {
   // }, [id]);
 
   useEffect(() => {
-    const data = user?.role?.sideBar;
-
-    if (data) {
-      const hasContactPermission = data.find(
-        (d) => d.name == contactPermission
-      );
-      if (hasContactPermission) {
-        setContactPermissions({
-          isCreate: hasContactPermission.isCreate,
-          isUpdate: hasContactPermission.isUpdate,
-          isRead: hasContactPermission.isRead,
-          isDelete: hasContactPermission.isDelete,
-        });
-      }
-
-      if (id) {
-        fetchContactData();
-      }
+    const hasContactPermission = permissions[contactResource];
+    if (hasContactPermission) {
+      setContactPermissions({
+        isCreate: hasContactPermission.isCreate,
+        isUpdate: hasContactPermission.isUpdate,
+        isRead: hasContactPermission.isRead,
+        isDelete: hasContactPermission.isDelete,
+      });
     }
-  }, [user]);
+
+    if (id) {
+      fetchContactData();
+    }
+  }, [id]);
 
   const fetchContactData = async () => {
     setLoading(true);
@@ -444,7 +438,9 @@ const Roles = (props) => {
                       />
                     </Box>
                     <Box hidden={currentTabIndex !== 1}>
-                      <OrgChartContainer data={orgChartData} />
+                      <OrgChartContainer data={orgChartData} onClick={(id) => {
+                        history.push(`/${contactApi}/detail/${id}`)
+                      }} />
                     </Box>
                   </>
                 )
@@ -513,7 +509,10 @@ const Roles = (props) => {
               setOrgChartInFullScreenDialog(false);
             }}
           >
-            <OrgChartContainer data={orgChartData} />
+            <OrgChartContainer data={orgChartData} onClick={(id) => {
+              setOrgChartInFullScreenDialog(false);
+              history.push(`/${contactApi}/detail/${id}`)
+            }} />
           </FullScreenDialog>
         }
       </Layout>
