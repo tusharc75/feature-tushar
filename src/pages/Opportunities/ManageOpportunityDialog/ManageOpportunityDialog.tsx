@@ -36,6 +36,7 @@ export default function ManageOpportunityDialog({
   dataToUpdate,
   accountId,
   resource, // either called from customer account or supplier account
+  isRedirectTodetailPage
 }) {
   const { opportunityResource, opportunityApi } = opportunity
   const toastConfig = useContext(CustomToastContext);
@@ -167,7 +168,7 @@ export default function ManageOpportunityDialog({
           type: "success",
           message: data.message,
         });
-        history.push(`${opportunityApi}/detail/${newId}`);
+        if(isRedirectTodetailPage) history.push(`${opportunityApi}/detail/${newId}`);
         setLoading(false);
         onSuccess();
       })
@@ -408,5 +409,6 @@ ManageOpportunityDialog.propTypes = {
   onClose: PropTypes.any,
   isNew: PropTypes.bool,
   dataToUpdate: PropTypes.any,
-  accountId: PropTypes.string
+  accountId: PropTypes.string,
+  isRedirectToDetailPage: PropTypes.bool,
 };
