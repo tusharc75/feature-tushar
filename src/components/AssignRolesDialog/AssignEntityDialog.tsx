@@ -23,6 +23,7 @@ const AssignEntityDialog = ({
   handleCloseDialog,
   ids,
   type,
+  assignedEntity
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
@@ -36,9 +37,15 @@ const AssignEntityDialog = ({
       .get(`/${type}`)
       .then(({ data: { data } }) => {
         if (type === "role") {
-          let roles = data.filter((d) => d.type === 2);
-          setData(roles);
+          assignedEntity ?
+            setData(data.filter(role => role?.type === 2 && !assignedEntity.some(item => item?._id === role?._id)))
+            :
+            setData(data.filter((d) => d.type === 2));
         } else {
+         
+          assignedEntity ?
+          setData(data.filter(entity => !assignedEntity.some(item => item?._id === entity?._id)))
+          :
           setData(data);
         }
         setLoadingData(false);
@@ -130,7 +137,7 @@ const AssignEntityDialog = ({
             ))}
           </List>
         ) : (
-          <Typography>No Entities</Typography>
+          <Typography>All Entities has been assigned</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>

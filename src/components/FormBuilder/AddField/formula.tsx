@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
@@ -10,6 +10,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
 import { checkFormula } from "../../../constants/formulaUtility";
+import Chip from '@material-ui/core/Chip';
 
 const MenuProps = {
     PaperProps: {
@@ -22,6 +23,9 @@ const MenuProps = {
 export const Formula = ({ fields, values, setFieldValue }) => {
 
     const [formulaError, setFormulaError] = useState(null);
+    const inputRef = useRef<any>();
+
+
     const handleCheckSyntax = () => {
         if (values["formula"] && values["formula"] !== "") {
             let inputValues = {}
@@ -35,6 +39,12 @@ export const Formula = ({ fields, values, setFieldValue }) => {
                 setFormulaError("Invalid Formula")
             }
         }
+    }
+
+    const handleAddInputField = (field) => {
+        let pushPosition = inputRef.current.selectionStart
+        var new_formula = [values["formula"].slice(0, pushPosition), field, values["formula"].slice(pushPosition)].join('');
+        setFieldValue("formula", new_formula)
     }
 
     return (<Box>
@@ -62,6 +72,11 @@ export const Formula = ({ fields, values, setFieldValue }) => {
                 ))}
             </Select>
         </FormControl>
+        <Box pt={0.5} pb={0.5}>
+            {values["inputFields"] && values["inputFields"].map((_field) => (
+                <Chip className="ml-1 cursor-pointer" key={_field} label={_field} onClick={() => handleAddInputField(_field)} />
+            ))}
+        </Box>
         <Box pt={1}>
             <TextField
                 id="standard-basic"
@@ -72,6 +87,7 @@ export const Formula = ({ fields, values, setFieldValue }) => {
                 fullWidth
                 multiline
                 rows={8}
+                inputRef={inputRef}
                 value={values["formula"]}
                 onChange={(e) => setFieldValue("formula", e.target.value)}
             />

@@ -61,7 +61,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
     }
 
     const classes = useStyles();
-    return (<Box mt={1} p={2} bgcolor="white">
+    return (<Box p={2} bgcolor="white">
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
             <Grid container spacing={1}>
                 <Grid item xs={3}>

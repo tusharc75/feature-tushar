@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from "react-router-dom";
 
 const OrgChart = ({
     positions,
@@ -6,7 +7,8 @@ const OrgChart = ({
     chartId,
     // update,
     // edit,
-    google
+    onClickNode,
+    google,
 }) => {
 
     let draggedNode = null;
@@ -24,6 +26,7 @@ const OrgChart = ({
 
     useEffect(() => {
         setOrgChart(positions);
+        console.log(positions);
     }, [positions])
 
     const getIds = element => {
@@ -98,19 +101,35 @@ const OrgChart = ({
         }
     };
 
-    const editNode = event => {
-        let element = event.target.parentElement;
-        const node = getIds(element);
-        // edit(node.id);
-    }
+    // const editNode = event => {
+    //     let element = event.target.parentElement;
+    //     const node = getIds(element);
+    //     edit(node.id);
+    // }
 
+    const onClick = event => {
+        let element = event.target;
+        if (element.tagName !== "TD") {
+            while (element.parentElement) {
+                element = element.parentElement;
+                if (element.tagName === "TD") {
+                    break;
+                }
+            }
+        }
+        const currentNode = getIds(element);
+        onClickNode(currentNode.id);
+    }
 
     const drawChart = () => {
         const template = p =>
             `
             <hidden data-id='${p.id}' />
             <hidden data-parent-id='${p.parentId}' />
-            <h5>${p.name} </h5>
+            ${p.logo ? `<img src=${p.logo} width="50px" /> <br />` : ""}
+            <h5>${p.name}</h5>
+            ${p.email ? `<h5>${p.email}</h5>` : ""}
+            ${p.phone ? `<h5>${p.phone}</h5>` : ""}
             <h5 class="title">
               ${p.current ? "(Current)" : ""} 
             </h5>
@@ -127,10 +146,12 @@ const OrgChart = ({
                         "google-visualization-orgchart-node",
                     );
                     Array.from(nodes).forEach(node => {
-                        const iconElement = document.createElement('i');
-                        iconElement.className = 'edit outline icon node-icon';
-                        // iconElement.addEventListener('click', editNode)
+                        // const iconElement = document.createElement('i');
+                        // iconElement.className = 'edit outline icon node-icon';
+                        // iconElement.addEventListener('click', onClick)
                         // node.appendChild(iconElement);
+                        node.classList.add("link");
+                        node.addEventListener('click', onClick)
                         // node.setAttribute("draggable", "true");
                         // node.addEventListener("dragstart", dragStart);
                         // node.addEventListener("dragenter", dragEnter);

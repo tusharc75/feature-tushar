@@ -114,6 +114,11 @@ const FieldList = {
     type: "converter",
     icon: "far fa-calendar-check",
   },
+  PROCESS: {
+    label: "Process",
+    type: "process",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;

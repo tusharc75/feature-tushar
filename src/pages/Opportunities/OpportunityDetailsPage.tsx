@@ -19,6 +19,7 @@ import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunity
 import _ from "lodash";
 import { customerAccount, supplierAccount, yyyyMMDD } from "../../constants/helpers";
 import { opportunity } from '../../constants/helpers'
+import CustomSteps from "../../components/CustomSteps/CustomSteps";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -38,6 +39,17 @@ function OpportunityDetailsPage() {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [steps, setSteps] = useState([
+    { text: "First", canCompleteManually: true },
+    { text: "Second", canCompleteManually: true },
+    { text: "Third", canCompleteManually: true },
+    { text: "Fourth", canCompleteManually: true },
+    { text: "Fifth", canCompleteManually: true },
+    { text: "Doa", id: "doa", canCompleteManually: false },
+    { text: "Finish", canCompleteManually: true }
+  ]);
+  const [activeStep, setActiveStep] = useState(0)
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -91,13 +103,13 @@ function OpportunityDetailsPage() {
   };
 
   const handleMainPoints = (data) => {
-    let tempMp = {
-      accountName: data?.accountName?.optionLabel || "",
-      closeDate: yyyyMMDD(data.closeDate),
-      amount: data.amount || "",
-      opportunityOwner: data?.owner?.optionLabel || "",
-    };
-    setMainPoints(tempMp);
+    let mainPoint = {};
+      mainPoint["Account Name"]= data?.accountName?.optionLabel || "";
+      mainPoint["Close Date"]= yyyyMMDD(data.closeDate);
+      mainPoint["Amount"]= data.amount || "";
+      mainPoint["Opportunity Owner"]= data?.owner?.optionLabel || "";
+    
+    setMainPoints(mainPoint);
   };
 
   const getOpportunityFields = () => {
@@ -268,6 +280,17 @@ function OpportunityDetailsPage() {
                   ) : null}
                 </DetailsPageHeader>
               )}
+
+              {/* <CustomSteps steps={steps} active={activeStep} />
+
+              <div className="w-100 d-flex justify-content-end mt-2">
+                {
+                  activeStep != steps.length && <Button variant="contained"
+                    color="primary"
+                    disabled={!steps[activeStep].canCompleteManually}
+                    onClick={() => { setActiveStep(activeStep + 1) }}>Mark {steps[activeStep].text} as Completed</Button>
+                }
+              </div> */}
 
               {loading ? (
                 <Box padding={2}>
