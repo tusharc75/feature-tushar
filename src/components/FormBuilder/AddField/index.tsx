@@ -50,33 +50,57 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
 
   const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
     type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
-    tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "" }], formula: "", isvlookupReverse: false
+    tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "" }], formula: "return ", isvlookupReverse: false,
+    units: [], displayUnits: []
   });
   const ref = useRef(null);
 
   const handleSave = (values) => {
-    values.fieldName = camelCase(values.fieldLabel.replace(/[^a-zA-Z ]/g, ""))
-    if (values.type !== "formula") {
-      delete values.inputFields
-      delete values.formula
-      delete values.returnType
-    }
-    if (values.type !== "formula" && values.type !== "decimal") {
-      delete values.decimalPlaces
-    }
-    if (values.type !== "vlookupDropdown" && values.type !== "converter") {
-      delete values.option
-      delete values.inputFields
-      delete values.isvlookupReverse
-    }
-    if (values.option) {
-      values.option.forEach((ele) => {
-        if (ele.optionValue) {
-          ele.optionValue = ele.optionLabel
+
+    let data: any = {}
+    data.fieldLabel = values.fieldLabel
+    data.fieldName = camelCase(values.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+    data.required = values.required
+    data.isTooltip = values.isTooltip
+    data.tooltipMessage = values.tooltipMessage
+
+    if (values.type === "dropDown" || values.type === "multiSelect" || values.type === "radio" || values.type === "process") {
+      values.option.forEach((ele, index) => {
+        ele.order = index + 1
+        ele.default = false
+        if (index === 0) {
+          ele.default = true
         }
       })
+      data.option = values.option
     }
-    handleAddField(values)
+    if (values.type === "decimal") {
+      data.decimalPlaces = values.decimalPlaces
+    }
+    if (values.lookup) {
+      data.lookup = values.lookup
+      data.lookupResource = values.lookupResource
+    }
+    if (values.type === "formula") {
+      data.formula = values.formula
+      data.inputFields = values.inputFields
+      data.returnType = values.returnType
+      data.decimalPlaces = values.decimalPlaces
+    }
+    if (values.type === "vlookupDropdown") {
+      values.option.forEach((ele) => {
+        ele.optionValue = ele.optionLabel
+      })
+      data.inputFields = values.inputFields
+      data.option = values.option
+      data.isvlookupReverse = values.isvlookupReverse
+    }
+    if (values.type === "converter") {
+      data.units = values.units
+      data.displayUnits = values.displayUnits
+      data.option = values.option
+    }
+    handleAddField(data)
   }
 
 

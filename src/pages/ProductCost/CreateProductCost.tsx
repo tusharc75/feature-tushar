@@ -12,21 +12,24 @@ import * as Yup from "yup";
 import { TextField } from "formik-material-ui";
 import Loader from "../../components/Loader";
 import { camelCase } from "../../constants/helpers";
-import { productCategoryPage } from '../../routes/ProductCategory'
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import CustomContainer from "../../components/CustomContainer";
+import routes from "../../components/Helpers/Routes";
 
-const ProductCategorySchema = Yup.object().shape({
+const ProductCostSchema = Yup.object().shape({
     name: Yup.string()
         .min(3, "Too Short!")
         .max(50, "Too Long")
-        .required("category name is required"),
+        .required("name is required"),
+    incoTermsFrom: Yup.string()
+        .required("inco terms from is required"),
+    incoTermsTo: Yup.string()
+        .required("inco terms to is required"),
 });
 
 
-const ProductCategory = () => {
+const ProductCost = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
@@ -38,15 +41,15 @@ const ProductCategory = () => {
     const [deleteField, setDeleteField] = useState([]);
 
     useEffect(() => {
-        fetchOneProductCategory();
+        fetchOneProductCost();
     }, [id]);
 
-    const fetchOneProductCategory = () => {
+    const fetchOneProductCost = () => {
         if (id === "0") {
-            setInitialValues({ name: "" });
+            setInitialValues({ name: "", incoTermsFrom: "", incoTermsTo: "" });
         }
         else {
-            axiosInstance().get(`/productcategory/` + id).then(({ data: { data } }) => {
+            axiosInstance().get(`/productcost/` + id).then(({ data: { data } }) => {
                 setInitialValues(data);
                 setSection(data.section);
             }).catch((error) => {
@@ -58,6 +61,8 @@ const ProductCategory = () => {
     const handleSave = (values) => {
         let data: any = {}
         data.name = values.name;
+        data.incoTermsFrom = values.incoTermsFrom;
+        data.incoTermsTo = values.incoTermsTo;
 
         let fields: any = []
         let order = 0;
@@ -76,20 +81,20 @@ const ProductCategory = () => {
         data.fields = fields;
         setIsUpdating(true)
         if (id === "0") {
-            axiosInstance().post("/productcategory", data).then(({ data: { data } }) => {
+            axiosInstance().post("/productcost", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
-                history.push({ pathname: productCategoryPage.path });
+                history.push({ pathname: routes.productCost.path });
             }).catch((error) => {
                 setIsUpdating(false)
                 toastConfig.setToastConfig(error);
             });
         }
         else {
-            data.categoryId = id;
+            data.costId = id;
             data.deleteField = deleteField;
-            axiosInstance().put("/productcategory", data).then(({ data: { data } }) => {
+            axiosInstance().put("/productcost", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
-                history.push({ pathname: productCategoryPage.path });
+                history.push({ pathname: routes.productCost.path });
             }).catch((error) => {
                 setIsUpdating(false)
                 toastConfig.setToastConfig(error);
@@ -98,15 +103,14 @@ const ProductCategory = () => {
     }
 
     return (<Layout>
-
         <Grid container direction="row">
             <Grid item xs={12}>
-                <CustomBreadCrumbs routes={[{ title: "Product Category", path: productCategoryPage.path }, { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.productCost.title, path: routes.productCost.path }, { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
             </Grid>
         </Grid>
-        <CustomContainer>
+        <div className="main-container">
             {initialValues ?
-                <Formik initialValues={initialValues} validationSchema={ProductCategorySchema} onSubmit={handleSave}>
+                <Formik initialValues={initialValues} validationSchema={ProductCostSchema} onSubmit={handleSave}>
                     {({ submitForm }) => (
                         <Form>
                             <Box p={1} bgcolor="white">
@@ -117,26 +121,46 @@ const ProductCategory = () => {
                                             fullWidth
                                             margin="dense"
                                             type="text"
-                                            label="Category Name"
+                                            label="Name"
                                             name="name"
                                             variant="outlined"
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={3}  >
+                                        <Field
+                                            component={TextField}
+                                            fullWidth
+                                            margin="dense"
+                                            type="text"
+                                            label="Inco Terms From"
+                                            name="incoTermsFrom"
+                                            variant="outlined"
+                                        />
                                     </Grid>
-                                    <Grid item xs={12} sm={6} container justify="flex-end">
+                                    <Grid item xs={12} sm={3}  >
+                                        <Field
+                                            component={TextField}
+                                            fullWidth
+                                            margin="dense"
+                                            type="text"
+                                            label="Inco Terms To"
+                                            name="incoTermsTo"
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={3} container justify="flex-end">
                                         <Box>
                                             <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
                                                 Save{isUpdating && <CircularProgress size={24} />}
                                             </Button>
                                         </Box>
                                         <Box ml={1} >
-                                            <Button color="primary" variant="contained" onClick={() => history.push({ pathname: "/product-category" })} >Close</Button>
+                                            <Button color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productCost.path })} >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
                             </Box>
-                            <Box >
+                            <Box>
                                 <FormBuilder
                                     section={section}
                                     setSection={setSection}
@@ -146,11 +170,11 @@ const ProductCategory = () => {
                             </Box>
                         </Form>)}
                 </Formik>
-
-                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-        </CustomContainer>
+                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+            }
+        </div>
     </Layout>
     );
 }
 
-export default ProductCategory;
+export default ProductCost;
