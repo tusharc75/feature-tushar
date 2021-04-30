@@ -69,12 +69,15 @@ function App() {
 
   const truepush = window["truepush"] || [];
   truepush.push(function () {
-    truepush.Init({
-      id: "608a852cd4fd7034e72c1b43"
-    }, function (error) {
-      if (error) console.error(error);
-    })
-  })
+    truepush.Init(
+      {
+        id: "608a852cd4fd7034e72c1b43",
+      },
+      function (error) {
+        if (error) console.error(error);
+      }
+    );
+  });
 
   // const messaging = firebase.messaging();
   // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
@@ -313,7 +316,7 @@ function App() {
           <PrivateRoute exact path={routes.productCost.path}>
             <ProductCost />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productCost.path + "/:id"} >
+          <PrivateRoute exact path={routes.productCost.path + "/:id"}>
             <CreateProductCost />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}

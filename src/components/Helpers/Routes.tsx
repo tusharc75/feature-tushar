@@ -124,25 +124,18 @@ export default {
   },
   profilePage: {
     title: "Profile",
-<<<<<<< HEAD
     path: "/profile",
   },
   projectSales: {
     title: "Project Sales",
     path: "/project-sales",
-    data: {},
   },
   projectSalesDetail: {
     title: "Project Sales",
     path: "/project-sales/detail",
-    data: {},
-  },
-=======
-    path: "/profile"
   },
   productCost: {
     title: "Product Cost",
-    path: "/product-cost"
-  }
->>>>>>> 166dea7245ba90d83e89bc3e2cb173835c857ac9
+    path: "/product-cost",
+  },
 };
