@@ -103,13 +103,13 @@ function OpportunityDetailsPage() {
   };
 
   const handleMainPoints = (data) => {
-    let tempMp = {
-      accountName: data?.accountName?.optionLabel || "",
-      closeDate: yyyyMMDD(data.closeDate),
-      amount: data.amount || "",
-      opportunityOwner: data?.owner?.optionLabel || "",
-    };
-    setMainPoints(tempMp);
+    let mainPoint = {};
+      mainPoint["Account Name"]= data?.accountName?.optionLabel || "";
+      mainPoint["Close Date"]= yyyyMMDD(data.closeDate);
+      mainPoint["Amount"]= data.amount || "";
+      mainPoint["Opportunity Owner"]= data?.owner?.optionLabel || "";
+    
+    setMainPoints(mainPoint);
   };
 
   const getOpportunityFields = () => {

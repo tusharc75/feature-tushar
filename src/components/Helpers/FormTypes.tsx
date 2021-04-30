@@ -713,7 +713,7 @@ const FormTypes = (props) => {
         }
         options={currencyData}
         getOptionLabel={(option: any) =>
-          option ? `${option.currencyCode} - ${option.name}` : ""
+          option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
         }
         getOptionSelected={(option: any, val) => option.currencyCode === val}
         onChange={(e, val) =>
@@ -731,7 +731,7 @@ const FormTypes = (props) => {
           />
         )}
         renderOption={(option) => {
-          const { currencyCode, name, countryCode } = option;
+          const { currencyCode, name, countryCode, symbolNative } = option;
           return (
             <Grid container alignItems="center">
               <Grid item>
@@ -742,7 +742,7 @@ const FormTypes = (props) => {
                 />
               </Grid>
               <Grid item xs>
-                <Typography>{currencyCode}</Typography>
+                <Typography>{currencyCode} ({symbolNative})</Typography>
                 <Typography variant="body2" color="textSecondary">
                   {name}
                 </Typography>

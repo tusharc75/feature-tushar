@@ -121,6 +121,9 @@ const Roles = (props) => {
                 .filter((d) => d)
                 .join(" "),
               parentId: d.reportsTo ? d.reportsTo : 0,
+              logo: d.contactLogo,
+              email: d.email,
+              phone: d.phone,
               current: false
             })
           })
@@ -132,6 +135,9 @@ const Roles = (props) => {
             .filter((d) => d)
             .join(" "),
           parentId: data.reportsTo ? data.reportsTo.optionValue : 0,
+          logo: data.contactLogo,
+          email: data.email,
+          phone: data.phone,
           current: true
         })
 
@@ -510,6 +516,7 @@ const Roles = (props) => {
             }}
           >
             <OrgChartContainer data={orgChartData} onClick={(id) => {
+              setOrgChartInFullScreenDialog(false);
               history.push(`/${contactApi}/detail/${id}`)
             }} />
           </FullScreenDialog>

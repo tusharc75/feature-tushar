@@ -23,6 +23,7 @@ const AssignRolesDialog = ({
   onSuccess,
   handleCloseDialog,
   userIds,
+  assignedRoles
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [roles, setRoles] = useState([]);
@@ -35,7 +36,11 @@ const AssignRolesDialog = ({
     axiosInstance()
       .get(`/role`)
       .then(({ data: { data } }) => {
-        setRoles(data.filter((d) => d.type === globalRole))
+        assignedRoles ?
+          setRoles(data.filter(role => role?.type === globalRole && !assignedRoles.some(item => item?._id === role?._id)))
+          :
+          setRoles(data.filter(role => role?.type === globalRole))
+
         setLoadingRoles(false)
       })
       .catch((error) => {
@@ -118,7 +123,7 @@ const AssignRolesDialog = ({
             ))}
           </List>
         ) : (
-          <Typography>No Roles</Typography>
+          <Typography>All Roles has been assigned</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
