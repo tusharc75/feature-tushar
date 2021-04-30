@@ -137,7 +137,7 @@ const AssignEntityDialog = ({
             ))}
           </List>
         ) : (
-          <Typography>No Entities</Typography>
+          <Typography>All Entities has been assigned</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>

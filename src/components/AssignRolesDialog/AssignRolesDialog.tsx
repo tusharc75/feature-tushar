@@ -123,7 +123,7 @@ const AssignRolesDialog = ({
             ))}
           </List>
         ) : (
-          <Typography>No Roles</Typography>
+          <Typography>All Roles has been assigned</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
