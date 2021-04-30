@@ -126,7 +126,10 @@ const OrgChart = ({
             `
             <hidden data-id='${p.id}' />
             <hidden data-parent-id='${p.parentId}' />
+            ${p.logo ? `<img src=${p.logo} width="50px" /> <br />` : ""}
             <h5>${p.name}</h5>
+            ${p.email ? `<h5>${p.email}</h5>` : ""}
+            ${p.phone ? `<h5>${p.phone}</h5>` : ""}
             <h5 class="title">
               ${p.current ? "(Current)" : ""} 
             </h5>
