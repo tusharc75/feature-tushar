@@ -417,6 +417,7 @@ const User: FC = () => {
           rolesDialogOpen={rolesDialogOpen}
           handleCloseDialog={handleCloseDialog}
           userIds={selectedUsers}
+          assignedRoles={null}
           onSuccess={() => {
             handleCloseDialog();
             setSelectedUsers([]);

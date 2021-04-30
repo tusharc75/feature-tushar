@@ -338,6 +338,7 @@ const UserDetailsPage = () => {
           rolesDialogOpen={rolesDialogOpen}
           handleCloseDialog={handleCloseDialog}
           userIds={[id]}
+          assignedRoles={globalRoles}
           onSuccess={() => {
             handleCloseDialog();
             getRoleUnion();
