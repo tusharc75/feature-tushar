@@ -50,15 +50,17 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     _section.field.forEach(_field => {
       let fid = { ..._field }
       if (!fid.fieldName) {
-        fid.fieldName = camelCase(fid.fieldLabel.replace(/[^a-zA-Z ]/g, ""));
+        fid.fieldName = camelCase(fid.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
       }
-      if (fid.type === "converter") {
-        fid.displayUnits && fid.displayUnits.forEach(_unit => {
-          fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + _unit.toLowerCase() })
-        })
-      }
-      else {
-        fields.push(fid)
+      if (fid.fieldId.toString() !== fieldData.fieldId.toString()) {
+        if (fid.type === "converter") {
+          fid.displayUnits && fid.displayUnits.forEach(_unit => {
+            fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + _unit.toLowerCase() })
+          })
+        }
+        else {
+          fields.push(fid)
+        }
       }
     })
   })
@@ -75,7 +77,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
             ele.isTooltip = values.isTooltip
             ele.tooltipMessage = values.tooltipMessage
 
-            if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio") {
+            if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio" || fieldData.type === "process") {
               values.option.forEach((ele, index) => {
                 ele.order = index + 1
                 ele.default = false
@@ -118,8 +120,6 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     setSection(data)
     handleClose()
   }
-
-
 
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={initialValues["type"] === "formula" ||
     initialValues["type"] === "vlookupDropdown" || initialValues["type"] === "converter" ? "md" : "sm"} open={true}>
@@ -216,7 +216,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               </Fragment>}
 
 
-            {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio") && !values["lookup"]) &&
+            {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio" || values["type"] === "process") && !values["lookup"]) &&
               <Option
                 values={values}
                 setFieldValue={setFieldValue}

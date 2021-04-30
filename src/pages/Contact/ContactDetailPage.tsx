@@ -510,6 +510,7 @@ const Roles = (props) => {
             }}
           >
             <OrgChartContainer data={orgChartData} onClick={(id) => {
+              setOrgChartInFullScreenDialog(false);
               history.push(`/${contactApi}/detail/${id}`)
             }} />
           </FullScreenDialog>
