@@ -86,7 +86,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                         placeholder="Units" />
                 )}
             />
-            {(values["units"] && values["units"].length) &&
+            {(values["units"] && values["units"].length > 0) &&
                 <Box marginTop={1} border={1} p={1} borderColor="grey.300" maxHeight={300} style={{ overflow: "auto" }} >
                     <table>
                         <thead>
@@ -122,8 +122,7 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                         </tbody>
                     </table>
                 </Box>}
-
-            {(values["units"] && values["units"].length) && <Box mt={1}>
+            {(values["units"] && values["units"].length > 0) && <Box mt={1}>
                 <FormControl variant="outlined" fullWidth margin="dense">
                     <InputLabel htmlFor="filled-age-native-simple">Display Units</InputLabel>
                     <Select
