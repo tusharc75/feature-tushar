@@ -519,6 +519,7 @@ export default function AccountDetailPage(props) {
                   accountName={accountData.accountName}
                   recordsPerLine={2}
                   resource={accountResource}
+                  isRedirect={false}
                 />
               )}
             </Paper>
@@ -647,6 +648,7 @@ export default function AccountDetailPage(props) {
               }}
               accountId={accountData._id}
               resource={accountResource}
+              isRedirectTodetailPage={false}
             />
           )}
           {showCreateContactDialog && (

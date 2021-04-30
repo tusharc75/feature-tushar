@@ -666,6 +666,7 @@ const Opportunities = () => {
           isNew={true}
           dataToUpdate={null}
           resource={null}
+          isRedirectTodetailPage={true}
         />
       )}
     </>

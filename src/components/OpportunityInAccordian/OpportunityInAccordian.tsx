@@ -70,7 +70,7 @@ function DisplayData({ label, value }) {
 
 export default function OpportunityInAccordian({
     opportunities, onNewOpportunityAdd, accountId, accountName,
-    expanded = true, recordsPerLine = 2, opportunityPermissions, resource
+    expanded = true, recordsPerLine = 2, opportunityPermissions, resource,isRedirect, 
 }) {
 
     const history = useHistory();
@@ -211,6 +211,7 @@ export default function OpportunityInAccordian({
                 }}
                 accountId={accountId}
                 resource={resource}
+                isRedirectTodetailPage={isRedirect}
             />
         }
     </>
