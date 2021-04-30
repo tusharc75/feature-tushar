@@ -203,7 +203,7 @@ const User: FC = () => {
           <h5 className="createBy">
             {params.value.user.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -225,7 +225,7 @@ const User: FC = () => {
         params?.value?.user ? (
           <h5 className="updateBy">
             {params?.value?.user?.firstName}
-            <span title={params?.value?.date} className="updatedAtTime">
+            <span title={params?.value?.date} className="updatedAtTime badge-date">
               {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
@@ -295,7 +295,7 @@ const User: FC = () => {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete === false)) {
+      if (dataRows.find((d) => d.isChecked && d.id === user?.user._id)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -417,6 +417,7 @@ const User: FC = () => {
           rolesDialogOpen={rolesDialogOpen}
           handleCloseDialog={handleCloseDialog}
           userIds={selectedUsers}
+          assignedRoles={null}
           onSuccess={() => {
             handleCloseDialog();
             setSelectedUsers([]);

@@ -262,6 +262,7 @@ const RoleDetailsPage = () => {
           usersDialogOpen={showAssignUserDialog}
           handleCloseDialog={userDialogClose}
           roleIds={[id]}
+          assignedUsers={roleData?.user}
           onSuccess={() => {
             fetchRoleData();
             userDialogClose();
@@ -274,6 +275,7 @@ const RoleDetailsPage = () => {
           handleCloseDialog={entityDialogClose}
           type="entity"
           ids={[id]}
+          assignedEntity={roleData?.entity}
           onSuccess={() => {
             fetchRoleData();
             fetchUserData();
@@ -397,7 +399,7 @@ const RoleDetailsPage = () => {
                                 ? isEditDeleteDisable
                                   ? true
                                   : false
-                                : false
+                                : true
                             }
                           />
                         )

@@ -19,8 +19,6 @@ export const capitalize = (string) => {
 };
 
 export const SearchFilter = ({ handleChangeFilter, filter }) => {
-
-
     const [options, setOptions] = React.useState([]);
     const [inputValue, setInputValue] = React.useState('');
     const [value, setValue] = React.useState([]);
@@ -67,7 +65,6 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
             <TextField
                 {...params}
                 variant="outlined"
-                label="Search"
                 placeholder="Search"
                 margin="dense"
             />

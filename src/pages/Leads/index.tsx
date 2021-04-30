@@ -186,7 +186,7 @@ const Leads = () => {
     firstName,
     middleName,
     lastName,
-    convertedToOpportunity,
+    staticData,
     isAllowedToUpdate
   }) => {
     let dontHavePermissions = [];
@@ -213,7 +213,7 @@ const Leads = () => {
           </IconButton>
         </Tooltip>
       </>
-    ) : convertedToOpportunity ? (
+    ) : staticData && staticData["convertedToOpportunity"] ? (
       <>
         <Tooltip title="This lead is already converted to opportunity">
           <IconButton aria-label="Convert to opportunity">
@@ -289,12 +289,22 @@ const Leads = () => {
       headerName: "Name",
       width: 400,
       renderCell: (params) => (
-        <Link
-          className="LeadNameLink"
-          to={`${leadDetailPage.path}/${params.row._id}`}
-        >
-          {params?.value ?? ""}
-        </Link>
+        <>
+          <Link
+            className="link"
+            to={`${leadDetailPage.path}/${params.row._id}`}
+          >
+            {params?.value ?? ""}
+          </Link>
+          {
+            params.row.staticData?.convertedToOpportunity && params.row.staticData?.opportunity ?
+              <Tooltip title="Go to Opportunity">
+                <Link className="link ml-2" to={`${routes.opportunityDetail.path}/${params.row.staticData.opportunity._id}`}>
+                  ({params.row.staticData?.opportunity?.opportunityName})
+                </Link>
+              </Tooltip> : ""
+          }
+        </>
       ),
       sortable: false,
       filterable: false,
@@ -323,7 +333,7 @@ const Leads = () => {
           <h5 className="createBy">
             {params.value.user.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params?.value?.date?.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -345,7 +355,7 @@ const Leads = () => {
         params?.value && params?.value?.user ? (
           <h5 className="updateBy">
             {params.value.user.firstName}
-            <span title={params.value.date} className="updatedAtTime">
+            <span title={params.value.date} className="updatedAtTime badge-date">
               {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
@@ -548,8 +558,8 @@ const Leads = () => {
           <ImportExportLinks
             module="lead(s)"
             api={leadApi}
-            onSuccessfulImport={() => {
-              fetchLeads();
+            onSuccessfulImport={(isImportedSuccessfully) => {
+              if (isImportedSuccessfully) { fetchLeads(); }
             }}
           />
         </Grid>

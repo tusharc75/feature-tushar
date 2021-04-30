@@ -4,7 +4,7 @@ import "./RichEditorStyle.scss";
 
 
 export function RichTextEditor(props) {
-  const { editorState } = props;
+  const { editorState, style, placeholder } = props;
   const editorRef = useRef(null);
   const onChange = editorState => {
     props.onChange('editorState', editorState);
@@ -44,7 +44,7 @@ export function RichTextEditor(props) {
     }
   }
   return (
-    <div className="RichEditor-root">
+    <div className="RichEditor-root" style={style ? { ...style } : null}>
       <BlockStyleControls
         editorState={editorState}
         onToggle={toggleBlockType}
@@ -61,7 +61,7 @@ export function RichTextEditor(props) {
           handleKeyCommand={handleKeyCommand}
           onChange={onChange}
           onTab={onTab}
-          placeholder="Tell a story..."
+          placeholder={placeholder || ''}
           // ref="editor"
           ref={editorRef}
           spellCheck={true}

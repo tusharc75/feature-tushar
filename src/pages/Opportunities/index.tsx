@@ -309,7 +309,7 @@ const Opportunities = () => {
           <h5 className="createBy">
             {params.value.user.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params?.value?.date?.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -332,7 +332,7 @@ const Opportunities = () => {
         params?.value?.user ? (
           <h5 className="updateBy">
             {params.value.user.firstName}
-            <span title={params.value.date} className="updatedAtTime">
+            <span title={params.value.date} className="updatedAtTime badge-date">
               {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
@@ -543,8 +543,8 @@ const Opportunities = () => {
                   <ImportExportLinks
                     module="opportunities"
                     api={opportunityApi}
-                    onSuccessfulImport={() => {
-                      fetchOpportunities();
+                    onSuccessfulImport={(isImportedSuccessfully) => {
+                      if (isImportedSuccessfully) { fetchOpportunities(); }
                     }}
                   />
                 </Grid>
@@ -554,7 +554,7 @@ const Opportunities = () => {
         </Grid>
 
         {/* Tables Begins Here */}
-    <CustomContainer>
+        <CustomContainer>
           <div className="header-panel">
             <OpportunitiesHeader
               selectedType={selectedType}

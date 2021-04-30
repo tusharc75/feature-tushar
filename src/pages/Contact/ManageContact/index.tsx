@@ -8,7 +8,7 @@ import {
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import _ from "lodash";
-import {useHistory} from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAccountDialog from '../../Account/ManageAccount/index'
@@ -142,7 +142,7 @@ export default function ManageContactMain(props) {
             accountApi={accountApi}
             isGetAccountData={true}
             onGetAddedAccount={handleGetAddedAccount}
-
+            isDoNotRedirect={true}
           /> : null
       }
     </>

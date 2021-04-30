@@ -35,6 +35,10 @@ import Roles from "./pages/Role";
 import RoleDetailsPage from "./pages/Role/RoleDetailsPage";
 import Product from "./pages/Product";
 import TermsAndConditions from "./pages/TermsAndConditions";
+
+import ProductCost from "./pages/ProductCost";
+import CreateProductCost from "./pages/ProductCost/CreateProductCost";
+
 import {
   termsAndCondition,
   customerAccount,
@@ -56,6 +60,15 @@ import CustomNotification from "./components/CustomNotification/CustomNotificati
 function App() {
   const toast = useContext(CustomToastContext);
   const [notification, setNotification] = useState({ open: false, title: null, message: null })
+
+  const truepush = window["truepush"] || [];
+  truepush.push(function () {
+    truepush.Init({
+      id: "608a852cd4fd7034e72c1b43"
+    }, function (error) {
+      if (error) console.error(error);
+    })
+  })
 
   // const messaging = firebase.messaging();
   // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
@@ -275,6 +288,13 @@ function App() {
             <TermsAndConditions
               termsAndConditionBreadcrumb={routes.termsAndConditions}
             />
+          </PrivateRoute>
+
+          <PrivateRoute exact path={routes.productCost.path}>
+            <ProductCost />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productCost.path + "/:id"} >
+            <CreateProductCost />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

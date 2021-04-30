@@ -101,8 +101,8 @@ export default function Contact(props) {
 
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName
-  })
+    accountName: history.location?.state?.accountName,
+  });
 
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
@@ -203,7 +203,7 @@ export default function Contact(props) {
           <h5 className="createBy">
             {params.value.user.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -226,7 +226,7 @@ export default function Contact(props) {
           <h5 className="updateBy">
             {params.value.user.firstName}
             <span
-              className="updatedAtTime"
+              className="updatedAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -325,10 +325,37 @@ export default function Contact(props) {
     }
   }, [user]);
 
+  const getContacts = useCallback(() => {
+    setLoading(true);
+    let searchParams: any = { ...query, filterContacts: selectedType };
+    searchParams = searchVal
+      ? { ...searchParams, search: searchVal }
+      : { ...searchParams };
+
+    if (accountDetails.accountId) {
+      searchParams["accountId"] = accountDetails.accountId;
+    }
+    let api = getSearchQuery(`/${contactApi}`, searchParams);
+
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data, count } }) => {
+        setContactData(data);
+        // getRows(data);
+        setRowCount(count);
+        setCheckAllContacts(false);
+        setLoading(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoading(false);
+      });
+  }, [searchVal, query, selectedType]);
+
   useEffect(() => {
     getContacts();
     // eslint-disable-next-line
-  }, [query, searchVal, selectedType]);
+  }, [getContacts]);
 
   const handleSingleDeleteContacts = async () => {
     setLoading(true);
@@ -349,43 +376,6 @@ export default function Contact(props) {
     setSingleContactDelete({ id: null, show: false, contactName: "" });
   };
 
-  const getContacts = useCallback(() => {
-    setLoading(true);
-    let searchParams: any = { ...query, filterContacts: selectedType };
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
-
-    if (accountDetails.accountId) {
-      searchParams["accountId"] = accountDetails.accountId;
-    }
-
-    //     GetContacts(searchParams).then(({ data, count }) => {
-    //         setContactData(data);
-    //         setRowCount(count)
-    //         setLoading(false);
-    //     }).catch(error => {
-    //         toastConfig.setToastConfig(error);
-    //         setLoading(false);
-    //     })
-    // }
-    let api = getSearchQuery(`/${contactApi}`, searchParams);
-
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data, count } }) => {
-        setContactData(data);
-        // getRows(data);
-        setRowCount(count);
-        setCheckAllContacts(false);
-        setLoading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-      });
-  }, [searchVal, query]);
-
   useEffect(() => {
     let rows = contactData?.map((u) => ({
       ...u,
@@ -394,7 +384,7 @@ export default function Contact(props) {
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
       accountName: u.accountName?.optionLabel,
-      name: [u.firstName, u.middleName, u.lastName].filter(f => f).join(" "),
+      name: [u.firstName, u.middleName, u.lastName].filter((f) => f).join(" "),
     }));
     setDataRows([...rows]);
   }, [contactData]);
@@ -484,15 +474,14 @@ export default function Contact(props) {
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[contactBreadcrumb]} />
         </Grid>
-        <Grid item
-          md={8}
-          sm={1}
-          xs={2}>
+        <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             module="contact(s)"
             api={contactApi}
-            onSuccessfulImport={() => {
-              getContacts();
+            onSuccessfulImport={(isImportedSuccessfully) => {
+              if (isImportedSuccessfully) {
+                getContacts();
+              }
             }}
           />
         </Grid>
@@ -527,9 +516,8 @@ export default function Contact(props) {
                   })}
                 </ToggleButtonGroup>
               )}
-
-              {
-                accountDetails.accountId && <Chip
+              {accountDetails.accountId && (
+                <Chip
                   className="ml-3"
                   color="primary"
                   label={`Account: ${accountDetails.accountName}`}
@@ -538,8 +526,7 @@ export default function Contact(props) {
                     getContacts();
                   }}
                 />
-              }
-
+              )}
             </Grid>
             <Grid className={styles.filter_side} item>
               <Box className={styles.filter_side_header} component="div">
@@ -642,11 +629,11 @@ export default function Contact(props) {
               density="compact"
               filterMode="server"
               onFilterModelChange={onFilterChange}
-            // filterModel={{
-            //     items: [
-            //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
-            //     ],
-            // }}
+              // filterModel={{
+              //     items: [
+              //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
+              //     ],
+              // }}
             />
           </div>
           {/* </Box> */}

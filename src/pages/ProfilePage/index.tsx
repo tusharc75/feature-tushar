@@ -10,6 +10,7 @@ import NotifiationPreference from './components/NotifiationPreference'
 import axiosInstance from "../../axios/axiosInstance";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import CustomContainer from '../../components/CustomContainer';
 const _ = require('lodash')
 
 const useStyles = makeStyles((theme) => ({
@@ -58,22 +59,19 @@ export default function ProfilePage(props) {
     const fetchUserData = () => {
         setUserLoading(true)
         axiosInstance()
-            .get(`/user/${user?.user?._id}`)
-            .then(({ data }) => {
-                if (data?.data) {
+            .get(`/user/me`)
+            .then(({ data: { data } }) => {
+                if (data?.user) {
                     setOtherDetails({
-                        Email: data?.data?.email ?? '',
-                        EmployeeNumber: data?.data?.employeeNumber ?? ''
+                        Email: data.user.email ?? '',
+                        EmployeeNumber: data.user?.employeeNumber ?? ''
                     })
-                    Object.keys(data.data).forEach(k => {
-                        if (["blocked", "updatedBy", "email", "employeeNumber"].indexOf(data.data[k]) > 0) {
-                            delete data.data[k]
-                        }
-                    })
-                    setUserData(data.data)
+                    let { blocked, updatedBy, employeeNumber, ...userData } = data.user
+                    setUserData(userData)
                 }
                 setUserLoading(false)
-            }).catch((error) => {
+            })
+            .catch((error) => {
                 setUserLoading(false)
                 toastConfig.setToastConfig(error);
             });
@@ -96,36 +94,42 @@ export default function ProfilePage(props) {
     };
 
     return <Layout>
-        <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
-        <Grid container className={classes.profileContainer} spacing={2}>
-            <Grid item sm={3} lg={3} md={3} className={classes.profileSidebar} >
-                <ProfileSidebar onItemClick={handleItemClick}
-                    activeLink={activeItem}
-                    userData={userData}
-                    onFetchUserData={fetchUserData}
-                />
-            </Grid>
-            <Grid item sm={9} md={9} lg={9} >
-                {
-                    activeItem === profileMenuItems.profile ?
-                        <ManageProfile displayUserDetails={true}
-                            userFields={userFields}
-                            userData={userData}
-                            loading={loading}
-                            userLoading={userLoading}
-                            onFetchUserData={fetchUserData}
-                            otherDetails={otherDetails}
-                        /> :
-                        activeItem === profileMenuItems.notification ?
-                            <NotifiationPreference />
-                            : activeItem === profileMenuItems.setting ?
-                                <Paper className={classes.paper}>setting</Paper>
-                                : activeItem === profileMenuItems.users ?
-                                    <Paper className={classes.paper}>users</Paper>
-                                    : activeItem === profileMenuItems.securityPrivacy ?
-                                        <Paper className={classes.paper}>securityPrivacy</Paper> : null
-                }
+        <Grid container>
+            <Grid item md={12} sm={12} xs={12}>
+                <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
             </Grid>
         </Grid>
+        <CustomContainer>
+            <Grid container className={classes.profileContainer} spacing={2}>
+                <Grid item sm={3} lg={3} md={3} className={classes.profileSidebar} >
+                    <ProfileSidebar onItemClick={handleItemClick}
+                        activeLink={activeItem}
+                        userData={userData}
+                        onFetchUserData={fetchUserData}
+                    />
+                </Grid>
+                <Grid item sm={9} md={9} lg={9} >
+                    {
+                        activeItem === profileMenuItems.profile ?
+                            <ManageProfile displayUserDetails={true}
+                                userFields={userFields}
+                                userData={userData}
+                                loading={loading}
+                                userLoading={userLoading}
+                                onFetchUserData={fetchUserData}
+                                otherDetails={otherDetails}
+                            /> :
+                            activeItem === profileMenuItems.notification ?
+                                <NotifiationPreference />
+                                : activeItem === profileMenuItems.setting ?
+                                    <Paper className={classes.paper}>setting</Paper>
+                                    : activeItem === profileMenuItems.users ?
+                                        <Paper className={classes.paper}>users</Paper>
+                                        : activeItem === profileMenuItems.securityPrivacy ?
+                                            <Paper className={classes.paper}>securityPrivacy</Paper> : null
+                    }
+                </Grid>
+            </Grid>
+        </CustomContainer>
     </Layout >
 }

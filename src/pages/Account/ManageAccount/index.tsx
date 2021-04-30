@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import {useHistory} from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import ManageAccount from "./ManageAccount";
 import { getObjKeys, sidebarResource } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
@@ -10,7 +10,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 export default function ManageAccountMain(props) {
   const toastConfig = useContext(CustomToastContext);
 
-  const { open, onClose, id, accountResource, accountApi, isGetAccountData, onGetAddedAccount } = props;
+  const { open, onClose, id, accountResource, accountApi, isGetAccountData, onGetAddedAccount, isDoNotRedirect } = props;
   const {
     state: { user },
   }: any = useData();
@@ -63,7 +63,7 @@ export default function ManageAccountMain(props) {
         data
           .filter((d) => d.isCreate)
           .map((_f) => newFields.push(_f.fieldData));
-          
+
         setEntityData({
           fields: newFields,
           initialValues: getObjKeys("", newFields),
@@ -86,7 +86,7 @@ export default function ManageAccountMain(props) {
           type: "success",
           message: data.message,
         });
-        history.push(`${accountApi}/detail/${newId}`);
+        if (!isDoNotRedirect) history.push(`${accountApi}/detail/${newId}`);
         setLoading(false);
       })
       .catch((error) => {

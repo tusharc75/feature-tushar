@@ -75,16 +75,16 @@ const Roles: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((role: any) => ({
-          ...role,
-          id: role._id,
-          isChecked: false,
-          name: role.name,
-          description: role.description,
-          type: `${role.type === 1 ? "Global" : "Regional"} Role`,
-          createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
-          createdBy: role.createdBy,
-          updatedBy: role.updatedBy,
-        }))
+        ...role,
+        id: role._id,
+        isChecked: false,
+        name: role.name,
+        description: role.description,
+        type: `${role.type === 1 ? "Global" : "Regional"} Role`,
+        createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
+        createdBy: role.createdBy,
+        updatedBy: role.updatedBy,
+      }))
       : [];
 
     setDataRows(rows);
@@ -179,7 +179,7 @@ const Roles: FC = () => {
           <h5 className="createBy">
             {params.value.user.firstName}
             <span
-              className="createdAtTime"
+              className="createdAtTime badge-date"
               title={`${params.value.user.firstName} • ${moment(
                 params.value.date.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
@@ -203,7 +203,7 @@ const Roles: FC = () => {
             {params.value.user.firstName}
             <span
               title={`${params.value.user.firstName} • ${params.value.date}`}
-              className="updatedAtTime"
+              className="updatedAtTime badge-date"
             >
               {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
@@ -389,13 +389,12 @@ const Roles: FC = () => {
       )}
       <Layout>
 
-      <Grid container>
+        <Grid container>
           <Grid item md={12} sm={12} xs={12}>
-          <CustomBreadCrumbs routes={[routes.role]} />
+            <CustomBreadCrumbs routes={[routes.role]} />
           </Grid>
-     </Grid>
-     <CustomContainer>
-      
+        </Grid>
+        <CustomContainer>
           <div className="header-panel">
             <Header
               selectedType={selectedType}
@@ -434,7 +433,7 @@ const Roles: FC = () => {
             />
           </div>
 
-          </CustomContainer>
+        </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -445,9 +444,8 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete role ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
