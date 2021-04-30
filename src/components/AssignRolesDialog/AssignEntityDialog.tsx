@@ -43,7 +43,6 @@ const AssignEntityDialog = ({
             :
             setData(data.filter((d) => d.type === 2));
         } else {
-
           assignedEntity ?
             setData(data.filter(entity => !assignedEntity.some(item => item?._id === entity?._id)))
             :
