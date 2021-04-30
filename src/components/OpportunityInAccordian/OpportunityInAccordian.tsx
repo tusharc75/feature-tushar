@@ -170,7 +170,7 @@ export default function OpportunityInAccordian({
                                                             <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
                                                                 <Typography className="mb-2">{obj?.opportunityName}</Typography>
                                                             </Link>
-                                                            <DisplayData label='Stage' value={obj?.stage?.optionLabel ?? ''} />
+                                                            <DisplayData label='Stage' value={obj?.stage ?? ''} />
                                                             <DisplayData label='Amount' value={obj?.amount ?? ''} />
                                                             <DisplayData label='Close Date' value={displayDate(obj.closeDate)} />
                                                         </CardContent>

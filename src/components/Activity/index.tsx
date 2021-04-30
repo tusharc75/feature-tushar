@@ -38,12 +38,13 @@ const useStyles = makeStyles((theme) => ({
     activitySubBox: {
         display: "flex",
         padding: "8px",
-        borderColor: "rgb(224, 224, 224)",
-        borderBottom: "1px solid #f5f5f5",
         margin: "8px 8px 0 8px",
-        borderRadius: "3px",
         cursor: "pointer",
-        background: "#fff"
+        background: "#fff",
+        borderRadius: "3px",
+        border: "1px solid #c9c0c0",
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
     }
 }));
 

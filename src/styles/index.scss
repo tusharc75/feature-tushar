@@ -5,7 +5,7 @@
   --error: #dc3545;
   --info: #03afe2;
   --success: #28a745;
-  --link: #0932b9 ;
+  --link: #0932b9;
   --white: #ffffff;
   --aliceblue: aliceblue;
 
@@ -27,8 +27,7 @@
   --theme-text: #fff;
   --grey: #838485;
 
-
-  --box-shadow:"rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px";
+  --box-shadow: "rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px";
 }
 
 * {
@@ -316,6 +315,7 @@ body::-webkit-scrollbar-thumb {
   font-size: 1.15rem;
   font-weight: bold;
   color: var(--secondary);
+  padding-right: 10px;
 
   &.single {
     padding: 6px;
@@ -366,17 +366,18 @@ body::-webkit-scrollbar-thumb {
 }
 
 .badge-date {
-  background: #fff0e4;
+  background: #ebf9ff;
   padding: 2px 6px;
   border-radius: 2px;
   float: right;
-  margin-left: 6px;
-  color: #984408;
+  margin-left: 2px;
+  color: #001520;
   float: right;
   text-align: right;
   align-items: inherit;
   display: flex;
-  font-weight: 500;
+  font-weight: bold;
+  font-size: 0.6rem;
 }
 .export-import-link {
   position: absolute;
@@ -415,20 +416,29 @@ body::-webkit-scrollbar-thumb {
 }
 
 .activityDetailBox {
-  box-shadow: rgb(166, 156, 156) 0px 3px 4px;
   margin: 0px 8px 12px;
+  border-top: none;
 
   .activity {
     padding: 6px 10px;
-    border-bottom: 1px solid #eae1e1;
     background: white;
+    border-left: 4px solid var(--secondary);
+    margin: 8px 0;
+    border-radius: 7px;
+
+    .activity-date{
+      font-size: 0.8rem;
+      padding-top: 2px;
+      padding-left: 6px;
+      color: #7b898e;
+    }
   }
 }
 
 .custom-chip {
-  background-color: transparent !important;
-  border-radius: 3px !important;
-  border: 1px solid #f2eded !important;
+  // background-color: transparent !important;
+  // border-radius: 3px !important;
+  // border: 1px solid #f2eded !important;
 }
 
 .quickLinks {
@@ -475,8 +485,21 @@ body::-webkit-scrollbar-thumb {
   }
 }
 
-.activityContainer{
+.activityContainer {
   padding: 10px;
   height: calc(100vh - 11.4rem);
   overflow: auto;
+}
+
+
+.btn-view{
+  background: #fff3ef;
+  color: var(--secondary);
+  font-weight: bold;
+  border: 1px solid var(--secondary);
+  border-radius: 5px;
+}
+
+.custom-autocomplete{
+
 }

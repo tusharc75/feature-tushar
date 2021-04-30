@@ -3,7 +3,7 @@
 }
 
 .MuiButton-root {
-  padding: 6px 16px !important;
+  // padding: 6px 16px !important;
   text-transform: capitalize !important;
 }
 
@@ -149,4 +149,7 @@ Button.MuiButtonBase-root {
 }
 .MuiAccordionSummary-content{
   margin: 6px !important;
+}
+.MuiToggleButton-root{
+    text-transform: capitalize !important;
 }

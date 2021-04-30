@@ -83,7 +83,7 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
                             <Box>
                                 <Grid container>
                                     <Grid item xs={10}  className="d-flex align-items-center gap-1">
-                                        <Typography variant="subtitle2">{_task.name} </Typography> <span className="badge-date"> Due On : {moment(_task.dueDate).format("MMM DD YYYY")}</span>
+                                        <Typography variant="subtitle2">{_task.name} </Typography> <span className="activity-date"> Due On : {moment(_task.dueDate).format("MMM DD YYYY")}</span>
                                     </Grid>
                                     <Grid item xs={2} container justify="flex-end" >
                                         <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _task._id)} >
@@ -97,9 +97,6 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
                                     <Grid item xs={12} >
                                         <ListRelatedTo relatedTo={_task.relatedTo} originRelatedTo={relatedTo} />
                                         {/* <Chip label={_task.status} size="small" color="primary" /> */}
-                                    </Grid>
-                                    <Grid item xs={12} container justify="flex-end">
-                                        
                                     </Grid>
                                 </Grid>
                             </Box>

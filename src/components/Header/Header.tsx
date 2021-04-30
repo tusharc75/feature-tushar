@@ -324,14 +324,13 @@ const Header = ({ toggleDrawer }) => {
           "No Entity"
         )}
       </MenuItem>
-
-      {/* <MenuItem>
+      <MenuItem>
         <Badge badgeContent={1} color="secondary">
           <Notifications />
         </Badge>
         <Box component="span" mx={1} />
         <p>Notifications</p>
-      </MenuItem> */}
+      </MenuItem>
       <MenuItem>
         <HelpOutline />
         <Box component="span" mx={1} my={2}/>
@@ -431,7 +430,7 @@ const Header = ({ toggleDrawer }) => {
                 </ButtonBase>
               )}
             </Box>
-            {/* <div className={classes.search}>
+            <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <Search />
               </div>
@@ -445,7 +444,7 @@ const Header = ({ toggleDrawer }) => {
                 }}
                 inputProps={{ "aria-label": "search" }}
               />
-            </div> */}
+            </div>
           </Box>
 
           {/* <div className={classes.sectionDesktop}>
@@ -467,11 +466,11 @@ const Header = ({ toggleDrawer }) => {
           ) : null}
 
           <div className={classes.sectionDesktop}>
-            {/* <IconButton aria-label="settings" color="inherit">
+            <IconButton aria-label="settings" color="inherit">
               <Badge badgeContent={1} color="secondary">
                 <Notifications />
               </Badge>
-            </IconButton> */}
+            </IconButton>
 
             <IconButton aria-label="help" color="inherit">
               <HelpOutline />
