@@ -275,7 +275,7 @@ const RoleDetailsPage = () => {
           handleCloseDialog={entityDialogClose}
           type="entity"
           ids={[id]}
-          assignedEntity={null}
+          assignedEntity={roleData?.entity}
           onSuccess={() => {
             fetchRoleData();
             fetchUserData();
