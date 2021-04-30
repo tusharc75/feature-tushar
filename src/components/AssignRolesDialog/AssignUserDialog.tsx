@@ -119,7 +119,7 @@ const AssignUserDialog = ({
             ))}
           </List>
         ) : (
-          <Typography>No Users</Typography>
+          <Typography>All Users has been assigned</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
