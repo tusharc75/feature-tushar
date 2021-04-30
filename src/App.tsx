@@ -29,6 +29,8 @@ import User from "./pages/User";
 import Entity from "./pages/Entity";
 import EntityDetailPage from "./pages/Entity/EntityDetailPage";
 import UserDetailsPage from "./pages/User/UserDetailsPage";
+import ProductSalesDetails from "./pages/ProjectSales/ProjectSalesDetails";
+import ProductSales from "./pages/ProjectSales";
 
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 import Roles from "./pages/Role";
@@ -49,13 +51,17 @@ import Dashboard from "./pages/Dashboard";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
-import UserProfilePage from './pages/ProfilePage/index'
+import UserProfilePage from "./pages/ProfilePage/index";
 // import firebase, { onMessageListener } from "./firebase";
 import CustomNotification from "./components/CustomNotification/CustomNotification";
 
 function App() {
   const toast = useContext(CustomToastContext);
-  const [notification, setNotification] = useState({ open: false, title: null, message: null })
+  const [notification, setNotification] = useState({
+    open: false,
+    title: null,
+    message: null,
+  });
 
   // const messaging = firebase.messaging();
   // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
@@ -218,6 +224,20 @@ function App() {
               contact={supplierContact}
               contactBreadcrumb={routes.supplierContact}
             />
+          </PrivateRoute>
+          <PrivateRoute
+            key="project-sales"
+            exact
+            path={routes.projectSales.path}
+          >
+            <ProductSales />
+          </PrivateRoute>
+          <PrivateRoute
+            key="project-sales-details"
+            exact
+            path={`${routes.projectSalesDetail.path}/:id`}
+          >
+            <ProductSalesDetails />
           </PrivateRoute>
           <PrivateRoute exact path="/user">
             <User />

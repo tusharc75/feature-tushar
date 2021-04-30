@@ -176,8 +176,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-          ? 1
-          : 0
+        ? 1
+        : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -219,7 +219,6 @@ const FormTypes = (props) => {
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
-
       getImageUrl(file);
       event.target.value = "";
     }
@@ -501,11 +500,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -534,11 +533,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -632,10 +631,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-              handleChange(
-                name,
-                val && val.optionValue ? val.optionValue : ""
-              )
+                handleChange(
+                  name,
+                  val && val.optionValue ? val.optionValue : ""
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -707,8 +706,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-              (data) => data.currencyCode === values[name]
-            )[0]
+                (data) => data.currencyCode === values[name]
+              )[0]
             : ""
         }
         options={currencyData}
@@ -759,9 +758,13 @@ const FormTypes = (props) => {
         multiple
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-        value={values[name] ? options.filter((data: any) =>
-          values[name].includes(data.optionValue)
-        ) : []}
+        value={
+          values[name]
+            ? options.filter((data: any) =>
+                values[name].includes(data.optionValue)
+              )
+            : []
+        }
         getOptionSelected={(option: any, val: any) =>
           option.optionValue === val.optionValue
         }
@@ -769,10 +772,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-              setFieldValue(
-                name,
-                value.map((val) => val.optionValue)
-              )
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -873,9 +876,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-              setValue(newValue);
-            }
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -1050,10 +1053,10 @@ const FormTypes = (props) => {
             {isFileUploading
               ? `Uploading... ${fileUploadProgress}%`
               : values[name]
-                ? values[name]
-                : touched[name] && Boolean(errors[name])
-                  ? errors[name]
-                  : "No file choosen"}
+              ? values[name]
+              : touched[name] && Boolean(errors[name])
+              ? errors[name]
+              : "No file choosen"}
           </Typography>
         </Box>
         <IconButton
