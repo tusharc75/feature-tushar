@@ -43,11 +43,11 @@ const AssignEntityDialog = ({
             :
             setData(data.filter((d) => d.type === 2));
         } else {
-         
+
           assignedEntity ?
-          setData(data.filter(entity => !assignedEntity.some(item => item?._id === entity?._id)))
-          :
-          setData(data);
+            setData(data.filter(entity => !assignedEntity.some(item => item?._id === entity?._id)))
+            :
+            setData(data);
         }
         setLoadingData(false);
       })
@@ -112,10 +112,10 @@ const AssignEntityDialog = ({
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={"Assign "+startCase(type)} />
+      <CustomDialogHeader title={`Assign ${startCase(type)}`} />
       <CustomDialogContent>
         {loadingData ? (
-          <Loader text="Loading Entities" />
+          <Loader text={`Loading ${startCase(type)}`} />
         ) : data.length ? (
           <List style={{ padding: 0 }}>
             {data.map((d) => (
@@ -138,7 +138,7 @@ const AssignEntityDialog = ({
             ))}
           </List>
         ) : (
-          <Typography>{"All "+ startCase(type)+" has been assigned"}</Typography>
+          <Typography>{`All ${startCase(type)} has been assigned`}</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
