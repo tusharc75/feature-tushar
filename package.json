@@ -50,6 +50,7 @@
     "react-select-search": "^2.2.4",
     "typescript": "^4.2.3",
     "web-vitals": "^0.2.4",
+    "xlsx": "^0.16.9",
     "yup": "^0.32.9"
   },
   "scripts": {

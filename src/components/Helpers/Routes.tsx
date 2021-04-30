@@ -125,5 +125,9 @@ export default {
   profilePage: {
     title: "Profile",
     path: "/profile"
+  },
+  productCost: {
+    title: "Product Cost",
+    path: "/product-cost"
   }
 };
