@@ -1,4 +1,4 @@
-import { profilePage } from "../../constants/helpers"
+import { profilePage } from "../../constants/helpers";
 
 export default {
   // account: {
@@ -136,14 +136,22 @@ export default {
   },
   termsAndConditions: {
     title: "Terms and Conditions",
-    path: "/terms-conditions"
+    path: "/terms-conditions",
   },
   profilePage: {
     title: "Profile",
-    path: "/profile"
+    path: "/profile",
+  },
+  projectSales: {
+    title: "Project Sales",
+    path: "/project-sales",
+  },
+  projectSalesDetail: {
+    title: "Project Sales",
+    path: "/project-sales/detail",
   },
   productCost: {
     title: "Product Cost",
-    path: "/product-cost"
-  }
+    path: "/product-cost",
+  },
 };

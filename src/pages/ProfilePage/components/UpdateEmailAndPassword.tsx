@@ -43,10 +43,10 @@ export default function ManageUpdatePassword({
 
     const handleSubmit = (values) => {
         if (isUpdatePassword) {
-            delete values["confirmPassword"]
+            // delete values["confirmPassword"]
             setLoading(true)
             axiosInstance()
-                .put(`/user/me/password`, { ...values })
+                .put(`/user/me/password`, {oldPassword: values.oldPassword, newPassword: values.newPassword } )
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
@@ -122,7 +122,7 @@ export default function ManageUpdatePassword({
                                                                 component={TextFieldFormik}
                                                                 fullWidth
                                                                 margin="dense"
-                                                                type="text"
+                                                                type="password"
                                                                 label="Old Password"
                                                                 name="oldPassword"
                                                                 variant="outlined"
