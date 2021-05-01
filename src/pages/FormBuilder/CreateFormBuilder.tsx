@@ -13,6 +13,7 @@ import { FormBuilder } from "../../components/FormBuilder";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import CustomContainer from "../../components/CustomContainer";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -90,10 +91,13 @@ const CreateFormBuilder = (props) => {
 
     const classes = useStyles();
     return (<Layout>
-        <CustomBreadCrumbs routes={[routes.formBuilder, { title: "Resource" }]} />
+        <Grid container direction="row">
+            <CustomBreadCrumbs routes={[routes.formBuilder, { title: "Resource" }]} />
+        </Grid>
+        <CustomContainer>
         {section ?
             <Fragment>
-                <Box mt={2} p={2} pb={0} bgcolor="white" >
+                <Box p={1} pb={0} bgcolor="white" >
                     <Grid container spacing={1}>
                         <Grid item xs={3}>
                             <Typography variant="caption">Brand </Typography>
@@ -128,6 +132,7 @@ const CreateFormBuilder = (props) => {
             :
             <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
         }
+        </CustomContainer>
     </Layout >
     );
 }

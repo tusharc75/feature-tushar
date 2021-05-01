@@ -75,17 +75,17 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
     }
 
     return (emails &&
-        <Box>
+        <Box className="activityDetailBox">
             {emails.length ?
                 <Fragment>
                     {emails.map((_email, index) => (
-                        <Box key={_email._id} mb={1} border={1} p={1} borderColor="grey.300">
+                        <Box key={_email._id} className="activity">
                             <Box>
                                 <Grid container>
-                                    <Grid item xs={8} >
+                                <Grid item xs={10} className="d-flex align-items-center gap-1"> 
                                         <Typography variant="subtitle2">{_email.name}</Typography>
                                     </Grid>
-                                    <Grid item xs={4} container justify="flex-end" >
+                                    <Grid item xs={2} container justify="flex-end" >
                                         <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _email._id)} >
                                             <MoreHorizIcon />
                                         </IconButton>
@@ -94,13 +94,13 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
                             </Box>
                             <Box pt={1}>
                                 <Grid container>
-                                    <Grid item xs={6} >
+                                    <Grid item xs={12} >
                                         <ListRelatedTo relatedTo={_email.relatedTo} originRelatedTo={relatedTo} />
                                         {/* <Chip label={_task.status} size="small" color="primary" /> */}
                                     </Grid>
-                                    <Grid item xs={6} container justify="flex-end">
-                                        {/*                                     <Typography variant="caption" >Due Date : {moment(_email.dueDate).format("MMM DD YYYY")}</Typography>
- */}                                </Grid>
+                                    {/* <Grid item xs={6} container justify="flex-end">
+                                        {                                   <Typography variant="caption" >Due Date : {moment(_email.dueDate).format("MMM DD YYYY")}</Typography>
+ }                                </Grid> */}
                                 </Grid>
                             </Box>
                         </Box>))}
@@ -109,7 +109,7 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
                         relatedTo={relatedTo}
                     />
                 </Fragment>
-                : <Box p={1}>
+                : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
                     <Typography variant="subtitle2">No Past Email</Typography>
                 </Box>
             }

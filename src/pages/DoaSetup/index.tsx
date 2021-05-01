@@ -312,7 +312,7 @@ export default function Doa() {
       renderCell: (params: any) => (
         <Link
           title={params.value}
-          className="text-truncate LeadNameLink"
+          className="text-truncate link"
           onClick={() => {
             // setOpen(true)
             setUserSingleSelect(params?.row)
