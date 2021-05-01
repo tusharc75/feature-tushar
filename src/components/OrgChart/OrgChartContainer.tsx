@@ -125,8 +125,18 @@ export default function OrgChartContainer({ data, onClick }) {
 
     return (
         <Fragment>
-            <div className="custom-orgchart w-100 d-flex justify-content-center">
-                {/* <div className="ui menu">
+             <div className="custom-orgchart w-100 d-flex justify-content-center">
+                <OrgChart
+                    positions={positions}
+                    getOrgChart={getOrgChart}
+                    chartId={chartId}
+                    // update={update}
+                    onClickNode={onClickNode}
+                    google={google}
+                />
+             </div>
+                {/* <ToastContainer position="bottom-right" /> */}
+                   {/* <div className="ui menu">
                 <div className="item">
                     <div onClick={openAddModal} className="ui primary button">Add node</div>
                 </div>
@@ -169,16 +179,7 @@ export default function OrgChartContainer({ data, onClick }) {
                     </Modal>
                 ) : null
             } */}
-                <OrgChart
-                    positions={positions}
-                    getOrgChart={getOrgChart}
-                    chartId={chartId}
-                    // update={update}
-                    onClickNode={onClickNode}
-                    google={google}
-                />
-                {/* <ToastContainer position="bottom-right" /> */}
-            </div>
+           
         </Fragment>
     );
 };

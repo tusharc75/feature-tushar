@@ -7,7 +7,7 @@ import {
   Menu,
   MenuItem,
 } from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
+import { IoIosArrowDropdown } from "react-icons/io";
 import axiosInstance from "../../axios/axiosInstance";
 import { downloadExcel } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -38,6 +38,12 @@ const useStyles = makeStyles((theme) => ({
   delBtn: {
     color: "red",
   },
+  expandIcon: {
+    position: "absolute",
+    right: "0",
+    color: "white"
+  }
+
 }));
 
 export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
@@ -228,7 +234,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
       </Menu>
       {isMobile && (
         <IconButton onClick={handleClick}>
-          <ExpandMore />
+          <IoIosArrowDropdown  className={classes.expandIcon}/>
         </IconButton>
       )}
     </div>

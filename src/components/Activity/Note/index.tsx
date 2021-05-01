@@ -75,17 +75,17 @@ export const Note = ({ relatedTo, handleActivityRefresh }) => {
     }
 
     return (notes &&
-        <Box>
+        <Box className="activityDetailBox">
             {notes.length ?
                 <Fragment>
                     {notes.map((_note, index) => (
-                        <Box key={_note._id} mb={1} border={1} p={1} borderColor="grey.300">
+                        <Box key={_note._id} className="activity">
                             <Box>
                                 <Grid container>
-                                    <Grid item xs={8} >
-                                        <Typography variant="subtitle2">{_note.name}</Typography>
+                                <Grid item xs={10} className="d-flex align-items-center gap-1"> 
+                                        <Typography variant="subtitle2">{_note.name}</Typography><span className="activity-date">Created : {moment(_note.createdBy.date).format("MMM DD YYYY")}</span>
                                     </Grid>
-                                    <Grid item xs={4} container justify="flex-end" >
+                                    <Grid item xs={2} container justify="flex-end" >
                                         <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _note._id)} >
                                             <MoreHorizIcon />
                                         </IconButton>
@@ -94,11 +94,8 @@ export const Note = ({ relatedTo, handleActivityRefresh }) => {
                             </Box>
                             <Box pt={1}>
                                 <Grid container>
-                                    <Grid item xs={6} >
+                                    <Grid item xs={12} >
                                         <ListRelatedTo relatedTo={_note.relatedTo} originRelatedTo={relatedTo} />
-                                    </Grid>
-                                    <Grid item xs={6} container justify="flex-end">
-                                        <Typography variant="caption" >Created : {moment(_note.createdBy.date).format("MMM DD YYYY")}</Typography>
                                     </Grid>
                                 </Grid>
                             </Box>
@@ -108,7 +105,7 @@ export const Note = ({ relatedTo, handleActivityRefresh }) => {
                         relatedTo={relatedTo}
                     />
                 </Fragment>
-                : <Box p={1}>
+                : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
                     <Typography variant="subtitle2">No Past Note</Typography>
                 </Box>
             }

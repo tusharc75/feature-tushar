@@ -16,7 +16,7 @@ import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
 import { kebabCase, startCase } from "lodash";
 import axios from "axios";
 import { Popover, Whisper } from "rsuite";
-import "rsuite/dist/styles/rsuite-default.css";
+// import "rsuite/dist/styles/rsuite-default.css";
 
 import { getObjKeysWithValues, yyyyMMDD } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";

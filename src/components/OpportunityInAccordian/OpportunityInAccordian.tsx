@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import CommonSkeleton from '../Helpers/CommonSkeleton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -13,6 +13,9 @@ import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
+import { IoCalendarOutline } from 'react-icons/io5';
+import { BiCustomize } from 'react-icons/bi';
+import { FaEye } from 'react-icons/fa';
 
 const Accordion = withStyles({
     root: {
@@ -33,10 +36,10 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "rgba(0, 0, 0, .03)",
+        backgroundColor: "#e4e4e4",
         borderBottom: "1px solid rgba(0, 0, 0, .125)",
         "&$expanded": {
-            minHeight: 56,
+            minHeight: 46,
         },
     },
     content: {
@@ -52,19 +55,23 @@ const AccordionDetails = withStyles((theme) => ({
         padding: theme.spacing(1),
         display: "block",
     },
+    amount: {
+        float: "right",
+        fontWeight: "bold"
+    }
+
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value }) {
-
+function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-            <Grid item sm={6} xs={6} md={4}>
-                <Typography>{label}</Typography>
-            </Grid>
-            <Grid item sm={6} xs={6} md={8}>
-                <Typography>{value}</Typography>
-            </Grid>
-        </Grid>
+        <List >
+            <ListItem>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText primary={value} secondary={label} />
+            </ListItem>
+        </List>
     </div>
 }
 
@@ -86,11 +93,11 @@ export default function OpportunityInAccordian({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 3;
+            recordsPerLineInLargeScreen = 4;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 6;
+            recordsPerLineInLargeScreen = 4;
             break;
     }
 
@@ -147,6 +154,7 @@ export default function OpportunityInAccordian({
                     </Grid>
                 </Grid>
             </AccordionSummary>
+            <Box margin={0.50} />
             <AccordionDetails>
                 <>
                     {
@@ -156,10 +164,9 @@ export default function OpportunityInAccordian({
                                     <Grid container spacing={1}>
                                         {
                                             opportunities.map((obj, index) => (
-                                                <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
-
-                                                    <Card style={{ minWidth: "100%" }} variant="outlined">
-                                                        <CardContent>
+                                                <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
+                                                    <Card style={{ minWidth: "100%" }}>
+                                                        <CardContent className="detailListing">
                                                             {/* <span className={classes.actionsItems}> */}
                                                             {/* <VisibilityOutlined /> */}
                                                             {/* <IconButton size="small">
@@ -167,15 +174,30 @@ export default function OpportunityInAccordian({
                                                         </IconButton> */}
                                                             {/* <EditOutlined /> */}
                                                             {/* </span> */}
-                                                            <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
-                                                                <Typography className="mb-2">{obj?.opportunityName}</Typography>
-                                                            </Link>
-                                                            <DisplayData label='Stage' value={obj?.stage?.optionLabel ?? ''} />
-                                                            <DisplayData label='Amount' value={obj?.amount ?? ''} />
-                                                            <DisplayData label='Close Date' value={displayDate(obj.closeDate)} />
+                                                            <Grid container className="detailCardHeader">
+                                                                <Grid item xs={12} sm={8}>
+                                                                    <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                                                        <Typography >{obj?.opportunityName} </Typography>
+                                                                    </Link>
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={4}>
+                                                                    <Typography className="amount"> {obj?.amount ?? ''}</Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                            <Grid container>
+                                                                <Grid item xs={12} sm={12}>
+                                                                    {
+                                                                        obj?.stage ? <DisplayData label='Stage' value={obj?.stage ?? ''} icon={<BiCustomize size={20} />} /> : ''
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={12}>
+                                                                    {
+                                                                        obj.closeDate ? <DisplayData label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={20} />} /> : ''
+                                                                    }
+                                                                </Grid>
+                                                            </Grid>
                                                         </CardContent>
                                                     </Card>
-
                                                 </Grid>
                                             ))
                                         }
@@ -185,19 +207,11 @@ export default function OpportunityInAccordian({
                     }
                 </>
             </AccordionDetails>
-
-            <Box marginY={1} />
-            <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => history.push(`/opportunity`, {
-                    accountId: accountId,
-                    accountName: accountName
-                })}>
-                View All
-             </Button>
+            <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/opportunity`, {
+            })} p={1} display="flex" justifyContent="center" alignItems="center">
+                <FaEye /> View All
+            </Box>
+            <Box margin={1} />
         </Accordion>
 
         {
