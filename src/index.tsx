@@ -7,6 +7,7 @@ import { Provider } from "./StateProvider/Provider";
 import "./styles/index.scss";
 import "./styles/common-styles.scss";
 import "./styles/material-component.scss";
+import "./styles/responsive-styles.scss"
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
 import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 

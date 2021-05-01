@@ -442,7 +442,7 @@ const Header = ({ toggleDrawer }) => {
         <Box component="span" mx={1} my={2} />
         <p>Help</p>
       </MenuItem>
-    </Menu >
+    </Menu>
   );
 
   function handleSelectedEnity(id) {
@@ -463,7 +463,7 @@ const Header = ({ toggleDrawer }) => {
               <ClearIcon />
             </IconButton>
 
-            <div
+            {/* <div
               className={classes.search}
               style={{ display: "block", width: "100%" }}
             >
@@ -480,7 +480,7 @@ const Header = ({ toggleDrawer }) => {
                 style={{ width: "100%" }}
                 inputProps={{ "aria-label": "search" }}
               />
-            </div>
+            </div> */}
           </Toolbar>
         </AppBar>
       </Slide>
@@ -596,13 +596,18 @@ const Header = ({ toggleDrawer }) => {
                 <NotificationContent />
               </Popover>
             </div>
+            {/* <IconButton aria-label="settings" color="inherit">
+              <Badge badgeContent={1} color="secondary">
+                <Notifications />
+              </Badge>
+            </IconButton> */}
 
             <IconButton aria-label="help" color="inherit">
               <HelpOutline />
             </IconButton>
           </div>
 
-          <div className={classes.sectionMobile}>
+          {/* <div className={classes.sectionMobile}>
             <IconButton
               aria-label="search"
               onClick={() => setSearch(true)}
@@ -611,7 +616,7 @@ const Header = ({ toggleDrawer }) => {
             >
               <Search />
             </IconButton>
-          </div>
+          </div> */}
 
           <UserProfile
             anchorRef={anchorRef}

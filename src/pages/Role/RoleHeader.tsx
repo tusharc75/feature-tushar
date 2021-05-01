@@ -5,10 +5,11 @@ import SearchBox from "../../components/Helpers/SearchBox";
 
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import { BsPersonBoundingBox } from 'react-icons/bs';
 
 import styles from "../Leads/Header.module.scss";
 
-const Header = (props) => {
+const RoleHeader = (props) => {
   const {
     onTypeChange,
     options,
@@ -39,7 +40,7 @@ const Header = (props) => {
   return (
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
-        <h2>Roles</h2>
+         <BsPersonBoundingBox /> <span className="listingHeader">Roles</span>
         {options && (
           <ToggleButtonGroup
             size="small"
@@ -120,4 +121,4 @@ const Header = (props) => {
   );
 };
 
-export default Header;
+export default RoleHeader;

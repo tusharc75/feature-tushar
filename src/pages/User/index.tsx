@@ -134,7 +134,7 @@ const User: FC = () => {
       renderCell: (params: any) => (
         <Link
           title={params.value}
-          className="text-truncate LeadNameLink"
+          className="text-truncate link"
           to={`${routes.userDetail.path}/${params.row.id}`}
         >
           {params.value}
