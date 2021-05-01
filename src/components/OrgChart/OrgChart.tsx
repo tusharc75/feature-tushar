@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
+import { AiOutlineMail } from 'react-icons/ai';
 
 const OrgChart = ({
     positions,
@@ -31,8 +32,8 @@ const OrgChart = ({
 
     const getIds = element => {
         if (element) {
-            const id = element.querySelector("hidden[data-id]");
-            const parentId = element.querySelector("hidden[data-parent-id]");
+            const id = element.querySelector("div[data-id]");
+            const parentId = element.querySelector("div[data-parent-id]");
             if (id && parentId) {
                 return {
                     id: id.getAttribute("data-id"),
@@ -123,33 +124,31 @@ const OrgChart = ({
 
     const drawChart = () => {
         const template = p =>
-            `   
-             <hidden data-id='${p.id}' />
-             <hidden data-parent-id='${p.parentId}' />
-             <div class="card">
-                <div class="firstinfo">
-                ${p.logo ? `<img src=${p.logo} width="50px" />` : ""}
-                        <div class="profileinfo">
-                        <h5>${p.name}</h5>
-                            ${p.email ? `<h5>${p.email}</h5>` : ""} 
-                            ${p.phone ? `<h5>${p.phone}</h5>` : ""}
-                            <p class="bio">${p.current ? "(Current)" : ""}</p>
-                        </div>
-                </div>
-             </div>
-                
-       `
-        //     `
-        //     <hidden data-id='${p.id}' />
-        //     <hidden data-parent-id='${p.parentId}' />
-        //     ${p.logo ? `<img src=${p.logo} width="50px" /> <br />` : ""}
-        //     <h5>${p.name}</h5>
-        //     ${p.email ? `<h5>${p.email}</h5>` : ""}
-        //     ${p.phone ? `<h5>${p.phone}</h5>` : ""}
-        //     <h5 class="title">
-        //       ${p.current ? "(Current)" : ""} 
-        //     </h5>
-        //   `;
+            p.current ? `
+        <div class="card current">
+            <div class="p-0" data-id='${p.id}'> </div>
+            <div class="p-0" data-parent-id='${p.parentId}'> </div>
+           <div class="firstinfo">
+                   ${p.logo ? `<img class="profile-img" src="${p.logo}" width="50px" />` : `<img />`}
+                   <div class="profileinfo">
+                      <h5 class="card-header">${p.name}</h5>
+                       ${p.email ? `<h5 class="card-detail"><span class="iconEmail" />${p.email}</h5>` : ""} 
+                       ${p.phone ? `<h5  class="card-detail">${p.phone}</h5>` : ""}
+                   </div>
+           </div>
+        </div> `  : `
+        <div class="card">
+            <div class="p-0" data-id='${p.id}' />
+            <div class="p-0" data-parent-id='${p.parentId}' />
+           <div class="firstinfo">
+                   ${p.logo ? `<img class="profile-img" src="${p.logo}" width="50px" />` : `<img />`}
+                   <div class="profileinfo">
+                      <h5 class="card-header">${p.name}</h5>
+                       ${p.email ? `<h5 class="card-detail"><span class="iconEmail" />${p.email}</h5>` : ""} 
+                       ${p.phone ? `<h5  class="card-detail">${p.phone}</h5>` : ""}
+                   </div>
+           </div>
+        </div> ` ;
         const orgChartDiv = document.getElementById(chartId);
         if (orgChartDiv) {
             chart = new google.visualization.OrgChart(orgChartDiv);
@@ -166,7 +165,6 @@ const OrgChart = ({
                         // iconElement.className = 'edit outline icon node-icon';
                         // iconElement.addEventListener('click', onClick)
                         // node.appendChild(iconElement);
-                        node.classList.add("link");
                         node.addEventListener('click', onClick)
                         // node.setAttribute("draggable", "true");
                         // node.addEventListener("dragstart", dragStart);
@@ -193,7 +191,6 @@ const OrgChart = ({
             data.addRows(orgPositions);
 
             chart.draw(data, {
-                size: "large",
                 allowHtml: true,
                 nodeClass: "google-visualization-orgchart-node",
             });

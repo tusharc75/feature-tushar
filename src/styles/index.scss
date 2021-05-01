@@ -5,7 +5,7 @@
   --error: #dc3545;
   --info: #03afe2;
   --success: #28a745;
-  --link: #0932b9;
+  --link: #04279a;
   --white: #ffffff;
   --aliceblue: aliceblue;
 
@@ -63,7 +63,7 @@ body {
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
   background: #fff;
-  -webkit-box-shadow: inset 0 0 6px #d3d5d6;
+  -webkit-box-shadow: inset 0 0 6px #343637;
 }
 ::-webkit-scrollbar-thumb:window-inactive {
   background: #ada7a7cc;
@@ -367,7 +367,7 @@ body::-webkit-scrollbar-thumb {
 
 .badge-date {
   background: #ebf9ff;
-  padding: 2px 6px;
+  padding: 0px 6px;
   border-radius: 2px;
   float: right;
   margin-left: 2px;
@@ -378,6 +378,8 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   font-weight: bold;
   font-size: 0.6rem;
+  border: 1px solid #bbd5e0;
+  margin-left: 6px;
 }
 .export-import-link {
   position: absolute;

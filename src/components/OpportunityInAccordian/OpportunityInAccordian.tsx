@@ -93,11 +93,11 @@ export default function OpportunityInAccordian({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 3;
+            recordsPerLineInLargeScreen = 4;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 6;
+            recordsPerLineInLargeScreen = 4;
             break;
     }
 
@@ -185,12 +185,12 @@ export default function OpportunityInAccordian({
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
-                                                                <Grid item xs={12} sm={6}>
+                                                                <Grid item xs={12} sm={12}>
                                                                     {
                                                                         obj?.stage ? <DisplayData label='Stage' value={obj?.stage ?? ''} icon={<BiCustomize size={20} />} /> : ''
                                                                     }
                                                                 </Grid>
-                                                                <Grid item xs={12} sm={6}>
+                                                                <Grid item xs={12} sm={12}>
                                                                     {
                                                                         obj.closeDate ? <DisplayData label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={20} />} /> : ''
                                                                     }
