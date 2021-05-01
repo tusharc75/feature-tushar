@@ -141,11 +141,7 @@ export default function ManageUpdatePassword({
                                                                 <VisibilityIcon color="primary" />
                                                             </IconButton>
                                                         </Grid>
-                                                        <Grid item xs={1} sm={1} md={1}>
 
-
-
-                                                        </Grid>
                                                         <Grid item sm={8}>
                                                             <Field
                                                                 component={TextFieldFormik}
