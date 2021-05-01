@@ -57,12 +57,12 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
   const handleSubmit = (values) => {
     setSubmitting(true);
     axiosInstance()
-      .post("/entity", values)
+      .post("/projectStrategy", values)
       .then(({ data }) => {
         const newId = data.data._id;
         setSubmitting(false);
         fetchData();
-        history.push(`/entity/detail/${newId}`);
+        history.push(`/project-sales/detail/${newId}`);
         close();
       })
       .catch((err) => {
@@ -78,14 +78,14 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
       fullWidth
       fullScreen={isMobile}
     >
-      <CustomDialogHeader title="Create New Entity" onClose={close} />
+      <CustomDialogHeader title="Create New Project-Sales" onClose={close} />
 
       {loading || !initialData.fields.length ? (
         <>
           <CustomDialogContent>
             <Skeleton width="100%" height="70px" />
             <Grid container spacing={2}>
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
                 <Grid key={i} item xs={12} sm={6} md={6}>
                   <Skeleton width="100%" height="60px" />
                 </Grid>

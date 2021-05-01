@@ -25,13 +25,14 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import AssignTeamUsers from "./AssignTeamUsers";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions },
+    state: { permissions },
   }: any = useData();
   const [loading, setLoading] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -44,6 +45,7 @@ const ProjectSalesDetails = () => {
   const [deleteRec, setDeleteRec] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openUsersDialog, setOpenUsersDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.projectSales,
   ]);
@@ -56,16 +58,13 @@ const ProjectSalesDetails = () => {
     try {
       const {
         data: { data },
-      } = await axiosInstance().get(`/user/${id}`);
+      } = await axiosInstance().get(`/projectStrategy/${id}`);
 
       handleMainPoints(data);
       const name = data.projectName;
       setHeadingLbl(name);
       setProjectSalesData(data);
-      setCustomizedRoutes([
-        routes.user,
-        { title: `${data.firstName} ${data.lastName}` },
-      ]);
+      setCustomizedRoutes([routes.projectSales, { title: data.projectName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -74,27 +73,40 @@ const ProjectSalesDetails = () => {
 
   useEffect(() => {
     getSalesData();
+    getProjectFields();
   }, [id]);
+
+  const getProjectFields = () => {
+    axiosInstance()
+      .get("/field?resource=Project Strategy")
+      .then(({ data }) => {
+        setProjectSalesFields(data.data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      closedDate: data.closedDate || "",
+      projectName: data.projectName || "",
+      endDate: new Date(data.endDate).toDateString() || "",
       value: data.value || "",
-      projectProbability: `${data.projectProbability}%` || "",
+      projectProbability: `${data.projectProbability}` || "",
       opportunityOwner: data.opportunityOwner?.optionLabel || "",
     };
     setMainPoints(tempMp);
   };
 
   /**
-   * Handle updating the sales data
+   * Handle updating the project data
    * @param values
    */
-  const handleUpdateUser = (values) => {
+  const handleUpdateProject = (values) => {
     setUpdating(true);
 
     axiosInstance()
-      .put(`/user`, { ...values, _id: id })
+      .put(`/projectStrategy`, { ...values, _id: id })
       .then(({ data }) => {
         getSalesData();
         toastConfig.setToastConfig({
@@ -127,27 +139,36 @@ const ProjectSalesDetails = () => {
    * Handle Delete Sales Data
    * @param id
    */
-  const handleDeleteUser = (id) => {
+  const handleDeleteProject = (id) => {
     setDeleteRec(id);
     setShowConfirmBox(true);
   };
 
-  const DeleteUser = () => {
+  const DeleteProject = () => {
     if (deleteRec) {
-      if (permissions.user.isDelete) {
-        axiosInstance()
-          .put(`/user/remove`, { ids: [deleteRec] })
-          .then(({ data }) => {
-            setShowConfirmBox(false);
-            history.goBack();
-          })
-          .catch((err) => {
-            setShowConfirmBox(false);
-          });
-      }
+      axiosInstance()
+        .put(`/projectStrategy/remove`, { ids: [deleteRec] })
+        .then(({ data }) => {
+          setShowConfirmBox(false);
+          history.goBack();
+        })
+        .catch((err) => {
+          setShowConfirmBox(false);
+        });
     } else {
       setShowConfirmBox(false);
     }
+  };
+
+  /**
+   * Handle Open Users Dialog For Teams
+   */
+  const handleOpenUserDialog = () => {
+    setOpenUsersDialog(true);
+  };
+
+  const handleCloseUserDialog = () => {
+    setOpenUsersDialog(false);
   };
 
   return (
@@ -160,7 +181,15 @@ const ProjectSalesDetails = () => {
           data={projectSalesData}
           fields={projectSalesFields}
           isUpdating={isUpdating}
-          handleUpdate={handleUpdateUser}
+          handleUpdate={handleUpdateProject}
+        />
+      )}
+      {openUsersDialog && (
+        <AssignTeamUsers
+          usersDialogOpen={openUsersDialog}
+          onSuccess={() => {}}
+          handleCloseDialog={handleCloseUserDialog}
+          ids={[id]}
         />
       )}
       <Layout>
@@ -193,20 +222,17 @@ const ProjectSalesDetails = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {permissions.user.isUpdate ? (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      Edit
-                    </Button>
-                  ) : null}
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenUpdateDialog}
+                  >
+                    Edit
+                  </Button>
+
                   <Box component="span" marginX={1} />
 
-                  {permissions.user.isDelete ? (
-                    <DeleteButton text="Delete" onClick={() => {}} />
-                  ) : null}
+                  <DeleteButton text="Delete" onClick={() => {}} />
                 </DetailsPageHeader>
               )}
               <Box>
@@ -248,10 +274,9 @@ const ProjectSalesDetails = () => {
                 >
                   <Typography variant="subtitle2">Project Team</Typography>
                   <IconButton
-                    disabled={!permissions.role.isUpdate}
                     color="primary"
                     size="small"
-                    onClick={() => {}}
+                    onClick={handleOpenUserDialog}
                   >
                     <ControlPoint />
                   </IconButton>
@@ -300,7 +325,7 @@ const ProjectSalesDetails = () => {
             setShowConfirmBox(false);
             if (deleteRec) setDeleteRec(null);
           }}
-          onOk={deleteRec ? DeleteUser : null}
+          onOk={deleteRec ? DeleteProject : null}
         />
       ) : null}
     </>

@@ -156,7 +156,7 @@ const Details = (props: DetailProps) => {
     } else if (input.type === "checkBox") {
       text = values[input.fieldName] === true ? "Yes" : "No";
     } else if (input.type === "date") {
-      text = yyyyMMDD(values[input.fieldName]);
+      text = new Date(values[input.fieldName]).toDateString();
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : "-";
     }
@@ -234,9 +234,8 @@ const Details = (props: DetailProps) => {
             placement="right"
             trigger="hover"
             speaker={renderPopoverData()}
-            delay={1000}
+            delay={500}
             enterable
-            onClose={handlePopoverClose}
           >
             <Typography className={classes.fieldText} variant="body2">
               {Array.isArray(data[fieldData.fieldName]) ? (

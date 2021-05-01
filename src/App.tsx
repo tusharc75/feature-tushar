@@ -29,8 +29,8 @@ import User from "./pages/User";
 import Entity from "./pages/Entity";
 import EntityDetailPage from "./pages/Entity/EntityDetailPage";
 import UserDetailsPage from "./pages/User/UserDetailsPage";
-import ProductSalesDetails from "./pages/ProjectSales/ProjectSalesDetails";
-import ProductSales from "./pages/ProjectSales";
+import ProjectSalesDetails from "./pages/ProjectSales/ProjectSalesDetails";
+import ProjectSales from "./pages/ProjectSales";
 
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 import Roles from "./pages/Role";
@@ -246,14 +246,14 @@ function App() {
             exact
             path={routes.projectSales.path}
           >
-            <ProductSales />
+            <ProjectSales />
           </PrivateRoute>
           <PrivateRoute
             key="project-sales-details"
             exact
             path={`${routes.projectSalesDetail.path}/:id`}
           >
-            <ProductSalesDetails />
+            <ProjectSalesDetails />
           </PrivateRoute>
           <PrivateRoute exact path="/user">
             <User />

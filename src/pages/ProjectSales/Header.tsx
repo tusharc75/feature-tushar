@@ -41,57 +41,52 @@ const ProjectStrategyHeader = (props) => {
             placeholder="Search Project Sales"
             width="242px"
           />
-          {permissions.isCreate && (
-            <Button
-              className={styles.add_submit_btn}
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={onCreate}
-              startIcon={<AddOutlined />}
-            >
-              Add
-            </Button>
-          )}
 
-          {permissions.isDelete || permissions.isUpdate ? (
-            <>
-              <Button
-                className={styles.action_submit_btn}
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-              >
-                Actions <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
+          <Button
+            className={styles.add_submit_btn}
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={onCreate}
+            startIcon={<AddOutlined />}
+          >
+            Add
+          </Button>
+
+          <>
+            <Button
+              className={styles.action_submit_btn}
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+            >
+              Actions <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                disabled={Boolean(canDelete)}
+                onClick={() => {
+                  showConfirmBox(null);
+                  closeActions();
                 }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
               >
-                {permissions.isDelete && (
-                  <MenuItem
-                    disabled={Boolean(canDelete)}
-                    onClick={() => {
-                      showConfirmBox(null);
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                )}
-              </Menu>
-            </>
-          ) : null}
+                Delete
+              </MenuItem>
+            </Menu>
+          </>
         </Box>
       </Grid>
     </Grid>

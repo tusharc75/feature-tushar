@@ -46,11 +46,12 @@ const ProjectSales: FC = () => {
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
-    let api = getSearchQuery("/entity", searchParams);
+    let api = getSearchQuery("/projectStrategy", searchParams);
     setLoadingProjects(true);
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
+        console.log(data);
         getRows(data);
         setRowCount(count);
         setCheckAllProjects(false);
@@ -69,14 +70,14 @@ const ProjectSales: FC = () => {
 
   const getRows = (data: []) => {
     const rows = data.length
-      ? data.map((entity: any) => ({
-          id: entity._id,
+      ? data.map((project: any) => ({
+          id: project._id,
           isChecked: false,
-          name: entity.entityName,
-          address: entity.address,
-          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-          createdBy: entity?.createdBy,
-          updatedBy: entity?.updatedBy,
+          name: project.projectName,
+          projectOwner: project.projectOwner?.optionLabel,
+          createdAt: moment(project.createdAt).format("MMM Do, YYYY"),
+          createdBy: project?.createdBy,
+          updatedBy: project?.updatedBy,
         }))
       : [];
     setDataRows(rows);
@@ -124,22 +125,13 @@ const ProjectSales: FC = () => {
           title={params.value}
           className="text-truncate"
           component={Link}
-          to={`${routes.entityDetails.path}/${params.row.id}`}
+          to={`${routes.projectSalesDetail.path}/${params.row.id}`}
         >
           {params.value}
         </MuiLink>
       ),
     },
-    {
-      field: "address",
-      headerName: "Address",
-      width: 300,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          {params.value}
-        </p>
-      ),
-    },
+
     // {
     //   field: "createdAt",
     //   headerName: "Created At",
@@ -198,34 +190,6 @@ const ProjectSales: FC = () => {
       sortable: false,
       filterable: false,
     },
-
-    // {
-    //   field: "actions",
-    //   headerName: "Actions ",
-    //   disableColumnMenu: true,
-    //   sortable: false,
-    //   filterable: false,
-    //   renderCell: (params: any) => (
-    //     <>
-    //       <span
-    //         title={
-    //           permissions?.entity.isDelete
-    //             ? "Delete"
-    //             : "You can't do this action"
-    //         }
-    //       >
-    //         <IconButton
-    //           disabled={!permissions?.entity.isDelete}
-    //           aria-label="Delete"
-    //           onClick={() => showConfirmBox(params.row)}
-    //         >
-    //           <DeleteIcon fontSize="small" color="error" />
-    //         </IconButton>
-    //       </span>
-    //     </>
-    //   ),
-    //   width: 200,
-    // },
   ];
 
   const updateCheckedStatus = (params, ev) => {
@@ -265,7 +229,7 @@ const ProjectSales: FC = () => {
     }
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/entity/remove`, { ids: [...recs] })
+        .put(`/projectStrategy/remove`, { ids: [...recs] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -316,7 +280,7 @@ const ProjectSales: FC = () => {
     }
   };
 
-  // Handle entity selection
+  // Handle project selection
   const handleSelectedProjects = (id, isChecked) => {
     let tempSelectedProjects = [...selectedProjects],
       curRecIndex = selectedProjects.indexOf(id);
@@ -364,7 +328,7 @@ const ProjectSales: FC = () => {
             <ProjectStrategyHeader
               onSearch={handleSearch}
               searchVal={searchVal}
-              entityPermissions={permissions?.entity}
+              permissions={permissions}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
@@ -406,7 +370,7 @@ const ProjectSales: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${
+            message={`Are you sure, you want to delete this record ${
               deleteRec.name || ""
             }?`}
             onClose={() => {
