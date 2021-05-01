@@ -151,6 +151,7 @@ const FormTypes = (props) => {
     isvlookupReverse,
     doNotShowInfoTooltip,
     fieldData,
+    startAdornment,
     ...rest
   } = props;
 
@@ -475,6 +476,7 @@ const FormTypes = (props) => {
           inputProps: {
             allowNegative: false,
           },
+          startAdornment: startAdornment
         }}
       />
     </InfoLabel>

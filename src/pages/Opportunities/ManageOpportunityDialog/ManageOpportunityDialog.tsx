@@ -118,14 +118,16 @@ export default function ManageOpportunityDialog({
 
         const filterData = isNew ? data.filter((d) => d.isCreate) : data.filter((d) => d.isUpdate);
 
-
         filterData
-          .filter((d) => d.isCreate)
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
 
             if (accountId && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
+            }
+
+            if (!isNew && _f.fieldData.fieldName == "currency") {
+              setCurrencySymbol(currencies.find(d => d.currencyCode == dataToUpdate["currency"])?.symbolNative);
             }
 
             newFields.push(_f.fieldData);
@@ -354,7 +356,7 @@ export default function ManageOpportunityDialog({
                                     size="small"
                                     onChange={(e, val) => {
                                       if (val && val.currencyCode) {
-                                        setFieldValue(field.fieldName, val);
+                                        setFieldValue(field.fieldName, val.currencyCode);
                                         setCurrencySymbol(val.symbolNative)
                                       }
                                       else {
@@ -366,7 +368,7 @@ export default function ManageOpportunityDialog({
                                 ) : (field.fieldName == "amount") ? (
                                   <FormTypes
                                     // {...rest}
-                                    startAdornment={currencySymbol ? <InputAdornment position="start">$</InputAdornment> : ""}
+                                    startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
