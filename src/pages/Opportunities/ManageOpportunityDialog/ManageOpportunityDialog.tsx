@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
+import { Box, Button, CircularProgress, Grid, InputAdornment } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import Dialog from "@material-ui/core/Dialog";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -25,6 +25,7 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import { useData } from "../../../StateProvider/Provider";
 import { useLocation, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
+import currencies from "../../../constants/currency_with_country.json";
 
 const arr = [...Array(9).keys()];
 
@@ -59,7 +60,7 @@ export default function ManageOpportunityDialog({
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
     const ownerCollabOptions = entityData.fields.filter(
@@ -168,7 +169,7 @@ export default function ManageOpportunityDialog({
           type: "success",
           message: data.message,
         });
-        if(isRedirectTodetailPage) history.push(`${opportunityApi}/detail/${newId}`);
+        if (isRedirectTodetailPage) history.push(`${opportunityApi}/detail/${newId}`);
         setLoading(false);
         onSuccess();
       })
@@ -241,8 +242,8 @@ export default function ManageOpportunityDialog({
               <CustomDialogContent>
                 <Form>
                   {formsData &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
+                    formsData.map((form, i) => {
+                      return form.name && <div key={i}>
                         <h2 className="form-label-style">{form.name}</h2>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
@@ -336,6 +337,49 @@ export default function ManageOpportunityDialog({
                                       isTooltip={true}
                                       size="small"
                                     /> : null
+                                ) : (field.fieldName == "currency") ? (
+                                  <FormTypes
+                                    // {...rest}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={setFieldValue}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={true}
+                                    size="small"
+                                    onChange={(e, val) => {
+                                      if (val && val.currencyCode) {
+                                        setFieldValue(field.fieldName, val);
+                                        setCurrencySymbol(val.symbolNative)
+                                      }
+                                      else {
+                                        setFieldValue(field.fieldName, "");
+                                        setCurrencySymbol(null);
+                                      }
+                                    }}
+                                  />
+                                ) : (field.fieldName == "amount") ? (
+                                  <FormTypes
+                                    // {...rest}
+                                    startAdornment={currencySymbol ? <InputAdornment position="start">$</InputAdornment> : ""}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={setFieldValue}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={true}
+                                    size="small"
+                                  />
                                 ) : (
                                   <FormTypes
                                     // {...rest}
@@ -359,7 +403,7 @@ export default function ManageOpportunityDialog({
                           </Grid>
                         </Box>
                       </div>
-                    ))}
+                    })}
                 </Form>
               </CustomDialogContent>
 

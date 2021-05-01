@@ -131,7 +131,7 @@ const Roles: FC = () => {
         <Link
           title={params.value}
           className="text-truncate LeadNameLink"
-          to={`${routes.roleDetails.path}/${params.row.id}`}
+          to={`${routes.roleDetail.path}/${params.row.id}`}
         >
           {params.value}
         </Link>

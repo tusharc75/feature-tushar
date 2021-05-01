@@ -238,7 +238,7 @@ export default function AccountDetailPage(props) {
 
   const quickLinks: IQuickLinks[] = [
     {
-      label: "Account Heirarchy",
+      label: "Account Hierarchy",
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },

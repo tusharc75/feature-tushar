@@ -26,7 +26,6 @@ const OrgChart = ({
 
     useEffect(() => {
         setOrgChart(positions);
-        console.log(positions);
     }, [positions])
 
     const getIds = element => {
