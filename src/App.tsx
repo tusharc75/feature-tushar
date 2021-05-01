@@ -38,6 +38,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 
 import ProductCost from "./pages/ProductCost";
 import CreateProductCost from "./pages/ProductCost/CreateProductCost";
+import BrandConfiguration from "./pages/BrandConfiguration";
 
 import {
   termsAndCondition,
@@ -60,15 +61,6 @@ import CustomNotification from "./components/CustomNotification/CustomNotificati
 function App() {
   const toast = useContext(CustomToastContext);
   const [notification, setNotification] = useState({ open: false, title: null, message: null })
-
-  const truepush = window["truepush"] || [];
-  truepush.push(function () {
-    truepush.Init({
-      id: "608a852cd4fd7034e72c1b43"
-    }, function (error) {
-      if (error) console.error(error);
-    })
-  })
 
   // const messaging = firebase.messaging();
   // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
@@ -237,6 +229,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/profile">
             <UserProfilePage profileBreadCrumbs={routes.profilePage} />
+          </PrivateRoute>
+          <PrivateRoute exact path="/brand-configuration">
+            <BrandConfiguration />
           </PrivateRoute>
           <PrivateRoute exact path="/user/detail/:id">
             <UserDetailsPage />

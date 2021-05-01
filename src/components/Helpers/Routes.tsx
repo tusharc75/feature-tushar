@@ -129,5 +129,9 @@ export default {
   productCost: {
     title: "Product Cost",
     path: "/product-cost"
+  },
+  brandConfiguration: {
+    title: "Brand Configuration",
+    path: "/brand-configuration"
   }
 };

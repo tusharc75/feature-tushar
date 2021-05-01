@@ -32,7 +32,7 @@ import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
 import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
-import { profilePage } from "../../constants/helpers";
+import { brandConfiguration, profilePage } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 
 const useStyles = makeStyles((theme) => ({
@@ -203,6 +203,13 @@ const Header = ({ toggleDrawer }) => {
         pathname: profilePage.profilePageRoute,
       });
     }
+    if (option && option.brandConfiguration) {
+      history.push({
+        pathname: brandConfiguration.brandConfigurationRoute,
+      });
+    }
+
+
     setOpen(false);
   };
 
@@ -275,24 +282,24 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-              }}
-            >
-              <Typography className={classes.entityName}>
-                {curEntity.entityName}
-              </Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && (
-                <Chip size="small" label="Current" color="primary" />
-              )}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+            }}
+          >
+            <Typography className={classes.entityName}>
+              {curEntity.entityName}
+            </Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && (
+              <Chip size="small" label="Current" color="primary" />
+            )}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );
@@ -334,7 +341,7 @@ const Header = ({ toggleDrawer }) => {
       </MenuItem> */}
       <MenuItem>
         <HelpOutline />
-        <Box component="span" mx={1} my={2}/>
+        <Box component="span" mx={1} my={2} />
         <p>Help</p>
       </MenuItem>
     </Menu>
