@@ -13,12 +13,10 @@ import {
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { GetApp, InfoOutlined, InsertDriveFile } from "@material-ui/icons";
-import { kebabCase, startCase } from "lodash";
+import { kebabCase } from "lodash";
 import axios from "axios";
-import { Popover, Whisper } from "rsuite";
-import "rsuite/dist/styles/rsuite-default.css";
 
-import { getObjKeysWithValues, yyyyMMDD } from "../../constants/helpers";
+import { getObjKeysWithValues } from "../../constants/helpers";
 import currencies from "../../constants/currency_with_country.json";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -230,59 +228,53 @@ const Details = (props: DetailProps) => {
     if (fieldData.hasOwnProperty("lookup") && fieldData.lookup) {
       if (fieldData.type === "multiSelect" || fieldData.type === "dropDown") {
         return (
-          <Whisper
-            placement="right"
-            trigger="hover"
-            speaker={renderPopoverData()}
-            delay={500}
-            enterable
-          >
-            <Typography className={classes.fieldText} variant="body2">
-              {Array.isArray(data[fieldData.fieldName]) ? (
-                data[fieldData.fieldName].length ? (
-                  data[fieldData.fieldName].map((_val: any) => (
-                    <React.Fragment key={_val.optionValue}>
-                      <Box
-                        style={{ cursor: "pointer" }}
-                        component="span"
-                        onMouseEnter={(e) =>
-                          getPopoverData(
-                            e,
-                            fieldData.lookupResource,
-                            _val.optionValue
-                          )
-                        }
-                      >
-                        <span className={classes.dataValue}>
-                          {_val.optionLabel}
-                        </span>
-                      </Box>
-                    </React.Fragment>
-                  ))
-                ) : (
-                  "-"
-                )
-              ) : data[fieldData.fieldName] ? (
-                <Box
-                  style={{ cursor: "pointer" }}
-                  component="span"
-                  onMouseEnter={(e) =>
-                    getPopoverData(
-                      e,
-                      fieldData.lookupResource,
-                      val[fieldData.fieldName]
-                    )
-                  }
-                >
-                  <span className={classes.dataValue}>
-                    {data[fieldData.fieldName].optionLabel}
-                  </span>
-                </Box>
+          <Typography className={classes.fieldText} variant="body2">
+            {Array.isArray(data[fieldData.fieldName]) ? (
+              data[fieldData.fieldName].length ? (
+                data[fieldData.fieldName].map((_val: any) => (
+                  <React.Fragment key={_val.optionValue}>
+                    <Link
+                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${
+                        _val.optionValue
+                      }`}
+                      // onMouseEnter={(e) =>
+                      //   getPopoverData(
+                      //     e,
+                      //     fieldData.lookupResource,
+                      //     _val.optionValue
+                      //   )
+                      // }
+                    >
+                      <span className={classes.dataValue}>
+                        {_val.optionLabel}
+                      </span>
+                    </Link>
+                  </React.Fragment>
+                ))
               ) : (
                 "-"
-              )}
-            </Typography>
-          </Whisper>
+              )
+            ) : data[fieldData.fieldName] ? (
+              <Link
+                to={`/${kebabCase(fieldData.lookupResource)}/detail/${
+                  val[fieldData.fieldName]
+                }`}
+                // onMouseEnter={(e) =>
+                //   getPopoverData(
+                //     e,
+                //     fieldData.lookupResource,
+                //     val[fieldData.fieldName]
+                //   )
+                // }
+              >
+                <span className={classes.dataValue}>
+                  {data[fieldData.fieldName].optionLabel}
+                </span>
+              </Link>
+            ) : (
+              "-"
+            )}
+          </Typography>
         );
       }
     } else {
@@ -360,61 +352,59 @@ const Details = (props: DetailProps) => {
 
     const isRole = lookupResource === "role";
     return (
-      <Popover title={startCase(lookupResource)}>
-        <Box width="250px">
-          {loadingPopoverData || !popoverData ? (
-            <Box display="flex" justifyContent="start">
-              <Skeleton variant="circle" width="50px" height="50px" />
-              <Box
-                marginLeft={2}
-                display="flex"
-                flexDirection="column"
-                justifyContent="start"
-              >
-                <Skeleton variant="text" width="150px" />
-                <Skeleton variant="text" width="120px" />
-              </Box>
+      <Box width="250px">
+        {loadingPopoverData || !popoverData ? (
+          <Box display="flex" justifyContent="start">
+            <Skeleton variant="circle" width="50px" height="50px" />
+            <Box
+              marginLeft={2}
+              display="flex"
+              flexDirection="column"
+              justifyContent="start"
+            >
+              <Skeleton variant="text" width="150px" />
+              <Skeleton variant="text" width="120px" />
             </Box>
-          ) : (
-            <Box display="flex" alignItems="start">
-              {!isRole && (
-                <Avatar style={{ width: 50, height: 50 }} src={img}>
-                  {name && name.charAt(0)}
-                </Avatar>
-              )}
-              <Box
-                marginLeft={2}
-                display="flex"
-                flexDirection="column"
-                justifyContent="start"
-              >
-                <Typography className={classes.popoverText}>
-                  <MuiLink
-                    component={Link}
-                    to={`/${lookupResource}/detail/${popoverData?._id}`}
-                  >
-                    <span className={classes.dataValue}>{name}</span>
-                  </MuiLink>
-                </Typography>
-                <Typography
-                  color="textSecondary"
-                  variant="body2"
-                  className={classes.popoverText}
+          </Box>
+        ) : (
+          <Box display="flex" alignItems="start">
+            {!isRole && (
+              <Avatar style={{ width: 50, height: 50 }} src={img}>
+                {name && name.charAt(0)}
+              </Avatar>
+            )}
+            <Box
+              marginLeft={2}
+              display="flex"
+              flexDirection="column"
+              justifyContent="start"
+            >
+              <Typography className={classes.popoverText}>
+                <MuiLink
+                  component={Link}
+                  to={`/${lookupResource}/detail/${popoverData?._id}`}
                 >
-                  {subInfo}
-                </Typography>
-                {/* <Typography
+                  <span className={classes.dataValue}>{name}</span>
+                </MuiLink>
+              </Typography>
+              <Typography
+                color="textSecondary"
+                variant="body2"
+                className={classes.popoverText}
+              >
+                {subInfo}
+              </Typography>
+              {/* <Typography
                 color="textSecondary"
                 variant="body2"
                 className={classes.popoverText}
               >
                 {subInfo1}
               </Typography> */}
-              </Box>
             </Box>
-          )}
-        </Box>
-      </Popover>
+          </Box>
+        )}
+      </Box>
     );
   };
 
