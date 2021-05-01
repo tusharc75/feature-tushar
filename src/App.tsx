@@ -29,6 +29,8 @@ import User from "./pages/User";
 import Entity from "./pages/Entity";
 import EntityDetailPage from "./pages/Entity/EntityDetailPage";
 import UserDetailsPage from "./pages/User/UserDetailsPage";
+import ProjectSalesDetails from "./pages/ProjectSales/ProjectSalesDetails";
+import ProjectSales from "./pages/ProjectSales";
 
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 import Roles from "./pages/Role";
@@ -53,22 +55,29 @@ import Dashboard from "./pages/Dashboard";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
-import UserProfilePage from './pages/ProfilePage/index'
+import UserProfilePage from "./pages/ProfilePage/index";
 // import firebase, { onMessageListener } from "./firebase";
 import CustomNotification from "./components/CustomNotification/CustomNotification";
 
 function App() {
   const toast = useContext(CustomToastContext);
-  const [notification, setNotification] = useState({ open: false, title: null, message: null })
+  const [notification, setNotification] = useState({
+    open: false,
+    title: null,
+    message: null,
+  });
 
   const truepush = window["truepush"] || [];
   truepush.push(function () {
-    truepush.Init({
-      id: "608a852cd4fd7034e72c1b43"
-    }, function (error) {
-      if (error) console.error(error);
-    })
-  })
+    truepush.Init(
+      {
+        id: "608a852cd4fd7034e72c1b43",
+      },
+      function (error) {
+        if (error) console.error(error);
+      }
+    );
+  });
 
   // const messaging = firebase.messaging();
   // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
@@ -232,6 +241,20 @@ function App() {
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
+          <PrivateRoute
+            key="project-sales"
+            exact
+            path={routes.projectSales.path}
+          >
+            <ProjectSales />
+          </PrivateRoute>
+          <PrivateRoute
+            key="project-sales-details"
+            exact
+            path={`${routes.projectSalesDetail.path}/:id`}
+          >
+            <ProjectSalesDetails />
+          </PrivateRoute>
           <PrivateRoute exact path="/user">
             <User />
           </PrivateRoute>
@@ -293,7 +316,7 @@ function App() {
           <PrivateRoute exact path={routes.productCost.path}>
             <ProductCost />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productCost.path + "/:id"} >
+          <PrivateRoute exact path={routes.productCost.path + "/:id"}>
             <CreateProductCost />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
