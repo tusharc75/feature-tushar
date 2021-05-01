@@ -151,6 +151,7 @@ const FormTypes = (props) => {
     isvlookupReverse,
     doNotShowInfoTooltip,
     fieldData,
+    startAdornment,
     ...rest
   } = props;
 
@@ -474,6 +475,7 @@ const FormTypes = (props) => {
           inputProps: {
             allowNegative: false,
           },
+          startAdornment: startAdornment
         }}
       />
     </InfoLabel>
@@ -715,7 +717,7 @@ const FormTypes = (props) => {
           option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
         }
         getOptionSelected={(option: any, val) => option.currencyCode === val}
-        onChange={(e, val) =>
+        onChange={onChange ? onChange : (e, val) =>
           setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
         }
         renderInput={(params) => (

@@ -58,26 +58,22 @@ import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from "./pages/ProfilePage/index";
 // import firebase, { onMessageListener } from "./firebase";
 import CustomNotification from "./components/CustomNotification/CustomNotification";
+import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
+import axiosInstance from "./axios/axiosInstance";
 
 function App() {
   const toast = useContext(CustomToastContext);
-  const [notification, setNotification] = useState({
-    open: false,
-    title: null,
-    message: null,
-  });
+  const notification = useContext(CustomNotificationCountContext);
+  // const [notification, setNotification] = useState({ open: false, title: null, message: null })
 
-  const truepush = window["truepush"] || [];
-  truepush.push(function () {
-    truepush.Init(
-      {
-        id: "608a852cd4fd7034e72c1b43",
-      },
-      function (error) {
-        if (error) console.error(error);
-      }
-    );
-  });
+  // const truepush = window["truepush"] || [];
+  // truepush.push(function () {
+  //   truepush.Init({
+  //     id: "608a852cd4fd7034e72c1b43"
+  //   }, function (error) {
+  //     if (error) console.error(error);
+  //   })
+  // })
 
   // const messaging = firebase.messaging();
   // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
@@ -108,6 +104,20 @@ function App() {
   const {
     state: { user },
   }: any = useData();
+
+
+  // if (user?.user?._id) {
+  //   setInterval(() => {
+  //     notification.setCount(notification.count + 1);
+  //     // axiosInstance().get(`/notificationCount/${user?.user?._id}`).then(({ data: { data } }) => {
+  //     //   console.log(data);
+  //     //   debugger;
+  //     //   // notification.setCount();
+  //     // }).catch((error) => {
+  //     //   toast.setToastConfig(error);
+  //     // });
+  //   }, 10000);
+  // }
 
   const conditionalRedirect = (Comp, location) => {
     return !user ? (

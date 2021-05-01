@@ -9,13 +9,16 @@ import "./styles/common-styles.scss";
 import "./styles/material-component.scss";
 import "./styles/responsive-styles.scss"
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
+import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
       <Provider>
         <CustomToastProvider>
-          <App />
+          <CustomNotificationCountProvider>
+            <App />
+          </CustomNotificationCountProvider>
         </CustomToastProvider>
       </Provider>
     </Router>
