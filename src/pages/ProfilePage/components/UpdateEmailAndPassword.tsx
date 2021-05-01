@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import Grid from '@material-ui/core/Grid';
 import { TextField as TextFieldFormik } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
@@ -138,7 +139,7 @@ export default function ManageUpdatePassword({
                                                                 onChange={(e) => setFieldValue("oldPassword", e.target.value.trimStart())}
                                                             />
                                                             <IconButton onClick={toggleVisibility} size="small">
-                                                                <VisibilityIcon color="primary" />
+                                                                {isShowPassword ? <VisibilityOffIcon color="primary"/> : <VisibilityIcon color="primary" />}
                                                             </IconButton>
                                                         </Grid>
 
