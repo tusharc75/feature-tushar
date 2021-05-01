@@ -106,7 +106,7 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
                         relatedTo={relatedTo}
                     />
                 </Fragment>
-                : <Box p={1}>
+                : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
                     <Typography variant="subtitle2">No Past Task</Typography>
                 </Box>
             }

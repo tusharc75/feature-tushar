@@ -123,17 +123,33 @@ const OrgChart = ({
 
     const drawChart = () => {
         const template = p =>
-            `
-            <hidden data-id='${p.id}' />
-            <hidden data-parent-id='${p.parentId}' />
-            ${p.logo ? `<img src=${p.logo} width="50px" /> <br />` : ""}
-            <h5>${p.name}</h5>
-            ${p.email ? `<h5>${p.email}</h5>` : ""}
-            ${p.phone ? `<h5>${p.phone}</h5>` : ""}
-            <h5 class="title">
-              ${p.current ? "(Current)" : ""} 
-            </h5>
-          `;
+            `   
+             <hidden data-id='${p.id}' />
+             <hidden data-parent-id='${p.parentId}' />
+             <div class="card">
+                <div class="firstinfo">
+                ${p.logo ? `<img src=${p.logo} width="50px" />` : ""}
+                        <div class="profileinfo">
+                        <h5>${p.name}</h5>
+                            ${p.email ? `<h5>${p.email}</h5>` : ""} 
+                            ${p.phone ? `<h5>${p.phone}</h5>` : ""}
+                            <p class="bio">${p.current ? "(Current)" : ""}</p>
+                        </div>
+                </div>
+             </div>
+                
+       `
+        //     `
+        //     <hidden data-id='${p.id}' />
+        //     <hidden data-parent-id='${p.parentId}' />
+        //     ${p.logo ? `<img src=${p.logo} width="50px" /> <br />` : ""}
+        //     <h5>${p.name}</h5>
+        //     ${p.email ? `<h5>${p.email}</h5>` : ""}
+        //     ${p.phone ? `<h5>${p.phone}</h5>` : ""}
+        //     <h5 class="title">
+        //       ${p.current ? "(Current)" : ""} 
+        //     </h5>
+        //   `;
         const orgChartDiv = document.getElementById(chartId);
         if (orgChartDiv) {
             chart = new google.visualization.OrgChart(orgChartDiv);

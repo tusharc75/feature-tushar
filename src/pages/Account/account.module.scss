@@ -60,10 +60,9 @@
 }
 .custom_box1 {
   min-height: 150px;
-  border-radius: 10px;
-  padding: 10px 1px;
   justify-content: center;
-  margin: 3px;
+  background: #f5f5f5;
+  padding: 5px;
 }
 .custom_div13 {
   display: flex;
@@ -90,8 +89,8 @@
   font-size: 16px;
 }
 .related_contacts {
-  padding: 10px;
-  background-color: rgb(238, 238, 238);
+  padding: 6px;
+  background-color: #e4e4e4;
   display: flex;
   justify-content: space-between;
 }

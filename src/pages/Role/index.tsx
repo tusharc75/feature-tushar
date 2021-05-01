@@ -130,7 +130,7 @@ const Roles: FC = () => {
       renderCell: (params: any) => (
         <Link
           title={params.value}
-          className="text-truncate LeadNameLink"
+          className="text-truncate link"
           to={`${routes.roleDetails.path}/${params.row.id}`}
         >
           {params.value}

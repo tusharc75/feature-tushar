@@ -357,7 +357,7 @@ const Header = ({ toggleDrawer }) => {
               <ClearIcon />
             </IconButton>
 
-            <div
+            {/* <div
               className={classes.search}
               style={{ display: "block", width: "100%" }}
             >
@@ -374,7 +374,7 @@ const Header = ({ toggleDrawer }) => {
                 style={{ width: "100%" }}
                 inputProps={{ "aria-label": "search" }}
               />
-            </div>
+            </div> */}
           </Toolbar>
         </AppBar>
       </Slide>
@@ -430,7 +430,7 @@ const Header = ({ toggleDrawer }) => {
                 </ButtonBase>
               )}
             </Box>
-            <div className={classes.search}>
+            {/* <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <Search />
               </div>
@@ -444,7 +444,7 @@ const Header = ({ toggleDrawer }) => {
                 }}
                 inputProps={{ "aria-label": "search" }}
               />
-            </div>
+            </div> */}
           </Box>
 
           {/* <div className={classes.sectionDesktop}>
@@ -477,7 +477,7 @@ const Header = ({ toggleDrawer }) => {
             </IconButton>
           </div>
 
-          <div className={classes.sectionMobile}>
+          {/* <div className={classes.sectionMobile}>
             <IconButton
               aria-label="search"
               onClick={() => setSearch(true)}
@@ -486,7 +486,7 @@ const Header = ({ toggleDrawer }) => {
             >
               <Search />
             </IconButton>
-          </div>
+          </div> */}
 
           <UserProfile
             anchorRef={anchorRef}
