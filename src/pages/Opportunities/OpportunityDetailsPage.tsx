@@ -388,6 +388,7 @@ function OpportunityDetailsPage() {
             isNew={false}
             dataToUpdate={opportunityData}
             resource={null}
+            isRedirectTodetailPage={false}
           // opportunityApi={opportunityApi}
           />
         )}

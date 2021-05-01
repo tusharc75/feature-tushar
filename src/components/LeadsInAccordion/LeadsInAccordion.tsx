@@ -11,7 +11,7 @@ import { withStyles, makeStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
+import ManageLeadDialog from '../../pages/Leads/ManageLeadDialog/ManageLeadDialog'
 import { useHistory } from 'react-router-dom';
 
 const Accordion = withStyles({
@@ -68,9 +68,10 @@ function DisplayData({ label, value }) {
     </div>
 }
 
-export default function OpportunityInAccordian({
-    opportunities, onNewOpportunityAdd, accountId, accountName,
-    expanded = true, recordsPerLine = 2, opportunityPermissions, resource,isRedirect, 
+export default function LeadInAccordion({
+
+    expanded = true,
+    recordsPerLine = 2,
 }) {
 
     const history = useHistory();
@@ -94,19 +95,12 @@ export default function OpportunityInAccordian({
             break;
     }
 
-    const [expandOpportunity, setExpandOpportunity] = useState(expanded);
-    const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
+    const [expandLead, setExpandLead] = useState(expanded);
+    const [showCreateLeadDialog, setShowCreateLeadDialog] = useState(false);
 
-    useEffect(() => {
-        let isExpanded = expandOpportunity
-        if (opportunities.length === 0 && isExpanded) isExpanded = false
-        else if (opportunities.length > 0 && !isExpanded) isExpanded = true
 
-        setExpandOpportunity(isExpanded)
-
-    }, [opportunities])
     return <>
-        <Accordion expanded={expandOpportunity}>
+        <Accordion expanded={expandLead}>
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -117,9 +111,9 @@ export default function OpportunityInAccordian({
                             <Box>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => setExpandOpportunity(!expandOpportunity)} >
+                                    onClick={(event) => setExpandLead(!expandLead)} >
                                     {
-                                        expandOpportunity === true ? (
+                                        expandLead === true ? (
                                             <ExpandLessIcon />
                                         ) : (
                                             <ExpandMoreIcon />
@@ -129,17 +123,17 @@ export default function OpportunityInAccordian({
                             </Box>
                             <Box padding="5px">
                                 <Typography variant="subtitle2">
-                                    Opportunity ({opportunities.length})
+                                    Leads (1)
                                 </Typography>
                             </Box>
                         </Box>
                     </Grid>
                     <Grid item xs={4} container justify="flex-end">
                         {
-                            opportunityPermissions.isCreate && <IconButton
+                            <IconButton
                                 color="primary"
                                 size="small"
-                                onClick={() => { setShowCreateOpportunityDialog(true) }}
+                                onClick={() => { setShowCreateLeadDialog(true) }}
                             >
                                 <ControlPointIcon />
                             </IconButton>
@@ -150,36 +144,38 @@ export default function OpportunityInAccordian({
             <AccordionDetails>
                 <>
                     {
-                        expandOpportunity && <>
+                        expandLead && <>
                             {
-                                opportunities && opportunities.length ?
-                                    <Grid container spacing={1}>
-                                        {
-                                            opportunities.map((obj, index) => (
-                                                <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
 
-                                                    <Card style={{ minWidth: "100%" }} variant="outlined">
-                                                        <CardContent>
-                                                            {/* <span className={classes.actionsItems}> */}
-                                                            {/* <VisibilityOutlined /> */}
-                                                            {/* <IconButton size="small">
+                                <Grid container spacing={1}>
+                                    {
+
+                                        <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
+
+                                            <Card style={{ minWidth: "100%" }} variant="outlined">
+                                                <CardContent>
+                                                    {/* <span className={classes.actionsItems}> */}
+                                                    {/* <VisibilityOutlined /> */}
+                                                    {/* <IconButton size="small">
                                                             <Delete color="error" />
                                                         </IconButton> */}
-                                                            {/* <EditOutlined /> */}
-                                                            {/* </span> */}
-                                                            <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
-                                                                <Typography className="mb-2">{obj?.opportunityName}</Typography>
-                                                            </Link>
-                                                            <DisplayData label='Stage' value={obj?.stage?.optionLabel ?? ''} />
-                                                            <DisplayData label='Amount' value={obj?.amount ?? ''} />
-                                                            <DisplayData label='Close Date' value={displayDate(obj.closeDate)} />
-                                                        </CardContent>
-                                                    </Card>
+                                                    {/* <EditOutlined /> */}
+                                                    {/* </span> */}
+                                                    <Link className="link" to="">
+                                                        <Typography className="mb-2">Lead 1</Typography>
+                                                    </Link>
+                                                    <DisplayData label='First Name' value="Samsher" />
+                                                    <DisplayData label='Middle Name' value="" />
+                                                    <DisplayData label='Last Name' value="Patel" />
+                                                    <DisplayData label='Status' value="Active" />
+                                                    <DisplayData label='Company' value="Vebholic" />
+                                                </CardContent>
+                                            </Card>
 
-                                                </Grid>
-                                            ))
-                                        }
-                                    </Grid> : null
+                                        </Grid>
+
+                                    }
+                                </Grid>
                             }
                         </>
                     }
@@ -192,27 +188,27 @@ export default function OpportunityInAccordian({
                 variant="contained"
                 color="primary"
                 size="small"
-                onClick={() => history.push(`/opportunity`, {
-                    accountId: accountId,
-                    accountName: accountName
-                })}>
+                onClick={() => { }}>
                 View All
              </Button>
         </Accordion>
 
-        {
-            showCreateOpportunityDialog && <ManageOpportunityDialog
+        {/* {
+            showCreateLeadDialog && <ManageLeadDialog
                 isNew={true}
-                open={showCreateOpportunityDialog}
-                onClose={() => setShowCreateOpportunityDialog(false)}
+                open={showCreateLeadDialog}
+                onClose={() => setShowCreateLeadDialog(false)}
                 onSuccess={() => {
-                    setShowCreateOpportunityDialog(false);
-                    onNewOpportunityAdd();
+                    setShowCreateLeadDialog(false);
+                    onNewLeadAdd();
                 }}
-                accountId={accountId}
-                resource={resource}
-                isRedirectTodetailPage={isRedirect}
+                dataToUpdate={null}
+                leadApi={leadApi}
+                // accountId={accountId}
+                // resource={resource}
+                // isRedirectTodetailPage={false}
             />
-        }
+        } */}
     </>
+
 }
