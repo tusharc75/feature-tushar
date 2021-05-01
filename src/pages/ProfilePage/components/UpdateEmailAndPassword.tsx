@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import Grid from '@material-ui/core/Grid';
 import { TextField as TextFieldFormik } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
@@ -12,6 +13,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import axiosInstance from "../../../axios/axiosInstance";
 import CustomButton from "../../../components/Helpers/CustomButton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { IconButton } from "@material-ui/core";
 
 const updatePassWordSchema = Yup.object().shape({
     oldPassword: Yup.string()
@@ -40,13 +42,17 @@ export default function ManageUpdatePassword({
 }) {
     const toastConfig = useContext(CustomToastContext);
     const [loading, setLoading] = useState(false)
+    const [isShowPassword, setIsShowPassword] = useState(false);
 
+    const toggleVisibility = () => {
+        setIsShowPassword(!isShowPassword)
+    }
     const handleSubmit = (values) => {
         if (isUpdatePassword) {
             // delete values["confirmPassword"]
             setLoading(true)
             axiosInstance()
-                .put(`/user/me/password`, {oldPassword: values.oldPassword, newPassword: values.newPassword } )
+                .put(`/user/me/password`, { oldPassword: values.oldPassword, newPassword: values.newPassword })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
@@ -117,12 +123,13 @@ export default function ManageUpdatePassword({
                                             {
                                                 isUpdatePassword ?
                                                     <>
-                                                        <Grid item sm={8}>
+                                                        <Grid style={{ display: "flex" }} item sm={8}>
+
                                                             <Field
                                                                 component={TextFieldFormik}
                                                                 fullWidth
                                                                 margin="dense"
-                                                                type="password"
+                                                                type={isShowPassword ? "string" : "password"}
                                                                 label="Old Password"
                                                                 name="oldPassword"
                                                                 variant="outlined"
@@ -130,6 +137,14 @@ export default function ManageUpdatePassword({
                                                                 value={values["oldPassword"]}
                                                                 onChange={(e) => setFieldValue("oldPassword", e.target.value.trimStart())}
                                                             />
+                                                            <IconButton onClick={toggleVisibility} size="small">
+                                                                <VisibilityIcon color="primary" />
+                                                            </IconButton>
+                                                        </Grid>
+                                                        <Grid item xs={1} sm={1} md={1}>
+
+
+
                                                         </Grid>
                                                         <Grid item sm={8}>
                                                             <Field
