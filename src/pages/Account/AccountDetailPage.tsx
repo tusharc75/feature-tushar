@@ -38,6 +38,10 @@ import QuickLinks, {
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import { FcFlowChart, FcContacts, FcBinoculars, FcConferenceCall, FcMultipleSmartphones, FcMoneyTransfer } from 'react-icons/fc';
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
+import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
+import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 const useStyles = makeStyles((theme) => ({
   container: {
     padding: "0px",
@@ -112,6 +116,7 @@ export default function AccountDetailPage(props) {
             ? data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
             : []
         );
+        
         setRelatedContactsLoading(false);
       });
   };
@@ -518,8 +523,13 @@ export default function AccountDetailPage(props) {
                   accountName={accountData.accountName}
                   recordsPerLine={2}
                   resource={accountResource}
+                  isRedirect={false}
                 />
               )}
+              <ProjectInAccordion />
+              <QuotesInAccordion />
+              <ProductBuilderInAccordion />
+              <LeadInAccordion />
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
@@ -646,6 +656,7 @@ export default function AccountDetailPage(props) {
               }}
               accountId={accountData._id}
               resource={accountResource}
+              isRedirectTodetailPage={false}
             />
           )}
           {showCreateContactDialog && (
