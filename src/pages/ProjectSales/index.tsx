@@ -1,43 +1,38 @@
-import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton, Grid } from "@material-ui/core";
-import { Delete as DeleteIcon } from "@material-ui/icons";
+import { useState, FC, useCallback, useEffect, useContext } from "react";
+import { Checkbox, Link as MuiLink } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
+
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
-import routes from "./../../components/Helpers/Routes";
-import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import CustomContainer from "../../components/CustomContainer";
+import routes from "../../components/Helpers/Routes";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import ProjectStrategyHeader from "./Header";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
-
+import CreateProjectStrategy from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CreateRole from "./CreateRole";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import { PERMISSION } from "../../constants/Roles";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-import { roleTypes } from "../../constants/helpers";
-import RoleHeader from "./RoleHeader";
 
-const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
-
-const Roles: FC = () => {
+const ProjectSales: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity },
+    state: { permissions },
   }: any = useData();
+
   const [searchVal, setSearchVal] = useState("");
-  const [selectedType, setSelectedType] = useState(1);
   const [query, setQuery] = useState({ page: 0, limit: 25 });
+  const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
-  const [loadingRoles, setLoadingRoles] = useState(false);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllRoles, setCheckAllRoles] = useState(false);
+  const [checkAllProjects, setCheckAllProjects] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -46,47 +41,45 @@ const Roles: FC = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
 
-  const fetchRoles = useCallback(() => {
-    let searchParams: any = { ...query, type: selectedType };
+  const fetchProjects = useCallback(() => {
+    let searchParams: any = { ...query };
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
-    let api = getSearchQuery("/role", searchParams);
-    setLoadingRoles(true);
+    let api = getSearchQuery("/projectStrategy", searchParams);
+    setLoadingProjects(true);
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
+        console.log(data);
         getRows(data);
         setRowCount(count);
-        setCheckAllRoles(false);
-        setLoadingRoles(false);
+        setCheckAllProjects(false);
+        setLoadingProjects(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setLoadingRoles(false);
+        setLoadingProjects(false);
       });
     // eslint-disable-next-line
-  }, [searchVal, query, selectedType]);
+  }, [searchVal, query]);
 
   useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+    fetchProjects();
+  }, [fetchProjects]);
 
   const getRows = (data: []) => {
     const rows = data.length
-      ? data.map((role: any) => ({
-        ...role,
-        id: role._id,
-        isChecked: false,
-        name: role.name,
-        description: role.description,
-        type: `${role.type === 1 ? "Global" : "Regional"} Role`,
-        createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
-        createdBy: role.createdBy,
-        updatedBy: role.updatedBy,
-      }))
+      ? data.map((project: any) => ({
+          id: project._id,
+          isChecked: false,
+          name: project.projectName,
+          projectOwner: project.projectOwner?.optionLabel,
+          createdAt: moment(project.createdAt).format("MMM Do, YYYY"),
+          createdBy: project?.createdBy,
+          updatedBy: project?.updatedBy,
+        }))
       : [];
-
     setDataRows(rows);
   };
 
@@ -97,9 +90,9 @@ const Roles: FC = () => {
       renderHeader: () => (
         <Checkbox
           color="primary"
-          checked={checkAllRoles}
+          checked={checkAllProjects}
           onChange={(ev) => {
-            setCheckAllRoles(ev.target.checked);
+            setCheckAllProjects(ev.target.checked);
             const gridData = dataRows;
             gridData.map((d) => {
               d.isChecked = ev.target.checked;
@@ -126,44 +119,26 @@ const Roles: FC = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 200,
+      width: 250,
       renderCell: (params: any) => (
-        <Link
+        <MuiLink
           title={params.value}
-          className="text-truncate link"
-          to={`${routes.roleDetails.path}/${params.row.id}`}
+          className="text-truncate"
+          component={Link}
+          to={`${routes.projectSalesDetail.path}/${params.row.id}`}
         >
           {params.value}
-        </Link>
+        </MuiLink>
       ),
     },
-    {
-      field: "description",
-      headerName: "Description",
-      width: 300,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          {params.value}
-        </p>
-      ),
-    },
-    {
-      field: "type",
-      headerName: "Type",
-      width: 140,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          {params.value}
-        </p>
-      ),
-    },
+
     // {
     //   field: "createdAt",
     //   headerName: "Created At",
     //   width: 150,
     //   renderCell: (params: any) => (
     //     <p title={`Created At • ${params.value}`} className="text-truncate">
-    //       {params.value}
+    //       {params?.value}
     //     </p>
     //   ),
     // },
@@ -177,14 +152,14 @@ const Roles: FC = () => {
       renderCell: (params: any) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
-            {params.value.user.firstName}
+            {params?.value?.user?.firstName}
             <span
               className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
+              title={`${params?.value?.user?.firstName} • ${moment(
+                params?.value?.date?.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
             >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
         ) : (
@@ -195,15 +170,15 @@ const Roles: FC = () => {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params: any) =>
         params?.value && params?.value?.user ? (
           <h5 className="updateBy">
             {params.value.user.firstName}
             <span
-              title={`${params.value.user.firstName} • ${params.value.date}`}
               className="updatedAtTime badge-date"
+              title={`${params.value.user.firstName} • ${moment(
+                params.value.date.slice(0, 10)
+              ).format("MMM Do, YYYY")}`}
             >
               {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
@@ -211,45 +186,9 @@ const Roles: FC = () => {
         ) : (
           <NoDataCell />
         ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
       disableColumnMenu: true,
       sortable: false,
       filterable: false,
-      renderCell: (params: any) => (
-        <>
-          {permissions.role.isDelete ? (
-            <span title="Delete Role">
-              <IconButton
-                aria-label="Delete"
-                onClick={() => showConfirmBox(params.row)}
-                disabled={
-                  rolePermissionArray.indexOf(params?.row?.permission) >= 0
-                }
-              >
-                {rolePermissionArray.indexOf(params?.row?.permission) >= 0 ? (
-                  <DeleteIcon fontSize="small" color="disabled" />
-                ) : (
-                  <DeleteIcon fontSize="small" color="error" />
-                )}
-              </IconButton>
-            </span>
-          ) : (
-            <Tooltip
-              className="cursor-stop"
-              title="You do not have permission to delete role"
-            >
-              <IconButton aria-label="Delete">
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-        </>
-      ),
-
-      width: 200,
     },
   ];
 
@@ -263,28 +202,22 @@ const Roles: FC = () => {
     const checkedRecords = gridData.filter((d) => d.isChecked === true);
 
     if (checkedRecords.length === gridData.length) {
-      setCheckAllRoles(true);
+      setCheckAllProjects(true);
     } else {
-      setCheckAllRoles(false);
+      setCheckAllProjects(false);
     }
+
+    handleSelectedProjects(params.row.id, ev.target.checked);
   };
 
   const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row.id) {
-        setDeleteRec(row);
-      }
-    } else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
+    setIsConformDialogVisible(true);
+    if (row && row.id) {
+      setDeleteRec(row);
     }
   };
 
-  const handleDeleteRole = async () => {
+  const handleDeleteProjects = async () => {
     setDeleteLoading(true);
     let recs = [];
     if (deleteRec?.id) {
@@ -294,10 +227,9 @@ const Roles: FC = () => {
         if (obj.isChecked) recs.push(obj.id);
       });
     }
-
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/role/remove`, { ids: [...recs] })
+        .put(`/projectStrategy/remove`, { ids: [...recs] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -307,7 +239,7 @@ const Roles: FC = () => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
-          fetchRoles();
+          fetchProjects();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -348,6 +280,18 @@ const Roles: FC = () => {
     }
   };
 
+  // Handle project selection
+  const handleSelectedProjects = (id, isChecked) => {
+    let tempSelectedProjects = [...selectedProjects],
+      curRecIndex = selectedProjects.indexOf(id);
+    if (isChecked && curRecIndex < 0) {
+      tempSelectedProjects = [...selectedProjects, id];
+    } else if (!isChecked && curRecIndex >= 0) {
+      tempSelectedProjects.splice(curRecIndex, 1);
+    }
+    setSelectedProjects(tempSelectedProjects);
+  };
+
   const handleCreate = () => {
     setIsOpen(true);
   };
@@ -355,11 +299,8 @@ const Roles: FC = () => {
   const handleClose = () => {
     setIsOpen(false);
   };
-  const handleRoleTypeSel = (filteredValue) => {
-    setSelectedType(filteredValue);
-  };
 
-  const onFilterChange = React.useCallback((params) => {
+  const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
       setQuery((prevState) => ({
         ...prevState,
@@ -371,41 +312,26 @@ const Roles: FC = () => {
     }
   }, []);
 
-  const disableDelete = dataRows.some(
-    (o) => o.isChecked && rolePermissionArray.indexOf(o?.permission) >= 0
-  );
-
   return (
     <>
       {isOpen && (
-        <CreateRole
+        <CreateProjectStrategy
           open={isOpen}
           close={handleClose}
-          fetchData={fetchRoles}
-          roleType={selectedType}
-          setToastConfig={toastConfig.setToastConfig}
-          selectedEntity={selectedEntity}
+          fetchData={fetchProjects}
         />
       )}
       <Layout>
-
-        <Grid container>
-          <Grid item md={12} sm={12} xs={12}>
-            <CustomBreadCrumbs routes={[routes.role]} />
-          </Grid>
-        </Grid>
-        <CustomContainer>
+        <CustomBreadCrumbs routes={[routes.projectSales]} />
+        <div className="main-container">
           <div className="header-panel">
-            <RoleHeader
-              selectedType={selectedType}
-              onTypeChange={handleRoleTypeSel}
-              options={roleTypes}
+            <ProjectStrategyHeader
               onSearch={handleSearch}
               searchVal={searchVal}
-              rolePermissions={permissions.role}
+              permissions={permissions}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              canDelete={!disableDelete}
+              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
             />
           </div>
           <div className="listing-grid">
@@ -414,8 +340,8 @@ const Roles: FC = () => {
                 Toolbar: DataGridCustomToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
-              loading={loadingRoles}
-              rows={loadingRoles ? [] : dataRows}
+              loading={loadingProjects}
+              rows={loadingProjects ? [] : dataRows}
               columns={columns}
               disableSelectionOnClick
               disableMultipleSelection
@@ -432,8 +358,7 @@ const Roles: FC = () => {
               onFilterModelChange={onFilterChange}
             />
           </div>
-
-        </CustomContainer>
+        </div>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -441,17 +366,19 @@ const Roles: FC = () => {
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
         ) : null}
+
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete this record ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteRole}
+            onOk={handleDeleteProjects}
           />
         ) : null}
       </Layout>
@@ -459,4 +386,4 @@ const Roles: FC = () => {
   );
 };
 
-export default Roles;
+export default ProjectSales;

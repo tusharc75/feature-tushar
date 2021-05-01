@@ -324,14 +324,13 @@ const Header = ({ toggleDrawer }) => {
           "No Entity"
         )}
       </MenuItem>
-
-      {/* <MenuItem>
+      <MenuItem>
         <Badge badgeContent={1} color="secondary">
           <Notifications />
         </Badge>
         <Box component="span" mx={1} />
         <p>Notifications</p>
-      </MenuItem> */}
+      </MenuItem>
       <MenuItem>
         <HelpOutline />
         <Box component="span" mx={1} my={2}/>
@@ -358,7 +357,7 @@ const Header = ({ toggleDrawer }) => {
               <ClearIcon />
             </IconButton>
 
-            <div
+            {/* <div
               className={classes.search}
               style={{ display: "block", width: "100%" }}
             >
@@ -375,7 +374,7 @@ const Header = ({ toggleDrawer }) => {
                 style={{ width: "100%" }}
                 inputProps={{ "aria-label": "search" }}
               />
-            </div>
+            </div> */}
           </Toolbar>
         </AppBar>
       </Slide>
@@ -467,18 +466,18 @@ const Header = ({ toggleDrawer }) => {
           ) : null}
 
           <div className={classes.sectionDesktop}>
-            {/* <IconButton aria-label="settings" color="inherit">
+            <IconButton aria-label="settings" color="inherit">
               <Badge badgeContent={1} color="secondary">
                 <Notifications />
               </Badge>
-            </IconButton> */}
+            </IconButton>
 
             <IconButton aria-label="help" color="inherit">
               <HelpOutline />
             </IconButton>
           </div>
 
-          <div className={classes.sectionMobile}>
+          {/* <div className={classes.sectionMobile}>
             <IconButton
               aria-label="search"
               onClick={() => setSearch(true)}
@@ -487,7 +486,7 @@ const Header = ({ toggleDrawer }) => {
             >
               <Search />
             </IconButton>
-          </div>
+          </div> */}
 
           <UserProfile
             anchorRef={anchorRef}

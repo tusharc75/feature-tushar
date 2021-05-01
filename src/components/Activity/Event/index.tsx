@@ -75,17 +75,17 @@ export const Event = ({ relatedTo, handleActivityRefresh }) => {
     }
 
     return (events &&
-        <Box>
+        <Box className="activityDetailBox">
             {events.length ?
                 <Fragment>
                     {events.map((_event, index) => (
-                        <Box key={_event._id} mb={1} border={1} p={1} borderColor="grey.300">
+                      <Box className="activity" key={_event._id}>
                             <Box>
                                 <Grid container>
-                                    <Grid item xs={8} >
-                                        <Typography variant="subtitle2">{_event.name}</Typography>
+                                    <Grid item xs={10} className="d-flex align-items-center gap-1"> 
+                                        <Typography variant="subtitle2">{_event.name}</Typography><span className="activity-date">End Date : {moment(_event.endDate).format("MMM DD YYYY")}</span>
                                     </Grid>
-                                    <Grid item xs={4} container justify="flex-end" >
+                                    <Grid item xs={2} container justify="flex-end" >
                                         <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _event._id)} >
                                             <MoreHorizIcon />
                                         </IconButton>
@@ -98,9 +98,6 @@ export const Event = ({ relatedTo, handleActivityRefresh }) => {
                                         <ListRelatedTo relatedTo={_event.relatedTo} originRelatedTo={relatedTo} />
                                         {/* <Chip label={_event.status} size="small" color="primary" /> */}
                                     </Grid>
-                                    <Grid item xs={6} container justify="flex-end">
-                                        <Typography variant="caption" >End Date : {moment(_event.endDate).format("MMM DD YYYY")}</Typography>
-                                    </Grid>
                                 </Grid>
                             </Box>
                         </Box>))}
@@ -109,7 +106,7 @@ export const Event = ({ relatedTo, handleActivityRefresh }) => {
                         relatedTo={relatedTo}
                     />
                 </Fragment>
-                : <Box p={1}>
+                : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
                     <Typography variant="subtitle2">No Past Event</Typography>
                 </Box>
             }

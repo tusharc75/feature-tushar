@@ -47,7 +47,7 @@ export default function Sidebar({ onItemClick, activeLink, userData, onFetchUser
             <div className="d-flex flex-column gap-4 px-4 pt-2 pb-3" >
                 {
                     userMenu.map((k, index) => {
-                        return <div key={index} className={`font-size-3 link d-flex justify-content-center align-items-center gap-1 ${styles.profileSidebarLink}`}>
+                        return <div key={index} className={`font-size-3 link d-flex align-items-center gap-1 ${styles.profileSidebarLink}`}>
                             <span className={`${styles.menuLink} ${activeLink === k.id ? styles.active : ""}`}>
                                 <Icon >{k.icon}</Icon>
                                 <Typography className={styles.linkLabel} align="left" key={index} onClick={() => onItemClick(k)}>{k.label} </Typography>

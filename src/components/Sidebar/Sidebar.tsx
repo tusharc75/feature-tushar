@@ -199,9 +199,12 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         <Toolbar />
         <div className={classes.toolbar}>
           {/* <div className={classes.sidebarUser}>
-            <Avatar className="d-flex align-items-center gap-1"></Avatar>
-            <div className="d-flex align-items-center gap-1">Linda Miller</div>
-            <small className="d-flex align-items-center gap-1">Front-end Developer</small>
+            {
+              user?.user?.avatar ? <Avatar className="d-flex align-items-center gap-1" src={user?.user?.avatar}></Avatar>
+                : <Avatar className="d-flex align-items-center gap-1"></Avatar>
+            }
+            <div className="d-flex align-items-center gap-1">{[user?.user?.firstName, user?.user?.lastName].filter(f => f).join(" ")}</div>
+            <small className="d-flex align-items-center gap-1">{user?.user?.email}</small>
           </div> */}
           <IconButton onClick={handleToggleDrawer}>
             {toggleDrawer ? <ChevronLeft /> : <ChevronRight />}
