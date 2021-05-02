@@ -150,7 +150,6 @@ const LeadDetailsPage = () => {
         .get(`${leadApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           setConvertedOpportunityName(data?.staticData?.opportunity?.opportunityName)
-          console.log(convertedOpportunityName)
           const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName]
