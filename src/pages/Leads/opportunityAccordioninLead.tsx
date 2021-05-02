@@ -9,14 +9,14 @@ import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
-import routes from './../../components/Helpers/Routes'
+import routes from '../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
+import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
-import currencies from './../../constants/currency_with_country.json';
+import currencies from '../../constants/currency_with_country.json';
 
 const Accordion = withStyles({
     root: {
