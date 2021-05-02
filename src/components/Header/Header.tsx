@@ -171,12 +171,13 @@ const Header = ({ toggleDrawer }) => {
 
     setLoadingNotifications(true);
 
-    // axiosInstance().get("getAllNotification").then(({ data: { data } }) => {
-    //   setNotificationList(data);
-    // }).catch((error) => {
-    //   setLoadingNotifications(false);
-    //   toastConfig.setToastConfig(error);
-    // })
+    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      setNotificationList(data);
+      setLoadingNotifications(false);
+    }).catch((error) => {
+      setLoadingNotifications(false);
+      toastConfig.setToastConfig(error);
+    })
   };
 
   const handleFullScreenNotificationClose = () => {
@@ -194,12 +195,13 @@ const Header = ({ toggleDrawer }) => {
     setMobileScreenNotificationAnchorEl(event.currentTarget);
     setLoadingNotifications(true);
 
-    // axiosInstance().get("getAllNotification").then(({ data: { data } }) => {
-    //   setNotificationList(data);
-    // }).catch((error) => {
-    //   setLoadingNotifications(false);
-    //   toastConfig.setToastConfig(error);
-    // })
+    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      setNotificationList(data);
+      setLoadingNotifications(false);
+    }).catch((error) => {
+      setLoadingNotifications(false);
+      toastConfig.setToastConfig(error);
+    })
   };
 
   const handleMobileScreenNotificationClose = () => {

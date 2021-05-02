@@ -113,7 +113,7 @@ function OpportunityDetailsPage() {
           setOpportunityFields(data);
           setLoading(false);
 
-          const processSteps = data.find(d => d.isRead && d.fieldData.type == "process");
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == "process");
           setSteps(processSteps.fieldData.option.map(m => {
             return {
               text: m.optionLabel,

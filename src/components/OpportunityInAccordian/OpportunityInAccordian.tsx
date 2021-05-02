@@ -16,6 +16,7 @@ import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
+import currencies from './../../constants/currency_with_country.json';
 
 const Accordion = withStyles({
     root: {
@@ -77,7 +78,7 @@ function DisplayData({ label, value, icon }) {
 
 export default function OpportunityInAccordian({
     opportunities, onNewOpportunityAdd, accountId, accountName,
-    expanded = true, recordsPerLine = 2, opportunityPermissions, resource,isRedirect, 
+    expanded = true, recordsPerLine = 2, opportunityPermissions, resource, isRedirect,
 }) {
 
     const history = useHistory();
@@ -181,7 +182,9 @@ export default function OpportunityInAccordian({
                                                                     </Link>
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={4}>
-                                                                    <Typography className="amount"> {obj?.amount ?? ''}</Typography>
+                                                                    <Typography className="amount">
+                                                                        {currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative}
+                                                                        {obj?.amount ?? ''}</Typography>
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
