@@ -121,9 +121,6 @@ export const customerContact = {
 export const profilePage = {
   profilePageRoute: "/profile",
 };
-export const brandConfiguration = {
-  brandConfigurationRoute: "/brand-configuration"
-}
 
 export const profileMenuItems = {
   profile: 1,
