@@ -105,19 +105,15 @@ function App() {
     state: { user },
   }: any = useData();
 
-
-  // if (user?.user?._id) {
-  //   setInterval(() => {
-  //     notification.setCount(notification.count + 1);
-  //     // axiosInstance().get(`/notificationCount/${user?.user?._id}`).then(({ data: { data } }) => {
-  //     //   console.log(data);
-  //     //   debugger;
-  //     //   // notification.setCount();
-  //     // }).catch((error) => {
-  //     //   toast.setToastConfig(error);
-  //     // });
-  //   }, 10000);
-  // }
+  if (user?.user?._id) {
+    setInterval(() => {
+      axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+        notification.setCount(count);
+      }).catch((error) => {
+        toast.setToastConfig(error);
+      });
+    }, 60000);
+  }
 
   const conditionalRedirect = (Comp, location) => {
     return !user ? (
