@@ -13,6 +13,7 @@ import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import ManageLeadDialog from '../../pages/Leads/ManageLeadDialog/ManageLeadDialog'
 import { useHistory } from 'react-router-dom';
+import { FaEye } from 'react-icons/fa';
 
 const Accordion = withStyles({
     root: {
@@ -181,16 +182,10 @@ export default function LeadInAccordion({
                     }
                 </>
             </AccordionDetails>
-
-            <Box marginY={1} />
-            <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => { }}>
-                View All
-             </Button>
+            <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
+                <FaEye /> View All &#8599;
+            </Box>
+            <Box margin={1} />
         </Accordion>
 
         {/* {

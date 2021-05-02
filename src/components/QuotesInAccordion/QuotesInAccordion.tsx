@@ -12,7 +12,7 @@ import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import { useHistory } from 'react-router-dom';
-
+import { FaEye } from 'react-icons/fa';
 
 const Accordion = withStyles({
     root: {
@@ -68,7 +68,7 @@ function DisplayData({ label, value }) {
     </div>
 }
 
-export default function QuotesInAccordion({expanded = true, recordsPerLine = 2}){
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 }) {
 
     const history = useHistory();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
@@ -126,7 +126,7 @@ export default function QuotesInAccordion({expanded = true, recordsPerLine = 2})
                             <IconButton
                                 color="primary"
                                 size="small"
-                                onClick={() => {  }}
+                                onClick={() => { }}
                             >
                                 <ControlPointIcon />
                             </IconButton>
@@ -139,48 +139,42 @@ export default function QuotesInAccordion({expanded = true, recordsPerLine = 2})
                     {
                         expandQuote && <>
                             {
-                                
-                                    <Grid container spacing={1}>
-                                        {
-                                            
-                                                <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
 
-                                                    <Card style={{ minWidth: "100%" }} variant="outlined">
-                                                        <CardContent>
-                                                            {/* <span className={classes.actionsItems}> */}
-                                                            {/* <VisibilityOutlined /> */}
-                                                            {/* <IconButton size="small">
+                                <Grid container spacing={1}>
+                                    {
+
+                                        <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
+
+                                            <Card style={{ minWidth: "100%" }} variant="outlined">
+                                                <CardContent>
+                                                    {/* <span className={classes.actionsItems}> */}
+                                                    {/* <VisibilityOutlined /> */}
+                                                    {/* <IconButton size="small">
                                                             <Delete color="error" />
                                                         </IconButton> */}
-                                                            {/* <EditOutlined /> */}
-                                                            {/* </span> */}
-                                                            <Link className="link" to="">
-                                                                <Typography className="mb-2">Quote 1</Typography>
-                                                            </Link>
-                                                            <DisplayData label='Status' value="Active" />
-                                                            <DisplayData label='Due Date' value="24/05/2020" />
-                                                        </CardContent>
-                                                    </Card>
+                                                    {/* <EditOutlined /> */}
+                                                    {/* </span> */}
+                                                    <Link className="link" to="">
+                                                        <Typography className="mb-2">Quote 1</Typography>
+                                                    </Link>
+                                                    <DisplayData label='Status' value="Active" />
+                                                    <DisplayData label='Due Date' value="24/05/2020" />
+                                                </CardContent>
+                                            </Card>
 
-                                                </Grid>
-                                            
-                                        }
-                                    </Grid> 
+                                        </Grid>
+
+                                    }
+                                </Grid>
                             }
                         </>
                     }
                 </>
             </AccordionDetails>
-
-            <Box marginY={1} />
-            <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-            >
-                View All
-             </Button>
+            <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
+                <FaEye /> View All &#8599;
+            </Box>
+            <Box margin={1} />
         </Accordion>
 
         {/* {
