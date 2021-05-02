@@ -223,6 +223,7 @@ export default function ManageProfile(props) {
                                                             <Box marginX="2px" />
                                                             <h4
                                                                 title={k}
+                                                                className={styles.userProfileFieldText}
                                                                 style={{
                                                                     color: theme.palette.text.secondary,
                                                                     fontWeight: "normal",
@@ -232,6 +233,7 @@ export default function ManageProfile(props) {
                                                         </Box>
                                                     </Grid>
                                                     <Grid item xs={6} md={7} sm={7}><Typography
+                                                        align="left"
                                                         title={otherDetails[k] || "_ _ _"}
                                                         className={styles.userProfileFieldText}
                                                         variant="body2"

@@ -33,11 +33,10 @@ import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
 import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
-import { profilePage } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import routes from './../../components/Helpers/Routes';
+import routes from "../Helpers/Routes"
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -266,9 +265,16 @@ const Header = ({ toggleDrawer }) => {
 
     if (option && option.profile) {
       history.push({
-        pathname: profilePage.profilePageRoute,
+        pathname: routes.profilePage.path
       });
     }
+    if (option && option.brandConfiguration) {
+      history.push({
+        pathname: routes.brandConfiguration.path
+      });
+    }
+
+
     setOpen(false);
   };
 
