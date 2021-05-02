@@ -55,8 +55,9 @@ const EntityDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.entity,
   ]);
-  const [showUsers, setShowUsers] = useState(2);
-  const [showRegionalRoles, setShowRegionalRoles] = useState(2);
+  const showRecordsBeforeViewAll = 2;
+  const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
+  const [showRegionalRoles, setShowRegionalRoles] = useState(showRecordsBeforeViewAll);
 
   useEffect(() => {
     if (id) {
@@ -450,15 +451,17 @@ const EntityDetailsPage = () => {
                         />
 
                         <Box marginY={1} />
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => setShowUsers(users.length)}
-                        >
-                          View All ({users.length})
-                    </Button>
+                        {
+                          users.length > showRecordsBeforeViewAll && <Button
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => setShowUsers(users.length)}
+                          >
+                            View All ({users.length})
+                          </Button>
+                        }
                       </>
                     ) : (
                       <Box textAlign="center" padding={2}>
@@ -515,15 +518,18 @@ const EntityDetailsPage = () => {
                         unassignRole={handleUnassignRole}
                       />
                       <Box marginY={1} />
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => setShowRegionalRoles(roles.length)}
-                      >
-                        View All ({roles.length})
+                      {
+                        roles.length > showRecordsBeforeViewAll &&
+                        <Button
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => setShowRegionalRoles(roles.length)}
+                        >
+                          View All ({roles.length})
                       </Button>
+                      }
                     </>
                   ) : (
                     <Box textAlign="center" padding={2}>

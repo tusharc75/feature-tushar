@@ -70,8 +70,10 @@ const RoleDetailsPage = () => {
     description: "",
   });
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.role]);
-  const [showUsers, setShowUsers] = useState(2);
-  const [showEntities, setShowEntities] = useState(2);
+
+  const showRecordsBeforeViewAll = 2;
+  const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
+  const [showEntities, setShowEntities] = useState(showRecordsBeforeViewAll);
 
   useEffect(() => {
     if (id) {
@@ -473,15 +475,17 @@ const RoleDetailsPage = () => {
                         />
 
                         <Box marginY={1} />
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => setShowEntities(roleData.entity.length)}
-                        >
-                          View All ({roleData.entity.length})
-                      </Button>
+                        {
+                          roleData.entity.length > showRecordsBeforeViewAll && <Button
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={() => setShowEntities(roleData.entity.length)}
+                          >
+                            View All ({roleData.entity.length})
+                          </Button>
+                        }
                       </>
                     ) : (
                       <Box textAlign="center" padding={2}>
@@ -547,15 +551,17 @@ const RoleDetailsPage = () => {
                         currentUser={user?.user._id}
                       />
                       <Box marginY={1} />
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => setShowUsers(roleData.user.length)}
-                      >
-                        View All ({roleData.user.length})
-                      </Button>
+                      {
+                        roleData.user.length > showRecordsBeforeViewAll && <Button
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => setShowUsers(roleData.user.length)}
+                        >
+                          View All ({roleData.user.length})
+                        </Button>
+                      }
                     </>
                   ) : (
                     <Box textAlign="center" padding={2}>

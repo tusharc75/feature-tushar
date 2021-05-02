@@ -1,43 +1,38 @@
-import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton, Grid } from "@material-ui/core";
-import { Delete as DeleteIcon } from "@material-ui/icons";
+import { useState, FC, useCallback, useEffect, useContext } from "react";
+import { Checkbox, Link as MuiLink } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
 
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
-import routes from "./../../components/Helpers/Routes";
-import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import Header from "./Header";
+import routes from "../../components/Helpers/Routes";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import ProjectStrategyHeader from "./Header";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
-import CreateUser from "./CreateUser";
+import CreateProjectStrategy from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
-import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-import CustomContainer from "../../components/CustomContainer";
 
-let userTimeout;
-const User: FC = () => {
+const ProjectSales: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions },
+    state: { permissions },
   }: any = useData();
+
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
+  const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllUsers, setCheckAllUsers] = useState(false);
+  const [checkAllProjects, setCheckAllProjects] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -46,51 +41,45 @@ const User: FC = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
 
-  const fetchUsers = useCallback(() => {
-    if (userTimeout) {
-      clearTimeout(userTimeout);
-    }
-
-    userTimeout = setTimeout(() => {
-      let searchParams: any = { ...query };
-      searchParams = searchVal
-        ? { ...searchParams, search: searchVal }
-        : { ...searchParams };
-      let api = getSearchQuery("/user", searchParams);
-      setLoadingUsers(true);
-      axiosInstance()
-        .get(api)
-        .then(({ data: { data, count } }) => {
-          getRows(data);
-          setRowCount(count);
-          setCheckAllUsers(false)
-          setLoadingUsers(false);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setLoadingUsers(false);
-        });
-    }, 600);
-  }, [searchVal, query, toastConfig]);
+  const fetchProjects = useCallback(() => {
+    let searchParams: any = { ...query };
+    searchParams = searchVal
+      ? { ...searchParams, search: searchVal }
+      : { ...searchParams };
+    let api = getSearchQuery("/projectStrategy", searchParams);
+    setLoadingProjects(true);
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data, count } }) => {
+        console.log(data);
+        getRows(data);
+        setRowCount(count);
+        setCheckAllProjects(false);
+        setLoadingProjects(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoadingProjects(false);
+      });
+    // eslint-disable-next-line
+  }, [searchVal, query]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchProjects();
+  }, [fetchProjects]);
 
   const getRows = (data: []) => {
     const rows = data.length
-      ? data.map((user: any) => ({
-        id: user._id,
-        isChecked: false,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-        createdBy: user.createdBy,
-        updatedBy: user.updatedBy,
-        status: user.blocked ? user.blocked : false,
-      }))
+      ? data.map((project: any) => ({
+          id: project._id,
+          isChecked: false,
+          name: project.projectName,
+          projectOwner: project.projectOwner?.optionLabel,
+          createdAt: moment(project.createdAt).format("MMM Do, YYYY"),
+          createdBy: project?.createdBy,
+          updatedBy: project?.updatedBy,
+        }))
       : [];
-
     setDataRows(rows);
   };
 
@@ -101,9 +90,9 @@ const User: FC = () => {
       renderHeader: () => (
         <Checkbox
           color="primary"
-          checked={checkAllUsers}
+          checked={checkAllProjects}
           onChange={(ev) => {
-            setCheckAllUsers(ev.target.checked);
+            setCheckAllProjects(ev.target.checked);
             const gridData = dataRows;
             gridData.map((d) => {
               d.isChecked = ev.target.checked;
@@ -130,64 +119,26 @@ const User: FC = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 400,
+      width: 250,
       renderCell: (params: any) => (
-        <Link
+        <MuiLink
           title={params.value}
-          className="text-truncate link"
-          to={`${routes.userDetail.path}/${params.row.id}`}
+          className="text-truncate"
+          component={Link}
+          to={`${routes.projectSalesDetail.path}/${params.row.id}`}
         >
           {params.value}
-        </Link>
-      ),
-      sortable: false,
-      filterable: false,
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 150,
-      sortable: false,
-      filterable: false,
-      align: "center",
-      headerAlign: "center",
-      disableColumnMenu: true,
-      renderCell: (params: any) => (
-        <div style={{ width: 150 }}>
-          {params.value ? (
-            <Tooltip title="Inactive">
-              <IconButton>
-                <FaUserAltSlash className="text-error" />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Active">
-              <IconButton>
-                <FaUserCheck className="text-success" />
-              </IconButton>
-            </Tooltip>
-          )}{" "}
-        </div>
+        </MuiLink>
       ),
     },
 
-    {
-      field: "email",
-      headerName: "Email",
-      width: 300,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          {params.value}
-        </p>
-      ),
-    },
     // {
     //   field: "createdAt",
     //   headerName: "Created At",
-    //   width: 200,
+    //   width: 150,
     //   renderCell: (params: any) => (
     //     <p title={`Created At • ${params.value}`} className="text-truncate">
-    //       {params.value}
+    //       {params?.value}
     //     </p>
     //   ),
     // },
@@ -201,14 +152,14 @@ const User: FC = () => {
       renderCell: (params: any) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
-            {params.value.user.firstName}
+            {params?.value?.user?.firstName}
             <span
               className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
+              title={`${params?.value?.user?.firstName} • ${moment(
+                params?.value?.date?.slice(0, 10)
               ).format("MMM Do, YYYY")}`}
             >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
         ) : (
@@ -219,57 +170,27 @@ const User: FC = () => {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) =>
-        params?.value?.user ? (
+      renderCell: (params: any) =>
+        params?.value && params?.value?.user ? (
           <h5 className="updateBy">
-            {params?.value?.user?.firstName}
-            <span title={params?.value?.date} className="updatedAtTime badge-date">
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
+            {params.value.user.firstName}
+            <span
+              className="updatedAtTime badge-date"
+              title={`${params.value.user.firstName} • ${moment(
+                params.value.date.slice(0, 10)
+              ).format("MMM Do, YYYY")}`}
+            >
+              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
         ) : (
           <NoDataCell />
         ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
       disableColumnMenu: true,
       sortable: false,
       filterable: false,
-      renderCell: (params: any) =>
-        user?.user._id === params.row.id ? (
-          <p title="There is no action for currently logged in user">
-            No Actions
-          </p>
-        ) : (
-          <>
-            {permissions.user.isDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You do not have permission to delete user"
-              >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </>
-        ),
-      width: 200,
     },
-  ] as Array<any>;
+  ];
 
   const updateCheckedStatus = (params, ev) => {
     const gridData = [...dataRows];
@@ -281,29 +202,22 @@ const User: FC = () => {
     const checkedRecords = gridData.filter((d) => d.isChecked === true);
 
     if (checkedRecords.length === gridData.length) {
-      setCheckAllUsers(true);
+      setCheckAllProjects(true);
     } else {
-      setCheckAllUsers(false);
+      setCheckAllProjects(false);
     }
-    handleSelectedUsers(params.row.id, ev.target.checked);
+
+    handleSelectedProjects(params.row.id, ev.target.checked);
   };
 
   const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row.id) {
-        setDeleteRec(row);
-      }
-    } else {
-      if (dataRows.find((d) => d.isChecked && d.id === user?.user._id)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
+    setIsConformDialogVisible(true);
+    if (row && row.id) {
+      setDeleteRec(row);
     }
   };
 
-  const handleDeleteUser = async () => {
+  const handleDeleteProjects = async () => {
     setDeleteLoading(true);
     let recs = [];
     if (deleteRec?.id) {
@@ -313,10 +227,9 @@ const User: FC = () => {
         if (obj.isChecked) recs.push(obj.id);
       });
     }
-
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/user/remove`, { ids: [...recs] })
+        .put(`/projectStrategy/remove`, { ids: [...recs] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -326,7 +239,7 @@ const User: FC = () => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRec) setDeleteRec({});
-          fetchUsers();
+          fetchProjects();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -367,16 +280,16 @@ const User: FC = () => {
     }
   };
 
-  // Handle entity selection
-  const handleSelectedUsers = (id, isChecked) => {
-    let tempSelectedUsers = [...selectedUsers],
-      curRecIndex = selectedUsers.indexOf(id);
+  // Handle project selection
+  const handleSelectedProjects = (id, isChecked) => {
+    let tempSelectedProjects = [...selectedProjects],
+      curRecIndex = selectedProjects.indexOf(id);
     if (isChecked && curRecIndex < 0) {
-      tempSelectedUsers = [...selectedUsers, id];
+      tempSelectedProjects = [...selectedProjects, id];
     } else if (!isChecked && curRecIndex >= 0) {
-      tempSelectedUsers.splice(curRecIndex, 1);
+      tempSelectedProjects.splice(curRecIndex, 1);
     }
-    setSelectedUsers(tempSelectedUsers);
+    setSelectedProjects(tempSelectedProjects);
   };
 
   const handleCreate = () => {
@@ -387,15 +300,7 @@ const User: FC = () => {
     setIsOpen(false);
   };
 
-  const handleOpenDialog = () => {
-    setRolesDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setRolesDialogOpen(false);
-  };
-
-  const onFilterChange = React.useCallback((params) => {
+  const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
       setQuery((prevState) => ({
         ...prevState,
@@ -410,35 +315,22 @@ const User: FC = () => {
   return (
     <>
       {isOpen && (
-        <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
-      )}
-      {rolesDialogOpen && (
-        <AssignRolesDialog
-          rolesDialogOpen={rolesDialogOpen}
-          handleCloseDialog={handleCloseDialog}
-          userIds={selectedUsers}
-          assignedRoles={null}
-          onSuccess={() => {
-            handleCloseDialog();
-            setSelectedUsers([]);
-          }}
+        <CreateProjectStrategy
+          open={isOpen}
+          close={handleClose}
+          fetchData={fetchProjects}
         />
       )}
       <Layout>
-
-        <Grid container direction="row">
-          <CustomBreadCrumbs routes={[routes.user]} />
-        </Grid>
-        <CustomContainer>
+        <CustomBreadCrumbs routes={[routes.projectSales]} />
+        <div className="main-container">
           <div className="header-panel">
-            <Header
+            <ProjectStrategyHeader
               onSearch={handleSearch}
               searchVal={searchVal}
-              userPermissions={permissions.user}
+              permissions={permissions}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              openRolesDialog={handleOpenDialog}
-              rolesActionDiabled={Boolean(!selectedUsers.length)}
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
             />
           </div>
@@ -448,8 +340,8 @@ const User: FC = () => {
                 Toolbar: DataGridCustomToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
-              loading={loadingUsers}
-              rows={loadingUsers ? [] : dataRows}
+              loading={loadingProjects}
+              rows={loadingProjects ? [] : dataRows}
               columns={columns}
               disableSelectionOnClick
               disableMultipleSelection
@@ -466,7 +358,7 @@ const User: FC = () => {
               onFilterModelChange={onFilterChange}
             />
           </div>
-        </CustomContainer>
+        </div>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -474,17 +366,19 @@ const User: FC = () => {
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
         ) : null}
+
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete this record ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteUser}
+            onOk={handleDeleteProjects}
           />
         ) : null}
       </Layout>
@@ -492,4 +386,4 @@ const User: FC = () => {
   );
 };
 
-export default User;
+export default ProjectSales;

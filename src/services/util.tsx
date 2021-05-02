@@ -32,5 +32,5 @@ export const getErrorMessage = (err) => {
 };
 
 export const displayDate = (date) => {
-  return date ? moment(date).format("MM/DD/YYYY") : "";
+  return date ? moment(date).format("MMM-DD-YYYY") : "";
 };

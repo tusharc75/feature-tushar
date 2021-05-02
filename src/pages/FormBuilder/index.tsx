@@ -12,7 +12,9 @@ import routes from "./../../components/Helpers/Routes";
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-
+import CustomContainer from "../../components/CustomContainer";
+import DetailsPageHeader from "../../components/DetailsPageHeader";
+import { FaWpforms } from 'react-icons/fa';
 const FormBuilder = () => {
 
 
@@ -53,9 +55,21 @@ const FormBuilder = () => {
 
   return (
     <Layout>
-      <CustomBreadCrumbs routes={[routes.formBuilder]} />
-      <Box p={2} bgcolor="white">
-        <div style={{ height: window.innerHeight - 120, width: "100%" }}>
+      <Grid container>
+        <Grid item md={12} sm={12} xs={12}>
+          <CustomBreadCrumbs routes={[routes.formBuilder]} />
+        </Grid>
+      </Grid>
+      <CustomContainer>
+        <Grid container spacing={1} >
+          <Grid item xs={12} className="d-flex align-items-center gap-1">
+            <div className="header-panel d-flex align-items-center gap-1">
+              <FaWpforms className="headerLogo" /> <span className="listingHeader">Form Builder
+            </span>
+            </div>
+          </Grid>
+        </Grid>
+        <div className="listing-grid">
           <DataGrid
             components={{
               Toolbar: DataGridCustomToolbar,
@@ -72,7 +86,8 @@ const FormBuilder = () => {
             density="compact"
           />
         </div>
-      </Box>
+
+      </CustomContainer>
     </Layout>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
 
 import {
@@ -16,6 +16,7 @@ import {
   Typography,
   useMediaQuery,
   ButtonBase,
+  Popover,
 } from "@material-ui/core";
 import {
   Search,
@@ -33,6 +34,8 @@ import UserProfile from "./../UserProfile";
 import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
 import axiosInstance from "../../axios/axiosInstance";
+import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../Helpers/Routes"
 
 const useStyles = makeStyles((theme) => ({
@@ -129,6 +132,11 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     whiteSpace: "nowrap",
   },
+  notificationHeight: {
+    minWidth: 200,
+    minHeight: 200,
+    maxHeight: `calc(100vh - 200px)`
+  }
 }));
 
 const Header = ({ toggleDrawer }) => {
@@ -152,6 +160,63 @@ const Header = ({ toggleDrawer }) => {
   const isArcelorMenuOpen = Boolean(servicesAnchorEl);
   const isEntitiesMenuOpen = Boolean(entitiesEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const notification = useContext(CustomNotificationCountContext);
+  const toastConfig = useContext(CustomToastContext);
+
+  // For FullScreen Notification - Start
+  const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
+
+  const handleFullScreenNotificationClick = (event) => {
+    setFullScreenNotificationAnchorEl(event.currentTarget);
+
+    setLoadingNotifications(true);
+
+    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      debugger;
+      setNotificationList(data);
+      setLoadingNotifications(false);
+    }).catch((error) => {
+      setLoadingNotifications(false);
+      toastConfig.setToastConfig(error);
+    })
+  };
+
+  const handleFullScreenNotificationClose = () => {
+    setFullScreenNotificationAnchorEl(null);
+  };
+
+  const fullScreenNotificationOpen = Boolean(fullScreenNotificationAnchorEl);
+  const fullScreenNotificationId = fullScreenNotificationOpen ? 'full-screen-notification' : undefined;
+  // For FullScreen Notification - End
+
+  // For MobileScreen Notification - Start
+  const [mobileScreenNotificationAnchorEl, setMobileScreenNotificationAnchorEl] = React.useState(null);
+
+  const handleMobileScreenNotificationClick = (event) => {
+    setMobileScreenNotificationAnchorEl(event.currentTarget);
+    setLoadingNotifications(true);
+
+    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      debugger;
+      setNotificationList(data);
+      setLoadingNotifications(false);
+    }).catch((error) => {
+      setLoadingNotifications(false);
+      toastConfig.setToastConfig(error);
+    })
+  };
+
+  const handleMobileScreenNotificationClose = () => {
+    setMobileScreenNotificationAnchorEl(null);
+  };
+
+  const mobileScreenNotificationOpen = Boolean(mobileScreenNotificationAnchorEl);
+  const mobileScreenNotificationId = mobileScreenNotificationOpen ? 'mobile-screen-notification' : undefined;
+  // For MobileScreen Notification - End
+
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [notificationList, setNotificationList] = useState([]);
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -262,6 +327,26 @@ const Header = ({ toggleDrawer }) => {
     </Menu>
   );
 
+  const NotificationContent = ({ data }) => {
+    return <div className={`${classes.notificationHeight} py-1`} style={{ position: "relative" }}>
+      {
+        data.map((d) => {
+          return <div style={{ borderBottom: "1px solid lightgrey" }} className="p-3">
+            {
+              routes[d.route] ? <Link to={`${routes[d.route].path}/${d.id}`}>
+                <h6>{d.text}</h6>
+              </Link> : d.text
+            }
+          </div>
+        })
+      }
+
+      {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
+        View All
+      </Button> */}
+    </div>
+  }
+
   const entitiesMenuId = "entities-menu";
 
   const entitiesMenu = (
@@ -332,13 +417,38 @@ const Header = ({ toggleDrawer }) => {
         )}
       </MenuItem>
 
-      {/* <MenuItem>
-        <Badge badgeContent={1} color="secondary">
-          <Notifications />
-        </Badge>
-        <Box component="span" mx={1} />
-        <p>Notifications</p>
-      </MenuItem> */}
+      <div>
+        <MenuItem onClick={handleMobileScreenNotificationClick}>
+
+          <Badge badgeContent={notification.count} color="secondary"
+            aria-describedby={mobileScreenNotificationId}>
+            <Notifications />
+          </Badge>
+          <Box component="span" mx={1} />
+          <p>Notifications</p>
+
+          <Popover
+            id={mobileScreenNotificationId}
+            open={mobileScreenNotificationOpen}
+            anchorEl={mobileScreenNotificationAnchorEl}
+            onClose={handleMobileScreenNotificationClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'center',
+            }}
+          >
+            {
+              loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
+                (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
+            }
+          </Popover>
+        </MenuItem>
+      </div>
+
       <MenuItem>
         <HelpOutline />
         <Box component="span" mx={1} my={2} />
@@ -365,7 +475,7 @@ const Header = ({ toggleDrawer }) => {
               <ClearIcon />
             </IconButton>
 
-            <div
+            {/* <div
               className={classes.search}
               style={{ display: "block", width: "100%" }}
             >
@@ -382,7 +492,7 @@ const Header = ({ toggleDrawer }) => {
                 style={{ width: "100%" }}
                 inputProps={{ "aria-label": "search" }}
               />
-            </div>
+            </div> */}
           </Toolbar>
         </AppBar>
       </Slide>
@@ -474,6 +584,33 @@ const Header = ({ toggleDrawer }) => {
           ) : null}
 
           <div className={classes.sectionDesktop}>
+            <div>
+              <IconButton aria-describedby={fullScreenNotificationId} aria-label="settings" color="inherit" onClick={handleFullScreenNotificationClick}>
+                <Badge badgeContent={notification.count} color="secondary">
+                  <Notifications />
+                </Badge>
+              </IconButton>
+
+              <Popover
+                id={fullScreenNotificationId}
+                open={fullScreenNotificationOpen}
+                anchorEl={fullScreenNotificationAnchorEl}
+                onClose={handleFullScreenNotificationClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+              >
+                {
+                  loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
+                    (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
+                }
+              </Popover>
+            </div>
             {/* <IconButton aria-label="settings" color="inherit">
               <Badge badgeContent={1} color="secondary">
                 <Notifications />
@@ -485,7 +622,7 @@ const Header = ({ toggleDrawer }) => {
             </IconButton>
           </div>
 
-          <div className={classes.sectionMobile}>
+          {/* <div className={classes.sectionMobile}>
             <IconButton
               aria-label="search"
               onClick={() => setSearch(true)}
@@ -494,7 +631,7 @@ const Header = ({ toggleDrawer }) => {
             >
               <Search />
             </IconButton>
-          </div>
+          </div> */}
 
           <UserProfile
             anchorRef={anchorRef}

@@ -36,8 +36,7 @@ import QuickLinks, {
   IQuickLinks,
 } from "../../components/QuickLinks/QuickLinks";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
-import { BsChatSquareQuoteFill } from "react-icons/bs";
-import { FcFlowChart, FcContacts, FcBinoculars, FcConferenceCall, FcMultipleSmartphones } from 'react-icons/fc';
+import { FcFlowChart, FcContacts, FcBinoculars, FcConferenceCall, FcMultipleSmartphones, FcMoneyTransfer } from 'react-icons/fc';
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
@@ -238,7 +237,7 @@ export default function AccountDetailPage(props) {
 
   const quickLinks: IQuickLinks[] = [
     {
-      label: "Account Heirarchy",
+      label: "Account Hierarchy",
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
@@ -274,7 +273,7 @@ export default function AccountDetailPage(props) {
       label: "Quotes",
       count: 0,
       show: true,
-      icon: <BsChatSquareQuoteFill />,
+      icon: <FcMoneyTransfer />,
       class: "quotes"
     },
     {

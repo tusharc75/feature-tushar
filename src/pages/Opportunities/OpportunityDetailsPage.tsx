@@ -17,9 +17,10 @@ import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
-import { customerAccount, supplierAccount, yyyyMMDD } from "../../constants/helpers";
+import { customerAccount, supplierAccount, yyyyMMDD, stepsToIgnoreManualCompleteForOpportunity } from "../../constants/helpers";
 import { opportunity } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
+import OpportunityContacts from "./OpportunityContacts";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -39,15 +40,7 @@ function OpportunityDetailsPage() {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [steps, setSteps] = useState([
-    { text: "First", canCompleteManually: true },
-    { text: "Second", canCompleteManually: true },
-    { text: "Third", canCompleteManually: true },
-    { text: "Fourth", canCompleteManually: true },
-    { text: "Fifth", canCompleteManually: true },
-    { text: "Doa", id: "doa", canCompleteManually: false },
-    { text: "Finish", canCompleteManually: true }
-  ]);
+  const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0)
 
   const handleOpenUpdateDialog = () => {
@@ -104,11 +97,11 @@ function OpportunityDetailsPage() {
 
   const handleMainPoints = (data) => {
     let mainPoint = {};
-      mainPoint["Account Name"]= data?.accountName?.optionLabel || "";
-      mainPoint["Close Date"]= yyyyMMDD(data.closeDate);
-      mainPoint["Amount"]= data.amount || "";
-      mainPoint["Opportunity Owner"]= data?.owner?.optionLabel || "";
-    
+    mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
+    mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
+    mainPoint["Amount"] = data.amount || "";
+    mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
+
     setMainPoints(mainPoint);
   };
 
@@ -119,6 +112,14 @@ function OpportunityDetailsPage() {
         .then(({ data: { data } }) => {
           setOpportunityFields(data);
           setLoading(false);
+
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == "process");
+          setSteps(processSteps.fieldData.option.map(m => {
+            return {
+              text: m.optionLabel,
+              canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+            }
+          }));
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -281,7 +282,7 @@ function OpportunityDetailsPage() {
                 </DetailsPageHeader>
               )}
 
-              {/* <CustomSteps steps={steps} active={activeStep} />
+              <CustomSteps steps={steps} active={activeStep} />
 
               <div className="w-100 d-flex justify-content-end mt-2">
                 {
@@ -290,7 +291,7 @@ function OpportunityDetailsPage() {
                     disabled={!steps[activeStep].canCompleteManually}
                     onClick={() => { setActiveStep(activeStep + 1) }}>Mark {steps[activeStep].text} as Completed</Button>
                 }
-              </div> */}
+              </div>
 
               {loading ? (
                 <Box padding={2}>
@@ -352,6 +353,9 @@ function OpportunityDetailsPage() {
                     ]}
                     handleActivityRefresh={() => { }}
                   />
+
+                  <OpportunityContacts />
+
                 </div>
               )}
             </Paper>

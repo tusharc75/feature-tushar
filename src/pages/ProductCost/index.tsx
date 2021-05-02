@@ -62,7 +62,7 @@ const ProductCost = () => {
             headerName: "Product Cost",
             width: 300,
             renderCell: (params) => (
-                <Link className="LeadNameLink" to={`${routes.productCost.path}/${params.row.id}`} >
+                <Link className="link" to={`${routes.productCost.path}/${params.row.id}`} >
                     {params.row.name}
                 </Link>
             )

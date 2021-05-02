@@ -7,7 +7,6 @@ const DialogContent = withStyles((theme) => ({
     root: {
         margin: 0,
         padding: theme.spacing(1, 2),
-        maxHeight: 'calc(100vh - 180px)'
     },
 }))(MuiDialogContent);
 
