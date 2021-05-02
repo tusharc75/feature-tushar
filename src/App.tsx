@@ -105,19 +105,18 @@ function App() {
     state: { user },
   }: any = useData();
 
-  // if (localStorage.getItem("token")) {
-  //   let interval = setInterval(() => {
-  //     if (localStorage.getItem("token")) {
-  //       axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-  //         notification.setCount(count);
-  //       }).catch((error) => {
-  //         toast.setToastConfig(error);
-  //       });
-  //     } else {
-  //       clearInterval(interval);
-  //     }
-  //   }, 60000);
-  // }
+  setInterval(() => {
+    if (localStorage.getItem("token")) {
+      axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+        notification.setCount(count);
+      }).catch((error) => {
+        toast.setToastConfig(error);
+      });
+    }
+    //  else {
+    //   clearInterval(interval);
+    // }
+  }, 60000);
 
   const conditionalRedirect = (Comp, location) => {
     return !user ? (
