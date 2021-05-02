@@ -173,9 +173,6 @@ const Opportunities = () => {
           searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: { $in: [accountDetails.accountId] } }]);
         }
       }
-      else {
-        debugger;
-      }
 
       let api = getSearchQuery(opportunityApi, searchParams);
       try {

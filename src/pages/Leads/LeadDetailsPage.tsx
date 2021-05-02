@@ -28,7 +28,7 @@ import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccord
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 import { withStyles } from "@material-ui/core/styles";
-import OpportunityAccordionInLead from './OpportunityAccordionInLead';
+// import OpportunityAccordionInLead from './opportunityAccordionInLead';
 
 
 
@@ -332,11 +332,11 @@ const LeadDetailsPage = () => {
               ) : (
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
-             <OpportunityAccordionInLead 
+             {/* <OpportunityAccordionInLead 
                 recordsPerLine={2}
                 opportunityName={leadData?.staticData?.opportunity?.opportunityName}
                 opportunityId={leadData?.staticData?.opportunity?._id}
-             />
+             /> */}
               <ProjectInAccordion />
               <QuotesInAccordion />
               <ProductBuilderInAccordion />
