@@ -1030,10 +1030,9 @@ const FormTypes = (props) => {
           name={name}
           onChange={handleUploadFile}
           style={{ display: "none" }}
-          accept=".doc , .docs , .docx"
           onClick={(e: any) => (e.target.value = null)}
           type="file"
-          accept={accept || ""}
+          accept={accept || ".doc , .docs , .docx"}
         />
         <label htmlFor={name}>
           <Button
