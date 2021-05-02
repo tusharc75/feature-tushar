@@ -241,8 +241,6 @@ export default function Account(props) {
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -265,8 +263,6 @@ export default function Account(props) {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value?.user ? (
           <h5 className="updateBy">
@@ -285,8 +281,6 @@ export default function Account(props) {
       field: "parentAccount",
       headerName: "Parent Account",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => (
         <CustomRenderCell value={params?.value?.optionLabel} />
       ),
@@ -614,11 +608,20 @@ export default function Account(props) {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let field = params.filterModel.items[0].columnField
+
+      if (params.filterModel.items[0].columnField == 'createdBy') {
+        field = "createdBy.user"
+      }
+      if (params.filterModel.items[0].columnField == 'updatedBy') {
+        field = "updatedBy.user"
+      }
+      const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
+
     } else {
       setQuery({ page: 0, limit: 25 });
     }
@@ -813,6 +816,7 @@ export default function Account(props) {
               // onRowClick={handleRowClick}
               density="compact"
               onFilterModelChange={onFilterChange}
+              filterMode="server"
             />
           </div>
           {showDeleteWarningConfirmBox ? (
@@ -849,8 +853,8 @@ export default function Account(props) {
             <ConfirmationDialog
               open={singleApproveDisapproveAccount.show}
               message={`Are you sure, you want to ${singleApproveDisapproveAccount.approved
-                  ? "approve"
-                  : "disapprove"
+                ? "approve"
+                : "disapprove"
                 } account: ${singleApproveDisapproveAccount.accountName} ? `}
               onClose={() =>
                 setSingleApproveDisapproveAccount({
@@ -867,8 +871,8 @@ export default function Account(props) {
             <ConfirmationDialog
               open={multipleApproveDisapproveAccount.show}
               message={`Are you sure, you want to ${multipleApproveDisapproveAccount.approved
-                  ? "approve"
-                  : "disapprove"
+                ? "approve"
+                : "disapprove"
                 } selected ${multipleApproveDisapproveAccount.selectedRecords
                 } account(s) ? `}
               onClose={() =>
