@@ -69,7 +69,7 @@ const Product = () => {
             headerName: "Product Name",
             width: 300,
             renderCell: (params) => (
-                <Link className="LeadNameLink" onClick={() => { OpenProduct(params.row.id); setIsClone(false) }}  >
+                <Link className="link" onClick={() => { OpenProduct(params.row.id); setIsClone(false) }}  >
                     {params.row.productName}
                 </Link>
             )

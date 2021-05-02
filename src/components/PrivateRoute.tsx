@@ -34,6 +34,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
       pathnames[0] === "product-category" ||
       pathnames[0] === "product-cost" ||
       pathnames[0] === "form-builder" ||
+      pathnames[0] === "project-sales" ||
       pathnames[0] === "profile"
     ) {
       setAccess(true);
