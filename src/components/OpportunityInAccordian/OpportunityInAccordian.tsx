@@ -184,7 +184,7 @@ export default function OpportunityInAccordian({
                                                                 <Grid item xs={12} sm={4}>
                                                                     <Typography className="amount">
                                                                         {currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative}
-                                                                        {obj?.amount ?? ''}</Typography>
+                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
