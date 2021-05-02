@@ -40,6 +40,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 
 import ProductCost from "./pages/ProductCost";
 import CreateProductCost from "./pages/ProductCost/CreateProductCost";
+import BrandConfiguration from "./pages/BrandConfiguration";
 
 import {
   termsAndCondition,
@@ -266,6 +267,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/profile">
             <UserProfilePage profileBreadCrumbs={routes.profilePage} />
+          </PrivateRoute>
+          <PrivateRoute exact path="/brand-configuration">
+            <BrandConfiguration />
           </PrivateRoute>
           <PrivateRoute exact path="/user/detail/:id">
             <UserDetailsPage />
