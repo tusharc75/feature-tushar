@@ -134,6 +134,8 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
   },
   notificationHeight: {
+    minWidth: 200,
+    minHeight: 200,
     maxHeight: `calc(100vh - 200px)`
   }
 }));
@@ -172,6 +174,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      debugger;
       setNotificationList(data);
       setLoadingNotifications(false);
     }).catch((error) => {
@@ -196,6 +199,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      debugger;
       setNotificationList(data);
       setLoadingNotifications(false);
     }).catch((error) => {
@@ -317,7 +321,7 @@ const Header = ({ toggleDrawer }) => {
     </Menu>
   );
 
-  const NotificationContent = (data) => {
+  const NotificationContent = ({ data }) => {
     return <div className={`${classes.notificationHeight} py-1`} style={{ position: "relative" }}>
       {
         data.map((d) => {
@@ -331,9 +335,9 @@ const Header = ({ toggleDrawer }) => {
         })
       }
 
-      <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
+      {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All
-      </Button>
+      </Button> */}
     </div>
   }
 
@@ -432,8 +436,8 @@ const Header = ({ toggleDrawer }) => {
             }}
           >
             {
-              loadingNotifications ? "Loading Notifications..." :
-                <NotificationContent data={notificationList} />
+              loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
+                (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
             }
           </Popover>
         </MenuItem>
@@ -595,7 +599,10 @@ const Header = ({ toggleDrawer }) => {
                   horizontal: 'center',
                 }}
               >
-                <NotificationContent />
+                {
+                  loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
+                    (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
+                }
               </Popover>
             </div>
             {/* <IconButton aria-label="settings" color="inherit">
