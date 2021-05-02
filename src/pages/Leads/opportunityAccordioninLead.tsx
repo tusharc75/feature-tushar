@@ -76,7 +76,7 @@ function DisplayData({ label, value }) {
     </div>
 }
 
-export default function OpportunityInLeadAccordian({
+export default function OpportunityAccordionInLead({
     opportunityName, opportunityId,
     expanded = true, recordsPerLine = 2,
 }) {
@@ -160,10 +160,10 @@ export default function OpportunityInLeadAccordian({
                                                 <CardContent className="detailListing">
 
                                                     <Grid container className="detailCardHeader">
-                                                        <Grid item xs={12} sm={8}>
+                                                        <Grid item xs={12} sm={12}>
                                                             {opportunityName ?
                                                                 (<Link className="link" to={`${routes.opportunityDetail.path}/${opportunityId}`}>
-                                                                    <Typography >{opportunityName} </Typography>
+                                                                    <DisplayData label="Name" value={opportunityName} />
                                                                 </Link>) : <DisplayData label="" value="No Opportunity" />
                                                             }
                                                         </Grid>
