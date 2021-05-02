@@ -139,7 +139,7 @@ export default function ManageUpdatePassword({
                                                                 onChange={(e) => setFieldValue("oldPassword", e.target.value.trimStart())}
                                                             />
                                                             <IconButton onClick={toggleVisibility} size="small">
-                                                                {isShowPassword ? <VisibilityOffIcon color="primary"/> : <VisibilityIcon color="primary" />}
+                                                                {isShowPassword ? <VisibilityOffIcon color="primary" /> : <VisibilityIcon color="primary" />}
                                                             </IconButton>
                                                         </Grid>
 
