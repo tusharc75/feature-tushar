@@ -332,11 +332,11 @@ const LeadDetailsPage = () => {
               ) : (
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
-             <OpportunityAccordionInLead 
+             {/* <OpportunityAccordionInLead 
                 recordsPerLine={2}
                 opportunityName={leadData?.staticData?.opportunity?.opportunityName}
                 opportunityId={leadData?.staticData?.opportunity?._id}
-             />
+             /> */}
               <ProjectInAccordion />
               <QuotesInAccordion />
               <ProductBuilderInAccordion />

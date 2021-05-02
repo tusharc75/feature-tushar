@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Paper, Tab, Tabs, Typography } from "@material-ui/core";
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
@@ -14,6 +14,7 @@ import routes from "../../components/Helpers/Routes";
 import axiosInstance from "./../../axios/axiosInstance";
 import Activity from "../../components/Activity";
 import {
+  DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -26,6 +27,8 @@ import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
 import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
 import { FcFlowChart } from "react-icons/fc";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
+import BoxWithBorder from "../../components/BoxWithBorder";
+import { BiFace } from 'react-icons/bi'
 
 const Roles = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -495,6 +498,49 @@ const Roles = (props) => {
                     </Typography>
                     <Box className={`${contactClass.custom_box1}`}></Box>
                   </div> */}
+
+              {contactData?.staticData?.lead && permissions &&
+                permissions.lead &&
+                permissions.lead.isRead && (
+                  <Grid item xs={12}>
+                    <BoxWithBorder
+                      style={{ marginTop: "3%", padding: "0px" }}
+                    >
+                      <div className={`${contactClass.detail_page_div3}`}>
+                        <div className={`${contactClass.leads_data}`}>
+                          <Typography
+                            color="primary"
+                            variant="h6"
+                            style={{ margin: "0 10px" }}
+                          >
+                            Converted Lead
+                          </Typography>
+                        </div>
+                        <Box className={`${contactClass.custom_box1}`}>
+                          <Card>
+                            <CardContent className="detailListing">
+                              <Grid container className="detailCardHeader">
+                                <Grid item xs={12} sm={12}>
+                                  <Link className="link f_size"
+                                    to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                    {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
+                                  </Link>
+                                </Grid>
+                              </Grid>
+                              <Grid container>
+                                <Grid item xs={12} sm={6}>
+                                  {
+                                    contactData?.staticData?.lead?.title ? <DisplayData label='Title' value={contactData?.staticData?.lead.title || ''} icon={< BiFace size={20} />} /> : ''
+                                  }
+                                </Grid>
+                              </Grid>
+                            </CardContent>
+                          </Card>
+                        </Box>
+                      </div>
+                    </BoxWithBorder>
+                  </Grid>
+                )}
             </Paper>
           </Grid>
         </Grid>

@@ -103,7 +103,7 @@ export default function Contact(props) {
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
   });
-
+  console.log("history", history);
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
     isUpdate: false,
@@ -339,7 +339,6 @@ export default function Contact(props) {
 
     if (accountDetails.accountId) {
       searchParams["filterById"] = JSON.stringify([{ field: "accountName", term: accountDetails.accountId }]);
-
     }
     let api = getSearchQuery(`/${contactApi}`, searchParams);
 

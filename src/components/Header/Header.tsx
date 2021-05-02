@@ -173,7 +173,6 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
-      debugger;
       setNotificationList(data);
       setLoadingNotifications(false);
     }).catch((error) => {
@@ -198,7 +197,6 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
-      debugger;
       setNotificationList(data);
       setLoadingNotifications(false);
     }).catch((error) => {
