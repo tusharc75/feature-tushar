@@ -342,7 +342,7 @@ const Header = ({ toggleDrawer }) => {
       }
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
-        View All
+        View All &#8599;
       </Button> */}
     </div>
   }

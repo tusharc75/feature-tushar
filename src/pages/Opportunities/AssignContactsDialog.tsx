@@ -1,0 +1,161 @@
+import React, { useState, useEffect, useContext } from "react";
+import {
+    Button,
+    Checkbox,
+    CircularProgress,
+    Dialog,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Typography,
+} from "@material-ui/core";
+import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
+import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
+import Loader from "../../components/Loader";
+import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+
+export default function AssignContactsDialog({
+    opportunityId,
+    open,
+    title,
+    onSuccess,
+    handleCloseDialog,
+    // roleIds,
+    contacts,
+    assignedContacts,
+    contactType
+}) {
+    const toastConfig = useContext(CustomToastContext);
+    const [users, setUsers] = useState([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [selectedContacts, setSelectedUsers] = useState([]);
+    const [isAssigning, setAssigning] = useState(false);
+
+    const [supplierContacts, setSupplierContacts] = useState(contacts.supplierContacts)
+    const [customerContacts, setCustomerContacts] = useState(contacts.customerContacts)
+
+    const [currentContacts, setCurrentContacts] = useState(contactType === "supplier" ? supplierContacts : customerContacts)
+
+    useEffect(() => {
+        currentContacts.map(d => {
+            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false
+        })
+
+        // axiosInstance()
+        //     .get(`/user`)
+        //     .then(({ data: { data } }) => {
+        //         setUsers(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)))
+        //         setLoadingUsers(false);
+        //     })
+        //     .catch((error) => {
+        //         setLoadingUsers(false);
+        //         toastConfig.setToastConfig(error);
+        //     });
+        // eslint-disable-next-line
+    }, [currentContacts]);
+
+    const handleContactSelection = (e, id) => {
+        const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
+        let copyOfAllCurrentContacts = currentContacts;
+        copyOfAllCurrentContacts[indexOfContactToChange].isChecked = e.target.checked;
+
+        setCurrentContacts(copyOfAllCurrentContacts);
+
+
+        // let tempSelectedUsers = [...selectedContacts];
+        // let curIndex = tempSelectedUsers.indexOf(id);
+        // if (e.target.checked) {
+        //     if (curIndex < 0) tempSelectedUsers = [...tempSelectedUsers, id];
+        // } else if (curIndex >= 0) {
+        //     tempSelectedUsers.splice(curIndex, 1);
+        // }
+        // setSelectedUsers(tempSelectedUsers);
+    };
+
+    const handleAssignContacts = async () => {
+        // allContacts.filter(f => f.isChecked).map(m => m._id)
+        setAssigning(true);
+
+        const dataToSave = {
+            _id: opportunityId,
+            supplierContacts: contactType === "supplier" ? currentContacts.filter(f => f.isChecked).map(m => m._id) : supplierContacts,
+            customerContacts: contactType === "customer" ? currentContacts.filter(f => f.isChecked).map(m => m._id) : customerContacts
+        };
+
+        await axiosInstance()
+            .put(`/opportunity/add-contacts`, dataToSave)
+            .then(({ data }) => {
+                setAssigning(false);
+                toastConfig.setToastConfig({
+                    message: data.message,
+                    type: "success",
+                    open: true,
+                });
+
+                onSuccess();
+            })
+            .catch((error) => {
+                setAssigning(false);
+                toastConfig.setToastConfig(error);
+            });
+    };
+
+    return (
+        <Dialog
+            fullWidth
+            maxWidth="xs"
+            open={open}
+            onClose={handleCloseDialog}
+            aria-labelledby="assign-roles-dialog"
+        >
+            <CustomDialogHeader title={title} />
+            <CustomDialogContent>
+                {loadingUsers ? (
+                    <Loader text="Loading Contacts" />
+                ) : currentContacts.length ? (
+                    <List style={{ padding: 0 }}>
+                        {currentContacts.map((contact) => (
+                            <ListItem divider key={contact._id}>
+                                <ListItemIcon>
+                                    <Checkbox
+                                        edge="start"
+                                        onChange={(e) => handleContactSelection(e, contact._id)}
+                                        checked={contact.isChecked}
+                                        inputProps={{
+                                            "aria-labelledby": `checkbox-list-label-${contact._id}`,
+                                        }}
+                                    />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={[contact.firstName, contact.middleName, contact.lastName].filter(f => f).join(" ")}
+                                // secondary={role.email}
+                                />
+                            </ListItem>
+                        ))}
+                    </List>
+                ) : (
+                    <Typography>No Contacts found to add</Typography>
+                )}
+            </CustomDialogContent>
+            <CustomDialogFooter>
+                <Button
+                    disabled={isAssigning}
+                    onClick={handleCloseDialog}
+                    color="primary"
+                >
+                    Cancel
+                </Button>
+                <Button
+                    onClick={handleAssignContacts}
+                    color="primary"
+                >
+                    {isAssigning ? <CircularProgress size={22} /> : "Save"}
+                </Button>
+            </CustomDialogFooter>
+        </Dialog>
+    );
+};
+
