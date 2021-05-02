@@ -28,65 +28,10 @@ import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccord
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 import { withStyles } from "@material-ui/core/styles";
+import OpportunityInLeadAccordian from "./opportunityAccordioninLead";
 
 
-const Accordion = withStyles({
-  root: {
-    border: "1px solid rgba(0, 0, 0, .125)",
-    boxShadow: "none",
-    "&:not(:last-child)": {
-      borderBottom: 0,
-    },
-    "&:before": {
-      display: "none",
-    },
-    "&$expanded": {
-      margin: "auto",
-    },
-  },
-  expanded: {},
-})(MuiAccordion);
 
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: "#e4e4e4",
-    borderBottom: "1px solid rgba(0, 0, 0, .125)",
-    "&$expanded": {
-      minHeight: 46,
-    },
-  },
-  content: {
-    "&$expanded": {
-      margin: "12px 0",
-    },
-  },
-  expanded: {},
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    display: "block",
-  },
-  amount: {
-    float: "right",
-    fontWeight: "bold"
-  }
-
-}))(MuiAccordionDetails);
-
-function DisplayData({ label, value }) {
-  return <div style={{ flexGrow: 1 }}>
-    <Grid container spacing={2}>
-      <Grid item sm={6} xs={6} md={4}>
-        <Typography>{label}</Typography>
-      </Grid>
-      <Grid item sm={6} xs={6} md={8}>
-        <Typography>{value}</Typography>
-      </Grid>
-    </Grid>
-  </div>
-}
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -142,14 +87,15 @@ const LeadDetailsPage = () => {
     fetchLeadData();
   }, [user, selectedEntity]);
 
-
+  let leadToOpportunity;
   const fetchLeadData = async () => {
     setLoading(true);
     if (selectedEntity) {
       axiosInstance()
         .get(`${leadApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          setConvertedOpportunityName(data?.staticData?.opportunity?.opportunityName)
+          leadToOpportunity=data?.staticData?.opportunity;
+          console.log(leadToOpportunity)
           const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName]
@@ -388,69 +334,11 @@ const LeadDetailsPage = () => {
               ) : (
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
-              <Accordion expanded={expandOpportunity}>
-                <AccordionSummary
-                  aria-controls="user-panel-content"
-                  id="user-panel-header"
-                >
-                  <Grid container>
-                    <Grid item xs={8}>
-                      <Box display="flex">
-                        <Box>
-                          <IconButton
-                            size="small"
-                            onClick={(event) => setExpandOpportunity(!expandOpportunity)} >
-                            {
-                              expandOpportunity === true ? (
-                                <ExpandLessIcon />
-                              ) : (
-                                <ExpandMoreIcon />
-                              )
-                            }
-                          </IconButton>
-                        </Box>
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">
-                            Opportunity ({convertedOpportunityName?.length > 0 ? 1 : 0})
-                                </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-
-                  </Grid>
-                </AccordionSummary>
-                <Box margin={0.50} />
-                <AccordionDetails>
-                  <>
-                    {
-                      expandOpportunity && <>
-                        {
-
-                          <Grid container spacing={1}>
-                            {
-
-                              <Grid item xs={12} sm={12} md={12} key={1} >
-                                <Card style={{ minWidth: "100%" }}>
-                                  <CardContent className="detailListing">
-                                    {convertedOpportunityName?.length > 0 ?
-                                      <DisplayData label='Name' value={convertedOpportunityName} /> :
-                                      <DisplayData label="Nothing to show" value="" />
-                                    }
-                                  </CardContent>
-                                </Card>
-                              </Grid>
-
-
-                            }
-                          </Grid>
-                        }
-                      </>
-                    }
-                  </>
-                </AccordionDetails>
-
-                <Box margin={1} />
-              </Accordion>
+             <OpportunityInLeadAccordian 
+                recordsPerLine={2}
+                opportunityName={leadData?.staticData?.opportunity?.opportunityName}
+                opportunityId={leadData?.staticData?.opportunity?._id}
+             />
               <ProjectInAccordion />
               <QuotesInAccordion />
               <ProductBuilderInAccordion />
