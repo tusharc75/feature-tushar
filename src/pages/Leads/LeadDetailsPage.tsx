@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Paper } from "@material-ui/core";
+import { Box, Button, Grid, Paper, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Card, CardContent } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { Skeleton } from "@material-ui/lab";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
+import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -22,6 +27,11 @@ import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAcc
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
+import { withStyles } from "@material-ui/core/styles";
+import OpportunityAccordionInLead from './OpportunityAccordionInLead';
+
+
+
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -49,6 +59,10 @@ const LeadDetailsPage = () => {
   const [hasPermissionToConvertToOpportunity, setHasPermissionToConvertToOpportunity] = useState(false);
   const [isLeadAlreadyConvertedToOpportunity, setIsLeadAlreadyConvertedToOpportunity] = useState(false);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
+  const [isExpandedAccordion, setIsExpandedAccordion] = useState(true);
+  const [expandOpportunity, setExpandOpportunity] = useState(isExpandedAccordion);
+  const [convertedOpportunityName, setConvertedOpportunityName] = useState("");
+
   const [
     convertLeadToOpportunityConfirmationDialog,
     setConvertLeadToOpportunityConfirmationDialog,
@@ -73,6 +87,7 @@ const LeadDetailsPage = () => {
     fetchLeadData();
   }, [user, selectedEntity]);
 
+  
   const fetchLeadData = async () => {
     setLoading(true);
     if (selectedEntity) {
@@ -317,6 +332,11 @@ const LeadDetailsPage = () => {
               ) : (
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
+             <OpportunityAccordionInLead 
+                recordsPerLine={2}
+                opportunityName={leadData?.staticData?.opportunity?.opportunityName}
+                opportunityId={leadData?.staticData?.opportunity?._id}
+             />
               <ProjectInAccordion />
               <QuotesInAccordion />
               <ProductBuilderInAccordion />
