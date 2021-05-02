@@ -98,7 +98,7 @@ export default function BrandConfiguration(props) {
                 <CustomBreadCrumbs routes={[routes.brandConfiguration]} />
             </Grid>
             <Grid container spacing={1} className="detail-container" style={{ padding: '0 50px' }}>
-                <Grid item xs={12} sm={12} lg={12} spacing={2}>
+                <Grid item xs={12} sm={12} lg={12} >
                     <Paper>
                         {
                             user?.user?.userType === userType.brandAdmin ?
