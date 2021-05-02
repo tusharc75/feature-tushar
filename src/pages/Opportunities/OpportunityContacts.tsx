@@ -32,11 +32,11 @@ export default function OpportunityContacts({ contacts, title, onAddContact, con
     function ContactDetails({ contacts, contactApi, }) {
         return <>
             {
-                contacts && contacts.length ? <>
+                contacts && contacts.length ? <Grid container spacing={2}>
                     {
                         contacts.map((obj, index) => {
-                            return <>
-                                <Card key={index}>
+                            return <Grid key={index} item xs={12} sm={12} md={6}>
+                                <Card>
                                     <CardContent className="detailListing">
                                         <Grid container className="detailCardHeader">
                                             <Grid item xs={12} sm={12}>
@@ -48,29 +48,24 @@ export default function OpportunityContacts({ contacts, title, onAddContact, con
                                         <Grid container>
                                             <Grid item xs={12} sm={6}>
                                                 {
-                                                    obj?.title ? <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} /> : ''
+                                                    <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} />
                                                 }
 
                                             </Grid>
                                         </Grid>
                                     </CardContent>
                                 </Card>
-                                <Box margin={1} />
-                            </>
+                            </Grid>
+
+                            // <Box margin={1} />
                         })
                     }
-                    {/* <Box margin={1} /> */}
-                    {/* <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center">
-                        <FaEye /> <Link onClick={() => history.push(`/${contactRoute}`, {
-                            accountId: accountId,
-                            accountName: accountName
-                        })}>View All</Link>
-                    </Box> */}
-                </> : <Typography>No Contacts found</Typography>
+                </Grid> : <Typography className="m-2">No Contacts found</Typography>
+
+
             }
         </>
     }
-
 
     return (
         <>
@@ -83,7 +78,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact, con
                     }
                     subheader={title}
                 />
-                <CardContent className="m-2">
+                <CardContent>
                     <ContactDetails contacts={contacts} contactApi={contactApi} />
                 </CardContent>
             </Card>
