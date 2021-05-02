@@ -87,15 +87,13 @@ const LeadDetailsPage = () => {
     fetchLeadData();
   }, [user, selectedEntity]);
 
-  let leadToOpportunity;
+  
   const fetchLeadData = async () => {
     setLoading(true);
     if (selectedEntity) {
       axiosInstance()
         .get(`${leadApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
-          leadToOpportunity=data?.staticData?.opportunity;
-          console.log(leadToOpportunity)
           const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName]
