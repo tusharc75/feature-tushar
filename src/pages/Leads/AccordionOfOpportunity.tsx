@@ -76,7 +76,7 @@ function DisplayData({ label, value }) {
     </div>
 }
 
-export default function OpportunityAccordionInLead({
+export default function AccordionOfOpportunity({
     opportunityName, opportunityId,
     expanded = true, recordsPerLine = 2,
 }) {
@@ -162,9 +162,12 @@ export default function OpportunityAccordionInLead({
                                                     <Grid container className="detailCardHeader">
                                                         <Grid item xs={12} sm={12}>
                                                             {opportunityName ?
-                                                                (<Link className="link" to={`${routes.opportunityDetail.path}/${opportunityId}`}>
-                                                                    <DisplayData label="Name" value={opportunityName} />
-                                                                </Link>) : <DisplayData label="" value="No Opportunity" />
+                                                                (<div style={{display:'flex'}}>
+                                                                    <h3 style={{marginRight:10}}>Name</h3>
+                                                                    <Link className="link" to={`${routes.opportunityDetail.path}/${opportunityId}`}>
+                                                                        <Typography>{opportunityName}</Typography>
+                                                                    </Link>
+                                                                </div>) : <Typography>No Opportunity</Typography>
                                                             }
                                                         </Grid>
 
@@ -181,10 +184,7 @@ export default function OpportunityAccordionInLead({
                     }
                 </>
             </AccordionDetails>
-            <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/opportunity`, {
-            })} p={1} display="flex" justifyContent="center" alignItems="center">
-                <FaEye /> View All &#8599;
-            </Box>
+            
             <Box margin={1} />
         </Accordion>
 

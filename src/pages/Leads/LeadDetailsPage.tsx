@@ -28,7 +28,7 @@ import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccord
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 import { withStyles } from "@material-ui/core/styles";
-import OpportunityAccordionInLead from './OpportunityAccordionInLead';
+import OpportunityAccordionInLead from './AccordionOfOpportunity';
 
 
 
