@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Paper } from "@material-ui/core";
+import { Box, Button, Grid, Paper, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Card, CardContent } from "@material-ui/core";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { Skeleton } from "@material-ui/lab";
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
+import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -22,6 +27,66 @@ import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAcc
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
+import { withStyles } from "@material-ui/core/styles";
+
+
+const Accordion = withStyles({
+  root: {
+    border: "1px solid rgba(0, 0, 0, .125)",
+    boxShadow: "none",
+    "&:not(:last-child)": {
+      borderBottom: 0,
+    },
+    "&:before": {
+      display: "none",
+    },
+    "&$expanded": {
+      margin: "auto",
+    },
+  },
+  expanded: {},
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+  root: {
+    backgroundColor: "#e4e4e4",
+    borderBottom: "1px solid rgba(0, 0, 0, .125)",
+    "&$expanded": {
+      minHeight: 46,
+    },
+  },
+  content: {
+    "&$expanded": {
+      margin: "12px 0",
+    },
+  },
+  expanded: {},
+})(MuiAccordionSummary);
+
+const AccordionDetails = withStyles((theme) => ({
+  root: {
+    padding: theme.spacing(1),
+    display: "block",
+  },
+  amount: {
+    float: "right",
+    fontWeight: "bold"
+  }
+
+}))(MuiAccordionDetails);
+
+function DisplayData({ label, value }) {
+  return <div style={{ flexGrow: 1 }}>
+    <Grid container spacing={2}>
+      <Grid item sm={6} xs={6} md={4}>
+        <Typography>{label}</Typography>
+      </Grid>
+      <Grid item sm={6} xs={6} md={8}>
+        <Typography>{value}</Typography>
+      </Grid>
+    </Grid>
+  </div>
+}
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -49,6 +114,10 @@ const LeadDetailsPage = () => {
   const [hasPermissionToConvertToOpportunity, setHasPermissionToConvertToOpportunity] = useState(false);
   const [isLeadAlreadyConvertedToOpportunity, setIsLeadAlreadyConvertedToOpportunity] = useState(false);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
+  const [isExpandedAccordion, setIsExpandedAccordion] = useState(true);
+  const [expandOpportunity, setExpandOpportunity] = useState(isExpandedAccordion);
+  const [convertedOpportunityName, setConvertedOpportunityName] = useState("");
+
   const [
     convertLeadToOpportunityConfirmationDialog,
     setConvertLeadToOpportunityConfirmationDialog,
@@ -73,12 +142,15 @@ const LeadDetailsPage = () => {
     fetchLeadData();
   }, [user, selectedEntity]);
 
+
   const fetchLeadData = async () => {
     setLoading(true);
     if (selectedEntity) {
       axiosInstance()
         .get(`${leadApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+          setConvertedOpportunityName(data?.staticData?.opportunity?.opportunityName)
+          console.log(convertedOpportunityName)
           const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName]
@@ -317,6 +389,69 @@ const LeadDetailsPage = () => {
               ) : (
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
+              <Accordion expanded={expandOpportunity}>
+                <AccordionSummary
+                  aria-controls="user-panel-content"
+                  id="user-panel-header"
+                >
+                  <Grid container>
+                    <Grid item xs={8}>
+                      <Box display="flex">
+                        <Box>
+                          <IconButton
+                            size="small"
+                            onClick={(event) => setExpandOpportunity(!expandOpportunity)} >
+                            {
+                              expandOpportunity === true ? (
+                                <ExpandLessIcon />
+                              ) : (
+                                <ExpandMoreIcon />
+                              )
+                            }
+                          </IconButton>
+                        </Box>
+                        <Box padding="5px">
+                          <Typography variant="subtitle2">
+                            Opportunity ({convertedOpportunityName?.length > 0 ? 1 : 0})
+                                </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+
+                  </Grid>
+                </AccordionSummary>
+                <Box margin={0.50} />
+                <AccordionDetails>
+                  <>
+                    {
+                      expandOpportunity && <>
+                        {
+
+                          <Grid container spacing={1}>
+                            {
+
+                              <Grid item xs={12} sm={12} md={1} key={1} >
+                                <Card style={{ minWidth: "100%" }}>
+                                  <CardContent className="detailListing">
+                                    {convertedOpportunityName?.length > 0 ?
+                                      <DisplayData label='Name' value={convertedOpportunityName} /> :
+                                      <DisplayData label="Nothing to show" value="" />
+                                    }
+                                  </CardContent>
+                                </Card>
+                              </Grid>
+
+
+                            }
+                          </Grid>
+                        }
+                      </>
+                    }
+                  </>
+                </AccordionDetails>
+
+                <Box margin={1} />
+              </Accordion>
               <ProjectInAccordion />
               <QuotesInAccordion />
               <ProductBuilderInAccordion />
