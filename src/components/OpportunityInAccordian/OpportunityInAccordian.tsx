@@ -212,7 +212,7 @@ export default function OpportunityInAccordian({
             </AccordionDetails>
             <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/opportunity`, {
             })} p={1} display="flex" justifyContent="center" alignItems="center">
-                <FaEye /> View All
+                <FaEye /> View All &#8599;
             </Box>
             <Box margin={1} />
         </Accordion>

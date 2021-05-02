@@ -106,18 +106,22 @@ function App() {
     state: { user },
   }: any = useData();
 
-  setInterval(() => {
-    if (localStorage.getItem("token")) {
-      axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-        notification.setCount(count);
-      }).catch((error) => {
-        toast.setToastConfig(error);
-      });
+  useEffect(() => {
+    try {
+      setInterval(async () => {
+        if (localStorage.getItem("token")) {
+          await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+            notification.setCount(count);
+          }).catch((error) => {
+            toast.setToastConfig(error);
+          });
+        }
+      }, 60000);
     }
-    //  else {
-    //   clearInterval(interval);
-    // }
-  }, 60000);
+    catch (e) {
+      console.log(e);
+    }
+  }, [])
 
   const conditionalRedirect = (Comp, location) => {
     return !user ? (

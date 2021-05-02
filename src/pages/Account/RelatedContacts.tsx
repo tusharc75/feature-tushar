@@ -85,7 +85,7 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                     <FaEye /> <Link onClick={() => history.push(`/${contactRoute}`, {
                         accountId: accountId,
                         accountName: accountName
-                    })}>View All</Link>
+                    })}>View All &#8599;</Link>
                 </Box>
             </> : null
         }
