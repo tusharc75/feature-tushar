@@ -122,7 +122,7 @@ export default function ManageUpdatePassword({
                                                                 component={TextFieldFormik}
                                                                 fullWidth
                                                                 margin="dense"
-                                                                type="text"
+                                                                type="password"
                                                                 label="Old Password"
                                                                 name="oldPassword"
                                                                 variant="outlined"

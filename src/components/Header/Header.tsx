@@ -32,8 +32,8 @@ import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
 import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
-import { brandConfiguration, profilePage } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
+import routes from "../Helpers/Routes"
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -200,12 +200,12 @@ const Header = ({ toggleDrawer }) => {
 
     if (option && option.profile) {
       history.push({
-        pathname: profilePage.profilePageRoute,
+        pathname: routes.profilePage.path
       });
     }
     if (option && option.brandConfiguration) {
       history.push({
-        pathname: brandConfiguration.brandConfigurationRoute,
+        pathname: routes.brandConfiguration.path
       });
     }
 
