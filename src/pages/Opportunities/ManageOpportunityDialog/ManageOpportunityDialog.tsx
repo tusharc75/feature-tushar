@@ -245,7 +245,7 @@ export default function ManageOpportunityDialog({
                 <Form>
                   {formsData &&
                     formsData.map((form, i) => {
-                      return form.name && <div key={i}>
+                      return form.name ? <div key={i}>
                         <h2 className="form-label-style">{form.name}</h2>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
@@ -404,7 +404,24 @@ export default function ManageOpportunityDialog({
                             ))}
                           </Grid>
                         </Box>
-                      </div>
+                      </div> : form.sectionFields.map((field) => (
+                        <FormTypes
+                          // {...rest}
+                          values={values}
+                          errors={errors}
+                          touched={touched}
+                          label={field.fieldLabel}
+                          name={field.fieldName}
+                          type={field.type}
+                          options={field.option}
+                          setFieldValue={setFieldValue}
+                          required={field.required}
+                          fullWidth
+                          isTooltip={true}
+                          size="small"
+                          style={{ visibility: "hidden" }}
+                        />
+                      ))
                     })}
                 </Form>
               </CustomDialogContent>

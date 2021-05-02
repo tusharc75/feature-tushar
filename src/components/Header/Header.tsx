@@ -33,11 +33,10 @@ import { SVG } from "../../assets";
 import UserProfile from "./../UserProfile";
 import { SET_SELECTED_ENTITY, SET_USER } from "../../StateProvider/actionTypes";
 import "./Header.scss";
-import { profilePage } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import routes from './../../components/Helpers/Routes';
+import routes from "../Helpers/Routes"
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -134,6 +133,8 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
   },
   notificationHeight: {
+    minWidth: 200,
+    minHeight: 200,
     maxHeight: `calc(100vh - 200px)`
   }
 }));
@@ -171,12 +172,14 @@ const Header = ({ toggleDrawer }) => {
 
     setLoadingNotifications(true);
 
-    // axiosInstance().get("getAllNotification").then(({ data: { data } }) => {
-    //   setNotificationList(data);
-    // }).catch((error) => {
-    //   setLoadingNotifications(false);
-    //   toastConfig.setToastConfig(error);
-    // })
+    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      debugger;
+      setNotificationList(data);
+      setLoadingNotifications(false);
+    }).catch((error) => {
+      setLoadingNotifications(false);
+      toastConfig.setToastConfig(error);
+    })
   };
 
   const handleFullScreenNotificationClose = () => {
@@ -194,12 +197,14 @@ const Header = ({ toggleDrawer }) => {
     setMobileScreenNotificationAnchorEl(event.currentTarget);
     setLoadingNotifications(true);
 
-    // axiosInstance().get("getAllNotification").then(({ data: { data } }) => {
-    //   setNotificationList(data);
-    // }).catch((error) => {
-    //   setLoadingNotifications(false);
-    //   toastConfig.setToastConfig(error);
-    // })
+    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+      debugger;
+      setNotificationList(data);
+      setLoadingNotifications(false);
+    }).catch((error) => {
+      setLoadingNotifications(false);
+      toastConfig.setToastConfig(error);
+    })
   };
 
   const handleMobileScreenNotificationClose = () => {
@@ -260,9 +265,16 @@ const Header = ({ toggleDrawer }) => {
 
     if (option && option.profile) {
       history.push({
-        pathname: profilePage.profilePageRoute,
+        pathname: routes.profilePage.path
       });
     }
+    if (option && option.brandConfiguration) {
+      history.push({
+        pathname: routes.brandConfiguration.path
+      });
+    }
+
+
     setOpen(false);
   };
 
@@ -315,7 +327,7 @@ const Header = ({ toggleDrawer }) => {
     </Menu>
   );
 
-  const NotificationContent = (data) => {
+  const NotificationContent = ({ data }) => {
     return <div className={`${classes.notificationHeight} py-1`} style={{ position: "relative" }}>
       {
         data.map((d) => {
@@ -329,9 +341,9 @@ const Header = ({ toggleDrawer }) => {
         })
       }
 
-      <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
-        View All
-      </Button>
+      {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
+        View All &#8599;
+      </Button> */}
     </div>
   }
 
@@ -430,8 +442,8 @@ const Header = ({ toggleDrawer }) => {
             }}
           >
             {
-              loadingNotifications ? "Loading Notifications..." :
-                <NotificationContent data={notificationList} />
+              loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
+                (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
             }
           </Popover>
         </MenuItem>
@@ -593,7 +605,10 @@ const Header = ({ toggleDrawer }) => {
                   horizontal: 'center',
                 }}
               >
-                <NotificationContent />
+                {
+                  loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
+                    (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
+                }
               </Popover>
             </div>
             {/* <IconButton aria-label="settings" color="inherit">
