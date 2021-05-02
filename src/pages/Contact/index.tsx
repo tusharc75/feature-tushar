@@ -336,7 +336,7 @@ export default function Contact(props) {
       : { ...searchParams };
 
     if (accountDetails.accountId) {
-      searchParams["filterById"] = ([{field:"accountName",term:accountDetails.accountId}]);
+      searchParams["filterById"] = JSON.stringify([{field:"accountName",term:accountDetails.accountId}]);
 
     }
     let api = getSearchQuery(`/${contactApi}`, searchParams);
