@@ -430,7 +430,7 @@ const LeadDetailsPage = () => {
                           <Grid container spacing={1}>
                             {
 
-                              <Grid item xs={12} sm={12} md={1} key={1} >
+                              <Grid item xs={12} sm={12} md={12} key={1} >
                                 <Card style={{ minWidth: "100%" }}>
                                   <CardContent className="detailListing">
                                     {convertedOpportunityName?.length > 0 ?
