@@ -157,7 +157,7 @@ export default function ManageUpdatePassword({
                                                                 variant="outlined"
                                                                 required={true}
                                                                 value={values["oldPassword"]}
-                                                                onChange={(e) => setFieldValue("oldPassword", e.target.value.trimStart())}
+                                                                onChange={(e) => setFieldValue("oldPassword", e.target.value)}
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="oldPassword" />)
                                                                 }}
@@ -175,7 +175,7 @@ export default function ManageUpdatePassword({
                                                                 variant="outlined"
                                                                 required={true}
                                                                 value={values["newPassword"]}
-                                                                onChange={(e) => setFieldValue("newPassword", e.target.value.trimStart())}
+                                                                onChange={(e) => setFieldValue("newPassword", e.target.value)}
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="newPassword" />)
                                                                 }}
@@ -193,7 +193,7 @@ export default function ManageUpdatePassword({
                                                                 required={true}
                                                                 value={values["confirmPassword"]}
                                                                 onChange={(e) => {
-                                                                    setFieldValue("confirmPassword", e.target.value.trimStart())
+                                                                    setFieldValue("confirmPassword", e.target.value)
                                                                 }}
                                                                 InputProps={{
                                                                     endAdornment: (<PasswordEndAdornment fieldName="confirmPassword" />)
