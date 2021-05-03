@@ -283,6 +283,7 @@ const Header = ({ toggleDrawer }) => {
     await axiosInstance().get("/user/logout");
     history.push("/");
     dispatch({ type: SET_USER, payload: null });
+    dispatch({ type: SET_SELECTED_ENTITY, payload: null });
     localStorage.removeItem("token");
     history.push("/login");
   };
@@ -332,9 +333,9 @@ const Header = ({ toggleDrawer }) => {
     return <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: "relative" }}>
       {
         data.map((d, index) => {
-          return <div style={{ borderBottom: index != data.length - 1 ? "1px solid white" : "" }} className={`${d.isSeen != false ? "light-grey-bg" : ""} p-3 cursor-pointer`}
+          return <div style={{ borderBottom: index != data.length - 1 ? "1px solid white" : "" }} className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
             onClick={() => {
-              if (d.seen == false) {
+              if (d.read == false) {
                 axiosInstance().put("/user/notification/read", {
                   toggle: true,
                   notificationId: d.notificationId
