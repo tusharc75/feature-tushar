@@ -1,26 +1,26 @@
 import { profilePage } from "../../constants/helpers";
 
 export default {
-  account: {
-    title: "Account",
-    path: "/account",
-    data: {},
-  },
-  accountDetails: {
-    title: "Account",
-    path: "/account/detail",
-    data: {},
-  },
-  contact: {
-    title: "Contact",
-    path: "/contact",
-    data: {},
-  },
-  contactDetail: {
-    title: "Contact",
-    path: "/contact/detail",
-    data: {},
-  },
+  // account: {
+  //   title: "Account",
+  //   path: "/account",
+  //   data: {},
+  // },
+  // accountDetails: {
+  //   title: "Account",
+  //   path: "/account/detail",
+  //   data: {},
+  // },
+  // contact: {
+  //   title: "Contact",
+  //   path: "/contact",
+  //   data: {},
+  // },
+  // contactDetail: {
+  //   title: "Contact",
+  //   path: "/contact/detail",
+  //   data: {},
+  // },
   lead: {
     title: "Lead",
     path: "/lead",
@@ -41,7 +41,7 @@ export default {
     path: "/user",
     data: {},
   },
-  userDetails: {
+  userDetail: {
     title: "User",
     path: "/user/detail",
     data: {},
@@ -61,7 +61,7 @@ export default {
     path: "/role",
     data: {},
   },
-  roleDetails: {
+  roleDetail: {
     title: "Role",
     path: "/role/detail",
     data: {},
@@ -90,17 +90,33 @@ export default {
     title: "Customer Account",
     path: "/customer-account",
   },
+  customerAccountDetail: {
+    title: "Customer Account",
+    path: "/customer-accoun/detail",
+  },
   supplierAccount: {
     title: "Supplier Account",
     path: "/supplier-account",
+  },
+  supplierAccountDetail: {
+    title: "Supplier Account",
+    path: "/supplier-accoun/detail",
   },
   customerContact: {
     title: "Customer Contact",
     path: "/customer-contact",
   },
+  customerContactDetail: {
+    title: "Customer Contact",
+    path: "/customer-contact/detail",
+  },
   supplierContact: {
     title: "Supplier Contact",
     path: "/supplier-contact",
+  },
+  supplierContactDetail: {
+    title: "Supplier Contact",
+    path: "/supplier-contact/detail",
   },
   doa: {
     title: "Doa",
@@ -138,4 +154,8 @@ export default {
     title: "Product Cost",
     path: "/product-cost",
   },
+  brandConfiguration: {
+    title: "Brand Configuration",
+    path: "/brand-configuration"
+  }
 };

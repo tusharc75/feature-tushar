@@ -15,9 +15,13 @@ import {
   SaveAlt,
   Search,
   ViewColumn,
+  List
 } from "@material-ui/icons";
 import * as yup from "yup";
 import moment from "moment";
+import ListItem from '@material-ui/core/ListItem/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import { ListItemText } from '@material-ui/core';
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -48,6 +52,8 @@ export const roleTypes = [
 export const userType = {
   brandAdmin: 2
 }
+
+export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
 export const sidebarResource = {
   brand: "Brand",
@@ -498,3 +504,16 @@ export const simplifyValues = (obj, fields) => {
   }
   return newObj;
 };
+
+export function DisplayData({ label, value, icon }) {
+  return <div style={{ flexGrow: 1 }}>
+    <List>
+      <ListItem>
+        <ListItemAvatar>
+          {icon}
+        </ListItemAvatar>
+        <ListItemText primary={value} secondary={label} />
+      </ListItem>
+    </List>
+  </div>
+}

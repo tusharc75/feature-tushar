@@ -12,8 +12,9 @@ import {
 } from "@material-ui/core";
 import { useData } from "./../StateProvider/Provider";
 import { AccountCircle } from "@material-ui/icons";
-import { FiLogOut, FiUser } from 'react-icons/fi'
+import { FiLogOut, FiUser, FiSettings } from 'react-icons/fi'
 import "./sidebar.scss"
+import { userType } from "../constants/helpers"
 
 export default function UserProfile(props) {
     const {
@@ -60,6 +61,20 @@ export default function UserProfile(props) {
                                     </MenuItem>
                                 </MenuList>
                             </ClickAwayListener>
+                            {
+                                user?.user?.userType === userType.brandAdmin ?
+                                    < ClickAwayListener onClickAway={onClose}>
+                                        <MenuList
+                                            autoFocusItem={open}
+                                            id="menu-list-grow"
+                                            onKeyDown={onListKeyDown}>
+                                            <MenuItem onClick={(e) => onClose(e, { brandConfiguration: true })}>
+                                                <ListItemIcon style={{ minWidth: '30px' }}><FiSettings /></ListItemIcon>
+                                                <Typography className="logoutProfile">Brand Configuration</Typography>
+                                            </MenuItem>
+                                        </MenuList>
+                                    </ClickAwayListener> : null
+                            }
                             <ClickAwayListener onClickAway={onClose}>
                                 <MenuList
                                     autoFocusItem={open}

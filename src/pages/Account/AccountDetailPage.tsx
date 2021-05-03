@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar } from "@material-ui/core";
+import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar, Card, CardContent } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
 import { Skeleton, TabPanel } from "@material-ui/lab";
@@ -25,6 +25,7 @@ import ManageContactDialog from "../Contact/ManageContact/index";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { makeStyles } from "@material-ui/core/styles";
 import {
+  DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -42,6 +43,9 @@ import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAcc
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
+import { Link } from 'react-router-dom'
+import { BiFace } from 'react-icons/bi'
+
 const useStyles = makeStyles((theme) => ({
   container: {
     padding: "0px",
@@ -116,7 +120,7 @@ export default function AccountDetailPage(props) {
             ? data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
             : []
         );
-        
+
         setRelatedContactsLoading(false);
       });
   };
@@ -237,7 +241,7 @@ export default function AccountDetailPage(props) {
 
   const quickLinks: IQuickLinks[] = [
     {
-      label: "Account Heirarchy",
+      label: "Account Hierarchy",
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
@@ -595,6 +599,56 @@ export default function AccountDetailPage(props) {
                                   contactApi={contactApi}
                                   contactRoute={contactRoute}
                                 />
+                              </Box>
+                            </>
+                          )}
+                        </div>
+                      </BoxWithBorder>
+                    </Grid>
+                  )}
+
+
+                {accountData?.staticData?.lead && permissions &&
+                  permissions.lead &&
+                  permissions.lead.isRead && (
+                    <Grid item xs={12}>
+                      <BoxWithBorder
+                        style={{ marginTop: "3%", padding: "0px" }}
+                      >
+                        <div className={`${accountClass.detail_page_div3}`}>
+                          <div className={`${accountClass.leads_data}`}>
+                            <Typography
+                              color="primary"
+                              variant="h6"
+                              style={{ margin: "0 10px" }}
+                            >
+                              Converted Lead
+                            </Typography>
+                          </div>
+                          {relatedContactsLoading ? (
+                            <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                          ) : (
+                            <>
+                              <Box className={`${accountClass.custom_box1}`}>
+                                <Card>
+                                  <CardContent className="detailListing">
+                                    <Grid container className="detailCardHeader">
+                                      <Grid item xs={12} sm={12}>
+                                        <Link className="link f_size"
+                                          to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
+                                          {accountData?.staticData?.lead?.firstName || ''} {accountData?.staticData?.lead?.lastName || ''}
+                                        </Link>
+                                      </Grid>
+                                    </Grid>
+                                    <Grid container>
+                                      <Grid item xs={12} sm={6}>
+                                        {
+                                          accountData?.staticData?.lead?.title ? <DisplayData label='Title' value={accountData?.staticData?.lead.title || ''} icon={<BiFace size={20} />} /> : ''
+                                        }
+                                      </Grid>
+                                    </Grid>
+                                  </CardContent>
+                                </Card>
                               </Box>
                             </>
                           )}

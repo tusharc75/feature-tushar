@@ -63,15 +63,15 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                                     </Grid>
                                     <Grid container>
                                         <Grid item xs={12} sm={6}>
-                                           {
-                                              accountName ?  <DisplayData label='Account' value={accountName} icon={<BsPerson size={20} />} /> : '' 
-                                           } 
+                                            {
+                                                accountName ? <DisplayData label='Account' value={accountName} icon={<BsPerson size={20} />} /> : ''
+                                            }
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
                                             {
-                                                obj?.title ? <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} /> : ''  
+                                                obj?.title ? <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} /> : ''
                                             }
-                                          
+
                                         </Grid>
                                     </Grid>
                                 </CardContent>
@@ -81,11 +81,12 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                     })
                 }
                 <Box margin={1} />
-                <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center">
-                    <FaEye /> <Link onClick={() => history.push(`/${contactRoute}`, {
+                <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
+                    onClick={() => history.push(`/${contactRoute}`, {
                         accountId: accountId,
                         accountName: accountName
-                    })}>View All</Link>
+                    })}>
+                    <FaEye /> View All &#8599;
                 </Box>
             </> : null
         }

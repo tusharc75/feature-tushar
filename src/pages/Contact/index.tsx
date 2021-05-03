@@ -103,7 +103,7 @@ export default function Contact(props) {
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
   });
-
+  console.log("history", history);
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
     isUpdate: false,
@@ -170,8 +170,6 @@ export default function Contact(props) {
       field: "name",
       headerName: "Name",
       width: 400,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => (
         <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
           {params.value || ""}
@@ -196,8 +194,6 @@ export default function Contact(props) {
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -219,8 +215,6 @@ export default function Contact(props) {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="updateBy">
@@ -242,9 +236,9 @@ export default function Contact(props) {
       field: "accountName",
       headerName: "Account",
       width: 300,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <Link className="link" to={`/${account.accountRoute}/detail/${params.row.accountId}`}>
+        {params.value}
+      </Link>
     },
     {
       field: "actions",
@@ -298,10 +292,21 @@ export default function Contact(props) {
 
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let field = params.filterModel.items[0].columnField
+
+      if (params.filterModel.items[0].columnField == 'createdBy') {
+        field = "createdBy.user"
+      }
+      if (params.filterModel.items[0].columnField == 'updatedBy') {
+        field = "updatedBy.user"
+      }
+      let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
+      if (params.filterModel.items[0].columnField == 'name') {
+        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+      }
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
     } else {
       setQuery({ page: 0, limit: 25 });
@@ -333,7 +338,7 @@ export default function Contact(props) {
       : { ...searchParams };
 
     if (accountDetails.accountId) {
-      searchParams["accountId"] = accountDetails.accountId;
+      searchParams["filterById"] = JSON.stringify([{ field: "accountName", term: accountDetails.accountId }]);
     }
     let api = getSearchQuery(`/${contactApi}`, searchParams);
 
@@ -350,7 +355,7 @@ export default function Contact(props) {
         toastConfig.setToastConfig(err);
         setLoading(false);
       });
-  }, [searchVal, query, selectedType]);
+  }, [searchVal, query, selectedType, accountDetails]);
 
   useEffect(() => {
     getContacts();
@@ -383,6 +388,7 @@ export default function Contact(props) {
       id: u._id,
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
+      accountId: u.accountName?.optionValue,
       accountName: u.accountName?.optionLabel,
       name: [u.firstName, u.middleName, u.lastName].filter((f) => f).join(" "),
     }));
@@ -629,11 +635,6 @@ export default function Contact(props) {
               density="compact"
               filterMode="server"
               onFilterModelChange={onFilterChange}
-              // filterModel={{
-              //     items: [
-              //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
-              //     ],
-              // }}
             />
           </div>
           {/* </Box> */}
