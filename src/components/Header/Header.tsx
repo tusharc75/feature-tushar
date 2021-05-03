@@ -173,7 +173,6 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
-      debugger;
       setNotificationList(data);
       setLoadingNotifications(false);
     }).catch((error) => {
@@ -198,7 +197,6 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
-      debugger;
       setNotificationList(data);
       setLoadingNotifications(false);
     }).catch((error) => {
@@ -342,7 +340,7 @@ const Header = ({ toggleDrawer }) => {
       }
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
-        View All
+        View All &#8599;
       </Button> */}
     </div>
   }

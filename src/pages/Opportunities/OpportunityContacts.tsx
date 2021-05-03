@@ -6,68 +6,83 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import { Card, CardHeader, IconButton, CardContent, Grid, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core';
+import ControlPointIcon from "@material-ui/icons/ControlPoint";
+import axiosInstance from '../../axios/axiosInstance';
+import { BiFace } from 'react-icons/bi';
+import { BsPerson } from 'react-icons/bs';
+import { FaEye } from 'react-icons/fa';
+import { Link } from 'react-router-dom'
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-        backgroundColor: theme.palette.background.paper,
-    },
-}));
-
-function TabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && (
-                <Box p={3}>
-                    <Typography>{children}</Typography>
-                </Box>
-            )}
-        </div>
-    );
+function DisplayData({ label, value, icon }) {
+    return <div style={{ flexGrow: 1 }}>
+        <List>
+            <ListItem>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText primary={value} secondary={label} />
+            </ListItem>
+        </List>
+    </div>
 }
 
-function a11yProps(index) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
-}
+export default function OpportunityContacts({ contacts, title, onAddContact, contactApi }) {
 
-export default function OpportunityContacts() {
-    const classes = useStyles();
-    const [value, setValue] = useState(0);
+    function ContactDetails({ contacts, contactApi, }) {
+        return <>
+            {
+                contacts && contacts.length ? <Grid container spacing={2}>
+                    {
+                        contacts.map((obj, index) => {
+                            return <Grid key={index} item xs={12} sm={12} md={6}>
+                                <Card>
+                                    <CardContent className="detailListing">
+                                        <Grid container className="detailCardHeader">
+                                            <Grid item xs={12} sm={12}>
+                                                <Link className="link f_size" to={`/${contactApi}/detail/${obj._id}`}>
+                                                    {`${obj.firstName || ''}  ${obj.lastName || ''}`}
+                                                </Link>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid container>
+                                            <Grid item xs={12} sm={6}>
+                                                {
+                                                    <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} />
+                                                }
 
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
+                                            </Grid>
+                                        </Grid>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+
+                            // <Box margin={1} />
+                        })
+                    }
+                </Grid> : <Typography className="m-2">No Contacts found</Typography>
+
+
+            }
+        </>
+    }
 
     return (
-        <div className={classes.root}>
-            <Tabs className="oms-tab"
-                indicatorColor="primary"
-                textColor="primary"
-                aria-label="icon tabs example"
-                value={value}
-                onChange={handleChange}
-            >
-                <Tab label="Supplier" />
-                <Tab label="Customer" />
-            </Tabs>
+        <>
+            <Card>
+                <CardHeader
+                    action={
+                        <IconButton aria-label="settings" onClick={onAddContact}>
+                            <ControlPointIcon />
+                        </IconButton>
+                    }
+                    subheader={title}
+                />
+                <CardContent>
+                    <ContactDetails contacts={contacts} contactApi={contactApi} />
+                </CardContent>
+            </Card>
 
-            <TabPanel value={value} index={0}>
-                Supplier
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-                Customer
-            </TabPanel>
-        </div>
+        </>
     )
 }

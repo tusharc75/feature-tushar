@@ -45,6 +45,7 @@ import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import routes from "./../../components/Helpers/Routes";
 
 const AccTypes = [
   {
@@ -214,14 +215,24 @@ export default function Account(props) {
     {
       field: "accountName",
       headerName: "Account Name",
-      width: 300,
+      width: 500,
       renderCell: (params) => (
-        <Link
-          className={`${accountClass.account_name_link}`}
-          to={`/${accountRoute}/detail/${params.row._id}`}
-        >
-          <CustomRenderCell value={params?.value} />
-        </Link>
+        <>
+          <Link
+            className={`${accountClass.account_name_link}`}
+            to={`/${accountRoute}/detail/${params.row._id}`}
+          >
+            <CustomRenderCell value={params?.value} />
+          </Link>
+          {
+            params.row.staticData?.lead ?
+              <Tooltip title="Go to Lead">
+                <Link className="link ml-2" to={`${routes.leadDetail.path}/${params.row.staticData.lead._id}`}>
+                  ({[params.row.staticData?.lead?.firstName, params.row.staticData?.lead?.lastName].filter(f => f).join(" ")})
+              </Link>
+              </Tooltip> : ""
+          }
+        </>
       ),
     },
     {
