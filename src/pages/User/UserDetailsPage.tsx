@@ -606,12 +606,12 @@ const UserDetailsPage = () => {
                 </>
               }
               <OpportunityAccordionInUserDetail
-                opportunities={opportunityRelatedData?.Owner}
+                opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner,...opportunityRelatedData?.Collaborator]:opportunityRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
               />
               <LeadAccordionInUserDetailPage
-                leads={leadsRelatedData?.Owner}
+                leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner,...leadsRelatedData?.Collaborator]:leadsRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
               />
