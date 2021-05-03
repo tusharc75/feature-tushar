@@ -24,6 +24,7 @@ import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import currencies from "../../constants/currency_with_country.json";
+import { BsCheckAll } from "react-icons/bs";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -344,42 +345,47 @@ function OpportunityDetailsPage() {
                   ) : null}
                 </DetailsPageHeader>
               )}
-
-              <CustomSteps steps={steps} active={activeStep} />
-
-              <div className="w-100 d-flex justify-content-end mt-2">
-                {
-                  activeStep != steps.length ?
-                    isProcessing ? <Button variant="outlined"
-                      color="primary"
-                      disabled={true}
-                      onClick={() => { }}>
-                      Processing...
+              <div className="stepper-box">
+                <div className="mainview">
+                  <CustomSteps steps={steps} active={activeStep} />
+                </div>
+                <div className="actionview">
+                  <div className="d-flex justify-content-center">
+                    {
+                      activeStep != steps.length ?
+                        isProcessing ? <Button variant="contained"
+                          color="primary"
+                          size="small"
+                          disabled={true}
+                          onClick={() => { }}>
+                          Processing...
                     </Button> :
-                      <Button variant="contained"
-                        color="primary"
-                        disabled={!steps[activeStep].canCompleteManually}
-                        onClick={() => {
-                          setIsProcessing(true)
-                          const updatedData = {
-                            ...getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })),
-                            process: steps[activeStep].text,
-                            _id: opportunityData._id
-                          };
+                          <Button variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={!steps[activeStep].canCompleteManually}
+                            onClick={() => {
+                              setIsProcessing(true)
+                              const updatedData = {
+                                ...getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })),
+                                process: steps[activeStep].text,
+                                _id: opportunityData._id
+                              };
 
-                          axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
-                            setActiveStep(activeStep + 1)
-                            setIsProcessing(false)
-                          }).catch((error) => {
-                            toastConfig.setToastConfig(error);
-                            setIsProcessing(false)
-                          })
-                        }}>
-                        Mark {steps[activeStep].text} as Completed
+                              axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
+                                setActiveStep(activeStep + 1)
+                                setIsProcessing(false)
+                              }).catch((error) => {
+                                toastConfig.setToastConfig(error);
+                                setIsProcessing(false)
+                              })
+                            }}>
+                           <BsCheckAll />&nbsp; Mark {steps[activeStep].text} as Completed
                   </Button> : ""
-                }
+                    }
+                  </div>
+                </div>
               </div>
-
               {loading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>

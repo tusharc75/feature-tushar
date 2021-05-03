@@ -17,6 +17,7 @@ import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
+import { LinkOff } from '@material-ui/icons';
 
 const Accordion = withStyles({
     root: {
@@ -37,7 +38,7 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "#e4e4e4",
+        backgroundColor: "#f5f5f5",
         borderBottom: "1px solid rgba(0, 0, 0, .125)",
         "&$expanded": {
             minHeight: 46,
@@ -119,38 +120,33 @@ export default function OpportunityInAccordian({
                 id="user-panel-header"
             >
                 <Grid container>
-                    <Grid item xs={8}>
-                        <Box display="flex">
-                            <Box>
-                                <IconButton
-                                    size="small"
-                                    onClick={(event) => setExpandOpportunity(!expandOpportunity)} >
-                                    {
-                                        expandOpportunity === true ? (
-                                            <ExpandLessIcon />
-                                        ) : (
-                                            <ExpandMoreIcon />
-                                        )
-                                    }
-                                </IconButton>
-                            </Box>
-                            <Box padding="5px">
-                                <Typography variant="subtitle2">
-                                    Opportunity ({opportunities.length})
-                                </Typography>
-                            </Box>
+                    <Grid item xs={8} alignItems="center" >
+                        <Box component="div" display="flex" alignItems="center" flexGrow={1}>
+                            <IconButton
+                                size="small"
+                                onClick={(event) => setExpandOpportunity(!expandOpportunity)} >
+                                {
+                                    expandOpportunity === true ? (
+                                        <ExpandLessIcon />
+                                    ) : (
+                                        <ExpandMoreIcon />
+                                    )
+                                }
+                            </IconButton><strong>Opportunity ({opportunities.length})</strong>
                         </Box>
                     </Grid>
-                    <Grid item xs={4} container justify="flex-end">
-                        {
-                            opportunityPermissions.isCreate && <IconButton
-                                color="primary"
-                                size="small"
-                                onClick={() => { setShowCreateOpportunityDialog(true) }}
-                            >
-                                <ControlPointIcon />
-                            </IconButton>
-                        }
+                    <Grid item xs={4} container justify="flex-end" alignItems="center">
+                        <Typography variant="subtitle2">
+                            {
+                                opportunityPermissions.isCreate && <IconButton
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => { setShowCreateOpportunityDialog(true) }}
+                                >
+                                    <ControlPointIcon />
+                                </IconButton>
+                            }
+                        </Typography>
                     </Grid>
                 </Grid>
             </AccordionSummary>
@@ -167,13 +163,6 @@ export default function OpportunityInAccordian({
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
-                                                            {/* <span className={classes.actionsItems}> */}
-                                                            {/* <VisibilityOutlined /> */}
-                                                            {/* <IconButton size="small">
-                                                            <Delete color="error" />
-                                                        </IconButton> */}
-                                                            {/* <EditOutlined /> */}
-                                                            {/* </span> */}
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={8}>
                                                                     <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
