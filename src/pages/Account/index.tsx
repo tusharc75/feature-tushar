@@ -148,6 +148,7 @@ export default function Account(props) {
       masterAccount:
         u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount == "").accountName : "",
       approved: u.staticData?.approved ? u.staticData?.approved : false,
+      relatedLead: u.staticData?.lead
     }));
     setDataRows([...rows]);
   }, [accountData]);
@@ -215,7 +216,7 @@ export default function Account(props) {
     {
       field: "accountName",
       headerName: "Account Name",
-      width: 500,
+      width: 250,
       renderCell: (params) => (
         <>
           <Link
@@ -224,16 +225,26 @@ export default function Account(props) {
           >
             <CustomRenderCell value={params?.value} />
           </Link>
+        </>
+      ),
+    },
+    {
+      field: "relatedLead",
+      headerName: "Related Lead",
+      width: 250,
+      renderCell: (params) => (
+        <>
           {
-            params.row.staticData?.lead ?
-              <Tooltip title="Go to Lead">
-                <Link className="link ml-2" to={`${routes.leadDetail.path}/${params.row.staticData.lead._id}`}>
-                  ({[params.row.staticData?.lead?.firstName, params.row.staticData?.lead?.lastName].filter(f => f).join(" ")})
+            params.value ?
+              <Link className="link" to={`${routes.leadDetail.path}/${params.value._id}`} title={[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}>
+                {[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}
               </Link>
-              </Tooltip> : ""
+              : <NoDataCell />
           }
         </>
       ),
+      sortable: false,
+      filterable: false,
     },
     {
       field: "typeOfAccount",
