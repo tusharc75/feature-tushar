@@ -189,7 +189,8 @@ export default function AccountAccordionDetail({
                 </>
             </AccordionDetails>
             {
-                <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/${type === "customer" ? "customer-account":"supplier-account"}`)}
+                account?.length > 0 &&
+                <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/${type === "customer" ? "customer-account" : "supplier-account"}`)}
                     p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaEye /> View All &#8599;
                 </Box>

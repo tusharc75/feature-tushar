@@ -185,7 +185,6 @@ const UserDetailsPage = () => {
     axiosInstance()
       .get(`/user/related/${id}`)
       .then(({ data: { data } }) => {
-        console.log(data)
         setCustomerAccountRelatedData(data["Customer Account"]);
         setCustomerContactRelatedData(data["Customer Contact"]);
         setSupplierAccountRelatedData(data["Supplier Account"]);

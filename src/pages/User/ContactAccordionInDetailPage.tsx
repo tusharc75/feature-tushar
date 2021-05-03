@@ -193,7 +193,8 @@ export default function ContactAccordionInDetailPage({
                 </>
             </AccordionDetails>
             {
-                <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/${type === "customer" ? "customer-contact":"supplier-contact"}`)}
+                contact?.length > 0 &&
+                <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/${type === "customer" ? "customer-contact" : "supplier-contact"}`)}
                     p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaEye /> View All &#8599;
                 </Box>

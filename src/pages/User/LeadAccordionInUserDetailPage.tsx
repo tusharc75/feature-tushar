@@ -197,6 +197,7 @@ export default function LeadAccordionInUserDetailPage({
                 </>
             </AccordionDetails>
             {
+                leads?.length > 0 &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/lead`)}
                     p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaEye /> View All &#8599;
