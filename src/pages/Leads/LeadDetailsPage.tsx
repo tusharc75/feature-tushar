@@ -333,46 +333,50 @@ const LeadDetailsPage = () => {
               )}
 
               {
-                steps.length > 0 && <>
-                  <CustomSteps steps={steps} active={activeStep} />
-
-                  <div className="w-100 d-flex justify-content-end mt-2">
-                    {
-                      activeStep != steps.length ?
-                        isProcessing ? <Button variant="outlined"
-                          color="primary"
-                          disabled={true}
-                          onClick={() => { }}>
-                          Processing...
-                          </Button> :
-                          <Button variant="contained"
-                            color="primary"
-                            disabled={!steps[activeStep].canCompleteManually}
-                            onClick={() => {
-                              setIsProcessing(true)
-                              const updatedData = {
-                                ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
-                                [leadProcessFieldName]: steps[activeStep].text,
-                                _id: leadData._id
-                              };
-
-                              axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
-                                setActiveStep(activeStep + 1)
-                                setIsProcessing(false)
-
-                                if (steps[activeStep].text.toLowerCase() === "qualified") {
-                                  fetchLeadData();
-                                }
-                              }).catch((error) => {
-                                toastConfig.setToastConfig(error);
-                                setIsProcessing(false)
-                              })
-                            }}>
-                            Mark {steps[activeStep].text} as Completed
-                            </Button> : ""
-                    }
+                steps.length > 0 &&
+                <div className="stepper-box">
+                  <div className="mainview">
+                    <CustomSteps steps={steps} active={activeStep} />
                   </div>
-                </>
+                  <div className="actionview">
+                    <div className="d-flex justify-content-center">
+                      {
+                        activeStep != steps.length ?
+                          isProcessing ? <Button variant="outlined"
+                            color="primary"
+                            disabled={true}
+                            onClick={() => { }}>
+                            Processing...
+                          </Button> :
+                            <Button variant="contained"
+                              color="primary"
+                              disabled={!steps[activeStep].canCompleteManually}
+                              onClick={() => {
+                                setIsProcessing(true)
+                                const updatedData = {
+                                  ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
+                                  [leadProcessFieldName]: steps[activeStep].text,
+                                  _id: leadData._id
+                                };
+
+                                axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
+                                  setActiveStep(activeStep + 1)
+                                  setIsProcessing(false)
+
+                                  if (steps[activeStep].text.toLowerCase() === "qualified") {
+                                    fetchLeadData();
+                                  }
+                                }).catch((error) => {
+                                  toastConfig.setToastConfig(error);
+                                  setIsProcessing(false)
+                                })
+                              }}>
+                              Mark {steps[activeStep].text} as Completed
+                            </Button> : ""
+                      }
+                    </div>
+                  </div>
+                </div>
               }
 
               {loading ? (
@@ -405,13 +409,13 @@ const LeadDetailsPage = () => {
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
               <AccordionOfOpportunity
-                recordsPerLine={2}
+                recordsPerLine={3}
                 opportunity={leadData?.staticData?.opportunity}
               />
-              <ProjectInAccordion />
-              <QuotesInAccordion />
-              <ProductBuilderInAccordion />
-              <LeadInAccordion />
+              <ProjectInAccordion recordsPerLine={3}/>
+              <QuotesInAccordion recordsPerLine={3}/>
+              <ProductBuilderInAccordion recordsPerLine={3}/>
+              <LeadInAccordion recordsPerLine={3}/>
             </Paper>
           </Grid>
 
