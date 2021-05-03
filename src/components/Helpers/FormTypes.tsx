@@ -1032,7 +1032,7 @@ const FormTypes = (props) => {
           style={{ display: "none" }}
           onClick={(e: any) => (e.target.value = null)}
           type="file"
-          accept={accept || ".doc , .docs , .docx"}
+          accept={accept || ""}
         />
         <label htmlFor={name}>
           <Button
