@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
@@ -86,7 +86,8 @@ const Opportunities = () => {
   });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName
+    accountName: history.location?.state?.accountName,
+    resource: history.location?.state?.resource,
   })
 
   const { opportunityResource, opportunityApi } = opportunity;
@@ -115,7 +116,7 @@ const Opportunities = () => {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
     // eslint-disable-next-line
-  }, [query, selectedType, selectedEntity]);
+  }, [query, selectedType, selectedEntity, accountDetails]);
 
   useEffect(() => {
     let rows = opportunityData?.map((u) => {
@@ -165,9 +166,12 @@ const Opportunities = () => {
         ? { ...searchParams, search: searchVal }
         : { ...searchParams };
 
-
       if (accountDetails.accountId) {
-        searchParams["accountId"] = accountDetails.accountId;
+        if (accountDetails.resource === "customerAccountName") {
+          searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: accountDetails.accountId }]);
+        } else if (accountDetails.resource === "supplierAccountName") {
+          searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: { $in: [accountDetails.accountId] } }]);
+        }
       }
 
       let api = getSearchQuery(opportunityApi, searchParams);
@@ -184,7 +188,7 @@ const Opportunities = () => {
         setLoading(false);
       }
     }
-  };
+  }
 
   const handleSearch = (e) => {
     if (query.page !== 0) {
@@ -504,7 +508,7 @@ const Opportunities = () => {
     }
   };
 
-  const onFilterChange = React.useCallback((params) => {
+  const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
       let field = params.filterModel.items[0].columnField
 
@@ -574,15 +578,14 @@ const Opportunities = () => {
                   color="primary"
                   label={`Account: ${accountDetails.accountName}`}
                   onDelete={() => {
-                    setAccountDetails({ accountId: null, accountName: null });
-                    fetchOpportunities();
+                    setAccountDetails({ accountId: null, accountName: null, resource: null });
                   }}
                 />
               }
             </OpportunitiesHeader>
           </div>
-       
-       
+
+
           <div className="listing-grid">
             <DataGrid
               components={{

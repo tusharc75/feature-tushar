@@ -26,6 +26,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignTeamUsers from "./AssignTeamUsers";
+import CustomerStrategy from "./CustomerStrategy";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -58,7 +59,7 @@ const ProjectSalesDetails = () => {
     try {
       const {
         data: { data },
-      } = await axiosInstance().get(`/projectStrategy/${id}`);
+      } = await axiosInstance().get(`/project-sales/${id}`);
 
       handleMainPoints(data);
       const name = data.projectName;
@@ -78,7 +79,7 @@ const ProjectSalesDetails = () => {
 
   const getProjectFields = () => {
     axiosInstance()
-      .get("/field?resource=Project Strategy")
+      .get("/field?resource=Project Sales")
       .then(({ data }) => {
         setProjectSalesFields(data.data);
       })
@@ -106,7 +107,7 @@ const ProjectSalesDetails = () => {
     setUpdating(true);
 
     axiosInstance()
-      .put(`/projectStrategy`, { ...values, _id: id })
+      .put(`/project-sales`, { ...values, _id: id })
       .then(({ data }) => {
         getSalesData();
         toastConfig.setToastConfig({
@@ -147,7 +148,7 @@ const ProjectSalesDetails = () => {
   const DeleteProject = () => {
     if (deleteRec) {
       axiosInstance()
-        .put(`/projectStrategy/remove`, { ids: [deleteRec] })
+        .put(`/project-sales/remove`, { ids: [deleteRec] })
         .then(({ data }) => {
           setShowConfirmBox(false);
           history.goBack();
@@ -195,122 +196,138 @@ const ProjectSalesDetails = () => {
       <Layout>
         <CustomBreadCrumbs routes={customizedRoutes} />
 
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper>
-              {!projectSalesData ? (
-                <Box padding={1}>
-                  <Skeleton variant="text" width="150px" height="30px" />
-                  <Box display="flex">
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
-                    <Box marginX={1} />
-                    <Skeleton
-                      style={{ borderRadius: 6 }}
-                      width="120px"
-                      height="80px"
-                    />
+        <div className="detail-container">
+          {" "}
+          <Grid container spacing={1}>
+            <Grid item xs={12} sm={12} md={8} lg={8}>
+              <Paper>
+                {!projectSalesData ? (
+                  <Box padding={1}>
+                    <Skeleton variant="text" width="150px" height="30px" />
+                    <Box display="flex">
+                      <Skeleton
+                        style={{ borderRadius: 6 }}
+                        width="120px"
+                        height="80px"
+                      />
+                      <Box marginX={1} />
+                      <Skeleton
+                        style={{ borderRadius: 6 }}
+                        width="120px"
+                        height="80px"
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              ) : (
-                <DetailsPageHeader
-                  heading={headingLbl}
-                  logo={undefined}
-                  mainPoints={mainPoints}
-                  showHeading={true}
-                >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    Edit
-                  </Button>
-
-                  <Box component="span" marginX={1} />
-
-                  <DeleteButton text="Delete" onClick={() => {}} />
-                </DetailsPageHeader>
-              )}
-              <Box>
-                {loading || !projectSalesFields.length || !projectSalesData ? (
-                  <Grid container spacing={2} style={{ padding: "16px" }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
                 ) : (
-                  <>
-                    <Box
-                      width="100%"
-                      padding={1}
-                      bgcolor="grey.200"
-                      display="flex"
-                      justifyContent="space-between"
-                    >
-                      <Typography variant="subtitle2">
-                        Sales Strategy
-                      </Typography>
-                    </Box>
-                    <DetailsPage
-                      data={projectSalesData}
-                      fields={projectSalesFields}
-                    />
-                  </>
-                )}
-              </Box>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper style={{ overflow: "hidden" }}>
-              <Box style={{ padding: "0px", maxHeight: "450px" }}>
-                <Box
-                  width="100%"
-                  padding={1}
-                  bgcolor="grey.200"
-                  display="flex"
-                  justifyContent="space-between"
-                >
-                  <Typography variant="subtitle2">Project Team</Typography>
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={handleOpenUserDialog}
+                  <DetailsPageHeader
+                    heading={headingLbl}
+                    logo={undefined}
+                    mainPoints={mainPoints}
+                    showHeading={true}
                   >
-                    <ControlPoint />
-                  </IconButton>
-                </Box>
-                <Box padding={1}>
-                  {teamUsersLoading ? (
-                    [1, 2].map((i) => (
-                      <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
-                        <Box padding={1}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="20px"
-                          />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
-                        </Box>
-                      </BoxWithBorder>
-                    ))
-                  ) : teamUsers.length ? (
-                    <>
-                      <TeamUsers permissions={permissions} data={teamUsers} />
-                      <Box marginY={1} />
-                    </>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      Edit
+                    </Button>
+
+                    <Box component="span" marginX={1} />
+
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => {
+                        handleDeleteProject(id);
+                      }}
+                    />
+                  </DetailsPageHeader>
+                )}
+                <Box>
+                  {loading ||
+                  !projectSalesFields.length ||
+                  !projectSalesData ? (
+                    <Grid container spacing={2} style={{ padding: "16px" }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
                   ) : (
-                    <Box textAlign="center" padding={2}>
-                      No Users
-                    </Box>
+                    <>
+                      <Box
+                        width="100%"
+                        padding={1}
+                        bgcolor="grey.200"
+                        display="flex"
+                        justifyContent="space-between"
+                      >
+                        <Typography variant="subtitle2">
+                          Sales Strategy
+                        </Typography>
+                      </Box>
+                      <DetailsPage
+                        data={projectSalesData}
+                        fields={projectSalesFields}
+                      />
+                    </>
                   )}
                 </Box>
-              </Box>
-            </Paper>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={12} md={4} lg={4}>
+              <Paper style={{ overflow: "hidden" }}>
+                <Box style={{ padding: "0px", maxHeight: "450px" }}>
+                  <Box
+                    width="100%"
+                    padding={1}
+                    bgcolor="grey.200"
+                    display="flex"
+                    justifyContent="space-between"
+                  >
+                    <Typography variant="subtitle2">Project Team</Typography>
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUserDialog}
+                    >
+                      <ControlPoint />
+                    </IconButton>
+                  </Box>
+                  <Box padding={1}>
+                    {teamUsersLoading ? (
+                      [1, 2].map((i) => (
+                        <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
+                          <Box padding={1}>
+                            <Skeleton
+                              variant="text"
+                              width="100px"
+                              height="20px"
+                            />
+                            <Box marginTop={1} />
+                            <Skeleton
+                              variant="text"
+                              width="100%"
+                              height="15px"
+                            />
+                          </Box>
+                        </BoxWithBorder>
+                      ))
+                    ) : teamUsers.length ? (
+                      <>
+                        <TeamUsers permissions={permissions} data={teamUsers} />
+                        <Box marginY={1} />
+                      </>
+                    ) : (
+                      <Box textAlign="center" padding={2}>
+                        No Users
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              </Paper>
+            </Grid>
           </Grid>
-        </Grid>
+          <Box my={1} />
+          <CustomerStrategy />
+        </div>
       </Layout>
 
       {showConfirmBox ? (
