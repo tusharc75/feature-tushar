@@ -47,6 +47,7 @@ import { useHistory } from "react-router-dom";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
+import routes from "./../../components/Helpers/Routes";
 
 const ContactTypes = [
   {
@@ -171,9 +172,19 @@ export default function Contact(props) {
       headerName: "Name",
       width: 400,
       renderCell: (params) => (
-        <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
-          {params.value || ""}
-        </Link>
+        <>
+          <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
+            {params.value || ""}
+          </Link>
+          {
+            params.row.staticData?.lead ?
+              <Tooltip title="Go to Lead">
+                <Link className="link ml-2" to={`${routes.leadDetail.path}/${params.row.staticData.lead._id}`}>
+                  ({[params.row.staticData?.lead?.firstName, params.row.staticData?.lead?.lastName].filter(f => f).join(" ")})
+              </Link>
+              </Tooltip> : ""
+          }
+        </>
       ),
     },
     // { field: "lastName", headerName: "Last Name", width: 200 },

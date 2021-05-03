@@ -119,8 +119,8 @@ function OpportunityDetailsPage() {
   }
 
   const fetchSupplierContactData = (showDialog) => {
-    if (opportunityData.supplierAccountName?.optionValue) {
-      const ids = opportunityData.supplierAccountName?.optionValue;
+    if (opportunityData.supplierAccountName.length > 0) {
+      const ids = opportunityData.supplierAccountName.map(d => d.optionValue);
       const filterById = JSON.stringify([{ "field": "accountName", "term": { $in: ids } }])
 
       axiosInstance()
@@ -503,10 +503,10 @@ function OpportunityDetailsPage() {
             opportunityId={opportunityData._id}
             open={showAddSupplierContactsDialog}
             title="Assign Supplier Contacts"
-            onSuccess={() => { fetchSupplierContactData(false); setShowAddSupplierContactsDialog(false) }}
+            onSuccess={() => { fetchOpportunityData(); setShowAddSupplierContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddSupplierContactsDialog(false) }}
             contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
-            assignedContacts={opportunityData.staticData?.supplierContact ?? []}
+            assignedContacts={opportunityData.staticData?.supplierContacts ?? []}
             contactType="supplier"
           />
         }
@@ -516,10 +516,10 @@ function OpportunityDetailsPage() {
             opportunityId={opportunityData._id}
             open={showAddCustomerContactsDialog}
             title="Assign Customer Contacts"
-            onSuccess={() => { fetchCustomerContactData(false); setShowAddCustomerContactsDialog(false) }}
+            onSuccess={() => { fetchOpportunityData(); setShowAddCustomerContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddCustomerContactsDialog(false) }}
             contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
-            assignedContacts={opportunityData.staticData?.customerContact ?? []}
+            assignedContacts={opportunityData.staticData?.customerContacts ?? []}
             contactType="customer"
           />
         }

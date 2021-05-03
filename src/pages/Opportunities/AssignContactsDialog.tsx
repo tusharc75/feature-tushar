@@ -29,50 +29,27 @@ export default function AssignContactsDialog({
     contactType
 }) {
     const toastConfig = useContext(CustomToastContext);
-    const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
-    const [selectedContacts, setSelectedUsers] = useState([]);
     const [isAssigning, setAssigning] = useState(false);
 
     const [supplierContacts, setSupplierContacts] = useState(contacts.supplierContacts)
     const [customerContacts, setCustomerContacts] = useState(contacts.customerContacts)
 
-    const [currentContacts, setCurrentContacts] = useState(contactType === "supplier" ? supplierContacts : customerContacts)
+    const [currentContacts, setCurrentContacts] = useState(contactType === "supplier" ? contacts.supplierContacts : contacts.customerContacts)
 
     useEffect(() => {
+        const updatedContacts = [];
         currentContacts.map(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false
+            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+            updatedContacts.push(d);
         })
-
-        // axiosInstance()
-        //     .get(`/user`)
-        //     .then(({ data: { data } }) => {
-        //         setUsers(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)))
-        //         setLoadingUsers(false);
-        //     })
-        //     .catch((error) => {
-        //         setLoadingUsers(false);
-        //         toastConfig.setToastConfig(error);
-        //     });
-        // eslint-disable-next-line
-    }, [currentContacts]);
+        setCurrentContacts(updatedContacts)
+    }, []);
 
     const handleContactSelection = (e, id) => {
         const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
-        let copyOfAllCurrentContacts = currentContacts;
-        copyOfAllCurrentContacts[indexOfContactToChange].isChecked = e.target.checked;
-
-        setCurrentContacts(copyOfAllCurrentContacts);
-
-
-        // let tempSelectedUsers = [...selectedContacts];
-        // let curIndex = tempSelectedUsers.indexOf(id);
-        // if (e.target.checked) {
-        //     if (curIndex < 0) tempSelectedUsers = [...tempSelectedUsers, id];
-        // } else if (curIndex >= 0) {
-        //     tempSelectedUsers.splice(curIndex, 1);
-        // }
-        // setSelectedUsers(tempSelectedUsers);
+        currentContacts[indexOfContactToChange].isChecked = e.target.checked;
+        setCurrentContacts([...currentContacts]);
     };
 
     const handleAssignContacts = async () => {
@@ -117,8 +94,8 @@ export default function AssignContactsDialog({
                     <Loader text="Loading Contacts" />
                 ) : currentContacts.length ? (
                     <List style={{ padding: 0 }}>
-                        {currentContacts.map((contact) => (
-                            <ListItem divider key={contact._id}>
+                        {currentContacts.map((contact) => {
+                            return <ListItem divider key={contact._id}>
                                 <ListItemIcon>
                                     <Checkbox
                                         edge="start"
@@ -134,7 +111,8 @@ export default function AssignContactsDialog({
                                 // secondary={role.email}
                                 />
                             </ListItem>
-                        ))}
+                        }
+                        )}
                     </List>
                 ) : (
                     <Typography>No Contacts found to add</Typography>
