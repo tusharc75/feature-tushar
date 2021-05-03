@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography } from "@material-ui/core";
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
@@ -14,7 +14,7 @@ import routes from "../../components/Helpers/Routes";
 import axiosInstance from "./../../axios/axiosInstance";
 import Activity from "../../components/Activity";
 import {
-  DisplayData,
+  // DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -29,8 +29,24 @@ import { FcFlowChart } from "react-icons/fc";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import { BiFace } from 'react-icons/bi'
+import ListItem from '@material-ui/core/ListItem/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import { ListItemText } from '@material-ui/core';
 
-const Roles = (props) => {
+function DisplayData({ label, value, icon }) {
+  return <div style={{ flexGrow: 1 }}>
+    <List>
+      <ListItem>
+        <ListItemAvatar>
+          {icon}
+        </ListItemAvatar>
+        <ListItemText primary={value} secondary={label} />
+      </ListItem>
+    </List>
+  </div>
+}
+
+const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
@@ -513,7 +529,7 @@ const Roles = (props) => {
                             variant="h6"
                             style={{ margin: "0 10px" }}
                           >
-                            Converted Lead
+                            Related Lead
                           </Typography>
                         </div>
                         <Box className={`${contactClass.custom_box1}`}>
@@ -529,9 +545,7 @@ const Roles = (props) => {
                               </Grid>
                               <Grid container>
                                 <Grid item xs={12} sm={6}>
-                                  {
-                                    contactData?.staticData?.lead?.title ? <DisplayData label='Title' value={contactData?.staticData?.lead.title || ''} icon={< BiFace size={20} />} /> : ''
-                                  }
+                                  <DisplayData label='Title' value={contactData?.staticData?.lead?.title || '-'} icon={< BiFace size={20} />} />
                                 </Grid>
                               </Grid>
                             </CardContent>
@@ -572,4 +586,4 @@ const Roles = (props) => {
   );
 };
 
-export default Roles;
+export default ContactDetailsPage;
