@@ -193,14 +193,14 @@ export default function OpportunityAccordionInUserDetail({
                                                 </Grid>
                                             ))
                                         }
-                                    </Grid> : null
+                                    </Grid> : <Typography variant="subtitle1">No Opportunities To Show</Typography>
                             }
                         </>
                     }
                 </>
             </AccordionDetails>
             {
-                opportunities.length > 0 &&
+                opportunities?.length > 0 &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/opportunity`)}
                     p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaEye /> View All &#8599;

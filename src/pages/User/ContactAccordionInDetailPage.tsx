@@ -186,7 +186,7 @@ export default function ContactAccordionInDetailPage({
                                                 </Grid>
                                             ))
                                         }
-                                    </Grid> : null
+                                    </Grid> : <Typography variant="subtitle1">No Contacts To Show</Typography>
                             }
                         </>
                     }

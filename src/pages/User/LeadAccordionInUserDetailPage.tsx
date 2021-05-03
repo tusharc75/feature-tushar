@@ -190,7 +190,7 @@ export default function LeadAccordionInUserDetailPage({
                                                 </Grid>
                                             ))
                                         }
-                                    </Grid> : null
+                                    </Grid> : <Typography variant="subtitle1">No Leads To Show</Typography>
                             }
                         </>
                     }
