@@ -29,9 +29,7 @@ const useStyles = makeStyles((theme) => ({
 
 function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        {
-            value ? value : '-'
-        }
+    
         <List>
             <ListItem>
                 <ListItemAvatar>
@@ -67,12 +65,12 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                                     <Grid container>
                                         <Grid item xs={12} sm={6}>
                                             {
-                                                <DisplayData label='Account' value={accountName} icon={<BsPerson size={20} />} />
+                                                <DisplayData label='Account' value={accountName || '-'} icon={<BsPerson size={20} />} />
                                             }
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
                                             {
-                                                <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} />
+                                                <DisplayData label='Title' value={obj.title || '-'} icon={< BiFace size={20} />} />
                                             }
 
                                         </Grid>
