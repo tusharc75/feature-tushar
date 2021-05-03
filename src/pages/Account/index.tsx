@@ -424,13 +424,13 @@ export default function Account(props) {
   ];
 
   const handleSearch = (e) => {
-    if (query.page !== 1) {
+    if (query.page !== 0) {
       setQuery((prevState) => ({ ...prevState, page: 0 }));
     }
     setSearchVal(e.target.value);
   };
 
-  const fetchAccounts = useCallback(() => {
+  const fetchAccounts = async () => {
     setLoading(true);
     let searchParams: any = { ...query, filterAccounts: selectedType };
     searchParams = searchVal
@@ -451,7 +451,7 @@ export default function Account(props) {
         toastConfig.setToastConfig(err);
         setLoading(false);
       });
-  }, [searchVal, query, selectedType]);
+  }
 
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {

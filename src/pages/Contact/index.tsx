@@ -60,6 +60,7 @@ const ContactTypes = [
   },
 ];
 
+let contactTimeout;
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -81,6 +82,7 @@ export default function Contact(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [renderCount, setRenderCount] = useState(0);
 
   const [
     showDeleteWarningConfirmBox,
@@ -368,10 +370,7 @@ export default function Contact(props) {
       });
   }, [searchVal, query, selectedType, accountDetails]);
 
-  useEffect(() => {
-    getContacts();
-    // eslint-disable-next-line
-  }, [getContacts]);
+
 
   const handleSingleDeleteContacts = async () => {
     setLoading(true);
@@ -406,6 +405,24 @@ export default function Contact(props) {
     setDataRows([...rows]);
   }, [contactData]);
 
+
+  useEffect(() => {
+    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+
+    if (contactTimeout) {
+      clearTimeout(contactTimeout);
+    }
+
+    contactTimeout = setTimeout(() => {
+      getContacts();
+    }, millisec);
+  }, [searchVal]);
+
+  useEffect(() => {
+    if (renderCount > 0) {
+      getContacts();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [query, selectedType]);
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -457,7 +474,7 @@ export default function Contact(props) {
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 1) {
+    if (query.page !== 0) {
       setQuery((prevState) => ({ ...prevState, page: 0 }));
     }
     setSearchVal(e.target.value);
