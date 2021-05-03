@@ -47,7 +47,7 @@ const Entity: FC = () => {
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
 
-  const [loadingEntities, setLoadingEntities] = useState(false);
+  const [loadingEntities, setLoadingEntities] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllEntities, setCheckAllEntities] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
