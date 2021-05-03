@@ -326,14 +326,16 @@ const Header = ({ toggleDrawer }) => {
   );
 
   const NotificationContent = ({ data }) => {
-    return <div className={`${classes.notificationHeight} py-1`} style={{ position: "relative" }}>
+    return <div className={`${data.length == 0 ? classes.notificationHeight : ""}`} style={{ position: "relative" }}>
       {
-        data.map((d) => {
-          return <div style={{ borderBottom: "1px solid lightgrey" }} className="p-3">
+        data.map((d, index) => {
+          return <div style={{ borderBottom: index > 0 ? "1px solid lightgrey" : "" }} className={`${d.isSeen != false ? "light-grey-bg" : ""} p-3 cursor-pointer`}
+            onClick={() => history.push(`${d.resourcePath}/${d.resourceId}`)}>
             {
-              routes[d.route] ? <Link to={`${routes[d.route].path}/${d.id}`}>
-                <h6>{d.text}</h6>
-              </Link> : d.text
+              <>
+                <h4>{d.title}</h4>
+                <h5>{d.description}</h5>
+              </>
             }
           </div>
         })
