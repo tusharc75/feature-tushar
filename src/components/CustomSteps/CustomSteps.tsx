@@ -81,7 +81,7 @@ export default function CustomSteps({ steps, active }) {
 
     return (
         <div className={classes.root}>
-            <Stepper activeStep={active} nonLinear>
+            <Stepper activeStep={active}>
                 {steps.map((step, index) => {
                     const stepProps: any = {};
                     const labelProps: any = {};
@@ -94,9 +94,6 @@ export default function CustomSteps({ steps, active }) {
                     return (
                         <Step key={index} {...stepProps} className={active > index ? classes.completed : (index === active ? classes.current : "")}>
                             <StepLabel {...labelProps}  icon={active > index ? <FaCheckCircle /> : (index === active ? index+1 : index+1)}>
-                                {
-
-                                }
                                 {step.text}</StepLabel>
                         </Step>
                     );

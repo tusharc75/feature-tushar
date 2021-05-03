@@ -525,7 +525,7 @@ export default function AccountDetailPage(props) {
                   }}
                   accountId={accountData._id}
                   accountName={accountData.accountName}
-                  recordsPerLine={2}
+                  recordsPerLine={3}
                   resource={accountResource}
                   isRedirect={false}
                 />

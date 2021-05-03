@@ -134,14 +134,14 @@ export default function ProductBuilderInAccordion({ expanded = true, recordsPerL
                                                 <CardContent>
                                                     <Grid container className="detailCardHeader">
                                                         <Grid item xs={12} sm={8}>
-                                                            <Link className="link" >
+                                                            <Link className="link">
                                                                 <Typography >Product Builder 1</Typography>
                                                             </Link>
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container>
-                                                        <Grid item xs={12} sm={12}>
-                                                            This is Product one Description
+                                                        <Grid item xs={12} sm={12} className="p-2">
+                                                        <Typography >This is Product one Description</Typography> 
                                                                 </Grid>
                                                     </Grid>
                                                 </CardContent>

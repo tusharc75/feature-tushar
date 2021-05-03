@@ -68,7 +68,7 @@ function DisplayData({ label, value, icon }) {
     </div>
 }
 
-export default function ProjectInAccordion({ expanded = true, recordsPerLine = 2 }) {
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3 }) {
 
     const history = useHistory();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
@@ -83,11 +83,11 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 2
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 

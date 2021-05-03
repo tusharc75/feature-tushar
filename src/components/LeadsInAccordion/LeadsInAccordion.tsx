@@ -72,9 +72,8 @@ function DisplayData({ label, value, icon }) {
 }
 
 export default function LeadInAccordion({
-
     expanded = true,
-    recordsPerLine = 2,
+    recordsPerLine = 3,
 }) {
 
     const history = useHistory();
@@ -90,11 +89,11 @@ export default function LeadInAccordion({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 

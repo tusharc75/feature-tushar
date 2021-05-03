@@ -409,13 +409,13 @@ const LeadDetailsPage = () => {
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
               <AccordionOfOpportunity
-                recordsPerLine={2}
+                recordsPerLine={3}
                 opportunity={leadData?.staticData?.opportunity}
               />
-              <ProjectInAccordion />
-              <QuotesInAccordion />
-              <ProductBuilderInAccordion />
-              <LeadInAccordion />
+              <ProjectInAccordion recordsPerLine={3}/>
+              <QuotesInAccordion recordsPerLine={3}/>
+              <ProductBuilderInAccordion recordsPerLine={3}/>
+              <LeadInAccordion recordsPerLine={3}/>
             </Paper>
           </Grid>
 

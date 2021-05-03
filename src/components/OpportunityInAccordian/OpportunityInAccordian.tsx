@@ -94,11 +94,11 @@ export default function OpportunityInAccordian({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 
@@ -170,9 +170,14 @@ export default function OpportunityInAccordian({
                                                                     </Link>
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={4}>
-                                                                    <Typography className="amount">
-                                                                        {currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative}
-                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
+                                                                    {
+                                                                        obj?.amount ?
+                                                                            <Typography className="amount">
+                                                                                {currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative}
+                                                                                         &nbsp;{obj?.amount ?? ''}
+                                                                            </Typography>
+                                                                            : ""
+                                                                    }
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
