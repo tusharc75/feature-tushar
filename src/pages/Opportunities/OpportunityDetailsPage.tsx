@@ -86,6 +86,16 @@ function OpportunityDetailsPage() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (steps.length > 0) {
+      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == "process");
+      if (processSteps) {
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == opportunityData?.process) + 1;
+        setActiveStep(currentStepToShow);
+      }
+    }
+  }, [steps])
+
   const fetchOpportunityData = () => {
     if (selectedEntity) {
       setLoading(true);
@@ -172,10 +182,6 @@ function OpportunityDetailsPage() {
               canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
             }
           }));
-
-          // const setActiveStep = processSteps.fieldData.option.indexOf(d => d.optionLabel == data.process) + 1;
-          // setActiveStep(setActiveStep);
-
           // }
         })
         .catch((error) => {
