@@ -46,7 +46,7 @@ const ProjectSales: FC = () => {
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
-    let api = getSearchQuery("/projectStrategy", searchParams);
+    let api = getSearchQuery("/project-sales", searchParams);
     setLoadingProjects(true);
     axiosInstance()
       .get(api)

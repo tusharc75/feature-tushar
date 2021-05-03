@@ -23,7 +23,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
 
-let userTimeout;
+let userTimeout: ReturnType<typeof setTimeout>;
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -35,7 +35,7 @@ const User: FC = () => {
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllUsers, setCheckAllUsers] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -63,7 +63,7 @@ const User: FC = () => {
         .then(({ data: { data, count } }) => {
           getRows(data);
           setRowCount(count);
-          setCheckAllUsers(false)
+          setCheckAllUsers(false);
           setLoadingUsers(false);
         })
         .catch((err) => {
@@ -71,7 +71,8 @@ const User: FC = () => {
           setLoadingUsers(false);
         });
     }, 600);
-  }, [searchVal, query, toastConfig]);
+    // eslint-disable-next-line
+  }, [searchVal, query]);
 
   useEffect(() => {
     fetchUsers();
@@ -80,15 +81,15 @@ const User: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        isChecked: false,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-        createdBy: user.createdBy,
-        updatedBy: user.updatedBy,
-        status: user.blocked ? user.blocked : false,
-      }))
+          id: user._id,
+          isChecked: false,
+          name: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+          createdBy: user.createdBy,
+          updatedBy: user.updatedBy,
+          status: user.blocked ? user.blocked : false,
+        }))
       : [];
 
     setDataRows(rows);
@@ -225,7 +226,10 @@ const User: FC = () => {
         params?.value?.user ? (
           <h5 className="updateBy">
             {params?.value?.user?.firstName}
-            <span title={params?.value?.date} className="updatedAtTime badge-date">
+            <span
+              title={params?.value?.date}
+              className="updatedAtTime badge-date"
+            >
               {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
@@ -425,7 +429,6 @@ const User: FC = () => {
         />
       )}
       <Layout>
-
         <Grid container direction="row">
           <CustomBreadCrumbs routes={[routes.user]} />
         </Grid>
@@ -477,8 +480,9 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete user ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
