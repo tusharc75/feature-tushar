@@ -247,7 +247,13 @@ export default function ManageUpdatePassword({
                                         setFieldError("confirmPassword", "new and confirm password should be same")
                                         setFieldTouched("confirmPassword", true)
                                         return
-                                    } else {
+                                    }
+                                     else if(values.newPassword === values.oldPassword) {
+                                        setFieldError("newPassword", "new and old password should be different")
+                                        setFieldTouched("newPassword", true)
+                                        return
+                                    }
+                                    else  {
                                         handleSubmit(values)
                                     }
                                 }}
