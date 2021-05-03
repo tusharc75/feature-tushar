@@ -635,6 +635,7 @@ const Leads = () => {
             onSortModelChange={handleSortModelChange}
             density="compact"
             onFilterModelChange={onFilterChange}
+            filterMode="server"
           />
         </div>
         {showDeleteWarningConfirmBox ? (

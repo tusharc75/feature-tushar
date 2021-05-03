@@ -608,6 +608,7 @@ const Opportunities = () => {
               onSortModelChange={handleSortModelChange}
               density="compact"
               onFilterModelChange={onFilterChange}
+              filterMode="server"
             />
           </div>
 
