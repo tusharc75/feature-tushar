@@ -329,8 +329,6 @@ const Leads = () => {
           }
         </>
       ),
-      sortable: false,
-      filterable: false,
     },
     {
       field: "title",
@@ -349,8 +347,6 @@ const Leads = () => {
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -372,8 +368,6 @@ const Leads = () => {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="updateBy">
@@ -411,8 +405,6 @@ const Leads = () => {
       headerName: "Owner Alies",
       width: 250,
       hide: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => <CustomRenderCell value={params?.value} />,
     },
     {
@@ -557,10 +549,21 @@ const Leads = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let field = params.filterModel.items[0].columnField
+
+      if (params.filterModel.items[0].columnField == 'createdBy') {
+        field = "createdBy.user"
+      }
+      if (params.filterModel.items[0].columnField == 'updatedBy') {
+        field = "updatedBy.user"
+      }
+      let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
+      if (params.filterModel.items[0].columnField == 'name') {
+        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value },{ field: "lastName", term: params.filterModel.items[0].value }])
+      }
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
     } else {
       setQuery({ page: 0, limit: 25 });
@@ -655,6 +658,7 @@ const Leads = () => {
             onSortModelChange={handleSortModelChange}
             density="compact"
             onFilterModelChange={onFilterChange}
+            filterMode="server"
           />
         </div>
         {showDeleteWarningConfirmBox ? (
