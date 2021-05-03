@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     },
     completed: {
         background: "#20789a",
-        border: "2px solid #003f57"
+        border: "2px solid #04506d"
     },
     current: {
         // background: "#50ad50",

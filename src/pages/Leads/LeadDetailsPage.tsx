@@ -18,7 +18,7 @@ import routes from "../../components/Helpers/Routes";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import { lead } from "../../constants/helpers";
+import { getObjKeysWithValues, lead, leadProcessFieldName } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import styles from "./LeadDetailsPage.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -30,6 +30,7 @@ import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion"
 import { withStyles } from "@material-ui/core/styles";
 import OpportunityAccordionInLead from './AccordionOfOpportunity';
 import AccordionOfOpportunity from "./AccordionOfOpportunity";
+import CustomSteps from "../../components/CustomSteps/CustomSteps";
 
 
 
@@ -44,7 +45,7 @@ const LeadDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [leadFields, setLeadFIelds] = useState([]);
+  const [leadFields, setLeadFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
@@ -69,6 +70,10 @@ const LeadDetailsPage = () => {
     setConvertLeadToOpportunityConfirmationDialog,
   ] = useState({ open: false, id: null, leadName: null, message: null });
 
+  const [steps, setSteps] = useState([]);
+  const [activeStep, setActiveStep] = useState(0)
+  const [isProcessing, setIsProcessing] = useState(false)
+
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
 
@@ -85,10 +90,20 @@ const LeadDetailsPage = () => {
   }, [permissions]);
 
   useEffect(() => {
+    if (steps.length > 0) {
+      const processSteps = leadFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == leadProcessFieldName.toLocaleLowerCase());
+      if (processSteps && processSteps.isRead && leadData) {
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == leadData[leadProcessFieldName]) + 1;
+        setActiveStep(currentStepToShow);
+      }
+    }
+  }, [steps])
+
+  useEffect(() => {
     fetchLeadData();
   }, [user, selectedEntity]);
 
-  
+
   const fetchLeadData = async () => {
     setLoading(true);
     if (selectedEntity) {
@@ -116,7 +131,9 @@ const LeadDetailsPage = () => {
           const isAllowedToUpdate = [...data.collaborator ?? [], data.owner].some(
             (d) => d?.optionValue == userId
           );
-          setHasPermissionToConvertToOpportunity(dontHavePermissions.length == 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate);
+
+          setHasPermissionToConvertToOpportunity(dontHavePermissions.length == 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate &&
+            data[leadProcessFieldName] && data[leadProcessFieldName].toLowerCase() === "qualified");
           setIsLeadAlreadyConvertedToOpportunity(data.staticData && data.staticData["convertedToOpportunity"] ? data.staticData["convertedToOpportunity"] : false);
 
           if (data?.salutation?.optionLabel) {
@@ -152,8 +169,19 @@ const LeadDetailsPage = () => {
   const getLeadFields = () => {
     axiosInstance()
       .get(`/field?resource=Lead&entity=${selectedEntity}`)
-      .then(({ data }) => {
-        setLeadFIelds(data.data);
+      .then(({ data: { data } }) => {
+        setLeadFields(data);
+
+        const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == leadProcessFieldName.toLowerCase());
+        if (processSteps && processSteps.isRead) {
+          setSteps(processSteps.fieldData.option.map(m => {
+            return {
+              text: m.optionLabel,
+              canCompleteManually: true //  !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+            }
+          }));
+        }
+
         setLoading(false);
       });
   };
@@ -291,7 +319,7 @@ const LeadDetailsPage = () => {
                         }}
                       >
                         Convert Lead To Opportunity
-                </Button>
+                      </Button>
                       <Box component="span" marginX={1} />
                     </>
                   }
@@ -303,6 +331,53 @@ const LeadDetailsPage = () => {
                   )}
                 </DetailsPageHeader>
               )}
+
+              {
+                steps.length > 0 &&
+                <div className="stepper-box">
+                  <div className="mainview">
+                    <CustomSteps steps={steps} active={activeStep} />
+                  </div>
+                  <div className="actionview">
+                    <div className="d-flex justify-content-center">
+                      {
+                        activeStep != steps.length ?
+                          isProcessing ? <Button variant="outlined"
+                            color="primary"
+                            disabled={true}
+                            onClick={() => { }}>
+                            Processing...
+                          </Button> :
+                            <Button variant="contained"
+                              color="primary"
+                              disabled={!steps[activeStep].canCompleteManually}
+                              onClick={() => {
+                                setIsProcessing(true)
+                                const updatedData = {
+                                  ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
+                                  [leadProcessFieldName]: steps[activeStep].text,
+                                  _id: leadData._id
+                                };
+
+                                axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
+                                  setActiveStep(activeStep + 1)
+                                  setIsProcessing(false)
+
+                                  if (steps[activeStep].text.toLowerCase() === "qualified") {
+                                    fetchLeadData();
+                                  }
+                                }).catch((error) => {
+                                  toastConfig.setToastConfig(error);
+                                  setIsProcessing(false)
+                                })
+                              }}>
+                              Mark {steps[activeStep].text} as Completed
+                            </Button> : ""
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
 
               {loading ? (
                 <Grid container spacing={2}>
@@ -333,7 +408,7 @@ const LeadDetailsPage = () => {
               ) : (
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
-              <AccordionOfOpportunity 
+              <AccordionOfOpportunity
                 recordsPerLine={2}
                 opportunity={leadData?.staticData?.opportunity}
               />

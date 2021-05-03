@@ -181,8 +181,8 @@ Button.MuiButtonBase-root {
 
   & .mainview {
     width: 98%;
-    padding: 1rem 0.5rem 2rem 0.5rem;
-    margin: 1% 1% 0 1%;
+    padding: 2rem 0.5rem 2rem 0.5rem;
+    margin: 1%;
     box-shadow: 0px 1px 7px rgba(0, 0, 0, 0.2);
     background: white;
     border-radius: 5px;
@@ -190,7 +190,7 @@ Button.MuiButtonBase-root {
 
   & .actionview {
     padding: 12px 20px;
-    margin-top: -1.5rem;
+    margin-top: -2.3rem;
 
     .MuiButton-contained.Mui-disabled {
       box-shadow: none;
@@ -207,21 +207,18 @@ Button.MuiButtonBase-root {
   border: 2px solid #dcdada;
 }
 .MuiStepLabel-label {
-  color: #ddd;
-  font-weight: 500;
+  color: #bab9b9 !important;
+  font-weight: 500 !important;
   &.MuiStepLabel-completed {
     color: white !important;
   }
 
   &.MuiStepLabel-active {
-    color: white !important;
+    color: var(--primary) !important;
   }
 }
 
 .MuiStepLabel-iconContainer{
   opacity: 0.4;
-  color: white;
-}
-.MuiStepLabel-labelContainer{
   color: white;
 }

@@ -18,6 +18,7 @@ import styles from "./Header.module.scss"
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import MessageDialog from '../../components/Helpers/MessageDialog';
+import { leadProcessFieldName } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
     filter_side: {
@@ -144,7 +145,11 @@ function LeadsHeader(props) {
                                         closeActions();
                                         if (selectedLeads.some((d) => d.isChecked && d.staticData["convertedToOpportunity"])) {
                                             setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
-                                        } else {
+                                        }
+                                        else if (selectedLeads.some((d) => d.isChecked && (!d[leadProcessFieldName] || d[leadProcessFieldName].toLowerCase() != "qualified"))) {
+                                            setMessageDialog({ open: true, message: `You have selected lead(s) which are not qualified yet to be converted into opportunity` })
+                                        }
+                                        else {
                                             if (selectedLeads.some(d => d.isAllowedToUpdate == false)) {
                                                 setMessageDialog({ open: true, message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.` })
                                             }
