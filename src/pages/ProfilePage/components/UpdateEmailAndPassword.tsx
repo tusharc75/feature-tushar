@@ -248,12 +248,12 @@ export default function ManageUpdatePassword({
                                         setFieldTouched("confirmPassword", true)
                                         return
                                     }
-                                     else if(values.newPassword === values.oldPassword) {
+                                    else if (values.newPassword === values.oldPassword) {
                                         setFieldError("newPassword", "new and old password should be different")
                                         setFieldTouched("newPassword", true)
                                         return
                                     }
-                                    else  {
+                                    else {
                                         handleSubmit(values)
                                     }
                                 }}
