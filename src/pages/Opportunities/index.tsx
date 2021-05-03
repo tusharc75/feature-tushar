@@ -253,9 +253,9 @@ const Opportunities = () => {
         />
       ),
       disableColumnMenu: true,
+      width: 75,
       sortable: false,
       filterable: false,
-      width: 75,
     },
     {
       field: "opportunityName",
@@ -267,8 +267,6 @@ const Opportunities = () => {
       field: "supplierAccountName",
       headerName: "Supplier Account Name",
       width: 300,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => (
         <Link
           className="link"
@@ -284,8 +282,6 @@ const Opportunities = () => {
       field: "customerAccountName",
       headerName: "Customer Account Name",
       width: 300,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => (
         <Link
           className="link"
@@ -302,8 +298,6 @@ const Opportunities = () => {
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -326,8 +320,6 @@ const Opportunities = () => {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value?.user ? (
           <h5 className="updateBy">
@@ -359,8 +351,6 @@ const Opportunities = () => {
       field: "owner",
       headerName: "Opportunity Owner",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => <CustomRenderCell value={params?.value} />,
     },
     {
@@ -516,11 +506,20 @@ const Opportunities = () => {
 
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let field = params.filterModel.items[0].columnField
+
+      if (params.filterModel.items[0].columnField == 'createdBy') {
+        field = "createdBy.user"
+      }
+      if (params.filterModel.items[0].columnField == 'updatedBy') {
+        field = "updatedBy.user"
+      }
+      const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
+
     } else {
       setQuery({ page: 0, limit: 25 });
     }
