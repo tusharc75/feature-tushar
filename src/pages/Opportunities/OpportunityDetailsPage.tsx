@@ -55,6 +55,10 @@ function OpportunityDetailsPage() {
   const [isProcessing, setIsProcessing] = useState(false)
 
   const [messageDialog, setMessageDialog] = useState({ open: false, message: null })
+  const [expanded, setExpanded] = useState({
+    supplierContacts: false,
+    customerContacts: false
+  })
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -129,20 +133,24 @@ function OpportunityDetailsPage() {
   }
 
   const fetchSupplierContactData = (showDialog) => {
-    if (opportunityData.supplierAccountName.length > 0) {
-      const ids = opportunityData.supplierAccountName.map(d => d.optionValue);
-      const filterById = JSON.stringify([{ "field": "accountName", "term": { $in: ids } }])
 
-      axiosInstance()
-        .get(`supplier-contact?filterById=${filterById}`)
-        .then(({ data: { data } }) => {
-          setSupplierContacts(data)
-          setShowAddSupplierContactsDialog(showDialog);
-        });
+    let ids = []
+
+    if (opportunityFields && opportunityFields.length) {
+      let fieldData = opportunityFields.find(currentField => currentField?.fieldData?.fieldName === "supplierAccountName")?.fieldData
+      if (fieldData?.option && fieldData.option.length) {
+        ids = [...fieldData.option.map(option => option.optionValue)]
+      }
     }
-    else {
-      setMessageDialog({ open: true, message: "Please add supplier accounts for this opportunity" })
-    }
+
+    const filterById = JSON.stringify([{ "field": "accountName", "term": ids.length > 1 ? { $in: ids } : ids[0] }])
+
+    axiosInstance()
+      .get(`supplier-contact?filterById=${filterById}`)
+      .then(({ data: { data } }) => {
+        setSupplierContacts(data)
+        setShowAddSupplierContactsDialog(showDialog);
+      });
   }
 
   const fetchCustomerContactData = (showDialog) => {
@@ -282,6 +290,7 @@ function OpportunityDetailsPage() {
       count: 0,
     },
   ];
+
   return (
     <>
       <Layout>
@@ -409,27 +418,37 @@ function OpportunityDetailsPage() {
                     <hr />
 
                     {
-                      opportunityData && <Box padding="16px">
+                      opportunityData && <Box padding="8px">
                         <OpportunityContacts
-                          contacts={opportunityData?.staticData?.supplierContacts}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
                           title="Supplier Contacts"
                           contactApi={supplierContact.contactApi}
+                          isExpanded={expanded.supplierContacts}
                           onAddContact={() => {
                             fetchSupplierContactData(true);
                           }}
+                          onSetExpanded={(key) => {
+                            setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
+                          }}
+                          contactsRoute={routes.supplierContact.path}
                         />
                       </Box>
                     }
 
                     {
-                      opportunityData && <Box padding="16px" marginTop="1rem">
+                      opportunityData && <Box padding="8px" marginTop="1rem">
                         <OpportunityContacts
-                          contacts={opportunityData?.staticData?.customerContacts}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
                           title="Customer Contacts"
+                          isExpanded={expanded["customerContacts"]}
                           contactApi={customerContact.contactApi}
                           onAddContact={() => {
                             fetchCustomerContactData(true);
                           }}
+                          onSetExpanded={(key) => {
+                            setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
+                          }}
+                          contactsRoute={routes.customerContact.path}
                         />
                       </Box>
                     }

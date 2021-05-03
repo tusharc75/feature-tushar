@@ -122,6 +122,7 @@ export default function ManageOpportunityDialog({
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
 
+
             if (accountId && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
             }
@@ -130,7 +131,9 @@ export default function ManageOpportunityDialog({
               setCurrencySymbol(currencies.find(d => d.currencyCode == dataToUpdate["currency"])?.symbolNative);
             }
 
-            newFields.push(_f.fieldData);
+            if (!(_f.fieldData.fieldName === "supplierAccountName")) {
+              newFields.push(_f.fieldData);
+            }
           });
 
         setEntityData({
