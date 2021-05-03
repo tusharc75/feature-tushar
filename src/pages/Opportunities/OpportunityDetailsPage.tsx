@@ -102,7 +102,7 @@ function OpportunityDetailsPage() {
 
           if (modifiedData["currency"]) {
             const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
-            modifiedData["amount"] = `${currency} ${modifiedData["amount"]}`
+            modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
           }
 
           setOpportunityData(modifiedData);
@@ -164,6 +164,7 @@ function OpportunityDetailsPage() {
           setOpportunityFields(data);
           setLoading(false);
 
+          // if (permissions.opportunity.isRead) {
           const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == "process");
           setSteps(processSteps.fieldData.option.map(m => {
             return {
@@ -171,6 +172,11 @@ function OpportunityDetailsPage() {
               canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
             }
           }));
+
+          // const setActiveStep = processSteps.fieldData.option.indexOf(d => d.optionLabel == data.process) + 1;
+          // setActiveStep(setActiveStep);
+
+          // }
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
