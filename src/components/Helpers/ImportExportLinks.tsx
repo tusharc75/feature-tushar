@@ -72,7 +72,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
       let formData = new FormData();
       formData.append("file", file);
       axiosInstance()
-        .post(`/${api}/import`, formData, {
+        .post(`${api}/import`, formData, {
           responseType: "blob",
           headers: { "Content-Type": "multipart/form-data" },
 
@@ -109,7 +109,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
    */
   const exportToExcel = () => {
     axiosInstance()
-      .get(`/${api}/template?export=true`, {
+      .get(`${api}/template?export=true`, {
         responseType: "arraybuffer",
       })
       .then((response) => {
@@ -128,7 +128,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
    */
   const downloadTemplate = () => {
     axiosInstance()
-      .get(`/${api}/template`, { responseType: "arraybuffer" })
+      .get(`${api}/template`, { responseType: "arraybuffer" })
       .then((response) => {
         const fileName = response.headers["content-disposition"].split(
           "filename="
@@ -189,7 +189,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
         >
           Download Template
         </label>
-        <Divider
+        {/* <Divider
           orientation="vertical"
           flexItem
           className={classes.linkDivider}
@@ -199,7 +199,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
           className={`${classes.links} cursor-pointer`}
         >
           Email a Link
-        </label>
+        </label> */}
       </div>
       <Menu
         id="import-export-links"
@@ -230,7 +230,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
         >
           Download Template
         </MenuItem>
-        <MenuItem>Email a Link</MenuItem>
+        {/* <MenuItem>Email a Link</MenuItem> */}
       </Menu>
       {isMobile && (
         <IconButton onClick={handleClick}>

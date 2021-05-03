@@ -25,6 +25,7 @@ import {
   downloadExcel,
   leadTemplateFileName,
   leadImportErrorFileName,
+  leadProcessFieldName,
 } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import { HiUserGroup } from "react-icons/hi";
@@ -127,7 +128,8 @@ const Leads = () => {
         owner: u.owner,
         isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
           (d) => d?.optionValue == user?.user?._id
-        )
+        ),
+        relatedOpportunity: u.staticData?.convertedToOpportunity && u.staticData?.opportunity
       };
       return res;
     });
@@ -187,7 +189,8 @@ const Leads = () => {
     middleName,
     lastName,
     staticData,
-    isAllowedToUpdate
+    [leadProcessFieldName]: leadProcess,
+    isAllowedToUpdate,
   }) => {
     let dontHavePermissions = [];
 
@@ -200,6 +203,8 @@ const Leads = () => {
     if (!permissions["opportunity"].isCreate) {
       dontHavePermissions.push("Opportunity");
     }
+
+    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() == "qualified";
 
     return dontHavePermissions.length > 0 ? (
       <>
@@ -224,6 +229,14 @@ const Leads = () => {
     ) : !isAllowedToUpdate ? (
       <>
         <Tooltip title="You are not allowed to convert as you are neither owner nor collaborator">
+          <IconButton aria-label="Convert to opportunity">
+            <SiConvertio size={18} />
+          </IconButton>
+        </Tooltip>
+      </>
+    ) : !isCurrentLeadStatusQualified ? (
+      <>
+        <Tooltip title="To covert this lead to opportunity, Lead status must be qualified">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
@@ -287,7 +300,7 @@ const Leads = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 400,
+      width: 250,
       renderCell: (params) => (
         <>
           <Link
@@ -296,13 +309,23 @@ const Leads = () => {
           >
             {params?.value ?? ""}
           </Link>
+        </>
+      ),
+      sortable: false,
+      filterable: false,
+    },
+    {
+      field: "relatedOpportunity",
+      headerName: "Related Opportunity",
+      width: 300,
+      renderCell: (params) => (
+        <>
           {
-            params.row.staticData?.convertedToOpportunity && params.row.staticData?.opportunity ?
-              <Tooltip title="Go to Opportunity">
-                <Link className="link ml-2" to={`${routes.opportunityDetail.path}/${params.row.staticData.opportunity._id}`}>
-                  ({params.row.staticData?.opportunity?.opportunityName})
-                </Link>
-              </Tooltip> : ""
+            params.value ?
+              <Link className="link" to={`${routes.opportunityDetail.path}/${params.value?._id}`} title={params.value?.opportunityName}>
+                {params.value?.opportunityName}
+              </Link>
+              : <NoDataCell />
           }
         </>
       ),

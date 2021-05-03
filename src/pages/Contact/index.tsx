@@ -104,7 +104,6 @@ export default function Contact(props) {
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
   });
-  console.log("history", history);
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
     isUpdate: false,
@@ -170,22 +169,32 @@ export default function Contact(props) {
     {
       field: "name",
       headerName: "Name",
-      width: 400,
+      width: 250,
       renderCell: (params) => (
         <>
           <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
             {params.value || ""}
           </Link>
+        </>
+      ),
+    },
+    {
+      field: "relatedLead",
+      headerName: "Related Lead",
+      width: 250,
+      renderCell: (params) => (
+        <>
           {
-            params.row.staticData?.lead ?
-              <Tooltip title="Go to Lead">
-                <Link className="link ml-2" to={`${routes.leadDetail.path}/${params.row.staticData.lead._id}`}>
-                  ({[params.row.staticData?.lead?.firstName, params.row.staticData?.lead?.lastName].filter(f => f).join(" ")})
+            params.value ?
+              <Link className="link" to={`${routes.leadDetail.path}/${params.value._id}`} title={[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}>
+                {[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}
               </Link>
-              </Tooltip> : ""
+              : <NoDataCell />
           }
         </>
       ),
+      sortable: false,
+      filterable: false,
     },
     // { field: "lastName", headerName: "Last Name", width: 200 },
     {
@@ -402,6 +411,7 @@ export default function Contact(props) {
       accountId: u.accountName?.optionValue,
       accountName: u.accountName?.optionLabel,
       name: [u.firstName, u.middleName, u.lastName].filter((f) => f).join(" "),
+      relatedLead: u.staticData?.lead
     }));
     setDataRows([...rows]);
   }, [contactData]);

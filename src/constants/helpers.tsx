@@ -53,6 +53,9 @@ export const userType = {
   brandAdmin: 2
 }
 
+export const leadProcessFieldName = "leadProcess";
+export const opportunityProcessFieldName = "process";
+
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
 export const sidebarResource = {
