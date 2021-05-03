@@ -40,7 +40,7 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
   const getInitialData = () => {
     setLoading(true);
     axiosInstance()
-      .get("/field?resource=Project Strategy")
+      .get("/field?resource=Project Sales")
       .then(({ data: { data } }) => {
         const fieldsData = data.map((d: any) => d.fieldData);
         setInitialData({
@@ -57,7 +57,7 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
   const handleSubmit = (values) => {
     setSubmitting(true);
     axiosInstance()
-      .post("/projectStrategy", values)
+      .post("/project-Sales", values)
       .then(({ data }) => {
         const newId = data.data._id;
         setSubmitting(false);
