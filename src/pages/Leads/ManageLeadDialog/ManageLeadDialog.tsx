@@ -236,8 +236,8 @@ export default function ManageLeadDialog({
               <CustomDialogContent>
                 <Form>
                   {formsData &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
+                    formsData.map((form, i) => {
+                      return form.name && <div key={i}>
                         <h2 className="form-label-style">{form.name}</h2>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
@@ -312,7 +312,7 @@ export default function ManageLeadDialog({
                           </Grid>
                         </Box>
                       </div>
-                    ))}
+                    })}
                 </Form>
               </CustomDialogContent>
 

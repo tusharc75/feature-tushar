@@ -17,7 +17,7 @@ import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
-import { customerAccount, supplierAccount, yyyyMMDD, stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact, getObjKeysWithValues } from "../../constants/helpers";
+import { customerAccount, supplierAccount, yyyyMMDD, stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact, getObjKeysWithValues, opportunityProcessFieldName } from "../../constants/helpers";
 import { opportunity } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
@@ -92,9 +92,9 @@ function OpportunityDetailsPage() {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == "process");
-      if (processSteps) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == opportunityData?.process) + 1;
+      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == opportunityProcessFieldName.toLowerCase());
+      if (processSteps && processSteps.isRead && opportunityData) {
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == opportunityData[opportunityProcessFieldName]) + 1;
         setActiveStep(currentStepToShow);
       }
     }
@@ -182,15 +182,15 @@ function OpportunityDetailsPage() {
           setOpportunityFields(data);
           setLoading(false);
 
-          // if (permissions.opportunity.isRead) {
-          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == "process");
-          setSteps(processSteps.fieldData.option.map(m => {
-            return {
-              text: m.optionLabel,
-              canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
-            }
-          }));
-          // }
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == opportunityProcessFieldName.toLowerCase());
+          if (processSteps && processSteps.isRead) {
+            setSteps(processSteps.fieldData.option.map(m => {
+              return {
+                text: m.optionLabel,
+                canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+              }
+            }));
+          }
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -354,40 +354,44 @@ function OpportunityDetailsPage() {
                 </DetailsPageHeader>
               )}
 
-              <CustomSteps steps={steps} active={activeStep} />
+              {
+                steps.length > 0 && <>
+                  <CustomSteps steps={steps} active={activeStep} />
 
-              <div className="w-100 d-flex justify-content-end mt-2">
-                {
-                  activeStep != steps.length ?
-                    isProcessing ? <Button variant="outlined"
-                      color="primary"
-                      disabled={true}
-                      onClick={() => { }}>
-                      Processing...
-                    </Button> :
-                      <Button variant="contained"
-                        color="primary"
-                        disabled={!steps[activeStep].canCompleteManually}
-                        onClick={() => {
-                          setIsProcessing(true)
-                          const updatedData = {
-                            ...getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })),
-                            process: steps[activeStep].text,
-                            _id: opportunityData._id
-                          };
+                  <div className="w-100 d-flex justify-content-end mt-2">
+                    {
+                      activeStep != steps.length ?
+                        isProcessing ? <Button variant="outlined"
+                          color="primary"
+                          disabled={true}
+                          onClick={() => { }}>
+                          Processing...
+                          </Button> :
+                          <Button variant="contained"
+                            color="primary"
+                            disabled={!steps[activeStep].canCompleteManually}
+                            onClick={() => {
+                              setIsProcessing(true)
+                              const updatedData = {
+                                ...getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })),
+                                process: steps[activeStep].text,
+                                _id: opportunityData._id
+                              };
 
-                          axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
-                            setActiveStep(activeStep + 1)
-                            setIsProcessing(false)
-                          }).catch((error) => {
-                            toastConfig.setToastConfig(error);
-                            setIsProcessing(false)
-                          })
-                        }}>
-                        Mark {steps[activeStep].text} as Completed
-                  </Button> : ""
-                }
-              </div>
+                              axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
+                                setActiveStep(activeStep + 1)
+                                setIsProcessing(false)
+                              }).catch((error) => {
+                                toastConfig.setToastConfig(error);
+                                setIsProcessing(false)
+                              })
+                            }}>
+                            Mark {steps[activeStep].text} as Completed
+                            </Button> : ""
+                    }
+                  </div>
+                </>
+              }
 
               {loading ? (
                 <Box padding={2}>

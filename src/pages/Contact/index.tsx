@@ -60,6 +60,7 @@ const ContactTypes = [
   },
 ];
 
+let contactTimeout;
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -81,6 +82,7 @@ export default function Contact(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [renderCount, setRenderCount] = useState(0);
 
   const [
     showDeleteWarningConfirmBox,
@@ -104,7 +106,6 @@ export default function Contact(props) {
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
   });
-  console.log("history", history);
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
     isUpdate: false,
@@ -170,22 +171,32 @@ export default function Contact(props) {
     {
       field: "name",
       headerName: "Name",
-      width: 400,
+      width: 250,
       renderCell: (params) => (
         <>
           <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
             {params.value || ""}
           </Link>
+        </>
+      ),
+    },
+    {
+      field: "relatedLead",
+      headerName: "Related Lead",
+      width: 250,
+      renderCell: (params) => (
+        <>
           {
-            params.row.staticData?.lead ?
-              <Tooltip title="Go to Lead">
-                <Link className="link ml-2" to={`${routes.leadDetail.path}/${params.row.staticData.lead._id}`}>
-                  ({[params.row.staticData?.lead?.firstName, params.row.staticData?.lead?.lastName].filter(f => f).join(" ")})
+            params.value ?
+              <Link className="link" to={`${routes.leadDetail.path}/${params.value._id}`} title={[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}>
+                {[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}
               </Link>
-              </Tooltip> : ""
+              : <NoDataCell />
           }
         </>
       ),
+      sortable: false,
+      filterable: false,
     },
     // { field: "lastName", headerName: "Last Name", width: 200 },
     {
@@ -368,10 +379,7 @@ export default function Contact(props) {
       });
   }, [searchVal, query, selectedType, accountDetails]);
 
-  useEffect(() => {
-    getContacts();
-    // eslint-disable-next-line
-  }, [getContacts]);
+
 
   const handleSingleDeleteContacts = async () => {
     setLoading(true);
@@ -402,10 +410,29 @@ export default function Contact(props) {
       accountId: u.accountName?.optionValue,
       accountName: u.accountName?.optionLabel,
       name: [u.firstName, u.middleName, u.lastName].filter((f) => f).join(" "),
+      relatedLead: u.staticData?.lead
     }));
     setDataRows([...rows]);
   }, [contactData]);
 
+
+  useEffect(() => {
+    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+
+    if (contactTimeout) {
+      clearTimeout(contactTimeout);
+    }
+
+    contactTimeout = setTimeout(() => {
+      getContacts();
+    }, millisec);
+  }, [searchVal]);
+
+  useEffect(() => {
+    if (renderCount > 0) {
+      getContacts();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [query, selectedType]);
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -457,7 +484,7 @@ export default function Contact(props) {
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 1) {
+    if (query.page !== 0) {
       setQuery((prevState) => ({ ...prevState, page: 0 }));
     }
     setSearchVal(e.target.value);
