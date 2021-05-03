@@ -80,7 +80,6 @@ export default function OpportunityInAccordian({
     opportunities, onNewOpportunityAdd, accountId, accountName,
     expanded = true, recordsPerLine = 2, opportunityPermissions, resource, isRedirect,
 }) {
-
     const history = useHistory();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -184,7 +183,7 @@ export default function OpportunityInAccordian({
                                                                 <Grid item xs={12} sm={4}>
                                                                     <Typography className="amount">
                                                                         {currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative}
-                                                                        {obj?.amount ?? ''}</Typography>
+                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
@@ -211,6 +210,9 @@ export default function OpportunityInAccordian({
                 </>
             </AccordionDetails>
             <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/opportunity`, {
+                accountId: accountId,
+                accountName: accountName,
+                resource: `${resource}Name`
             })} p={1} display="flex" justifyContent="center" alignItems="center">
                 <FaEye /> View All &#8599;
             </Box>

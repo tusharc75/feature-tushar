@@ -55,7 +55,7 @@ const AssignTeamUsers = ({
     setSelectedUsers(tempSelectedUsers);
   };
 
-  const handleAssignRoles = async () => {
+  const handleAssignUsers = async () => {
     if (selectedUsers.length) {
       setAssigning(true);
 
@@ -64,22 +64,22 @@ const AssignTeamUsers = ({
         roles: ids,
       };
 
-      await axiosInstance()
-        .post(`/role/assign-role`, dataObj)
-        .then(() => {
-          setAssigning(false);
-          toastConfig.setToastConfig({
-            message: "Roles assigned successfully",
-            type: "success",
-            open: true,
-          });
+      //   await axiosInstance()
+      //     .post(`/role/assign-role`, dataObj)
+      //     .then(() => {
+      //       setAssigning(false);
+      //       toastConfig.setToastConfig({
+      //         message: "Roles assigned successfully",
+      //         type: "success",
+      //         open: true,
+      //       });
 
-          onSuccess();
-        })
-        .catch((error) => {
-          setAssigning(false);
-          toastConfig.setToastConfig(error);
-        });
+      //       onSuccess();
+      //     })
+      //     .catch((error) => {
+      //       setAssigning(false);
+      //       toastConfig.setToastConfig(error);
+      //     });
     }
   };
 
@@ -130,7 +130,7 @@ const AssignTeamUsers = ({
         </Button>
         <Button
           disabled={!selectedUsers.length || isAssigning}
-          onClick={handleAssignRoles}
+          onClick={handleAssignUsers}
           color="primary"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}

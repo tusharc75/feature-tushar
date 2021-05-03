@@ -47,6 +47,7 @@ import { useHistory } from "react-router-dom";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
+import routes from "./../../components/Helpers/Routes";
 
 const ContactTypes = [
   {
@@ -103,7 +104,7 @@ export default function Contact(props) {
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
   });
-
+  console.log("history", history);
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
     isUpdate: false,
@@ -171,9 +172,19 @@ export default function Contact(props) {
       headerName: "Name",
       width: 400,
       renderCell: (params) => (
-        <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
-          {params.value || ""}
-        </Link>
+        <>
+          <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
+            {params.value || ""}
+          </Link>
+          {
+            params.row.staticData?.lead ?
+              <Tooltip title="Go to Lead">
+                <Link className="link ml-2" to={`${routes.leadDetail.path}/${params.row.staticData.lead._id}`}>
+                  ({[params.row.staticData?.lead?.firstName, params.row.staticData?.lead?.lastName].filter(f => f).join(" ")})
+              </Link>
+              </Tooltip> : ""
+          }
+        </>
       ),
     },
     // { field: "lastName", headerName: "Last Name", width: 200 },
@@ -236,7 +247,9 @@ export default function Contact(props) {
       field: "accountName",
       headerName: "Account",
       width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <Link className="link" to={`/${account.accountRoute}/detail/${params.row.accountId}`}>
+        {params.value}
+      </Link>
     },
     {
       field: "actions",
@@ -300,7 +313,7 @@ export default function Contact(props) {
       }
       let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
       if (params.filterModel.items[0].columnField == 'name') {
-        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value },{ field: "lastName", term: params.filterModel.items[0].value }])
+        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
       }
       setQuery((prevState) => ({
         ...prevState,
@@ -336,8 +349,7 @@ export default function Contact(props) {
       : { ...searchParams };
 
     if (accountDetails.accountId) {
-      searchParams["filterById"] = JSON.stringify([{field:"accountName",term:accountDetails.accountId}]);
-
+      searchParams["filterById"] = JSON.stringify([{ field: "accountName", term: accountDetails.accountId }]);
     }
     let api = getSearchQuery(`/${contactApi}`, searchParams);
 
@@ -387,6 +399,7 @@ export default function Contact(props) {
       id: u._id,
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
+      accountId: u.accountName?.optionValue,
       accountName: u.accountName?.optionLabel,
       name: [u.firstName, u.middleName, u.lastName].filter((f) => f).join(" "),
     }));
