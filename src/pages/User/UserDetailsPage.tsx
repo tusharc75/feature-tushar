@@ -104,7 +104,6 @@ const UserDetailsPage = () => {
       const {
         data: { data },
       } = await axiosInstance().get(`/user/${id}`);
-      console.log("Inside User",user)
       handleMainPoints(data);
       const name = [data.firstName, data.lastName].filter((d) => d).join(" ");
 
