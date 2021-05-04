@@ -164,6 +164,7 @@ export default function ManageOpportunityDialog({
 
   const handleCreateOpportunity = (values) => {
     // values.closeDate = "03/03/2021"
+    if (accountId) values["supplierAccountName"] = [accountId]
     setLoading(true);
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)

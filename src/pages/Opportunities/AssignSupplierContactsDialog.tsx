@@ -27,37 +27,22 @@ export default function AssignSupplierContactsDialog({
     onSuccess,
     handleCloseDialog,
     contacts,
-    assignedContacts,
     contactType,
-    supplierAccountOptions
+    supplierAccountOptions,
+    onGetSupplierAccountsContacts,
+    handleContactSelection,
+    currentContacts,
+    selectedSupplierAccountsList,
+    loadingSupplierAccounts,
+    onUpdateOpportunity
 }) {
     const toastConfig = useContext(CustomToastContext);
-    const [loadingUsers, setLoadingUsers] = useState(false);
     const [isAssigning, setAssigning] = useState(false);
-
-    const [currentContacts, setCurrentContacts] = useState(contacts.supplierContacts)
-
-    const [selectedSupplierAccounts, setSelectedSupplierAccounts] = useState([])
+    const [selectedSupplierAccounts, setSelectedSupplierAccounts] = useState([]);
 
     useEffect(() => {
-        let selectedSupplierAccounts = []
-        const updatedContacts = [];
-        currentContacts.map(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
-            if (d["isChecked"] && selectedSupplierAccounts.indexOf(d?.accountName?.optionValue) < 0) {
-                selectedSupplierAccounts.push(d.accountName.optionValue)
-            }
-            updatedContacts.push(d);
-        })
-        setSelectedSupplierAccounts(selectedSupplierAccounts)
-        setCurrentContacts(updatedContacts)
-    }, []);
-
-    const handleContactSelection = (e, id) => {
-        const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
-        currentContacts[indexOfContactToChange].isChecked = e.target.checked;
-        setCurrentContacts([...currentContacts]);
-    };
+        setSelectedSupplierAccounts(selectedSupplierAccountsList)
+    }, [])
 
     const getFilteredIds = (data) => {
         return _.cloneDeep(data).filter(f => f.isChecked).map(m => m._id)
@@ -83,7 +68,7 @@ export default function AssignSupplierContactsDialog({
                     type: "success",
                     open: true,
                 });
-
+                onUpdateOpportunity(selectedSupplierAccounts)
                 onSuccess();
             })
             .catch((error) => {
@@ -117,15 +102,7 @@ export default function AssignSupplierContactsDialog({
             }
         })
         setSelectedSupplierAccounts(selectedAccounts)
-
-        const updatedContacts = [];
-        currentContacts.map(d => {
-            if (d["isChecked"] && selectedAccounts.indexOf(d?.accountName?.optionValue) < 0) {
-                d["isChecked"] = false
-            }
-            updatedContacts.push(d);
-        })
-        setCurrentContacts(updatedContacts)
+        onGetSupplierAccountsContacts(false, true, option)
     }
 
     return (
@@ -138,31 +115,30 @@ export default function AssignSupplierContactsDialog({
         >
             <CustomDialogHeader title={title} />
             <CustomDialogContent>
-                {loadingUsers ? (
+                {
+                    contactType === "supplier" ?
+                        < Autocomplete
+                            id="combo-box-demo"
+                            size="small"
+                            multiple={true}
+                            options={supplierAccountOptions}
+                            value={supplierAccountOptions.filter(o => selectedSupplierAccounts.indexOf(o.optionValue) >= 0)}
+                            getOptionLabel={(option) => option["optionLabel"] || ''}
+                            style={{ padding: '10px 5px' }}
+                            renderInput={(params) => <TextField {...params} label="Supplier Accounts" variant="outlined" />}
+                            onChange={handleSupplierAccountChange}
+                        /> : null
+                }
+                {loadingSupplierAccounts ? (
                     <Loader text="Loading Contacts" />
                 ) : <>
                     {
-                        contactType === "supplier" ?
-                            < Autocomplete
-                                id="combo-box-demo"
-                                size="small"
-                                multiple={true}
-                                options={supplierAccountOptions}
-                                value={supplierAccountOptions.filter(o => selectedSupplierAccounts.indexOf(o.optionValue) >= 0)}
-                                getOptionLabel={(option) => option["optionLabel"] || ''}
-                                style={{ padding: '10px 5px' }}
-                                renderInput={(params) => <TextField {...params} label="Supplier Accounts" variant="outlined" />}
-                                onChange={handleSupplierAccountChange}
-                            /> : null
-                    }
-                    {
                         currentContacts.length ? (
                             <List style={{ padding: 0 }}>
-                                {currentContacts.filter(contact => selectedSupplierAccounts.indexOf(contact.accountName.optionValue) >= 0)
-                                    .map((contact) => <RenderListItem contact={contact} />)}
+                                {currentContacts.map((contact) => <RenderListItem contact={contact} />)}
                             </List>
                         ) : (
-                            <Typography>No Contacts found to add</Typography>
+                            <Typography style={{ margin: '20px' }}>No Contacts found to add</Typography>
                         )
                     }
                 </>

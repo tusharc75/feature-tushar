@@ -62,6 +62,7 @@ function OpportunityDetailsPage() {
     customerContacts: true
   })
   const [supplierAccountOptions, setSupplierAccountOptions] = useState([])
+  const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -148,23 +149,44 @@ function OpportunityDetailsPage() {
     }
   }
 
-  const fetchSupplierContactData = (showDialog) => {
-
+  const fetchSupplierContactData = (showDialog, useAccountList = false, accountList = []) => {
     let ids = []
+    if (opportunityData.supplierAccountName.length > 0 || useAccountList) {
 
-    if (supplierAccountOptions && supplierAccountOptions.length) {
-      ids = [...supplierAccountOptions.map(option => option.optionValue)]
+      ids = useAccountList ? accountList.map(d => d.optionValue) : opportunityData.supplierAccountName.map(d => d.optionValue);
+
+      const filterById = JSON.stringify([{ "field": "accountName", "term": ids.length > 1 ? { $in: ids } : ids[0] }])
+      setLoadingSupplierAccounts(true)
+      axiosInstance()
+        .get(`supplier-contact?filterById=${filterById}`)
+        .then(({ data: { data } }) => {
+
+          let assignedContacts = opportunityData.staticData?.supplierContacts ?? []
+          const updatedContacts = [];
+          data.map(d => {
+            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+            updatedContacts.push(d);
+          })
+          setSupplierContacts(updatedContacts)
+          setLoadingSupplierAccounts(false)
+          if (!useAccountList) setShowAddSupplierContactsDialog(showDialog);
+        }).catch(error => {
+          setLoadingSupplierAccounts(false)
+        })
     }
-
-    const filterById = JSON.stringify([{ "field": "accountName", "term": ids.length > 1 ? { $in: ids } : ids[0] }])
-
-    axiosInstance()
-      .get(`supplier-contact?filterById=${filterById}`)
-      .then(({ data: { data } }) => {
-        setSupplierContacts(data)
-        setShowAddSupplierContactsDialog(showDialog);
-      });
+    else {
+      setShowAddSupplierContactsDialog(showDialog);
+    }
+    // else if (supplierAccountOptions && supplierAccountOptions.length) {
+    //   ids = [...supplierAccountOptions.map(option => option.optionValue)]
+    // }
   }
+
+  const handleContactSelection = (e, id) => {
+    const indexOfContactToChange = supplierContacts.findIndex(d => d._id == id);
+    supplierContacts[indexOfContactToChange].isChecked = e.target.checked;
+    setSupplierContacts([...supplierContacts]);
+  };
 
   const fetchCustomerContactData = (showDialog) => {
     const filterById = JSON.stringify([{ "field": "accountName", "term": opportunityData.customerAccountName.optionValue }])
@@ -270,27 +292,6 @@ function OpportunityDetailsPage() {
     });
   };
 
-  // const handleUpdateOpportunity = (values) => {
-  //   setUpdating(true);
-  //   const updatedData = {
-  //     ...values,
-  //     _id: opportunityData._id,
-  //   };
-
-  //   axiosInstance()
-  //     .put("/opportunity", updatedData)
-  //     .then(({ data }) => {
-  //       toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
-  //       setUpdating(false);
-  //       goBackToListing();
-
-  //     })
-  //     .catch((error) => {
-  //       toastConfig.setToastConfig(error);
-  //       setUpdating(false);
-  //     });
-  // };
-
   const quickLinks = [
     {
       label: "Call a log",
@@ -309,6 +310,32 @@ function OpportunityDetailsPage() {
       count: 0,
     },
   ];
+  const handleUpdateOpportunity = (supplierAccounts) => {
+
+    let newFields = [];
+
+    opportunityFields.filter((d) => d.isUpdate).map((_f) => newFields.push(_f.fieldData));
+
+    let values = {
+      ...getObjKeysWithValues(opportunityData, newFields),
+      supplierAccountName: supplierAccounts,
+      _id: opportunityData._id
+    }
+
+    axiosInstance()
+      .put(`${opportunity.opportunityApi}?entity=${selectedEntity}`, values)
+      .then(({ data }) => {
+        fetchOpportunityData()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  let selectedSupplierAccounts = []
+  if (opportunityData?.supplierAccountName && opportunityData.supplierAccountName.length) {
+    selectedSupplierAccounts = opportunityData.supplierAccountName.map(s => s.optionValue)
+  }
 
   return (
     <>
@@ -565,9 +592,14 @@ function OpportunityDetailsPage() {
             onSuccess={() => { fetchOpportunityData(); setShowAddSupplierContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddSupplierContactsDialog(false) }}
             contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
-            assignedContacts={opportunityData.staticData?.supplierContacts ?? []}
             contactType="supplier"
             supplierAccountOptions={supplierAccountOptions}
+            onGetSupplierAccountsContacts={fetchSupplierContactData}
+            onUpdateOpportunity={handleUpdateOpportunity}
+            currentContacts={supplierContacts}
+            selectedSupplierAccountsList={selectedSupplierAccounts}
+            handleContactSelection={handleContactSelection}
+            loadingSupplierAccounts={loadingSupplierAccounts}
           />
         }
 
