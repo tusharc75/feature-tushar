@@ -414,13 +414,12 @@ const UserDetailsPage = () => {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small"
                       onClick={handleOpenUpdateDialog}
                     >
                       Edit
                     </Button>
                   ) : null}
-                  <Box component="span" marginX={1} />
-
                   {permissions.user.isDelete ? (
                     <DeleteButton
                       text="Delete"
