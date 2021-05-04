@@ -7,10 +7,10 @@ import _ from "lodash";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
-export default function ManageAccountMain(props) {
+export default function ManageAccountDialog(props) {
   const toastConfig = useContext(CustomToastContext);
 
-  const { open, onClose, id, accountResource, accountApi, isGetAccountData, onGetAddedAccount, isRedirectToDetailPage, userId = null } = props;
+  const { open, onClose, id, accountResource, accountApi, isGetAccountData, onGetAddedAccount, isRedirectToDetailPage = true, userId = null } = props;
   const {
     state: { user },
   }: any = useData();
