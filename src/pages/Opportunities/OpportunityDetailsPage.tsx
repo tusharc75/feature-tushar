@@ -58,8 +58,8 @@ function OpportunityDetailsPage() {
 
   const [messageDialog, setMessageDialog] = useState({ open: false, message: null })
   const [expanded, setExpanded] = useState({
-    supplierContacts: false,
-    customerContacts: false
+    supplierContacts: true,
+    customerContacts: true
   })
   const [supplierAccountOptions, setSupplierAccountOptions] = useState([])
 
@@ -123,6 +123,21 @@ function OpportunityDetailsPage() {
           }
 
           setOpportunityData(modifiedData);
+
+          if (data?.staticData?.supplierContacts && data.staticData.supplierContacts.length == 0) {
+            setExpanded({
+              ...expanded,
+              supplierContacts: false
+            })
+          }
+          if (data?.staticData?.customerContacts && data.staticData.customerContacts.length == 0) {
+            setExpanded({
+              ...expanded,
+              customerContacts: false
+            })
+          }
+
+
           getOpportunityFields();
           setCustomizedRoutes([
             routes.opportunity,
