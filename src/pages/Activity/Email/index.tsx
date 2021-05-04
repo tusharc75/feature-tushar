@@ -12,6 +12,7 @@ import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import DataGridCustomToolbar from "../../../components/Helpers/DataGridCustomToolbar";
 import CustomDataGridNoDataFound from "../../../components/Helpers/CustomDataGridNoDataFound";
+import axiosAPI from "../../../axios/axios";
 
 const Email = () => {
 
@@ -42,13 +43,19 @@ const Email = () => {
 
     const fetchEmails = async () => {
         setLoading(true)
-        await GetEmails(JSON.stringify(filter))
-            .then(({ data }) => {
-                setEmails(data)
-                setLoading(false)
-            })
-            .catch((err) => {
-            });
+        axiosAPI().get(`/email?relatedTo=${JSON.stringify(filter)}`)
+        .then(({ data }) => {
+            setEmails(data.emails)
+            setLoading(false)
+        }).catch((err) => {})
+            //     }
+        // await GetEmails(JSON.stringify(filter))
+        //     .then(({ data }) => {
+        //         setEmails(data)
+        //         setLoading(false)
+        //     })
+        //     .catch((err) => {
+        //     });
     };
 
     const handleChangeFilter = (value) => {

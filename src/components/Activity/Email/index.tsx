@@ -14,6 +14,7 @@ import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Dialog from '@material-ui/core/Dialog';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo'
 import { ViewAll } from '../Helpers/ViewAll'
+import { isEmpty } from "lodash";
 
 export const Email = ({ relatedTo, handleActivityRefresh }) => {
 
@@ -27,12 +28,15 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
     }, []);
 
     const fetchEmail = async () => {
-        await GetEmail(JSON.stringify(relatedTo))
-            .then(({ data }) => {
-                setEmails(data)
-            })
-            .catch((err) => {
-            });
+        try{
+         const emails =  await GetEmail(JSON.stringify(relatedTo))
+         setEmails(emails.emails)
+         console.log(emails);
+         
+        }catch(e) {
+            console.log(e);
+            
+        }
     };
 
     const handleOpenMenu = (event, _id) => {
@@ -73,7 +77,6 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
         setOpen(false)
         handleActivityRefresh()
     }
-
     return (emails &&
         <Box className="activityDetailBox">
             {emails.length ?
@@ -83,7 +86,7 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
                             <Box>
                                 <Grid container>
                                 <Grid item xs={10} className="d-flex align-items-center gap-1"> 
-                                        <Typography variant="subtitle2">{_email.name}</Typography>
+                                        <Typography variant="subtitle2">{_email?.subject}</Typography>
                                     </Grid>
                                     <Grid item xs={2} container justify="flex-end" >
                                         <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _email._id)} >
