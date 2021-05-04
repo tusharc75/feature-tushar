@@ -8,6 +8,7 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { BsPersonBoundingBox } from 'react-icons/bs';
 
 import styles from "../Leads/Header.module.scss";
+import { useData } from "../../StateProvider/Provider";
 
 const RoleHeader = (props) => {
   const {
@@ -22,6 +23,10 @@ const RoleHeader = (props) => {
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState("Global");
+
+  const {
+    state: { selectedEntity },
+  }: any = useData();
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
@@ -40,7 +45,7 @@ const RoleHeader = (props) => {
   return (
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={6} className="d-flex align-items-center gap-1">
-         <BsPersonBoundingBox /> <span className="listingHeader">Roles</span>
+        <BsPersonBoundingBox /> <span className="listingHeader">Roles</span>
         {options && (
           <ToggleButtonGroup
             size="small"
@@ -68,7 +73,7 @@ const RoleHeader = (props) => {
             placeholder="Search Role"
             width="242px"
           />
-          {rolePermissions.isCreate && (
+          {rolePermissions.isCreate && (filter === "Global" || (filter === "Regional" && selectedEntity)) && (
             <Button
               className={styles.add_submit_btn}
               variant="contained"
