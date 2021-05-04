@@ -33,9 +33,11 @@ interface props {
   unassignRole: Function;
   data: any;
   permissions: any;
+  loggedInUser: any;
+  currentUserId:any;
 }
 
-const UserRoles = ({ data, unassignRole, permissions }: props) => {
+const UserRoles = ({ data, unassignRole, permissions,loggedInUser,currentUserId }: props) => {
   const classes = useStyles();
 
   return (
@@ -59,6 +61,7 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
                             {obj.name || ""}
                           </Link>
                         </Typography>
+
                       }
                       secondary={
                         <Typography
@@ -71,14 +74,15 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
                       }
                     />
                     {permissions.user.isUpdate && (
-                      <ListItemSecondaryAction title="Unassign Role"
-                        // title={
-                        //   rolesPermissions.indexOf(obj?.permission) >= 0
-                        //     ? ""
-                        //     : "Unassign Role"
-                        // }
+                      <ListItemSecondaryAction
+                        title={
+                      obj?.name === "Global Brand Admin" && currentUserId === loggedInUser._id
+                            ? "Role cann't be deleted"
+                            : "Unassign Role"
+                        }
                       >
                         <IconButton
+                          disabled={ obj?.name === "Global Brand Admin" && currentUserId === loggedInUser._id}
                           size="small"
                           edge="end"
                           aria-label="delete"
@@ -87,12 +91,13 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
                           //   rolesPermissions.indexOf(obj?.permission) >= 0
                           // }
                         >
-                          <DeleteIcon color="error"
+                          <DeleteIcon 
                             // color={
                             //   rolesPermissions.indexOf(obj?.permission) >= 0
                             //     ? "disabled"
                             //     : "error"
                             // }
+                            color={ obj?.name === "Global Brand Admin" && currentUserId === loggedInUser._id ? "disabled" : "error"}
                           />
                         </IconButton>
                       </ListItemSecondaryAction>
