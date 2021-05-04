@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import { Card, CardHeader, IconButton, CardContent, Grid, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core';
+import {
+    Card, CardHeader, IconButton, CardContent, Grid,
+    List, ListItem, ListItemAvatar, ListItemText, Accordion, AccordionDetails,
+    AccordionSummary
+} from '@material-ui/core';
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
-import axiosInstance from '../../axios/axiosInstance';
 import { BiFace } from 'react-icons/bi';
-import { BsPerson } from 'react-icons/bs';
 import { FaEye } from 'react-icons/fa';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import { useHistory } from 'react-router-dom';
 
 function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
@@ -27,14 +27,17 @@ function DisplayData({ label, value, icon }) {
     </div>
 }
 
-export default function OpportunityContacts({ contacts, title, onAddContact, contactApi }) {
+export default function OpportunityContacts({ contacts, title, onAddContact,
+    contactApi, onSetExpanded, isExpanded, contactsRoute, recordsPerLine }) {
 
+    const history = useHistory();
+    const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     function ContactDetails({ contacts, contactApi, }) {
         return <>
             {
                 contacts && contacts.length ? <Grid container spacing={2}>
                     {
-                        contacts.map((obj, index) => {
+                        [...contacts].slice(0, maxRecordsToShow).map((obj, index) => {
                             return <Grid key={index} item xs={12} sm={12} md={6}>
                                 <Card>
                                     <CardContent className="detailListing">
@@ -67,22 +70,77 @@ export default function OpportunityContacts({ contacts, title, onAddContact, con
         </>
     }
 
-    return (
-        <>
-            <Card>
-                <CardHeader
-                    action={
-                        <IconButton aria-label="settings" onClick={onAddContact}>
-                            <ControlPointIcon />
-                        </IconButton>
-                    }
-                    subheader={title}
-                />
-                <CardContent>
-                    <ContactDetails contacts={contacts} contactApi={contactApi} />
-                </CardContent>
-            </Card>
+    // return (
+    //     <>
+    //         <Card>
+    //             <CardHeader
+    //                 action={
+    //                     <IconButton aria-label="settings" onClick={onAddContact}>
+    //                         <ControlPointIcon />
+    //                     </IconButton>
+    //                 }
+    //                 subheader={title}
+    //             />
+    //             <CardContent>
+    //                 <ContactDetails contacts={contacts} contactApi={contactApi} />
+    //             </CardContent>
+    //         </Card>
 
-        </>
-    )
+    //     </>
+    // )
+    return <Accordion expanded={isExpanded}>
+        <AccordionSummary
+            aria-controls="user-panel-content"
+            id="user-panel-header"
+        >
+            <Grid container>
+                <Grid item xs={8}>
+                    <Box display="flex">
+                        <Box>
+                            <IconButton
+                                size="small"
+                                onClick={onSetExpanded} >
+                                {
+                                    isExpanded === true ? (
+                                        <ExpandLessIcon />
+                                    ) : (
+                                        <ExpandMoreIcon />
+                                    )
+                                }
+                            </IconButton>
+                        </Box>
+                        <Box padding="5px">
+                            <Typography variant="subtitle2">
+                                {title} {contacts && contacts.length > 0 ? `(${contacts.length})` : ''}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </Grid>
+                <Grid item xs={4} container justify="flex-end">
+                    <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={onAddContact}
+                    >
+                        <ControlPointIcon />
+                    </IconButton>
+                </Grid>
+            </Grid>
+        </AccordionSummary>
+        <Box margin={0.50} />
+        <AccordionDetails>
+            <ContactDetails contacts={contacts} contactApi={contactApi} />
+        </AccordionDetails>
+        {
+            contacts && contacts.length > 2 ? <>
+                <Box margin={1} className="btn-view gap-1" p={1} display="flex" justifyContent="center"
+                    alignItems="center"
+                    onClick={() => setMaxRecordsToShow(contacts.length)}>
+                    <FaEye /> View All
+                </Box>
+                <Box margin={1} />
+            </> : null
+        }
+    </Accordion>
+
 }

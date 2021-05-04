@@ -383,7 +383,7 @@ const UserDetailsPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8}>
             <Paper>
               {!userData ? (
                 <div>
@@ -571,7 +571,7 @@ const UserDetailsPage = () => {
                             </Box>
                           </Box>
                         </Grid>
-                        <Grid item xs={4} container justify="flex-end">
+                        <Grid item xs={4}>
                           {permissions.user.isUpdate && (
                             <Button
                               variant="contained"
@@ -608,7 +608,7 @@ const UserDetailsPage = () => {
               }
               <OpportunityAccordionInUserDetail
                 opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner, ...opportunityRelatedData?.Collaborator] : opportunityRelatedData?.Owner}
-                recordsPerLine={2}
+                recordsPerLine={3}
                 expanded={false}
                 userId={id}
                 onSuccess={() => {
@@ -617,7 +617,7 @@ const UserDetailsPage = () => {
               />
               <LeadAccordionInUserDetailPage
                 leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner, ...leadsRelatedData?.Collaborator] : leadsRelatedData?.Owner}
-                recordsPerLine={2}
+                recordsPerLine={3}
                 expanded={false}
                 userId={id}
                 onSuccess={() => {
@@ -627,7 +627,7 @@ const UserDetailsPage = () => {
               <AccountAccordionDetail
                 type="customer"
                 accounts={(customerAccountRelatedData?.Owner && customerAccountRelatedData?.Collaborator) ? [...customerAccountRelatedData.Owner, ...customerAccountRelatedData.Collaborator] : customerAccountRelatedData?.Owner}
-                recordsPerLine={2}
+                recordsPerLine={3}
                 expanded={false}
                 userId={id}
                 onSuccess={() => {
@@ -637,7 +637,7 @@ const UserDetailsPage = () => {
               <AccountAccordionDetail
                 type="supplier"
                 accounts={(supplierAccountRelatedData?.Owner && supplierAccountRelatedData?.Collaborator) ? [...supplierAccountRelatedData.Owner, ...supplierAccountRelatedData.Collaborator] : supplierAccountRelatedData?.Owner}
-                recordsPerLine={2}
+                recordsPerLine={3}
                 expanded={false}
                 userId={id}
                 onSuccess={() => {
@@ -647,7 +647,7 @@ const UserDetailsPage = () => {
               <ContactAccordionInDetailPage
                 type="customer"
                 contacts={(customerContactRelatedData?.Owner && customerContactRelatedData?.Collaborator) ? [...customerContactRelatedData.Owner, ...customerContactRelatedData.Collaborator] : customerContactRelatedData?.Owner}
-                recordsPerLine={2}
+                recordsPerLine={3}
                 expanded={false}
                 userId={id}
                 onSuccess={() => {
@@ -666,7 +666,7 @@ const UserDetailsPage = () => {
               />
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
             <Paper>
               <Box width="100%" padding={1} bgcolor="grey.200">
                 <Typography color="primary">Approval Process</Typography>

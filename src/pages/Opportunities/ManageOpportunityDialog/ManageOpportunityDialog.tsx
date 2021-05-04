@@ -156,7 +156,9 @@ export default function ManageOpportunityDialog({
             );
           }
 
-          newFields.push(_f.fieldData);
+          if (!(_f.fieldData.fieldName === "supplierAccountName")) {
+            newFields.push(_f.fieldData);
+          }
         });
 
         setEntityData({
@@ -189,6 +191,7 @@ export default function ManageOpportunityDialog({
 
   const handleCreateOpportunity = (values) => {
     // values.closeDate = "03/03/2021"
+    if (accountId) values["supplierAccountName"] = [accountId]
     setLoading(true);
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
@@ -258,7 +261,7 @@ export default function ManageOpportunityDialog({
           initialValues={entityData.initialValues}
           validationSchema={yupSchema(entityData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,
