@@ -267,7 +267,7 @@ const LeadDetailsPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8} className="gap-2">
             <Paper>
               {!leadData ? (
                 <div>
@@ -297,17 +297,18 @@ const LeadDetailsPage = () => {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small"
                       onClick={handleOpneUpdateDialog}
                     >
                       Edit
                     </Button>
                   )}
-                  <Box component="span" marginX={1} />
                   {
                     !isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && <>
                       <Button
                         variant="contained"
                         color="primary"
+                        size="small"
                         onClick={() => {
                           const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter(d => d).join(" ")
                           setConvertLeadToOpportunityConfirmationDialog({
@@ -320,7 +321,6 @@ const LeadDetailsPage = () => {
                       >
                         Convert Lead To Opportunity
                       </Button>
-                      <Box component="span" marginX={1} />
                     </>
                   }
                   {leadsPermissions.isDelete && allowedToDelete && (
@@ -419,9 +419,8 @@ const LeadDetailsPage = () => {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+          <Grid item xs={12} sm={12} md={4} lg={4} className="gap-2">
             <Paper>
-
               {!leadData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />

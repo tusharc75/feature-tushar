@@ -48,6 +48,7 @@ const Header = (props) => {
               className={styles.add_submit_btn}
               variant="contained"
               color="primary"
+              size="small"
               onClick={onCreate}
               startIcon={<AddOutlined />}
             >
@@ -61,6 +62,7 @@ const Header = (props) => {
                 className={styles.action_submit_btn}
                 variant="outlined"
                 color="default"
+                size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
               >

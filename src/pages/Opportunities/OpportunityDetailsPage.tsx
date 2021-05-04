@@ -328,12 +328,12 @@ function OpportunityDetailsPage() {
                       }
                       variant="contained"
                       color="primary"
+                      size="small"
                       onClick={handleOpenUpdateDialog}
                     >
                       Edit
                     </Button>
                   ) : null}
-                  <Box component="span" marginX={1} />
                   {opportunityPermissions.isDelete &&
                     opportunityData?.owner.optionValue &&
                     user?.user?._id &&
