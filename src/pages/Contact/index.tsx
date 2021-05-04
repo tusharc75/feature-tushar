@@ -432,7 +432,8 @@ export default function Contact(props) {
     if (renderCount > 0) {
       getContacts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query, selectedType]);
+  }, [query, selectedType, accountDetails]);
+
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -567,7 +568,7 @@ export default function Contact(props) {
                   label={`Account: ${accountDetails.accountName}`}
                   onDelete={() => {
                     setAccountDetails({ accountId: null, accountName: null });
-                    getContacts();
+                    // getContacts();
                   }}
                 />
               )}
