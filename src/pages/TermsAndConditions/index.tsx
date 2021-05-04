@@ -32,6 +32,8 @@ import { termsAndCondition } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import _ from 'lodash'
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import { IoDocumentTextOutline } from 'react-icons/io5'; 
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -296,6 +298,7 @@ export default function TermsAndCondition(props) {
                                 total={rowCount}
                                 heading="Terms and Conditions"
                                 secondHeading="Terms and Conditions"
+                                icon={<IoDocumentTextOutline className="headerLogo" />}
                             >
                                 <div className={`${styles.terms_header} ${styles["terms_header-mobile"]}`} >
                                     <SearchBox
@@ -308,7 +311,8 @@ export default function TermsAndCondition(props) {
                                             actionsPermissions.isCreate && <Button
                                                 variant="contained"
                                                 color="primary"
-                                                className={`px-3 ${styles.terms_header_add_btn}`}
+                                                size="small"
+                                                className={`${styles.terms_header_add_btn}`}
                                                 onClick={() => setShowCreateDialog(true)}
                                                 startIcon={<AddOutlined />} >Add</Button>
                                         }
@@ -317,6 +321,7 @@ export default function TermsAndCondition(props) {
                                             disabled={dataRows.filter((d) => d.isChecked).length === 0}
                                             variant="outlined"
                                             color="default"
+                                            size="small"
                                             className={`${styles.terms_header_action_btn}`}
                                             onClick={openActions}
                                             aria-controls="action-menu"

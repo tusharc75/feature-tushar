@@ -26,7 +26,7 @@ const CustomHeader = (props) => {
         justify="space-between"
         alignContent="center"
       >
-        <Grid item className="d-flex align-items-center gap-1">
+        <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1">
           {icon} <span className="listingHeader">{heading}</span>
           {options && (
             <ToggleButtonGroup
@@ -46,80 +46,8 @@ const CustomHeader = (props) => {
             </ToggleButtonGroup>
           )}
         </Grid>
-        {/* <Box className="ml-2">
-          {icon} */}
-        {/* {options && Object.keys(options).length ? (
-
-            <FormControl className="customHeaderDropdown">
-              <InputLabel id="demo-simple-select-label">{secondHeading}</InputLabel>
-              <Select
-                style={{ width: "160px" }}
-                displayEmpty
-                labelId="demo-simple-select-outlined-label"
-                disableUnderline={true}
-                inputProps={{ "aria-label": "Without label" }}
-                id="demo-simple-select-outlined"
-                MenuProps={{
-                  anchorOrigin: {
-                    vertical: "bottom",
-                    horizontal: "left",
-                  },
-                  getContentAnchorEl: null,
-                }}
-                value={selectedType}
-                onChange={onTypeChange}
-                label="Select Type"
-              >
-                {Object.keys(options).map((k, index) => {
-                  return (
-                    <MenuItem key={index} value={options[k]}>
-                      {k}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-          ) : null} */}
-        {/* <div className="customActiveInavtiveTab">
-            {total ? (
-              <Box
-                className="customHeaderCustomTab"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <Badge badgeContent={total} color="primary">
-                  <Chip label={heading}></Chip>
-                </Badge>
-              </Box>
-            ) : null}
-
-            {active ? (
-              <Box
-                className="customHeaderActiveCustomTab"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <Badge badgeContent={active} color="primary">
-                  <Chip label=" Active Customs" />
-                </Badge>
-              </Box>
-            ) : null}
-
-            {inactive ? (
-              <Box
-                className="customHeaderInactiveCustomTab"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <Badge badgeContent={inactive} color="secondary">
-                  <Chip label="Inactive Customs" />
-                </Badge>
-              </Box>
-            ) : null}
-            <Box component="span" marginX={1} />
-          </div> */}
-        {/* </Box> */}
-        <Grid item>
-          <Grid container alignItems="center" style={{ height: "100%" }}>
-            {children}
-          </Grid>
+        <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1" justify="flex-end">
+          {children}
         </Grid>
       </Grid>
     </React.Fragment>
