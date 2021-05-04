@@ -1,12 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Paper, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Card, CardContent } from "@material-ui/core";
-import { useHistory, useParams, Link } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { Box, Button, Grid, Paper } from "@material-ui/core";
+import { useHistory, useParams } from "react-router-dom";
 import { Skeleton } from "@material-ui/lab";
-import MuiAccordion from "@material-ui/core/Accordion";
-import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
-import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -20,20 +15,14 @@ import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import { getObjKeysWithValues, lead, leadProcessFieldName } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import styles from "./LeadDetailsPage.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
-import { withStyles } from "@material-ui/core/styles";
-import OpportunityAccordionInLead from './AccordionOfOpportunity';
 import AccordionOfOpportunity from "./AccordionOfOpportunity";
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
-
-
-
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -239,7 +228,7 @@ const LeadDetailsPage = () => {
           leadName: null,
           message: null,
         });
-        fetchLeadData();
+        history.push(`${routes.opportunityDetail.path}/${data.data[0]}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -362,7 +351,7 @@ const LeadDetailsPage = () => {
                                 axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
                                   setActiveStep(activeStep + 1)
                                   setIsProcessing(false)
-
+                                  debugger;
                                   if (steps[activeStep].text.toLowerCase() === "qualified") {
                                     fetchLeadData();
                                   }
