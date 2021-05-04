@@ -726,7 +726,6 @@ export default function AccountDetailPage(props) {
               accountId={accountData._id}
               resource={accountResource}
               isRedirectTodetailPage={false}
-              userId={user?.user?._id}
             />
           )}
           {showCreateContactDialog && (
