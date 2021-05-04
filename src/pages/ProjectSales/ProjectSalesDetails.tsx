@@ -90,11 +90,11 @@ const ProjectSalesDetails = () => {
 
   const handleMainPoints = (data) => {
     let tempMp = {
-      projectName: data.projectName || "",
-      endDate: new Date(data.endDate).toDateString() || "",
-      value: data.value || "",
-      projectProbability: `${data.projectProbability}` || "",
-      opportunityOwner: data.opportunityOwner?.optionLabel || "",
+      ["Project Name"]: data.projectName || "",
+      ["End Date"]: new Date(data.endDate).toDateString() || "",
+      ["Value"]: data.value || "",
+      ["Project Probability"]: `${data.projectProbability}` || "",
+      ["Opportunity Owner"]: data.opportunityOwner?.optionLabel || "",
     };
     setMainPoints(tempMp);
   };
@@ -197,7 +197,6 @@ const ProjectSalesDetails = () => {
         <CustomBreadCrumbs routes={customizedRoutes} />
 
         <div className="detail-container">
-          {" "}
           <Grid container spacing={1}>
             <Grid item xs={12} sm={12} md={8} lg={8}>
               <Paper>
@@ -280,6 +279,7 @@ const ProjectSalesDetails = () => {
                     padding={1}
                     bgcolor="grey.200"
                     display="flex"
+                    alignItems="center"
                     justifyContent="space-between"
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
