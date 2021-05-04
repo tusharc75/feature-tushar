@@ -24,6 +24,7 @@ import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import currencies from "../../constants/currency_with_country.json";
+import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -59,6 +60,7 @@ function OpportunityDetailsPage() {
     supplierContacts: false,
     customerContacts: false
   })
+  const [supplierAccountOptions, setSupplierAccountOptions] = useState([])
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -136,11 +138,8 @@ function OpportunityDetailsPage() {
 
     let ids = []
 
-    if (opportunityFields && opportunityFields.length) {
-      let fieldData = opportunityFields.find(currentField => currentField?.fieldData?.fieldName === "supplierAccountName")?.fieldData
-      if (fieldData?.option && fieldData.option.length) {
-        ids = [...fieldData.option.map(option => option.optionValue)]
-      }
+    if (supplierAccountOptions && supplierAccountOptions.length) {
+      ids = [...supplierAccountOptions.map(option => option.optionValue)]
     }
 
     const filterById = JSON.stringify([{ "field": "accountName", "term": ids.length > 1 ? { $in: ids } : ids[0] }])
@@ -182,6 +181,12 @@ function OpportunityDetailsPage() {
           setOpportunityFields(data);
           setLoading(false);
 
+          if (data && data.length) {
+            let fieldData = data.find(currentField => currentField?.fieldData?.fieldName === "supplierAccountName")?.fieldData
+            if (fieldData?.option && fieldData.option.length) {
+              setSupplierAccountOptions(fieldData.option.map(option => ({ ...option, isSelected: false })))
+            }
+          }
           const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == opportunityProcessFieldName.toLowerCase());
           if (processSteps && processSteps.isRead) {
             setSteps(processSteps.fieldData.option.map(m => {
@@ -534,7 +539,7 @@ function OpportunityDetailsPage() {
         )}
 
         {
-          showAddSupplierContactsDialog && <AssignContactsDialog
+          showAddSupplierContactsDialog && <AssignSupplierContactsDialog
             opportunityId={opportunityData._id}
             open={showAddSupplierContactsDialog}
             title="Assign Supplier Contacts"
@@ -543,6 +548,7 @@ function OpportunityDetailsPage() {
             contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
             assignedContacts={opportunityData.staticData?.supplierContacts ?? []}
             contactType="supplier"
+            supplierAccountOptions={supplierAccountOptions}
           />
         }
 
