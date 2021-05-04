@@ -9,6 +9,7 @@ import {
     ListItemIcon,
     ListItemText,
     Typography,
+    TextField
 } from "@material-ui/core";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -17,38 +18,31 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import Loader from "../../components/Loader";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import _ from 'lodash'
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
-export default function AssignContactsDialog({
+export default function AssignSupplierContactsDialog({
     opportunityId,
     open,
     title,
     onSuccess,
     handleCloseDialog,
-    // roleIds,
     contacts,
-    assignedContacts,
-    contactType
+    contactType,
+    supplierAccountOptions,
+    onGetSupplierAccountsContacts,
+    handleContactSelection,
+    currentContacts,
+    selectedSupplierAccountsList,
+    loadingSupplierAccounts,
+    onUpdateOpportunity
 }) {
     const toastConfig = useContext(CustomToastContext);
-    const [loadingUsers, setLoadingUsers] = useState(false);
     const [isAssigning, setAssigning] = useState(false);
-
-    const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
+    const [selectedSupplierAccounts, setSelectedSupplierAccounts] = useState([]);
 
     useEffect(() => {
-        const updatedContacts = [];
-        currentContacts.map(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
-            updatedContacts.push(d);
-        })
-        setCurrentContacts(updatedContacts)
-    }, []);
-
-    const handleContactSelection = (e, id) => {
-        const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
-        currentContacts[indexOfContactToChange].isChecked = e.target.checked;
-        setCurrentContacts([...currentContacts]);
-    };
+        setSelectedSupplierAccounts(selectedSupplierAccountsList)
+    }, [])
 
     const getFilteredIds = (data) => {
         return _.cloneDeep(data).filter(f => f.isChecked).map(m => m._id)
@@ -57,7 +51,6 @@ export default function AssignContactsDialog({
         return (contacts && contacts?.[fieldKey] && contacts[fieldKey].length)
     }
     const handleAssignContacts = async () => {
-        // allContacts.filter(f => f.isChecked).map(m => m._id)
         setAssigning(true);
 
         const dataToSave = {
@@ -75,7 +68,7 @@ export default function AssignContactsDialog({
                     type: "success",
                     open: true,
                 });
-
+                onUpdateOpportunity(selectedSupplierAccounts)
                 onSuccess();
             })
             .catch((error) => {
@@ -83,6 +76,34 @@ export default function AssignContactsDialog({
                 toastConfig.setToastConfig(error);
             });
     };
+    const RenderListItem = ({ contact }) => (
+        <ListItem divider key={contact._id}>
+            <ListItemIcon>
+                <Checkbox
+                    edge="start"
+                    onChange={(e) => handleContactSelection(e, contact._id)}
+                    checked={contact.isChecked}
+                    inputProps={{
+                        "aria-labelledby": `checkbox-list-label-${contact._id}`,
+                    }}
+                />
+            </ListItemIcon>
+            <ListItemText
+                primary={[contact.firstName, contact.middleName, contact.lastName].filter(f => f).join(" ")}
+            // secondary={role.email}
+            />
+        </ListItem>
+    )
+    const handleSupplierAccountChange = (e, option) => {
+        let selectedAccounts = []
+        option.forEach(currentOption => {
+            if (currentOption.optionValue) {
+                selectedAccounts.push(currentOption.optionValue)
+            }
+        })
+        setSelectedSupplierAccounts(selectedAccounts)
+        onGetSupplierAccountsContacts(false, true, option)
+    }
 
     return (
         <Dialog
@@ -94,33 +115,34 @@ export default function AssignContactsDialog({
         >
             <CustomDialogHeader title={title} />
             <CustomDialogContent>
-                {loadingUsers ? (
+                {
+                    contactType === "supplier" ?
+                        < Autocomplete
+                            id="combo-box-demo"
+                            size="small"
+                            multiple={true}
+                            options={supplierAccountOptions}
+                            value={supplierAccountOptions.filter(o => selectedSupplierAccounts.indexOf(o.optionValue) >= 0)}
+                            getOptionLabel={(option) => option["optionLabel"] || ''}
+                            style={{ padding: '10px 5px' }}
+                            renderInput={(params) => <TextField {...params} label="Supplier Accounts" variant="outlined" />}
+                            onChange={handleSupplierAccountChange}
+                        /> : null
+                }
+                {loadingSupplierAccounts ? (
                     <Loader text="Loading Contacts" />
-                ) : currentContacts.length ? (
-                    <List style={{ padding: 0 }}>
-                        {currentContacts.map((contact) => {
-                            return <ListItem divider key={contact._id}>
-                                <ListItemIcon>
-                                    <Checkbox
-                                        edge="start"
-                                        onChange={(e) => handleContactSelection(e, contact._id)}
-                                        checked={contact.isChecked}
-                                        inputProps={{
-                                            "aria-labelledby": `checkbox-list-label-${contact._id}`,
-                                        }}
-                                    />
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={[contact.firstName, contact.middleName, contact.lastName].filter(f => f).join(" ")}
-                                // secondary={role.email}
-                                />
-                            </ListItem>
-                        }
-                        )}
-                    </List>
-                ) : (
-                    <Typography>No Contacts found to add</Typography>
-                )}
+                ) : <>
+                    {
+                        currentContacts.length ? (
+                            <List style={{ padding: 0 }}>
+                                {currentContacts.map((contact) => <RenderListItem contact={contact} />)}
+                            </List>
+                        ) : (
+                            <Typography style={{ margin: '20px' }}>No Contacts found to add</Typography>
+                        )
+                    }
+                </>
+                }
             </CustomDialogContent>
             <CustomDialogFooter>
                 <Button
