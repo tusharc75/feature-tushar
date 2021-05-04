@@ -464,7 +464,6 @@ export default function AccountDetailPage(props) {
                         >
                           Edit
                     </Button>
-                        <Box component="span" marginX={0.50} />
                       </>
                     )}
 

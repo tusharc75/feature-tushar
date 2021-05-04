@@ -20,6 +20,9 @@ import currencies from './../../constants/currency_with_country.json';
 import { customerContact, supplierContact, customerAccount, supplierAccount } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import ManageContactDialog from "./../Contact/ManageContact/index";
+import { AiOutlineMail } from 'react-icons/ai';
+import { HiOutlineUser } from 'react-icons/hi';
+import { AiOutlinePhone } from 'react-icons/ai';
 
 const Accordion = withStyles({
     root: {
@@ -58,26 +61,22 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
-    amount: {
-        float: "right",
-        fontWeight: "bold"
     }
-
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value }) {
+function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-            <Grid item sm={6} xs={6} md={4}>
-                <Typography>{label}</Typography>
-            </Grid>
-            <Grid item sm={6} xs={6} md={8}>
-                <Typography>{value}</Typography>
-            </Grid>
-        </Grid>
+        <List >
+            <ListItem>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText primary={value} secondary={label} />
+            </ListItem>
+        </List>
     </div>
 }
+
 
 export default function ContactAccordionInDetailPage({
     contacts, type,
@@ -99,11 +98,11 @@ export default function ContactAccordionInDetailPage({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 
@@ -177,30 +176,32 @@ export default function ContactAccordionInDetailPage({
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
-
-
+                                                            <Grid container className="detailCardHeader">
+                                                                <Grid item xs={12} sm={12}>
+                                                                    {
+                                                                        type === "customer" ?
+                                                                            <Link className="link" to={`${routes.customerContactDetail.path}/${obj._id}`}>
+                                                                                <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
+                                                                            </Link> :
+                                                                            <Link className="link" to={`${routes.supplierContactDetail.path}/${obj._id}`}>
+                                                                                <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
+                                                                            </Link>
+                                                                    }
+                                                                </Grid>
+                                                            </Grid>
                                                             <Grid container>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.firstName ? <DisplayData label='First Name' value={obj?.firstName ?? ''} /> : ''
-                                                                    }
+                                                                <Grid container>
+                                                                    <Grid item xs={12} sm={12}>
+                                                                        {
+                                                                            obj?.firstName ? <DisplayData icon={<AiOutlinePhone size={20} />} label='Phone' value={obj?.phone ?? ''} /> : ''
+                                                                        }
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={12}>
+                                                                        {
+                                                                            obj?.email ? <DisplayData icon={<AiOutlineMail size={20} />} label='Email' value={obj?.email ?? ''} /> : ''
+                                                                        }
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.middleName ? <DisplayData label='Middle Name' value={obj?.middleName ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.lastName ? <DisplayData label='Last Name' value={obj?.lastName ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.email ? <DisplayData label='Email' value={obj?.email ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-
                                                             </Grid>
                                                         </CardContent>
                                                     </Card>
