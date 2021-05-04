@@ -37,13 +37,7 @@ function DisplayData({ label, value, icon }) {
   );
 }
 
-function RelatedContacts({
-  contacts,
-  accountId,
-  accountName,
-  contactApi,
-  contactRoute,
-}) {
+function RelatedContacts({ contacts, accountId, accountName, contactRoute }) {
   const classes = useStyles();
   const history = useHistory();
 
@@ -60,7 +54,7 @@ function RelatedContacts({
                       <Grid item xs={12} sm={12}>
                         <Link
                           className={`f_size`}
-                          to={`/${contactApi}/detail/${obj._id}`}
+                          to={`/${contactRoute}/detail/${obj._id}`}
                         >
                           {`${obj.firstName || ""}  ${obj.lastName || ""}`}
                         </Link>

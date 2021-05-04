@@ -25,7 +25,7 @@ import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import AssignTeamUsers from "./AssignTeamUsers";
+import AssignDataDialog from "./AssignDataDialog";
 import CustomerStrategy from "./CustomerStrategy";
 
 const ProjectSalesDetails = () => {
@@ -40,13 +40,17 @@ const ProjectSalesDetails = () => {
   const [projectSalesData, setProjectSalesData] = useState(null);
   const [projectSalesFields, setProjectSalesFields] = useState([]);
   const [teamUsers, setTeamUsers] = useState([]);
-  const [teamUsersLoading, setTeamUsersLoading] = useState(false);
+  const [customerAccounts, setCustomerAccounts] = useState([]);
+  const [customerContacts, setCustomerContacts] = useState([]);
+  const [opportunities, setOpportunities] = useState([]);
+  const [currentAccountId, setCurrentAccountId] = useState("");
   const [headingLbl, setHeadingLbl] = useState("");
   const [mainPoints, setMainPoints] = useState(null);
   const [deleteRec, setDeleteRec] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [openUsersDialog, setOpenUsersDialog] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogType, setDialogType] = useState("");
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.projectSales,
   ]);
@@ -66,6 +70,10 @@ const ProjectSalesDetails = () => {
       setHeadingLbl(name);
       setProjectSalesData(data);
       setCustomizedRoutes([routes.projectSales, { title: data.projectName }]);
+      setTeamUsers(data.staticData?.user);
+      setCustomerAccounts(data.staticData?.customerAccount);
+      setOpportunities(data.staticData?.opportunity);
+      setCustomerContacts(data.staticData?.customerContact);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -80,8 +88,8 @@ const ProjectSalesDetails = () => {
   const getProjectFields = () => {
     axiosInstance()
       .get("/field?resource=Project Sales")
-      .then(({ data }) => {
-        setProjectSalesFields(data.data);
+      .then(({ data: { data } }) => {
+        setProjectSalesFields(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -164,12 +172,33 @@ const ProjectSalesDetails = () => {
   /**
    * Handle Open Users Dialog For Teams
    */
-  const handleOpenUserDialog = () => {
-    setOpenUsersDialog(true);
+  const handleOpenDialog = (type: string, id: string = "") => {
+    setOpenDialog(true);
+    setDialogType(type);
+    setCurrentAccountId(id);
   };
 
-  const handleCloseUserDialog = () => {
-    setOpenUsersDialog(false);
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setDialogType("");
+  };
+
+  const getExisitingData = () => {
+    switch (dialogType) {
+      case "user":
+        return teamUsers.length ? teamUsers.map((t) => t._id) : [];
+      case "customer-account":
+        return customerAccounts.length
+          ? customerAccounts.map((t) => t._id)
+          : [];
+      case "customer-contact":
+        return customerContacts.length
+          ? customerContacts.map((t) => t._id)
+          : [];
+
+      default:
+        return [];
+    }
   };
 
   return (
@@ -185,12 +214,18 @@ const ProjectSalesDetails = () => {
           handleUpdate={handleUpdateProject}
         />
       )}
-      {openUsersDialog && (
-        <AssignTeamUsers
-          usersDialogOpen={openUsersDialog}
-          onSuccess={() => {}}
-          handleCloseDialog={handleCloseUserDialog}
-          ids={[id]}
+      {openDialog && (
+        <AssignDataDialog
+          dialogOpen={openDialog}
+          onSuccess={() => {
+            handleCloseDialog();
+            getSalesData();
+          }}
+          handleCloseDialog={handleCloseDialog}
+          projectID={id}
+          type={dialogType}
+          existingData={getExisitingData}
+          accountId={currentAccountId}
         />
       )}
       <Layout>
@@ -286,13 +321,13 @@ const ProjectSalesDetails = () => {
                     <IconButton
                       color="primary"
                       size="small"
-                      onClick={handleOpenUserDialog}
+                      onClick={() => handleOpenDialog("user")}
                     >
                       <ControlPoint />
                     </IconButton>
                   </Box>
                   <Box padding={1}>
-                    {teamUsersLoading ? (
+                    {loading ? (
                       [1, 2].map((i) => (
                         <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
                           <Box padding={1}>
@@ -326,7 +361,16 @@ const ProjectSalesDetails = () => {
             </Grid>
           </Grid>
           <Box my={1} />
-          <CustomerStrategy />
+          <CustomerStrategy
+            loading={loading}
+            handleOpenDialog={handleOpenDialog}
+            customerAccounts={customerAccounts}
+            customerContacts={customerContacts}
+            opportunities={opportunities}
+            permissions={permissions}
+            fetchProjectData={getSalesData}
+            projectId={id}
+          />
         </div>
       </Layout>
 
