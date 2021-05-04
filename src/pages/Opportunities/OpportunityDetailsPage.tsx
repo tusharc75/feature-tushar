@@ -124,19 +124,17 @@ function OpportunityDetailsPage() {
 
           setOpportunityData(modifiedData);
 
+          let tempExpanded = {
+            supplierContacts: true,
+            customerContacts: true
+          }
           if (data?.staticData?.supplierContacts && data.staticData.supplierContacts.length == 0) {
-            setExpanded({
-              ...expanded,
-              supplierContacts: false
-            })
+            tempExpanded.supplierContacts = false
           }
           if (data?.staticData?.customerContacts && data.staticData.customerContacts.length == 0) {
-            setExpanded({
-              ...expanded,
-              customerContacts: false
-            })
+            tempExpanded.customerContacts = false
           }
-
+          setExpanded(tempExpanded)
 
           getOpportunityFields();
           setCustomizedRoutes([
