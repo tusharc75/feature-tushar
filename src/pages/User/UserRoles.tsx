@@ -76,13 +76,13 @@ const UserRoles = ({ data, unassignRole, permissions,loggedInUser,currentUserId 
                     {permissions.user.isUpdate && (
                       <ListItemSecondaryAction
                         title={
-                      obj?.name === "Global Brand Admin" && currentUserId === loggedInUser._id
-                            ? "Role cann't be deleted"
+                          rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id
+                            ? "Role can not be deleted"
                             : "Unassign Role"
                         }
                       >
                         <IconButton
-                          disabled={ obj?.name === "Global Brand Admin" && currentUserId === loggedInUser._id}
+                          disabled={ rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id}
                           size="small"
                           edge="end"
                           aria-label="delete"
@@ -97,7 +97,7 @@ const UserRoles = ({ data, unassignRole, permissions,loggedInUser,currentUserId 
                             //     ? "disabled"
                             //     : "error"
                             // }
-                            color={ obj?.name === "Global Brand Admin" && currentUserId === loggedInUser._id ? "disabled" : "error"}
+                            color={ rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id ? "disabled" : "error"}
                           />
                         </IconButton>
                       </ListItemSecondaryAction>
