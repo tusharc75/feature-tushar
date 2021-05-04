@@ -53,6 +53,9 @@ export const userType = {
   brandAdmin: 2
 }
 
+export const leadProcessFieldName = "leadProcess";
+export const opportunityProcessFieldName = "process";
+
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
 export const sidebarResource = {
@@ -505,15 +508,15 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
-export function DisplayData({ label, value, icon }) {
-  return <div style={{ flexGrow: 1 }}>
-    <List>
-      <ListItem>
-        <ListItemAvatar>
-          {icon}
-        </ListItemAvatar>
-        <ListItemText primary={value} secondary={label} />
-      </ListItem>
-    </List>
-  </div>
-}
+// export const DisplayData = ({ label, value, icon }) => {
+//   return <div style={{ flexGrow: 1 }}>
+//     <List>
+//       <ListItem>
+//         <ListItemAvatar>
+//           {icon}
+//         </ListItemAvatar>
+//         <ListItemText primary={value} secondary={label} />
+//       </ListItem>
+//     </List>
+//   </div>
+// }

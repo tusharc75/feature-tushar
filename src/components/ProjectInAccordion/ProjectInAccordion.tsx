@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import CommonSkeleton from '../Helpers/CommonSkeleton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -9,7 +9,8 @@ import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
-import routes from './../../components/Helpers/Routes'
+import { BsClockHistory } from 'react-icons/bs';
+import { IoCalendarOutline } from 'react-icons/io5';
 import { Link } from 'react-router-dom'
 import { useHistory } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
@@ -54,21 +55,20 @@ const AccordionDetails = withStyles((theme) => ({
     },
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value }) {
-
+function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-            <Grid item sm={6} xs={6} md={4}>
-                <Typography>{label}</Typography>
-            </Grid>
-            <Grid item sm={6} xs={6} md={8}>
-                <Typography>{value}</Typography>
-            </Grid>
-        </Grid>
+        <List >
+            <ListItem>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText primary={value} secondary={label} />
+            </ListItem>
+        </List>
     </div>
 }
 
-export default function ProjectInAccordion({expanded = true, recordsPerLine = 2}){
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3 }) {
 
     const history = useHistory();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
@@ -126,7 +126,7 @@ export default function ProjectInAccordion({expanded = true, recordsPerLine = 2}
                             <IconButton
                                 color="primary"
                                 size="small"
-                                onClick={() => {  }}
+                                onClick={() => { }}
                             >
                                 <ControlPointIcon />
                             </IconButton>
@@ -139,33 +139,36 @@ export default function ProjectInAccordion({expanded = true, recordsPerLine = 2}
                     {
                         expandProject && <>
                             {
-                                
-                                    <Grid container spacing={1}>
-                                        {
-                                            
-                                                <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
-
-                                                    <Card style={{ minWidth: "100%" }} variant="outlined">
-                                                        <CardContent>
-                                                            {/* <span className={classes.actionsItems}> */}
-                                                            {/* <VisibilityOutlined /> */}
-                                                            {/* <IconButton size="small">
-                                                            <Delete color="error" />
-                                                        </IconButton> */}
-                                                            {/* <EditOutlined /> */}
-                                                            {/* </span> */}
-                                                            <Link className="link" to="">
-                                                                <Typography className="mb-2">Project 1</Typography>
+                                <Grid container spacing={1}>
+                                    {
+                                        <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
+                                            <Card style={{ minWidth: "100%" }}>
+                                                <CardContent className="detailListing">
+                                                    <Grid container className="detailCardHeader">
+                                                        <Grid item xs={12} sm={12}>
+                                                            <Link className="link">
+                                                                <Typography >Project 1</Typography>
                                                             </Link>
-                                                            <DisplayData label='Status' value="Active" />
-                                                            <DisplayData label='Due Date' value="20/05/2020" />
-                                                        </CardContent>
-                                                    </Card>
-
-                                                </Grid>
-                                            
-                                        }
-                                    </Grid> 
+                                                        </Grid>
+                                                    </Grid>
+                                                    <Grid container>
+                                                        <Grid item xs={12} sm={12}>
+                                                            {
+                                                                <DisplayData label='Status' value="Active" icon={<BsClockHistory size={20} />} />
+                                                            }
+                                                        </Grid>
+                                                        <Grid item xs={12} sm={12}>
+                                                            {
+                                                                //TODO :value={displayDate(date)}
+                                                                <DisplayData label='Due Date' value="May-20-2021" icon={< IoCalendarOutline size={20} />} />
+                                                            }
+                                                        </Grid>
+                                                    </Grid>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    }
+                                </Grid>
                             }
                         </>
                     }

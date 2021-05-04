@@ -9,14 +9,14 @@ import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
-import routes from '../../components/Helpers/Routes'
+import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
+import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
-import currencies from '../../constants/currency_with_country.json';
+import currencies from './../../constants/currency_with_country.json';
 
 const Accordion = withStyles({
     root: {
@@ -75,10 +75,11 @@ function DisplayData({ label, value, icon }) {
         </List>
     </div>
 }
-export default function AccordionOfOpportunity({
-    opportunity, expanded = true, recordsPerLine = 2,
-}) {
 
+export default function OpportunityAccordionInUserDetail({
+    opportunities,
+    expanded = true, recordsPerLine = 2,
+}) {
     const history = useHistory();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -92,16 +93,25 @@ export default function AccordionOfOpportunity({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 3;
+            recordsPerLineInLargeScreen = 4;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 6;
+            recordsPerLineInLargeScreen = 4;
             break;
     }
 
     const [expandOpportunity, setExpandOpportunity] = useState(expanded);
+    const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
 
+    useEffect(() => {
+        let isExpanded = expandOpportunity
+        if (opportunities?.length === 0 && isExpanded) isExpanded = false
+        else if (opportunities?.length > 0 && !isExpanded) isExpanded = true
+
+        setExpandOpportunity(isExpanded)
+
+    }, [opportunities])
     return <>
         <Accordion expanded={expandOpportunity}>
             <AccordionSummary
@@ -126,7 +136,7 @@ export default function AccordionOfOpportunity({
                             </Box>
                             <Box padding="5px">
                                 <Typography variant="subtitle2">
-                                    Opportunity ({opportunity ? 1 : 0})
+                                    Opportunity ({opportunities?.length ? opportunities.length : 0})
                                 </Typography>
                             </Box>
                         </Box>
@@ -140,59 +150,62 @@ export default function AccordionOfOpportunity({
                     {
                         expandOpportunity && <>
                             {
-                                opportunity ?
-                                    (<Grid container spacing={1}>
+                                opportunities && opportunities?.length ?
+                                    <Grid container spacing={1}>
                                         {
-
-                                            <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1} >
-                                                <Card style={{ minWidth: "100%" }}>
-                                                    <CardContent className="detailListing">
-
-                                                        <Grid container className="detailCardHeader">
-                                                            <Grid item xs={12} sm={12}>
-
+                                            opportunities.map((obj, index) => (
+                                                <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
+                                                    <Card style={{ minWidth: "100%" }}>
+                                                        <CardContent className="detailListing">
+                                                            {/* <span className={classes.actionsItems}> */}
+                                                            {/* <VisibilityOutlined /> */}
+                                                            {/* <IconButton size="small">
+                                                            <Delete color="error" />
+                                                        </IconButton> */}
+                                                            {/* <EditOutlined /> */}
+                                                            {/* </span> */}
+                                                            <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={8}>
-                                                                    <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
-                                                                        <Typography >{opportunity?.opportunityName} </Typography>
+                                                                    <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                                                        <Typography >{obj?.opportunityName} </Typography>
                                                                     </Link>
                                                                 </Grid>
-                                                                {
-                                                                    opportunity?.amount &&
-                                                                    <Grid item xs={12} sm={4}>
-                                                                        <Typography className="amount">
-                                                                            {currencies.find(d => d.currencyCode == opportunity["currency"])?.symbolNative}
-                                                                        &nbsp;{opportunity?.amount ?? ''}</Typography>
-                                                                    </Grid>
-                                                                }
-                                                                <Grid container>
-                                                                    <Grid item xs={12} sm={12}>
-                                                                        {
-                                                                            opportunity?.stage ? <DisplayData label='Stage' value={opportunity?.stage ?? ''} icon={<BiCustomize size={20} />} /> : ''
-                                                                        }
-                                                                    </Grid>
-                                                                    <Grid item xs={12} sm={12}>
-                                                                        {
-                                                                            opportunity?.closeDate ? <DisplayData label='Closing Date' value={displayDate(opportunity.closeDate)} icon={< IoCalendarOutline size={20} />} /> : ''
-                                                                        }
-                                                                    </Grid>
+                                                                <Grid item xs={12} sm={4}>
+                                                                    <Typography className="amount">
+                                                                        {currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative}
+                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
                                                                 </Grid>
-
                                                             </Grid>
-
-                                                        </Grid>
-
-                                                    </CardContent>
-                                                </Card>
-                                            </Grid>
-
+                                                            <Grid container>
+                                                                <Grid item xs={12} sm={12}>
+                                                                    {
+                                                                        obj?.stage ? <DisplayData label='Stage' value={obj?.stage ?? ''} icon={<BiCustomize size={20} />} /> : ''
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={12}>
+                                                                    {
+                                                                        obj.closeDate ? <DisplayData label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={20} />} /> : ''
+                                                                    }
+                                                                </Grid>
+                                                            </Grid>
+                                                        </CardContent>
+                                                    </Card>
+                                                </Grid>
+                                            ))
                                         }
-                                    </Grid>) : <Typography variant="subtitle2">No Opportunity To Show</Typography>
+                                    </Grid> : <Typography variant="subtitle1">No Opportunities To Show</Typography>
                             }
                         </>
                     }
                 </>
             </AccordionDetails>
-
+            {
+                opportunities?.length > 0 &&
+                <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/opportunity`)}
+                    p={1} display="flex" justifyContent="center" alignItems="center">
+                    <FaEye /> View All &#8599;
+                </Box>
+            }
             <Box margin={1} />
         </Accordion>
 

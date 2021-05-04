@@ -45,6 +45,7 @@ import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import routes from "./../../components/Helpers/Routes";
 
 const AccTypes = [
   {
@@ -147,6 +148,7 @@ export default function Account(props) {
       masterAccount:
         u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount == "").accountName : "",
       approved: u.staticData?.approved ? u.staticData?.approved : false,
+      relatedLead: u.staticData?.lead
     }));
     setDataRows([...rows]);
   }, [accountData]);
@@ -214,15 +216,35 @@ export default function Account(props) {
     {
       field: "accountName",
       headerName: "Account Name",
-      width: 300,
+      width: 250,
       renderCell: (params) => (
-        <Link
-          className={`${accountClass.account_name_link}`}
-          to={`/${accountRoute}/detail/${params.row._id}`}
-        >
-          <CustomRenderCell value={params?.value} />
-        </Link>
+        <>
+          <Link
+            className={`${accountClass.account_name_link}`}
+            to={`/${accountRoute}/detail/${params.row._id}`}
+          >
+            <CustomRenderCell value={params?.value} />
+          </Link>
+        </>
       ),
+    },
+    {
+      field: "relatedLead",
+      headerName: "Related Lead",
+      width: 250,
+      renderCell: (params) => (
+        <>
+          {
+            params.value ?
+              <Link className="link" to={`${routes.leadDetail.path}/${params.value._id}`} title={[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}>
+                {[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}
+              </Link>
+              : <NoDataCell />
+          }
+        </>
+      ),
+      sortable: false,
+      filterable: false,
     },
     {
       field: "typeOfAccount",
@@ -413,13 +435,13 @@ export default function Account(props) {
   ];
 
   const handleSearch = (e) => {
-    if (query.page !== 1) {
+    if (query.page !== 0) {
       setQuery((prevState) => ({ ...prevState, page: 0 }));
     }
     setSearchVal(e.target.value);
   };
 
-  const fetchAccounts = useCallback(() => {
+  const fetchAccounts = async () => {
     setLoading(true);
     let searchParams: any = { ...query, filterAccounts: selectedType };
     searchParams = searchVal
@@ -440,7 +462,7 @@ export default function Account(props) {
         toastConfig.setToastConfig(err);
         setLoading(false);
       });
-  }, [searchVal, query, selectedType]);
+  }
 
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {

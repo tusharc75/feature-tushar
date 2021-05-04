@@ -37,6 +37,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../Helpers/Routes"
+import moment from 'moment'
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -133,8 +134,12 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
   },
   notificationHeight: {
-    minWidth: 200,
+    minWidth: 300,
     minHeight: 200,
+    maxHeight: `calc(100vh - 200px)`
+  },
+  notificationHeightWithData: {
+    minWidth: 300,
     maxHeight: `calc(100vh - 200px)`
   }
 }));
@@ -271,8 +276,6 @@ const Header = ({ toggleDrawer }) => {
         pathname: routes.brandConfiguration.path
       });
     }
-
-
     setOpen(false);
   };
 
@@ -280,6 +283,7 @@ const Header = ({ toggleDrawer }) => {
     await axiosInstance().get("/user/logout");
     history.push("/");
     dispatch({ type: SET_USER, payload: null });
+    dispatch({ type: SET_SELECTED_ENTITY, payload: null });
     localStorage.removeItem("token");
     history.push("/login");
   };
@@ -326,23 +330,38 @@ const Header = ({ toggleDrawer }) => {
   );
 
   const NotificationContent = ({ data }) => {
-    return <div className={`${classes.notificationHeight} py-1`} style={{ position: "relative" }}>
+    return <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: "relative" }}>
       {
-        data.map((d) => {
-          return <div style={{ borderBottom: "1px solid lightgrey" }} className="p-3">
+        data.map((d, index) => {
+          return <div style={{ borderBottom: index != data.length - 1 ? "1px solid white" : "" }} className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
+            onClick={() => {
+              if (d.read == false) {
+                axiosInstance().put("/user/notification/read", {
+                  toggle: true,
+                  notificationId: d.notificationId
+                }).then(() => {
+                }).catch(error => {
+                  toastConfig.setToastConfig(error);
+                })
+              }
+              history.push(`${d.resourcePath}/${d.resourceId}`)
+            }}>
             {
-              routes[d.route] ? <Link to={`${routes[d.route].path}/${d.id}`}>
-                <h6>{d.text}</h6>
-              </Link> : d.text
+              <>
+                <h4>{d.title}</h4>
+                <h5>{d.description}</h5>
+
+                <h6 className="pull-right">{moment(d.date).format("MMM DD YYYY")}</h6>
+              </>
             }
-          </div>
+          </div >
         })
       }
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
       </Button> */}
-    </div>
+    </div >
   }
 
   const entitiesMenuId = "entities-menu";
@@ -405,15 +424,14 @@ const Header = ({ toggleDrawer }) => {
       {/* <MenuItem onClick={openServicesMenu}>
         <p>Services</p> <ExpandMore />
       </MenuItem> */}
-      <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu}>
-        {selectedEntity ? (
+      {
+        selectedEntity && <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu} className="d-flex justify-content-space-between">
           <span className={classes.entityName}>
-            {curEntity && curEntity.entityName} <ExpandMore />
+            {curEntity && curEntity.entityName}
           </span>
-        ) : (
-          "No Entity"
-        )}
-      </MenuItem>
+          <ExpandMore />
+        </MenuItem>
+      }
 
       <div>
         <MenuItem onClick={handleMobileScreenNotificationClick}>
@@ -590,6 +608,7 @@ const Header = ({ toggleDrawer }) => {
               </IconButton>
 
               <Popover
+                className="mr-2"
                 id={fullScreenNotificationId}
                 open={fullScreenNotificationOpen}
                 anchorEl={fullScreenNotificationAnchorEl}

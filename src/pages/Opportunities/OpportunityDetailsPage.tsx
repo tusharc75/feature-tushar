@@ -17,13 +17,14 @@ import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
-import { customerAccount, supplierAccount, yyyyMMDD, stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact, getObjKeysWithValues } from "../../constants/helpers";
+import { customerAccount, supplierAccount, yyyyMMDD, stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact, getObjKeysWithValues, opportunityProcessFieldName } from "../../constants/helpers";
 import { opportunity } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import currencies from "../../constants/currency_with_country.json";
+import { BsCheckAll } from "react-icons/bs";
 
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
@@ -86,6 +87,16 @@ function OpportunityDetailsPage() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (steps.length > 0) {
+      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == opportunityProcessFieldName.toLowerCase());
+      if (processSteps && processSteps.isRead && opportunityData) {
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == opportunityData[opportunityProcessFieldName]) + 1;
+        setActiveStep(currentStepToShow);
+      }
+    }
+  }, [steps])
+
   const fetchOpportunityData = () => {
     if (selectedEntity) {
       setLoading(true);
@@ -102,7 +113,7 @@ function OpportunityDetailsPage() {
 
           if (modifiedData["currency"]) {
             const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
-            modifiedData["amount"] = `${currency} ${modifiedData["amount"]}`
+            modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
           }
 
           setOpportunityData(modifiedData);
@@ -119,8 +130,8 @@ function OpportunityDetailsPage() {
   }
 
   const fetchSupplierContactData = (showDialog) => {
-    if (opportunityData.supplierAccountName?.optionValue) {
-      const ids = opportunityData.supplierAccountName?.optionValue;
+    if (opportunityData.supplierAccountName.length > 0) {
+      const ids = opportunityData.supplierAccountName.map(d => d.optionValue);
       const filterById = JSON.stringify([{ "field": "accountName", "term": { $in: ids } }])
 
       axiosInstance()
@@ -164,13 +175,15 @@ function OpportunityDetailsPage() {
           setOpportunityFields(data);
           setLoading(false);
 
-          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == "process");
-          setSteps(processSteps.fieldData.option.map(m => {
-            return {
-              text: m.optionLabel,
-              canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
-            }
-          }));
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == opportunityProcessFieldName.toLowerCase());
+          if (processSteps && processSteps.isRead) {
+            setSteps(processSteps.fieldData.option.map(m => {
+              return {
+                text: m.optionLabel,
+                canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+              }
+            }));
+          }
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -333,41 +346,50 @@ function OpportunityDetailsPage() {
                 </DetailsPageHeader>
               )}
 
-              <CustomSteps steps={steps} active={activeStep} />
-
-              <div className="w-100 d-flex justify-content-end mt-2">
-                {
-                  activeStep != steps.length ?
-                    isProcessing ? <Button variant="outlined"
-                      color="primary"
-                      disabled={true}
-                      onClick={() => { }}>
-                      Processing...
+              {
+                steps.length > 0 && 
+                <div className="stepper-box">
+                  <div className="mainview">
+                    <CustomSteps steps={steps} active={activeStep} />
+                  </div>
+                  <div className="actionview">
+                    <div className="d-flex justify-content-center">
+                      {
+                        activeStep != steps.length ?
+                          isProcessing ? <Button variant="contained"
+                            color="primary"
+                            size="small"
+                            disabled={true}
+                            onClick={() => { }}>
+                            Processing...
                     </Button> :
-                      <Button variant="contained"
-                        color="primary"
-                        disabled={!steps[activeStep].canCompleteManually}
-                        onClick={() => {
-                          setIsProcessing(true)
-                          const updatedData = {
-                            ...getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })),
-                            process: steps[activeStep].text,
-                            _id: opportunityData._id
-                          };
+                            <Button variant="contained"
+                              color="primary"
+                              size="small"
+                              disabled={!steps[activeStep].canCompleteManually}
+                              onClick={() => {
+                                setIsProcessing(true)
+                                const updatedData = {
+                                  ...getObjKeysWithValues(opportunityData, opportunityFields.map((f) => { return f.fieldData })),
+                                  process: steps[activeStep].text,
+                                  _id: opportunityData._id
+                                };
 
-                          axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
-                            setActiveStep(activeStep + 1)
-                            setIsProcessing(false)
-                          }).catch((error) => {
-                            toastConfig.setToastConfig(error);
-                            setIsProcessing(false)
-                          })
-                        }}>
-                        Mark {steps[activeStep].text} as Completed
+                                axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
+                                  setActiveStep(activeStep + 1)
+                                  setIsProcessing(false)
+                                }).catch((error) => {
+                                  toastConfig.setToastConfig(error);
+                                  setIsProcessing(false)
+                                })
+                              }}>
+                              <BsCheckAll />&nbsp; Mark {steps[activeStep].text} as Completed
                   </Button> : ""
-                }
-              </div>
-
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
               {loading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>
@@ -503,10 +525,10 @@ function OpportunityDetailsPage() {
             opportunityId={opportunityData._id}
             open={showAddSupplierContactsDialog}
             title="Assign Supplier Contacts"
-            onSuccess={() => { fetchSupplierContactData(false); setShowAddSupplierContactsDialog(false) }}
+            onSuccess={() => { fetchOpportunityData(); setShowAddSupplierContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddSupplierContactsDialog(false) }}
             contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
-            assignedContacts={opportunityData.staticData?.supplierContact ?? []}
+            assignedContacts={opportunityData.staticData?.supplierContacts ?? []}
             contactType="supplier"
           />
         }
@@ -516,10 +538,10 @@ function OpportunityDetailsPage() {
             opportunityId={opportunityData._id}
             open={showAddCustomerContactsDialog}
             title="Assign Customer Contacts"
-            onSuccess={() => { fetchCustomerContactData(false); setShowAddCustomerContactsDialog(false) }}
+            onSuccess={() => { fetchOpportunityData(); setShowAddCustomerContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddCustomerContactsDialog(false) }}
             contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
-            assignedContacts={opportunityData.staticData?.customerContact ?? []}
+            assignedContacts={opportunityData.staticData?.customerContacts ?? []}
             contactType="customer"
           />
         }

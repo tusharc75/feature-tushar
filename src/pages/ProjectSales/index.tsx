@@ -51,7 +51,6 @@ const ProjectSales: FC = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
-        console.log(data);
         getRows(data);
         setRowCount(count);
         setCheckAllProjects(false);
