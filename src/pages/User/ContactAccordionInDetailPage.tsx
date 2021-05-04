@@ -178,15 +178,9 @@ export default function ContactAccordionInDetailPage({
                                                         <CardContent className="detailListing">
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        type === "customer" ?
-                                                                            <Link className="link" to={`${routes.customerContactDetail.path}/${obj._id}`}>
-                                                                                <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
-                                                                            </Link> :
-                                                                            <Link className="link" to={`${routes.supplierContactDetail.path}/${obj._id}`}>
-                                                                                <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
-                                                                            </Link>
-                                                                    }
+                                                                    <Link className="link" to={type === "customer" ? `${routes.customerContactDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
+                                                                        <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
+                                                                    </Link>
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
