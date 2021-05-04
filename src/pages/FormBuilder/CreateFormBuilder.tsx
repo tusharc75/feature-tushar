@@ -109,13 +109,13 @@ const CreateFormBuilder = (props) => {
                         </Grid>
                         <Grid item xs={6} container justify="flex-end">
                             <Box>
-                                <Button disabled={isUpdating} color="primary" onClick={handleSave} variant="contained" >
+                                <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant="contained" >
                                     Save
                                     {isUpdating && <CircularProgress size={24} />}
                                 </Button>
                             </Box>
                             <Box ml={1} >
-                                <Button color="primary" variant="contained" onClick={() => history.push({ pathname: "/form-builder" })} >Close</Button>
+                                <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/form-builder" })} >Close</Button>
                             </Box>
                         </Grid>
                     </Grid>

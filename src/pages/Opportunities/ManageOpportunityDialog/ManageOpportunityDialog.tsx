@@ -44,6 +44,7 @@ export default function ManageOpportunityDialog({
   accountId,
   resource, // either called from customer account or supplier account
   isRedirectTodetailPage,
+  userId = null,
 }) {
   const { opportunityResource, opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
@@ -136,6 +137,16 @@ export default function ManageOpportunityDialog({
             )
           ) {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
+          }
+
+          if (!isNew && _f.fieldData.fieldName == "currency") {
+            setCurrencySymbol(
+              currencies.find((d) => d.currencyCode == dataToUpdate["currency"])
+                ?.symbolNative
+            );
+          }
+          if (isNew && userId && _f.fieldData.fieldName == "owner") {
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
           }
 
           if (!isNew && _f.fieldData.fieldName == "currency") {
