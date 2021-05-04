@@ -37,7 +37,8 @@ export default function ManageOpportunityDialog({
   dataToUpdate,
   accountId,
   resource, // either called from customer account or supplier account
-  isRedirectTodetailPage
+  isRedirectTodetailPage,
+  userId = null
 }) {
   const { opportunityResource, opportunityApi } = opportunity
   const toastConfig = useContext(CustomToastContext);
@@ -124,6 +125,10 @@ export default function ManageOpportunityDialog({
 
             if (accountId && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
+            }
+
+            if (isNew && userId && _f.fieldData.fieldName == "owner") {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
             }
 
             if (!isNew && _f.fieldData.fieldName == "currency") {

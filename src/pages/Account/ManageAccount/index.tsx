@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from 'react-router-dom';
 import ManageAccount from "./ManageAccount";
-import { getObjKeys, sidebarResource } from "../../../constants/helpers";
+import { getObjKeys, sidebarResource, initializeDropdownById } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import _ from "lodash";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -10,7 +10,7 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 export default function ManageAccountMain(props) {
   const toastConfig = useContext(CustomToastContext);
 
-  const { open, onClose, id, accountResource, accountApi, isGetAccountData, onGetAddedAccount, isDoNotRedirect } = props;
+  const { open, onClose, id, accountResource, accountApi, isGetAccountData, onGetAddedAccount, isRedirectToDetailPage, userId = null } = props;
   const {
     state: { user },
   }: any = useData();
@@ -62,7 +62,14 @@ export default function ManageAccountMain(props) {
         const newFields = [];
         data
           .filter((d) => d.isCreate)
-          .map((_f) => newFields.push(_f.fieldData));
+          .map((_f) => {
+
+            if (userId && _f.fieldData.fieldName == "owner") {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
+            }
+
+            newFields.push(_f.fieldData)
+          });
 
         setEntityData({
           fields: newFields,
@@ -86,7 +93,9 @@ export default function ManageAccountMain(props) {
           type: "success",
           message: data.message,
         });
-        if (!isDoNotRedirect) history.push(`${accountApi}/detail/${newId}`);
+        if (isRedirectToDetailPage) {
+          history.push(`${accountApi}/detail/${newId}`);
+        }
         setLoading(false);
       })
       .catch((error) => {
