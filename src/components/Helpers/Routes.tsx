@@ -92,7 +92,7 @@ export default {
   },
   customerAccountDetail: {
     title: "Customer Account",
-    path: "/customer-accoun/detail",
+    path: "/customer-account/detail",
   },
   supplierAccount: {
     title: "Supplier Account",
@@ -100,7 +100,7 @@ export default {
   },
   supplierAccountDetail: {
     title: "Supplier Account",
-    path: "/supplier-accoun/detail",
+    path: "/supplier-account/detail",
   },
   customerContact: {
     title: "Customer Contact",

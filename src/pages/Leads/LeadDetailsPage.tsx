@@ -1,12 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Paper, List, ListItem, ListItemAvatar, ListItemText, Typography, IconButton, Card, CardContent } from "@material-ui/core";
-import { useHistory, useParams, Link } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { Box, Button, Grid, Paper } from "@material-ui/core";
+import { useHistory, useParams } from "react-router-dom";
 import { Skeleton } from "@material-ui/lab";
-import MuiAccordion from "@material-ui/core/Accordion";
-import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
-import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -20,20 +15,14 @@ import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
 import { getObjKeysWithValues, lead, leadProcessFieldName } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import styles from "./LeadDetailsPage.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
-import { withStyles } from "@material-ui/core/styles";
-import OpportunityAccordionInLead from './AccordionOfOpportunity';
 import AccordionOfOpportunity from "./AccordionOfOpportunity";
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
-
-
-
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -239,7 +228,7 @@ const LeadDetailsPage = () => {
           leadName: null,
           message: null,
         });
-        fetchLeadData();
+        history.push(`${routes.opportunityDetail.path}/${data.data[0]}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -267,7 +256,7 @@ const LeadDetailsPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8} className="gap-2">
             <Paper>
               {!leadData ? (
                 <div>
@@ -297,17 +286,18 @@ const LeadDetailsPage = () => {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small"
                       onClick={handleOpneUpdateDialog}
                     >
                       Edit
                     </Button>
                   )}
-                  <Box component="span" marginX={1} />
                   {
                     !isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && <>
                       <Button
                         variant="contained"
                         color="primary"
+                        size="small"
                         onClick={() => {
                           const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter(d => d).join(" ")
                           setConvertLeadToOpportunityConfirmationDialog({
@@ -320,7 +310,6 @@ const LeadDetailsPage = () => {
                       >
                         Convert Lead To Opportunity
                       </Button>
-                      <Box component="span" marginX={1} />
                     </>
                   }
                   {leadsPermissions.isDelete && allowedToDelete && (
@@ -333,46 +322,50 @@ const LeadDetailsPage = () => {
               )}
 
               {
-                steps.length > 0 && <>
-                  <CustomSteps steps={steps} active={activeStep} />
-
-                  <div className="w-100 d-flex justify-content-end mt-2">
-                    {
-                      activeStep != steps.length ?
-                        isProcessing ? <Button variant="outlined"
-                          color="primary"
-                          disabled={true}
-                          onClick={() => { }}>
-                          Processing...
-                          </Button> :
-                          <Button variant="contained"
-                            color="primary"
-                            disabled={!steps[activeStep].canCompleteManually}
-                            onClick={() => {
-                              setIsProcessing(true)
-                              const updatedData = {
-                                ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
-                                [leadProcessFieldName]: steps[activeStep].text,
-                                _id: leadData._id
-                              };
-
-                              axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
-                                setActiveStep(activeStep + 1)
-                                setIsProcessing(false)
-
-                                if (steps[activeStep].text.toLowerCase() === "qualified") {
-                                  fetchLeadData();
-                                }
-                              }).catch((error) => {
-                                toastConfig.setToastConfig(error);
-                                setIsProcessing(false)
-                              })
-                            }}>
-                            Mark {steps[activeStep].text} as Completed
-                            </Button> : ""
-                    }
+                steps.length > 0 &&
+                <div className="stepper-box">
+                  <div className="mainview">
+                    <CustomSteps steps={steps} active={activeStep} />
                   </div>
-                </>
+                  <div className="actionview">
+                    <div className="d-flex justify-content-center">
+                      {
+                        activeStep != steps.length ?
+                          isProcessing ? <Button variant="outlined"
+                            color="primary"
+                            disabled={true}
+                            onClick={() => { }}>
+                            Processing...
+                          </Button> :
+                            <Button variant="contained"
+                              color="primary"
+                              disabled={!steps[activeStep].canCompleteManually}
+                              onClick={() => {
+                                setIsProcessing(true)
+                                const updatedData = {
+                                  ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
+                                  [leadProcessFieldName]: steps[activeStep].text,
+                                  _id: leadData._id
+                                };
+
+                                axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
+                                  setActiveStep(activeStep + 1)
+                                  setIsProcessing(false)
+                                  debugger;
+                                  if (steps[activeStep].text.toLowerCase() === "qualified") {
+                                    fetchLeadData();
+                                  }
+                                }).catch((error) => {
+                                  toastConfig.setToastConfig(error);
+                                  setIsProcessing(false)
+                                })
+                              }}>
+                              Mark {steps[activeStep].text} as Completed
+                            </Button> : ""
+                      }
+                    </div>
+                  </div>
+                </div>
               }
 
               {loading ? (
@@ -405,19 +398,18 @@ const LeadDetailsPage = () => {
                 <DetailsPage data={leadData} fields={leadFields} />
               )}
               <AccordionOfOpportunity
-                recordsPerLine={2}
+                recordsPerLine={3}
                 opportunity={leadData?.staticData?.opportunity}
               />
-              <ProjectInAccordion />
-              <QuotesInAccordion />
-              <ProductBuilderInAccordion />
-              <LeadInAccordion />
+              <ProjectInAccordion recordsPerLine={3}/>
+              <QuotesInAccordion recordsPerLine={3}/>
+              <ProductBuilderInAccordion recordsPerLine={3}/>
+              <LeadInAccordion recordsPerLine={3}/>
             </Paper>
           </Grid>
 
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+          <Grid item xs={12} sm={12} md={4} lg={4} className="gap-2">
             <Paper>
-
               {!leadData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />

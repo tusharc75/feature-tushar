@@ -28,6 +28,9 @@ import { BsCalendarFill, BsFillPuzzleFill } from 'react-icons/bs';
 import { MdDashboard, MdLocalActivity } from 'react-icons/md';
 import SidebarImage from '../../assets/header-bg.png';
 import Avatar from '@material-ui/core/Avatar';
+import { RiFolderSettingsFill } from 'react-icons/ri';
+import { RiAccountPinCircleFill } from 'react-icons/ri';
+import { SiCivicrm } from 'react-icons/si';
 
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -112,6 +115,10 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       icon: <FaDatabase size={15} className="sidebar-icon" />
     },
     {
+      key: 'Product Setup',
+      icon: <RiFolderSettingsFill size={15} className="sidebar-icon" />
+    },
+    {
       key: 'Admin Portal',
       icon: <BsCalendarFill size={15} className="sidebar-icon" />
     },
@@ -122,7 +129,17 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     {
       key: 'Activities Management',
       icon: <BsFillPuzzleFill size={15} className="sidebar-icon" />
+    },
+    {
+      key: 'Accounts',
+      icon: <RiAccountPinCircleFill size={15} className="sidebar-icon" />
+    },
+    {
+      key: 'CRM +',
+      icon: <SiCivicrm size={15} className="sidebar-icon" />
     }
+    
+    
   ]
   const handleToggleDrawer = () => {
     setToggleDrawer(!toggleDrawer);

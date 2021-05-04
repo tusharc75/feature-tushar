@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar, Card, CardContent } from "@material-ui/core";
+import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar, Card, CardContent, List } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
 import { Skeleton, TabPanel } from "@material-ui/lab";
@@ -25,7 +25,7 @@ import ManageContactDialog from "../Contact/ManageContact/index";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { makeStyles } from "@material-ui/core/styles";
 import {
-  DisplayData,
+  // DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -45,6 +45,10 @@ import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordio
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 import { Link } from 'react-router-dom'
 import { BiFace } from 'react-icons/bi'
+import { BsPerson } from 'react-icons/bs'
+import ListItem from '@material-ui/core/ListItem/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import { ListItemText } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -55,6 +59,19 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "10px",
   },
 }));
+
+function DisplayData({ label, value, icon }) {
+  return <div style={{ flexGrow: 1 }}>
+    <List>
+      <ListItem>
+        <ListItemAvatar>
+          {icon}
+        </ListItemAvatar>
+        <ListItemText primary={value} secondary={label} />
+      </ListItem>
+    </List>
+  </div>
+}
 
 export default function AccountDetailPage(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -430,7 +447,7 @@ export default function AccountDetailPage(props) {
                         >
                           {accountData.staticData?.approved ? "Disapprove" : "Approve"}
                         </Button>
-                        <Box component="span" marginX={1} />
+                        <Box component="span" marginX={0.50} />
                       </>
                     )}
 
@@ -447,7 +464,7 @@ export default function AccountDetailPage(props) {
                         >
                           Edit
                     </Button>
-                        <Box component="span" marginX={1} />
+                        <Box component="span" marginX={0.50} />
                       </>
                     )}
 
@@ -525,7 +542,7 @@ export default function AccountDetailPage(props) {
                   }}
                   accountId={accountData._id}
                   accountName={accountData.accountName}
-                  recordsPerLine={2}
+                  recordsPerLine={3}
                   resource={accountResource}
                   isRedirect={false}
                 />
@@ -622,7 +639,7 @@ export default function AccountDetailPage(props) {
                               variant="h6"
                               style={{ margin: "0 10px" }}
                             >
-                              Converted Lead
+                              Related Lead
                             </Typography>
                           </div>
                           {relatedContactsLoading ? (
@@ -642,9 +659,7 @@ export default function AccountDetailPage(props) {
                                     </Grid>
                                     <Grid container>
                                       <Grid item xs={12} sm={6}>
-                                        {
-                                          accountData?.staticData?.lead?.title ? <DisplayData label='Title' value={accountData?.staticData?.lead.title || ''} icon={<BiFace size={20} />} /> : ''
-                                        }
+                                        <DisplayData label='Title' value={accountData?.staticData?.lead?.title || '-'} icon={<BsPerson size={20} />} />
                                       </Grid>
                                     </Grid>
                                   </CardContent>
