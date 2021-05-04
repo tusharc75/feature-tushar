@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import clsx from "clsx";
 import {
   withStyles,
@@ -14,7 +14,14 @@ import {
   Tabs,
   Tab,
 } from "@material-ui/core";
-import { Add, ExpandMore } from "@material-ui/icons";
+import { Skeleton } from "@material-ui/lab";
+import { Add, ExpandMore, ControlPoint } from "@material-ui/icons";
+
+import axiosInstance from "../../axios/axiosInstance";
+import BoxWithBorder from "../../components/BoxWithBorder";
+import CustomerContacts from "./CustomerContacts";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 
 const Accordion = withStyles({
   root: {
@@ -60,8 +67,8 @@ const AccordionDetails = withStyles((theme) => ({
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    padding: "12px",
     background: "#FFF",
+    marginBottom: 12,
   },
   expand: {
     transform: "rotate(0deg)",
@@ -77,32 +84,44 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CustomerStrategy = () => {
+const CustomerStrategy = (props) => {
+  const {
+    loading,
+    handleOpenDialog,
+    customerAccounts,
+    opportunities,
+    permissions,
+    fetchProjectData,
+    customerContacts,
+    projectId,
+  } = props;
   const classes = useStyles();
+  const { setToastConfig } = useContext(CustomToastContext);
   const [expandedParent, setExpandedParent] = useState(true);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
-  const [allCustomers, setAllCustomers] = useState([]);
+  const saveOppToProject = async (id) => {
+    const existingData = opportunities.map((o) => o._id);
 
-  const customers = [
-    { title: "Customer 1", id: "fdf342" },
-    { title: "Customer 2", id: "434erf" },
-    { title: "Customer 3", id: "223red" },
-    { title: "Customer 4", id: "d23dsf" },
-    { title: "Customer 5", id: "f3g123f" },
-    { title: "Customer 6", id: "39fd12d" },
-    { title: "Customer 7", id: "32432fs" },
-  ];
+    const dataObj = {
+      opportunity: [id, ...existingData],
+      _id: projectId,
+    };
 
-  useEffect(() => {
-    if (customers.length) {
-      const data = customers.map((c, i) => ({
-        ...c,
-        index: i,
-      }));
-      setAllCustomers(data);
-    }
-  }, []);
+    await axiosInstance()
+      .put(`/project-sales/add-opportunity`, dataObj)
+      .then(() => {
+        setToastConfig({
+          message: `Opportunity added successfully`,
+          type: "success",
+          open: true,
+        });
+        fetchProjectData();
+      })
+      .catch((error) => {
+        setToastConfig(error);
+      });
+  };
 
   return (
     <Paper className={classes.root}>
@@ -112,8 +131,6 @@ const CustomerStrategy = () => {
         onChange={() => setExpandedParent(!expandedParent)}
       >
         <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-          <Typography>Customer Strategy</Typography>
-          <Box component="span" mx={1} />
           <Box
             display="flex"
             alignItems="center"
@@ -123,58 +140,151 @@ const CustomerStrategy = () => {
           >
             <ExpandMore />
           </Box>
+          <Box component="span" mx={1} />
+          <Typography>Customer Strategy</Typography>
           <IconButton
             color="primary"
             size="small"
             className={classes.addBtn}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenDialog("customer-account");
+            }}
           >
             <Add />
           </IconButton>
         </AccordionSummary>
         <AccordionDetails>
-          <Box>
-            <>
-              <Tabs
-                variant="scrollable"
-                scrollButtons="auto"
-                // className="oms-tab"
-                value={currentTabIndex}
-                onChange={(index, newValue) => {
-                  setCurrentTabIndex(newValue);
-                }}
-                indicatorColor="primary"
-                textColor="primary"
-                aria-label="icon tabs example"
-              >
-                {allCustomers.map((c, i) => (
-                  <Tab
-                    tabIndex={c.index}
-                    label={c.title}
-                    aria-controls={`a11y-tabpanel-${i}`}
-                    id={`a11y-tab-${i}`}
-                  />
-                ))}
-              </Tabs>
+          {loading ? (
+            <Typography>Loading...</Typography>
+          ) : customerAccounts.length ? (
+            <Box width="100%">
+              <>
+                <Tabs
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  className="oms-tab"
+                  value={currentTabIndex}
+                  onChange={(index, newValue) => {
+                    setCurrentTabIndex(newValue);
+                  }}
+                  indicatorColor="primary"
+                  textColor="primary"
+                  aria-label="icon tabs example"
+                >
+                  {customerAccounts.map((c, i) => (
+                    <Tab
+                      key={i}
+                      tabIndex={i}
+                      label={c.accountName}
+                      aria-controls={`a11y-tabpanel-${i}`}
+                      id={`a11y-tab-${i}`}
+                    />
+                  ))}
+                </Tabs>
 
-              {allCustomers.map((c) => (
-                <Box hidden={currentTabIndex !== c.index}>
-                  <Grid container spacing={1}>
-                    {/**
-                     * LEFT SIDE
-                     */}
-                    <Grid item xs={12} sm={12} md={8} lg={8}>
-                      {/*TODO: Heirarchy Table */}
+                {customerAccounts.map((c, i) => (
+                  <Box mt={2} hidden={currentTabIndex !== i} key={c._id}>
+                    <Grid container spacing={1}>
+                      {/**
+                       * LEFT SIDE
+                       */}
+
+                      <Grid item xs={12} sm={12} md={8} lg={8}>
+                        {/*TODO: Heirarchy Table */}
+                        {permissions?.opportunity?.isRead && (
+                          <OpportunityInAccordian
+                            opportunities={opportunities.filter(
+                              (o) => o.customerAccountName === c._id
+                            )}
+                            onNewOpportunityAdd={(id) => {
+                              saveOppToProject(id);
+                            }}
+                            opportunityPermissions={permissions?.opportunity}
+                            accountId={c._id}
+                            accountName={c.accountName}
+                            resource={"customerAccount"}
+                            isRedirect={false}
+                          />
+                        )}
+                      </Grid>
+                      {/**
+                       * RIGHT SIDE
+                       */}
+                      <Grid item xs={12} sm={12} md={4} lg={4}>
+                        <Paper style={{ overflow: "hidden" }}>
+                          <Box style={{ padding: "0px", maxHeight: "450px" }}>
+                            <Box
+                              width="100%"
+                              padding={1}
+                              bgcolor="grey.200"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="space-between"
+                            >
+                              <Typography variant="subtitle2">
+                                Customer Contacts
+                              </Typography>
+                              <IconButton
+                                color="primary"
+                                size="small"
+                                onClick={() =>
+                                  handleOpenDialog("customer-contact", c._id)
+                                }
+                              >
+                                <ControlPoint />
+                              </IconButton>
+                            </Box>
+                            <Box padding={1}>
+                              {loading ? (
+                                [1, 2].map((i) => (
+                                  <BoxWithBorder
+                                    key={i}
+                                    style={{ marginBottom: "8px" }}
+                                  >
+                                    <Box padding={1}>
+                                      <Skeleton
+                                        variant="text"
+                                        width="100px"
+                                        height="20px"
+                                      />
+                                      <Box marginTop={1} />
+                                      <Skeleton
+                                        variant="text"
+                                        width="100%"
+                                        height="15px"
+                                      />
+                                    </Box>
+                                  </BoxWithBorder>
+                                ))
+                              ) : customerContacts.length ? (
+                                <>
+                                  <CustomerContacts
+                                    contacts={customerContacts.filter(
+                                      (cA) => cA.accountName === c._id
+                                    )}
+                                    accountId={c._id}
+                                    accountName={c.accountName}
+                                    contactRoute="customer-contact"
+                                  />
+                                </>
+                              ) : (
+                                <Box textAlign="center" padding={2}>
+                                  No Contacts
+                                </Box>
+                              )}
+                            </Box>
+                          </Box>
+                        </Paper>
+                      </Grid>
                     </Grid>
-                    {/**
-                     * RIGHT SIDE
-                     */}
-                    <Grid item xs={12} sm={12} md={4} lg={4}></Grid>
-                  </Grid>
-                </Box>
-              ))}
-            </>
-          </Box>
+                  </Box>
+                ))}
+              </>
+            </Box>
+          ) : (
+            <Typography>No Customer Accounts</Typography>
+          )}
         </AccordionDetails>
       </Accordion>
     </Paper>

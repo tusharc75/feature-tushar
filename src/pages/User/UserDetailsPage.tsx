@@ -608,38 +608,62 @@ const UserDetailsPage = () => {
                 </>
               }
               <OpportunityAccordionInUserDetail
-                opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner,...opportunityRelatedData?.Collaborator]:opportunityRelatedData?.Owner}
+                opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner, ...opportunityRelatedData?.Collaborator] : opportunityRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
               />
               <LeadAccordionInUserDetailPage
-                leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner,...leadsRelatedData?.Collaborator]:leadsRelatedData?.Owner}
+                leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner, ...leadsRelatedData?.Collaborator] : leadsRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
               />
               <AccountAccordionDetail
                 type="customer"
-                account={(customerAccountRelatedData?.Owner && customerAccountRelatedData?.Collaborator) ? [...customerAccountRelatedData.Owner, ...customerAccountRelatedData.Collaborator] : customerAccountRelatedData?.Owner}
+                accounts={(customerAccountRelatedData?.Owner && customerAccountRelatedData?.Collaborator) ? [...customerAccountRelatedData.Owner, ...customerAccountRelatedData.Collaborator] : customerAccountRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
               />
               <AccountAccordionDetail
                 type="supplier"
-                account={(supplierAccountRelatedData?.Owner && supplierAccountRelatedData?.Collaborator) ? [...supplierAccountRelatedData.Owner, ...supplierAccountRelatedData.Collaborator] : supplierAccountRelatedData?.Owner}
+                accounts={(supplierAccountRelatedData?.Owner && supplierAccountRelatedData?.Collaborator) ? [...supplierAccountRelatedData.Owner, ...supplierAccountRelatedData.Collaborator] : supplierAccountRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
               />
               <ContactAccordionInDetailPage
                 type="customer"
-                contact={(customerContactRelatedData?.Owner && customerContactRelatedData?.Collaborator) ? [...customerContactRelatedData.Owner, ...customerContactRelatedData.Collaborator] : customerContactRelatedData?.Owner}
+                contacts={(customerContactRelatedData?.Owner && customerContactRelatedData?.Collaborator) ? [...customerContactRelatedData.Owner, ...customerContactRelatedData.Collaborator] : customerContactRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
               />
               <ContactAccordionInDetailPage
                 type="supplier"
-                contact={(supplierContactRelatedData?.Owner && supplierContactRelatedData?.Collaborator) ? [...supplierContactRelatedData.Owner, ...supplierContactRelatedData.Collaborator] : supplierContactRelatedData?.Owner}
+                contacts={(supplierContactRelatedData?.Owner && supplierContactRelatedData?.Collaborator) ? [...supplierContactRelatedData.Owner, ...supplierContactRelatedData.Collaborator] : supplierContactRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
               />
             </Paper>
           </Grid>
