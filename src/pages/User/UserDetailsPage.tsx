@@ -41,6 +41,11 @@ import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import { userType } from "../../constants/helpers";
+import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
+import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
+import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
+import AccountAccordionDetail from "./AccountAccordionInDetail";
+import ContactAccordionInDetailPage from "./ContactAccordionInDetailPage";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -55,7 +60,14 @@ const UserDetailsPage = () => {
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [rolesLoading, setRolesLoading] = useState(false);
+  const [userRelatedLoading, setUserRelatedLoading] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [leadsRelatedData, setLeadsRelatedData] = useState(null);
+  const [opportunityRelatedData, setOpportunityRelatedData] = useState(null);
+  const [customerContactRelatedData, setCustomerContactRelatedData] = useState(null);
+  const [customerAccountRelatedData, setCustomerAccountRelatedData] = useState(null);
+  const [supplierAccountRelatedData, setSupplierAccountRelatedData] = useState(null);
+  const [supplierContactRelatedData, setSupplierContactRelatedData] = useState(null);
   const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
 
@@ -81,6 +93,7 @@ const UserDetailsPage = () => {
       fetchUserRoles();
       fetchDoa();
       fetchUsers()
+      fetchUserRelatedDetail()
     }
     // eslint-disable-next-line
   }, [id]);
@@ -167,6 +180,25 @@ const UserDetailsPage = () => {
         toastConfig.setToastConfig(error);
       });
   };
+  const fetchUserRelatedDetail = () => {
+    setUserRelatedLoading(true);
+    axiosInstance()
+      .get(`/user/related/${id}`)
+      .then(({ data: { data } }) => {
+        setCustomerAccountRelatedData(data["Customer Account"]);
+        setCustomerContactRelatedData(data["Customer Contact"]);
+        setSupplierAccountRelatedData(data["Supplier Account"]);
+        setSupplierContactRelatedData(data["Supplier Contact"]);
+        setLeadsRelatedData(data["Lead"]);
+        setOpportunityRelatedData(data["Opportunity"]);
+      })
+      .catch((error) => {
+        setUserRelatedLoading(false);
+        toastConfig.setToastConfig(error);
+      })
+
+
+  }
 
   const handleMainPoints = (data) => {
     let tempMp = {
@@ -382,13 +414,12 @@ const UserDetailsPage = () => {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small"
                       onClick={handleOpenUpdateDialog}
                     >
                       Edit
                     </Button>
                   ) : null}
-                  <Box component="span" marginX={1} />
-
                   {permissions.user.isDelete ? (
                     <DeleteButton
                       text="Delete"
@@ -573,7 +604,64 @@ const UserDetailsPage = () => {
                   </Grid>
                 </>
               }
-
+              <OpportunityAccordionInUserDetail
+                opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner, ...opportunityRelatedData?.Collaborator] : opportunityRelatedData?.Owner}
+                recordsPerLine={2}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <LeadAccordionInUserDetailPage
+                leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner, ...leadsRelatedData?.Collaborator] : leadsRelatedData?.Owner}
+                recordsPerLine={2}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <AccountAccordionDetail
+                type="customer"
+                accounts={(customerAccountRelatedData?.Owner && customerAccountRelatedData?.Collaborator) ? [...customerAccountRelatedData.Owner, ...customerAccountRelatedData.Collaborator] : customerAccountRelatedData?.Owner}
+                recordsPerLine={2}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <AccountAccordionDetail
+                type="supplier"
+                accounts={(supplierAccountRelatedData?.Owner && supplierAccountRelatedData?.Collaborator) ? [...supplierAccountRelatedData.Owner, ...supplierAccountRelatedData.Collaborator] : supplierAccountRelatedData?.Owner}
+                recordsPerLine={2}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <ContactAccordionInDetailPage
+                type="customer"
+                contacts={(customerContactRelatedData?.Owner && customerContactRelatedData?.Collaborator) ? [...customerContactRelatedData.Owner, ...customerContactRelatedData.Collaborator] : customerContactRelatedData?.Owner}
+                recordsPerLine={2}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <ContactAccordionInDetailPage
+                type="supplier"
+                contacts={(supplierContactRelatedData?.Owner && supplierContactRelatedData?.Collaborator) ? [...supplierContactRelatedData.Owner, ...supplierContactRelatedData.Collaborator] : supplierContactRelatedData?.Owner}
+                recordsPerLine={2}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
@@ -605,6 +693,7 @@ const UserDetailsPage = () => {
                             height="30px"
                           />
                         </Box>
+
                       ))
                     ) : userPermissions ? (
                       Object.keys(userPermissions).map((key) => (

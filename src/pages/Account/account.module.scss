@@ -88,9 +88,10 @@
 .f_size {
   font-size: 16px;
 }
-.related_contacts {
+.related_contacts,
+.leads_data {
   padding: 6px;
-  background-color: #e4e4e4;
+  background-color: #f5f5f5;
   display: flex;
   justify-content: space-between;
 }
@@ -104,7 +105,7 @@
 
 .account_header {
   display: flex;
-  grid-gap: 20px;
+  grid-gap: 0.50rem;
   align-items: center;
 }
 .account_header_search_bar {
@@ -125,7 +126,7 @@
 }
 .account_header_add_btn_action_btn_group {
   display: flex;
-  grid-gap: 15px;
+  grid-gap:0.50rem;
 }
 .account_header_logo {
   font-size: 3rem;
@@ -156,11 +157,7 @@
     width: 99px;
     height: 34px;
   } */
-Button.account_header_action_btn {
-  padding-left: 18px;
-  padding-right: 18px;
-  height: 34px;
-}
+
 .MuiButton-iconSizeMedium > *:first-child {
   font-size: 18px !important;
 }

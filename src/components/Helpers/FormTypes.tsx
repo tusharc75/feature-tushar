@@ -151,6 +151,8 @@ const FormTypes = (props) => {
     isvlookupReverse,
     doNotShowInfoTooltip,
     fieldData,
+    startAdornment,
+    accept,
     ...rest
   } = props;
 
@@ -176,8 +178,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -474,6 +476,7 @@ const FormTypes = (props) => {
           inputProps: {
             allowNegative: false,
           },
+          startAdornment: startAdornment
         }}
       />
     </InfoLabel>
@@ -500,11 +503,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? null : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? null : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -533,11 +536,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? null : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? null : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -631,10 +634,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                handleChange(
-                  name,
-                  val && val.optionValue ? val.optionValue : ""
-                )
+              handleChange(
+                name,
+                val && val.optionValue ? val.optionValue : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -706,8 +709,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-                (data) => data.currencyCode === values[name]
-              )[0]
+              (data) => data.currencyCode === values[name]
+            )[0]
             : ""
         }
         options={currencyData}
@@ -715,7 +718,7 @@ const FormTypes = (props) => {
           option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
         }
         getOptionSelected={(option: any, val) => option.currencyCode === val}
-        onChange={(e, val) =>
+        onChange={onChange ? onChange : (e, val) =>
           setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
         }
         renderInput={(params) => (
@@ -761,8 +764,8 @@ const FormTypes = (props) => {
         value={
           values[name]
             ? options.filter((data: any) =>
-                values[name].includes(data.optionValue)
-              )
+              values[name].includes(data.optionValue)
+            )
             : []
         }
         getOptionSelected={(option: any, val: any) =>
@@ -772,10 +775,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -876,9 +879,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+              setValue(newValue);
+            }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -1029,6 +1032,7 @@ const FormTypes = (props) => {
           style={{ display: "none" }}
           onClick={(e: any) => (e.target.value = null)}
           type="file"
+          accept={accept || ""}
         />
         <label htmlFor={name}>
           <Button
@@ -1053,10 +1057,10 @@ const FormTypes = (props) => {
             {isFileUploading
               ? `Uploading... ${fileUploadProgress}%`
               : values[name]
-              ? values[name]
-              : touched[name] && Boolean(errors[name])
-              ? errors[name]
-              : "No file choosen"}
+                ? values[name]
+                : touched[name] && Boolean(errors[name])
+                  ? errors[name]
+                  : "No file choosen"}
           </Typography>
         </Box>
         <IconButton

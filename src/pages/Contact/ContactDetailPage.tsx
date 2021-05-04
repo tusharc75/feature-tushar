@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Paper, Tab, Tabs, Typography } from "@material-ui/core";
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
@@ -14,6 +14,7 @@ import routes from "../../components/Helpers/Routes";
 import axiosInstance from "./../../axios/axiosInstance";
 import Activity from "../../components/Activity";
 import {
+  // DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -26,8 +27,26 @@ import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
 import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
 import { FcFlowChart } from "react-icons/fc";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
+import BoxWithBorder from "../../components/BoxWithBorder";
+import { BiFace } from 'react-icons/bi'
+import ListItem from '@material-ui/core/ListItem/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import { ListItemText } from '@material-ui/core';
 
-const Roles = (props) => {
+function DisplayData({ label, value, icon }) {
+  return <div style={{ flexGrow: 1 }}>
+    <List>
+      <ListItem>
+        <ListItemAvatar>
+          {icon}
+        </ListItemAvatar>
+        <ListItemText primary={value} secondary={label} />
+      </ListItem>
+    </List>
+  </div>
+}
+
+const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
@@ -380,6 +399,7 @@ const Roles = (props) => {
                   <Button
                     variant="contained"
                     color="primary"
+                    size="small"
                     onClick={handleOpneUpdateDialog}
                   >
                     Edit
@@ -393,6 +413,7 @@ const Roles = (props) => {
                   contactData.owner.optionValue === user.user._id ? (
                   <DeleteButton
                     text="Delete"
+                    size="small"
                     onClick={() => setShowConfirmBox(true)}
                   />
                 ) : null}
@@ -495,6 +516,47 @@ const Roles = (props) => {
                     </Typography>
                     <Box className={`${contactClass.custom_box1}`}></Box>
                   </div> */}
+
+              {contactData?.staticData?.lead && permissions &&
+                permissions.lead &&
+                permissions.lead.isRead && (
+                  <Grid item xs={12}>
+                    <BoxWithBorder
+                      style={{ marginTop: "3%", padding: "0px" }}
+                    >
+                      <div className={`${contactClass.detail_page_div3}`}>
+                        <div className={`${contactClass.leads_data}`}>
+                          <Typography
+                            color="primary"
+                            variant="h6"
+                            style={{ margin: "0 10px" }}
+                          >
+                            Related Lead
+                          </Typography>
+                        </div>
+                        <Box className={`${contactClass.custom_box1}`}>
+                          <Card>
+                            <CardContent className="detailListing">
+                              <Grid container className="detailCardHeader">
+                                <Grid item xs={12} sm={12}>
+                                  <Link className="link f_size"
+                                    to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                    {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
+                                  </Link>
+                                </Grid>
+                              </Grid>
+                              <Grid container>
+                                <Grid item xs={12} sm={6}>
+                                  <DisplayData label='Title' value={contactData?.staticData?.lead?.title || '-'} icon={< BiFace size={20} />} />
+                                </Grid>
+                              </Grid>
+                            </CardContent>
+                          </Card>
+                        </Box>
+                      </div>
+                    </BoxWithBorder>
+                  </Grid>
+                )}
             </Paper>
           </Grid>
         </Grid>
@@ -526,4 +588,4 @@ const Roles = (props) => {
   );
 };
 
-export default Roles;
+export default ContactDetailsPage;

@@ -445,55 +445,6 @@ export default function Doa() {
   return (
     <Layout>
       <CustomBreadCrumbs routes={[routes.doa]} />
-      {/* <Grid container direction="row" className="header-links">
-        <Grid item xs={12} sm={12} className="pr-3">
-          <Grid container justify="flex-end">
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Import from Excel
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Export to Excel
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Download Template
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Email a Link
-            </Link>
-          </Grid>
-        </Grid>
-      </Grid> */}
 
       {/* Tables Begins Here */}
       <Container>

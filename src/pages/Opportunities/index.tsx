@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
@@ -86,7 +86,8 @@ const Opportunities = () => {
   });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName
+    accountName: history.location?.state?.accountName,
+    resource: history.location?.state?.resource,
   })
 
   const { opportunityResource, opportunityApi } = opportunity;
@@ -115,7 +116,7 @@ const Opportunities = () => {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
     // eslint-disable-next-line
-  }, [query, selectedType, selectedEntity]);
+  }, [query, selectedType, selectedEntity, accountDetails]);
 
   useEffect(() => {
     let rows = opportunityData?.map((u) => {
@@ -165,9 +166,12 @@ const Opportunities = () => {
         ? { ...searchParams, search: searchVal }
         : { ...searchParams };
 
-
       if (accountDetails.accountId) {
-        searchParams["accountId"] = accountDetails.accountId;
+        if (accountDetails.resource === "customerAccountName") {
+          searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: accountDetails.accountId }]);
+        } else if (accountDetails.resource === "supplierAccountName") {
+          searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: { $in: [accountDetails.accountId] } }]);
+        }
       }
 
       let api = getSearchQuery(opportunityApi, searchParams);
@@ -184,7 +188,7 @@ const Opportunities = () => {
         setLoading(false);
       }
     }
-  };
+  }
 
   const handleSearch = (e) => {
     if (query.page !== 0) {
@@ -253,9 +257,9 @@ const Opportunities = () => {
         />
       ),
       disableColumnMenu: true,
+      width: 75,
       sortable: false,
       filterable: false,
-      width: 75,
     },
     {
       field: "opportunityName",
@@ -267,8 +271,6 @@ const Opportunities = () => {
       field: "supplierAccountName",
       headerName: "Supplier Account Name",
       width: 300,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => (
         <Link
           className="link"
@@ -284,8 +286,6 @@ const Opportunities = () => {
       field: "customerAccountName",
       headerName: "Customer Account Name",
       width: 300,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => (
         <Link
           className="link"
@@ -302,8 +302,6 @@ const Opportunities = () => {
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -326,8 +324,6 @@ const Opportunities = () => {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value?.user ? (
           <h5 className="updateBy">
@@ -359,8 +355,6 @@ const Opportunities = () => {
       field: "owner",
       headerName: "Opportunity Owner",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => <CustomRenderCell value={params?.value} />,
     },
     {
@@ -514,13 +508,22 @@ const Opportunities = () => {
     }
   };
 
-  const onFilterChange = React.useCallback((params) => {
+  const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let field = params.filterModel.items[0].columnField
+
+      if (params.filterModel.items[0].columnField == 'createdBy') {
+        field = "createdBy.user"
+      }
+      if (params.filterModel.items[0].columnField == 'updatedBy') {
+        field = "updatedBy.user"
+      }
+      const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
+
     } else {
       setQuery({ page: 0, limit: 25 });
     }
@@ -575,15 +578,14 @@ const Opportunities = () => {
                   color="primary"
                   label={`Account: ${accountDetails.accountName}`}
                   onDelete={() => {
-                    setAccountDetails({ accountId: null, accountName: null });
-                    fetchOpportunities();
+                    setAccountDetails({ accountId: null, accountName: null, resource: null });
                   }}
                 />
               }
             </OpportunitiesHeader>
           </div>
-       
-       
+
+
           <div className="listing-grid">
             <DataGrid
               components={{
@@ -606,6 +608,7 @@ const Opportunities = () => {
               onSortModelChange={handleSortModelChange}
               density="compact"
               onFilterModelChange={onFilterChange}
+              filterMode="server"
             />
           </div>
 

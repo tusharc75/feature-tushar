@@ -23,7 +23,9 @@ export default function ManageContactMain(props) {
     accountId,
     contactResource,
     contactApi,
-    account = {}
+    account = {},
+    userId = null,
+    isRedirectToDetailPage = true
   } = props;
   const { accountApi, accountResource, accountPermission, accountRoute } = account
   const {
@@ -53,8 +55,13 @@ export default function ManageContactMain(props) {
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
             if (accountId && _f.fieldData.fieldName === "accountName") {
-              _f = initializeDropdownById(_f, "accountName", accountId);
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
             }
+
+            if (userId && _f.fieldData.fieldName == "owner") {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
+            }
+
             if (_f?.fieldData?.fieldName && _f.fieldData.fieldName === "accountName") {
               setAccountSource(_f.fieldData.option)
             }
@@ -82,7 +89,9 @@ export default function ManageContactMain(props) {
           type: "success",
           message: data.message,
         });
-        history.push(`${contactApi}/detail/${newId}`)
+        if (isRedirectToDetailPage) {
+          history.push(`${contactApi}/detail/${newId}`)
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -142,7 +151,7 @@ export default function ManageContactMain(props) {
             accountApi={accountApi}
             isGetAccountData={true}
             onGetAddedAccount={handleGetAddedAccount}
-            isDoNotRedirect={true}
+            isRedirectToDetailPage={false}
           /> : null
       }
     </>
