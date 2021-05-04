@@ -27,15 +27,17 @@ function DisplayData({ label, value, icon }) {
     </div>
 }
 
-export default function OpportunityContacts({ contacts, title, onAddContact, contactApi, onSetExpanded, isExpanded, contactsRoute }) {
+export default function OpportunityContacts({ contacts, title, onAddContact,
+    contactApi, onSetExpanded, isExpanded, contactsRoute, recordsPerLine }) {
 
     const history = useHistory();
+    const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     function ContactDetails({ contacts, contactApi, }) {
         return <>
             {
                 contacts && contacts.length ? <Grid container spacing={2}>
                     {
-                        [...contacts].slice(0, 2).map((obj, index) => {
+                        [...contacts].slice(0, maxRecordsToShow).map((obj, index) => {
                             return <Grid key={index} item xs={12} sm={12} md={6}>
                                 <Card>
                                     <CardContent className="detailListing">
@@ -132,8 +134,9 @@ export default function OpportunityContacts({ contacts, title, onAddContact, con
         {
             contacts && contacts.length > 2 ? <>
                 <Box margin={1} className="btn-view gap-1" p={1} display="flex" justifyContent="center"
-                    alignItems="center" onClick={() => history.push({ pathname: contactsRoute })}>
-                    <FaEye /> View All &#8599;
+                    alignItems="center"
+                    onClick={() => setMaxRecordsToShow(contacts.length)}>
+                    <FaEye /> View All
                 </Box>
                 <Box margin={1} />
             </> : null

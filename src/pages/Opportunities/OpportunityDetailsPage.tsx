@@ -27,6 +27,7 @@ import currencies from "../../constants/currency_with_country.json";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
 
+const recordsPerLine = 2
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -486,6 +487,7 @@ function OpportunityDetailsPage() {
                             setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
                           }}
                           contactsRoute={routes.supplierContact.path}
+                          recordsPerLine={recordsPerLine}
                         />
                       </Box>
                     }
@@ -504,6 +506,7 @@ function OpportunityDetailsPage() {
                             setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
                           }}
                           contactsRoute={routes.customerContact.path}
+                          recordsPerLine={recordsPerLine}
                         />
                       </Box>
                     }
@@ -600,6 +603,7 @@ function OpportunityDetailsPage() {
             selectedSupplierAccountsList={selectedSupplierAccounts}
             handleContactSelection={handleContactSelection}
             loadingSupplierAccounts={loadingSupplierAccounts}
+
           />
         }
 
