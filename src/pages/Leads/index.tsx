@@ -5,7 +5,7 @@ import {
   IconButton,
   Checkbox,
 } from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { DataGrid } from "@material-ui/data-grid";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
@@ -81,6 +81,7 @@ const Leads = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
+  const history = useHistory();
 
   const [
     convertLeadToOpportunityConfirmationDialog,
@@ -539,7 +540,11 @@ const Leads = () => {
           leadName: null,
           message: null,
         });
-        fetchLeads();
+        if (convertLeadToOpportunityConfirmationDialog.id) {
+          history.push(`${routes.opportunityDetail.path}/${data.data[0]}`)
+        } else {
+          fetchLeads();
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -559,7 +564,7 @@ const Leads = () => {
       }
       let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
       if (params.filterModel.items[0].columnField == 'name') {
-        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value },{ field: "lastName", term: params.filterModel.items[0].value }])
+        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
       }
       setQuery((prevState) => ({
         ...prevState,

@@ -118,7 +118,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                 validationSchema={termsAndConditionSchema}
                 onSubmit={handleSubmit}>
                 {({ submitForm, touched, errors, setFieldValue, values
-                    , handleBlur
+                    , handleBlur, setFieldTouched
                 }) => (
                     <>
                         <CustomDialogContent>
@@ -176,7 +176,16 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                 variant="contained"
                                 color="primary"
                                 loading={loading}
-                                onClick={submitForm} >
+                                onClick={() => {
+                                    if (Object.keys(errors).length) {
+                                        Object.keys(errors).forEach(key => {
+                                            setFieldTouched(key, true)
+                                        })
+                                        return
+                                    }
+                                    handleSubmit(values)
+                                }}
+                            >
                                 Save
                             </CustomButton>
                         </CustomDialogFooter>

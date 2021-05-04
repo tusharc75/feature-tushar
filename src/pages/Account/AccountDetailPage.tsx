@@ -447,7 +447,7 @@ export default function AccountDetailPage(props) {
                         >
                           {accountData.staticData?.approved ? "Disapprove" : "Approve"}
                         </Button>
-                        <Box component="span" marginX={1} />
+                        <Box component="span" marginX={0.50} />
                       </>
                     )}
 
@@ -464,7 +464,7 @@ export default function AccountDetailPage(props) {
                         >
                           Edit
                     </Button>
-                        <Box component="span" marginX={1} />
+                        <Box component="span" marginX={0.50} />
                       </>
                     )}
 
