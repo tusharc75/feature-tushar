@@ -13,7 +13,7 @@ import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
+import { IoCalendarOutline, IoCall } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
@@ -63,16 +63,16 @@ const AccordionDetails = withStyles((theme) => ({
 
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value }) {
+function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-            <Grid item sm={6} xs={6} md={4}>
-                <Typography>{label}</Typography>
-            </Grid>
-            <Grid item sm={6} xs={6} md={8}>
-                <Typography>{value}</Typography>
-            </Grid>
-        </Grid>
+        <List >
+            <ListItem>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText primary={value} secondary={label} />
+            </ListItem>
+        </List>
     </div>
 }
 
@@ -156,22 +156,25 @@ export default function AccountAccordionDetail({
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
+                                                        <Grid container className="detailCardHeader">
+                                                        <Grid item xs={12} sm={12}>
+                                                            <Link className="link" to={type === "customer" ? `${routes.customerAccountDetail.path}/${obj._id}`:`${routes.supplierAccountDetail.path}/${obj._id}`}>
+                                                                <Typography >{obj?.accountName}</Typography>
+                                                            </Link>
+                                                        </Grid>
+                                                    </Grid>
 
 
                                                             <Grid container>
+                                                               
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.accountName ? <DisplayData label='Name' value={obj?.accountName ?? ''} /> : ''
+                                                                        obj?.industry ? <DisplayData label='Industry' value={obj?.industry ?? ''} icon={<BiCustomize size={20} />} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.industry ? <DisplayData label='Industry' value={obj?.industry ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.phone ? <DisplayData label='Phone' value={obj?.phone ?? ''} /> : ''
+                                                                        obj?.phone ? <DisplayData label='Phone' value={obj?.phone ?? ''} icon={<IoCall size={20} />} /> : ''
                                                                     }
                                                                 </Grid>
 

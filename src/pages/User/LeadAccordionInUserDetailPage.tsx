@@ -17,6 +17,7 @@ import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
+import { BsBuilding } from 'react-icons/bs';
 
 const Accordion = withStyles({
     root: {
@@ -63,16 +64,16 @@ const AccordionDetails = withStyles((theme) => ({
 
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value }) {
+function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-            <Grid item sm={6} xs={6} md={4}>
-                <Typography>{label}</Typography>
-            </Grid>
-            <Grid item sm={6} xs={6} md={8}>
-                <Typography>{value}</Typography>
-            </Grid>
-        </Grid>
+        <List >
+            <ListItem>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText primary={value} secondary={label} />
+            </ListItem>
+        </List>
     </div>
 }
 
@@ -156,32 +157,25 @@ export default function LeadAccordionInUserDetailPage({
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
+                                                            <Grid container className="detailCardHeader">
 
+                                                                <Grid item xs={12} sm={8}>
+                                                                    <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
+                                                                        <Typography >{obj?.firstName}  {obj?.lastName} </Typography>
+                                                                    </Link>
+                                                                </Grid>
+                                                            </Grid>
 
                                                             <Grid container>
+
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.firstName ? <DisplayData label='First Name' value={obj?.firstName ?? ''} /> : ''
+                                                                        obj?.status ? <DisplayData label='Status' value={obj?.status ?? ''} icon={<IoCalendarOutline size={20} />} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.middleName ? <DisplayData label='Middle Name' value={obj?.middleName ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.lastName ? <DisplayData label='Last Name' value={obj?.lastName ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.status ? <DisplayData label='Status' value={obj?.status ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.company ? <DisplayData label='Company' value={obj?.company ?? ''} /> : ''
+                                                                        obj?.company ? <DisplayData label='Company' value={obj?.company ?? ''} icon={<BsBuilding size={20} />} /> : ''
                                                                     }
                                                                 </Grid>
                                                             </Grid>
