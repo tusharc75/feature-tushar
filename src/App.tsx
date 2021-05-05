@@ -108,6 +108,14 @@ function App() {
 
   useEffect(() => {
     try {
+      if (localStorage.getItem("token")) {
+        axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+          notification.setCount(count);
+        }).catch((error) => {
+          toast.setToastConfig(error);
+        });
+      }
+
       setInterval(async () => {
         if (localStorage.getItem("token")) {
           await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
