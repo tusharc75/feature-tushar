@@ -38,20 +38,23 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
           ? data.map((obj) => (
             <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
               <ListItem disableGutters className={classes.list}>
-                <ListItemText
-                  primary={
-                    <Typography>
-                      <Link
-                        className="link"
-                        to={`/user/detail/${obj._id}`}
-                      >
-                        {`${obj.firstName} ${obj.lastName}` || ""}
-                      </Link>
-                    </Typography>
-                  }
-                  secondary={obj.email}
-                />
-                <CopyToClipboard textToCopy={obj.email} />
+                <div>
+                  <ListItemText
+                    primary={
+                      <Typography>
+                        <Link
+                          className="link"
+                          to={`/user/detail/${obj._id}`}
+                        >
+                          {`${obj.firstName} ${obj.lastName}` || ""}
+                        </Link>
+                      </Typography>
+                    }
+                    secondary={obj.email}
+                  />
+                </div>
+
+                <CopyToClipboard textToCopy={obj.email} className="mt-4" />
                 {permissions.role.isUpdate && (
                   <ListItemSecondaryAction
                     title={
