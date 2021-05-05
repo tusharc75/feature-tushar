@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 export default function ManageContact(props) {
 
-    const { entityData, handleSubmit, onClose, open, isNew, loading, onCreateAccount, accountSource } = props
+    const { entityData, handleSubmit, onClose, open, isNew, loading, onCreateAccount, accountSource, contactId = null } = props
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const { state: { user } }: any = useData();
@@ -37,6 +37,7 @@ export default function ManageContact(props) {
     const [ownerCollaboratorCommonDataSource, setOwnerCollaboratorCommonDataSource] = useState([]);
     const [ownerDataSource, setOwnerDataSource] = useState([]);
     const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+    const [reportsToDataSource, setReportsToDataSource] = useState([]);
 
     useEffect(() => {
         if (entityData.fields.length > 0) {
@@ -46,6 +47,18 @@ export default function ManageContact(props) {
                 setOwnerDataSource(ownerCollaboratorDropdownData[0].option)
                 setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
             }
+
+            const reportsToDropdownData = entityData.fields.find(d => d.fieldName === "reportsTo");
+            if (reportsToDropdownData) {
+                if (isNew) {
+                    setReportsToDataSource(reportsToDropdownData.option)
+                }
+                else {
+                    let currentContactRemovedDataSource = reportsToDropdownData.option.filter(d => d.optionValue !== contactId);
+                    setReportsToDataSource(currentContactRemovedDataSource);
+                }
+            }
+
             sortArray();
         }
     }, [entityData.fields]);
@@ -78,6 +91,10 @@ export default function ManageContact(props) {
         setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource))
     }
     //  Owner, Collaborator Code - End
+
+    const getreportsToDataSource = () => {
+
+    }
 
     const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
 
@@ -140,7 +157,7 @@ export default function ManageContact(props) {
                                                                 {form.sectionFields.map((field) => (
                                                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                         {
-                                                                            field.fieldName == "owner" ?
+                                                                            field.fieldName == "owner" ? (
                                                                                 <FormTypes values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -155,71 +172,88 @@ export default function ManageContact(props) {
                                                                                     size="small"
                                                                                     disabled={disableOwnerSelection}
                                                                                     onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
-                                                                                /> : field.fieldName == "collaborator" ?
-                                                                                    <FormTypes
-                                                                                        multiple
-                                                                                        values={values}
-                                                                                        errors={errors}
-                                                                                        touched={touched}
-                                                                                        label={field.fieldLabel}
-                                                                                        name={field.fieldName}
-                                                                                        type={field.type}
-                                                                                        options={collaboratorDataSource}
-                                                                                        setFieldValue={setFieldValue}
-                                                                                        required={field.required}
-                                                                                        fullWidth
-                                                                                        isTooltip={true}
-                                                                                        size="small"
-                                                                                        onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
-                                                                                    /> : field.fieldName == "accountName" && accountSource !== undefined ?
-                                                                                        <Grid container spacing={1} alignItems="center">
-                                                                                            <Grid item xs={10} sm={10} md={10} >
-                                                                                                <FormTypes
-                                                                                                    values={values}
-                                                                                                    errors={errors}
-                                                                                                    touched={touched}
-                                                                                                    label={field.fieldLabel}
-                                                                                                    name={field.fieldName}
-                                                                                                    type={field.type}
-                                                                                                    options={accountSource}
-                                                                                                    setFieldValue={setFieldValue}
-                                                                                                    required={field.required}
-                                                                                                    fullWidth
-                                                                                                    isTooltip={true}
-                                                                                                    size="small"
-                                                                                                    doNotShowInfoTooltip={true}
-                                                                                                />
-                                                                                            </Grid>
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip title="Create Account" className={classes.createAccountTooltip} >
-                                                                                                    <IconButton onClick={onCreateAccount} size="small">
-                                                                                                        <AddIcon color="primary" />
-                                                                                                    </IconButton>
-                                                                                                </Tooltip>
-                                                                                            </Grid>
-                                                                                            {
-                                                                                                field?.tooltipMessage ?
-                                                                                                    <Grid item xs={1} sm={1} md={1}>
-                                                                                                        <Tooltip title={field?.tooltipMessage ?? ""}>
-                                                                                                            <InfoIcon color="disabled" />
-                                                                                                        </Tooltip>
-                                                                                                    </Grid> : null
-                                                                                            }
-                                                                                        </Grid>
-                                                                                        : <FormTypes
+                                                                                />
+                                                                            ) : field.fieldName == "collaborator" ? (
+                                                                                <FormTypes
+                                                                                    multiple
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={collaboratorDataSource}
+                                                                                    setFieldValue={setFieldValue}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={true}
+                                                                                    size="small"
+                                                                                    onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
+                                                                                />
+                                                                            ) : field.fieldName == "accountName" && accountSource !== undefined ? (
+                                                                                <Grid container spacing={1} alignItems="center">
+                                                                                    <Grid item xs={10} sm={10} md={10} >
+                                                                                        <FormTypes
                                                                                             values={values}
                                                                                             errors={errors}
                                                                                             touched={touched}
                                                                                             label={field.fieldLabel}
                                                                                             name={field.fieldName}
                                                                                             type={field.type}
-                                                                                            options={field.option}
+                                                                                            options={accountSource}
                                                                                             setFieldValue={setFieldValue}
                                                                                             required={field.required}
                                                                                             fullWidth
                                                                                             isTooltip={true}
                                                                                             size="small"
+                                                                                            doNotShowInfoTooltip={true}
                                                                                         />
+                                                                                    </Grid>
+                                                                                    <Grid item xs={1} sm={1} md={1}>
+                                                                                        <Tooltip title="Create Account" className={classes.createAccountTooltip} >
+                                                                                            <IconButton onClick={onCreateAccount} size="small">
+                                                                                                <AddIcon color="primary" />
+                                                                                            </IconButton>
+                                                                                        </Tooltip>
+                                                                                    </Grid>
+                                                                                    {
+                                                                                        field?.tooltipMessage ?
+                                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                                <Tooltip title={field?.tooltipMessage ?? ""}>
+                                                                                                    <InfoIcon color="disabled" />
+                                                                                                </Tooltip>
+                                                                                            </Grid> : null
+                                                                                    }
+                                                                                </Grid>
+                                                                            ) : field.fieldName == "reportsTo" ? (
+                                                                                <FormTypes
+                                                                                    values={values}
+                                                                                    errors={errors}
+                                                                                    touched={touched}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    options={reportsToDataSource}
+                                                                                    setFieldValue={setFieldValue}
+                                                                                    required={field.required}
+                                                                                    fullWidth
+                                                                                    isTooltip={true}
+                                                                                    size="small"
+                                                                                />
+                                                                            ) : <FormTypes
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={setFieldValue}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={true}
+                                                                                size="small"
+                                                                            />
                                                                         }
 
                                                                     </Grid>

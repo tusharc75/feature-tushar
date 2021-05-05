@@ -37,7 +37,7 @@ const AssignDataDialog = ({
   useEffect(() => {
     const url =
       type === "customer-contact"
-        ? `/${type}?filterById=[{"field":"accountName", "term": ${accountId}}]`
+        ? `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"}]`
         : `/${type}?limit=100`;
     setLoading(true);
     axiosInstance()
