@@ -48,7 +48,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
     const [currencyData, setCurrencyData] = useState<any[]>([]);
-    const [currency, setCurrency] = useState(doaCurrency ? doaCurrency : null);
+    const [currency, setCurrency] = useState(doaCurrency ? doaCurrency : "USD");
     const [currencySymbol, setCurrencySymbol] = useState(
         currencies.filter((data) => data?.currencyCode === currency).length
             ? currencies.filter(
@@ -213,9 +213,9 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                                                                         id="combo-box-demo"
                                                                                         size="small"
                                                                                         style={{ minWidth: 200 }}
-                                                                                        value={userList.find(v => v.name == userVal.name)}
+                                                                                        value={userList.find(v => v.name == userVal.name) ? userList.find(v => v.name == userVal.name) : ""}
                                                                                         options={userList.filter(element => !values.users.map(e => e.name).includes(element.name))}
-                                                                                        getOptionLabel={(option: any) => option.name}
+                                                                                        getOptionLabel={(option: any) => option?.name ? option?.name : ""}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
@@ -318,6 +318,10 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                         variant="contained"
                                         color="primary"
                                         type="submit"
+                                        disabled={currency === ""
+                                            || values.users.filter(item => item.name === "" || item.name === undefined || item.id == "" || item.id === undefined).length > 0
+                                            // || Object.values(values.users).toString() === Object.values(users).toString()
+                                        }
                                         onClick={() => {
                                             handleSubmit(values.users)
                                         }}
