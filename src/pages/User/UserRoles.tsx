@@ -34,10 +34,10 @@ interface props {
   data: any;
   permissions: any;
   loggedInUser: any;
-  currentUserId:any;
+  currentUserId: any;
 }
 
-const UserRoles = ({ data, unassignRole, permissions,loggedInUser,currentUserId }: props) => {
+const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserId }: props) => {
   const classes = useStyles();
 
   return (
@@ -46,65 +46,65 @@ const UserRoles = ({ data, unassignRole, permissions,loggedInUser,currentUserId 
         <List style={{ padding: 0 }}>
           {data && data.length
             ? data.map((obj: any, i: string) => (
-                <BoxWithBorder
-                  key={i}
-                  style={{ padding: "0px", margin: "8px" }}
-                >
-                  <ListItem className={classes.list}>
-                    <ListItemText
-                      primary={
-                        <Typography
-                          title={obj.name || ""}
-                          className="text-truncate"
-                        >
-                          <Link to={`/role/detail/${obj._id}`}>
-                            {obj.name || ""}
-                          </Link>
-                        </Typography>
-
-                      }
-                      secondary={
-                        <Typography
-                          color="textSecondary"
-                          title={obj.description || ""}
-                          className="text-truncate"
-                        >
-                          {obj.description || ""}
-                        </Typography>
-                      }
-                    />
-                    {permissions.user.isUpdate && (
-                      <ListItemSecondaryAction
-                        title={
-                          rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id
-                            ? "Role can not be deleted"
-                            : "Unassign Role"
-                        }
+              <BoxWithBorder
+                key={i}
+                style={{ padding: "0px", margin: "8px" }}
+              >
+                <ListItem className={classes.list}>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        title={obj.name || ""}
+                        className="text-truncate"
                       >
-                        <IconButton
-                          disabled={ rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id}
-                          size="small"
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => unassignRole(obj)}
-                          // disabled={
+                        <Link to={`/role/detail/${obj._id}`}>
+                          {obj.name || ""}
+                        </Link>
+                      </Typography>
+
+                    }
+                    secondary={
+                      <Typography
+                        color="textSecondary"
+                        title={obj.description || ""}
+                        className="text-truncate"
+                      >
+                        {obj.description || ""}
+                      </Typography>
+                    }
+                  />
+                  {permissions.user.isUpdate && (
+                    <ListItemSecondaryAction
+                      title={
+                        rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id
+                          ? "Role can not be deleted"
+                          : "Unassign Role"
+                      }
+                    >
+                      <IconButton
+                        disabled={rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id}
+                        size="small"
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => unassignRole(obj)}
+                      // disabled={
+                      //   rolesPermissions.indexOf(obj?.permission) >= 0
+                      // }
+                      >
+                        <DeleteIcon
+                          // color={
                           //   rolesPermissions.indexOf(obj?.permission) >= 0
+                          //     ? "disabled"
+                          //     : "error"
                           // }
-                        >
-                          <DeleteIcon 
-                            // color={
-                            //   rolesPermissions.indexOf(obj?.permission) >= 0
-                            //     ? "disabled"
-                            //     : "error"
-                            // }
-                            color={ rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id ? "disabled" : "error"}
-                          />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    )}
-                  </ListItem>
-                </BoxWithBorder>
-              ))
+                          color={rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id ? "disabled" : "error"}
+                        />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  )}
+                </ListItem>
+              </BoxWithBorder>
+            ))
             : null}
         </List>
       </div>
