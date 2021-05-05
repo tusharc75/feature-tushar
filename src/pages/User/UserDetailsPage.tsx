@@ -743,7 +743,7 @@ const UserDetailsPage = () => {
               <ContactAccordionInDetailPage
                 type="supplier"
                 contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
-                recordsPerLine={2}
+                recordsPerLine={3}
                 expanded={false}
                 userId={id}
                 onSuccess={() => {
@@ -754,11 +754,10 @@ const UserDetailsPage = () => {
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
             <Paper>
-              <Box width="100%" padding={1} bgcolor="grey.200">
-                <Typography color="primary">Approval Process</Typography>
+              <Box className="detailHeader">
+                <h2 className="listingHeader single">Approval Process</h2>
               </Box>
-
-              <Box padding={1}>
+              <Box padding={2}>
                 <FormControl component="fieldset" fullWidth>
                   <FormGroup>
                     {loading ? (
