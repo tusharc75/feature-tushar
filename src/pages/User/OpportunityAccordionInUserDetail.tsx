@@ -169,7 +169,7 @@ export default function OpportunityAccordionInUserDetail({
                                         {
                                             opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card style={{ minWidth: "100%" }}>
+                                                    <Card className="accountCard" >
                                                         <CardContent className="detailListing">
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={8}>

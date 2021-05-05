@@ -166,14 +166,19 @@ Button.MuiButtonBase-root {
     font-size: 0.7rem;
     font-weight: 500;
   }
+  .cardDetail {
+    color: #64615d;
+    text-transform: capitalize !important;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
   .MuiList-padding {
     padding: 0;
   }
 }
-.MuiCardContent-root:last-child {
-  padding-bottom: 0 !important;
-}
-
+// .MuiCardContent-root:last-child {
+//   padding: 0 10px !important;
+// }
 .stepper-box {
   background: #eeeeee;
   padding: 4px;
@@ -216,6 +221,22 @@ Button.MuiButtonBase-root {
     }
   }
 
+.MuiStepLabel-iconContainer {
+  opacity: 0.4;
+  color: white;
+}
+
+.contactCard {
+  display: flex;
+  align-items: center;
+  height: 6rem;
+}
+
+.accountCard {
+  height: 12rem;
+  display: flex;
+  align-items: center;
+}
   .MuiStepLabel-iconContainer {
     opacity: 0.4;
     color: white;
