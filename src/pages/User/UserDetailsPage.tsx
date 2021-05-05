@@ -17,6 +17,8 @@ import {
   TableBody,
   Paper,
   Tooltip,
+  Tabs,
+  Tab
 } from "@material-ui/core";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
@@ -46,6 +48,11 @@ import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
 import ContactAccordionInDetailPage from "./ContactAccordionInDetailPage";
+import ManageUserDialog from "./ManageUserDialog";
+import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
+import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
+import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
+import { FcFlowChart } from 'react-icons/fc';
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -84,6 +91,9 @@ const UserDetailsPage = () => {
   const [doa, setDoa] = useState<any[]>([]);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [orgChartData, setOrgChartData] = useState([])
+  const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -97,6 +107,18 @@ const UserDetailsPage = () => {
     }
     // eslint-disable-next-line
   }, [id]);
+
+  const quickLinks: IQuickLinks[] = [
+    {
+      label: "Org Chart",
+      onClick: () => {
+        setOrgChartInFullScreenDialog(true);
+      },
+      icon: <FcFlowChart />,
+      show: true,
+      class: "account"
+    },
+  ].filter((d) => d.show);
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -113,6 +135,39 @@ const UserDetailsPage = () => {
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
+
+      let orgChartData = [];
+
+      if (data.parentHierarchy && data.parentHierarchy.length > 0) {
+        data.parentHierarchy.map(d => {
+          orgChartData.push({
+            id: d._id,
+            name: [d.firstName, d.lastName]
+              .filter((d) => d)
+              .join(" "),
+            parentId: d.reportsTo ? d.reportsTo : 0,
+            logo: d.avatar,
+            email: d.email,
+            phone: d.mobileNo,
+            current: false
+          })
+        })
+      }
+
+      orgChartData.push({
+        id: data._id,
+        name: [data.firstName, data.lastName]
+          .filter((d) => d)
+          .join(" "),
+        parentId: data.reportsTo ? data.reportsTo.optionValue : 0,
+        logo: data.avatar,
+        email: data.email,
+        phone: data.mobileNo,
+        current: true
+      })
+
+      setOrgChartData(orgChartData);
+
       setUserPermissions(data.permissions);
       setLoading(false);
     } catch (error) {
@@ -256,7 +311,7 @@ const UserDetailsPage = () => {
         });
         setUserPermissions(data.permissions);
         setUpdating(false);
-        closeUpdateDIalog();
+        closeUpdateDialog();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -268,7 +323,7 @@ const UserDetailsPage = () => {
     setOpenUpdateDialog(true);
   };
 
-  const closeUpdateDIalog = () => {
+  const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
   };
 
@@ -354,15 +409,11 @@ const UserDetailsPage = () => {
   return (
     <>
       {openUpdateDialog && (
-        <UpdateDetailsDialog
-          title="Update"
-          openDialog={openUpdateDialog}
-          onClose={closeUpdateDIalog}
-          data={userData}
-          fields={userFields}
-          isUpdating={isUpdating}
-          handleUpdate={handleUpdateUser}
-        />
+        <ManageUserDialog open={openUpdateDialog} close={closeUpdateDialog} onSuccess={(permissions) => {
+          setUserPermissions(permissions);
+          setOpenUpdateDialog(false);
+          fetchUserData();
+        }} userId={userData._id} dataToUpdate={userData} isNew={false} />
       )}
       {rolesDialogOpen && (
         <AssignRolesDialog
@@ -435,9 +486,38 @@ const UserDetailsPage = () => {
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
-                  <DetailsPage data={userData} fields={userFields} />
+                  <>
+                    <Tabs className="oms-tab" value={currentTabIndex}
+                      onChange={(index, newValue) => {
+                        setCurrentTabIndex(newValue);
+                      }}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      aria-label="icon tabs example"
+                    >
+                      <Tab
+                        label="Details"
+                        aria-controls="a11y-tabpanel-0"
+                        id="a11y-tab-0"
+                      />
+                      <Tab
+                        label="Org Chart"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                    </Tabs>
+                    <Box hidden={currentTabIndex !== 0}>
+                      <DetailsPage data={userData} fields={userFields} />
+                    </Box>
+                    <Box hidden={currentTabIndex !== 1}>
+                      <OrgChartContainer data={orgChartData} onClick={(id) => {
+                        history.push(`${routes.userDetail.path}/${id}`)
+                      }} />
+                    </Box>
+                  </>
                 )}
               </Box>
+
               <Box style={{ padding: "0px", minHeight: "300px" }}>
                 <Box display="flex" padding={1} bgcolor="grey.200">
                   <Grid container>
@@ -721,6 +801,9 @@ const UserDetailsPage = () => {
                 </FormControl>
               </Box>
             </Paper>
+
+            <QuickLinks quickLinks={quickLinks} />
+            
           </Grid>
         </Grid>
       </Layout>
@@ -762,6 +845,21 @@ const UserDetailsPage = () => {
           }}
         />
       )}
+
+      {
+        orgChartInFullScreenDialog && <FullScreenDialog
+          heading="Org Chart"
+          open={orgChartInFullScreenDialog}
+          close={() => {
+            setOrgChartInFullScreenDialog(false);
+          }}
+        >
+          <OrgChartContainer data={orgChartData} onClick={(id) => {
+            setOrgChartInFullScreenDialog(false);
+            history.push(`${routes.userDetail.path}/${id}`)
+          }} />
+        </FullScreenDialog>
+      }
     </>
   );
 };
