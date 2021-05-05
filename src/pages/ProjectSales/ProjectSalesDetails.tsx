@@ -114,7 +114,9 @@ const ProjectSalesDetails = () => {
       ["Project Name"]: data.projectName || "",
       ["End Date"]: new Date(data.endDate).toDateString() || "",
       ["Value"]: data.value || "",
-      ["Project Probability"]: `${data.projectProbability}` || "",
+      ["Project Probability"]: data?.projectProbability
+        ? `${data.projectProbability}%`
+        : "",
       ["Opportunity Owner"]: data.opportunityOwner?.optionLabel || "",
     };
     setMainPoints(tempMp);
