@@ -82,6 +82,7 @@ const UserDetailsPage = () => {
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
+  const [doaCurrency, setDoaCurrency] = useState("");
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
 
@@ -133,11 +134,11 @@ const UserDetailsPage = () => {
               name: `${item.user.firstName} ${item.user.lastName}`,
               firstName: item.user.firstName,
               lastName: item.user.lastName,
-              currency: item.currency ? item.currency : "USD",
               amount: item.amount,
             };
           })
         );
+        setDoaCurrency(data?.doaCurrency)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -592,7 +593,11 @@ const UserDetailsPage = () => {
                         }}
                       >
                         {doa.length > 0 ? (
-                          <NewStepper heading={" "} steps={doa} />
+                          <NewStepper
+                            heading={" "}
+                            steps={doa}
+                            doaCurrency={doaCurrency}
+                          />
                         ) : (
                           <Box textAlign="center" marginTop={2}>
                             <Typography variant="body2">
@@ -606,12 +611,12 @@ const UserDetailsPage = () => {
                 </>
               }
               <OpportunityAccordionInUserDetail
-                opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner,...opportunityRelatedData?.Collaborator]:opportunityRelatedData?.Owner}
+                opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner, ...opportunityRelatedData?.Collaborator] : opportunityRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
               />
               <LeadAccordionInUserDetailPage
-                leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner,...leadsRelatedData?.Collaborator]:leadsRelatedData?.Owner}
+                leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner, ...leadsRelatedData?.Collaborator] : leadsRelatedData?.Owner}
                 recordsPerLine={2}
                 expanded={false}
               />
@@ -726,6 +731,7 @@ const UserDetailsPage = () => {
         <DoaDialog
           userList={userList}
           doa={doa}
+          doaCurrency={doaCurrency}
           userSelected={id}
           open={doaDialogOpen}
           onSuccess={() => {
