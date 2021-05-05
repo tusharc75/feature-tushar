@@ -569,11 +569,12 @@ const UserDetailsPage = () => {
                             </Box>
                           </Box>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item container xs={4} justify="flex-end">
                           {permissions.user.isUpdate && (
                             <Button
                               variant="contained"
                               color="primary"
+                              size="small"
                               onClick={() => setDoaDialogOpen(true)}
                             >
                               {doa.length > 0 ? "Edit DOA" : "Add DOA"}
