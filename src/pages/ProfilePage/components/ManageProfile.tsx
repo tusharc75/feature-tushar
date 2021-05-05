@@ -14,6 +14,7 @@ import UpdateEmailPasswordDialog from './UpdateEmailAndPassword'
 import _ from 'lodash'
 import { useHistory } from "react-router-dom";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import CopyToClipboard from '../../../components/Helpers/CopyToClipboard'
 
 export default function ManageProfile(props) {
 
@@ -237,7 +238,11 @@ export default function ManageProfile(props) {
                                                         title={otherDetails[k] || "_ _ _"}
                                                         className={styles.userProfileFieldText}
                                                         variant="body2"
-                                                    >{otherDetails[k] || "_ _ _"}</Typography> </Grid>
+                                                    >{otherDetails[k] || "_ _ _"}
+                                                        {k === "Email" ? <CopyToClipboard textToCopy={otherDetails[k]} /> : null}
+                                                    </Typography>
+
+                                                    </Grid>
                                                 </Grid>
                                                 <Box marginY={1} />
                                             </Grid>)) : null
