@@ -108,11 +108,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
         >
             {!loading &&
                 <>
-                    {/* <CustomDialogHeader title="Add DOA" /> */}
-                    <MuiDialogTitle disableTypography className={classes.root}>
-                        <Typography variant="h6" className={classes.dialogTitle}>{doa?.length > 0 ? "Edit DOA" : "Add DOA"}</Typography>
-
-                        <Autocomplete className={classes.currencyStyle}
+                    <CustomDialogHeader title={doa?.length > 0 ? "Edit DOA" : "Add DOA"} />
+                    <Autocomplete className={classes.currencyStyle}
                             fullWidth
                             size="small"
                             value={
@@ -163,8 +160,6 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                 );
                             }}
                         />
-
-                    </MuiDialogTitle>
                     <Formik
                         initialValues={{ users: users }}
                         onSubmit={() => { }}
