@@ -221,9 +221,10 @@ Button.MuiButtonBase-root {
     }
   }
 
-.MuiStepLabel-iconContainer {
-  opacity: 0.4;
-  color: white;
+  .MuiStepLabel-iconContainer {
+    opacity: 0.4;
+    color: white;
+  }
 }
 
 .contactCard {
@@ -236,9 +237,4 @@ Button.MuiButtonBase-root {
   height: 12rem;
   display: flex;
   align-items: center;
-}
-  .MuiStepLabel-iconContainer {
-    opacity: 0.4;
-    color: white;
-  }
 }
