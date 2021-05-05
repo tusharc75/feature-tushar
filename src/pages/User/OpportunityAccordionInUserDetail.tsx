@@ -56,10 +56,6 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
-    amount: {
-        float: "right",
-        fontWeight: "bold"
     }
 
 }))(MuiAccordionDetails);
@@ -97,11 +93,11 @@ export default function OpportunityAccordionInUserDetail({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 
@@ -174,13 +170,6 @@ export default function OpportunityAccordionInUserDetail({
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
-                                                            {/* <span className={classes.actionsItems}> */}
-                                                            {/* <VisibilityOutlined /> */}
-                                                            {/* <IconButton size="small">
-                                                            <Delete color="error" />
-                                                        </IconButton> */}
-                                                            {/* <EditOutlined /> */}
-                                                            {/* </span> */}
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={8}>
                                                                     <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>

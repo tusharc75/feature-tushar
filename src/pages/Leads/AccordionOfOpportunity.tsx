@@ -55,12 +55,7 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
-    amount: {
-        float: "right",
-        fontWeight: "bold"
     }
-
 }))(MuiAccordionDetails);
 
 function DisplayData({ label, value, icon }) {
