@@ -322,7 +322,7 @@ export default function Account(props) {
       headerName: "Phone",
       hide: true,
       width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "actions",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction } from '@material-ui/core'
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -23,6 +23,7 @@ import ManageContactDialog from "./../Contact/ManageContact/index";
 import { AiOutlineMail } from 'react-icons/ai';
 import { HiOutlineUser } from 'react-icons/hi';
 import { AiOutlinePhone } from 'react-icons/ai';
+import CopyToClipboard from "../../components/Helpers/CopyToClipboard"
 
 const Accordion = withStyles({
     root: {
@@ -64,14 +65,19 @@ const AccordionDetails = withStyles((theme) => ({
     }
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value, icon }) {
+function DisplayData({ label, value, icon, showCopyToText = false }) {
     return <div style={{ flexGrow: 1 }}>
         <List >
             <ListItem>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
+                <ListItemText
+                    primary={value}
+                    secondary={label} />
+                {
+                    showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
+                }
             </ListItem>
         </List>
     </div>
@@ -192,7 +198,10 @@ export default function ContactAccordionInDetailPage({
                                                                     </Grid>
                                                                     <Grid item xs={12} sm={12}>
                                                                         {
-                                                                            obj?.email ? <DisplayData icon={<AiOutlineMail size={20} />} label='Email' value={obj?.email ?? ''} /> : ''
+                                                                            obj?.email ? <DisplayData icon={<AiOutlineMail size={20} />}
+                                                                                label='Email' value={obj?.email ?? ''}
+                                                                                showCopyToText={true}
+                                                                            /> : ''
                                                                         }
                                                                     </Grid>
                                                                 </Grid>

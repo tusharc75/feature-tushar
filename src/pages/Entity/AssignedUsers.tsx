@@ -3,6 +3,7 @@ import { Grid, Typography, IconButton } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import BoxWithBorder from "../../components/BoxWithBorder";
+import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function DisplayData({ label, value, color }) {
+function DisplayData({ label, value, color, showCopyToClipBoard = false }) {
   return (
     <div className="cTr">
       <div className="td1">
@@ -43,6 +44,7 @@ function DisplayData({ label, value, color }) {
           style={{ color: color ? color : "" }}
         >
           {value}
+          {showCopyToClipBoard ? <CopyToClipboard textToCopy={value} /> : null}
         </Typography>
       </div>
     </div>
@@ -81,6 +83,7 @@ export default function AssignedUsers({ data, unassignUser, permissions }) {
                   label="Email"
                   value={obj?.email ?? "____"}
                   color={null}
+                  showCopyToClipBoard={true}
                 />
               </BoxWithBorder>
             </Grid>
