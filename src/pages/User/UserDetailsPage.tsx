@@ -148,7 +148,7 @@ const UserDetailsPage = () => {
             parentId: d.reportsTo ? d.reportsTo : 0,
             logo: d.avatar,
             email: d.email,
-            phone: d.phone,
+            phone: d.mobileNo,
             current: false
           })
         })
@@ -162,7 +162,7 @@ const UserDetailsPage = () => {
         parentId: data.reportsTo ? data.reportsTo.optionValue : 0,
         logo: data.avatar,
         email: data.email,
-        phone: data.phone,
+        phone: data.mobileNo,
         current: true
       })
 
