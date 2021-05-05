@@ -33,6 +33,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import moment from "moment";
 import { FaUserAltSlash, FaUserCheck } from "react-icons/fa";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 
 const useStyles = makeStyles((theme) => ({
   actionBtn: {
@@ -350,7 +351,7 @@ export default function Doa() {
       width: 300,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
-          {params.value}
+          <CustomRenderCell value={params?.value} isCopyToClipboard={true} />
         </p>
       ),
     },

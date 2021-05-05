@@ -21,6 +21,7 @@ import currencies from "../../constants/currency_with_country.json";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Skeleton } from "@material-ui/lab";
+import CopyToClipboard from '../Helpers/CopyToClipboard'
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -234,16 +235,15 @@ const Details = (props: DetailProps) => {
                 data[fieldData.fieldName].map((_val: any) => (
                   <React.Fragment key={_val.optionValue}>
                     <Link
-                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${
-                        _val.optionValue
-                      }`}
-                      // onMouseEnter={(e) =>
-                      //   getPopoverData(
-                      //     e,
-                      //     fieldData.lookupResource,
-                      //     _val.optionValue
-                      //   )
-                      // }
+                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue
+                        }`}
+                    // onMouseEnter={(e) =>
+                    //   getPopoverData(
+                    //     e,
+                    //     fieldData.lookupResource,
+                    //     _val.optionValue
+                    //   )
+                    // }
                     >
                       <span className={classes.dataValue}>
                         {_val.optionLabel}
@@ -256,16 +256,15 @@ const Details = (props: DetailProps) => {
               )
             ) : data[fieldData.fieldName] ? (
               <Link
-                to={`/${kebabCase(fieldData.lookupResource)}/detail/${
-                  val[fieldData.fieldName]
-                }`}
-                // onMouseEnter={(e) =>
-                //   getPopoverData(
-                //     e,
-                //     fieldData.lookupResource,
-                //     val[fieldData.fieldName]
-                //   )
-                // }
+                to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]
+                  }`}
+              // onMouseEnter={(e) =>
+              //   getPopoverData(
+              //     e,
+              //     fieldData.lookupResource,
+              //     val[fieldData.fieldName]
+              //   )
+              // }
               >
                 <span className={classes.dataValue}>
                   {data[fieldData.fieldName].optionLabel}
@@ -285,12 +284,15 @@ const Details = (props: DetailProps) => {
           variant="body2"
         >
           {fieldData.type === "url" || fieldData.type === "email" ? (
-            <MuiLink
-              href={fieldData.type === "email" ? `mailto:${value}` : value}
-              target="_blank"
-            >
-              <span className={classes.dataValue}> {value} </span>
-            </MuiLink>
+            <>
+              <MuiLink
+                href={fieldData.type === "email" ? `mailto:${value}` : value}
+                target="_blank"
+              >
+                <span className={classes.dataValue}> {value} </span>
+              </MuiLink>
+              {fieldData.type === "email" && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
+            </>
           ) : (
             <span className={classes.dataValue}> {value} </span>
           )}
