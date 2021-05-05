@@ -291,7 +291,7 @@ const Details = (props: DetailProps) => {
               >
                 <span className={classes.dataValue}> {value} </span>
               </MuiLink>
-              {fieldData.type === "email" ? <CopyToClipboard textToCopy={value} /> : null}
+              {fieldData.type === "email" && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
             </>
           ) : (
             <span className={classes.dataValue}> {value} </span>

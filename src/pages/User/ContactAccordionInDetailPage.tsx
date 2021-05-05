@@ -92,7 +92,7 @@ export default function ContactAccordionInDetailPage({
     const {
         state: { permissions },
     }: any = useData();
-    let recordsPerLineInLargeScreen: 3 | 5 | 6 | 12 = 6;
+    let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
         case 1:
@@ -100,7 +100,7 @@ export default function ContactAccordionInDetailPage({
             break;
 
         case 3:
-            recordsPerLineInLargeScreen = 5;
+            recordsPerLineInLargeScreen = 4;
             break;
 
         case 4:
