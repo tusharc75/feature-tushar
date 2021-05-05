@@ -22,12 +22,12 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(1),
     },
     completed: {
-        background: "#20789a",
-        border: "2px solid #04506d"
+        background: "#20789a !important",
+        border: "2px solid #04506d !important"
     },
     current: {
         // background: "#50ad50",
-        border: "2px solid #003f57"
+        border: "2px solid #003f57 !important"
     }
 }));
 
