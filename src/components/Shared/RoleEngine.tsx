@@ -195,7 +195,7 @@ const RoleEngine = (props) => {
           <React.Fragment key={outerIndex}>
             <TableRow>
               <TableCell style={{ minWidth: 300 }}>
-                <Typography variant="h6">{_resource.name}</Typography>
+                <Typography className="tableMainHeader">{_resource.name}</Typography>
               </TableCell>
               <TableCell>
                 <Checkbox
