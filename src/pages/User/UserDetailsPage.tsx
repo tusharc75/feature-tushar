@@ -89,6 +89,7 @@ const UserDetailsPage = () => {
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
+  const [doaCurrency, setDoaCurrency] = useState("");
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
@@ -187,11 +188,11 @@ const UserDetailsPage = () => {
               name: `${item.user.firstName} ${item.user.lastName}`,
               firstName: item.user.firstName,
               lastName: item.user.lastName,
-              currency: item.currency ? item.currency : "USD",
               amount: item.amount,
             };
           })
         );
+        setDoaCurrency(data?.doaCurrency)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -651,11 +652,12 @@ const UserDetailsPage = () => {
                             </Box>
                           </Box>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item container xs={4} justify="flex-end">
                           {permissions.user.isUpdate && (
                             <Button
                               variant="contained"
                               color="primary"
+                              size="small"
                               onClick={() => setDoaDialogOpen(true)}
                             >
                               {doa.length > 0 ? "Edit DOA" : "Add DOA"}
@@ -673,7 +675,11 @@ const UserDetailsPage = () => {
                         }}
                       >
                         {doa.length > 0 ? (
-                          <NewStepper heading={" "} steps={doa} />
+                          <NewStepper
+                            heading={" "}
+                            steps={doa}
+                            doaCurrency={doaCurrency}
+                          />
                         ) : (
                           <Box textAlign="center" marginTop={2}>
                             <Typography variant="body2">
@@ -687,7 +693,7 @@ const UserDetailsPage = () => {
                 </>
               }
               <OpportunityAccordionInUserDetail
-                opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner, ...opportunityRelatedData?.Collaborator] : opportunityRelatedData?.Owner}
+                opportunities={[...opportunityRelatedData?.Owner ?? [],...opportunityRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -696,7 +702,7 @@ const UserDetailsPage = () => {
                 }}
               />
               <LeadAccordionInUserDetailPage
-                leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner, ...leadsRelatedData?.Collaborator] : leadsRelatedData?.Owner}
+                leads={[...leadsRelatedData?.Owner ?? [],...leadsRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -706,7 +712,7 @@ const UserDetailsPage = () => {
               />
               <AccountAccordionDetail
                 type="customer"
-                accounts={(customerAccountRelatedData?.Owner && customerAccountRelatedData?.Collaborator) ? [...customerAccountRelatedData.Owner, ...customerAccountRelatedData.Collaborator] : customerAccountRelatedData?.Owner}
+                accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -716,7 +722,7 @@ const UserDetailsPage = () => {
               />
               <AccountAccordionDetail
                 type="supplier"
-                accounts={(supplierAccountRelatedData?.Owner && supplierAccountRelatedData?.Collaborator) ? [...supplierAccountRelatedData.Owner, ...supplierAccountRelatedData.Collaborator] : supplierAccountRelatedData?.Owner}
+                accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -726,7 +732,7 @@ const UserDetailsPage = () => {
               />
               <ContactAccordionInDetailPage
                 type="customer"
-                contacts={(customerContactRelatedData?.Owner && customerContactRelatedData?.Collaborator) ? [...customerContactRelatedData.Owner, ...customerContactRelatedData.Collaborator] : customerContactRelatedData?.Owner}
+                contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -736,7 +742,7 @@ const UserDetailsPage = () => {
               />
               <ContactAccordionInDetailPage
                 type="supplier"
-                contacts={(supplierContactRelatedData?.Owner && supplierContactRelatedData?.Collaborator) ? [...supplierContactRelatedData.Owner, ...supplierContactRelatedData.Collaborator] : supplierContactRelatedData?.Owner}
+                contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
                 recordsPerLine={2}
                 expanded={false}
                 userId={id}
@@ -834,6 +840,7 @@ const UserDetailsPage = () => {
         <DoaDialog
           userList={userList}
           doa={doa}
+          doaCurrency={doaCurrency}
           userSelected={id}
           open={doaDialogOpen}
           onSuccess={() => {

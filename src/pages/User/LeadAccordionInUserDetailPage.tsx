@@ -177,6 +177,13 @@ export default function LeadAccordionInUserDetailPage({
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
 
+                                                                <Grid item xs={12} sm={8}>
+                                                                    <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
+                                                                        <Typography >{obj?.firstName}  {obj?.lastName} </Typography>
+                                                                    </Link>
+                                                                </Grid>
+                                                            
+
                                                             <Grid container>
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
