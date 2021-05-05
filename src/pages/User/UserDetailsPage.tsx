@@ -687,7 +687,7 @@ const UserDetailsPage = () => {
                 </>
               }
               <OpportunityAccordionInUserDetail
-                opportunities={(opportunityRelatedData?.Owner && opportunityRelatedData?.Collaborator) ? [...opportunityRelatedData?.Owner, ...opportunityRelatedData?.Collaborator] : opportunityRelatedData?.Owner}
+                opportunities={[...opportunityRelatedData?.Owner ?? [],...opportunityRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -696,7 +696,7 @@ const UserDetailsPage = () => {
                 }}
               />
               <LeadAccordionInUserDetailPage
-                leads={(leadsRelatedData?.Owner && leadsRelatedData?.Collaborator) ? [...leadsRelatedData?.Owner, ...leadsRelatedData?.Collaborator] : leadsRelatedData?.Owner}
+                leads={[...leadsRelatedData?.Owner ?? [],...leadsRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -706,7 +706,7 @@ const UserDetailsPage = () => {
               />
               <AccountAccordionDetail
                 type="customer"
-                accounts={(customerAccountRelatedData?.Owner && customerAccountRelatedData?.Collaborator) ? [...customerAccountRelatedData.Owner, ...customerAccountRelatedData.Collaborator] : customerAccountRelatedData?.Owner}
+                accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -716,7 +716,7 @@ const UserDetailsPage = () => {
               />
               <AccountAccordionDetail
                 type="supplier"
-                accounts={(supplierAccountRelatedData?.Owner && supplierAccountRelatedData?.Collaborator) ? [...supplierAccountRelatedData.Owner, ...supplierAccountRelatedData.Collaborator] : supplierAccountRelatedData?.Owner}
+                accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -726,7 +726,7 @@ const UserDetailsPage = () => {
               />
               <ContactAccordionInDetailPage
                 type="customer"
-                contacts={(customerContactRelatedData?.Owner && customerContactRelatedData?.Collaborator) ? [...customerContactRelatedData.Owner, ...customerContactRelatedData.Collaborator] : customerContactRelatedData?.Owner}
+                contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -736,7 +736,7 @@ const UserDetailsPage = () => {
               />
               <ContactAccordionInDetailPage
                 type="supplier"
-                contacts={(supplierContactRelatedData?.Owner && supplierContactRelatedData?.Collaborator) ? [...supplierContactRelatedData.Owner, ...supplierContactRelatedData.Collaborator] : supplierContactRelatedData?.Owner}
+                contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
                 recordsPerLine={2}
                 expanded={false}
                 userId={id}
