@@ -23,6 +23,8 @@ import ManageContactDialog from "./../Contact/ManageContact/index";
 import { AiOutlineMail } from 'react-icons/ai';
 import { HiOutlineUser } from 'react-icons/hi';
 import { AiOutlinePhone } from 'react-icons/ai';
+import { FiStar } from 'react-icons/fi';
+import { BiPhone } from 'react-icons/bi';
 
 const Accordion = withStyles({
     root: {
@@ -64,19 +66,13 @@ const AccordionDetails = withStyles((theme) => ({
     }
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value, icon }) {
-    return <div style={{ flexGrow: 1 }}>
-        <List >
-            <ListItem>
-                <ListItemAvatar>
-                    {icon}
-                </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
-            </ListItem>
-        </List>
-    </div>
-}
-
+// function DisplayData({ label, value, icon }) {
+//     return <div style={{ flexGrow: 1 }}>
+//         <span className="d-flex gap-2 align-items-center">
+//             {icon}{value}
+//         </span>
+//     </div>
+// }
 
 export default function ContactAccordionInDetailPage({
     contacts, type,
@@ -174,29 +170,44 @@ export default function ContactAccordionInDetailPage({
                                         {
                                             contacts.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card style={{ minWidth: "100%" }}>
+                                                    <Card className="contactCard">
                                                         <CardContent className="detailListing">
-                                                            <Grid container className="detailCardHeader">
-                                                                <Grid item xs={12} sm={12}>
-                                                                    <Link className="link" to={type === "customer" ? `${routes.customerContactDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
-                                                                        <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
-                                                                    </Link>
-                                                                </Grid>
-                                                            </Grid>
-                                                            <Grid container>
-                                                                <Grid container>
-                                                                    <Grid item xs={12} sm={12}>
+                                                            <List>
+                                                                <ListItem>
+                                                                    <ListItemAvatar>
                                                                         {
-                                                                            obj?.firstName ? <DisplayData icon={<AiOutlinePhone size={20} />} label='Phone' value={obj?.phone ?? ''} /> : ''
+                                                                            obj?.contactLogo ? <Avatar className="d-flex align-items-center gap-1" src={obj?.contactLogo}></Avatar>
+                                                                                : <div data-initials={[obj?.firstName?.charAt(0).toUpperCase(),
+                                                                                obj?.lastName?.charAt(0).toUpperCase()].filter(f => f).join("")}></div>
                                                                         }
-                                                                    </Grid>
-                                                                    <Grid item xs={12} sm={12}>
-                                                                        {
-                                                                            obj?.email ? <DisplayData icon={<AiOutlineMail size={20} />} label='Email' value={obj?.email ?? ''} /> : ''
+                                                                    </ListItemAvatar>
+                                                                    <ListItemText className="ml-2"
+                                                                        primary={
+                                                                            <Link className="link" to={type === "customer" ? `${routes.customerContactDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
+                                                                                <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
+                                                                            </Link>
                                                                         }
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </Grid>
+                                                                        secondary={
+                                                                            <React.Fragment>
+                                                                                <Typography
+                                                                                    component="p"
+                                                                                    variant="body2"
+                                                                                    className="cardDetail">
+                                                                                    {obj?.title && <span className="d-flex gap-2 align-items-center">
+                                                                                        <FiStar size="15" />{obj?.title}
+                                                                                    </span>}
+                                                                                    {obj?.phone && <span className="d-flex gap-2 align-items-center">
+                                                                                        <AiOutlineMail size="15" />{obj?.phone}
+                                                                                    </span>}
+                                                                                    {obj?.email && <span className="d-flex gap-2 align-items-center">
+                                                                                        <BiPhone size="15" />{obj?.email}
+                                                                                    </span>}
+                                                                                </Typography>
+                                                                            </React.Fragment>
+                                                                        }
+                                                                    />
+                                                                </ListItem>
+                                                            </List>
                                                         </CardContent>
                                                     </Card>
                                                 </Grid>
