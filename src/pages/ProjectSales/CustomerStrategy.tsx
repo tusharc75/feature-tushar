@@ -18,8 +18,8 @@ import { Skeleton } from "@material-ui/lab";
 import { Add, ExpandMore, ControlPoint } from "@material-ui/icons";
 
 import axiosInstance from "../../axios/axiosInstance";
-import BoxWithBorder from "../../components/BoxWithBorder";
 import CustomerContacts from "./CustomerContacts";
+import BoxWithBorder from "../../components/BoxWithBorder";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 
@@ -100,6 +100,10 @@ const CustomerStrategy = (props) => {
   const [expandedParent, setExpandedParent] = useState(true);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
+  /**
+   *  Save opportunity data in project sales
+   * @param id
+   */
   const saveOppToProject = async (id) => {
     const existingData = opportunities.map((o) => o._id);
 
@@ -257,7 +261,9 @@ const CustomerStrategy = (props) => {
                                     </Box>
                                   </BoxWithBorder>
                                 ))
-                              ) : customerContacts.length ? (
+                              ) : customerContacts.filter(
+                                  (cA) => cA.accountName === c._id
+                                ).length ? (
                                 <>
                                   <CustomerContacts
                                     contacts={customerContacts.filter(
