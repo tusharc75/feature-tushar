@@ -346,8 +346,8 @@ const Header = ({ toggleDrawer }) => {
               }
               if (d?.entity) {
                 handleSelectedEnity(d.entity)
-                history.push(`${d.resourcePath}/${d.resourceId}`)
               }
+              history.push(`${d.resourcePath}/${d.resourceId}`)
             }}>
             {
               <>
