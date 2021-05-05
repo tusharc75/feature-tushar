@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Container,
@@ -7,6 +7,7 @@ import {
   Paper,
   Button,
   LinearProgress,
+  Box,
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import { TextField } from "formik-material-ui";
@@ -19,6 +20,10 @@ import axiosInstance from './../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import firebase from 'firebase';
 import { vapidKey } from "../../constants/helpers";
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from "@azure/msal-react";
+import { isEmpty } from "lodash";
+import getAzureAcessToken from "../../components/Azure/getAzureAccessToken";
+import { AzureLogin } from "../../components/Azure/Azure";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -64,7 +69,46 @@ const Login = () => {
   const { dispatch }: any = useData();
   const classes = useStyles();
   const [isSubmitting, setSubmitting] = useState(false);
+  const { instance, accounts, inProgress } = useMsal();
+  const account = useAccount(accounts[0] || {});
+  const [counter,setCounter] = useState(0);
+  const [invalidAzureLogin,setInvalidAzureLogin] = useState(false);
+  useEffect(()=>{
+    
+    if(!isEmpty(account)){
+      (async () =>{
+        try {
+          const graphToken = await getAzureAcessToken(instance);
+          const res = await axiosInstance().post('/user/login/azure',{
+                  "graph-token":graphToken
+              })
+          const {data} = res.data
+        localStorage.setItem("token", data.token);
+        dispatch({ type: SET_USER, payload: data });
+        if (data?.role?.selectedEntity?._id) {
+          dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+        }
+        }catch(e){
+          setCounter(18);
+          setInvalidAzureLogin(true);
+          toastConfig.setToastConfig(e);
+        }
+      })()
 
+    }
+  },[account])
+
+  useEffect(()=>{
+    if(invalidAzureLogin){
+      if(invalidAzureLogin && counter){
+        setTimeout(()=> setCounter(counter - 1),1000)
+      }
+      else{
+        instance.logoutPopup();
+        setInvalidAzureLogin(false);
+      }
+    }
+  },[invalidAzureLogin,counter])
   const handleSubmit = async (values) => {
     setSubmitting(true);
     const data = {
@@ -169,6 +213,27 @@ const Login = () => {
                   </Form>
                 )}
               </Formik>
+              <br/>
+              <Box >
+              
+              <AuthenticatedTemplate>
+                  {invalidAzureLogin ? <span>Not authorized loging out in {counter}</span> : <Button
+                        variant="contained"
+                        style={{width:"100%"}}
+                        color="secondary"
+                        disabled={isSubmitting}
+                        onClick={()=> instance.logoutPopup()}
+                      >
+                      Azure Log Out
+                      </Button> 
+                  }
+                   
+                  
+              </AuthenticatedTemplate>
+              <UnauthenticatedTemplate>
+                <AzureLogin></AzureLogin>
+              </UnauthenticatedTemplate>
+              </Box>
             </Grid>
             <Grid item xs={12} sm={12} md={6} className={classes.image}>
               <img src={demoImg} alt="illustration" style={{ width: "100%" }} />
