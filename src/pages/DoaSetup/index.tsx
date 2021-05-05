@@ -467,6 +467,7 @@ export default function Doa() {
           <DoaDialog
             userList={dataRows}
             doa={doa}
+            doaCurrency={"USD"}
             userSelected={userSingleSelect.id}
             open={open}
             onClose={() => setOpen(false)}
@@ -526,6 +527,7 @@ export default function Doa() {
                 </Button>
                     <NewStepper
                       heading={"DOA Details of " + userSingleSelect?.name}
+                      doaCurrency={"USD"}
                       steps={doa}
                     />
                   </>
