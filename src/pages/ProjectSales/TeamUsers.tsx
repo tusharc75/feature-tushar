@@ -1,15 +1,19 @@
 import { makeStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import { Typography } from "@material-ui/core";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItemText from "@material-ui/core/ListItemText";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from "@material-ui/icons/Delete";
+import {
+  Typography,
+  Box,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  IconButton,
+  Chip,
+} from "@material-ui/core";
+import { SupervisorAccount, Delete } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 
 import BoxWithBorder from "../../components/BoxWithBorder";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
+import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,7 +24,8 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
   },
   title: {
-    margin: theme.spacing(4, 0, 2),
+    display: "flex",
+    alignItems: "center",
   },
   list: {
     width: "100%",
@@ -28,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TeamUsers = ({ data, permissions }) => {
+const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
   const classes = useStyles();
 
   return (
@@ -40,18 +45,37 @@ const TeamUsers = ({ data, permissions }) => {
               <ListItem disableGutters className={classes.list}>
                 <ListItemText
                   primary={
-                    <Typography>
+                    <Typography className={classes.title}>
                       <Link className="link" to={`/user/detail/${obj._id}`}>
                         {`${obj.firstName} ${obj.lastName}` || ""}
                       </Link>
+
+                      {managerId === obj._id && (
+                        <>
+                          <Box mr={1} title="Project" />
+                          <Chip
+                            variant="outlined"
+                            size="small"
+                            label="Manager"
+                            color="secondary"
+                          />
+                        </>
+                      )}
                     </Typography>
                   }
-                  secondary={<CustomRenderCell value={obj.email} isCopyToClipboard={true} />}
+                  secondary={obj.email || ''}
                 />
-                {permissions.role.isUpdate && (
+                <CopyToClipboard textToCopy={obj.email || ''} />
+                {permissions.projectSales.isUpdate && managerId !== obj._id && (
                   <ListItemSecondaryAction>
-                    <IconButton size="small" edge="end" aria-label="delete">
-                      <DeleteIcon color={"disabled"} />
+                    <IconButton
+                      title={`Remove ${obj.firstName}`}
+                      size="small"
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => removeUser(obj)}
+                    >
+                      <Delete color="error" />
                     </IconButton>
                   </ListItemSecondaryAction>
                 )}

@@ -1,29 +1,19 @@
-import { Link } from "react-router-dom";
-import { Box, Card, CardContent, Grid, List } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Fragment } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  List,
+  ListItemText,
+  ListItem,
+  ListItemAvatar,
+} from "@material-ui/core";
 
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 import { BsPerson } from "react-icons/bs";
 import { BiFace } from "react-icons/bi";
-import ListItem from "@material-ui/core/ListItem/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import { ListItemText } from "@material-ui/core";
-import { Fragment } from "react";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: "100%",
-    flexGrow: 1,
-  },
-  div1: {
-    display: "flex",
-    // justifyContent: 'space-between'
-  },
-  span: {
-    width: "50%",
-  },
-}));
 
 function DisplayData({ label, value, icon }) {
   return (
@@ -39,7 +29,6 @@ function DisplayData({ label, value, icon }) {
 }
 
 function RelatedContacts({ contacts, accountId, accountName, contactRoute }) {
-  const classes = useStyles();
   const history = useHistory();
 
   return (
