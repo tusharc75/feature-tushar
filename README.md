@@ -1,12 +1,12 @@
 # OMS Frontend App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Frontend for OMS CRM App
 
 ### Yarn Package Manager is used
 
 Download Yarn Globally with:
 
-### `npm i yarn`
+### `npm i -g yarn`
 
 ## Available Scripts
 
@@ -19,7 +19,15 @@ Runs the app in the development mode.
 ### `yarn test`
 
 Launches the test runner in the interactive watch mode.
-
+ 
 ### `yarn build`
 
 ## Project Structure
+
+
+## Branch Delete Code
+Delete Locally - git branch -d branch-name
+Delete Remotely - git push origin --delete branch-name
+
+
+

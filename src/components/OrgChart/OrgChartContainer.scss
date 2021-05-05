@@ -1,0 +1,233 @@
+.custom-orgchart {
+  .my-modal {
+    background: #fff;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 400px;
+    height: 350px;
+    padding: 20px;
+  }
+  .modal-close {
+    position: absolute;
+    right: 6px;
+    top: 9px;
+    cursor: pointer;
+    border: none;
+    font-size: 20px;
+  }
+  .modal-toggle-button {
+    cursor: pointer;
+    background-color: blue;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 20px;
+  }
+  .modal-toggle-button:focus {
+    outline: none;
+  }
+
+  .modal-wrapper {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .node-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    font-size: 0.9rem !important;
+    color: #3d93b8;
+  }
+  .google-visualization-orgchart-linebottom {
+    border-bottom: 2px solid #cdcdcd;
+  }
+  .google-visualization-orgchart-lineright {
+    border-right: 2px solid #cdcdcd;
+  }
+  .google-visualization-orgchart-lineleft {
+    border-left: 2px solid #cdcdcd;
+  }
+  .google-visualization-orgchart-linertop {
+    border-top: 2px solid #cdcdcd;
+  }
+
+
+  .google-visualization-orgchart-node {
+    position: relative;
+    box-shadow: 0px 3px 7px #6e6d6d !important;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    :after {
+      content: "";
+      display: block;
+      width: 140px;
+      height: 290px;
+      background: #f3f3f3;
+      position: absolute;
+      animation: rotatemagic 0.75s cubic-bezier(0.425, 1.04, 0.47, 1.105) 1s both;
+    }
+  }
+
+  // .google-visualization-orgchart-node {
+  //     text-align: center;
+  //     vertical-align: middle;
+  //     font-family: arial, helvetica;
+  //     cursor: default;
+  //     border: none !important;
+  //     background: #fcf7fa !important;
+  //     border-bottom: 5px solid #3d93b8 !important;
+  // }
+
+  // .google-visualization-orgchart-nodesel {
+  //     border-bottom: 5px solid #39ac3d !important;
+  // }
+  .google-visualization-orgchart-node-large {
+    font-size: 1rem !important;
+  }
+
+  .google-visualization-orgchart-node {
+    text-align: center;
+    vertical-align: middle;
+    font-family: inherit;
+    cursor: default;
+    border: none;
+    background-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .form-fields {
+    flex: 1;
+  }
+
+  .no-chart-text {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .no-chart-text p {
+    font-size: 1.5rem;
+    color: grey;
+    font-style: italic;
+    text-align: center;
+  }
+}
+
+.firstinfo,
+.badgescard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card {
+  padding: 6px !important;
+  border-radius: 3px;
+  background-color: white;
+
+  &.current {
+    border: 3px solid #bce2c3;
+    background: #e7f8ea;
+  }
+}
+.badgescard {
+  padding: 10px 20px;
+  border-radius: 3px;
+  background-color: #ececec;
+  width: 480px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  z-index: -1;
+  left: 10px;
+  bottom: 10px;
+  animation: animainfos 0.5s cubic-bezier(0.425, 1.04, 0.47, 1.105) 0.75s forwards;
+}
+.badgescard span {
+  font-size: 1.6em;
+  margin: 0px 6px;
+  opacity: 0.6;
+}
+
+.firstinfo {
+  flex-direction: row;
+  z-index: 2;
+  position: relative;
+
+  & .card-header {
+    font-weight: bold;
+    color: #003f57;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+
+  & .card-detail {
+    color: #534e4e;
+    font-weight: normal;
+  }
+
+  & .profile-img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    border: 3px solid white;
+    padding: 0;
+    z-index: 1;
+  }
+  // .profileinfo {
+  //   padding: 0 0 0 20px;
+  // }
+}
+@keyframes animatop {
+  0% {
+    opacity: 0;
+    bottom: -500px;
+  }
+  100% {
+    opacity: 1;
+    bottom: 0px;
+  }
+}
+@keyframes animainfos {
+  0% {
+    bottom: 10px;
+  }
+  100% {
+    bottom: -42px;
+  }
+}
+@keyframes rotatemagic {
+  0% {
+    opacity: 0;
+    transform: rotate(0deg);
+    top: -24px;
+    left: -253px;
+  }
+  100% {
+    transform: rotate(-30deg);
+    top: -24px;
+    left: -78px;
+  }
+}

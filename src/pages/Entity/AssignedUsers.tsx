@@ -1,0 +1,95 @@
+import { makeStyles } from "@material-ui/core/styles";
+import { Grid, Typography, IconButton } from "@material-ui/core";
+import { Delete } from "@material-ui/icons";
+import { Link } from "react-router-dom";
+import BoxWithBorder from "../../components/BoxWithBorder";
+import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    // flexGrow: 1,
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(17),
+    flexBasis: "33.33%",
+    flexShrink: 0,
+  },
+  secondaryHeading: {
+    fontSize: theme.typography.pxToRem(15),
+    color: theme.palette.text.secondary,
+  },
+  actionsItems: {
+    color: "grey",
+    float: "right",
+  },
+}));
+
+function DisplayData({ label, value, color, showCopyToClipBoard = false }) {
+  return (
+    <div className="cTr">
+      <div className="td1">
+        <Typography
+          color="textSecondary"
+          className="text-truncate"
+          variant="subtitle1"
+        >
+          {label}
+        </Typography>
+      </div>
+      <div className="td2">
+        {" "}
+        <Typography
+          title={value}
+          className="text-truncate"
+          style={{ color: color ? color : "" }}
+        >
+          {value}
+          {showCopyToClipBoard ? <CopyToClipboard textToCopy={value} /> : null}
+        </Typography>
+      </div>
+    </div>
+  );
+}
+
+export default function AssignedUsers({ data, unassignUser, permissions }) {
+  const classes = useStyles();
+
+  return (
+    <div className={classes.root}>
+      {data && data.length ? (
+        <Grid container spacing={1}>
+          {data.map((obj, index) => (
+            <Grid item md={6} xs={12} sm={12} key={index}>
+              <BoxWithBorder>
+                <span className={classes.actionsItems}>
+                  {permissions.role.isUpdate && (
+                    <IconButton onClick={() => unassignUser(obj)} size="small">
+                      <Delete color={"error"} />
+                    </IconButton>
+                  )}
+                </span>
+                <Typography
+                  title={`${obj?.firstName} ${obj?.lastName}` ?? ""}
+                  className="text-capitalize"
+                >
+                  <Link
+                    className="link"
+                    to={`/user/detail/${obj._id}`}
+                  >
+                    {`${obj?.firstName} ${obj?.lastName}` ?? ""}
+                  </Link>
+                </Typography>
+                <DisplayData
+                  label="Email"
+                  value={obj?.email ?? "____"}
+                  color={null}
+                  showCopyToClipBoard={true}
+                />
+              </BoxWithBorder>
+            </Grid>
+          ))}
+        </Grid>
+      ) : null}
+    </div>
+  );
+}
