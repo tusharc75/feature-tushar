@@ -399,6 +399,7 @@ const ContactDetailsPage = (props) => {
                   <Button
                     variant="contained"
                     color="primary"
+                    size="small"
                     onClick={handleOpneUpdateDialog}
                   >
                     Edit
@@ -412,6 +413,7 @@ const ContactDetailsPage = (props) => {
                   contactData.owner.optionValue === user.user._id ? (
                   <DeleteButton
                     text="Delete"
+                    size="small"
                     onClick={() => setShowConfirmBox(true)}
                   />
                 ) : null}

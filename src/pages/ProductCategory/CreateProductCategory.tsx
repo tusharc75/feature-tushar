@@ -126,12 +126,12 @@ const ProductCategory = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={6} container justify="flex-end">
                                         <Box>
-                                            <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
+                                            <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
                                                 Save{isUpdating && <CircularProgress size={24} />}
                                             </Button>
                                         </Box>
                                         <Box ml={1} >
-                                            <Button color="primary" variant="contained" onClick={() => history.push({ pathname: "/product-category" })} >Close</Button>
+                                            <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/product-category" })} >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
