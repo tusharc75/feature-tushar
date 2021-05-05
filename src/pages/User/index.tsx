@@ -24,6 +24,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { userType } from './../../constants/helpers'
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 
 let userTimeout: ReturnType<typeof setTimeout>;
 const User: FC = () => {
@@ -186,7 +187,7 @@ const User: FC = () => {
       width: 300,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
-          {params.value}
+          <CustomRenderCell isCopyToClipboard={true} value={params.value} />
         </p>
       ),
     },

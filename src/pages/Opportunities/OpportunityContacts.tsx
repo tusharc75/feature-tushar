@@ -13,8 +13,10 @@ import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { useHistory } from 'react-router-dom';
+import { AiOutlineMail } from 'react-icons/ai';
+import CopyToClipboard from "../../components/Helpers/CopyToClipboard"
 
-function DisplayData({ label, value, icon }) {
+function DisplayData({ label, value, icon, showCopyToText = false }) {
     return <div style={{ flexGrow: 1 }}>
         <List>
             <ListItem>
@@ -22,6 +24,9 @@ function DisplayData({ label, value, icon }) {
                     {icon}
                 </ListItemAvatar>
                 <ListItemText primary={value} secondary={label} />
+                {
+                    showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
+                }
             </ListItem>
         </List>
     </div>
@@ -49,11 +54,20 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                                             </Grid>
                                         </Grid>
                                         <Grid container>
-                                            <Grid item xs={12} sm={6}>
-                                                {
-                                                    <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} />
-                                                }
-
+                                            <Grid item xs={12} sm={12}>
+                                                <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} />
+                                            </Grid>
+                                            <Grid item xs={12} sm={12}>
+                                                <DisplayData label='Phone' value={obj.phone || ''}
+                                                    icon={<AiOutlineMail size={20} />}
+                                                    showCopyToText={true}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sm={12}>
+                                                <DisplayData label='Email' value={obj.email || ''}
+                                                    icon={<AiOutlineMail size={20} />}
+                                                    showCopyToText={true}
+                                                />
                                             </Grid>
                                         </Grid>
                                     </CardContent>

@@ -9,6 +9,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 
 import BoxWithBorder from "../../components/BoxWithBorder";
+import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,28 +36,28 @@ const TeamUsers = ({ data, permissions }) => {
       <List disablePadding>
         {data && data.length
           ? data.map((obj) => (
-              <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
-                <ListItem disableGutters className={classes.list}>
-                  <ListItemText
-                    primary={
-                      <Typography>
-                        <Link className="link" to={`/user/detail/${obj._id}`}>
-                          {`${obj.firstName} ${obj.lastName}` || ""}
-                        </Link>
-                      </Typography>
-                    }
-                    secondary={obj.email || ""}
-                  />
-                  {permissions.role.isUpdate && (
-                    <ListItemSecondaryAction>
-                      <IconButton size="small" edge="end" aria-label="delete">
-                        <DeleteIcon color={"disabled"} />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  )}
-                </ListItem>
-              </BoxWithBorder>
-            ))
+            <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
+              <ListItem disableGutters className={classes.list}>
+                <ListItemText
+                  primary={
+                    <Typography>
+                      <Link className="link" to={`/user/detail/${obj._id}`}>
+                        {`${obj.firstName} ${obj.lastName}` || ""}
+                      </Link>
+                    </Typography>
+                  }
+                  secondary={<CustomRenderCell value={obj.email} isCopyToClipboard={true} />}
+                />
+                {permissions.role.isUpdate && (
+                  <ListItemSecondaryAction>
+                    <IconButton size="small" edge="end" aria-label="delete">
+                      <DeleteIcon color={"disabled"} />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                )}
+              </ListItem>
+            </BoxWithBorder>
+          ))
           : null}
       </List>
     </div>

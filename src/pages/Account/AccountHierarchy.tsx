@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { materialTableIcons } from './../../constants/helpers';
 import React from 'react';
 import { Box } from '@material-ui/core';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 
 export default function AccountHierarchy({ data, currentAccountId, accountRoute }) {
 
@@ -65,7 +66,7 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
         {
             title: 'Phone', field: 'phone',
             render: (rowData: any) => <div style={{ width: commonFieldWidth }}>
-                {rowData.phone}
+                <CustomRenderCell value={rowData.phone} isCopyToClipboard={true} />
             </div>
         },
     ];
