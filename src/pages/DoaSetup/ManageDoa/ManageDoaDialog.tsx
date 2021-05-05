@@ -320,7 +320,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                         type="submit"
                                         disabled={currency === ""
                                             || values.users.filter(item => item.name === "" || item.name === undefined || item.id == "" || item.id === undefined).length > 0
-                                            // || Object.values(values.users).toString() === Object.values(users).toString()
+                                            || JSON.stringify(values.users) === JSON.stringify(users) && currency === doaCurrency
+                                          
                                         }
                                         onClick={() => {
                                             handleSubmit(values.users)
