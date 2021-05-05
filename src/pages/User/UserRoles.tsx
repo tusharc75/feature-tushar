@@ -76,13 +76,13 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                   {permissions.user.isUpdate && (
                     <ListItemSecondaryAction
                       title={
-                        rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id
+                          currentUserId === loggedInUser._id
                           ? "Role can not be deleted"
                           : "Unassign Role"
                       }
                     >
                       <IconButton
-                        disabled={rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id}
+                        disabled={currentUserId === loggedInUser._id}
                         size="small"
                         edge="end"
                         aria-label="delete"
@@ -97,7 +97,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                           //     ? "disabled"
                           //     : "error"
                           // }
-                          color={rolesPermissions.indexOf(obj?.permission) >= 0 && currentUserId === loggedInUser._id ? "disabled" : "error"}
+                          color={currentUserId === loggedInUser._id ? "disabled" : "error"}
                         />
                       </IconButton>
                     </ListItemSecondaryAction>
