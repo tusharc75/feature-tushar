@@ -12,6 +12,7 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Tooltip
 } from "@material-ui/core";
 import CommonSkeleton from "../Helpers/CommonSkeleton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -31,6 +32,8 @@ import { BiCustomize } from "react-icons/bi";
 import { FaEye } from "react-icons/fa";
 import currencies from "./../../constants/currency_with_country.json";
 import { LinkOff } from "@material-ui/icons";
+import { useData } from "../../StateProvider/Provider";
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 const Accordion = withStyles({
   root: {
@@ -101,6 +104,9 @@ export default function OpportunityInAccordian({
   isRedirect,
 }) {
   const history = useHistory();
+  const {
+    state: { selectedEntity },
+  }: any = useData();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
   switch (recordsPerLine) {
@@ -198,14 +204,15 @@ export default function OpportunityInAccordian({
                           <CardContent className="detailListing">
                             <Grid container className="detailCardHeader">
                               <Grid item xs={12} sm={8}>
-                                <Link
-                                  className="link"
-                                  to={`${routes.opportunityDetail.path}/${obj._id}`}
-                                >
-                                  <Typography>
-                                    {obj?.opportunityName}{" "}
-                                  </Typography>
-                                </Link>
+                                {
+                                  obj.entity === selectedEntity ? <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                    <Typography>{obj?.opportunityName}</Typography>
+                                  </Link> : <span className="d-flex gap-2 align-items-center">
+                                    <Typography>{obj.opportunityName}</Typography> <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
+                                      <InfoOutlinedIcon fontSize="small" />
+                                    </Tooltip>
+                                  </span>
+                                }
                               </Grid>
                               <Grid item xs={12} sm={4}>
                                 {obj?.amount ? (

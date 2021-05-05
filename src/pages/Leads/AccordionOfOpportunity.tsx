@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -17,6 +17,8 @@ import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from '../../constants/currency_with_country.json';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { useData } from '../../StateProvider/Provider';
 
 const Accordion = withStyles({
     root: {
@@ -73,8 +75,10 @@ function DisplayData({ label, value, icon }) {
 export default function AccordionOfOpportunity({
     opportunity, expanded = true, recordsPerLine = 2,
 }) {
-
     const history = useHistory();
+    const {
+        state: { selectedEntity },
+      }: any = useData();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -147,6 +151,16 @@ export default function AccordionOfOpportunity({
                                                             <Grid item xs={12} sm={12}>
 
                                                                 <Grid item xs={12} sm={8}>
+                                                                    {
+                                                                        opportunity.entity === selectedEntity ? <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
+                                                                            <Typography>{opportunity?.opportunityName}</Typography>
+                                                                        </Link> : <span className="d-flex gap-2 align-items-center">
+                                                                            <Typography>{opportunity.opportunityName}</Typography> <Tooltip title={`${opportunity.opportunityName} belongs to different entity`}>
+                                                                                <InfoOutlinedIcon fontSize="small" />
+                                                                            </Tooltip>
+                                                                        </span>
+                                                                    }
+
                                                                     <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
                                                                         <Typography >{opportunity?.opportunityName} </Typography>
                                                                     </Link>
