@@ -17,6 +17,12 @@ import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
+import { customerContact, supplierContact, customerAccount, supplierAccount } from '../../constants/helpers';
+import { useData } from '../../StateProvider/Provider';
+import ManageContactDialog from "./../Contact/ManageContact/index";
+import { AiOutlineMail } from 'react-icons/ai';
+import { HiOutlineUser } from 'react-icons/hi';
+import { AiOutlinePhone } from 'react-icons/ai';
 
 const Accordion = withStyles({
     root: {
@@ -55,32 +61,31 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
-    amount: {
-        float: "right",
-        fontWeight: "bold"
     }
-
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value }) {
+function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-            <Grid item sm={6} xs={6} md={4}>
-                <Typography>{label}</Typography>
-            </Grid>
-            <Grid item sm={6} xs={6} md={8}>
-                <Typography>{value}</Typography>
-            </Grid>
-        </Grid>
+        <List >
+            <ListItem>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText primary={value} secondary={label} />
+            </ListItem>
+        </List>
     </div>
 }
 
+
 export default function ContactAccordionInDetailPage({
-    contact, type,
-    expanded = true, recordsPerLine = 2,
+    contacts, type,
+    expanded = true, recordsPerLine = 2, userId, onSuccess
 }) {
     const history = useHistory();
+    const {
+        state: { permissions },
+    }: any = useData();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -93,24 +98,26 @@ export default function ContactAccordionInDetailPage({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 
+    const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [expandContact, setExpandContact] = useState(expanded);
+    const [showCreateContactDialog, setShowCreateContactDialog] = useState(false)
 
     useEffect(() => {
         let isExpanded = expandContact
-        if (contact?.length === 0 && isExpanded) isExpanded = false
-        else if (contact?.length > 0 && !isExpanded) isExpanded = true
+        if (contacts?.length === 0 && isExpanded) isExpanded = false
+        else if (contacts?.length > 0 && !isExpanded) isExpanded = true
 
         setExpandContact(isExpanded)
 
-    }, [contact])
+    }, [contacts])
     return <>
         <Accordion expanded={expandContact}>
             <AccordionSummary
@@ -135,10 +142,23 @@ export default function ContactAccordionInDetailPage({
                             </Box>
                             <Box padding="5px">
                                 <Typography variant="subtitle2">
-                                    {type === "customer" ? "Customer Contact" : "Supplier Contact"} ({contact?.length ? contact.length : 0})
+                                    {type === "customer" ? "Customer Contact" : "Supplier Contact"} ({contacts?.length ?? 0})
                                 </Typography>
                             </Box>
                         </Box>
+                    </Grid>
+                    <Grid item xs={4} container justify="flex-end" alignItems="center">
+                        <Typography variant="subtitle2">
+                            {
+                                (type === "customer" ? permissions?.customerContact?.isCreate : permissions?.supplierContact?.isCreate) && <IconButton
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => { setShowCreateContactDialog(true) }}
+                                >
+                                    <ControlPointIcon />
+                                </IconButton>
+                            }
+                        </Typography>
                     </Grid>
 
                 </Grid>
@@ -149,37 +169,33 @@ export default function ContactAccordionInDetailPage({
                     {
                         expandContact && <>
                             {
-                                contact && contact?.length ?
+                                contacts && contacts?.length ?
                                     <Grid container spacing={1}>
                                         {
-                                            contact.map((obj, index) => (
+                                            contacts.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
-
-
+                                                            <Grid container className="detailCardHeader">
+                                                                <Grid item xs={12} sm={12}>
+                                                                    <Link className="link" to={type === "customer" ? `${routes.customerContactDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
+                                                                        <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
+                                                                    </Link>
+                                                                </Grid>
+                                                            </Grid>
                                                             <Grid container>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.firstName ? <DisplayData label='First Name' value={obj?.firstName ?? ''} /> : ''
-                                                                    }
+                                                                <Grid container>
+                                                                    <Grid item xs={12} sm={12}>
+                                                                        {
+                                                                            obj?.firstName ? <DisplayData icon={<AiOutlinePhone size={20} />} label='Phone' value={obj?.phone ?? ''} /> : ''
+                                                                        }
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={12}>
+                                                                        {
+                                                                            obj?.email ? <DisplayData icon={<AiOutlineMail size={20} />} label='Email' value={obj?.email ?? ''} /> : ''
+                                                                        }
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.middleName ? <DisplayData label='Middle Name' value={obj?.middleName ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.lastName ? <DisplayData label='Last Name' value={obj?.lastName ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.email ? <DisplayData label='Email' value={obj?.email ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-
                                                             </Grid>
                                                         </CardContent>
                                                     </Card>
@@ -193,15 +209,32 @@ export default function ContactAccordionInDetailPage({
                 </>
             </AccordionDetails>
             {
-                contact?.length > 0 &&
-                <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/${type === "customer" ? "customer-contact" : "supplier-contact"}`)}
-                    p={1} display="flex" justifyContent="center" alignItems="center">
-                    <FaEye /> View All &#8599;
+                contacts?.length > 0 && contacts.length > recordsPerLine &&
+                <Box margin={1} className="btn-view gap-1" onClick={() => {
+                    // history.push(`/${type === "customer" ? "customer-contact" : "supplier-contact"}`)
+                    setMaxRecordsToShow(contacts.length)
+                }} p={1} display="flex" justifyContent="center" alignItems="center">
+                    <FaEye /> View All
                 </Box>
             }
             <Box margin={1} />
         </Accordion>
 
+        {
+            showCreateContactDialog && <ManageContactDialog
+                open={showCreateContactDialog}
+                onClose={() => setShowCreateContactDialog(false)}
+                onSuccess={() => {
+                    setShowCreateContactDialog(false);
+                    onSuccess();
+                }}
+                contactResource={type === "customer" ? customerContact.contactResource : supplierContact.contactResource}
+                contactApi={type === "customer" ? customerContact.contactApi : supplierContact.contactApi}
+                account={type === "customer" ? customerAccount : supplierAccount}
+                userId={userId}
+                isRedirectToDetailPage={false}
+            />
+        }
 
     </>
 }

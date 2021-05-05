@@ -18,8 +18,8 @@ const useStyles = makeStyles((theme) => ({
   box: {
     padding: theme.spacing(0.5, 1.5),
     borderRadius: "4px",
-    margin: theme.spacing(1.5),
-    boxShadow: "2px 2px 4px #916d4d",
+    margin: "8px 0px 8px 10px",
+    boxShadow: "2px 2px 4px #747474",
     background: "linear-gradient(to bottom right, #005d7c  0%, #013445 100%)",
     border: "#03232e"
   },
@@ -59,7 +59,7 @@ const DetailsPageHeader = (props) => {
               </>
             ) : null}
           </Grid>
-          <Grid item>{children}</Grid>
+          <Grid item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
         </Grid>
         <Box display="flex">
           {loading ? (

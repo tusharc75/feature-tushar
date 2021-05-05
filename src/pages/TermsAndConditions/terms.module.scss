@@ -16,7 +16,7 @@
 
 .terms_header {
   display: flex;
-  grid-gap: 20px;
+  grid-gap: 0.50rem;
   align-items: center;
 }
 .terms_header_search_bar {
@@ -25,7 +25,7 @@
 
 .terms_header_add_btn_action_btn_group {
   display: flex;
-  grid-gap: 15px;
+  grid-gap: 0.50rem;
 }
 
 .terms_header.terms_header-mobile

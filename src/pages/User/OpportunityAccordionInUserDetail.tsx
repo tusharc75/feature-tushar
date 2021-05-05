@@ -11,12 +11,13 @@ import { withStyles, makeStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
+import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
+import { useData } from '../../StateProvider/Provider';
 
 const Accordion = withStyles({
     root: {
@@ -55,10 +56,6 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
-    amount: {
-        float: "right",
-        fontWeight: "bold"
     }
 
 }))(MuiAccordionDetails);
@@ -78,9 +75,12 @@ function DisplayData({ label, value, icon }) {
 
 export default function OpportunityAccordionInUserDetail({
     opportunities,
-    expanded = true, recordsPerLine = 2,
+    expanded = true, recordsPerLine = 2, userId, onSuccess
 }) {
     const history = useHistory();
+    const {
+        state: { permissions },
+    }: any = useData();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -93,14 +93,15 @@ export default function OpportunityAccordionInUserDetail({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 
+    const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [expandOpportunity, setExpandOpportunity] = useState(expanded);
     const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
 
@@ -141,7 +142,19 @@ export default function OpportunityAccordionInUserDetail({
                             </Box>
                         </Box>
                     </Grid>
-
+                    <Grid item xs={4} container justify="flex-end" alignItems="center">
+                        <Typography variant="subtitle2">
+                            {
+                                permissions?.opportunity?.isCreate && <IconButton
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => { setShowCreateOpportunityDialog(true) }}
+                                >
+                                    <ControlPointIcon />
+                                </IconButton>
+                            }
+                        </Typography>
+                    </Grid>
                 </Grid>
             </AccordionSummary>
             <Box margin={0.50} />
@@ -153,17 +166,10 @@ export default function OpportunityAccordionInUserDetail({
                                 opportunities && opportunities?.length ?
                                     <Grid container spacing={1}>
                                         {
-                                            opportunities.map((obj, index) => (
+                                            opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
-                                                            {/* <span className={classes.actionsItems}> */}
-                                                            {/* <VisibilityOutlined /> */}
-                                                            {/* <IconButton size="small">
-                                                            <Delete color="error" />
-                                                        </IconButton> */}
-                                                            {/* <EditOutlined /> */}
-                                                            {/* </span> */}
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={8}>
                                                                     <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
@@ -200,15 +206,32 @@ export default function OpportunityAccordionInUserDetail({
                 </>
             </AccordionDetails>
             {
-                opportunities?.length > 0 &&
-                <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/opportunity`)}
-                    p={1} display="flex" justifyContent="center" alignItems="center">
-                    <FaEye /> View All &#8599;
+                opportunities?.length > 0 && opportunities.length > recordsPerLine &&
+                <Box margin={1} className="btn-view gap-1" onClick={() => {
+                    setMaxRecordsToShow(opportunities.length)
+                    // history.push(`/opportunity`)
+                }} p={1} display="flex" justifyContent="center" alignItems="center">
+                    <FaEye /> View All
                 </Box>
             }
             <Box margin={1} />
         </Accordion>
 
+        {
+            showCreateOpportunityDialog && <ManageOpportunityDialog
+                isNew={true}
+                open={showCreateOpportunityDialog}
+                onClose={() => setShowCreateOpportunityDialog(false)}
+                onSuccess={() => {
+                    setShowCreateOpportunityDialog(false);
+                    onSuccess();
+                    // onNewOpportunityAdd();
+                }}
+                isRedirectTodetailPage={false}
+                resource={null}
+                userId={userId}
+            />
+        }
 
     </>
 }

@@ -22,6 +22,8 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import { userType } from './../../constants/helpers'
 
 let userTimeout: ReturnType<typeof setTimeout>;
 const User: FC = () => {
@@ -81,15 +83,16 @@ const User: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          isChecked: false,
-          name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-          createdBy: user.createdBy,
-          updatedBy: user.updatedBy,
-          status: user.blocked ? user.blocked : false,
-        }))
+        id: user._id,
+        isChecked: false,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+        createdBy: user.createdBy,
+        updatedBy: user.updatedBy,
+        status: user.blocked ? user.blocked : false,
+        isBrandAdmin: user.userType === userType.brandAdmin
+      }))
       : [];
 
     setDataRows(rows);
@@ -133,13 +136,18 @@ const User: FC = () => {
       headerName: "Name",
       width: 400,
       renderCell: (params: any) => (
-        <Link
-          title={params.value}
-          className="text-truncate link"
-          to={`${routes.userDetail.path}/${params.row.id}`}
-        >
-          {params.value}
-        </Link>
+        <>
+          <Link
+            title={params.value}
+            className="text-truncate link"
+            to={`${routes.userDetail.path}/${params.row.id}`}
+          >
+            {params.value}
+          </Link>
+          {params.row.isBrandAdmin ? <Tooltip title="Brand Admin">
+            <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
+          </Tooltip> : ""}
+        </>
       ),
       sortable: false,
       filterable: false,
@@ -480,9 +488,8 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete user ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete user ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

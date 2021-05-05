@@ -432,7 +432,8 @@ export default function Contact(props) {
     if (renderCount > 0) {
       getContacts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query, selectedType]);
+  }, [query, selectedType, accountDetails]);
+
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -539,7 +540,7 @@ export default function Contact(props) {
             justify="space-between"
           >
             <Grid item className="d-flex align-items-center gap-1">
-              <MdContacts className="headerLogo" />{" "}
+              <MdContacts className="headerLogo" />
               <span className="listingHeader">
                 {sidebarResource[contactResource]}
               </span>
@@ -567,7 +568,7 @@ export default function Contact(props) {
                   label={`Account: ${accountDetails.accountName}`}
                   onDelete={() => {
                     setAccountDetails({ accountId: null, accountName: null });
-                    getContacts();
+                    // getContacts();
                   }}
                 />
               )}
@@ -585,6 +586,7 @@ export default function Contact(props) {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small"
                       onClick={clickCreateNew}
                       startIcon={<AddIcon />}
                       className={styles.add_submit_btn}
@@ -603,6 +605,7 @@ export default function Contact(props) {
                       }
                       variant="outlined"
                       color="default"
+                      size="small"
                       onClick={openActions}
                       className={styles.action_submit_btn}
                       aria-controls="action-menu"
