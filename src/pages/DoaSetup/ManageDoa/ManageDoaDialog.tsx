@@ -109,61 +109,63 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
             {!loading &&
                 <>
                     <CustomDialogHeader title={doa?.length > 0 ? "Edit DOA" : "Add DOA"} />
-                    <Autocomplete className={classes.currencyStyle}
-                            fullWidth
-                            size="small"
-                            value={
-                                currencyData.filter((data) => data?.currencyCode === currency)
-                                    .length
-                                    ? currencyData.filter(
-                                        (data) => data?.currencyCode === currency
-                                    )[0]
-                                    : ""
-                            }
-                            options={currencyData}
-                            getOptionLabel={(option: any) =>
-                                option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
-                            }
-                            getOptionSelected={(option: any, val) => option?.currencyCode === val}
-                            onChange={(e, val) => {
-                                setCurrency(val?.currencyCode ? val?.currencyCode : "")
-                                setCurrencySymbol(val?.symbolNative)
-                            }
-                            }
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    name={"currency"}
-                                    label={"Currency"}
 
-                                />
-                            )}
-                            renderOption={(option) => {
-                                const { currencyCode, name, countryCode, symbolNative } = option;
-                                return (
-                                    <Grid container alignItems="center">
-                                        <Grid item>
-                                            <Avatar
-                                                variant="rounded"
-                                                src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
-                                                style={{ marginRight: 20, width: "40px", height: "30px" }}
-                                            />
-                                        </Grid>
-                                        <Grid item xs>
-                                            <Typography>{currencyCode} ({symbolNative})</Typography>
-                                            <Typography variant="body2" color="textSecondary">
-                                                {name}
-                                            </Typography>
-                                        </Grid>
+                    <Autocomplete className={classes.currencyStyle}
+                        fullWidth
+                        size="small"
+                        value={
+                            currencyData.filter((data) => data?.currencyCode === currency)
+                                .length
+                                ? currencyData.filter(
+                                    (data) => data?.currencyCode === currency
+                                )[0]
+                                : ""
+                        }
+                        options={currencyData}
+                        getOptionLabel={(option: any) =>
+                            option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
+                        }
+                        getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                        onChange={(e, val) => {
+                            setCurrency(val?.currencyCode ? val?.currencyCode : "")
+                            setCurrencySymbol(val?.symbolNative)
+                        }
+                        }
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                name={"currency"}
+                                label={"Currency"}
+
+                            />
+                        )}
+                        renderOption={(option) => {
+                            const { currencyCode, name, countryCode, symbolNative } = option;
+                            return (
+                                <Grid container alignItems="center">
+                                    <Grid item>
+                                        <Avatar
+                                            variant="rounded"
+                                            src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+                                            style={{ marginRight: 20, width: "40px", height: "30px" }}
+                                        />
                                     </Grid>
-                                );
-                            }}
-                        />
+                                    <Grid item xs>
+                                        <Typography>{currencyCode} ({symbolNative})</Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {name}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            );
+                        }}
+                    />
                     <Formik
                         initialValues={{ users: users }}
                         onSubmit={() => { }}
-                        render={({ values }) => (
+                        render={({ values,
+                            errors }) => (
                             <>
                                 <DialogContent>
                                     <Form>
@@ -222,7 +224,13 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                                                                             });
                                                                                         }}
 
-                                                                                        renderInput={(params) => <TextField {...params} fullWidth variant="outlined"
+                                                                                        renderInput={(params) => <TextField
+                                                                                            {...params}
+                                                                                            variant="outlined"
+                                                                                            name="amountField"
+                                                                                            error={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined}
+                                                                                            helperText={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined ? " User is Required" : ""}
+                                                                                            required
                                                                                         />}
                                                                                     />
 
@@ -255,10 +263,14 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                                                                 </Grid>
                                                                                 <Grid item md={2}>
                                                                                     <ButtonGroup size="small" aria-label="small outlined button group">
-                                                                                        <IconButton size="small" aria-label="add" onClick={() => {
-                                                                                            arrayHelpers.push({ "id": "", "name": "", "amount": 0 })
-                                                                                        }
-                                                                                        } >
+                                                                                        <IconButton
+                                                                                            size="small"
+                                                                                            aria-label="add"
+                                                                                            disabled={values.users.length == userList.length}
+                                                                                            onClick={() => {
+                                                                                                arrayHelpers.push({ "id": "", "name": "", "amount": 0 })
+                                                                                            }
+                                                                                            } >
                                                                                             <Add />
                                                                                         </IconButton>
                                                                                         <IconButton size="small" aria-label="delete" onClick={() => arrayHelpers.remove(index)} >
