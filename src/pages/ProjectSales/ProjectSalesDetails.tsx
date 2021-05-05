@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { ControlPoint } from "@material-ui/icons";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 
 import TeamUsers from "./TeamUsers";
 import Layout from "../../components/Layout";
@@ -32,8 +32,9 @@ const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
+  const { state } = useLocation();
   const {
-    state: { permissions },
+    state: { user, permissions },
   }: any = useData();
   const [loading, setLoading] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -47,6 +48,7 @@ const ProjectSalesDetails = () => {
   const [headingLbl, setHeadingLbl] = useState("");
   const [mainPoints, setMainPoints] = useState(null);
   const [deleteRec, setDeleteRec] = useState(null);
+  const [removeUserRec, setRemoveUserRec] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
@@ -54,6 +56,17 @@ const ProjectSalesDetails = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.projectSales,
   ]);
+
+  useEffect(() => {
+    if (!state) return;
+
+    axiosInstance()
+      .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
+      .then(() => {})
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
 
   /**
    * Get sales strategy data for paticular ID
@@ -170,6 +183,36 @@ const ProjectSalesDetails = () => {
   };
 
   /**
+   * Handle Remove Users
+   */
+  const handleRemoveUser = (rec) => {
+    setRemoveUserRec(rec);
+    setShowConfirmBox(true);
+  };
+
+  const RemoveUser = () => {
+    if (removeUserRec) {
+      const dataObj = {
+        user: teamUsers
+          .filter((user) => user._id !== removeUserRec._id)
+          .map((user) => user._id),
+        _id: id,
+      };
+
+      axiosInstance()
+        .put(`/project-sales/add-user`, dataObj)
+        .then(() => {
+          getSalesData();
+          setShowConfirmBox(false);
+        })
+        .catch((error) => {
+          setShowConfirmBox(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  /**
    * Handle Open Users Dialog For Teams
    */
   const handleOpenDialog = (type: string, id: string = "") => {
@@ -195,6 +238,8 @@ const ProjectSalesDetails = () => {
         return customerContacts.length
           ? customerContacts.map((t) => t._id)
           : [];
+      case "opportunity":
+        return opportunities.length ? opportunities.map((t) => t._id) : [];
 
       default:
         return [];
@@ -259,22 +304,30 @@ const ProjectSalesDetails = () => {
                     mainPoints={mainPoints}
                     showHeading={true}
                   >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleOpenUpdateDialog}
-                    >
-                      Edit
-                    </Button>
+                    {permissions?.projectSales.isUpdate &&
+                      user.user._id ===
+                        projectSalesData.projectManager?.optionValue && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleOpenUpdateDialog}
+                        >
+                          Edit
+                        </Button>
+                      )}
 
                     <Box component="span" marginX={1} />
 
-                    <DeleteButton
-                      text="Delete"
-                      onClick={() => {
-                        handleDeleteProject(id);
-                      }}
-                    />
+                    {permissions?.projectSales.isDelete &&
+                      user.user._id ===
+                        projectSalesData.projectManager?.optionValue && (
+                        <DeleteButton
+                          text="Delete"
+                          onClick={() => {
+                            handleDeleteProject(id);
+                          }}
+                        />
+                      )}
                   </DetailsPageHeader>
                 )}
                 <Box>
@@ -294,7 +347,7 @@ const ProjectSalesDetails = () => {
                         justifyContent="space-between"
                       >
                         <Typography variant="subtitle2">
-                          Sales Strategy
+                          Project Sales
                         </Typography>
                       </Box>
                       <DetailsPage
@@ -347,7 +400,14 @@ const ProjectSalesDetails = () => {
                       ))
                     ) : teamUsers.length ? (
                       <>
-                        <TeamUsers permissions={permissions} data={teamUsers} />
+                        <TeamUsers
+                          managerId={
+                            projectSalesData.projectManager?.optionValue
+                          }
+                          permissions={permissions}
+                          data={teamUsers}
+                          removeUser={handleRemoveUser}
+                        />
                         <Box marginY={1} />
                       </>
                     ) : (
@@ -367,9 +427,10 @@ const ProjectSalesDetails = () => {
             customerAccounts={customerAccounts}
             customerContacts={customerContacts}
             opportunities={opportunities}
-            permissions={permissions}
+            permissions={permissions?.projectSales}
             fetchProjectData={getSalesData}
             projectId={id}
+            users={teamUsers}
           />
         </div>
       </Layout>
@@ -379,14 +440,17 @@ const ProjectSalesDetails = () => {
           open={showConfirmBox}
           message={
             deleteRec
-              ? `Are you sure you want to delete this sales strategy ${projectSalesData.projectName}`
+              ? `Are you sure you want to delete this ${projectSalesData.projectName}`
+              : removeUserRec
+              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
               : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
             if (deleteRec) setDeleteRec(null);
+            if (removeUserRec) setRemoveUserRec(null);
           }}
-          onOk={deleteRec ? DeleteProject : null}
+          onOk={deleteRec ? DeleteProject : removeUserRec ? RemoveUser : null}
         />
       ) : null}
     </>
