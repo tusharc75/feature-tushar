@@ -110,7 +110,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                 <>
                     {/* <CustomDialogHeader title="Add DOA" /> */}
                     <MuiDialogTitle disableTypography className={classes.root}>
-                        <Typography variant="h6" className={classes.dialogTitle}>Add DOA</Typography>
+                        <Typography variant="h6" className={classes.dialogTitle}>{doa?.length > 0 ? "Edit DOA" : "Add DOA"}</Typography>
 
                         <Autocomplete className={classes.currencyStyle}
                             fullWidth
@@ -227,7 +227,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                                                                             });
                                                                                         }}
 
-                                                                                        renderInput={(params) => <TextField {...params} fullWidth variant="outlined" 
+                                                                                        renderInput={(params) => <TextField {...params} fullWidth variant="outlined"
                                                                                         />}
                                                                                     />
 
@@ -311,12 +311,6 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                         variant="contained"
                                         color="primary"
                                         type="submit"
-                                        // disabled={
-                                        //     Object.values(doa).toString() ===
-                                        //     Object.values(values.users.filter(item => item.name != '' || item.name != undefined)).toString()
-                                        //     // || Object.keys(errors).length > 0 ? true : false
-
-                                        // }
                                         onClick={() => {
                                             handleSubmit(values.users)
                                         }}
