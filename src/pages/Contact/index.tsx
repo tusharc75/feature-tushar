@@ -203,13 +203,13 @@ export default function Contact(props) {
       field: "phone",
       headerName: "Phone",
       width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "email",
       headerName: "Email",
       width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "createdBy",

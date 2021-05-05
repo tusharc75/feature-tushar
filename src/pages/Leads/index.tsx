@@ -385,20 +385,20 @@ const Leads = () => {
       field: "phone",
       headerName: "Phone",
       width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "mobile",
       headerName: "Mobile",
       width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "email",
       headerName: "Email",
       width: 250,
       hide: true,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     // { field: "status", headerName: "Lead Status", width: 200 },
     {

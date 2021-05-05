@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Grid, Typography, Box, Avatar, Paper, Tooltip } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CopyToClipboard from '../components/Helpers/CopyToClipboard'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -97,6 +98,7 @@ const DetailsPageHeader = (props) => {
                         style={{ fontWeight: 500 }}
                       >
                         {mainPoints[key] || ""}
+                        {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: "white" }} /> : null}
                       </Typography>
                     </Box>
                   ) : null}

@@ -58,11 +58,13 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
     setSubmitting(true);
     axiosInstance()
       .post("/project-Sales", values)
-      .then(({ data }) => {
-        const newId = data.data._id;
+      .then(({ data: { data } }) => {
+        const newId = data._id;
         setSubmitting(false);
         fetchData();
-        history.push(`/project-sales/detail/${newId}`);
+        history.push(`/project-sales/detail/${newId}`, {
+          managerId: data.projectManager,
+        });
         close();
       })
       .catch((err) => {
@@ -78,7 +80,7 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
       fullWidth
       fullScreen={isMobile}
     >
-      <CustomDialogHeader title="Create New Project-Sales" onClose={close} />
+      <CustomDialogHeader title="Create New Project Sales" onClose={close} />
 
       {loading || !initialData.fields.length ? (
         <>

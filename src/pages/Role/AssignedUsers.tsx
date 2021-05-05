@@ -7,8 +7,9 @@ import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
-
+import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
+import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,45 +36,46 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
       <List disablePadding>
         {data && data.length
           ? data.map((obj) => (
-              <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
-                <ListItem disableGutters className={classes.list}>
-                  <ListItemText
-                    primary={
-                      <Typography>
-                        <Link
-                          className="link"
-                          to={`/user/detail/${obj._id}`}
-                        >
-                          {`${obj.firstName} ${obj.lastName}` || ""}
-                        </Link>
-                      </Typography>
-                    }
-                    secondary={obj.email || ""}
-                  />
-                  {permissions.role.isUpdate && (
-                    <ListItemSecondaryAction
-                      title={
-                        currentUser === obj._id
-                          ? "Primary user can't be unassigned"
-                          : "Unassign User"
-                      }
-                    >
-                      <IconButton
-                        size="small"
-                        disabled={currentUser === obj._id}
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => unassignRole(obj)}
+            <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
+              <ListItem disableGutters className={classes.list}>
+                <ListItemText
+                  primary={
+                    <Typography>
+                      <Link
+                        className="link"
+                        to={`/user/detail/${obj._id}`}
                       >
-                        <DeleteIcon
-                          color={currentUser === obj._id ? "disabled" : "error"}
-                        />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  )}
-                </ListItem>
-              </BoxWithBorder>
-            ))
+                        {`${obj.firstName} ${obj.lastName}` || ""}
+                      </Link>
+                    </Typography>
+                  }
+                  secondary={obj.email}
+                />
+                <CopyToClipboard textToCopy={obj.email} />
+                {permissions.role.isUpdate && (
+                  <ListItemSecondaryAction
+                    title={
+                      currentUser === obj._id
+                        ? "Primary user can't be unassigned"
+                        : "Unassign User"
+                    }
+                  >
+                    <IconButton
+                      size="small"
+                      disabled={currentUser === obj._id}
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => unassignRole(obj)}
+                    >
+                      <DeleteIcon
+                        color={currentUser === obj._id ? "disabled" : "error"}
+                      />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                )}
+              </ListItem>
+            </BoxWithBorder>
+          ))
           : null}
       </List>
     </div>

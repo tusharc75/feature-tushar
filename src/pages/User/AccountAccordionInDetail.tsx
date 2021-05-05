@@ -13,7 +13,7 @@ import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
+import { IoCalendarOutline, IoCall } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
@@ -25,7 +25,7 @@ import { FaIndustry } from 'react-icons/fa';
 import { AiOutlineMail } from 'react-icons/ai';
 import { HiOutlineUser } from 'react-icons/hi';
 import { AiOutlinePhone } from 'react-icons/ai';
-
+import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
 const Accordion = withStyles({
     root: {
         border: "1px solid rgba(0, 0, 0, .125)",
@@ -67,14 +67,19 @@ const AccordionDetails = withStyles((theme) => ({
 
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value, icon }) {
+function DisplayData({ label, value, icon, showCopyToText = false }) {
     return <div style={{ flexGrow: 1 }}>
         <List >
             <ListItem>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
+                <ListItemText
+                    primary={value}
+                    secondary={label} />
+                {
+                    showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
+                }
             </ListItem>
         </List>
     </div>
@@ -196,7 +201,7 @@ export default function AccountAccordionDetail({
                                                                     </Grid>
                                                                     <Grid item xs={12} sm={12}>
                                                                         {
-                                                                            obj?.phone ? <DisplayData icon={<AiOutlinePhone size={20} />} label='Phone' value={obj?.phone ?? ''} /> : ''
+                                                                            obj?.phone ? <DisplayData showCopyToText={true} icon={<AiOutlinePhone size={20} />} label='Phone' value={obj?.phone ?? ''} /> : ''
                                                                         }
                                                                     </Grid>
 

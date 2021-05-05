@@ -202,25 +202,24 @@ Button.MuiButtonBase-root {
       cursor: no-drop !important;
     }
   }
-}
 
-.MuiStep-horizontal {
-  background: #e4e4e4;
-  padding: 10px;
-  border-radius: 3px;
-  border: 2px solid #dcdada;
-}
-.MuiStepLabel-label {
-  color: #bab9b9 !important;
-  font-weight: 500 !important;
-  &.MuiStepLabel-completed {
-    color: white !important;
+  .MuiStep-horizontal {
+    background: #e4e4e4;
+    padding: 10px;
+    border-radius: 3px;
+    border: 2px solid #dcdada;
   }
+  .MuiStepLabel-label {
+    color: #bab9b9 !important;
+    font-weight: 500 !important;
+    &.MuiStepLabel-completed {
+      color: white !important;
+    }
 
-  &.MuiStepLabel-active {
-    color: var(--primary) !important;
+    &.MuiStepLabel-active {
+      color: var(--primary) !important;
+    }
   }
-}
 
 .MuiStepLabel-iconContainer {
   opacity: 0.4;
@@ -237,4 +236,9 @@ Button.MuiButtonBase-root {
   height: 12rem;
   display: flex;
   align-items: center;
+}
+  .MuiStepLabel-iconContainer {
+    opacity: 0.4;
+    color: white;
+  }
 }

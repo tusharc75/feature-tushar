@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction } from '@material-ui/core'
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -13,7 +13,7 @@ import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
+import { IoCalendarOutline, IoBriefcase } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
@@ -25,6 +25,7 @@ import { HiOutlineUser } from 'react-icons/hi';
 import { AiOutlinePhone } from 'react-icons/ai';
 import { FiStar } from 'react-icons/fi';
 import { BiPhone } from 'react-icons/bi';
+import CopyToClipboard from "../../components/Helpers/CopyToClipboard"
 
 const Accordion = withStyles({
     root: {
@@ -73,6 +74,24 @@ const AccordionDetails = withStyles((theme) => ({
 //         </span>
 //     </div>
 // }
+function DisplayData({ label, value, icon, showCopyToText = false }) {
+    return <div style={{ flexGrow: 1 }}>
+        <List >
+            <ListItem>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText
+                    primary={value}
+                    secondary={label} />
+                {
+                    showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
+                }
+            </ListItem>
+        </List>
+    </div>
+}
+
 
 export default function ContactAccordionInDetailPage({
     contacts, type,
@@ -197,10 +216,10 @@ export default function ContactAccordionInDetailPage({
                                                                                         <FiStar size="15" />{obj?.title}
                                                                                     </span>}
                                                                                     {obj?.phone && <span className="d-flex gap-2 align-items-center">
-                                                                                        <AiOutlineMail size="15" />{obj?.phone}
+                                                                                        <AiOutlineMail size="15" />{obj?.phone}  <CopyToClipboard textToCopy={obj?.phone} />
                                                                                     </span>}
                                                                                     {obj?.email && <span className="d-flex gap-2 align-items-center">
-                                                                                        <BiPhone size="15" />{obj?.email}
+                                                                                        <BiPhone size="15" />{obj?.email}  <CopyToClipboard textToCopy={obj?.email} />
                                                                                     </span>}
                                                                                 </Typography>
                                                                             </React.Fragment>
