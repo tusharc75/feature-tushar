@@ -322,14 +322,14 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                             || values.users.filter(item => item.name === "" || item.name === undefined || item.id == "" || item.id === undefined).length > 0
                                             || JSON.stringify(values.users.map((item) => {
                                                 return {
-                                                  id: item?.id,
-                                                  name: item?.name,
-                                                  firstName: item?.firstName,
-                                                  lastName: item?.lastName,
-                                                  amount: Number(item.amount),
+                                                    id: item?.id,
+                                                    name: item?.name,
+                                                    firstName: item?.firstName,
+                                                    lastName: item?.lastName,
+                                                    amount: Number(item.amount),
                                                 };
-                                              })) === JSON.stringify(users) && currency === doaCurrency
-                                          
+                                            })) === JSON.stringify(users) && currency === doaCurrency
+
                                         }
                                         onClick={() => {
                                             handleSubmit(values.users)
