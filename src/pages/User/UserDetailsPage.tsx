@@ -126,7 +126,6 @@ const UserDetailsPage = () => {
       const {
         data: { data },
       } = await axiosInstance().get(`/user/${id}`);
-
       handleMainPoints(data);
       const name = [data.firstName, data.lastName].filter((d) => d).join(" ");
 
@@ -589,6 +588,9 @@ const UserDetailsPage = () => {
                               permissions={permissions}
                               data={globalRoles}
                               unassignRole={handleUnassignRole}
+                              loggedInUser={user?.user}
+                              currentUserId={id}
+
                             />
                           )}
                         </Box>
