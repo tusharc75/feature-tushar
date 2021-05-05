@@ -15,9 +15,12 @@ import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunity
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
-import { FaEye } from 'react-icons/fa';
-import currencies from './../../constants/currency_with_country.json';
+import { HiOutlineUser } from 'react-icons/hi';
 import { BsBuilding } from 'react-icons/bs';
+import currencies from './../../constants/currency_with_country.json';
+import { useData } from '../../StateProvider/Provider';
+import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
+import { FaEye } from 'react-icons/fa';
 
 const Accordion = withStyles({
     root: {
@@ -56,10 +59,6 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
-    amount: {
-        float: "right",
-        fontWeight: "bold"
     }
 
 }))(MuiAccordionDetails);
@@ -77,11 +76,16 @@ function DisplayData({ label, value, icon }) {
     </div>
 }
 
+
 export default function LeadAccordionInUserDetailPage({
     leads,
-    expanded = true, recordsPerLine = 2,
+    expanded = true, recordsPerLine = 3, userId, onSuccess
 }) {
     const history = useHistory();
+    const {
+        state: { permissions },
+    }: any = useData();
+
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -94,15 +98,17 @@ export default function LeadAccordionInUserDetailPage({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 
+    const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     const [expandLead, setExpandLead] = useState(expanded);
+    const [showCreateLeadDialog, setShowCreateLeadDialog] = useState(false)
 
     useEffect(() => {
         let isExpanded = expandLead
@@ -141,6 +147,19 @@ export default function LeadAccordionInUserDetailPage({
                             </Box>
                         </Box>
                     </Grid>
+                    <Grid item xs={4} container justify="flex-end" alignItems="center">
+                        <Typography variant="subtitle2">
+                            {
+                                permissions?.lead?.isCreate && <IconButton
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => { setShowCreateLeadDialog(true) }}
+                                >
+                                    <ControlPointIcon />
+                                </IconButton>
+                            }
+                        </Typography>
+                    </Grid>
 
                 </Grid>
             </AccordionSummary>
@@ -153,29 +172,25 @@ export default function LeadAccordionInUserDetailPage({
                                 leads && leads?.length ?
                                     <Grid container spacing={1}>
                                         {
-                                            leads.map((obj, index) => (
+                                            leads.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card style={{ minWidth: "100%" }}>
                                                         <CardContent className="detailListing">
-                                                            <Grid container className="detailCardHeader">
-
-                                                                <Grid item xs={12} sm={8}>
-                                                                    <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
-                                                                        <Typography >{obj?.firstName}  {obj?.lastName} </Typography>
-                                                                    </Link>
-                                                                </Grid>
-                                                            </Grid>
 
                                                             <Grid container>
-
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.status ? <DisplayData label='Status' value={obj?.status ?? ''} icon={<IoCalendarOutline size={20} />} /> : ''
+                                                                        obj?.firstName ? <DisplayData label='Name' icon={<HiOutlineUser size={20}/>} value={[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.company ? <DisplayData label='Company' value={obj?.company ?? ''} icon={<BsBuilding size={20} />} /> : ''
+                                                                        obj?.status ? <DisplayData label='Status' icon={<BiCustomize size={20}/>} value={obj?.status ?? ''} /> : ''
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={12}>
+                                                                    {
+                                                                        obj?.company ? <DisplayData label='Company' icon={<BsBuilding size={20}/>} value={obj?.company ?? ''} /> : ''
                                                                     }
                                                                 </Grid>
                                                             </Grid>
@@ -192,14 +207,32 @@ export default function LeadAccordionInUserDetailPage({
             </AccordionDetails>
             {
                 leads?.length > 0 &&
-                <Box margin={1} className="btn-view gap-1" onClick={() => history.push(`/lead`)}
+                <Box margin={1} className="btn-view gap-1" onClick={() => {
+                    setMaxRecordsToShow(leads.length)
+                    // history.push(`/lead`)
+                }}
                     p={1} display="flex" justifyContent="center" alignItems="center">
-                    <FaEye /> View All &#8599;
+                    <FaEye /> View All
                 </Box>
             }
             <Box margin={1} />
         </Accordion>
 
+        {
+            showCreateLeadDialog && <ManageLeadDialog
+                open={showCreateLeadDialog}
+                onSuccess={() => {
+                    setShowCreateLeadDialog(false);
+                    onSuccess();
+                }}
+                onClose={() => setShowCreateLeadDialog(false)}
+                isNew={true}
+                dataToUpdate={null}
+                leadApi={routes.lead.path}
+                isRedirectToDetailPage={false}
+                userId={userId}
+            />
+        }
 
     </>
 }

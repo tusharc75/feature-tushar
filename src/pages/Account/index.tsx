@@ -695,7 +695,8 @@ export default function Account(props) {
                     <Button
                       variant="contained"
                       color="primary"
-                      className={`px-3 ${accountClass.account_header_add_btn}`}
+                      size="small"
+                      className={`${accountClass.account_header_add_btn}`}
                       onClick={clickCreateNew}
                       startIcon={<AddOutlined />}
                     >
@@ -711,6 +712,7 @@ export default function Account(props) {
                         }
                         variant="outlined"
                         color="default"
+                        size="small"
                         className={`${accountClass.account_header_action_btn}`}
                         onClick={openActions}
                         aria-controls="action-menu"

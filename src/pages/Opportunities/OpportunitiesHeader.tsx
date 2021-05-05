@@ -83,6 +83,7 @@ function OpportunitiesHeader(props) {
                     <Button
                         variant="contained"
                         color="primary"
+                        size="small"
                         className={styles.add_submit_btn}
                         onClick={onCreate}
                         startIcon={<AddOutlined />}
@@ -96,6 +97,7 @@ function OpportunitiesHeader(props) {
                             disabled={canDelete}
                             variant="outlined"
                             color="default"
+                            size="small"
                             onClick={openActions}
                             className={styles.action_submit_btn}
                             aria-controls="action-menu"
