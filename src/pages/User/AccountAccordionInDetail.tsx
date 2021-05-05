@@ -13,7 +13,7 @@ import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
+import { IoCalendarOutline, IoCall } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
