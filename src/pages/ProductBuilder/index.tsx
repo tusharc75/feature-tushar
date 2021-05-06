@@ -11,7 +11,6 @@ import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { productCategoryPage } from '../../routes/ProductCategory'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -21,24 +20,27 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
+import routes from "../../components/Helpers/Routes";
+import CreateNewDialog from "./CreateNewDialog";
 
-const ProductCategory = () => {
+const ProductBuilder = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const [loading, setLoading] = useState(true);
-    const [productCategory, setProductCategory] = useState([]);
+    const [isCreate, setIsCreate] = useState(false);
+    const [productBuilder, setProductBuilder] = useState([]);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
 
     useEffect(() => {
-        fetchProductCategory();
+        fetchProductBuilder();
     }, []);
 
-    const fetchProductCategory = () => {
+    const fetchProductBuilder = () => {
         setLoading(true)
-        axiosInstance().get(`/productcategory`).then(({ data: { data } }) => {
-            setProductCategory(data);
+        axiosInstance().get(`/productbuilder`).then(({ data: { data } }) => {
+            setProductBuilder(data);
             setLoading(false)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -46,8 +48,8 @@ const ProductCategory = () => {
     };
 
     const handleDelete = () => {
-        axiosInstance().delete(`/productcategory/` + deleteRecord._id).then(() => {
-            fetchProductCategory();
+        axiosInstance().delete(`/productbuilder/` + deleteRecord._id).then(() => {
+            fetchProductBuilder();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
         }).catch((error) => {
@@ -60,10 +62,10 @@ const ProductCategory = () => {
         { field: 'id', headerName: 'id', hide: true },
         {
             field: "name",
-            headerName: "Product Category",
+            headerName: "Name",
             width: 300,
             renderCell: (params) => (
-                <Link className="LeadNameLink" to={`${productCategoryPage.path}/${params.row.id}`} >
+                <Link className="LeadNameLink" to={`${routes.productBuilder.path}/${params.row.id}`} >
                     {params.row.name}
                 </Link>
             )
@@ -128,24 +130,21 @@ const ProductCategory = () => {
         }
     ];
 
-    const CreateNew = () => {
-        history.push({ pathname: "/product-category/0" })
-    }
 
     return (<Layout>
         <Grid container>
             <Grid item md={12} sm={12} xs={12}>
-                <CustomBreadCrumbs routes={[{ title: "Product Category" }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title }]} />
             </Grid>
         </Grid>
         <CustomContainer>
             <div className="header-panel">
                 <Grid container>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">Product Category </span>
+                        <GiAbstract055 /> <span className="listingHeader">{routes.productBuilder.title}</span>
                     </Grid>
                     <Grid xs={6} container justify="flex-end">
-                        <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                        <Button onClick={() => setIsCreate(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                     </Grid>
                 </Grid>
             </div>
@@ -156,7 +155,7 @@ const ProductCategory = () => {
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
-                    rows={productCategory}
+                    rows={productBuilder}
                     disableSelectionOnClick
                     disableMultipleSelection
                     columns={columns}
@@ -172,9 +171,10 @@ const ProductCategory = () => {
                     onOk={handleDelete}
                 />
             }
+            {isCreate && <CreateNewDialog handleClose={() => setIsCreate(false)} />}
         </CustomContainer>
     </Layout>
     );
 }
 
-export default ProductCategory;
+export default ProductBuilder;

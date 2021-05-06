@@ -325,6 +325,7 @@ const FormTypes = (props) => {
               _data.decimalPlaces
             );
             setFieldValue(_data.fieldName, calValue);
+            //handleFormula(_data.fieldName, calValue)
           }
         });
     }
@@ -555,7 +556,14 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => handleChange(name, e.target.value)
+          onChange ? onChange : (e) => {
+            if (fieldData.returnType === "decimal") {
+              handleChange(name, parseFloat(e.target.value))
+            }
+            else {
+              handleChange(name, e.target.value)
+            }
+          }
         }
       />
     </InfoLabel>

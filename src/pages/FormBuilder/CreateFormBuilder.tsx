@@ -13,6 +13,7 @@ import { FormBuilder } from "../../components/FormBuilder";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import CustomContainer from "../../components/CustomContainer";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -64,9 +65,9 @@ const CreateFormBuilder = (props) => {
         section.forEach(_section => {
             _section.field.forEach(_field => {
                 let _field_data = _field
-                _field_data.fieldId = _field_data.fieldId.toString();
+                _field_data._id = _field_data._id.toString();
                 _field_data.sectionName = _section.sectionName
-                if (!isNaN(_field.fieldId)) {
+                if (!isNaN(_field._id)) {
                     _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
                 }
                 _field_data.order = ++order
@@ -91,43 +92,45 @@ const CreateFormBuilder = (props) => {
     const classes = useStyles();
     return (<Layout>
         <CustomBreadCrumbs routes={[routes.formBuilder, { title: "Resource" }]} />
-        {section ?
-            <Fragment>
-                <Box mt={2} p={2} pb={0} bgcolor="white" >
-                    <Grid container spacing={1}>
-                        <Grid item xs={3}>
-                            <Typography variant="caption">Brand </Typography>
-                            <Typography variant="body1">{brandName}</Typography>
+        <CustomContainer>
+            {section ?
+                <Fragment>
+                    <Box mt={2} p={2} pb={0} bgcolor="white" >
+                        <Grid container spacing={1}>
+                            <Grid item xs={3}>
+                                <Typography variant="caption">Brand </Typography>
+                                <Typography variant="body1">{brandName}</Typography>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Typography variant="caption">Resource </Typography>
+                                <Typography variant="body1">{resource}</Typography>
+                            </Grid>
+                            <Grid item xs={6} container justify="flex-end">
+                                <Box>
+                                    <Button disabled={isUpdating} color="primary" onClick={handleSave} variant="contained" >
+                                        Save
+                                        {isUpdating && <CircularProgress size={24} />}
+                                    </Button>
+                                </Box>
+                                <Box ml={1} >
+                                    <Button color="primary" variant="contained" onClick={() => history.push({ pathname: "/form-builder" })} >Close</Button>
+                                </Box>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={3}>
-                            <Typography variant="caption">Resource </Typography>
-                            <Typography variant="body1">{resource}</Typography>
-                        </Grid>
-                        <Grid item xs={6} container justify="flex-end">
-                            <Box>
-                                <Button disabled={isUpdating} color="primary" onClick={handleSave} variant="contained" >
-                                    Save
-                                    {isUpdating && <CircularProgress size={24} />}
-                                </Button>
-                            </Box>
-                            <Box ml={1} >
-                                <Button color="primary" variant="contained" onClick={() => history.push({ pathname: "/form-builder" })} >Close</Button>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Box>
-                <Box >
-                    <FormBuilder
-                        section={section}
-                        setSection={setSection}
-                        deleteField={deleteField}
-                        setDeleteField={setDeleteField}
-                        isCustomField={false} />
-                </Box>
-            </Fragment>
-            :
-            <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-        }
+                    </Box>
+                    <Box >
+                        <FormBuilder
+                            section={section}
+                            setSection={setSection}
+                            deleteField={deleteField}
+                            setDeleteField={setDeleteField}
+                            isCustomField={false} />
+                    </Box>
+                </Fragment>
+                :
+                <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+            }
+        </CustomContainer>
     </Layout >
     );
 }

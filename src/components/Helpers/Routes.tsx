@@ -129,5 +129,9 @@ export default {
   productCost: {
     title: "Product Cost",
     path: "/product-cost"
+  },
+  productBuilder: {
+    title: "Product Builder",
+    path: "/product-builder"
   }
 };

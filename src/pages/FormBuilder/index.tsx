@@ -12,6 +12,7 @@ import routes from "./../../components/Helpers/Routes";
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomContainer from "../../components/CustomContainer";
 
 const FormBuilder = () => {
 
@@ -54,25 +55,27 @@ const FormBuilder = () => {
   return (
     <Layout>
       <CustomBreadCrumbs routes={[routes.formBuilder]} />
-      <Box p={2} bgcolor="white">
-        <div style={{ height: window.innerHeight - 120, width: "100%" }}>
-          <DataGrid
-            components={{
-              Toolbar: DataGridCustomToolbar,
-              NoRowsOverlay: CustomDataGridNoDataFound,
-            }}
-            rows={brandResource}
-            columns={columns.map((column) => ({
-              ...column,
-              disableClickEventBubbling: true,
-            }))}
-            loading={loading}
-            pageSize={25}
-            pagination
-            density="compact"
-          />
-        </div>
-      </Box>
+      <CustomContainer>
+        <Box p={2} bgcolor="white">
+          <div style={{ height: window.innerHeight - 120, width: "100%" }}>
+            <DataGrid
+              components={{
+                Toolbar: DataGridCustomToolbar,
+                NoRowsOverlay: CustomDataGridNoDataFound,
+              }}
+              rows={brandResource}
+              columns={columns.map((column) => ({
+                ...column,
+                disableClickEventBubbling: true,
+              }))}
+              loading={loading}
+              pageSize={25}
+              pagination
+              density="compact"
+            />
+          </div>
+        </Box>
+      </CustomContainer>
     </Layout>
   );
 };

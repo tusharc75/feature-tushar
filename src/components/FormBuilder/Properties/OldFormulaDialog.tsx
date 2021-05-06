@@ -97,7 +97,7 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
     data.forEach((row) => {
       if (row.sectionId.toString() === sectionId.toString()) {
         row.field.forEach((ele) => {
-          if (ele.fieldId.toString() === fieldData.fieldId.toString()) {
+          if (ele._id.toString() === fieldData._id.toString()) {
             ele.fieldLabel = state.fieldLabel
             ele.required = state.required
             ele.isTooltip = state.isTooltip
@@ -262,7 +262,7 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
                   {section.map((_section) => (
                     _section.field.map((_field) => (
                       _field.type !== FieldList.FORMULA.type &&
-                      <ListItem className={(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)) === fieldSelect && classes.active} key={_field.fieldId} dense button onClick={() => seFieldSelect(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel))} >
+                      <ListItem className={(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)) === fieldSelect && classes.active} key={_field._id} dense button onClick={() => seFieldSelect(_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel))} >
                         <ListItemText primary={_field.fieldLabel + " (" + (_field.fieldName ? _field.fieldName : camelCase(_field.fieldLabel)) + ")"} />
                       </ListItem>
                     ))
