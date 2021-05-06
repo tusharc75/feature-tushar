@@ -64,9 +64,9 @@ const ProductCategory = () => {
         section.forEach(_section => {
             _section.field.forEach(_field => {
                 let _field_data = _field
-                _field_data.fieldId = _field_data.fieldId.toString();
+                _field_data._id = _field_data._id.toString();
                 _field_data.sectionName = _section.sectionName
-                if (!isNaN(_field.fieldId)) {
+                if (!isNaN(_field._id)) {
                     _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
                 }
                 _field_data.order = ++order
