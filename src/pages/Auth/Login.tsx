@@ -19,6 +19,7 @@ import axiosInstance from './../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import firebase from 'firebase';
 import { vapidKey } from "../../constants/helpers";
+import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -60,6 +61,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Login = () => {
+  const notification = useContext(CustomNotificationCountContext);
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
   const classes = useStyles();
@@ -81,6 +83,12 @@ const Login = () => {
         if (data?.role?.selectedEntity?._id) {
           dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
         }
+
+        axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+          notification.setCount(count);
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
 
         // const messaging = firebase.messaging();
         // messaging.getToken({ vapidKey: vapidKey }).then((token) => {

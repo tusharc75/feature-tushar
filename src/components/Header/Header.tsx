@@ -204,6 +204,7 @@ const Header = ({ toggleDrawer }) => {
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
       setNotificationList(data);
       setLoadingNotifications(false);
+      notification.setCount(0);
     }).catch((error) => {
       setLoadingNotifications(false);
       toastConfig.setToastConfig(error);

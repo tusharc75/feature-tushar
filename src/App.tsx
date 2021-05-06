@@ -106,23 +106,20 @@ function App() {
     state: { user },
   }: any = useData();
 
+  const getNotification = async () => {
+    await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+      notification.setCount(count);
+    }).catch((error) => {
+      toast.setToastConfig(error);
+    });
+  }
+
   useEffect(() => {
     try {
-      if (localStorage.getItem("token")) {
-        axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-          notification.setCount(count);
-        }).catch((error) => {
-          toast.setToastConfig(error);
-        });
-      }
-
+      getNotification();
       setInterval(async () => {
         if (localStorage.getItem("token")) {
-          await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-            notification.setCount(count);
-          }).catch((error) => {
-            toast.setToastConfig(error);
-          });
+          await getNotification();
         }
       }, 60000);
     }
