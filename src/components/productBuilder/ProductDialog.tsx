@@ -17,12 +17,14 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
+import TextField from '@material-ui/core/TextField';
 
+var levalOrderBy = ["product", "category", "cost", "builder"]
 
 const CreateProduct = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder } = props;
+    const { productData, handleClose, handleSaveProduct } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -35,70 +37,46 @@ const CreateProduct = (props) => {
 
 
     useEffect(() => {
-        axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
-            setMasterFields(data.map((_f) => _f.fieldData))
-            const _fields = [];
-            data.map((_f) => _fields.push(_f.fieldData));
-            if (productId) {
-                const newField = _fields;
-                axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
-                    data.fields?.map((_f) => newField.push(_f));
-                    data.productData.fields?.map((_f) => newField.push(_f));
-                    setFields(data.productData.fields)
-                    setInitialData({
-                        fields: newField,
-                        values: data.productData
-                    });
-                    EvaluteproductFields(newField)
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error);
-                });
-            }
-            else {
-                setInitialData({
-                    fields: _fields,
-                    values: getObjKeys('', _fields),
-                });
-                EvaluteproductFields(_fields)
-            }
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
+        let _fields = [];
+        productData.fields.map((_f) => _fields.push(_f));
+
+        _fields = _.sortBy(_fields, function (item) {
+            return levalOrderBy.indexOf(item.leval)
         });
+
+        setMasterFields(_fields.filter((_f) => _f.leval !== "cost"))
+
+        let values = { ...productData }
+        values.productCategory = values.productCategory._id
+        values.productCost = values.productCost && values.productCost._id && values.productCost._id
+        delete values.fields
+
+        setInitialData({
+            fields: _fields,
+            values: { ...getObjKeys('', _fields), ...values },
+        });
+        EvaluteproductFields(_fields)
+        // axiosInstance().get(`/field?resource=Product Builder`).then(({ data: { data } }) => {
+        //     const _fields = [];
+        //     productData.fields.map((_f) => _fields.push(_f));
+        //     console.log(productData)
+        //     let values = { ...productData }
+        //     values.productCategory = values.productCategory._id
+        //     delete values.fields
+        //     data.map((_f) => _fields.push(_f.fieldData));
+        //     setMasterFields(_fields)
+        //     setInitialData({
+        //         fields: _fields,
+        //         values: values,
+        //     });
+        //     EvaluteproductFields(_fields)
+        // }).catch((error) => {
+        //     toastConfig.setToastConfig(error);
+        // });
     }, []);
 
     const handleSubmit = (values) => {
-        setLoading(true);
-        values.fields = fields;
-        if (productId && !isClone) {
-            values._id = productId;
-            axiosInstance().put(`/product`, values).then(({ data: { data } }) => {
-                setLoading(false);
-                handleClose()
-            }).catch((error) => {
-                setLoading(false);
-                toastConfig.setToastConfig(error);
-            });
-        }
-        else {
-            delete values._id
-            delete values.brand
-            axiosInstance().post(`/product`, values).then(({ data: { data } }) => {
-                setLoading(false);
-                handleClose()
-                if (isAddInBuilder) {
-                    delete data.brand
-                    delete data.createdBy
-                    delete data.updatedBy
-                    delete data.fields
-                    data.productId = data._id
-                    delete data._id
-                    addProductInBuilder([data])
-                }
-            }).catch((error) => {
-                setLoading(false);
-                toastConfig.setToastConfig(error);
-            });
-        }
+        handleSaveProduct(values)
     };
 
     const EvaluteproductFields = (fields) => {
@@ -110,9 +88,9 @@ const CreateProduct = (props) => {
         setProductFields(customData)
     }
 
-    const handleChangeCategory = (value) => {
+    const handleChangeProductCost = (value) => {
         if (value && value !== "") {
-            axiosInstance().get(`/productcategory/fields/` + value).then(({ data: { data } }) => {
+            axiosInstance().get(`/productcost/fields/` + value).then(({ data: { data } }) => {
                 let newField = [...masterFields];
                 data.forEach(_f => {
                     newField.push(_f)
@@ -151,6 +129,7 @@ const CreateProduct = (props) => {
         setIsAddField(false)
     }
 
+
     return (<Dialog
         maxWidth="md"
         aria-labelledby="customized-dialog-title"
@@ -172,47 +151,25 @@ const CreateProduct = (props) => {
                     submitForm,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={`${(productId && !isClone) ? "Edit" : "New"} Product`} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogHeader title={`Edit Product`} onClose={handleClose}></CustomDialogHeader>
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
                                             <h2 className="form-label-style">{section.name}
+                                                <span style={{ float: "right", marginTop: "-5px" }}>
                                                     <IconButton color="primary" size="small" onClick={() => handleOpenAddField(section.name)} >
                                                         <ControlPointIcon />
                                                     </IconButton>
+                                                </span>
                                             </h2>
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.fieldName === "productCategory" ?
+                                                        field.leval === "product" ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 <FormTypes
-                                                                    fields={initialData.fields}
-                                                                    values={values}
-                                                                    errors={errors}
-                                                                    touched={touched}
-                                                                    label={field.fieldLabel}
-                                                                    name={field.fieldName}
-                                                                    type={field.type}
-                                                                    options={field.option}
-                                                                    setFieldValue={setFieldValue}
-                                                                    required={field.required}
-                                                                    fullWidth
-                                                                    isTooltip={field.isTooltip}
-                                                                    tooltipMessage={field.tooltipMessage}
-                                                                    decimalPlaces={field.decimalPlaces}
-                                                                    disableClearable
-                                                                    onChange={(e, val) => {
-                                                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                        handleChangeCategory(val && val.optionValue ? val.optionValue : "")
-                                                                    }}
-                                                                    size="small"
-                                                                />  </Grid> :
-                                                            field.type === "converter" ?
-                                                                <FormTypes
-                                                                    fields={initialData.fields}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
@@ -228,9 +185,36 @@ const CreateProduct = (props) => {
                                                                     decimalPlaces={field.decimalPlaces}
                                                                     isvlookupReverse={field.isvlookupReverse}
                                                                     fieldData={field}
+                                                                    onChange={() => { }}
                                                                     size="small"
-                                                                /> :
+                                                                />
+                                                            </Grid> :
+
+                                                            field.fieldName === "productCost" ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <FormTypes
+                                                                        fields={initialData.fields}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field.isTooltip}
+                                                                        tooltipMessage={field.tooltipMessage}
+                                                                        decimalPlaces={field.decimalPlaces}
+                                                                        disableClearable
+                                                                        onChange={(e, val) => {
+                                                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                            handleChangeProductCost(val && val.optionValue ? val.optionValue : "")
+                                                                        }}
+                                                                        size="small"
+                                                                    />  </Grid> :
+                                                                field.type === "converter" ?
                                                                     <FormTypes
                                                                         fields={initialData.fields}
                                                                         values={values}
@@ -249,8 +233,28 @@ const CreateProduct = (props) => {
                                                                         isvlookupReverse={field.isvlookupReverse}
                                                                         fieldData={field}
                                                                         size="small"
-                                                                    />
-                                                                </Grid>
+                                                                    /> :
+                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                        <FormTypes
+                                                                            fields={initialData.fields}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={field.option}
+                                                                            setFieldValue={setFieldValue}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field.isTooltip}
+                                                                            tooltipMessage={field.tooltipMessage}
+                                                                            decimalPlaces={field.decimalPlaces}
+                                                                            isvlookupReverse={field.isvlookupReverse}
+                                                                            fieldData={field}
+                                                                            size="small"
+                                                                        />
+                                                                    </Grid>
                                                     ))}
                                                 </Grid>
                                             </Box>
@@ -266,8 +270,6 @@ const CreateProduct = (props) => {
                                 variant="contained"
                                 color="primary"
                                 type="submit"
-                                disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
-                                    Object.values(simplifyValues(values, initialData.fields)).toString()}
                                 onClick={submitForm}
                             > Save</CustomButton>
                         </CustomDialogFooter>
