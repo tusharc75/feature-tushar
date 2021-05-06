@@ -22,6 +22,7 @@ import moment from "moment";
 import ListItem from "@material-ui/core/ListItem/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import { ListItemText } from "@material-ui/core";
+import currencies from './currency_with_country.json';
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -286,6 +287,10 @@ export const UnCamelCase = (str) => {
 export const isObjectEmpty = (obj) => {
   return Object.keys(obj).length === 0;
 };
+
+export const currencyCodeToSymbol = (currencyCode) => {
+  return currencies.filter((obj) => obj.currencyCode === currencyCode)[0].symbolNative;
+}
 
 // Function To Set Owner DataSource
 export const getOwnerDropdownDataSource = (
