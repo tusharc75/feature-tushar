@@ -46,16 +46,16 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
         setSection(data);
     };
 
-    const addDeleteField = (fieldId) => {
+    const addDeleteField = (_id) => {
         let data = [...deleteField];
-        data.push({ fieldId: fieldId })
+        data.push({ _id: _id })
         setDeleteField(data);
     }
 
     const removeExtraField = () => {
         let data = [...section];
         data.forEach((row) => {
-            row.field = row.field.filter(i => i.fieldId)
+            row.field = row.field.filter(i => i._id)
         });
         setSection(data);
     }
