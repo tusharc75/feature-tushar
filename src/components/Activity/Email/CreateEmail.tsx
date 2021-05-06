@@ -66,7 +66,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
     const { instance, accounts, inProgress } = useMsal();
     const azureAcoount = useAccount(accounts[0] || {});
     const [initialValues, setInitialValues] = useState(null);
-
+    
     useEffect(() => {
         fetchEmailDetail();
 
@@ -85,20 +85,22 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
             setInitialValues({ name: "", content: RichTextEditor.createEmptyValue(), to: [], cc: [] })
         }
     };
+    
     const [sending,setSending] = useState(false)
     const handleSave = async (values) => {
         setSending(true)
         try {
             // values.relatedTo = relatedTo;
             // values.content = values.content.toString('html');
-            values.grapToken = await getAzureAcessToken(instance);
+            // values.grapToken = await getAzureAcessToken(instance);
             const payload = {
                 relatedTo: relatedTo,
                 message: values.content.toString('html'),
                 graphToken: await getAzureAcessToken(instance),
                 to: values.to,
                 cc: values.cc,
-                subject: values.name
+                subject: values.name,
+                mailbox:azureAcoount.username
             }
 
             if (emailId) {
@@ -135,7 +137,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
     }
 
     const classes = useStyles();
-
+    
     return <>
         {initialValues && <Formik initialValues={initialValues} validationSchema={EmailSchema} onSubmit={handleSave} onKeyPress={onKeyPress}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
@@ -146,7 +148,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                             <Box padding={1}>
                                 {emailId ?
                                     <Fragment>
-                                        <Typography variant="subtitle1">Subject : {initialValues.name} </Typography>
+                                        <Typography variant="subtitle1">Subject : {initialValues.name || initialValues.subject} </Typography>
                                         <Box mt={1} mb={1}>
                                             <Typography variant="subtitle1">To : {initialValues.to.join()} </Typography>
                                         </Box>
@@ -155,7 +157,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                         </Box>}
                                         <Divider />
                                         <Box mt={2}>
-                                            <div dangerouslySetInnerHTML={{ __html: initialValues.content }} />
+                                            <div dangerouslySetInnerHTML={{ __html: initialValues.content || initialValues.message }} />
                                         </Box>
                                         <Box mt={2}>
                                             <RelatedToDispay relatedTo={initialValues.relatedTo} />
@@ -263,7 +265,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                         </MuiPickersUtilsProvider>
                     </CustomDialogContent>
                     <CustomDialogFooter>
-                        <Typography color="textSecondary">Maile will sent from {azureAcoount?.username}</Typography>
+                        <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAcoount?.username} </>}</Typography>
                         <Button color="primary" onClick={handleClose}>Cancel</Button>
                         {!emailId &&
                             <Button type="submit" color="primary" variant="contained" disabled={sending}>
@@ -275,7 +277,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
             }
         </Formik >
         }
-        <UnauthenticatedTemplate>
+        {!emailId && <UnauthenticatedTemplate>
             <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
                 backdropFilter: "blur(2px)",
                 color: "#F9FAFB",
@@ -286,7 +288,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                     <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
                 </Box>
             </Box>
-        </UnauthenticatedTemplate>
+        </UnauthenticatedTemplate>}
+        
     </>
 
 }

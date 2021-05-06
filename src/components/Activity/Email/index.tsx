@@ -30,12 +30,9 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
     const fetchEmail = async () => {
         try{
          const emails =  await GetEmail(JSON.stringify(relatedTo))
-         setEmails(emails.emails)
-         console.log(emails);
-         
+         setEmails(emails.data)
         }catch(e) {
             console.log(e);
-            
         }
     };
 

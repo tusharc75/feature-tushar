@@ -44,19 +44,21 @@ const Email = () => {
 
     const fetchEmails = async () => {
         setLoading(true)
-        axiosAPI().get(`/email?relatedTo=${JSON.stringify(filter)}`)
-        .then(({ data }) => {
-            setEmails(data.emails)
-            setLoading(false)
-        }).catch((err) => {})
+        // axiosAPI().get(`/email?relatedTo=${JSON.stringify(filter)}`)
+        // .then(({ data }) => {
+        //     setEmails(data.data)
+        //     setLoading(false)
+        // }).catch((err) => {})
             //     }
-        // await GetEmails(JSON.stringify(filter))
-        //     .then(({ data }) => {
-        //         setEmails(data)
-        //         setLoading(false)
-        //     })
-        //     .catch((err) => {
-        //     });
+        await GetEmails(JSON.stringify(filter))
+            .then(({ data }) => {
+                setEmails(data)
+                console.log(data);
+                
+                setLoading(false)
+            })
+            .catch((err) => {
+            });
     };
 
     const handleChangeFilter = (value) => {
@@ -90,6 +92,7 @@ const Email = () => {
             renderCell: (params) =>{
             return <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>
         }},
+        { field: 'mailbox', headerName: 'mailbox', width: 300 },
     ];
 
 

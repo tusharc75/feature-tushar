@@ -287,15 +287,15 @@ const Header = ({ toggleDrawer }) => {
   const logoutUser = async () => {
     try{
       if(!isEmpty(account))await instance.logoutPopup();
+    }catch(e){
+      toastConfig.setToastConfig({open: true, type: "error", message: "Need to logout from Azure" })
+    }finally{
       await axiosInstance().get("/user/logout");
       history.push("/");
       dispatch({ type: SET_USER, payload: null });
       dispatch({ type: SET_SELECTED_ENTITY, payload: null });
       localStorage.removeItem("token");
       history.push("/login");
-    }catch(e){
-      
-      toastConfig.setToastConfig({open: true, type: "error", message: "Need to logout from Azure" })
     }
     }
 

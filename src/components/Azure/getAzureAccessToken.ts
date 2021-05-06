@@ -2,12 +2,12 @@
 const getAzureAcessToken = async (msalInstance) => {
     const activeAccount = msalInstance.getActiveAccount(); // This will only return a non-null value if you have logic somewhere else that calls the setActiveAccount API
     const accounts = msalInstance.getAllAccounts();
-    const ResourceId = "https://graph.microsoft.com/";
+    const ResourceUrl = "https://graph.microsoft.com";
     if (!activeAccount && accounts.length === 0) {
         return "" 
     }
     const request = {
-        scopes: ["https://graph.microsoft.com/Mail.Send"],
+        scopes: ["https://graph.microsoft.com/Mail.Send",ResourceUrl+"/OnlineMeetings.ReadWrite"],
         account: activeAccount || accounts[0]
     };
 
