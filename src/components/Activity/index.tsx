@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { Task } from "./Task";
@@ -15,13 +15,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import Dialog from '@material-ui/core/Dialog';
-import { MdEventNote } from 'react-icons/md';
-import { IoIosMail } from 'react-icons/io'
-import { RiTaskFill } from 'react-icons/ri'
-import { FaSuitcase } from 'react-icons/fa'
-import { MdNoteAdd } from 'react-icons/md'
 import { makeStyles } from "@material-ui/core";
 import { BiTask } from 'react-icons/bi';
 import { VscCalendar } from 'react-icons/vsc';
@@ -29,6 +23,8 @@ import { BsBriefcase } from 'react-icons/bs';
 import { GoNote } from 'react-icons/go';
 import { HiOutlineMail } from 'react-icons/hi';
 import { FiPlusSquare } from 'react-icons/fi';
+import axiosInstance from "./../../axios/axiosInstance";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
     activityBox: {
@@ -50,11 +46,28 @@ const useStyles = makeStyles((theme) => ({
 
 const Activity = (props) => {
     const classes = useStyles();
-    const { relatedTo, handleActivityRefresh } = props;
+    const { relatedTo, handleActivityRefresh, emails = [] } = props;
+    const toastConfig = useContext(CustomToastContext);
+
     const [type, setType] = useState(null);
     const [open, setOpen] = useState(false);
+    const [emailUsersOptions, setEmailUsersOptions] = useState([])
 
     const tabs = ["Task", "Event", "Case", "Note", "Email"];
+
+    useEffect(() => {
+        fetchUsersEmails()
+    }, [])
+    useEffect(() => {
+        let data = []
+        if (emails && emails.length) {
+            let oldEmails = emailUsersOptions.map(o => o.email)
+            emails.map(curEmail => {
+                if (curEmail?.email && oldEmails.indexOf(curEmail.email) < 0) data.push(curEmail)
+            })
+            setEmailUsersOptions(prevState => { return [...prevState, ...data] })
+        }
+    }, [emails])
 
     const getIcon = (tab: string) => {
         switch (tab) {
@@ -97,6 +110,21 @@ const Activity = (props) => {
         setOpen(false)
         setType(temptype)
         handleActivityRefresh()
+    }
+
+    const fetchUsersEmails = () => {
+        axiosInstance()
+            .get('/user')
+            .then(({ data: { data, count } }) => {
+                let oldEmails = emailUsersOptions.map(o => o.email)
+                data = data.filter(obj => {
+                    if (obj?.email && oldEmails.indexOf(obj.email) < 0) return { ...obj, name: `${obj?.firstName ?? ''} ${obj?.lastName || ''}` }
+                })
+                setEmailUsersOptions(prevState => { return [...prevState, ...data] })
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err)
+            });
     }
 
     return (<Box>
@@ -148,7 +176,12 @@ const Activity = (props) => {
             {type === "Event" ? <CreateEvent eventId={null} handleClose={handleClose} relatedTo={relatedTo} /> : null}
             {type === "Case" ? <CreateCase caseId={null} handleClose={handleClose} relatedTo={relatedTo} /> : null}
             {type === "Note" ? <CreateNote noteId={null} handleClose={handleClose} relatedTo={relatedTo} /> : null}
-            {type === "Email" ? <CreateEmail emailId={null} handleClose={handleClose} relatedTo={relatedTo} /> : null}
+            {type === "Email" ? <CreateEmail
+                emailId={null}
+                handleClose={handleClose}
+                relatedTo={relatedTo}
+                options={emailUsersOptions}
+            /> : null}
         </Dialog>
     </Box>
     );

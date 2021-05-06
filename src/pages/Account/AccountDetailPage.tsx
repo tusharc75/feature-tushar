@@ -49,6 +49,7 @@ import { BsPerson } from 'react-icons/bs'
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
+import _ from 'lodash'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -414,6 +415,7 @@ export default function AccountDetailPage(props) {
   const handleCreateContact = () => {
     setShowCreateContactDialog(true);
   };
+
   return (
     <>
       <Layout>
@@ -566,6 +568,18 @@ export default function AccountDetailPage(props) {
                           },
                         ]}
                         handleActivityRefresh={() => { }}
+                        emails={
+                          relatedContacts && relatedContacts.length ?
+                            _.cloneDeep(relatedContacts).filter(contact => {
+                              if (contact?.email) {
+                                return {
+                                  email: contact?.email ?? '',
+                                  name: `${contact?.firstName ?? ''} ${contact?.lastName ?? ''}`,
+                                  _id: contact._id
+                                }
+                              }
+                            }) : []
+                        }
                       />
                     </div>
                   )}

@@ -401,10 +401,10 @@ const LeadDetailsPage = () => {
                 recordsPerLine={3}
                 opportunity={leadData?.staticData?.opportunity}
               />
-              <ProjectInAccordion recordsPerLine={3}/>
-              <QuotesInAccordion recordsPerLine={3}/>
-              <ProductBuilderInAccordion recordsPerLine={3}/>
-              <LeadInAccordion recordsPerLine={3}/>
+              <ProjectInAccordion recordsPerLine={3} />
+              <QuotesInAccordion recordsPerLine={3} />
+              <ProductBuilderInAccordion recordsPerLine={3} />
+              <LeadInAccordion recordsPerLine={3} />
             </Paper>
           </Grid>
 
@@ -429,6 +429,13 @@ const LeadDetailsPage = () => {
                       },
                     ]}
                     handleActivityRefresh={() => { }}
+                    emails={
+                      [{
+                        email: leadData?.email ?? '',
+                        name: `${leadData?.firstName ?? ""} ${leadData?.lastName ?? ""}`,
+                        _id: leadData?._id
+                      }]
+                    }
                   />
                 </div>
               )}
