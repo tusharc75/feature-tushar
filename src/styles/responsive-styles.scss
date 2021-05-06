@@ -1,0 +1,69 @@
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+   
+    .MuiMenuItem-root {
+        font-size: 0.8rem;
+        min-height: 34px;
+    }
+    .headerLogo {
+        font-size: 1rem;
+    }
+    .listingHeader {
+        font-size: 1rem;
+    }
+    .MuiToggleButton-sizeSmall {
+        padding: 4px !important;
+        font-size: 0.5rem !important;
+    }
+    .brandLogo {
+        height: auto !important;
+    }
+    .headerbox {
+        padding: 7px 26px 55px 12px;
+        ol {
+            li {
+                a {
+                    font-size: 0.8rem;
+                }
+                p {
+                    font-size: 0.8rem;
+                }
+            }
+        }
+    }
+    .detail-container{
+        position: absolute;
+        top: 92px;
+        width: 100% !important;
+        padding: 0px 0px 0 9px;
+        overflow: auto;
+        height: auto;
+    }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+// @media only screen and (min-width: 600px ) {}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 600px) and (max-width: 768px) {
+    .headerbox {
+        padding: 10px 15px 55px 26px;
+    }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (max-width: 959px) {
+    .main-container {
+        margin: 0 0.5rem;
+        width: calc(100% - 1rem);
+        top: 6rem;
+    }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+}

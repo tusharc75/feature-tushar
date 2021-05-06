@@ -47,7 +47,7 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
         handleChangeFilter(newValue)
     }
 
-    return (<Autocomplete
+    return (<Autocomplete className="custom-autocomplete"
         multiple={true}
         options={options}
         getOptionLabel={(option) => (option ? option.name : "")}

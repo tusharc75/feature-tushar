@@ -133,7 +133,7 @@ const CreateProductBuilder = () => {
                                             </Button>
                                         </Box> */}
                                         <Box ml={1} >
-                                            <Button color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} >Close</Button>
+                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>

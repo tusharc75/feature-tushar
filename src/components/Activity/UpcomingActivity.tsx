@@ -57,7 +57,7 @@ const UpcomingActivity = (props) => {
                             </Grid>
                         </Box>
                     </Box>))
-                : <Box p={1}>
+                : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
                     <Typography variant="subtitle2">No Past Activity</Typography>
                 </Box>}
         </Box>}

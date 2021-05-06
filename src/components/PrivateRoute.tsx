@@ -29,14 +29,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
       }
     } else if (
       pathname === "/" ||
-      pathnames[0] === "activity" ||
-      pathnames[0] === "terms-conditions" ||
-      pathnames[0] === "product-category" ||
-      pathnames[0] === "product-cost" ||
-      pathnames[0] === "product-builder" ||
-      pathnames[0] === "form-builder" ||
-      pathnames[0] === "profile"
-    ) {
+      ["activity", "terms-conditions", "product-category", "product-cost", "form-builder","product-builder",
+        "profile", "brand-configuration", "project-sales"].indexOf(pathnames[0]) >= 0) {
       setAccess(true);
       setChecking(false);
     }

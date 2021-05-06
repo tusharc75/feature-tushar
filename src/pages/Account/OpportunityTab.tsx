@@ -75,13 +75,6 @@ export default function OpportunityTab({ data }) {
 
                                     <Card style={{ minWidth: "100%" }} variant="outlined">
                                         <CardContent>
-                                            {/* <span className={classes.actionsItems}> */}
-                                            {/* <VisibilityOutlined /> */}
-                                            {/* <IconButton size="small">
-                                                <Delete color="error" />
-                                            </IconButton> */}
-                                            {/* <EditOutlined /> */}
-                                            {/* </span> */}
                                             <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
                                                 <Typography className="mb-2">{obj?.opportunityName}</Typography>
                                             </Link>

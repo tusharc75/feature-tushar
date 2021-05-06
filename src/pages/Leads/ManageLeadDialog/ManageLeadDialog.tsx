@@ -12,6 +12,7 @@ import {
   yupSchema,
   getObjKeysWithValues,
   simplifyValues,
+  initializeDropdownById
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -30,7 +31,9 @@ export default function ManageLeadDialog({
   onClose,
   isNew,
   dataToUpdate,
-  leadApi
+  leadApi,
+  userId = null,
+  isRedirectToDetailPage = true
 }) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -113,7 +116,14 @@ export default function ManageLeadDialog({
           if (isNew) {
             data
               .filter((d) => d.isCreate)
-              .map((_f) => newFields.push(_f.fieldData));
+              .map((_f) => {
+
+                if (isNew && userId && _f.fieldData.fieldName == "owner") {
+                  _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
+                }
+                newFields.push(_f.fieldData)
+              });
+
             setEntityData({
               fields: newFields,
               initialValues: getObjKeys("", newFields),
@@ -162,7 +172,9 @@ export default function ManageLeadDialog({
           type: "success",
           message: data.message,
         });
-        history.push(`${leadApi}/detail/${newId}`);
+        if (isRedirectToDetailPage) {
+          history.push(`${leadApi}/detail/${newId}`);
+        }
         setLoading(false);
         onSuccess();
       })
@@ -236,8 +248,8 @@ export default function ManageLeadDialog({
               <CustomDialogContent>
                 <Form>
                   {formsData &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
+                    formsData.map((form, i) => {
+                      return form.name && <div key={i}>
                         <h2 className="form-label-style">{form.name}</h2>
                         <Box marginY={2}>
                           <Grid spacing={3} container>
@@ -312,7 +324,7 @@ export default function ManageLeadDialog({
                           </Grid>
                         </Box>
                       </div>
-                    ))}
+                    })}
                 </Form>
               </CustomDialogContent>
 

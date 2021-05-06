@@ -29,6 +29,8 @@ import User from "./pages/User";
 import Entity from "./pages/Entity";
 import EntityDetailPage from "./pages/Entity/EntityDetailPage";
 import UserDetailsPage from "./pages/User/UserDetailsPage";
+import ProjectSalesDetails from "./pages/ProjectSales/ProjectSalesDetails";
+import ProjectSales from "./pages/ProjectSales";
 
 import { CustomToastContext } from "./StateProvider/CustomToastContext/CustomToastContext";
 import Roles from "./pages/Role";
@@ -40,6 +42,7 @@ import ProductCost from "./pages/ProductCost";
 import CreateProductCost from "./pages/ProductCost/CreateProductCost";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
+import BrandConfiguration from "./pages/BrandConfiguration";
 
 import {
   termsAndCondition,
@@ -55,22 +58,25 @@ import Dashboard from "./pages/Dashboard";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
-import UserProfilePage from './pages/ProfilePage/index'
+import UserProfilePage from "./pages/ProfilePage/index";
 // import firebase, { onMessageListener } from "./firebase";
 import CustomNotification from "./components/CustomNotification/CustomNotification";
+import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
+import axiosInstance from "./axios/axiosInstance";
 
 function App() {
   const toast = useContext(CustomToastContext);
-  const [notification, setNotification] = useState({ open: false, title: null, message: null })
+  const notification = useContext(CustomNotificationCountContext);
+  // const [notification, setNotification] = useState({ open: false, title: null, message: null })
 
-  const truepush = window["truepush"] || [];
-  truepush.push(function () {
-    truepush.Init({
-      id: "608a852cd4fd7034e72c1b43"
-    }, function (error) {
-      if (error) console.error(error);
-    })
-  })
+  // const truepush = window["truepush"] || [];
+  // truepush.push(function () {
+  //   truepush.Init({
+  //     id: "608a852cd4fd7034e72c1b43"
+  //   }, function (error) {
+  //     if (error) console.error(error);
+  //   })
+  // })
 
   // const messaging = firebase.messaging();
   // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
@@ -101,6 +107,31 @@ function App() {
   const {
     state: { user },
   }: any = useData();
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("token")) {
+        axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+          notification.setCount(count);
+        }).catch((error) => {
+          toast.setToastConfig(error);
+        });
+      }
+
+      setInterval(async () => {
+        if (localStorage.getItem("token")) {
+          await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+            notification.setCount(count);
+          }).catch((error) => {
+            toast.setToastConfig(error);
+          });
+        }
+      }, 60000);
+    }
+    catch (e) {
+      console.log(e);
+    }
+  }, [])
 
   const conditionalRedirect = (Comp, location) => {
     return !user ? (
@@ -234,11 +265,28 @@ function App() {
               contactBreadcrumb={routes.supplierContact}
             />
           </PrivateRoute>
+          <PrivateRoute
+            key="project-sales"
+            exact
+            path={routes.projectSales.path}
+          >
+            <ProjectSales />
+          </PrivateRoute>
+          <PrivateRoute
+            key="project-sales-details"
+            exact
+            path={`${routes.projectSalesDetail.path}/:id`}
+          >
+            <ProjectSalesDetails />
+          </PrivateRoute>
           <PrivateRoute exact path="/user">
             <User />
           </PrivateRoute>
           <PrivateRoute exact path="/profile">
             <UserProfilePage profileBreadCrumbs={routes.profilePage} />
+          </PrivateRoute>
+          <PrivateRoute exact path="/brand-configuration">
+            <BrandConfiguration />
           </PrivateRoute>
           <PrivateRoute exact path="/user/detail/:id">
             <UserDetailsPage />
@@ -295,7 +343,7 @@ function App() {
           <PrivateRoute exact path={routes.productCost.path}>
             <ProductCost />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productCost.path + "/:id"} >
+          <PrivateRoute exact path={routes.productCost.path + "/:id"}>
             <CreateProductCost />
           </PrivateRoute>
 

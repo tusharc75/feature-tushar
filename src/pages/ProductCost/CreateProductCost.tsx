@@ -150,12 +150,12 @@ const ProductCost = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={3} container justify="flex-end">
                                         <Box>
-                                            <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
+                                            <Button disabled={isUpdating} size="small" color="primary" onClick={submitForm} variant="contained" >
                                                 Save{isUpdating && <CircularProgress size={24} />}
                                             </Button>
                                         </Box>
                                         <Box ml={1} >
-                                            <Button color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productCost.path })} >Close</Button>
+                                            <Button color="primary" size="small" variant="contained" onClick={() => history.push({ pathname: routes.productCost.path })} >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>

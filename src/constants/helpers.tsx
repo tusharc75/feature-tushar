@@ -15,9 +15,13 @@ import {
   SaveAlt,
   Search,
   ViewColumn,
+  List,
 } from "@material-ui/icons";
 import * as yup from "yup";
 import moment from "moment";
+import ListItem from "@material-ui/core/ListItem/ListItem";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import { ListItemText } from "@material-ui/core";
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -46,8 +50,13 @@ export const roleTypes = [
 ];
 
 export const userType = {
-  brandAdmin: 2
-}
+  brandAdmin: 2,
+};
+
+export const leadProcessFieldName = "leadProcess";
+export const opportunityProcessFieldName = "process";
+
+export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
 export const sidebarResource = {
   brand: "Brand",
@@ -70,6 +79,7 @@ export const sidebarResource = {
   flags: "Flags",
   lead: "Lead",
   opportunity: "Opportunity",
+  projectSales: "Project Sales",
 };
 
 export const lead = {
@@ -146,8 +156,8 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       obj[key.fieldName] = val ? val : false;
     } else if (key.type === "converter") {
       key.displayUnits.forEach((_unit) => {
-        obj[key.fieldName + _unit.toLowerCase()] = val
-      })
+        obj[key.fieldName + _unit.toLowerCase()] = val;
+      });
     } else {
       obj[key.fieldName] = val;
     }
@@ -163,8 +173,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -206,30 +216,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .url("Enter valid url eg. https://www.hostname.com")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .url("Enter valid url eg. https://www.hostname.com")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-          .array()
-          .required(`${input.fieldLabel} is required`)
-          .length(1, "Select at least one service access")
+            .array()
+            .required(`${input.fieldLabel} is required`)
+            .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -245,7 +255,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         schema[input.fieldName + _unit.toLowerCase()] = input.required
           ? yup.string().required(`${input.fieldLabel} is required`)
           : yup.string();
-      })
+      });
     } else {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`)
@@ -498,3 +508,16 @@ export const simplifyValues = (obj, fields) => {
   }
   return newObj;
 };
+
+// export const DisplayData = ({ label, value, icon }) => {
+//   return <div style={{ flexGrow: 1 }}>
+//     <List>
+//       <ListItem>
+//         <ListItemAvatar>
+//           {icon}
+//         </ListItemAvatar>
+//         <ListItemText primary={value} secondary={label} />
+//       </ListItem>
+//     </List>
+//   </div>
+// }

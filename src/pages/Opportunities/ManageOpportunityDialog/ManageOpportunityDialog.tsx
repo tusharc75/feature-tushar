@@ -1,5 +1,11 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  InputAdornment,
+} from "@material-ui/core";
 import { Formik, Form } from "formik";
 import Dialog from "@material-ui/core/Dialog";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -13,7 +19,7 @@ import {
   opportunity,
   supplierAccount,
   customerAccount,
-  simplifyValues
+  simplifyValues,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -25,6 +31,7 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import { useData } from "../../../StateProvider/Provider";
 import { useLocation, useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
+import currencies from "../../../constants/currency_with_country.json";
 
 const arr = [...Array(9).keys()];
 
@@ -36,8 +43,10 @@ export default function ManageOpportunityDialog({
   dataToUpdate,
   accountId,
   resource, // either called from customer account or supplier account
+  isRedirectTodetailPage,
+  userId = null,
 }) {
-  const { opportunityResource, opportunityApi } = opportunity
+  const { opportunityResource, opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -58,7 +67,7 @@ export default function ManageOpportunityDialog({
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
     const ownerCollabOptions = entityData.fields.filter(
@@ -114,24 +123,49 @@ export default function ManageOpportunityDialog({
       .then(({ data: { data } }) => {
         const newFields = [];
 
-        const filterData = isNew ? data.filter((d) => d.isCreate) : data.filter((d) => d.isUpdate);
+        const filterData = isNew
+          ? data.filter((d) => d.isCreate)
+          : data.filter((d) => d.isUpdate);
 
+        filterData.map((_f) => {
+          //  If this dialog opens from account details screen, make that account preselected
 
-        filterData
-          .filter((d) => d.isCreate)
-          .map((_f) => {
-            //  If this dialog opens from account details screen, make that account preselected
+          if (
+            accountId &&
+            ["customerAccountName", "supplierAccountName"].some(
+              (d) => d === _f.fieldData.fieldName
+            )
+          ) {
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
+          }
 
-            if (accountId && ["customerAccountName", "supplierAccountName"].some(d => d === _f.fieldData.fieldName)) {
-              _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
-            }
+          if (!isNew && _f.fieldData.fieldName == "currency") {
+            setCurrencySymbol(
+              currencies.find((d) => d.currencyCode == dataToUpdate["currency"])
+                ?.symbolNative
+            );
+          }
+          if (isNew && userId && _f.fieldData.fieldName == "owner") {
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
+          }
 
+          if (!isNew && _f.fieldData.fieldName == "currency") {
+            setCurrencySymbol(
+              currencies.find((d) => d.currencyCode == dataToUpdate["currency"])
+                ?.symbolNative
+            );
+          }
+
+          if (!(_f.fieldData.fieldName === "supplierAccountName")) {
             newFields.push(_f.fieldData);
-          });
+          }
+        });
 
         setEntityData({
           fields: newFields,
-          initialValues: isNew ? getObjKeys("", newFields) : getObjKeysWithValues(dataToUpdate, newFields)
+          initialValues: isNew
+            ? getObjKeys("", newFields)
+            : getObjKeysWithValues(dataToUpdate, newFields),
         });
       });
   };
@@ -157,6 +191,7 @@ export default function ManageOpportunityDialog({
 
   const handleCreateOpportunity = (values) => {
     // values.closeDate = "03/03/2021"
+    if (accountId) values["supplierAccountName"] = [accountId]
     setLoading(true);
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
@@ -167,9 +202,10 @@ export default function ManageOpportunityDialog({
           type: "success",
           message: data.message,
         });
-        history.push(`${opportunityApi}/detail/${newId}`);
+        if (isRedirectTodetailPage)
+          history.push(`${opportunityApi}/detail/${newId}`);
         setLoading(false);
-        onSuccess();
+        onSuccess(newId);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -240,86 +276,62 @@ export default function ManageOpportunityDialog({
               <CustomDialogContent>
                 <Form>
                   {formsData &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <h2 className="form-label-style">{form.name}</h2>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field) => (
-                              <Grid
-                                key={field.fieldName}
-                                item
-                                xs={12}
-                                sm={6}
-                                md={6}
-                              >
-                                {field.fieldName == "owner" ? (
-                                  <FormTypes
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={ownerData}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                    disabled={disableOwnerSelection}
-                                    onOpen={() => {
-                                      onOwnerDropdownOpen(
-                                        values["collaborator"]
-                                      );
-                                    }}
-                                  />
-                                ) : field.fieldName == "collaborator" ? (
-                                  <FormTypes
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={collaboratorData}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                    onOpen={() => {
-                                      onCollabOwnerMultiselectOpen(
-                                        values["owner"]
-                                      );
-                                    }}
-                                  />
-                                ) : field.fieldName == "probability" ? (
-                                  <FormTypes
-                                    // {...rest}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                    onChange={(e) => {
-                                      if (e.target.value && parseFloat(e.target.value) > 100) {
-                                        setFieldValue("probability", "100")
-                                      }
-                                      else {
-                                        setFieldValue("probability", e.target.value)
-                                      }
-                                    }}
-                                  />
-                                ) : (field.fieldName == "lostReason") ? (
-                                  values["stage"] === "Closed Lost" ?
+                    formsData.map((form, i) => {
+                      return form.name ? (
+                        <div key={i}>
+                          <h2 className="form-label-style">{form.name}</h2>
+                          <Box marginY={2}>
+                            <Grid spacing={3} container>
+                              {form.sectionFields.map((field) => (
+                                <Grid
+                                  key={field.fieldName}
+                                  item
+                                  xs={12}
+                                  sm={6}
+                                  md={6}
+                                >
+                                  {field.fieldName == "owner" ? (
+                                    <FormTypes
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={ownerData}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={true}
+                                      size="small"
+                                      disabled={disableOwnerSelection}
+                                      onOpen={() => {
+                                        onOwnerDropdownOpen(
+                                          values["collaborator"]
+                                        );
+                                      }}
+                                    />
+                                  ) : field.fieldName == "collaborator" ? (
+                                    <FormTypes
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={collaboratorData}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={true}
+                                      size="small"
+                                      onOpen={() => {
+                                        onCollabOwnerMultiselectOpen(
+                                          values["owner"]
+                                        );
+                                      }}
+                                    />
+                                  ) : field.fieldName == "probability" ? (
                                     <FormTypes
                                       // {...rest}
                                       values={values}
@@ -334,31 +346,134 @@ export default function ManageOpportunityDialog({
                                       fullWidth
                                       isTooltip={true}
                                       size="small"
-                                    /> : null
-                                ) : (
-                                  <FormTypes
-                                    // {...rest}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                  />
-                                )
-                                }
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                                      onChange={(e) => {
+                                        if (
+                                          e.target.value &&
+                                          parseFloat(e.target.value) > 100
+                                        ) {
+                                          setFieldValue("probability", "100");
+                                        } else {
+                                          setFieldValue(
+                                            "probability",
+                                            e.target.value
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  ) : field.fieldName == "lostReason" ? (
+                                    values["stage"] === "Closed Lost" ? (
+                                      <FormTypes
+                                        // {...rest}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                      />
+                                    ) : null
+                                  ) : field.fieldName == "currency" ? (
+                                    <FormTypes
+                                      // {...rest}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={true}
+                                      size="small"
+                                      onChange={(e, val) => {
+                                        if (val && val.currencyCode) {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            val.currencyCode
+                                          );
+                                          setCurrencySymbol(val.symbolNative);
+                                        } else {
+                                          setFieldValue(field.fieldName, "");
+                                          setCurrencySymbol(null);
+                                        }
+                                      }}
+                                    />
+                                  ) : field.fieldName == "amount" ? (
+                                    <FormTypes
+                                      // {...rest}
+                                      startAdornment={
+                                        currencySymbol ? (
+                                          <InputAdornment position="start">
+                                            {currencySymbol}
+                                          </InputAdornment>
+                                        ) : (
+                                          ""
+                                        )
+                                      }
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={true}
+                                      size="small"
+                                    />
+                                  ) : (
+                                    <FormTypes
+                                      // {...rest}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={true}
+                                      size="small"
+                                    />
+                                  )}
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Box>
+                        </div>
+                      ) : (
+                        form.sectionFields.map((field) => (
+                          <FormTypes
+                            // {...rest}
+                            values={values}
+                            errors={errors}
+                            touched={touched}
+                            label={field.fieldLabel}
+                            name={field.fieldName}
+                            type={field.type}
+                            options={field.option}
+                            setFieldValue={setFieldValue}
+                            required={field.required}
+                            fullWidth
+                            isTooltip={true}
+                            size="small"
+                            style={{ visibility: "hidden" }}
+                          />
+                        ))
+                      );
+                    })}
                 </Form>
               </CustomDialogContent>
 
@@ -377,8 +492,16 @@ export default function ManageOpportunityDialog({
                   variant="contained"
                   color="primary"
                   disabled={
-                    Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
-                    Object.values(simplifyValues(values, entityData.fields)).toString()}
+                    Object.values(
+                      simplifyValues(
+                        entityData.initialValues,
+                        entityData.fields
+                      )
+                    ).toString() ===
+                    Object.values(
+                      simplifyValues(values, entityData.fields)
+                    ).toString()
+                  }
                   onClick={(e) => {
                     e.preventDefault();
                     handleSubmit(
@@ -393,7 +516,6 @@ export default function ManageOpportunityDialog({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
-
             </>
           )}
         </Formik>
@@ -408,5 +530,6 @@ ManageOpportunityDialog.propTypes = {
   onClose: PropTypes.any,
   isNew: PropTypes.bool,
   dataToUpdate: PropTypes.any,
-  accountId: PropTypes.string
+  accountId: PropTypes.string,
+  isRedirectToDetailPage: PropTypes.bool,
 };

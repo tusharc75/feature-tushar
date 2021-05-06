@@ -179,11 +179,9 @@ const CreateProduct = (props) => {
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
                                             <h2 className="form-label-style">{section.name}
-                                                <span style={{ float: "right", marginTop: "-5px" }}>
                                                     <IconButton color="primary" size="small" onClick={() => handleOpenAddField(section.name)} >
                                                         <ControlPointIcon />
                                                     </IconButton>
-                                                </span>
                                             </h2>
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>

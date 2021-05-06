@@ -8,7 +8,6 @@ import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import Header from "./Header";
 import CustomContainer from "../../components/CustomContainer";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
@@ -22,6 +21,7 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import { PERMISSION } from "../../constants/Roles";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import { roleTypes } from "../../constants/helpers";
+import RoleHeader from "./RoleHeader";
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 
@@ -130,8 +130,8 @@ const Roles: FC = () => {
       renderCell: (params: any) => (
         <Link
           title={params.value}
-          className="text-truncate LeadNameLink"
-          to={`${routes.roleDetails.path}/${params.row.id}`}
+          className="text-truncate link"
+          to={`${routes.roleDetail.path}/${params.row.id}`}
         >
           {params.value}
         </Link>
@@ -396,7 +396,7 @@ const Roles: FC = () => {
         </Grid>
         <CustomContainer>
           <div className="header-panel">
-            <Header
+            <RoleHeader
               selectedType={selectedType}
               onTypeChange={handleRoleTypeSel}
               options={roleTypes}

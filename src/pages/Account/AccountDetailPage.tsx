@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar } from "@material-ui/core";
+import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar, Card, CardContent, List } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
 import { Skeleton, TabPanel } from "@material-ui/lab";
@@ -25,6 +25,7 @@ import ManageContactDialog from "../Contact/ManageContact/index";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { makeStyles } from "@material-ui/core/styles";
 import {
+  // DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -36,9 +37,19 @@ import QuickLinks, {
   IQuickLinks,
 } from "../../components/QuickLinks/QuickLinks";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
-import { BsChatSquareQuoteFill } from "react-icons/bs";
-import { FcFlowChart, FcContacts, FcBinoculars, FcConferenceCall, FcMultipleSmartphones } from 'react-icons/fc';
+import { FcFlowChart, FcContacts, FcBinoculars, FcConferenceCall, FcMultipleSmartphones, FcMoneyTransfer } from 'react-icons/fc';
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
+import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
+import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
+import { Link } from 'react-router-dom'
+import { BiFace } from 'react-icons/bi'
+import { BsPerson } from 'react-icons/bs'
+import ListItem from '@material-ui/core/ListItem/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import { ListItemText } from '@material-ui/core';
+
 const useStyles = makeStyles((theme) => ({
   container: {
     padding: "0px",
@@ -48,6 +59,19 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "10px",
   },
 }));
+
+function DisplayData({ label, value, icon }) {
+  return <div style={{ flexGrow: 1 }}>
+    <List>
+      <ListItem>
+        <ListItemAvatar>
+          {icon}
+        </ListItemAvatar>
+        <ListItemText primary={value} secondary={label} />
+      </ListItem>
+    </List>
+  </div>
+}
 
 export default function AccountDetailPage(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -113,6 +137,7 @@ export default function AccountDetailPage(props) {
             ? data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
             : []
         );
+
         setRelatedContactsLoading(false);
       });
   };
@@ -233,7 +258,7 @@ export default function AccountDetailPage(props) {
 
   const quickLinks: IQuickLinks[] = [
     {
-      label: "Account Heirarchy",
+      label: "Account Hierarchy",
       onClick: () => {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
@@ -269,7 +294,7 @@ export default function AccountDetailPage(props) {
       label: "Quotes",
       count: 0,
       show: true,
-      icon: <BsChatSquareQuoteFill />,
+      icon: <FcMoneyTransfer />,
       class: "quotes"
     },
     {
@@ -422,7 +447,6 @@ export default function AccountDetailPage(props) {
                         >
                           {accountData.staticData?.approved ? "Disapprove" : "Approve"}
                         </Button>
-                        <Box component="span" marginX={1} />
                       </>
                     )}
 
@@ -439,7 +463,6 @@ export default function AccountDetailPage(props) {
                         >
                           Edit
                     </Button>
-                        <Box component="span" marginX={1} />
                       </>
                     )}
 
@@ -517,10 +540,15 @@ export default function AccountDetailPage(props) {
                   }}
                   accountId={accountData._id}
                   accountName={accountData.accountName}
-                  recordsPerLine={2}
+                  recordsPerLine={3}
                   resource={accountResource}
+                  isRedirect={false}
                 />
               )}
+              <ProjectInAccordion />
+              <QuotesInAccordion />
+              <ProductBuilderInAccordion />
+              <LeadInAccordion />
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
@@ -593,6 +621,54 @@ export default function AccountDetailPage(props) {
                       </BoxWithBorder>
                     </Grid>
                   )}
+
+
+                {accountData?.staticData?.lead && permissions &&
+                  permissions.lead &&
+                  permissions.lead.isRead && (
+                    <Grid item xs={12}>
+                      <BoxWithBorder
+                        style={{ marginTop: "3%", padding: "0px" }}
+                      >
+                        <div className={`${accountClass.detail_page_div3}`}>
+                          <div className={`${accountClass.leads_data}`}>
+                            <Typography
+                              color="primary"
+                              variant="h6"
+                              style={{ margin: "0 10px" }}
+                            >
+                              Related Lead
+                            </Typography>
+                          </div>
+                          {relatedContactsLoading ? (
+                            <CommonSkeleton lenArray={[...Array(4).keys()]} />
+                          ) : (
+                            <>
+                              <Box className={`${accountClass.custom_box1}`}>
+                                <Card>
+                                  <CardContent className="detailListing">
+                                    <Grid container className="detailCardHeader">
+                                      <Grid item xs={12} sm={12}>
+                                        <Link className="link f_size"
+                                          to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
+                                          {accountData?.staticData?.lead?.firstName || ''} {accountData?.staticData?.lead?.lastName || ''}
+                                        </Link>
+                                      </Grid>
+                                    </Grid>
+                                    <Grid container>
+                                      <Grid item xs={12} sm={6}>
+                                        <DisplayData label='Title' value={accountData?.staticData?.lead?.title || '-'} icon={<BsPerson size={20} />} />
+                                      </Grid>
+                                    </Grid>
+                                  </CardContent>
+                                </Card>
+                              </Box>
+                            </>
+                          )}
+                        </div>
+                      </BoxWithBorder>
+                    </Grid>
+                  )}
               </Grid>
             </Paper>
           </Grid>
@@ -647,6 +723,7 @@ export default function AccountDetailPage(props) {
               }}
               accountId={accountData._id}
               resource={accountResource}
+              isRedirectTodetailPage={false}
             />
           )}
           {showCreateContactDialog && (

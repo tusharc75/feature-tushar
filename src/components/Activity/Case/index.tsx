@@ -75,17 +75,17 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
     }
 
     return (cases &&
-        <Box>
+        <Box className="activityDetailBox">
             {cases.length ?
                 <Fragment>
                     {cases.map((_case, index) => (
-                        <Box key={_case._id} mb={1} border={1} p={1} borderColor="grey.300">
+                        <Box key={_case._id} className="activity">
                             <Box>
                                 <Grid container>
-                                    <Grid item xs={8} >
-                                        <Typography variant="subtitle2">{_case.name}</Typography>
+                                    <Grid item xs={10} className="d-flex align-items-center gap-1"> 
+                                        <Typography variant="subtitle2">{_case.name}</Typography><span className="activity-date">Due Date : {moment(_case.dueDate).format("MMM DD YYYY")}</span>
                                     </Grid>
-                                    <Grid item xs={4} container justify="flex-end" >
+                                    <Grid item xs={2} container justify="flex-end" >
                                         <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _case._id)} >
                                             <MoreHorizIcon />
                                         </IconButton>
@@ -94,12 +94,9 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
                             </Box>
                             <Box pt={1}>
                                 <Grid container>
-                                    <Grid item xs={6} >
+                                    <Grid item xs={12} >
                                         <ListRelatedTo relatedTo={_case.relatedTo} originRelatedTo={relatedTo} />
                                         {/* <Chip label={_case.status} size="small" color="primary" /> */}
-                                    </Grid>
-                                    <Grid item xs={6} container justify="flex-end">
-                                        <Typography variant="caption" >Due Date : {moment(_case.dueDate).format("MMM DD YYYY")}</Typography>
                                     </Grid>
                                 </Grid>
                             </Box>
@@ -110,7 +107,7 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
                     />
                 </Fragment>
 
-                : <Box p={1}>
+                : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
                     <Typography variant="subtitle2">No Past Case</Typography>
                 </Box>
             }

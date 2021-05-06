@@ -5,7 +5,7 @@ import {
   IconButton,
   Checkbox,
 } from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { DataGrid } from "@material-ui/data-grid";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
@@ -25,6 +25,7 @@ import {
   downloadExcel,
   leadTemplateFileName,
   leadImportErrorFileName,
+  leadProcessFieldName,
 } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import { HiUserGroup } from "react-icons/hi";
@@ -80,6 +81,7 @@ const Leads = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
+  const history = useHistory();
 
   const [
     convertLeadToOpportunityConfirmationDialog,
@@ -127,7 +129,8 @@ const Leads = () => {
         owner: u.owner,
         isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
           (d) => d?.optionValue == user?.user?._id
-        )
+        ),
+        relatedOpportunity: u.staticData?.convertedToOpportunity && u.staticData?.opportunity
       };
       return res;
     });
@@ -187,7 +190,8 @@ const Leads = () => {
     middleName,
     lastName,
     staticData,
-    isAllowedToUpdate
+    [leadProcessFieldName]: leadProcess,
+    isAllowedToUpdate,
   }) => {
     let dontHavePermissions = [];
 
@@ -200,6 +204,8 @@ const Leads = () => {
     if (!permissions["opportunity"].isCreate) {
       dontHavePermissions.push("Opportunity");
     }
+
+    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() == "qualified";
 
     return dontHavePermissions.length > 0 ? (
       <>
@@ -224,6 +230,14 @@ const Leads = () => {
     ) : !isAllowedToUpdate ? (
       <>
         <Tooltip title="You are not allowed to convert as you are neither owner nor collaborator">
+          <IconButton aria-label="Convert to opportunity">
+            <SiConvertio size={18} />
+          </IconButton>
+        </Tooltip>
+      </>
+    ) : !isCurrentLeadStatusQualified ? (
+      <>
+        <Tooltip title="To covert this lead to opportunity, Lead status must be qualified">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
@@ -287,7 +301,7 @@ const Leads = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 400,
+      width: 250,
       renderCell: (params) => (
         <>
           <Link
@@ -296,18 +310,26 @@ const Leads = () => {
           >
             {params?.value ?? ""}
           </Link>
-          {
-            params.row.staticData?.convertedToOpportunity && params.row.staticData?.opportunity ?
-              <Tooltip title="Go to Opportunity">
-                <Link className="link ml-2" to={`${routes.opportunityDetail.path}/${params.row.staticData.opportunity._id}`}>
-                  ({params.row.staticData?.opportunity?.opportunityName})
-                </Link>
-              </Tooltip> : ""
-          }
         </>
       ),
       sortable: false,
       filterable: false,
+    },
+    {
+      field: "relatedOpportunity",
+      headerName: "Related Opportunity",
+      width: 300,
+      renderCell: (params) => (
+        <>
+          {
+            params.value ?
+              <Link className="link" to={`${routes.opportunityDetail.path}/${params.value?._id}`} title={params.value?.opportunityName}>
+                {params.value?.opportunityName}
+              </Link>
+              : <NoDataCell />
+          }
+        </>
+      ),
     },
     {
       field: "title",
@@ -326,8 +348,6 @@ const Leads = () => {
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -349,8 +369,6 @@ const Leads = () => {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="updateBy">
@@ -367,20 +385,20 @@ const Leads = () => {
       field: "phone",
       headerName: "Phone",
       width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "mobile",
       headerName: "Mobile",
       width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "email",
       headerName: "Email",
       width: 250,
       hide: true,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     // { field: "status", headerName: "Lead Status", width: 200 },
     {
@@ -388,8 +406,6 @@ const Leads = () => {
       headerName: "Owner Alies",
       width: 250,
       hide: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) => <CustomRenderCell value={params?.value} />,
     },
     {
@@ -524,7 +540,11 @@ const Leads = () => {
           leadName: null,
           message: null,
         });
-        fetchLeads();
+        if (convertLeadToOpportunityConfirmationDialog.id) {
+          history.push(`${routes.opportunityDetail.path}/${data.data[0]}`)
+        } else {
+          fetchLeads();
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -534,10 +554,21 @@ const Leads = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let field = params.filterModel.items[0].columnField
+
+      if (params.filterModel.items[0].columnField == 'createdBy') {
+        field = "createdBy.user"
+      }
+      if (params.filterModel.items[0].columnField == 'updatedBy') {
+        field = "updatedBy.user"
+      }
+      let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
+      if (params.filterModel.items[0].columnField == 'name') {
+        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+      }
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
     } else {
       setQuery({ page: 0, limit: 25 });
@@ -632,6 +663,7 @@ const Leads = () => {
             onSortModelChange={handleSortModelChange}
             density="compact"
             onFilterModelChange={onFilterChange}
+            filterMode="server"
           />
         </div>
         {showDeleteWarningConfirmBox ? (

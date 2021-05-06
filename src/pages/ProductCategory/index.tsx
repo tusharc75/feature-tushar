@@ -63,7 +63,7 @@ const ProductCategory = () => {
             headerName: "Product Category",
             width: 300,
             renderCell: (params) => (
-                <Link className="LeadNameLink" to={`${productCategoryPage.path}/${params.row.id}`} >
+                <Link className="link" to={`${productCategoryPage.path}/${params.row.id}`} >
                     {params.row.name}
                 </Link>
             )

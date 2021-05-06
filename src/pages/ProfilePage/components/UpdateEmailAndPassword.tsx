@@ -5,6 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import { TextField as TextFieldFormik } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import InputAdornment from '@material-ui/core/InputAdornment'
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -12,6 +13,9 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import axiosInstance from "../../../axios/axiosInstance";
 import CustomButton from "../../../components/Helpers/CustomButton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import { IconButton } from "@material-ui/core";
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 
 const updatePassWordSchema = Yup.object().shape({
     oldPassword: Yup.string()
@@ -40,13 +44,24 @@ export default function ManageUpdatePassword({
 }) {
     const toastConfig = useContext(CustomToastContext);
     const [loading, setLoading] = useState(false)
+    const [visibity, setVisibity] = useState({
+        oldPassword: false,
+        newPassword: false,
+        confirmPassword: false
+    });
 
+    const toggleVisibility = (key) => {
+        setVisibity({ ...visibity, [key]: !visibity[key] })
+    }
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
     const handleSubmit = (values) => {
         if (isUpdatePassword) {
-            delete values["confirmPassword"]
+            // delete values["confirmPassword"]
             setLoading(true)
             axiosInstance()
-                .put(`/user/me/password`, { ...values })
+                .put(`/user/me/password`, { oldPassword: values.oldPassword, newPassword: values.newPassword })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
@@ -80,9 +95,22 @@ export default function ManageUpdatePassword({
                 });
         }
     }
+
+    const PasswordEndAdornment = ({ fieldName }) => (
+        <InputAdornment position="end" >
+            <IconButton
+                aria-label="toggle password visibility"
+                onClick={() => toggleVisibility(fieldName)}
+                onMouseDown={handleMouseDownPassword}
+                edge="end"
+            >
+                {visibity[fieldName] ? <Visibility /> : <VisibilityOff />}
+            </IconButton>
+        </InputAdornment>
+    )
     return (
         <Dialog
-            maxWidth="md"
+            maxWidth="sm"
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
             open={open}
@@ -117,47 +145,58 @@ export default function ManageUpdatePassword({
                                             {
                                                 isUpdatePassword ?
                                                     <>
-                                                        <Grid item sm={8}>
+                                                        <Grid style={{ display: "flex" }} item sm={10}>
+
                                                             <Field
                                                                 component={TextFieldFormik}
                                                                 fullWidth
                                                                 margin="dense"
-                                                                type="text"
+                                                                type={visibity["oldPassword"] ? "string" : "password"}
                                                                 label="Old Password"
                                                                 name="oldPassword"
                                                                 variant="outlined"
                                                                 required={true}
                                                                 value={values["oldPassword"]}
-                                                                onChange={(e) => setFieldValue("oldPassword", e.target.value.trimStart())}
+                                                                onChange={(e) => setFieldValue("oldPassword", e.target.value)}
+                                                                InputProps={{
+                                                                    endAdornment: (<PasswordEndAdornment fieldName="oldPassword" />)
+                                                                }}
                                                             />
                                                         </Grid>
-                                                        <Grid item sm={8}>
+
+                                                        <Grid item sm={10}>
                                                             <Field
                                                                 component={TextFieldFormik}
                                                                 fullWidth
                                                                 margin="dense"
-                                                                type="password"
+                                                                type={visibity["newPassword"] ? "string" : "password"}
                                                                 label="New Password"
                                                                 name="newPassword"
                                                                 variant="outlined"
                                                                 required={true}
                                                                 value={values["newPassword"]}
-                                                                onChange={(e) => setFieldValue("newPassword", e.target.value.trimStart())}
+                                                                onChange={(e) => setFieldValue("newPassword", e.target.value)}
+                                                                InputProps={{
+                                                                    endAdornment: (<PasswordEndAdornment fieldName="newPassword" />)
+                                                                }}
                                                             />
                                                         </Grid>
-                                                        <Grid item sm={8}>
+                                                        <Grid item sm={10}>
                                                             <Field
                                                                 component={TextFieldFormik}
                                                                 fullWidth
                                                                 margin="dense"
-                                                                type="password"
+                                                                type={visibity["confirmPassword"] ? "string" : "password"}
                                                                 label="Confirm Password"
                                                                 name="confirmPassword"
                                                                 variant="outlined"
                                                                 required={true}
                                                                 value={values["confirmPassword"]}
                                                                 onChange={(e) => {
-                                                                    setFieldValue("confirmPassword", e.target.value.trimStart())
+                                                                    setFieldValue("confirmPassword", e.target.value)
+                                                                }}
+                                                                InputProps={{
+                                                                    endAdornment: (<PasswordEndAdornment fieldName="confirmPassword" />)
                                                                 }}
                                                             />
                                                         </Grid>
@@ -208,7 +247,13 @@ export default function ManageUpdatePassword({
                                         setFieldError("confirmPassword", "new and confirm password should be same")
                                         setFieldTouched("confirmPassword", true)
                                         return
-                                    } else {
+                                    }
+                                    else if (values.newPassword === values.oldPassword) {
+                                        setFieldError("newPassword", "new and old password should be different")
+                                        setFieldTouched("newPassword", true)
+                                        return
+                                    }
+                                    else {
                                         handleSubmit(values)
                                     }
                                 }}

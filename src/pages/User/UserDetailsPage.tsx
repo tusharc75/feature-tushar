@@ -17,6 +17,8 @@ import {
   TableBody,
   Paper,
   Tooltip,
+  Tabs,
+  Tab
 } from "@material-ui/core";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { ControlPoint } from "@material-ui/icons";
@@ -41,6 +43,16 @@ import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import { userType } from "../../constants/helpers";
+import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
+import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
+import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
+import AccountAccordionDetail from "./AccountAccordionInDetail";
+import ContactAccordionInDetailPage from "./ContactAccordionInDetailPage";
+import ManageUserDialog from "./ManageUserDialog";
+import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
+import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
+import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
+import { FcFlowChart } from 'react-icons/fc';
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -55,7 +67,14 @@ const UserDetailsPage = () => {
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [rolesLoading, setRolesLoading] = useState(false);
+  const [userRelatedLoading, setUserRelatedLoading] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [leadsRelatedData, setLeadsRelatedData] = useState(null);
+  const [opportunityRelatedData, setOpportunityRelatedData] = useState(null);
+  const [customerContactRelatedData, setCustomerContactRelatedData] = useState(null);
+  const [customerAccountRelatedData, setCustomerAccountRelatedData] = useState(null);
+  const [supplierAccountRelatedData, setSupplierAccountRelatedData] = useState(null);
+  const [supplierContactRelatedData, setSupplierContactRelatedData] = useState(null);
   const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
 
@@ -70,8 +89,12 @@ const UserDetailsPage = () => {
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
+  const [doaCurrency, setDoaCurrency] = useState("");
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [orgChartData, setOrgChartData] = useState([])
+  const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -81,9 +104,22 @@ const UserDetailsPage = () => {
       fetchUserRoles();
       fetchDoa();
       fetchUsers()
+      fetchUserRelatedDetail()
     }
     // eslint-disable-next-line
   }, [id]);
+
+  const quickLinks: IQuickLinks[] = [
+    {
+      label: "Org Chart",
+      onClick: () => {
+        setOrgChartInFullScreenDialog(true);
+      },
+      icon: <FcFlowChart />,
+      show: true,
+      class: "account"
+    },
+  ].filter((d) => d.show);
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -91,7 +127,6 @@ const UserDetailsPage = () => {
       const {
         data: { data },
       } = await axiosInstance().get(`/user/${id}`);
-
       handleMainPoints(data);
       const name = [data.firstName, data.lastName].filter((d) => d).join(" ");
 
@@ -101,6 +136,39 @@ const UserDetailsPage = () => {
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
       ]);
+
+      let orgChartData = [];
+
+      if (data.parentHierarchy && data.parentHierarchy.length > 0) {
+        data.parentHierarchy.map(d => {
+          orgChartData.push({
+            id: d._id,
+            name: [d.firstName, d.lastName]
+              .filter((d) => d)
+              .join(" "),
+            parentId: d.reportsTo ? d.reportsTo : 0,
+            logo: d.avatar,
+            email: d.email,
+            phone: d.mobileNo,
+            current: false
+          })
+        })
+      }
+
+      orgChartData.push({
+        id: data._id,
+        name: [data.firstName, data.lastName]
+          .filter((d) => d)
+          .join(" "),
+        parentId: data.reportsTo ? data.reportsTo.optionValue : 0,
+        logo: data.avatar,
+        email: data.email,
+        phone: data.mobileNo,
+        current: true
+      })
+
+      setOrgChartData(orgChartData);
+
       setUserPermissions(data.permissions);
       setLoading(false);
     } catch (error) {
@@ -120,11 +188,11 @@ const UserDetailsPage = () => {
               name: `${item.user.firstName} ${item.user.lastName}`,
               firstName: item.user.firstName,
               lastName: item.user.lastName,
-              currency: item.currency ? item.currency : "USD",
               amount: item.amount,
             };
           })
         );
+        setDoaCurrency(data?.doaCurrency)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -167,6 +235,25 @@ const UserDetailsPage = () => {
         toastConfig.setToastConfig(error);
       });
   };
+  const fetchUserRelatedDetail = () => {
+    setUserRelatedLoading(true);
+    axiosInstance()
+      .get(`/user/related/${id}`)
+      .then(({ data: { data } }) => {
+        setCustomerAccountRelatedData(data["Customer Account"]);
+        setCustomerContactRelatedData(data["Customer Contact"]);
+        setSupplierAccountRelatedData(data["Supplier Account"]);
+        setSupplierContactRelatedData(data["Supplier Contact"]);
+        setLeadsRelatedData(data["Lead"]);
+        setOpportunityRelatedData(data["Opportunity"]);
+      })
+      .catch((error) => {
+        setUserRelatedLoading(false);
+        toastConfig.setToastConfig(error);
+      })
+
+
+  }
 
   const handleMainPoints = (data) => {
     let tempMp = {
@@ -225,7 +312,7 @@ const UserDetailsPage = () => {
         });
         setUserPermissions(data.permissions);
         setUpdating(false);
-        closeUpdateDIalog();
+        closeUpdateDialog();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -237,7 +324,7 @@ const UserDetailsPage = () => {
     setOpenUpdateDialog(true);
   };
 
-  const closeUpdateDIalog = () => {
+  const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
   };
 
@@ -323,15 +410,11 @@ const UserDetailsPage = () => {
   return (
     <>
       {openUpdateDialog && (
-        <UpdateDetailsDialog
-          title="Update"
-          openDialog={openUpdateDialog}
-          onClose={closeUpdateDIalog}
-          data={userData}
-          fields={userFields}
-          isUpdating={isUpdating}
-          handleUpdate={handleUpdateUser}
-        />
+        <ManageUserDialog open={openUpdateDialog} close={closeUpdateDialog} onSuccess={(permissions) => {
+          setUserPermissions(permissions);
+          setOpenUpdateDialog(false);
+          fetchUserData();
+        }} userId={userData._id} dataToUpdate={userData} isNew={false} />
       )}
       {rolesDialogOpen && (
         <AssignRolesDialog
@@ -352,7 +435,7 @@ const UserDetailsPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8}>
             <Paper>
               {!userData ? (
                 <div>
@@ -382,13 +465,12 @@ const UserDetailsPage = () => {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small"
                       onClick={handleOpenUpdateDialog}
                     >
                       Edit
                     </Button>
                   ) : null}
-                  <Box component="span" marginX={1} />
-
                   {permissions.user.isDelete ? (
                     <DeleteButton
                       text="Delete"
@@ -405,9 +487,38 @@ const UserDetailsPage = () => {
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
-                  <DetailsPage data={userData} fields={userFields} />
+                  <>
+                    <Tabs className="oms-tab" value={currentTabIndex}
+                      onChange={(index, newValue) => {
+                        setCurrentTabIndex(newValue);
+                      }}
+                      indicatorColor="primary"
+                      textColor="primary"
+                      aria-label="icon tabs example"
+                    >
+                      <Tab
+                        label="Details"
+                        aria-controls="a11y-tabpanel-0"
+                        id="a11y-tab-0"
+                      />
+                      <Tab
+                        label="Org Chart"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
+                    </Tabs>
+                    <Box hidden={currentTabIndex !== 0}>
+                      <DetailsPage data={userData} fields={userFields} />
+                    </Box>
+                    <Box hidden={currentTabIndex !== 1}>
+                      <OrgChartContainer data={orgChartData} onClick={(id) => {
+                        history.push(`${routes.userDetail.path}/${id}`)
+                      }} />
+                    </Box>
+                  </>
                 )}
               </Box>
+
               <Box style={{ padding: "0px", minHeight: "300px" }}>
                 <Box display="flex" padding={1} bgcolor="grey.200">
                   <Grid container>
@@ -478,6 +589,9 @@ const UserDetailsPage = () => {
                               permissions={permissions}
                               data={globalRoles}
                               unassignRole={handleUnassignRole}
+                              loggedInUser={user?.user}
+                              currentUserId={id}
+
                             />
                           )}
                         </Box>
@@ -538,11 +652,12 @@ const UserDetailsPage = () => {
                             </Box>
                           </Box>
                         </Grid>
-                        <Grid item xs={4} container justify="flex-end">
+                        <Grid item container xs={4} justify="flex-end">
                           {permissions.user.isUpdate && (
                             <Button
                               variant="contained"
                               color="primary"
+                              size="small"
                               onClick={() => setDoaDialogOpen(true)}
                             >
                               {doa.length > 0 ? "Edit DOA" : "Add DOA"}
@@ -560,7 +675,11 @@ const UserDetailsPage = () => {
                         }}
                       >
                         {doa.length > 0 ? (
-                          <NewStepper heading={" "} steps={doa} />
+                          <NewStepper
+                            heading={" "}
+                            steps={doa}
+                            doaCurrency={doaCurrency}
+                          />
                         ) : (
                           <Box textAlign="center" marginTop={2}>
                             <Typography variant="body2">
@@ -573,16 +692,72 @@ const UserDetailsPage = () => {
                   </Grid>
                 </>
               }
-
+              <OpportunityAccordionInUserDetail
+                opportunities={[...opportunityRelatedData?.Owner ?? [],...opportunityRelatedData?.Collaborator ?? []]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <LeadAccordionInUserDetailPage
+                leads={[...leadsRelatedData?.Owner ?? [],...leadsRelatedData?.Collaborator ?? []]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <AccountAccordionDetail
+                type="customer"
+                accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <AccountAccordionDetail
+                type="supplier"
+                accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <ContactAccordionInDetailPage
+                type="customer"
+                contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
+              <ContactAccordionInDetailPage
+                type="supplier"
+                contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail()
+                }}
+              />
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
             <Paper>
-              <Box width="100%" padding={1} bgcolor="grey.200">
-                <Typography color="primary">Approval Process</Typography>
+              <Box className="detailHeader">
+                <h2 className="listingHeader single">Approval Process</h2>
               </Box>
-
-              <Box padding={1}>
+              <Box padding={2}>
                 <FormControl component="fieldset" fullWidth>
                   <FormGroup>
                     {loading ? (
@@ -605,6 +780,7 @@ const UserDetailsPage = () => {
                             height="30px"
                           />
                         </Box>
+
                       ))
                     ) : userPermissions ? (
                       Object.keys(userPermissions).map((key) => (
@@ -630,6 +806,9 @@ const UserDetailsPage = () => {
                 </FormControl>
               </Box>
             </Paper>
+
+            <QuickLinks quickLinks={quickLinks} />
+            
           </Grid>
         </Grid>
       </Layout>
@@ -660,6 +839,7 @@ const UserDetailsPage = () => {
         <DoaDialog
           userList={userList}
           doa={doa}
+          doaCurrency={doaCurrency}
           userSelected={id}
           open={doaDialogOpen}
           onSuccess={() => {
@@ -671,6 +851,21 @@ const UserDetailsPage = () => {
           }}
         />
       )}
+
+      {
+        orgChartInFullScreenDialog && <FullScreenDialog
+          heading="Org Chart"
+          open={orgChartInFullScreenDialog}
+          close={() => {
+            setOrgChartInFullScreenDialog(false);
+          }}
+        >
+          <OrgChartContainer data={orgChartData} onClick={(id) => {
+            setOrgChartInFullScreenDialog(false);
+            history.push(`${routes.userDetail.path}/${id}`)
+          }} />
+        </FullScreenDialog>
+      }
     </>
   );
 };

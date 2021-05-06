@@ -65,7 +65,7 @@ const ProductBuilder = () => {
             headerName: "Name",
             width: 300,
             renderCell: (params) => (
-                <Link className="LeadNameLink" to={`${routes.productBuilder.path}/${params.row.id}`} >
+                <Link className="link" to={`${routes.productBuilder.path}/${params.row.id}`} >
                     {params.row.name}
                 </Link>
             )

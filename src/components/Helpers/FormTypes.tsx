@@ -151,6 +151,8 @@ const FormTypes = (props) => {
     isvlookupReverse,
     doNotShowInfoTooltip,
     fieldData,
+    startAdornment,
+    accept,
     ...rest
   } = props;
 
@@ -219,7 +221,6 @@ const FormTypes = (props) => {
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
-
       getImageUrl(file);
       event.target.value = "";
     }
@@ -476,6 +477,7 @@ const FormTypes = (props) => {
           inputProps: {
             allowNegative: false,
           },
+          startAdornment: startAdornment
         }}
       />
     </InfoLabel>
@@ -724,7 +726,7 @@ const FormTypes = (props) => {
           option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
         }
         getOptionSelected={(option: any, val) => option.currencyCode === val}
-        onChange={(e, val) =>
+        onChange={onChange ? onChange : (e, val) =>
           setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
         }
         renderInput={(params) => (
@@ -767,9 +769,13 @@ const FormTypes = (props) => {
         multiple
         options={options}
         getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-        value={values[name] ? options.filter((data: any) =>
-          values[name].includes(data.optionValue)
-        ) : []}
+        value={
+          values[name]
+            ? options.filter((data: any) =>
+              values[name].includes(data.optionValue)
+            )
+            : []
+        }
         getOptionSelected={(option: any, val: any) =>
           option.optionValue === val.optionValue
         }
@@ -1034,6 +1040,7 @@ const FormTypes = (props) => {
           style={{ display: "none" }}
           onClick={(e: any) => (e.target.value = null)}
           type="file"
+          accept={accept || ""}
         />
         <label htmlFor={name}>
           <Button

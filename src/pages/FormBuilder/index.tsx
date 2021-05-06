@@ -13,7 +13,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
-
+import DetailsPageHeader from "../../components/DetailsPageHeader";
+import { FaWpforms } from 'react-icons/fa';
 const FormBuilder = () => {
 
 
@@ -43,7 +44,7 @@ const FormBuilder = () => {
       headerName: "Resource",
       flex: 1,
       renderCell: (params) => (
-        <Link
+        <Link className="link"
           to={"/form-builder/resource?resource=" + params.row.resource}>
           {" "}
           {params.row.resource}
@@ -54,27 +55,38 @@ const FormBuilder = () => {
 
   return (
     <Layout>
-      <CustomBreadCrumbs routes={[routes.formBuilder]} />
+      <Grid container>
+        <Grid item md={12} sm={12} xs={12}>
+          <CustomBreadCrumbs routes={[routes.formBuilder]} />
+        </Grid>
+      </Grid>
       <CustomContainer>
-        <Box p={2} bgcolor="white">
-          <div style={{ height: window.innerHeight - 120, width: "100%" }}>
-            <DataGrid
-              components={{
-                Toolbar: DataGridCustomToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
-              }}
-              rows={brandResource}
-              columns={columns.map((column) => ({
-                ...column,
-                disableClickEventBubbling: true,
-              }))}
-              loading={loading}
-              pageSize={25}
-              pagination
-              density="compact"
-            />
-          </div>
-        </Box>
+        <Grid container spacing={1} >
+          <Grid item xs={12} className="d-flex align-items-center gap-1">
+            <div className="header-panel d-flex align-items-center gap-1">
+              <FaWpforms className="headerLogo" /> <span className="listingHeader">Form Builder
+            </span>
+            </div>
+          </Grid>
+        </Grid>
+        <div className="listing-grid">
+          <DataGrid
+            components={{
+              Toolbar: DataGridCustomToolbar,
+              NoRowsOverlay: CustomDataGridNoDataFound,
+            }}
+            rows={brandResource}
+            columns={columns.map((column) => ({
+              ...column,
+              disableClickEventBubbling: true,
+            }))}
+            loading={loading}
+            pageSize={25}
+            pagination
+            density="compact"
+          />
+        </div>
+
       </CustomContainer>
     </Layout>
   );

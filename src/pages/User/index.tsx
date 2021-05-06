@@ -22,8 +22,12 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import { userType } from './../../constants/helpers'
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import ManageUserDialog from "./ManageUserDialog";
 
-let userTimeout;
+let userTimeout: ReturnType<typeof setTimeout>;
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -35,7 +39,7 @@ const User: FC = () => {
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllUsers, setCheckAllUsers] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -63,7 +67,7 @@ const User: FC = () => {
         .then(({ data: { data, count } }) => {
           getRows(data);
           setRowCount(count);
-          setCheckAllUsers(false)
+          setCheckAllUsers(false);
           setLoadingUsers(false);
         })
         .catch((err) => {
@@ -71,7 +75,8 @@ const User: FC = () => {
           setLoadingUsers(false);
         });
     }, 600);
-  }, [searchVal, query, toastConfig]);
+    // eslint-disable-next-line
+  }, [searchVal, query]);
 
   useEffect(() => {
     fetchUsers();
@@ -88,6 +93,7 @@ const User: FC = () => {
         createdBy: user.createdBy,
         updatedBy: user.updatedBy,
         status: user.blocked ? user.blocked : false,
+        isBrandAdmin: user.userType === userType.brandAdmin
       }))
       : [];
 
@@ -132,13 +138,18 @@ const User: FC = () => {
       headerName: "Name",
       width: 400,
       renderCell: (params: any) => (
-        <Link
-          title={params.value}
-          className="text-truncate LeadNameLink"
-          to={`${routes.userDetails.path}/${params.row.id}`}
-        >
-          {params.value}
-        </Link>
+        <>
+          <Link
+            title={params.value}
+            className="text-truncate link"
+            to={`${routes.userDetail.path}/${params.row.id}`}
+          >
+            {params.value}
+          </Link>
+          {params.row.isBrandAdmin ? <Tooltip title="Brand Admin">
+            <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
+          </Tooltip> : ""}
+        </>
       ),
       sortable: false,
       filterable: false,
@@ -177,7 +188,7 @@ const User: FC = () => {
       width: 300,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
-          {params.value}
+          <CustomRenderCell isCopyToClipboard={true} value={params.value} />
         </p>
       ),
     },
@@ -225,7 +236,10 @@ const User: FC = () => {
         params?.value?.user ? (
           <h5 className="updateBy">
             {params?.value?.user?.firstName}
-            <span title={params?.value?.date} className="updatedAtTime badge-date">
+            <span
+              title={params?.value?.date}
+              className="updatedAtTime badge-date"
+            >
               {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
             </span>
           </h5>
@@ -409,9 +423,13 @@ const User: FC = () => {
 
   return (
     <>
-      {isOpen && (
-        <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
-      )}
+      {
+        isOpen && (
+          <ManageUserDialog open={isOpen} close={handleClose} onSuccess={() => { fetchUsers() }}
+            userId={null} dataToUpdate={null} isNew={true} />
+          // <CreateUser open={isOpen} close={handleClose} fetchData={fetchUsers} />
+        )
+      }
       {rolesDialogOpen && (
         <AssignRolesDialog
           rolesDialogOpen={rolesDialogOpen}
@@ -425,7 +443,6 @@ const User: FC = () => {
         />
       )}
       <Layout>
-
         <Grid container direction="row">
           <CustomBreadCrumbs routes={[routes.user]} />
         </Grid>

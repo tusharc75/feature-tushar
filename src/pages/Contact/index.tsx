@@ -47,6 +47,7 @@ import { useHistory } from "react-router-dom";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
+import routes from "./../../components/Helpers/Routes";
 
 const ContactTypes = [
   {
@@ -59,6 +60,7 @@ const ContactTypes = [
   },
 ];
 
+let contactTimeout;
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -80,6 +82,7 @@ export default function Contact(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+  const [renderCount, setRenderCount] = useState(0);
 
   const [
     showDeleteWarningConfirmBox,
@@ -103,7 +106,6 @@ export default function Contact(props) {
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
   });
-
   const [contactPermissions, setContactPermissions] = useState<any>({
     isCreate: false,
     isUpdate: false,
@@ -169,35 +171,51 @@ export default function Contact(props) {
     {
       field: "name",
       headerName: "Name",
-      width: 400,
+      width: 250,
+      renderCell: (params) => (
+        <>
+          <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
+            {params.value || ""}
+          </Link>
+        </>
+      ),
+    },
+    {
+      field: "relatedLead",
+      headerName: "Related Lead",
+      width: 250,
+      renderCell: (params) => (
+        <>
+          {
+            params.value ?
+              <Link className="link" to={`${routes.leadDetail.path}/${params.value._id}`} title={[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}>
+                {[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}
+              </Link>
+              : <NoDataCell />
+          }
+        </>
+      ),
       sortable: false,
       filterable: false,
-      renderCell: (params) => (
-        <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
-          {params.value || ""}
-        </Link>
-      ),
     },
     // { field: "lastName", headerName: "Last Name", width: 200 },
     {
       field: "phone",
       headerName: "Phone",
       width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "email",
       headerName: "Email",
       width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "createdBy",
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -219,8 +237,6 @@ export default function Contact(props) {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value && params?.value?.user ? (
           <h5 className="updateBy">
@@ -242,9 +258,9 @@ export default function Contact(props) {
       field: "accountName",
       headerName: "Account",
       width: 300,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <Link className="link" to={`/${account.accountRoute}/detail/${params.row.accountId}`}>
+        {params.value}
+      </Link>
     },
     {
       field: "actions",
@@ -298,10 +314,21 @@ export default function Contact(props) {
 
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let field = params.filterModel.items[0].columnField
+
+      if (params.filterModel.items[0].columnField == 'createdBy') {
+        field = "createdBy.user"
+      }
+      if (params.filterModel.items[0].columnField == 'updatedBy') {
+        field = "updatedBy.user"
+      }
+      let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
+      if (params.filterModel.items[0].columnField == 'name') {
+        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+      }
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
     } else {
       setQuery({ page: 0, limit: 25 });
@@ -333,7 +360,7 @@ export default function Contact(props) {
       : { ...searchParams };
 
     if (accountDetails.accountId) {
-      searchParams["accountId"] = accountDetails.accountId;
+      searchParams["filterById"] = JSON.stringify([{ field: "accountName", term: accountDetails.accountId }]);
     }
     let api = getSearchQuery(`/${contactApi}`, searchParams);
 
@@ -350,12 +377,9 @@ export default function Contact(props) {
         toastConfig.setToastConfig(err);
         setLoading(false);
       });
-  }, [searchVal, query, selectedType]);
+  }, [searchVal, query, selectedType, accountDetails]);
 
-  useEffect(() => {
-    getContacts();
-    // eslint-disable-next-line
-  }, [getContacts]);
+
 
   const handleSingleDeleteContacts = async () => {
     setLoading(true);
@@ -383,11 +407,32 @@ export default function Contact(props) {
       id: u._id,
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
+      accountId: u.accountName?.optionValue,
       accountName: u.accountName?.optionLabel,
       name: [u.firstName, u.middleName, u.lastName].filter((f) => f).join(" "),
+      relatedLead: u.staticData?.lead
     }));
     setDataRows([...rows]);
   }, [contactData]);
+
+
+  useEffect(() => {
+    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+
+    if (contactTimeout) {
+      clearTimeout(contactTimeout);
+    }
+
+    contactTimeout = setTimeout(() => {
+      getContacts();
+    }, millisec);
+  }, [searchVal]);
+
+  useEffect(() => {
+    if (renderCount > 0) {
+      getContacts();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [query, selectedType, accountDetails]);
 
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
@@ -440,7 +485,7 @@ export default function Contact(props) {
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 1) {
+    if (query.page !== 0) {
       setQuery((prevState) => ({ ...prevState, page: 0 }));
     }
     setSearchVal(e.target.value);
@@ -495,7 +540,7 @@ export default function Contact(props) {
             justify="space-between"
           >
             <Grid item className="d-flex align-items-center gap-1">
-              <MdContacts className="headerLogo" />{" "}
+              <MdContacts className="headerLogo" />
               <span className="listingHeader">
                 {sidebarResource[contactResource]}
               </span>
@@ -523,7 +568,7 @@ export default function Contact(props) {
                   label={`Account: ${accountDetails.accountName}`}
                   onDelete={() => {
                     setAccountDetails({ accountId: null, accountName: null });
-                    getContacts();
+                    // getContacts();
                   }}
                 />
               )}
@@ -541,6 +586,7 @@ export default function Contact(props) {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small"
                       onClick={clickCreateNew}
                       startIcon={<AddIcon />}
                       className={styles.add_submit_btn}
@@ -559,6 +605,7 @@ export default function Contact(props) {
                       }
                       variant="outlined"
                       color="default"
+                      size="small"
                       onClick={openActions}
                       className={styles.action_submit_btn}
                       aria-controls="action-menu"
@@ -629,11 +676,6 @@ export default function Contact(props) {
               density="compact"
               filterMode="server"
               onFilterModelChange={onFilterChange}
-              // filterModel={{
-              //     items: [
-              //         { columnField: 'accountName', operatorValue: 'contains', value: accountName },
-              //     ],
-              // }}
             />
           </div>
           {/* </Box> */}

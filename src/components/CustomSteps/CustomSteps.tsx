@@ -5,10 +5,14 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-
+import { FaCheckCircle } from 'react-icons/fa';
 const useStyles = makeStyles((theme) => ({
     root: {
-        width: '100%',
+        // width: "98%",
+        // padding: "10px",
+        // margin: "1%",
+        // marginBottom: '25px',
+        // boxShadow: "1px 3px 3px #ddd"
     },
     button: {
         marginRight: theme.spacing(1),
@@ -18,27 +22,14 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(1),
     },
     completed: {
-        background: theme.palette.primary.main,
-        padding: theme.spacing(1),
+        background: "#20789a !important",
+        border: "2px solid #04506d !important"
+    },
+    current: {
+        // background: "#50ad50",
+        border: "2px solid #003f57 !important"
     }
 }));
-
-// function getSteps() {
-//     return ['Select campaign settings', 'Create an ad group', 'Create an ad'];
-// }
-
-function getStepContent(step) {
-    switch (step) {
-        case 0:
-            return 'Select campaign settings...';
-        case 1:
-            return 'What is an ad group anyways?';
-        case 2:
-            return 'This is the bit I really care about!';
-        default:
-            return 'Unknown step';
-    }
-}
 
 
 export default function CustomSteps({ steps, active }) {
@@ -101,8 +92,9 @@ export default function CustomSteps({ steps, active }) {
                         stepProps.completed = false;
                     }
                     return (
-                        <Step key={index} {...stepProps} className={active > index ? classes.completed : ""}>
-                            <StepLabel {...labelProps} icon={null}>{step.text}</StepLabel>
+                        <Step key={index} {...stepProps} className={active > index ? classes.completed : (index === active ? classes.current : "")}>
+                            <StepLabel {...labelProps}  icon={active > index ? <FaCheckCircle /> : (index === active ? index+1 : index+1)}>
+                                {step.text}</StepLabel>
                         </Step>
                     );
                 })}

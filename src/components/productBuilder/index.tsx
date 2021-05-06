@@ -92,7 +92,7 @@ const ProductBuilder = (props) => {
                             col.width = 180
                             if (ele.fieldName === "productName") {
                                 col.renderCell = (params) => (
-                                    <Link className="LeadNameLink" onClick={() => { setProductData(params.row) }}   >
+                                    <Link className="link" onClick={() => { setProductData(params.row) }}   >
                                         {params.row.productName}
                                     </Link>
                                 )

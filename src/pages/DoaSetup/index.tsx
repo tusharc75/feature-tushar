@@ -33,6 +33,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import moment from "moment";
 import { FaUserAltSlash, FaUserCheck } from "react-icons/fa";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 
 const useStyles = makeStyles((theme) => ({
   actionBtn: {
@@ -312,7 +313,7 @@ export default function Doa() {
       renderCell: (params: any) => (
         <Link
           title={params.value}
-          className="text-truncate LeadNameLink"
+          className="text-truncate link"
           onClick={() => {
             // setOpen(true)
             setUserSingleSelect(params?.row)
@@ -350,7 +351,7 @@ export default function Doa() {
       width: 300,
       renderCell: (params: any) => (
         <p title={params.value} className="text-truncate">
-          {params.value}
+          <CustomRenderCell value={params?.value} isCopyToClipboard={true} />
         </p>
       ),
     },
@@ -445,55 +446,6 @@ export default function Doa() {
   return (
     <Layout>
       <CustomBreadCrumbs routes={[routes.doa]} />
-      {/* <Grid container direction="row" className="header-links">
-        <Grid item xs={12} sm={12} className="pr-3">
-          <Grid container justify="flex-end">
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Import from Excel
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Export to Excel
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Download Template
-            </Link>
-            <Divider
-              orientation="vertical"
-              flexItem
-              className={classes.linkDivider}
-            />
-            <Link
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className={classes.links}
-            >
-              Email a Link
-            </Link>
-          </Grid>
-        </Grid>
-      </Grid> */}
 
       {/* Tables Begins Here */}
       <Container>
@@ -515,6 +467,7 @@ export default function Doa() {
           <DoaDialog
             userList={dataRows}
             doa={doa}
+            doaCurrency={"USD"}
             userSelected={userSingleSelect.id}
             open={open}
             onClose={() => setOpen(false)}
@@ -574,6 +527,7 @@ export default function Doa() {
                 </Button>
                     <NewStepper
                       heading={"DOA Details of " + userSingleSelect?.name}
+                      doaCurrency={"USD"}
                       steps={doa}
                     />
                   </>

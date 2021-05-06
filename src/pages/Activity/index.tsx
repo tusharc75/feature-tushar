@@ -62,7 +62,6 @@ const Activity = () => {
         <CustomContainer>
             <Box>
                 <Grid container>
-                    
                     <Grid item xs={8}>
                         <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
                     </Grid>
