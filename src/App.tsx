@@ -44,6 +44,8 @@ import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 
+import QuoteBuilderPage from './pages/QuoteBuilder'
+
 import {
   termsAndCondition,
   customerAccount,
@@ -352,6 +354,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path={routes.productBuilder.path + "/:id"} >
             <CreateProductBuilder />
+          </PrivateRoute>
+          <PrivateRoute exact path={"quote-builder"} >
+            <QuoteBuilderPage />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
