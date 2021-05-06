@@ -25,7 +25,7 @@ import { FaIndustry } from 'react-icons/fa';
 import { AiOutlineMail } from 'react-icons/ai';
 import { HiOutlineUser } from 'react-icons/hi';
 import { AiOutlinePhone } from 'react-icons/ai';
-
+import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
 const Accordion = withStyles({
     root: {
         border: "1px solid rgba(0, 0, 0, .125)",
@@ -67,14 +67,19 @@ const AccordionDetails = withStyles((theme) => ({
 
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value, icon }) {
+function DisplayData({ label, value, icon, showCopyToText = false }) {
     return <div style={{ flexGrow: 1 }}>
         <List >
             <ListItem>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
+                <ListItemText
+                    primary={value}
+                    secondary={label} />
+                {
+                    showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
+                }
             </ListItem>
         </List>
     </div>
@@ -178,7 +183,7 @@ export default function AccountAccordionDetail({
                                         {
                                             accounts.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card style={{ minWidth: "100%" }}>
+                                                    <Card className="accountCard">
                                                         <CardContent className="detailListing">
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={12}>
@@ -196,7 +201,7 @@ export default function AccountAccordionDetail({
                                                                     </Grid>
                                                                     <Grid item xs={12} sm={12}>
                                                                         {
-                                                                            obj?.phone ? <DisplayData icon={<AiOutlinePhone size={20} />} label='Phone' value={obj?.phone ?? ''} /> : ''
+                                                                            obj?.phone ? <DisplayData showCopyToText={true} icon={<AiOutlinePhone size={20} />} label='Phone' value={obj?.phone ?? ''} /> : ''
                                                                         }
                                                                     </Grid>
 

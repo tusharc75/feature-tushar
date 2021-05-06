@@ -295,11 +295,6 @@ body::-webkit-scrollbar-thumb {
   cursor: pointer !important;
 }
 
-.roles-table > tbody > tr > td {
-  padding: 0px 15px;
-  border-bottom: 0px;
-}
-
 .header-links {
   position: absolute;
   top: 4.3rem;
@@ -374,8 +369,10 @@ body::-webkit-scrollbar-thumb {
 .detail-container {
   position: absolute;
   top: 99px;
-  width: calc(100% - 3rem) !important;
+  width: calc(100% - 2.8rem) !important;
   padding: 0 1.5rem;
+  height: calc(100vh - 100px);
+  overflow: auto;
 }
 
 .badge-date {
@@ -516,7 +513,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .detailCardHeader {
-  border-bottom: 1px solid #e9e9e9;
+  // border-bottom: 1px solid #e9e9e9;
   padding: 0 0 6px 0px;
 }
 
@@ -527,3 +524,38 @@ body::-webkit-scrollbar-thumb {
   font-size: 1rem !important;
   line-height: 1.5rem !important;
 }
+
+.roles-table {
+  table {
+    border-collapse: collapse;
+  }
+  & tbody {
+    & tr {
+      border-bottom: 1px solid #e4e4e4;
+      & td {
+        padding: 0px 15px !important;
+
+        & .tableMainHeader {
+          font-size: 1rem;
+          color: var(--secondary);
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+[data-initials]:before {
+  background: #8a8a8a;
+  color: white;
+  opacity: 1;
+  content: attr(data-initials);
+  display: inline-block;
+  font-weight: bold;
+  border-radius: 50%;
+  vertical-align: middle;
+  width: 42px;
+  height: 43px;
+  line-height: 46px;
+  text-align: center;
+  }

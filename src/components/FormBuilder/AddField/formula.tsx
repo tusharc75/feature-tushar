@@ -11,6 +11,7 @@ import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
 import { checkFormula } from "../../../constants/formulaUtility";
 import Chip from '@material-ui/core/Chip';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const MenuProps = {
     PaperProps: {
@@ -49,7 +50,29 @@ export const Formula = ({ fields, values, setFieldValue }) => {
 
     return (<Box>
         <FormControl variant="outlined" fullWidth margin="dense">
-            <InputLabel htmlFor="filled-age-native-simple">Input Parameters</InputLabel>
+            <Autocomplete
+                multiple
+                id="tags-filled"
+                options={fields && fields.map((_field) => { return _field.fieldName })}
+                getOptionLabel={(option) => option}
+                value={values["inputFields"] ? values["inputFields"] : []}
+                freeSolo
+                renderTags={(value: string[], getTagProps) =>
+                    value.map((option: string, index: number) => (
+                        <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                    ))
+                }
+                onChange={(e, value) => setFieldValue("inputFields", value)}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        margin="dense"
+                        variant="outlined"
+                        label="Input Parameters"
+                        placeholder="Input Parameters" />
+                )}
+            />
+            {/* <InputLabel htmlFor="filled-age-native-simple">Input Parameters</InputLabel>
             <Select
                 inputProps={{
                     name: 'inputFields',
@@ -66,11 +89,11 @@ export const Formula = ({ fields, values, setFieldValue }) => {
             >
                 {fields && fields.map((_field) => (
                     <MenuItem key={_field.fieldName} value={_field.fieldName}>
-                        <Checkbox color="primary" checked={values["inputFields"].indexOf(_field.fieldName) > -1} />
+                        <Checkbox color="primary" checked={values["inputFields"] && values["inputFields"].indexOf(_field.fieldName) > -1} />
                         <ListItemText primary={_field.fieldLabel} />
                     </MenuItem>
                 ))}
-            </Select>
+            </Select> */}
         </FormControl>
         <Box pt={0.5} pb={0.5}>
             {values["inputFields"] && values["inputFields"].map((_field) => (

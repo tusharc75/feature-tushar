@@ -218,14 +218,17 @@ export default function Account(props) {
       headerName: "Account Name",
       width: 250,
       renderCell: (params) => (
-        <>
+        <span className="d-flex gap-2 align-items-center">
           <Link
             className={`${accountClass.account_name_link}`}
             to={`/${accountRoute}/detail/${params.row._id}`}
           >
             <CustomRenderCell value={params?.value} />
           </Link>
-        </>
+          {
+            params.row.approved && <FcApproval className="mt-1" title="Approved" />
+          }
+        </span>
       ),
     },
     {
@@ -322,7 +325,7 @@ export default function Account(props) {
       headerName: "Phone",
       hide: true,
       width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
+      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
     },
     {
       field: "actions",
