@@ -118,11 +118,8 @@ const RoleDetailsPage = () => {
   };
   const checkError = () => {
 
-    return (values?.name?.length === 0 && values?.description?.length === 0)
-      ? true
-      : (values?.name?.length === 0 || values?.description?.length === 0)
-        ? true
-        : false;
+    return values?.name?.length === 0 || values?.description?.length === 0
+
   }
 
   const handleUpdateRole = () => {
@@ -353,7 +350,7 @@ const RoleDetailsPage = () => {
                   label="Role Name"
                   value={values.name}
                   onChange={(e) =>
-                    setValues({ ...values, name: e.target.value })
+                    setValues({ ...values, name: e.target.value.trimStart() })
                   }
                 />
 
@@ -366,7 +363,7 @@ const RoleDetailsPage = () => {
                   label="Role Description"
                   value={values.description}
                   onChange={(e) =>
-                    setValues({ ...values, description: e.target.value })
+                    setValues({ ...values, description: e.target.value.trimStart() })
                   }
                 />
               </Box>
