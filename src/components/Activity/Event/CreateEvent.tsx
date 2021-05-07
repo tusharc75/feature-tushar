@@ -27,6 +27,10 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import Select from '@material-ui/core/Select';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import { isEmpty } from "lodash";
+import getAzureAcessToken from "../../Azure/getAzureAccessToken";
+import { AuthenticatedTemplate, useAccount, useMsal } from "@azure/msal-react";
+import { Checkbox, FormControlLabel } from "@material-ui/core";
 
 const EventSchema = Yup.object().shape({
     name: Yup.string()
@@ -63,6 +67,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
     const [initialValues, setInitialValues] = useState(null);
     const toastConfig = useContext(CustomToastContext);
+    const { instance, accounts, inProgress } = useMsal();
+    const azureAccount = useAccount(accounts[0] || {});
 
     useEffect(() => {
         fetchEventDetail();
@@ -82,9 +88,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
         }
     };
 
-    const handleSave = (values) => {
+    const handleSave = async (values) => {
 
         values.relatedTo = relatedTo;
+        
         if (eventId) {
             UpdateEvent(eventId, values)
                 .then(({ data }) => {
@@ -95,6 +102,12 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                 });
         }
         else {
+            
+            
+            if(!isEmpty(azureAccount) && values.meeting){
+                values.azureId= azureAccount.homeAccountId;
+                values.graphToken = await getAzureAcessToken(instance);
+            }
             CreateNewEvent(values)
                 .then(({ data }) => {
                     handleClose()
@@ -162,6 +175,18 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                         name="location"
                                         variant="outlined"
                                     />
+                                    <AuthenticatedTemplate>
+                                        <FormControlLabel control={
+                                            <Checkbox 
+                                            name="meeting" 
+                                            color="primary"
+                                            onChange={(e) => setFieldValue("meeting", e.target.checked)}
+                                            />
+                                        } 
+                                        label= "meeting"
+                                        />
+                                    </AuthenticatedTemplate>
+                                    
                                     {eventId && <Fragment>
                                         <Box mt={2}>
                                             <RelatedToDispay relatedTo={initialValues.relatedTo} />

@@ -17,7 +17,11 @@ import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
-import { customerAccount, supplierAccount, yyyyMMDD, stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact, getObjKeysWithValues, opportunityProcessFieldName } from "../../constants/helpers";
+import {
+  customerAccount, supplierAccount, yyyyMMDD, currencyCodeToSymbol,
+  stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
+  getObjKeysWithValues, opportunityProcessFieldName, formatAmountWithCurrency
+} from "../../constants/helpers";
 import { opportunity } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
@@ -26,6 +30,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import currencies from "../../constants/currency_with_country.json";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
+import { stringify } from "query-string";
 
 const recordsPerLine = 2
 function OpportunityDetailsPage() {
@@ -105,6 +110,8 @@ function OpportunityDetailsPage() {
     }
   }, [steps])
 
+
+
   const fetchOpportunityData = () => {
     if (selectedEntity) {
       setLoading(true);
@@ -119,10 +126,11 @@ function OpportunityDetailsPage() {
           let modifiedData = {};
           Object.assign(modifiedData, data);
 
-          if (modifiedData["currency"]) {
-            const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
-            modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
-          }
+          // if (modifiedData["currency"] && modifiedData["amount"]) {
+          modifiedData["amount"] = formatAmountWithCurrency(modifiedData["currency"], modifiedData["amount"])
+          // const currency = currencies.find(d => d.currencyCode == modifiedData["currency"])?.symbolNative;
+          // modifiedData["amount"] = [currency, modifiedData["amount"]].filter(d => d).join(" ");
+          // }
 
           setOpportunityData(modifiedData);
 
@@ -204,7 +212,7 @@ function OpportunityDetailsPage() {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Amount"] = data.amount || "";
+    mainPoint["Amount"] = formatAmountWithCurrency(data?.currency, data?.amount);
     mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
 
     setMainPoints(mainPoint);
