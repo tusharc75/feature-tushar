@@ -422,7 +422,7 @@ export default function AccountDetailPage(props) {
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper>
+            <Paper className="subContainer">
               {
                 <DetailsPageHeader
                   loading={loading}
@@ -552,7 +552,7 @@ export default function AccountDetailPage(props) {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper>
+            <Paper className="subContainer">
               <Grid container>
                 <Grid item xs={12}>
                   {accountData && (

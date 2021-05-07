@@ -347,8 +347,7 @@ function OpportunityDetailsPage() {
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper>
-
+            <Paper className="subContainer">
               {!opportunityData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -520,7 +519,7 @@ function OpportunityDetailsPage() {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper>
+            <Paper className="subContainer">
               {!opportunityData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />

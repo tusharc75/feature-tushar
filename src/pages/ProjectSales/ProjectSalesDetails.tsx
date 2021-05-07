@@ -281,7 +281,7 @@ const ProjectSalesDetails = () => {
         <div className="detail-container">
           <Grid container spacing={1}>
             <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Paper>
+              <Paper className="subContainer">
                 {!projectSalesData ? (
                   <Box padding={1}>
                     <Skeleton variant="text" width="150px" height="30px" />
@@ -362,7 +362,7 @@ const ProjectSalesDetails = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper style={{ overflow: "hidden" }}>
+              <Paper  className="subContainer">
                 <Box style={{ padding: "0px", maxHeight: "450px" }}>
                   <Box
                     width="100%"

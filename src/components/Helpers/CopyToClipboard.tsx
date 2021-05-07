@@ -16,7 +16,7 @@ export default function CopyToClipboard({ size = 12, textToCopy, ...rest }) {
     }
     return <>
         {textToCopy ? <Tooltip title="Copied to clipboard" open={show}>
-            <span className="pl-2" onClick={handleCopyToClipBoard} {...rest}>
+            <span className="pl-2 cursor-pointer" onClick={handleCopyToClipBoard} {...rest}>
                 <MdContentCopy size={size} />
             </span>
         </Tooltip> : null

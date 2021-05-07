@@ -436,7 +436,7 @@ const UserDetailsPage = () => {
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper>
+            <Paper className="subContainer">
               {!userData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -693,7 +693,7 @@ const UserDetailsPage = () => {
                 </>
               }
               <OpportunityAccordionInUserDetail
-                opportunities={[...opportunityRelatedData?.Owner ?? [],...opportunityRelatedData?.Collaborator ?? []]}
+                opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -702,7 +702,7 @@ const UserDetailsPage = () => {
                 }}
               />
               <LeadAccordionInUserDetailPage
-                leads={[...leadsRelatedData?.Owner ?? [],...leadsRelatedData?.Collaborator ?? []]}
+                leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -753,7 +753,7 @@ const UserDetailsPage = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper>
+            <Paper className="subContainer">
               <Box className="detailHeader">
                 <h2 className="listingHeader single">Approval Process</h2>
               </Box>
@@ -805,10 +805,8 @@ const UserDetailsPage = () => {
                   </FormGroup>
                 </FormControl>
               </Box>
+              <QuickLinks quickLinks={quickLinks} />
             </Paper>
-
-            <QuickLinks quickLinks={quickLinks} />
-            
           </Grid>
         </Grid>
       </Layout>
