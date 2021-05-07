@@ -110,7 +110,7 @@ export default function ManageUpdatePassword({
     )
     return (
         <Dialog
-            maxWidth="md"
+            maxWidth="sm"
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
             open={open}
@@ -145,7 +145,7 @@ export default function ManageUpdatePassword({
                                             {
                                                 isUpdatePassword ?
                                                     <>
-                                                        <Grid style={{ display: "flex" }} item sm={8}>
+                                                        <Grid style={{ display: "flex" }} item sm={10}>
 
                                                             <Field
                                                                 component={TextFieldFormik}
@@ -164,7 +164,7 @@ export default function ManageUpdatePassword({
                                                             />
                                                         </Grid>
 
-                                                        <Grid item sm={8}>
+                                                        <Grid item sm={10}>
                                                             <Field
                                                                 component={TextFieldFormik}
                                                                 fullWidth
@@ -181,7 +181,7 @@ export default function ManageUpdatePassword({
                                                                 }}
                                                             />
                                                         </Grid>
-                                                        <Grid item sm={8}>
+                                                        <Grid item sm={10}>
                                                             <Field
                                                                 component={TextFieldFormik}
                                                                 fullWidth

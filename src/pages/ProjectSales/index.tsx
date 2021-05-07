@@ -228,7 +228,7 @@ const ProjectSales: FC = () => {
     }
     if (recs && recs.length > 0) {
       axiosInstance()
-        .put(`/projectStrategy/remove`, { ids: [...recs] })
+        .put(`/project-sales/remove`, { ids: [...recs] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
