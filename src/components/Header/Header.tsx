@@ -179,12 +179,12 @@ const Header = ({ toggleDrawer }) => {
 
   const handleFullScreenNotificationClick = (event) => {
     setFullScreenNotificationAnchorEl(event.currentTarget);
-
     setLoadingNotifications(true);
 
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
       setNotificationList(data);
       setLoadingNotifications(false);
+      notification.setCount(0);
     }).catch((error) => {
       setLoadingNotifications(false);
       toastConfig.setToastConfig(error);
@@ -202,11 +202,11 @@ const Header = ({ toggleDrawer }) => {
   // For MobileScreen Notification - Start
   const [mobileScreenNotificationAnchorEl, setMobileScreenNotificationAnchorEl] = React.useState(null);
 
-  const handleMobileScreenNotificationClick = (event) => {
+  const handleMobileScreenNotificationClick = async (event) => {
     setMobileScreenNotificationAnchorEl(event.currentTarget);
     setLoadingNotifications(true);
 
-    axiosInstance().get("/user/notification").then(({ data: { data } }) => {
+    await axiosInstance().get("/user/notification").then(({ data: { data } }) => {
       setNotificationList(data);
       setLoadingNotifications(false);
       notification.setCount(0);
@@ -286,11 +286,11 @@ const Header = ({ toggleDrawer }) => {
   };
 
   const logoutUser = async () => {
-    try{
-      if(!isEmpty(account))await instance.logoutPopup();
-    }catch(e){
-      toastConfig.setToastConfig({open: true, type: "error", message: "Need to logout from Azure" })
-    }finally{
+    try {
+      if (!isEmpty(account)) await instance.logoutPopup();
+    } catch (e) {
+      toastConfig.setToastConfig({ open: true, type: "error", message: "Need to logout from Azure" })
+    } finally {
       await axiosInstance().get("/user/logout");
       history.push("/");
       dispatch({ type: SET_USER, payload: null });
@@ -298,7 +298,7 @@ const Header = ({ toggleDrawer }) => {
       localStorage.removeItem("token");
       history.push("/login");
     }
-    }
+  }
 
   function handleListKeyDown(event) {
     if (event.key === "Tab") {
@@ -345,7 +345,8 @@ const Header = ({ toggleDrawer }) => {
     return <div className={`${data.length == 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: "relative" }}>
       {
         data.map((d, index) => {
-          return <div style={{ borderBottom: index != data.length - 1 ? "1px solid white" : "" }} className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
+          return <div style={{ borderBottom: d.read ? "1px solid lightgrey" : "1px solid white" }}
+            className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
             onClick={() => {
               if (d.read == false) {
                 axiosInstance().put("/user/notification/read", {
@@ -368,9 +369,30 @@ const Header = ({ toggleDrawer }) => {
                 <h6 className="pull-right">{moment(d.date).format("MMM DD YYYY")}</h6>
               </>
             }
-          </div >
+          </div>
         })
       }
+
+      <div className="px-2 py-1" style={{ borderTop: "1px solid lightgrey" }}>
+        <Typography onClick={() => {
+          axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
+            let updatedNotificationList = [];
+            notificationList.map(notification => {
+              notification.read = true;
+              updatedNotificationList.push(notification);
+            })
+
+            setNotificationList(updatedNotificationList);
+            toastConfig.setToastConfig({ open: true, message: data.message, type: "success" })
+
+            setFullScreenNotificationAnchorEl(null);
+            setMobileScreenNotificationAnchorEl(null);
+          }).catch((error) => {
+            toastConfig.setToastConfig(error)
+          })
+
+        }} className="cursor-pointer">Mark all as read</Typography>
+      </div>
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
@@ -447,37 +469,35 @@ const Header = ({ toggleDrawer }) => {
         </MenuItem>
       }
 
-      <div>
-        <MenuItem onClick={handleMobileScreenNotificationClick}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl == null ? handleMobileScreenNotificationClick : () => { }}>
 
-          <Badge badgeContent={ notification ? notification.count : 0 } color="secondary"
-            aria-describedby={mobileScreenNotificationId}>
-            <Notifications />
-          </Badge>
-          <Box component="span" mx={1} />
-          <p>Notifications</p>
+        <Badge badgeContent={notification ? notification.count : 0} color="secondary"
+          aria-describedby={mobileScreenNotificationId}>
+          <Notifications />
+        </Badge>
+        <Box component="span" mx={1} />
+        <p>Notifications</p>
 
-          <Popover
-            id={mobileScreenNotificationId}
-            open={mobileScreenNotificationOpen}
-            anchorEl={mobileScreenNotificationAnchorEl}
-            onClose={handleMobileScreenNotificationClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
-            }}
-          >
-            {
-              loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
-                (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
-            }
-          </Popover>
-        </MenuItem>
-      </div>
+        <Popover
+          id={mobileScreenNotificationId}
+          open={mobileScreenNotificationOpen}
+          anchorEl={mobileScreenNotificationAnchorEl}
+          onClose={handleMobileScreenNotificationClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+        >
+          {
+            loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
+              (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
+          }
+        </Popover>
+      </MenuItem>
 
       <MenuItem>
         <HelpOutline />
@@ -621,7 +641,8 @@ const Header = ({ toggleDrawer }) => {
 
           <div className={classes.sectionDesktop}>
             <div>
-              <IconButton aria-describedby={fullScreenNotificationId} aria-label="settings" color="inherit" onClick={handleFullScreenNotificationClick}>
+              <IconButton aria-describedby={fullScreenNotificationId} aria-label="settings" color="inherit"
+                onClick={handleFullScreenNotificationClick}>
                 <Badge badgeContent={notification ? notification.count : 0} color="secondary">
                   <Notifications />
                 </Badge>
@@ -644,7 +665,8 @@ const Header = ({ toggleDrawer }) => {
               >
                 {
                   loadingNotifications ? <Typography className="m-3">Loading Notifications...</Typography> :
-                    (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> : <NotificationContent data={notificationList} />)
+                    (notificationList.length == 0 ? <Typography className="m-3">No Notifications found</Typography> :
+                      <NotificationContent data={notificationList} />)
                 }
               </Popover>
             </div>

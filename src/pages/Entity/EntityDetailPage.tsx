@@ -236,6 +236,11 @@ const EntityDetailsPage = () => {
         .post("/role/un-assign-role", data)
         .then(() => {
           setShowConfirmBox(false);
+
+          if ((showUsers - 1) >= 2) {
+            setShowUsers(showUsers - 1)
+          }
+
           fetchEntityUser();
           toastConfig.setToastConfig({
             message: "Successfully unassigned user",
@@ -458,9 +463,13 @@ const EntityDetailsPage = () => {
                             variant="contained"
                             color="primary"
                             size="small"
-                            onClick={() => setShowUsers(users.length)}
+                            onClick={() => {
+                              setShowUsers(showUsers == users.length ? showRecordsBeforeViewAll : users.length)
+                            }}
                           >
-                            View All ({users.length})
+                            {
+                              showUsers == users.length ? `View less` : `View All (${users.length})`
+                            }
                           </Button>
                         }
                       </>
@@ -526,10 +535,12 @@ const EntityDetailsPage = () => {
                           variant="contained"
                           color="primary"
                           size="small"
-                          onClick={() => setShowRegionalRoles(roles.length)}
+                          onClick={() => setShowRegionalRoles(showRegionalRoles == roles.length ? showRecordsBeforeViewAll : roles.length)}
                         >
-                          View All ({roles.length})
-                      </Button>
+                          {
+                            showRegionalRoles == roles.length ? `View less` : `View All (${roles.length})`
+                          }
+                        </Button>
                       }
                     </>
                   ) : (
