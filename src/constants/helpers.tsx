@@ -536,7 +536,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   );
 
   if (!currencyData) {
-    return `$ ${amount}`;
+    return amount;
   }
 
   const language = navigator.language.split("-")[0];
