@@ -20,7 +20,13 @@ import PropTypes from 'prop-types'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-
+import { CircularProgress, Tooltip } from "@material-ui/core";
+import InfoIcon from "@material-ui/icons/Info";
+import { UnauthenticatedTemplate, useAccount, useMsal } from "@azure/msal-react";
+import { AzureLogin } from "../../Azure/Azure";
+import getAzureAcessToken from "../../Azure/getAzureAccessToken";
+import { getAllJSDocTagsOfKind } from "typescript";
+import { validations } from "../../../constants/helpers";
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -53,12 +59,14 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) => {
-
+export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
+    const { instance, accounts, inProgress } = useMsal();
+    const azureAccount = useAccount(accounts[0] || {});
     const [initialValues, setInitialValues] = useState(null);
 
     useEffect(() => {
         fetchEmailDetail();
+
     }, []);
 
     const fetchEmailDetail = async () => {
@@ -75,26 +83,46 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         }
     };
 
-    const handleSave = (values) => {
-        values.relatedTo = relatedTo;
-        values.content = values.content.toString('html');
-        if (emailId) {
-            UpdateEmail(emailId, values)
-                .then(({ data }) => {
-                    handleClose()
-                })
-                .catch((err) => {
-                });
+    const [sending, setSending] = useState(false)
+    const handleSave = async (values) => {
+        setSending(true)
+        try {
+            // values.relatedTo = relatedTo;
+            // values.content = values.content.toString('html');
+            // values.grapToken = await getAzureAcessToken(instance);
+            const payload = {
+                relatedTo: relatedTo,
+                message: values.content.toString('html'),
+                graphToken: await getAzureAcessToken(instance),
+                to: values.to,
+                cc: values.cc,
+                subject: values.name,
+                mailbox: azureAccount.username
+            }
+
+            if (emailId) {
+                UpdateEmail(emailId, values)
+                    .then(({ data }) => {
+                        handleClose()
+                    })
+                    .catch((err) => {
+                    });
+            }
+            else {
+                CreateNewEmail(payload)
+                    .then(({ data }) => {
+                        setInitialValues(null)
+                        handleClose()
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        setInitialValues(null)
+                    });
+            }
+        } catch (e) {
+
         }
-        else {
-            CreateNewEmail(values)
-                .then(({ data }) => {
-                    setInitialValues(null)
-                    handleClose()
-                })
-                .catch((err) => {
-                });
-        }
+        setSending(false)
     };
 
     const onKeyPress = (event) => {
@@ -117,21 +145,19 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const classes = useStyles();
 
     return <>
-        <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
-        {
-            initialValues && <Formik
-                initialValues={initialValues}
-                validationSchema={EmailSchema}
-                onSubmit={handleSave} onKeyPress={onKeyPress}>
-                {({ submitForm, touched, errors, setFieldValue, values, setFieldTouched }) => (
+        {initialValues && <Formik initialValues={initialValues} validationSchema={EmailSchema} onSubmit={handleSave} onKeyPress={onKeyPress}>
+            {
+                ({ submitForm, touched, errors, setFieldValue, values }) => (
                     <>
-                        <Form autoComplete="off" autoCorrect="off" noValidate >
-                            <CustomDialogContent>
+                        <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
+
+                        <CustomDialogContent>
+                            <Form autoComplete="off" autoCorrect="off" noValidate >
                                 <MuiPickersUtilsProvider utils={MomentUtils}>
                                     <Box padding={1}>
                                         {emailId ?
                                             <Fragment>
-                                                <Typography variant="subtitle1">Subject : {initialValues.name} </Typography>
+                                                <Typography variant="subtitle1">Subject : {initialValues.name || initialValues.subject} </Typography>
                                                 <Box mt={1} mb={1}>
                                                     <Typography variant="subtitle1">To : {initialValues.to.join()} </Typography>
                                                 </Box>
@@ -140,7 +166,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                 </Box>}
                                                 <Divider />
                                                 <Box mt={2}>
-                                                    <div dangerouslySetInnerHTML={{ __html: initialValues.content }} />
+                                                    <div dangerouslySetInnerHTML={{ __html: initialValues.content || initialValues.message }} />
                                                 </Box>
                                                 <Box mt={2}>
                                                     <RelatedToDispay relatedTo={initialValues.relatedTo} />
@@ -149,7 +175,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                     <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
                                                 </Box>
                                             </Fragment> :
-                                            <Grid container spacing={3} >
+                                            <Grid container spacing={3}>
                                                 <Grid item xs={12}>
                                                     <TextField
                                                         variant="outlined"
@@ -166,8 +192,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                     />
                                                     <Autocomplete
                                                         multiple
-                                                        options={options}
-                                                        getOptionLabel={option => option.email ?? ''}
+                                                        options={["rajat@vebholic.com"]}
                                                         freeSolo
                                                         renderTags={(value, getTagProps) =>
                                                             value.map((option, index) => (
@@ -183,20 +208,27 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 required={true}
                                                                 error={touched["to"] && Boolean(errors["to"])}
                                                                 helperText={touched["to"] && errors["to"]}
-                                                                name="Email" />
+                                                                placeholder="Email" />
                                                         )}
                                                         value={values["to"]}
-                                                        // onBlur={(e: any) => {
-                                                        //     if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
-                                                        //         setFieldValue("to", [...values["to"], e.target.value])
-                                                        //     }
-                                                        // }}
-                                                        onChange={(e, value) => setFieldValue("to", handleToCcChange(value))}
+                                                        onBlur={(e: any) => {
+                                                            if (e.target.value && e.target.value.trim() != "" && validations.email.test(e.target.value)) {
+                                                                setFieldValue("to", [...values["to"], e.target.value])
+                                                            }
+                                                        }}
+                                                        onChange={(e, value) => {
+                                                            let val = []
+                                                            for (var email of value) {
+                                                                if (validations.email.test(email)) {
+                                                                    val.push(email)
+                                                                }
+                                                            }
+                                                            setFieldValue("to", val)
+                                                        }}
                                                     />
                                                     <Autocomplete
                                                         multiple
-                                                        options={options}
-                                                        getOptionLabel={option => option.email ?? ''}
+                                                        options={[]}
                                                         freeSolo
                                                         renderTags={(value, getTagProps) =>
                                                             value.map((option, index) => (
@@ -211,15 +243,23 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 margin="dense"
                                                                 error={touched["cc"] && Boolean(errors["cc"])}
                                                                 helperText={touched["cc"] && errors["cc"]}
-                                                                name="Email" />
+                                                                placeholder="Email" />
                                                         )}
                                                         value={values["cc"]}
-                                                        // onBlur={(e: any) => {
-                                                        //     if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
-                                                        //         setFieldValue("cc", [...values["cc"], e.target.value])
-                                                        //     }
-                                                        // }}
-                                                        onChange={(e, value) => setFieldValue("cc", handleToCcChange(value))}
+                                                        onBlur={(e: any) => {
+                                                            if (e.target.value && e.target.value.trim() != "" && /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(e.target.value)) {
+                                                                setFieldValue("cc", [...values["cc"], e.target.value])
+                                                            }
+                                                        }}
+                                                        onChange={(e, value) => {
+                                                            let val = []
+                                                            for (var email of value) {
+                                                                if (validations.email.test(email)) {
+                                                                    val.push(email)
+                                                                }
+                                                            }
+                                                            setFieldValue("cc", val)
+                                                        }}
                                                     />
                                                     <Box mt={2}>
                                                         <RichTextEditor
@@ -232,22 +272,41 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                             </Grid>}
                                     </Box>
                                 </MuiPickersUtilsProvider>
-
-                            </CustomDialogContent>
-                            <CustomDialogFooter>
-                                <Button color="primary" onClick={handleClose}>Cancel</Button>
-                                {!emailId &&
-                                    <Button color="primary" variant="contained"
-                                        type="submit"
-                                    >Send </Button>
-                                }
-                            </CustomDialogFooter>
-                        </Form>
+                            </Form>
+                        </CustomDialogContent>
+                        <CustomDialogFooter>
+                            <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography>
+                            <Button color="primary" onClick={handleClose}>Cancel</Button>
+                            {!emailId &&
+                                <Button type="button" color="primary" variant="contained" disabled={sending}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        submitForm()
+                                    }}>
+                                    {sending ? (<><CircularProgress color="inherit" size={14} style={{ marginRight: "10px" }} />
+                                Sending ... </>) : "send"}
+                                </Button>}
+                        </CustomDialogFooter>
                     </>
                 )}
-            </Formik >
+
+        </Formik>
         }
+        {!emailId && <UnauthenticatedTemplate>
+            <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
+                backdropFilter: "blur(2px)",
+                color: "#F9FAFB",
+            }} zIndex={10} top={0} left={0} height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                <Box width="100%" textAlign="center">
+                    <AzureLogin></AzureLogin>
+                    <Box width="50%" marginX="auto" marginY={2} bgcolor="#F9FAFB" height="1px"></Box>
+                    <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
+                </Box>
+            </Box>
+        </UnauthenticatedTemplate>}
+
     </>
+
 }
 
 CreateEmail.propTypes = {
