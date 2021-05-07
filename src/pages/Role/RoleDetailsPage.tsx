@@ -173,6 +173,11 @@ const RoleDetailsPage = () => {
         .post("/role/un-assign-role", data)
         .then(() => {
           setShowConfirmBox(false);
+
+          if ((showUsers - 1) >= 2) {
+            setShowUsers(showUsers - 1)
+          }
+
           fetchRoleData();
           toastConfig.setToastConfig({
             message: "Successfully unassigned user",
@@ -557,9 +562,13 @@ const RoleDetailsPage = () => {
                           variant="contained"
                           color="primary"
                           size="small"
-                          onClick={() => setShowUsers(roleData.user.length)}
+                          onClick={() => {
+                            setShowUsers(showUsers == roleData.user.length ? showRecordsBeforeViewAll : roleData.user.length)
+                          }}
                         >
-                          View All ({roleData.user.length})
+                          {
+                            showUsers == roleData.user.length ? `View less` : `View All (${roleData.user.length})`
+                          }
                         </Button>
                       }
                     </>
