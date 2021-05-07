@@ -116,6 +116,14 @@ const RoleDetailsPage = () => {
       toastConfig.setToastConfig(error);
     }
   };
+  const checkError = () => {
+
+    return (values?.name?.length === 0 && values?.description?.length === 0)
+      ? true
+      : (values?.name?.length === 0 || values?.description?.length === 0)
+        ? true
+        : false;
+  }
 
   const handleUpdateRole = () => {
     setUpdating(true);
@@ -314,7 +322,7 @@ const RoleDetailsPage = () => {
                 <DetailsPageHeader heading={headingLbl} showHeading={true}>
                   {permissions.role.isUpdate && !isEditDeleteDisable ? (
                     <Button
-                      disabled={currentData === updatedData || isUpdating}
+                      disabled={currentData === updatedData || isUpdating || checkError()}
                       variant="contained"
                       color="primary"
                       onClick={handleUpdateRole}
