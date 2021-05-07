@@ -58,11 +58,13 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
   const handleSave = (values) => {
 
     let data: any = {}
+    data._id = values._id
     data.fieldLabel = values.fieldLabel
     data.fieldName = camelCase(values.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
     data.required = values.required
     data.isTooltip = values.isTooltip
     data.tooltipMessage = values.tooltipMessage
+    data.type = values.type
 
     if (values.type === "dropDown" || values.type === "multiSelect" || values.type === "radio" || values.type === "process") {
       values.option.forEach((ele, index) => {
