@@ -44,7 +44,7 @@ const FormBuilder = () => {
       headerName: "Resource",
       flex: 1,
       renderCell: (params) => (
-        <Link
+        <Link className="link"
           to={"/form-builder/resource?resource=" + params.row.resource}>
           {" "}
           {params.row.resource}

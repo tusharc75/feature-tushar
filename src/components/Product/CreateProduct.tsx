@@ -22,7 +22,7 @@ import { AddField } from '../FormBuilder/AddField';
 const CreateProduct = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose, isClone } = props;
+    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -85,6 +85,15 @@ const CreateProduct = (props) => {
             axiosInstance().post(`/product`, values).then(({ data: { data } }) => {
                 setLoading(false);
                 handleClose()
+                if (isAddInBuilder) {
+                    delete data.brand
+                    delete data.createdBy
+                    delete data.updatedBy
+                    delete data.fields
+                    data.productId = data._id
+                    delete data._id
+                    addProductInBuilder([data])
+                }
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);

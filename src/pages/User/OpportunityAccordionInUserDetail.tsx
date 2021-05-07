@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -18,6 +18,7 @@ import { FaEye } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
 import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useData } from '../../StateProvider/Provider';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 const Accordion = withStyles({
     root: {
@@ -56,10 +57,6 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
-    amount: {
-        float: "right",
-        fontWeight: "bold"
     }
 
 }))(MuiAccordionDetails);
@@ -83,7 +80,7 @@ export default function OpportunityAccordionInUserDetail({
 }) {
     const history = useHistory();
     const {
-        state: { permissions },
+        state: { permissions, selectedEntity },
     }: any = useData();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -97,11 +94,11 @@ export default function OpportunityAccordionInUserDetail({
             break;
 
         case 4:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 3;
             break;
 
         default:
-            recordsPerLineInLargeScreen = 4;
+            recordsPerLineInLargeScreen = 6;
             break;
     }
 
@@ -172,20 +169,20 @@ export default function OpportunityAccordionInUserDetail({
                                         {
                                             opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card style={{ minWidth: "100%" }}>
+                                                    <Card className="accountCard" >
                                                         <CardContent className="detailListing">
-                                                            {/* <span className={classes.actionsItems}> */}
-                                                            {/* <VisibilityOutlined /> */}
-                                                            {/* <IconButton size="small">
-                                                            <Delete color="error" />
-                                                        </IconButton> */}
-                                                            {/* <EditOutlined /> */}
-                                                            {/* </span> */}
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={8}>
-                                                                    <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
-                                                                        <Typography >{obj?.opportunityName} </Typography>
-                                                                    </Link>
+                                                                    {
+                                                                        obj.entity === selectedEntity ? <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                                                            <Typography>{obj?.opportunityName}</Typography>
+                                                                        </Link> : <span className="d-flex gap-2 align-items-center">
+                                                                            <Typography>{obj.opportunityName}</Typography> <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
+                                                                                <InfoOutlinedIcon fontSize="small" />
+                                                                            </Tooltip>
+                                                                        </span>
+                                                                    }
+
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={4}>
                                                                     <Typography className="amount">

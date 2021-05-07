@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
       }
     } else if (
       pathname === "/" ||
-      ["activity", "terms-conditions", "product-category", "product-cost", "form-builder",
+      ["activity", "terms-conditions", "product-category", "product-cost", "form-builder","product-builder",
         "profile", "brand-configuration", "project-sales"].indexOf(pathnames[0]) >= 0) {
       setAccess(true);
       setChecking(false);

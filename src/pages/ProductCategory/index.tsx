@@ -172,14 +172,6 @@ const ProductCategory = () => {
                     onOk={handleDelete}
                 />
             }
-            {showDeleteConfirmBox &&
-                <ConfirmationDialog
-                    open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete product ${deleteRecord?.name} ?`}
-                    onClose={() => setShowDeleteConfirmBox(false)}
-                    onOk={handleDelete}
-                />
-            }
         </CustomContainer>
     </Layout>
     );

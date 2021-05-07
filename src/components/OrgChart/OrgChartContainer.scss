@@ -72,15 +72,15 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    :after {
-      content: "";
-      display: block;
-      width: 140px;
-      height: 290px;
-      background: #f3f3f3;
-      position: absolute;
-      animation: rotatemagic 0.75s cubic-bezier(0.425, 1.04, 0.47, 1.105) 1s both;
-    }
+    // :after {
+    //   content: "";
+    //   display: block;
+    //   width: 140px;
+    //   height: 290px;
+    //   background: #f3f3f3;
+    //   position: absolute;
+    //   animation: rotatemagic 0.75s cubic-bezier(0.425, 1.04, 0.47, 1.105) 1s both;
+    // }
   }
 
   // .google-visualization-orgchart-node {
@@ -195,6 +195,7 @@
     border: 3px solid white;
     padding: 0;
     z-index: 1;
+    background: #c7c5c5;
   }
   // .profileinfo {
   //   padding: 0 0 0 20px;

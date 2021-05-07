@@ -17,7 +17,14 @@ export const Provider = ({ children }) => {
         .then(({ data: response }) => {
           const { data } = response;
           dispatch({ type: SET_USER, payload: data });
-          if (data?.role?.selectedEntity?._id) {
+          let prevSelectedEntity = localStorage.getItem("selectedEntity")
+          if (prevSelectedEntity && prevSelectedEntity !== 'null') {
+            dispatch({
+              type: SET_SELECTED_ENTITY,
+              payload: prevSelectedEntity,
+            });
+          }
+          else if (data?.role?.selectedEntity?._id) {
             dispatch({
               type: SET_SELECTED_ENTITY,
               payload: data.role.selectedEntity._id,

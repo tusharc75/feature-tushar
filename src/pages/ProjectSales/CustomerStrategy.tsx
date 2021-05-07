@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import clsx from "clsx";
 import {
   withStyles,
@@ -18,10 +18,13 @@ import { Skeleton } from "@material-ui/lab";
 import { Add, ExpandMore, ControlPoint } from "@material-ui/icons";
 
 import axiosInstance from "../../axios/axiosInstance";
-import BoxWithBorder from "../../components/BoxWithBorder";
 import CustomerContacts from "./CustomerContacts";
+import BoxWithBorder from "../../components/BoxWithBorder";
+import OpportunityAccordianProjectSales from "./OpportunityAccordingProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
+import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 
 const Accordion = withStyles({
   root: {
@@ -94,12 +97,30 @@ const CustomerStrategy = (props) => {
     fetchProjectData,
     customerContacts,
     projectId,
+    users,
   } = props;
   const classes = useStyles();
   const { setToastConfig } = useContext(CustomToastContext);
   const [expandedParent, setExpandedParent] = useState(true);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [collaborators, setCollaborators] = useState([]);
 
+  useEffect(() => {
+    if (!users.length) return;
+
+    const collabs = users.map((u, i) => ({
+      optionValue: u._id,
+      optionLabel: u.firstName + " " + u.lastName,
+      order: i,
+      default: false,
+    }));
+    setCollaborators(collabs);
+  }, [users]);
+
+  /**
+   *  Save opportunity data in project sales
+   * @param id
+   */
   const saveOppToProject = async (id) => {
     const existingData = opportunities.map((o) => o._id);
 
@@ -141,18 +162,20 @@ const CustomerStrategy = (props) => {
             <ExpandMore />
           </Box>
           <Box component="span" mx={1} />
-          <Typography>Customer Strategy</Typography>
-          <IconButton
-            color="primary"
-            size="small"
-            className={classes.addBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenDialog("customer-account");
-            }}
-          >
-            <Add />
-          </IconButton>
+          <Typography variant="subtitle1">Customer Accounts</Typography>
+          {permissions.isUpdate && (
+            <IconButton
+              color="primary"
+              size="small"
+              className={classes.addBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenDialog("customer-account");
+              }}
+            >
+              <Add />
+            </IconButton>
+          )}
         </AccordionSummary>
         <AccordionDetails>
           {loading ? (
@@ -192,21 +215,29 @@ const CustomerStrategy = (props) => {
 
                       <Grid item xs={12} sm={12} md={8} lg={8}>
                         {/*TODO: Heirarchy Table */}
-                        {permissions?.opportunity?.isRead && (
-                          <OpportunityInAccordian
+                        {permissions?.isRead && (
+                          <OpportunityAccordianProjectSales
                             opportunities={opportunities.filter(
                               (o) => o.customerAccountName === c._id
                             )}
                             onNewOpportunityAdd={(id) => {
                               saveOppToProject(id);
                             }}
-                            opportunityPermissions={permissions?.opportunity}
+                            opportunityPermissions={permissions}
                             accountId={c._id}
                             accountName={c.accountName}
                             resource={"customerAccount"}
                             isRedirect={false}
+                            expanded={true}
+                            collaborators={collaborators}
+                            projectId={projectId}
+                            addExisting={handleOpenDialog}
+                            fetchProjectData={fetchProjectData}
                           />
                         )}
+                        <QuotesInAccordion />
+                        <ProjectInAccordion />
+                        <ProductBuilderInAccordion />
                       </Grid>
                       {/**
                        * RIGHT SIDE
@@ -225,15 +256,17 @@ const CustomerStrategy = (props) => {
                               <Typography variant="subtitle2">
                                 Customer Contacts
                               </Typography>
-                              <IconButton
-                                color="primary"
-                                size="small"
-                                onClick={() =>
-                                  handleOpenDialog("customer-contact", c._id)
-                                }
-                              >
-                                <ControlPoint />
-                              </IconButton>
+                              {permissions.isUpdate && (
+                                <IconButton
+                                  color="primary"
+                                  size="small"
+                                  onClick={() =>
+                                    handleOpenDialog("customer-contact", c._id)
+                                  }
+                                >
+                                  <ControlPoint />
+                                </IconButton>
+                              )}
                             </Box>
                             <Box padding={1}>
                               {loading ? (
@@ -257,7 +290,9 @@ const CustomerStrategy = (props) => {
                                     </Box>
                                   </BoxWithBorder>
                                 ))
-                              ) : customerContacts.length ? (
+                              ) : customerContacts.filter(
+                                  (cA) => cA.accountName === c._id
+                                ).length ? (
                                 <>
                                   <CustomerContacts
                                     contacts={customerContacts.filter(

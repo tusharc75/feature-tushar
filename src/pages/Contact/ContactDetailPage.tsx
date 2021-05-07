@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List } from "@material-ui/core";
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, Avatar, Divider } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
@@ -32,6 +32,9 @@ import { BiFace } from 'react-icons/bi'
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
+import { AiOutlineMail } from 'react-icons/ai';
+import { BiPhone } from 'react-icons/bi';
+import { FiStar } from 'react-icons/fi';
 
 function DisplayData({ label, value, icon }) {
   return <div style={{ flexGrow: 1 }}>
@@ -374,6 +377,7 @@ const ContactDetailsPage = (props) => {
             }}
             loading={loading}
             handleSubmit={handleUpdateContact}
+            contactId={contactData._id}
           // contactResource={contactResource}
           // contactApi={contactApi}
           />
@@ -406,7 +410,6 @@ const ContactDetailsPage = (props) => {
                   </Button>
                 ) : null}
 
-                <Box component="span" marginX={1} />
                 {contactPermissions.isDelete &&
                   contactData?.owner?.optionValue &&
                   user?.user?._id &&
@@ -535,7 +538,45 @@ const ContactDetailsPage = (props) => {
                           </Typography>
                         </div>
                         <Box className={`${contactClass.custom_box1}`}>
-                          <Card>
+                          <Card className="contactCard">
+                            <CardContent className="detailListing">
+                                <List>
+                                  <ListItem>
+                                    <ListItemAvatar>
+                                      <div data-initials={[contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
+                                      contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()].filter(f => f).join("")}></div>
+                                    </ListItemAvatar>
+                                    <ListItemText className="ml-2"
+                                      primary={
+                                        <Link className="link f_size p-l2"
+                                          to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                          {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
+                                        </Link>
+                                      }
+                                      secondary={
+                                        <React.Fragment>
+                                          <Typography
+                                            component="p"
+                                            variant="body2"
+                                            className="cardDetail">
+                                          {contactData?.staticData?.lead?.title && <span className="d-flex gap-2 align-items-center">
+                                            <FiStar size="15" />{contactData?.staticData?.lead?.title}
+                                          </span>}
+                                          {contactData?.staticData?.lead?.email && <span className="d-flex gap-2 align-items-center">
+                                            <AiOutlineMail size="15" />{contactData?.staticData?.lead?.email}
+                                          </span>}
+                                          {contactData?.staticData?.lead?.phone && <span className="d-flex gap-2 align-items-center">
+                                            <BiPhone size="15" />{contactData?.staticData?.lead?.phone}
+                                          </span>}
+                                          </Typography>
+                                        </React.Fragment>
+                                      }
+                                    />
+                                  </ListItem>
+                                </List>
+                          </CardContent>
+                          </Card>
+                            {/* <Card>
                             <CardContent className="detailListing">
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={12} sm={12}>
@@ -551,7 +592,7 @@ const ContactDetailsPage = (props) => {
                                 </Grid>
                               </Grid>
                             </CardContent>
-                          </Card>
+                          </Card> */}
                         </Box>
                       </div>
                     </BoxWithBorder>
@@ -559,30 +600,30 @@ const ContactDetailsPage = (props) => {
                 )}
             </Paper>
           </Grid>
-        </Grid>
-        {showConfirmBox ? (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this Contact ?`}
-            onClose={() => setShowConfirmBox(false)}
-            onOk={handleDeleteContact}
-          />
-        ) : null}
+          </Grid>
+          {showConfirmBox ? (
+            <ConfirmationDialog
+              open={showConfirmBox}
+              message={`Are you sure you want to delete this Contact ?`}
+              onClose={() => setShowConfirmBox(false)}
+              onOk={handleDeleteContact}
+            />
+          ) : null}
 
-        {
-          orgChartInFullScreenDialog && <FullScreenDialog
-            heading="Org Chart"
-            open={orgChartInFullScreenDialog}
-            close={() => {
-              setOrgChartInFullScreenDialog(false);
-            }}
-          >
-            <OrgChartContainer data={orgChartData} onClick={(id) => {
-              setOrgChartInFullScreenDialog(false);
-              history.push(`/${contactApi}/detail/${id}`)
-            }} />
-          </FullScreenDialog>
-        }
+          {
+            orgChartInFullScreenDialog && <FullScreenDialog
+              heading="Org Chart"
+              open={orgChartInFullScreenDialog}
+              close={() => {
+                setOrgChartInFullScreenDialog(false);
+              }}
+            >
+              <OrgChartContainer data={orgChartData} onClick={(id) => {
+                setOrgChartInFullScreenDialog(false);
+                history.push(`/${contactApi}/detail/${id}`)
+              }} />
+            </FullScreenDialog>
+          }
       </Layout>
     </>
   );

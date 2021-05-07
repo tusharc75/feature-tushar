@@ -38,6 +38,8 @@ import { CustomNotificationCountContext } from "../../StateProvider/CustomNotifi
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../Helpers/Routes"
 import moment from 'moment'
+import { useAccount, useMsal } from "@azure/msal-react";
+import { isEmpty } from "lodash";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -145,6 +147,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Header = ({ toggleDrawer }) => {
+  const { instance, accounts, inProgress } = useMsal();
+  const account = useAccount(accounts[0] || {});
+
   const {
     state: { user, selectedEntity },
     dispatch,
@@ -204,6 +209,7 @@ const Header = ({ toggleDrawer }) => {
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
       setNotificationList(data);
       setLoadingNotifications(false);
+      notification.setCount(0);
     }).catch((error) => {
       setLoadingNotifications(false);
       toastConfig.setToastConfig(error);
@@ -280,13 +286,19 @@ const Header = ({ toggleDrawer }) => {
   };
 
   const logoutUser = async () => {
-    await axiosInstance().get("/user/logout");
-    history.push("/");
-    dispatch({ type: SET_USER, payload: null });
-    dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-    localStorage.removeItem("token");
-    history.push("/login");
-  };
+    try{
+      if(!isEmpty(account))await instance.logoutPopup();
+    }catch(e){
+      toastConfig.setToastConfig({open: true, type: "error", message: "Need to logout from Azure" })
+    }finally{
+      await axiosInstance().get("/user/logout");
+      history.push("/");
+      dispatch({ type: SET_USER, payload: null });
+      dispatch({ type: SET_SELECTED_ENTITY, payload: null });
+      localStorage.removeItem("token");
+      history.push("/login");
+    }
+    }
 
   function handleListKeyDown(event) {
     if (event.key === "Tab") {
@@ -344,13 +356,15 @@ const Header = ({ toggleDrawer }) => {
                   toastConfig.setToastConfig(error);
                 })
               }
+              if (d?.entity) {
+                handleSelectedEnity(d.entity)
+              }
               history.push(`${d.resourcePath}/${d.resourceId}`)
             }}>
             {
               <>
                 <h4>{d.title}</h4>
                 <h5>{d.description}</h5>
-
                 <h6 className="pull-right">{moment(d.date).format("MMM DD YYYY")}</h6>
               </>
             }
@@ -436,7 +450,7 @@ const Header = ({ toggleDrawer }) => {
       <div>
         <MenuItem onClick={handleMobileScreenNotificationClick}>
 
-          <Badge badgeContent={notification.count} color="secondary"
+          <Badge badgeContent={ notification ? notification.count : 0 } color="secondary"
             aria-describedby={mobileScreenNotificationId}>
             <Notifications />
           </Badge>
@@ -475,6 +489,12 @@ const Header = ({ toggleDrawer }) => {
 
   function handleSelectedEnity(id) {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+    if (history.location.pathname.includes(routes.opportunityDetail.path)) {
+      history.push({ pathname: routes.opportunity.path })
+    }
+    if (history.location.pathname.includes(routes.lead.path)) {
+      history.push({ pathname: routes.lead.path })
+    }
   }
 
   return (
@@ -602,7 +622,7 @@ const Header = ({ toggleDrawer }) => {
           <div className={classes.sectionDesktop}>
             <div>
               <IconButton aria-describedby={fullScreenNotificationId} aria-label="settings" color="inherit" onClick={handleFullScreenNotificationClick}>
-                <Badge badgeContent={notification.count} color="secondary">
+                <Badge badgeContent={notification ? notification.count : 0} color="secondary">
                   <Notifications />
                 </Badge>
               </IconButton>

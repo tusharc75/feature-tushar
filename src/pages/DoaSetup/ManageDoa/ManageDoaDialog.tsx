@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -8,7 +8,11 @@ import {
     Dialog,
     DialogContent,
     IconButton,
-    ButtonGroup
+    ButtonGroup,
+    makeStyles,
+    Typography,
+    Avatar,
+    InputAdornment
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { Formik, Form, Field, FieldArray } from 'formik';
@@ -18,15 +22,44 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { removeEmptyKeys } from "../../../constants/helpers";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import currencies from "../../../constants/currency_with_country.json";
 
-const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) => {
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        margin: 0,
+        padding: theme.spacing(1.5, 1.5, 1.5, 2),
+        // borderBottom: `1px solid #daf5ff`
+    },
+    currencyStyle: {
+        width: 200,
+        position: "absolute",
+        right: theme.spacing(1.5),
+        top: theme.spacing(1.5),
+    },
+    dialogTitle: {
+        fontSize: "1.2rem"
+    }
+}));
+const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, onClose }) => {
     const toastConfig = useContext(CustomToastContext);
+    const classes = useStyles();
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<any[]>([]);
+    const [currencyData, setCurrencyData] = useState<any[]>([]);
+    const [currency, setCurrency] = useState(doaCurrency ? doaCurrency : "USD");
+    const [currencySymbol, setCurrencySymbol] = useState(
+        currencies.filter((data) => data?.currencyCode === currency).length
+            ? currencies.filter(
+                (data) => data?.currencyCode === currency
+            )[0].symbolNative
+            : null);
+
     const fetchDoa = useCallback(() => {
         doa.length > 0 ?
             setUsers(doa) :
-            setUsers(([{ id: userList[0].id, name: userList[0].name, currency: "USD", amount: 0 }]))
+            setUsers(([{ id: userList[0].id, name: userList[0].name, amount: 0 }]))
     }, [open]);
 
     useEffect(() => {
@@ -35,13 +68,13 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
 
     const handleSubmit = async (values) => {
         values.sort((a, b) => a.amount - b.amount)
-        const doaArray = values.map(item => {
+        const doaArray = values.filter(item => item.name != "" && item.name != undefined && item.id != "" && item.id != undefined).map(item => {
             return {
                 user: item.id,
                 amount: Number(item.amount)
             };
         });
-        const userDoa = { _id: userSelected, doa: doaArray };
+        const userDoa = { _id: userSelected, doaCurrency: currency, doa: doaArray };
         setLoading(true)
         axiosInstance().put('/doa/setup', removeEmptyKeys(userDoa))
             .then(({ data }) => {
@@ -54,29 +87,85 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
             });
 
     }
-    const currencies = [
-        { label: "USD", sign: "$", groupStyle: "thousand" },
-        { label: "AUD", sign: "$", groupStyle: "thousand" },
-        { label: "INR", sign: "₹", groupStyle: "lakh" }
-    ];
-
-
+    useEffect(() => {
+        const sortedArr = currencies.sort((a, b) =>
+            a.name.toUpperCase() < b.name.toUpperCase()
+                ? -1
+                : a.name.toUpperCase() > b.name.toUpperCase()
+                    ? 1
+                    : 0
+        );
+        setCurrencyData(sortedArr);
+    }, []);
 
     return (
         <Dialog
             open={open}
             onClose={onClose}
             scroll="body"
-            maxWidth="sm"
+            maxWidth="md"
             fullWidth
         >
             {!loading &&
                 <>
-                    <CustomDialogHeader title="Add DOA" />
+                    <CustomDialogHeader title={doa?.length > 0 ? "Edit DOA" : "Add DOA"} />
+
+                    <Autocomplete className={classes.currencyStyle}
+                        fullWidth
+                        size="small"
+                        value={
+                            currencyData.filter((data) => data?.currencyCode === currency)
+                                .length
+                                ? currencyData.filter(
+                                    (data) => data?.currencyCode === currency
+                                )[0]
+                                : ""
+                        }
+                        options={currencyData}
+                        getOptionLabel={(option: any) =>
+                            option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
+                        }
+                        getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                        onChange={(e, val) => {
+                            setCurrency(val?.currencyCode ? val?.currencyCode : "")
+                            setCurrencySymbol(val?.symbolNative)
+                        }
+                        }
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                name={"currency"}
+                                label={"Currency"}
+
+                            />
+                        )}
+                        renderOption={(option) => {
+                            const { currencyCode, name, countryCode, symbolNative } = option;
+                            return (
+                                <Grid container alignItems="center">
+                                    <Grid item>
+                                        <Avatar
+                                            variant="rounded"
+                                            src={`https://lipis.github.io/flag-icon-css/flags/4x3/${countryCode.toLowerCase()}.svg`}
+                                            style={{ marginRight: 20, width: "40px", height: "30px" }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs>
+                                        <Typography>{currencyCode} ({symbolNative})</Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {name}
+                                        </Typography>
+                                    </Grid>
+                                </Grid>
+                            );
+                        }}
+                    />
                     <Formik
                         initialValues={{ users: users }}
                         onSubmit={() => { }}
-                        render={({ values }) => (
+                        render={({ values,
+                            errors }) => (
                             <>
                                 <DialogContent>
                                     <Form>
@@ -97,9 +186,8 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                             alignItems="center"
                                                         >
                                                             <Grid item md={1}> Sr </Grid>
-                                                            <Grid item md={3}> Users </Grid>
-                                                            <Grid item md={3}> Currency </Grid>
-                                                            <Grid item md={3}> Amount </Grid>
+                                                            <Grid item md={5}> Users </Grid>
+                                                            <Grid item md={4}> Amount </Grid>
                                                             <Grid item md={2}></Grid>
                                                         </Grid>
                                                     </Box>
@@ -119,14 +207,15 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                 key={index}
                                                                             >
                                                                                 <Grid item md={1}>{index + 1}</Grid>
-                                                                                <Grid item md={3}>
+                                                                                <Grid item md={5}>
 
                                                                                     <Autocomplete
                                                                                         id="combo-box-demo"
                                                                                         size="small"
-                                                                                        value={userList.find(v => v.name == userVal.name)}
+                                                                                        style={{ minWidth: 200 }}
+                                                                                        value={userList.find(v => v.name == userVal.name) ? userList.find(v => v.name == userVal.name) : ""}
                                                                                         options={userList.filter(element => !values.users.map(e => e.name).includes(element.name))}
-                                                                                        getOptionLabel={(option: any) => option.name}
+                                                                                        getOptionLabel={(option: any) => option?.name ? option?.name : ""}
                                                                                         onChange={(event, newValue) => {
                                                                                             arrayHelpers.replace(index, {
                                                                                                 ...values.users[index],
@@ -135,33 +224,29 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                             });
                                                                                         }}
 
-                                                                                        renderInput={(params) => <TextField {...params} variant="outlined"
+                                                                                        renderInput={(params) => <TextField
+                                                                                            {...params}
+                                                                                            variant="outlined"
+                                                                                            name="amountField"
+                                                                                            error={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined}
+                                                                                            helperText={userList.find(v => v.name == userVal.name) === "" || userList.find(v => v.name == userVal.name) === undefined ? " User is Required" : ""}
+                                                                                            required
                                                                                         />}
                                                                                     />
 
                                                                                 </Grid>
-                                                                                <Grid item md={3}>
-                                                                                    <Autocomplete
-                                                                                        id="combo-box-demo"
-                                                                                        size="small"
-                                                                                        value={currencies.find(v => v.label == userVal.currency)}
-                                                                                        options={currencies}
-                                                                                        getOptionLabel={(option: any) => option.label}
-                                                                                        onChange={(event, newValue) => {
-                                                                                            arrayHelpers.replace(index, {
-                                                                                                ...values.users[index],
-                                                                                                ["currency"]: newValue?.label
-                                                                                            });
 
-                                                                                        }}
-
-                                                                                        renderInput={(params) => <TextField {...params} variant="outlined"
-                                                                                        />}
-                                                                                    />
-                                                                                </Grid>
-                                                                                <Grid item md={3}>
+                                                                                <Grid item md={4}>
                                                                                     <Field
                                                                                         fullWidth
+                                                                                        InputProps={{
+                                                                                            startAdornment: (
+                                                                                                <InputAdornment position="start">
+                                                                                                    {currencySymbol ? currencySymbol : ""}
+                                                                                                </InputAdornment>
+                                                                                            ),
+                                                                                        }}
+                                                                                        startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ""}
                                                                                         variant="outlined"
                                                                                         type="text"
                                                                                         size="small"
@@ -178,10 +263,14 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                                 </Grid>
                                                                                 <Grid item md={2}>
                                                                                     <ButtonGroup size="small" aria-label="small outlined button group">
-                                                                                        <IconButton size="small" aria-label="add" onClick={() => {
-                                                                                            arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
-                                                                                        }
-                                                                                        } >
+                                                                                        <IconButton
+                                                                                            size="small"
+                                                                                            aria-label="add"
+                                                                                            disabled={values.users.length == userList.length}
+                                                                                            onClick={() => {
+                                                                                                arrayHelpers.push({ "id": "", "name": "", "amount": 0 })
+                                                                                            }
+                                                                                            } >
                                                                                             <Add />
                                                                                         </IconButton>
                                                                                         <IconButton size="small" aria-label="delete" onClick={() => arrayHelpers.remove(index)} >
@@ -195,7 +284,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                                                         <Grid item md={2}>
                                                                             <ButtonGroup size="small" aria-label="small outlined button group">
                                                                                 <IconButton size="small" aria-label="add" onClick={() => {
-                                                                                    arrayHelpers.push({ "id": "", "name": "", "currency": "USD", "amount": 0 })
+                                                                                    arrayHelpers.push({ "id": "", "name": "", "amount": 0 })
                                                                                 }
                                                                                 } >
                                                                                     <Add />
@@ -229,14 +318,21 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, open, onClose }) =>
                                         variant="contained"
                                         color="primary"
                                         type="submit"
-                                        disabled={
-                                            loading || Object.values(doa).toString() ===
-                                            Object.values(values.users.filter(item => item.amount != 0 && (item.name != '' || item.name != undefined))).toString()
-                                            // || Object.keys(errors).length > 0 ? true : false
+                                        disabled={currency === ""
+                                            || values.users.filter(item => item.name === "" || item.name === undefined || item.id == "" || item.id === undefined).length > 0
+                                            || JSON.stringify(values.users.map((item) => {
+                                                return {
+                                                    id: item?.id,
+                                                    name: item?.name,
+                                                    firstName: item?.firstName,
+                                                    lastName: item?.lastName,
+                                                    amount: Number(item.amount),
+                                                };
+                                            })) === JSON.stringify(users) && currency === doaCurrency
 
                                         }
                                         onClick={() => {
-                                            handleSubmit(values.users.filter(item => item.amount != 0 && (item.name != '' || item.name != undefined)))
+                                            handleSubmit(values.users)
                                         }}
                                     >
                                         Save
