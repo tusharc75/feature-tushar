@@ -433,7 +433,7 @@ const FormTypes = (props) => {
         onChange={(e) => {
           const regex = /^[a-zA-Z ]+$/i;
           if (e.target.value === "" || regex.test(e.target.value.trim())) {
-            setFieldValue(name, e.target.value);
+            setFieldValue(name, e.target.value.trim());
           }
         }}
       />
