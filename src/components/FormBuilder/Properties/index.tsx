@@ -52,7 +52,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
       if (!fid.fieldName) {
         fid.fieldName = camelCase(fid.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
       }
-      if (fid.fieldId.toString() !== fieldData.fieldId.toString()) {
+      if (fid._id.toString() !== fieldData._id.toString()) {
         if (fid.type === "converter") {
           fid.displayUnits && fid.displayUnits.forEach(_unit => {
             fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + _unit.toLowerCase() })
@@ -71,7 +71,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     data.forEach((row) => {
       if (row.sectionId.toString() === sectionId.toString()) {
         row.field.forEach((ele) => {
-          if (ele.fieldId.toString() === fieldData.fieldId.toString()) {
+          if (ele._id.toString() === fieldData._id.toString()) {
             ele.fieldLabel = values.fieldLabel
             ele.required = values.required
             ele.isTooltip = values.isTooltip

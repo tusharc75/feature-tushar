@@ -7,8 +7,9 @@ import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
-
+import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
+import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,8 +36,9 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
       <List disablePadding>
         {data && data.length
           ? data.map((obj) => (
-              <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
-                <ListItem disableGutters className={classes.list}>
+            <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
+              <ListItem disableGutters className={classes.list}>
+                <div>
                   <ListItemText
                     primary={
                       <Typography>
@@ -48,32 +50,35 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                         </Link>
                       </Typography>
                     }
-                    secondary={obj.email || ""}
+                    secondary={obj.email}
                   />
-                  {permissions.role.isUpdate && (
-                    <ListItemSecondaryAction
-                      title={
-                        currentUser === obj._id
-                          ? "Primary user can't be unassigned"
-                          : "Unassign User"
-                      }
+                </div>
+
+                <CopyToClipboard textToCopy={obj.email} className="mt-4" />
+                {permissions.role.isUpdate && (
+                  <ListItemSecondaryAction
+                    title={
+                      currentUser === obj._id
+                        ? "Primary user can't be unassigned"
+                        : "Unassign User"
+                    }
+                  >
+                    <IconButton
+                      size="small"
+                      disabled={currentUser === obj._id}
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => unassignRole(obj)}
                     >
-                      <IconButton
-                        size="small"
-                        disabled={currentUser === obj._id}
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => unassignRole(obj)}
-                      >
-                        <DeleteIcon
-                          color={currentUser === obj._id ? "disabled" : "error"}
-                        />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  )}
-                </ListItem>
-              </BoxWithBorder>
-            ))
+                      <DeleteIcon
+                        color={currentUser === obj._id ? "disabled" : "error"}
+                      />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                )}
+              </ListItem>
+            </BoxWithBorder>
+          ))
           : null}
       </List>
     </div>

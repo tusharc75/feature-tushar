@@ -209,6 +209,7 @@ const Header = ({ toggleDrawer }) => {
     axiosInstance().get("/user/notification").then(({ data: { data } }) => {
       setNotificationList(data);
       setLoadingNotifications(false);
+      notification.setCount(0);
     }).catch((error) => {
       setLoadingNotifications(false);
       toastConfig.setToastConfig(error);
@@ -355,13 +356,15 @@ const Header = ({ toggleDrawer }) => {
                   toastConfig.setToastConfig(error);
                 })
               }
+              if (d?.entity) {
+                handleSelectedEnity(d.entity)
+              }
               history.push(`${d.resourcePath}/${d.resourceId}`)
             }}>
             {
               <>
                 <h4>{d.title}</h4>
                 <h5>{d.description}</h5>
-
                 <h6 className="pull-right">{moment(d.date).format("MMM DD YYYY")}</h6>
               </>
             }
@@ -486,6 +489,12 @@ const Header = ({ toggleDrawer }) => {
 
   function handleSelectedEnity(id) {
     dispatch({ type: SET_SELECTED_ENTITY, payload: id });
+    if (history.location.pathname.includes(routes.opportunityDetail.path)) {
+      history.push({ pathname: routes.opportunity.path })
+    }
+    if (history.location.pathname.includes(routes.lead.path)) {
+      history.push({ pathname: routes.lead.path })
+    }
   }
 
   return (

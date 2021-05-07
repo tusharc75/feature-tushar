@@ -166,14 +166,19 @@ Button.MuiButtonBase-root {
     font-size: 0.7rem;
     font-weight: 500;
   }
+  .cardDetail {
+    color: #64615d;
+    text-transform: capitalize !important;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
   .MuiList-padding {
     padding: 0;
   }
 }
-.MuiCardContent-root:last-child {
-  padding-bottom: 0 !important;
-}
-
+// .MuiCardContent-root:last-child {
+//   padding: 0 10px !important;
+// }
 .stepper-box {
   background: #eeeeee;
   padding: 4px;
@@ -197,28 +202,39 @@ Button.MuiButtonBase-root {
       cursor: no-drop !important;
     }
   }
-}
 
-.MuiStep-horizontal {
-  background: #e4e4e4;
-  padding: 10px;
-  border-radius: 3px;
-  border: 2px solid #dcdada;
-}
-.MuiStepLabel-label {
-  color: #bab9b9 !important;
-  font-weight: 500 !important;
-  &.MuiStepLabel-completed {
-    color: white !important;
+  .MuiStep-horizontal {
+    background: #e4e4e4;
+    padding: 10px;
+    border-radius: 3px;
+    border: 2px solid #dcdada;
+  }
+  .MuiStepLabel-label {
+    color: #bab9b9 !important;
+    font-weight: 500 !important;
+    &.MuiStepLabel-completed {
+      color: white !important;
+    }
+
+    &.MuiStepLabel-active {
+      color: var(--primary) !important;
+    }
   }
 
-  &.MuiStepLabel-active {
-    color: var(--primary) !important;
+  .MuiStepLabel-iconContainer {
+    opacity: 0.4;
+    color: white;
   }
 }
 
-.MuiStepLabel-iconContainer{
-  opacity: 0.4;
-  color: white;
+.contactCard {
+  display: flex;
+  align-items: center;
+  height: 6rem;
 }
 
+.accountCard {
+  height: 12rem;
+  display: flex;
+  align-items: center;
+}

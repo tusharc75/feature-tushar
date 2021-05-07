@@ -19,15 +19,16 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
-const AssignDataDialog = ({
-  dialogOpen,
-  onSuccess,
-  handleCloseDialog,
-  type,
-  projectID,
-  existingData,
-  accountId = "",
-}) => {
+const AssignDataDialog = (props) => {
+  const {
+    dialogOpen,
+    onSuccess,
+    handleCloseDialog,
+    type,
+    projectID,
+    existingData,
+    accountId = "",
+  } = props;
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,9 @@ const AssignDataDialog = ({
   useEffect(() => {
     const url =
       type === "customer-contact"
-        ? `/${type}?filterById=[{"field":"accountName", "term": ${accountId}}]`
+        ? `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"}]`
+        : type === "opportunity"
+        ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
         : `/${type}?limit=100`;
     setLoading(true);
     axiosInstance()
@@ -68,7 +71,7 @@ const AssignDataDialog = ({
     setSelectedData(tempSelectedData);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (selectedData.length) {
       setAssigning(true);
 
@@ -77,7 +80,7 @@ const AssignDataDialog = ({
         _id: projectID,
       };
 
-      await axiosInstance()
+      axiosInstance()
         .put(`/project-sales/add-${kebabCase(type)}`, dataObj)
         .then(() => {
           setAssigning(false);
@@ -165,8 +168,8 @@ const AssignDataDialog = ({
           </List>
         ) : (
           <Typography>
-            There are no {lowerCase(type)}s or you have already added all{" "}
-            {lowerCase(type)}s
+            There are no {lowerCase(type)} or you have already added all{" "}
+            {lowerCase(type)}
           </Typography>
         )}
       </CustomDialogContent>

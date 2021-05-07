@@ -2,6 +2,7 @@ import MaterialTable from "material-table";
 import { Chip, Box } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { materialTableIcons } from "./../../constants/helpers";
+import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 
 export default function AccountHierarchy({
   data,
@@ -86,7 +87,9 @@ export default function AccountHierarchy({
       title: "Phone",
       field: "phone",
       render: (rowData: any) => (
-        <div style={{ width: commonFieldWidth }}>{rowData.phone}</div>
+        <div style={{ width: commonFieldWidth }}>
+          <CustomRenderCell value={rowData.phone} isCopyToClipboard={true} />
+        </div>
       ),
     },
   ];

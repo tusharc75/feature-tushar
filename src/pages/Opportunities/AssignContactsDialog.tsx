@@ -16,6 +16,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import Loader from "../../components/Loader";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
+import _ from 'lodash'
 
 export default function AssignContactsDialog({
     opportunityId,
@@ -32,10 +33,7 @@ export default function AssignContactsDialog({
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [isAssigning, setAssigning] = useState(false);
 
-    const [supplierContacts, setSupplierContacts] = useState(contacts.supplierContacts)
-    const [customerContacts, setCustomerContacts] = useState(contacts.customerContacts)
-
-    const [currentContacts, setCurrentContacts] = useState(contactType === "supplier" ? contacts.supplierContacts : contacts.customerContacts)
+    const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
 
     useEffect(() => {
         const updatedContacts = [];
@@ -52,14 +50,20 @@ export default function AssignContactsDialog({
         setCurrentContacts([...currentContacts]);
     };
 
+    const getFilteredIds = (data) => {
+        return _.cloneDeep(data).filter(f => f.isChecked).map(m => m._id)
+    }
+    const isDataAvailable = (fieldKey) => {
+        return (contacts && contacts?.[fieldKey] && contacts[fieldKey].length)
+    }
     const handleAssignContacts = async () => {
         // allContacts.filter(f => f.isChecked).map(m => m._id)
         setAssigning(true);
 
         const dataToSave = {
             _id: opportunityId,
-            supplierContacts: contactType === "supplier" ? currentContacts.filter(f => f.isChecked).map(m => m._id) : supplierContacts,
-            customerContacts: contactType === "customer" ? currentContacts.filter(f => f.isChecked).map(m => m._id) : customerContacts
+            supplierContacts: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
+            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : []
         };
 
         await axiosInstance()

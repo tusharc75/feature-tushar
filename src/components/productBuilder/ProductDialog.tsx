@@ -1,0 +1,287 @@
+import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import { Formik, Form, Field } from "formik";
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import Dialog from '@material-ui/core/Dialog'
+import FormTypes from "../Helpers/FormTypes";
+import axiosInstance from '../../axios/axiosInstance'
+import _ from 'lodash';
+import { getObjKeys, simplifyValues, yupSchema } from '../../constants/helpers';
+import CustomButton from '../Helpers/CustomButton'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import IconButton from '@material-ui/core/IconButton';
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import { AddField } from '../FormBuilder/AddField';
+import TextField from '@material-ui/core/TextField';
+
+var levalOrderBy = ["product", "category", "cost", "builder"]
+
+const CreateProduct = (props) => {
+
+    const toastConfig = useContext(CustomToastContext)
+    const { productData, handleClose, handleSaveProduct } = props;
+    const [masterFields, setMasterFields] = useState([]);
+    const [productFields, setProductFields] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [initialData, setInitialData] = useState({ fields: [], values: {} });
+
+    const [isAddField, setIsAddField] = useState(false);
+    const [fields, setFields] = useState([]);
+    const [sectionName, setSectionName] = useState("");
+    const ref = useRef(null);
+
+
+    useEffect(() => {
+        let _fields = [];
+        productData.fields.map((_f) => _fields.push(_f));
+
+        _fields = _.sortBy(_fields, function (item) {
+            return levalOrderBy.indexOf(item.leval)
+        });
+
+        setMasterFields(_fields.filter((_f) => _f.leval !== "cost"))
+
+        let values = { ...productData }
+        values.productCategory = values.productCategory._id
+        values.productCost = values.productCost && values.productCost._id && values.productCost._id
+        delete values.fields
+
+        setInitialData({
+            fields: _fields,
+            values: { ...getObjKeys('', _fields), ...values },
+        });
+        EvaluteproductFields(_fields)
+        // axiosInstance().get(`/field?resource=Product Builder`).then(({ data: { data } }) => {
+        //     const _fields = [];
+        //     productData.fields.map((_f) => _fields.push(_f));
+        //     console.log(productData)
+        //     let values = { ...productData }
+        //     values.productCategory = values.productCategory._id
+        //     delete values.fields
+        //     data.map((_f) => _fields.push(_f.fieldData));
+        //     setMasterFields(_fields)
+        //     setInitialData({
+        //         fields: _fields,
+        //         values: values,
+        //     });
+        //     EvaluteproductFields(_fields)
+        // }).catch((error) => {
+        //     toastConfig.setToastConfig(error);
+        // });
+    }, []);
+
+    const handleSubmit = (values) => {
+        handleSaveProduct(values)
+    };
+
+    const EvaluteproductFields = (fields) => {
+        const sections = _.uniq(_.map(fields, 'sectionName'));
+        const customData = sections.map((name) => {
+            let sectionFields = fields.filter((field) => field.sectionName === name);
+            return { name, sectionFields };
+        });
+        setProductFields(customData)
+    }
+
+    const handleChangeProductCost = (value) => {
+        if (value && value !== "") {
+            axiosInstance().get(`/productcost/fields/` + value).then(({ data: { data } }) => {
+                let newField = [...masterFields];
+                data.forEach(_f => {
+                    newField.push(_f)
+                })
+                setInitialData({
+                    fields: newField,
+                    values: { ...getObjKeys('', newField), ...ref.current.values },
+                });
+                EvaluteproductFields(newField)
+            });
+        }
+    }
+
+    const handleOpenAddField = (name) => {
+        setSectionName(name)
+        setIsAddField(true)
+    }
+
+    const handleCloseAddField = () => {
+        setSectionName("")
+        setIsAddField(false)
+    }
+
+    const handleAddField = (field) => {
+        field.sectionName = sectionName;
+        fields.push(field)
+        setFields(fields)
+        let newField = initialData.fields;
+        newField.push(field)
+        setInitialData({
+            fields: newField,
+            values: { ...getObjKeys('', newField), ...ref.current.values },
+        });
+        EvaluteproductFields(newField)
+        setSectionName("")
+        setIsAddField(false)
+    }
+
+
+    return (<Dialog
+        maxWidth="md"
+        aria-labelledby="customized-dialog-title"
+        open={true}
+        fullWidth
+    >
+        {initialData && initialData.fields.length ?
+            <Formik
+                innerRef={ref}
+                enableReinitialize={true}
+                initialValues={initialData.values}
+                validationSchema={yupSchema(initialData.fields)}
+                validateOnMount
+                onSubmit={handleSubmit}>
+                {({ values,
+                    errors,
+                    touched,
+                    setFieldValue,
+                    submitForm,
+                }) => (
+                    <Fragment>
+                        <CustomDialogHeader title={`Edit Product`} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogContent>
+                            <Box>
+                                <Form autoComplete="off" autoCorrect="off" noValidate >
+                                    {productFields && productFields.map((section, i) => (
+                                        <div key={i}>
+                                            <h2 className="form-label-style">{section.name}
+                                                <span style={{ float: "right", marginTop: "-5px" }}>
+                                                    <IconButton color="primary" size="small" onClick={() => handleOpenAddField(section.name)} >
+                                                        <ControlPointIcon />
+                                                    </IconButton>
+                                                </span>
+                                            </h2>
+                                            <Box marginY={2}>
+                                                <Grid spacing={3} container>
+                                                    {section.sectionFields && section.sectionFields.map((field) => (
+                                                        field.leval === "product" ?
+                                                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                <FormTypes
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    setFieldValue={setFieldValue}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field.isTooltip}
+                                                                    tooltipMessage={field.tooltipMessage}
+                                                                    decimalPlaces={field.decimalPlaces}
+                                                                    isvlookupReverse={field.isvlookupReverse}
+                                                                    fieldData={field}
+                                                                    onChange={() => { }}
+                                                                    size="small"
+                                                                />
+                                                            </Grid> :
+
+                                                            field.fieldName === "productCost" ?
+                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <FormTypes
+                                                                        fields={initialData.fields}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field.isTooltip}
+                                                                        tooltipMessage={field.tooltipMessage}
+                                                                        decimalPlaces={field.decimalPlaces}
+                                                                        disableClearable
+                                                                        onChange={(e, val) => {
+                                                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                            handleChangeProductCost(val && val.optionValue ? val.optionValue : "")
+                                                                        }}
+                                                                        size="small"
+                                                                    />  </Grid> :
+                                                                field.type === "converter" ?
+                                                                    <FormTypes
+                                                                        fields={initialData.fields}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field.isTooltip}
+                                                                        tooltipMessage={field.tooltipMessage}
+                                                                        decimalPlaces={field.decimalPlaces}
+                                                                        isvlookupReverse={field.isvlookupReverse}
+                                                                        fieldData={field}
+                                                                        size="small"
+                                                                    /> :
+                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                        <FormTypes
+                                                                            fields={initialData.fields}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={field.option}
+                                                                            setFieldValue={setFieldValue}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field.isTooltip}
+                                                                            tooltipMessage={field.tooltipMessage}
+                                                                            decimalPlaces={field.decimalPlaces}
+                                                                            isvlookupReverse={field.isvlookupReverse}
+                                                                            fieldData={field}
+                                                                            size="small"
+                                                                        />
+                                                                    </Grid>
+                                                    ))}
+                                                </Grid>
+                                            </Box>
+                                        </div>
+                                    ))}
+                                </Form>
+                            </Box>
+                        </CustomDialogContent>
+                        <CustomDialogFooter>
+                            <Button color="primary" onClick={handleClose}>Cancel</Button>
+                            <CustomButton
+                                loading={loading}
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                onClick={submitForm}
+                            > Save</CustomButton>
+                        </CustomDialogFooter>
+                    </Fragment>
+                )}
+            </Formik> :
+            <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>}
+        {isAddField && <AddField fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
+    </Dialog>
+    );
+}
+
+export default CreateProduct;

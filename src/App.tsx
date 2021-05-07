@@ -40,6 +40,8 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 
 import ProductCost from "./pages/ProductCost";
 import CreateProductCost from "./pages/ProductCost/CreateProductCost";
+import ProductBuilder from "./pages/ProductBuilder";
+import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 
 import {
@@ -106,15 +108,20 @@ function App() {
     state: { user },
   }: any = useData();
 
+  const getNotification = async () => {
+    await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+      notification.setCount(count);
+    }).catch((error) => {
+      toast.setToastConfig(error);
+    });
+  }
+
   useEffect(() => {
     try {
+      getNotification();
       setInterval(async () => {
         if (localStorage.getItem("token")) {
-          await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-            notification.setCount(count);
-          }).catch((error) => {
-            toast.setToastConfig(error);
-          });
+          await getNotification();
         }
       }, 60000);
     }
@@ -335,6 +342,13 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path={routes.productCost.path + "/:id"}>
             <CreateProductCost />
+          </PrivateRoute>
+
+          <PrivateRoute exact path={routes.productBuilder.path}>
+            <ProductBuilder />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productBuilder.path + "/:id"} >
+            <CreateProductBuilder />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
