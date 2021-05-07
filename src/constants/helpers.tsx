@@ -174,8 +174,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-      ? data.optionValue
-      : "";
+        ? data.optionValue
+        : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -217,30 +217,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .url("Enter valid url eg. https://www.hostname.com")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .url("Enter valid url eg. https://www.hostname.com")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-            .array()
-            .required(`${input.fieldLabel} is required`)
-            .length(1, "Select at least one service access")
+          .array()
+          .required(`${input.fieldLabel} is required`)
+          .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -276,7 +276,7 @@ export const camelCase = (str) => {
 };
 
 export const UnCamelCase = (str) => {
-return str
+  return str
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/\b([A-Z]+)([A-Z])([a-z])/, "$1 $2$3")
     .replace(/^./, function (str) {
@@ -526,3 +526,30 @@ export const simplifyValues = (obj, fields) => {
 //     </List>
 //   </div>
 // }
+
+export const formatAmountWithCurrency = (currencyCode, amount) => {
+  if (!currencyCode && !amount)
+    return null;
+
+  const currencyData = currencies.find(
+    (data) => data?.currencyCode === currencyCode
+  );
+
+  if (!currencyData) {
+    return `$ ${amount}`;
+  }
+
+  const language = navigator.language.split("-")[0];
+
+  let options = {
+    style: 'currency',
+    currency: currencyCode
+  }
+
+  if (Number.isInteger(amount)) {
+    options["maximumFractionDigits"] = 0
+  }
+
+  return new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1 ');
+
+}
