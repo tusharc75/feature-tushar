@@ -147,19 +147,20 @@ const CreateRole = ({
                   label="Role Name"
                   value={values.name}
                   onChange={(e) =>
-                    setValues({ ...values, name: e.target.value })
+                    setValues({ ...values, name: e.target.value.trimStart() })
                   }
                 />
 
                 <TextField
                   required
                   variant="outlined"
+                  multiline
                   size="small"
                   fullWidth
                   label="Role Description"
                   value={values.description}
                   onChange={(e) =>
-                    setValues({ ...values, description: e.target.value })
+                    setValues({ ...values, description: e.target.value.trimStart() })
                   }
                 />
               </Box>
