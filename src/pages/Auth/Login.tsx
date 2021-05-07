@@ -104,7 +104,7 @@ const Login = () => {
         setTimeout(()=> setCounter(counter - 1),1000)
       }
       else{
-        instance.logoutPopup();
+        instance.logout();
         setInvalidAzureLogin(false);
       }
     }
