@@ -10,6 +10,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { GetBoard } from "../../../../axios/activity";
 import Loader from "../../../../components/Loader";
 import { BoardList } from "./BoardList";
+import axiosInstance from "../../../../axios/axiosInstance";
 
 const Board = ({ type, filter, activityId }) => {
   const [activities, setActivities] = useState(null);
@@ -34,9 +35,23 @@ const Board = ({ type, filter, activityId }) => {
           status,
         };
       }
+
       return activity;
     });
     setActivities(updatedState);
+    const updatedActivity = updatedState.find((a) => a._id === activityId);
+    if (updatedActivity) {
+      updateStatus(activityId, updatedActivity);
+    }
+  };
+
+  const updateStatus = (id: string, updatedData: any) => {
+    axiosInstance()
+      .put(`activity/field/${id}`, { status: updatedData.status })
+      .then(({ data }) => {
+        console.log(data);
+      })
+      .catch((err) => console.log(JSON.stringify(err)));
   };
 
   return activities ? (

@@ -5,7 +5,6 @@ import {
   Typography,
   Box,
   Tooltip,
-  useTheme,
   Avatar,
   IconButton,
   CircularProgress,
