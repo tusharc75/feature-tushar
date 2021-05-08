@@ -10,10 +10,10 @@ import { GetReferenceName, GetEmails } from "../../../axios/activity";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
-import DataGridCustomToolbar from "../../../components/Helpers/DataGridCustomToolbar";
-import CustomDataGridNoDataFound from "../../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import axiosAPI from "../../../axios/axios";
 import { isEmpty } from "lodash";
+import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 const Email = () => {
 
@@ -115,7 +115,7 @@ const Email = () => {
             <div className="listing-grid">
                 <DataGrid
                     components={{
-                        Toolbar: DataGridCustomToolbar,
+                        Toolbar: CustomDataGridToolbar,
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}

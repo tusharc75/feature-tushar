@@ -28,7 +28,6 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import CancelIcon from "@material-ui/icons/Cancel";
 import accountClass from "./account.module.scss";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomHeader from "../../components/Helpers/CustomHeader";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -43,9 +42,11 @@ import {
 } from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import routes from "./../../components/Helpers/Routes";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import CustomLoadingOverlay from "../../components/Helpers/DataGridHelpers/CustomLoadingOverlay";
 
 const AccTypes = [
   {
@@ -822,8 +823,9 @@ export default function Account(props) {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
+                // LoadingOverlay: CustomLoadingOverlay
               }}
               scrollbarSize={20}
               rows={loading ? [] : dataRows}
