@@ -45,7 +45,7 @@ export default function ManageProfile(props) {
             setUpdating(true);
             let clonedValues = _.cloneDeep(values)
             axiosInstance()
-                .put(`/user/me`, { ...clonedValues })
+                .put(`/user/me`, { ..._.omit(clonedValues,'reportsTo') })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
