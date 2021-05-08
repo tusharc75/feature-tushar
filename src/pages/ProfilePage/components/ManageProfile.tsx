@@ -44,6 +44,10 @@ export default function ManageProfile(props) {
         if (userData?._id) {
             setUpdating(true);
             let clonedValues = _.cloneDeep(values)
+            console.log("userFields", userFields)
+            console.log("userData", userData)
+            console.log("displayUserDetails", displayUserDetails)
+            console.log("onFetchUserData", onFetchUserData);
             axiosInstance()
                 .put(`/user/me`, { ...clonedValues })
                 .then(({ data }) => {
@@ -108,7 +112,7 @@ export default function ManageProfile(props) {
         handleUpdateUser({ ...values })
         setShowDeleteConfirmBox(false)
     }
-    let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image") : []
+    let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image" && field?.fieldData?.fieldName !== "reportsTo") : []
 
     return <>
         {openUpdateDialog && (
