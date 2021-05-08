@@ -9,6 +9,7 @@ import { BsPersonBoundingBox } from 'react-icons/bs';
 
 import styles from "../Leads/Header.module.scss";
 import { useData } from "../../StateProvider/Provider";
+import { localStorageKeys } from "../../constants/helpers";
 
 const RoleHeader = (props) => {
   const {
@@ -22,7 +23,8 @@ const RoleHeader = (props) => {
     canDelete,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
-  const [filter, setFilter] = useState("Global");
+  const [filter, setFilter] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
+    localStorage.getItem(localStorageKeys.currentSelectedRoleType) : "Global");
 
   const {
     state: { selectedEntity },
@@ -32,6 +34,7 @@ const RoleHeader = (props) => {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
+      localStorage.setItem("currentSelectedRoleType", newFilter)
     }
   };
   const openActions = (event) => {

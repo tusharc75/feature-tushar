@@ -20,7 +20,7 @@ import CreateRole from "./CreateRole";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { PERMISSION } from "../../constants/Roles";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-import { roleTypes } from "../../constants/helpers";
+import { localStorageKeys, roleTypes } from "../../constants/helpers";
 import RoleHeader from "./RoleHeader";
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
@@ -31,7 +31,9 @@ const Roles: FC = () => {
     state: { permissions, selectedEntity },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
+    roleTypes.find((d) => d.key === localStorage.getItem(localStorageKeys.currentSelectedRoleType)).value :
+    roleTypes.find((d) => d.key === "Global")?.value);
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);

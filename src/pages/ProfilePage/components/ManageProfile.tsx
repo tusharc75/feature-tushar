@@ -108,7 +108,7 @@ export default function ManageProfile(props) {
         handleUpdateUser({ ...values })
         setShowDeleteConfirmBox(false)
     }
-    let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image") : []
+    let filteredUserFields = userFields && userFields.length ? userFields.filter(field => field?.fieldData?.sectionName !== "Profile Image" && field?.fieldData?.fieldName !== "reportsTo") : []
 
     return <>
         {openUpdateDialog && (
