@@ -18,7 +18,6 @@ import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
 
 import axiosInstance from './../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import firebase from 'firebase';
 import { vapidKey } from "../../constants/helpers";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from "@azure/msal-react";
@@ -133,22 +132,6 @@ const Login = () => {
         }).catch((error) => {
           toastConfig.setToastConfig(error);
         });
-
-        // const messaging = firebase.messaging();
-        // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
-        //   if (token) {
-        //     localStorage.setItem("notificationToken", token)
-        //   } else {
-        //     toastConfig.setToastConfig({
-        //       open: true,
-        //       type: "error",
-        //       message: "No registration token available. Request permission to generate one."
-        //     })
-        //   }
-        // }).catch((err) => {
-        //   console.log('An error occurred while retrieving token. ', err);
-        //   // catch error while creating client token
-        // });
       })
       .catch((error) => {
         setSubmitting(false);
