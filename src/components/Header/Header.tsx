@@ -291,12 +291,16 @@ const Header = ({ toggleDrawer }) => {
     } catch (e) {
       toastConfig.setToastConfig({ open: true, type: "error", message: "Need to logout from Azure" })
     } finally {
-      await axiosInstance().get("/user/logout");
-      history.push("/");
-      dispatch({ type: SET_USER, payload: null });
-      dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-      localStorage.removeItem("token");
-      history.push("/login");
+      await axiosInstance().get("/user/logout").then(() => {
+        history.push("/");
+        dispatch({ type: SET_USER, payload: null });
+        dispatch({ type: SET_SELECTED_ENTITY, payload: null });
+        // localStorage.removeItem("token");
+        localStorage.clear();
+        history.push("/login");
+      }).catch((error) => {
+        toastConfig.setToastConfig(error)
+      });
     }
   }
 
