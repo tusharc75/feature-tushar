@@ -6,15 +6,15 @@ import Layout from "../../components/Layout";
 import { Autocomplete } from "@material-ui/lab";
 import { Box, TextField, Typography } from "@material-ui/core";
 import Loader from "../../components/Loader";
-import DataGridCustomToolbar from './../../components/Helpers/DataGridCustomToolbar';
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { FaWpforms } from 'react-icons/fa';
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 const FormBuilder = () => {
 
 
@@ -72,7 +72,7 @@ const FormBuilder = () => {
         <div className="listing-grid">
           <DataGrid
             components={{
-              Toolbar: DataGridCustomToolbar,
+              Toolbar: CustomDataGridToolbar,
               NoRowsOverlay: CustomDataGridNoDataFound,
             }}
             rows={brandResource}

@@ -11,8 +11,8 @@ import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import moment from "moment";
 import ActivityModelHandler from "../../../components/Activity/ActivityModelHandler";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
-import DataGridCustomToolbar from "../../../components/Helpers/DataGridCustomToolbar";
-import CustomDataGridNoDataFound from "../../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 
 const Note = () => {
 
@@ -109,7 +109,7 @@ const Note = () => {
             <div className="listing-grid">
                 <DataGrid
                     components={{
-                        Toolbar: DataGridCustomToolbar,
+                        Toolbar: CustomDataGridToolbar,
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
