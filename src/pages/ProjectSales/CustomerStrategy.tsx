@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
   expand: {
     transform: "rotate(0deg)",
     transition: theme.transitions.create("transform", {
-      duration: theme.transitions.duration.shortest,
+      duration: theme.transitions.duration.standard,
     }),
   },
   expandOpen: {
@@ -98,6 +98,8 @@ const CustomerStrategy = (props) => {
     customerContacts,
     projectId,
     users,
+    isTeamMember,
+    isManager,
   } = props;
   const classes = useStyles();
   const { setToastConfig } = useContext(CustomToastContext);
@@ -163,7 +165,7 @@ const CustomerStrategy = (props) => {
           </Box>
           <Box component="span" mx={1} />
           <Typography variant="subtitle1">Customer Accounts</Typography>
-          {permissions.isUpdate && (
+          {(permissions.isUpdate && isTeamMember) || isManager ? (
             <IconButton
               color="primary"
               size="small"
@@ -175,7 +177,7 @@ const CustomerStrategy = (props) => {
             >
               <Add />
             </IconButton>
-          )}
+          ) : null}
         </AccordionSummary>
         <AccordionDetails>
           {loading ? (
@@ -223,7 +225,7 @@ const CustomerStrategy = (props) => {
                             onNewOpportunityAdd={(id) => {
                               saveOppToProject(id);
                             }}
-                            opportunityPermissions={permissions}
+                            permissions={permissions}
                             accountId={c._id}
                             accountName={c.accountName}
                             resource={"customerAccount"}
@@ -233,6 +235,8 @@ const CustomerStrategy = (props) => {
                             projectId={projectId}
                             addExisting={handleOpenDialog}
                             fetchProjectData={fetchProjectData}
+                            isTeamMember={isTeamMember}
+                            isManager={isManager}
                           />
                         )}
                         <QuotesInAccordion />
@@ -256,7 +260,8 @@ const CustomerStrategy = (props) => {
                               <Typography variant="subtitle2">
                                 Customer Contacts
                               </Typography>
-                              {permissions.isUpdate && (
+                              {(permissions.isUpdate && isTeamMember) ||
+                              isManager ? (
                                 <IconButton
                                   color="primary"
                                   size="small"
@@ -266,7 +271,7 @@ const CustomerStrategy = (props) => {
                                 >
                                   <ControlPoint />
                                 </IconButton>
-                              )}
+                              ) : null}
                             </Box>
                             <Box padding={1}>
                               {loading ? (

@@ -1,50 +1,61 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import Box from '@material-ui/core/Box';
-import { BoardBox } from './BoardBox';
-import update from 'immutability-helper';
-import { useDrag, useDrop } from 'react-dnd';
-import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
+import React, { useState, useCallback, useEffect } from "react";
+import Box from "@material-ui/core/Box";
+import { BoardBox } from "./BoardBox";
+import update from "immutability-helper";
+import { useDrop } from "react-dnd";
 
-export const BoardList = ({ status, type, activity, fetchBoard, handleChangeStatus }) => {
+export const BoardList = ({
+  status,
+  type,
+  activity,
+  fetchBoard,
+  handleChangeStatus,
+}) => {
+  const ref = React.useRef(null);
+  const [subActivity, setSubActivity] = useState([]);
 
-    const ref = React.useRef(null);
-    const [subActivity, setSubActivity] = useState([]);
+  useEffect(() => {
+    setSubActivity(activity);
+  }, [activity]);
 
-    useEffect(() => {
-        setSubActivity(activity);
-    }, [activity])
+  const moveCard = useCallback(
+    (dragIndex, hoverIndex) => {
+      const dragCard = subActivity[dragIndex];
+      setSubActivity(
+        update(subActivity, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, dragCard],
+          ],
+        })
+      );
+    },
+    [subActivity]
+  );
 
-    const moveCard = useCallback((dragIndex, hoverIndex) => {
-        const dragCard = subActivity[dragIndex];
-        setSubActivity(update(subActivity, {
-            $splice: [
-                [dragIndex, 1],
-                [hoverIndex, 0, dragCard],
-            ],
-        }));
-    }, [subActivity]);
+  const [{}, drop] = useDrop({
+    accept: "move",
+    drop: (data: any) => {
+      handleChangeStatus(data.id, status);
+    },
+  });
+  drop(ref);
 
-    const [{ }, drop] = useDrop({
-        accept: "move",
-        drop: (data: any) => {
-            handleChangeStatus(data._id, status)
-        },
-    });
-    (drop(ref));
-
-    return <div ref={ref} >
-        <Box minHeight="100%" >
-            {subActivity.map((element, index) => (
-                <BoardBox
-                    data={element}
-                    key={element._id}
-                    id={element._id}
-                    index={index}
-                    type={type}
-                    moveCard={moveCard}
-                    fetchBoard={fetchBoard} />
-            ))}
-        </Box>
+  return (
+    <div ref={ref} style={{ height: "calc(100% - 42px)" }}>
+      <Box minHeight="100%">
+        {subActivity.map((element, index) => (
+          <BoardBox
+            data={element}
+            key={element._id}
+            id={element._id}
+            index={index}
+            type={type}
+            moveCard={moveCard}
+            fetchBoard={fetchBoard}
+          />
+        ))}
+      </Box>
     </div>
-}
+  );
+};

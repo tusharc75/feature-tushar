@@ -7,7 +7,6 @@ import axiosInstance from "../../axios/axiosInstance";
 
 import {
   getOwnerDropdownDataSource,
-  getCollaboratorDropdownDataSource,
   getObjKeys,
   yupSchema,
   getObjKeysWithValues,
@@ -58,7 +57,6 @@ export default function NewOpportunityProjectSales({
   const [formsData, setFormsData] = useState([]);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
 
@@ -69,7 +67,6 @@ export default function NewOpportunityProjectSales({
     if (ownerCollabOptions.length > 0) {
       setOwnerCollaboratorData(ownerCollabOptions[0].option);
       setOwnerData(ownerCollabOptions[0].option);
-      setCollaboratorData(ownerCollabOptions[0].option);
     }
     sortArray();
   }, [opportunityData.fields]);
@@ -98,10 +95,6 @@ export default function NewOpportunityProjectSales({
     setOwnerData(
       getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData)
     );
-  };
-
-  const onCollabOwnerMultiselectOpen = () => {
-    setCollaboratorData(collaborators);
   };
 
   useEffect(() => {
@@ -255,7 +248,6 @@ export default function NewOpportunityProjectSales({
             setFieldValue,
             setFieldTouched,
             setErrors,
-            setValues,
           }) => (
             <>
               <CustomDialogContent>
@@ -414,6 +406,10 @@ export default function NewOpportunityProjectSales({
                                   ) : (
                                     <FormTypes
                                       // {...rest}
+                                      disabled={
+                                        field.fieldName ===
+                                        "customerAccountName"
+                                      }
                                       values={values}
                                       errors={errors}
                                       touched={touched}

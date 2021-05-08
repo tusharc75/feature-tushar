@@ -59,6 +59,10 @@ export const opportunityProcessFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
+export const localStorageKeys = {
+  currentSelectedRoleType: "currentSelectedRoleType",
+}
+
 export const sidebarResource = {
   brand: "Brand",
   role: "Role",
