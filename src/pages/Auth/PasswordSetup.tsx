@@ -60,7 +60,7 @@ const PasswordSetup = () => {
   const [isSubmitting, setSubmitting] = useState(false);
   const { email, token } = queryString.parse(window.location.search);
 
-  const URL = "https://oms-backend.vebholic.com";
+  const URL = "https://oms-backend-us.vebholic.com";
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
