@@ -12,6 +12,8 @@ import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import DataGridCustomToolbar from "../../../components/Helpers/DataGridCustomToolbar";
 import CustomDataGridNoDataFound from "../../../components/Helpers/CustomDataGridNoDataFound";
+import axiosAPI from "../../../axios/axios";
+import { isEmpty } from "lodash";
 
 const Email = () => {
 
@@ -42,9 +44,17 @@ const Email = () => {
 
     const fetchEmails = async () => {
         setLoading(true)
+        // axiosAPI().get(`/email?relatedTo=${JSON.stringify(filter)}`)
+        // .then(({ data }) => {
+        //     setEmails(data.data)
+        //     setLoading(false)
+        // }).catch((err) => {})
+            //     }
         await GetEmails(JSON.stringify(filter))
             .then(({ data }) => {
                 setEmails(data)
+                console.log(data);
+                
                 setLoading(false)
             })
             .catch((err) => {
@@ -56,15 +66,33 @@ const Email = () => {
     }
 
     const columns = [
-        { field: 'id', headerName: 'id', hide: true },
-        { field: 'name', headerName: 'Subject', width: 300 },
+        { field: '_id', headerName: 'id', hide: true },
+        { field: 'subject', headerName: 'Subject', width: 300 },
+        {
+            field: 'to',
+            headerName: 'Recipient',
+            width: 200,
+            renderCell: (params) =>{
+            if(typeof params.row.to == "string") return <span>{params.row.to}</span> 
+            return <span>{params.row.to.join(", ")}</span> 
+        }},
+        {
+            field: 'cc',
+            headerName: 'CC',
+            width: 200,
+            renderCell: (params) =>{
+            if(isEmpty(params.row.cc)) return <span>---</span>
+            if(typeof params.row.cc == "string") return <span>{params.row.cc}</span> 
+            return <span>{params.row.cc.join(", ")}</span> 
+        }},
         {
             field: 'createdBy',
             headerName: 'Send At',
             width: 200,
-            renderCell: (params) =>
-                <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>,
-        },
+            renderCell: (params) =>{
+            return <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>
+        }},
+        { field: 'mailbox', headerName: 'mailbox', width: 300 },
     ];
 
 
@@ -97,6 +125,7 @@ const Email = () => {
                     columns={columns}
                     pageSize={10}
                     density="compact"
+                    getRowId={(row) => row._id}
                 />
             </div>
         </Box>
