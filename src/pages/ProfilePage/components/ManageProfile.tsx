@@ -44,10 +44,6 @@ export default function ManageProfile(props) {
         if (userData?._id) {
             setUpdating(true);
             let clonedValues = _.cloneDeep(values)
-            console.log("userFields", userFields)
-            console.log("userData", userData)
-            console.log("displayUserDetails", displayUserDetails)
-            console.log("onFetchUserData", onFetchUserData);
             axiosInstance()
                 .put(`/user/me`, { ...clonedValues })
                 .then(({ data }) => {
