@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import { getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, simplifyValues, yupSchema } from '../../../constants/helpers';
-import CustomButton from '../../../components/Helpers/CustomButton'
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -12,23 +11,23 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import Dialog from '@material-ui/core/Dialog'
 import _ from 'lodash'
 import { useData } from '../../../StateProvider/Provider';
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import AddIcon from '@material-ui/icons/AddCircle'
 import InfoIcon from "@material-ui/icons/Info";
 import { makeStyles } from "@material-ui/core/styles";
 
 const arr = [...Array(9).keys()]
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     createAccountTooltip: {
         marginBottom: "6px"
     }
 }));
 export default function ManageContact(props) {
 
-    const { entityData, handleSubmit, onClose, open, isNew, loading, onCreateAccount, accountSource, contactId = null } = props
+    const { entityData, handleSubmit, onClose, open, isNew, loading,
+        onCreateAccount, accountSource, contactId = null, accountId = null } = props
+
     const classes = useStyles();
-    const toastConfig = useContext(CustomToastContext);
     const { state: { user } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
 
@@ -63,8 +62,6 @@ export default function ManageContact(props) {
         }
     }, [entityData.fields]);
 
-
-
     const sortArray = () => {
         const sections = [];
         entityData.fields.forEach((field) => {
@@ -92,10 +89,6 @@ export default function ManageContact(props) {
     }
     //  Owner, Collaborator Code - End
 
-    const getreportsToDataSource = () => {
-
-    }
-
     const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
 
         if (Object.keys(errors).length) {
@@ -108,198 +101,208 @@ export default function ManageContact(props) {
             handleSubmit(values, saveAndNew, setValues)
             setErrors({});
         }
-
     }
-    // let customAccountSource = [...accountSource,
-    // { isCreateNew: true, optionValue: "", optionLabel: "", default: false }
-    // ]
-    return (<>
-        <Dialog
-            disableBackdropClick={true}
-            maxWidth="md"
-            aria-labelledby="customized-dialog-title"
-            onClose={onClose}
-            open={open}
-        >
-            <CustomDialogHeader onClose={onClose} title={isNew ? "Add Contact" : `Editing ${entityData.initialValues.firstName}`} />
 
-            {
-                entityData.fields.length > 0 ?
-                    <>
-                        <Formik
-                            initialValues={entityData.initialValues}
-                            validationSchema={yupSchema(entityData.fields)}
-                            // validate={(values) => formValidation(values, entityData.fields)}
-                            validateOnMount
-                            onSubmit={() => { }}
-                        >
-                            {({
-                                setValues,
-                                setErrors,
-                                values,
-                                errors,
-                                touched,
-                                setFieldValue,
-                                setFieldTouched,
-                                validateForm,
-                                resetForm
-                            }) => (
-                                <>
-                                    <CustomDialogContent>
-                                        <Form autoComplete="off" autoCorrect="off" noValidate>
-                                            {
-                                                formsData &&
-                                                formsData.map((form, i) => (
-                                                    <div key={i}>
-                                                        <h2 className="form-label-style">{form.name}</h2>
-                                                        <Box marginY={2}>
-                                                            <Grid spacing={3} container>
-                                                                {form.sectionFields.map((field) => (
-                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                        {
-                                                                            field.fieldName == "owner" ? (
-                                                                                <FormTypes values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={ownerDataSource}
-                                                                                    setFieldValue={setFieldValue}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={true}
-                                                                                    size="small"
-                                                                                    disabled={disableOwnerSelection}
-                                                                                    onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
-                                                                                />
-                                                                            ) : field.fieldName == "collaborator" ? (
-                                                                                <FormTypes
-                                                                                    multiple
+    const initializeAccountDropdown = (values, accountSource) => {
+        if (values && values.hasOwnProperty("accountName")) {
+
+            const getNewAddedAccount = accountSource.find(d => d.optionValue === accountId);
+            if (getNewAddedAccount) {
+                values["accountName"] = getNewAddedAccount.optionValue;
+            }
+            return values;
+        }
+        return values
+    }
+
+    return (
+        <>
+            <Dialog
+                disableBackdropClick={true}
+                maxWidth="md"
+                aria-labelledby="customized-dialog-title"
+                onClose={onClose}
+                open={open}
+            >
+                <CustomDialogHeader onClose={onClose} title={isNew ? "Add Contact" : `Editing ${entityData.initialValues.firstName}`} />
+
+                {
+                    entityData.fields.length > 0 ?
+                        <>
+                            <Formik
+                                initialValues={entityData.initialValues}
+                                validationSchema={yupSchema(entityData.fields)}
+                                // validate={(values) => formValidation(values, entityData.fields)}
+                                validateOnMount
+                                onSubmit={() => { }}
+                            >
+                                {({
+                                    setValues,
+                                    setErrors,
+                                    values,
+                                    errors,
+                                    touched,
+                                    setFieldValue,
+                                    setFieldTouched,
+                                    validateForm,
+                                    resetForm
+                                }) => (
+                                    <>
+                                        <CustomDialogContent>
+                                            <Form autoComplete="off" autoCorrect="off" noValidate>
+                                                {
+                                                    formsData &&
+                                                    formsData.map((form, i) => (
+                                                        <div key={i}>
+                                                            <h2 className="form-label-style">{form.name}</h2>
+                                                            <Box marginY={2}>
+                                                                <Grid spacing={3} container>
+                                                                    {form.sectionFields.map((field) => (
+                                                                        <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                            {
+                                                                                field.fieldName == "owner" ? (
+                                                                                    <FormTypes values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={ownerDataSource}
+                                                                                        setFieldValue={setFieldValue}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={true}
+                                                                                        size="small"
+                                                                                        disabled={disableOwnerSelection}
+                                                                                        onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
+                                                                                    />
+                                                                                ) : field.fieldName == "collaborator" ? (
+                                                                                    <FormTypes
+                                                                                        multiple
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={collaboratorDataSource}
+                                                                                        setFieldValue={setFieldValue}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={true}
+                                                                                        size="small"
+                                                                                        onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
+                                                                                    />
+                                                                                ) : field.fieldName == "accountName" && accountSource !== undefined ? (
+                                                                                    <Grid container spacing={1} alignItems="center">
+                                                                                        <Grid item xs={10} sm={10} md={10} >
+                                                                                            <FormTypes
+                                                                                                values={accountId ? initializeAccountDropdown(values, accountSource) : values}
+                                                                                                errors={errors}
+                                                                                                touched={touched}
+                                                                                                label={field.fieldLabel}
+                                                                                                name={field.fieldName}
+                                                                                                type={field.type}
+                                                                                                options={accountSource}
+                                                                                                setFieldValue={setFieldValue}
+                                                                                                required={field.required}
+                                                                                                fullWidth
+                                                                                                isTooltip={true}
+                                                                                                size="small"
+                                                                                                doNotShowInfoTooltip={true}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                        <Grid item xs={1} sm={1} md={1}>
+                                                                                            <Tooltip title="Create Account" className={classes.createAccountTooltip} >
+                                                                                                <IconButton onClick={onCreateAccount} size="small">
+                                                                                                    <AddIcon color="primary" />
+                                                                                                </IconButton>
+                                                                                            </Tooltip>
+                                                                                        </Grid>
+                                                                                        {
+                                                                                            field?.tooltipMessage ?
+                                                                                                <Grid item xs={1} sm={1} md={1}>
+                                                                                                    <Tooltip title={field?.tooltipMessage ?? ""}>
+                                                                                                        <InfoIcon color="disabled" />
+                                                                                                    </Tooltip>
+                                                                                                </Grid> : null
+                                                                                        }
+                                                                                    </Grid>
+                                                                                ) : field.fieldName == "reportsTo" ? (
+                                                                                    <FormTypes
+                                                                                        values={values}
+                                                                                        errors={errors}
+                                                                                        touched={touched}
+                                                                                        label={field.fieldLabel}
+                                                                                        name={field.fieldName}
+                                                                                        type={field.type}
+                                                                                        options={reportsToDataSource}
+                                                                                        setFieldValue={setFieldValue}
+                                                                                        required={field.required}
+                                                                                        fullWidth
+                                                                                        isTooltip={true}
+                                                                                        size="small"
+                                                                                    />
+                                                                                ) : <FormTypes
                                                                                     values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
                                                                                     label={field.fieldLabel}
                                                                                     name={field.fieldName}
                                                                                     type={field.type}
-                                                                                    options={collaboratorDataSource}
-                                                                                    setFieldValue={setFieldValue}
-                                                                                    required={field.required}
-                                                                                    fullWidth
-                                                                                    isTooltip={true}
-                                                                                    size="small"
-                                                                                    onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
-                                                                                />
-                                                                            ) : field.fieldName == "accountName" && accountSource !== undefined ? (
-                                                                                <Grid container spacing={1} alignItems="center">
-                                                                                    <Grid item xs={10} sm={10} md={10} >
-                                                                                        <FormTypes
-                                                                                            values={values}
-                                                                                            errors={errors}
-                                                                                            touched={touched}
-                                                                                            label={field.fieldLabel}
-                                                                                            name={field.fieldName}
-                                                                                            type={field.type}
-                                                                                            options={accountSource}
-                                                                                            setFieldValue={setFieldValue}
-                                                                                            required={field.required}
-                                                                                            fullWidth
-                                                                                            isTooltip={true}
-                                                                                            size="small"
-                                                                                            doNotShowInfoTooltip={true}
-                                                                                        />
-                                                                                    </Grid>
-                                                                                    <Grid item xs={1} sm={1} md={1}>
-                                                                                        <Tooltip title="Create Account" className={classes.createAccountTooltip} >
-                                                                                            <IconButton onClick={onCreateAccount} size="small">
-                                                                                                <AddIcon color="primary" />
-                                                                                            </IconButton>
-                                                                                        </Tooltip>
-                                                                                    </Grid>
-                                                                                    {
-                                                                                        field?.tooltipMessage ?
-                                                                                            <Grid item xs={1} sm={1} md={1}>
-                                                                                                <Tooltip title={field?.tooltipMessage ?? ""}>
-                                                                                                    <InfoIcon color="disabled" />
-                                                                                                </Tooltip>
-                                                                                            </Grid> : null
-                                                                                    }
-                                                                                </Grid>
-                                                                            ) : field.fieldName == "reportsTo" ? (
-                                                                                <FormTypes
-                                                                                    values={values}
-                                                                                    errors={errors}
-                                                                                    touched={touched}
-                                                                                    label={field.fieldLabel}
-                                                                                    name={field.fieldName}
-                                                                                    type={field.type}
-                                                                                    options={reportsToDataSource}
+                                                                                    options={field.option}
                                                                                     setFieldValue={setFieldValue}
                                                                                     required={field.required}
                                                                                     fullWidth
                                                                                     isTooltip={true}
                                                                                     size="small"
                                                                                 />
-                                                                            ) : <FormTypes
-                                                                                values={values}
-                                                                                errors={errors}
-                                                                                touched={touched}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                options={field.option}
-                                                                                setFieldValue={setFieldValue}
-                                                                                required={field.required}
-                                                                                fullWidth
-                                                                                isTooltip={true}
-                                                                                size="small"
-                                                                            />
-                                                                        }
+                                                                            }
 
-                                                                    </Grid>
-                                                                ))}
-                                                            </Grid>
-                                                        </Box>
-                                                    </div>
-                                                ))
-                                            }
-                                        </Form>
-                                    </CustomDialogContent>
-                                    <CustomDialogFooter>
-                                        <Button onClick={onClose} variant="outlined" color="primary" >
-                                            Cancel
+                                                                        </Grid>
+                                                                    ))}
+                                                                </Grid>
+                                                            </Box>
+                                                        </div>
+                                                    ))
+                                                }
+                                            </Form>
+                                        </CustomDialogContent>
+                                        <CustomDialogFooter>
+                                            <Button onClick={onClose} variant="outlined" color="primary" >
+                                                Cancel
                                              </Button>
 
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
 
-                                            disabled={
-                                                loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
-                                                Object.values(simplifyValues(values, entityData.fields)).toString()
-                                                // || Object.keys(errors).length > 0 ? true : false
+                                                disabled={
+                                                    loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                                                    Object.values(simplifyValues(values, entityData.fields)).toString()
+                                                    // || Object.keys(errors).length > 0 ? true : false
 
-                                            }
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm, errors)
-                                            }}
-                                        >
-                                            Save
+                                                }
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm, errors)
+                                                }}
+                                            >
+                                                Save
                                         </Button>
-                                    </CustomDialogFooter>
-                                </>
-                            )}
-                        </Formik>
-                    </>
-                    : <CustomDialogContent>
-                        <CommonSkeleton
-                            lenArray={arr}
-                        />
-                    </CustomDialogContent>
-            }
-        </Dialog>
-    </ >
+                                        </CustomDialogFooter>
+                                    </>
+                                )}
+                            </Formik>
+                        </>
+                        : <CustomDialogContent>
+                            <CommonSkeleton
+                                lenArray={arr}
+                            />
+                        </CustomDialogContent>
+                }
+            </Dialog>
+        </ >
 
     )
 }
