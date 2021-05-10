@@ -23,6 +23,10 @@ import { BsBriefcase } from "react-icons/bs";
 import { GoNote } from "react-icons/go";
 import { HiOutlineMail } from "react-icons/hi";
 import { FiPlusSquare } from "react-icons/fi";
+import { AiOutlinePaperClip } from 'react-icons/ai'
+import { Tooltip } from '@material-ui/core'
+import AddAttachment from './Attachments/ManageAttachment'
+import Attachments from './Attachments/index'
 
 const useStyles = makeStyles((theme) => ({
   activityBox: {
@@ -48,7 +52,7 @@ const Activity = (props) => {
   const [type, setType] = useState(null);
   const [open, setOpen] = useState(false);
 
-  const tabs = ["Task", "Event", "Case", "Note", "Email"];
+  const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
   const getIcon = (tab: string) => {
     switch (tab) {
@@ -66,6 +70,9 @@ const Activity = (props) => {
 
       case "Email":
         return <HiOutlineMail size={20} />;
+
+      case "Attachment":
+        return <AiOutlinePaperClip size={22} />
     }
   };
 
@@ -133,7 +140,12 @@ const Activity = (props) => {
                     size="small"
                     onClick={(event) => handleCreateActivity(event, data)}
                   >
-                    <FiPlusSquare />
+                    {
+                      data === "Attachment" ?
+                        <Tooltip title="Upload File">
+                          <FiPlusSquare />
+                        </Tooltip> : <FiPlusSquare />
+                    }
                   </IconButton>
                 </Grid>
               </Grid>
@@ -169,6 +181,13 @@ const Activity = (props) => {
                   handleActivityRefresh={handleActivityRefresh}
                 />
               ) : null}
+              {
+                type === "Attachment" && data === "Attachment" ? (
+                  <Attachments
+                    relatedTo={relatedTo}
+                    handleActivityRefresh={handleActivityRefresh}
+                  />) : null
+              }
             </Box>
           </Fragment>
         ))}
@@ -215,6 +234,15 @@ const Activity = (props) => {
             relatedTo={relatedTo}
           />
         ) : null}
+        {
+          type === "Attachment" ? (
+            <AddAttachment
+              attachmentId={null}
+              handleClose={handleClose}
+              relatedTo={relatedTo}
+            />
+          ) : null
+        }
       </Dialog>
     </Box>
   );
