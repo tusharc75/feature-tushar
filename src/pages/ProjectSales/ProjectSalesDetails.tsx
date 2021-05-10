@@ -248,17 +248,22 @@ const ProjectSalesDetails = () => {
     }
   };
 
+  const isTeamMember = Boolean(teamUsers.find((u) => u._id === user.user._id));
+  const isManager =
+    user.user._id === projectSalesData?.projectManager?.optionValue;
+
   return (
     <>
       {openUpdateDialog && (
         <UpdateDetailsDialog
-          title="Update"
+          title={`Update ${projectSalesData?.projectName}`}
           openDialog={openUpdateDialog}
           onClose={closeUpdateDIalog}
           data={projectSalesData}
           fields={projectSalesFields}
           isUpdating={isUpdating}
           handleUpdate={handleUpdateProject}
+          isProjectSales={true}
         />
       )}
       {openDialog && (
@@ -306,30 +311,27 @@ const ProjectSalesDetails = () => {
                     mainPoints={mainPoints}
                     showHeading={true}
                   >
-                    {permissions?.projectSales.isUpdate &&
-                      user.user._id ===
-                        projectSalesData.projectManager?.optionValue && (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleOpenUpdateDialog}
-                        >
-                          Edit
-                        </Button>
-                      )}
+                    {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                    isManager ? (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        Edit
+                      </Button>
+                    ) : null}
 
                     <Box component="span" marginX={1} />
 
-                    {permissions?.projectSales.isDelete &&
-                      user.user._id ===
-                        projectSalesData.projectManager?.optionValue && (
-                        <DeleteButton
-                          text="Delete"
-                          onClick={() => {
-                            handleDeleteProject(id);
-                          }}
-                        />
-                      )}
+                    {permissions?.projectSales.isDelete && isManager ? (
+                      <DeleteButton
+                        text="Delete"
+                        onClick={() => {
+                          handleDeleteProject(id);
+                        }}
+                      />
+                    ) : null}
                   </DetailsPageHeader>
                 )}
                 <Box>
@@ -373,13 +375,16 @@ const ProjectSalesDetails = () => {
                     justifyContent="space-between"
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
-                    <IconButton
-                      color="primary"
-                      size="small"
-                      onClick={() => handleOpenDialog("user")}
-                    >
-                      <ControlPoint />
-                    </IconButton>
+                    {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                    isManager ? (
+                      <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={() => handleOpenDialog("user")}
+                      >
+                        <ControlPoint />
+                      </IconButton>
+                    ) : null}
                   </Box>
                   <Box padding={1}>
                     {loading ? (
@@ -424,6 +429,8 @@ const ProjectSalesDetails = () => {
           </Grid>
           <Box my={1} />
           <CustomerStrategy
+            isTeamMember={isTeamMember}
+            isManager={isManager}
             loading={loading}
             handleOpenDialog={handleOpenDialog}
             customerAccounts={customerAccounts}

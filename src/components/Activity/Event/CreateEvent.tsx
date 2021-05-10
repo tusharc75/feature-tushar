@@ -91,7 +91,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     const handleSave = async (values) => {
 
         values.relatedTo = relatedTo;
-        
+
         if (eventId) {
             UpdateEvent(eventId, values)
                 .then(({ data }) => {
@@ -102,10 +102,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                 });
         }
         else {
-            
-            
-            if(!isEmpty(azureAccount) && values.meeting){
-                values.azureId= azureAccount.homeAccountId;
+
+
+            if (!isEmpty(azureAccount) && values.meeting) {
+                values.azureId = azureAccount.homeAccountId;
                 values.graphToken = await getAzureAcessToken(instance);
             }
             CreateNewEvent(values)
@@ -133,199 +133,202 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     let times = TimeList()
     return (initialValues && <Formik initialValues={initialValues} validationSchema={EventSchema} onSubmit={handleSave} validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <Form autoComplete="off" autoCorrect="off" noValidate >
+            <>
                 <CustomDialogHeader title={`${eventId ? "Edit" : "New"} Event`} onClose={handleClose}></CustomDialogHeader>
                 <CustomDialogContent>
-                    <MuiPickersUtilsProvider utils={MomentUtils}>
-                        <Box padding={1}>
-                            <Grid container spacing={3}>
-                                <Grid item xs={7}>
-                                    <TextField
-                                        variant="outlined"
-                                        type="text"
-                                        label="Event Name"
-                                        required={true}
-                                        name="name"
-                                        fullWidth
-                                        margin="dense"
-                                        value={values["name"]}
-                                        error={touched["name"] && Boolean(errors["name"])}
-                                        helperText={touched["name"] && errors["name"]}
-                                        onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
-                                    />
-                                    <Box pt={1}>
+                    <Form autoComplete="off" autoCorrect="off" noValidate >
+                        <MuiPickersUtilsProvider utils={MomentUtils}>
+                            <Box padding={1}>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={7}>
+                                        <TextField
+                                            variant="outlined"
+                                            type="text"
+                                            label="Event Name"
+                                            required={true}
+                                            name="name"
+                                            fullWidth
+                                            margin="dense"
+                                            value={values["name"]}
+                                            error={touched["name"] && Boolean(errors["name"])}
+                                            helperText={touched["name"] && errors["name"]}
+                                            onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
+                                        />
+                                        <Box pt={1}>
+                                            <Field
+                                                component={TextFieldFormik}
+                                                fullWidth
+                                                margin="dense"
+                                                type="text"
+                                                multiline
+                                                rows={3}
+                                                label="Description"
+                                                name="description"
+                                                variant="outlined"
+                                            />
+                                        </Box>
                                         <Field
                                             component={TextFieldFormik}
                                             fullWidth
                                             margin="dense"
                                             type="text"
-                                            multiline
-                                            rows={3}
-                                            label="Description"
-                                            name="description"
+                                            label="Location"
+                                            name="location"
                                             variant="outlined"
                                         />
-                                    </Box>
-                                    <Field
-                                        component={TextFieldFormik}
-                                        fullWidth
-                                        margin="dense"
-                                        type="text"
-                                        label="Location"
-                                        name="location"
-                                        variant="outlined"
-                                    />
-                                    <AuthenticatedTemplate>
-                                        <FormControlLabel control={
-                                            <Checkbox 
-                                            name="meeting" 
-                                            color="primary"
-                                            onChange={(e) => setFieldValue("meeting", e.target.checked)}
+                                        <AuthenticatedTemplate>
+                                            <FormControlLabel control={
+                                                <Checkbox
+                                                    name="meeting"
+                                                    color="primary"
+                                                    onChange={(e) => setFieldValue("meeting", e.target.checked)}
+                                                />
+                                            }
+                                                label="meeting"
                                             />
-                                        } 
-                                        label= "meeting"
-                                        />
-                                    </AuthenticatedTemplate>
-                                    
-                                    {eventId && <Fragment>
-                                        <Box mt={2}>
-                                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
-                                        </Box>
-                                        <Box mt={2} >
-                                            <Divider />
-                                            <Box mt={1} >
-                                                <Comment referenceId={eventId} />
-                                            </Box>
-                                        </Box>
-                                    </Fragment>}
-                                </Grid>
-                                <Grid item xs={5}>
-                                    <FormControl fullWidth margin="dense" variant="outlined">
-                                        <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-outlined-label"
-                                            id="demo-simple-select-outlined"
-                                            value={values["status"]}
-                                            onChange={(e) => setFieldValue("status", e.target.value)}
-                                            label="Status"
-                                            name="status"
-                                            error={touched["status"] && Boolean(errors["status"])}
-                                            MenuProps={MenuProps}
-                                        >
-                                            {statusList.map((_status, index) => (
-                                                <MenuItem key={index} value={_status.status}>{_status.status}</MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                    <Box pt={1}>
-                                        <UserDropdown
-                                            name="participant"
-                                            label="Participant"
-                                            errors={errors}
-                                            touched={touched}
-                                            required={false}
-                                            setFieldValue={setFieldValue}
-                                            multiple={true}
-                                            value={values["participant"]}
-                                        />
-                                    </Box>
-                                    <Box pt={1}>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={6}>
-                                                <Field
-                                                    component={KeyboardDatePicker}
-                                                    label="Start Date"
-                                                    name="startDate"
-                                                    autoOk
-                                                    variant="inline"
-                                                    inputVariant="outlined"
-                                                    fullWidth
-                                                    margin="dense"
-                                                    format="yyyy/MM/DD"
-                                                />
-                                            </Grid>
-                                            <Grid item xs={6}>
-                                                <Box>
-                                                    <FormControl fullWidth margin="dense" variant="outlined">
-                                                        <InputLabel id="demo-simple-select-outlined-label">Start Time</InputLabel>
-                                                        <Select
-                                                            labelId="demo-simple-select-outlined-label"
-                                                            id="demo-simple-select-outlined"
-                                                            value={values["startTime"]}
-                                                            onChange={(e) => setFieldValue("startTime", e.target.value)}
-                                                            label="Start Time"
-                                                            name="startTime"
-                                                            error={touched["startTime"] && Boolean(errors["startTime"])}
-                                                            MenuProps={MenuProps}
-                                                        >
-                                                            {times.map((_time, index) => (
-                                                                <MenuItem key={index} value={_time}>{_time}</MenuItem>
-                                                            ))}
-                                                        </Select>
-                                                    </FormControl>
-                                                </Box>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                    <Box pt={1}>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={6}>
-                                                <Field
-                                                    component={KeyboardDatePicker}
-                                                    label="End Date"
-                                                    name="endDate"
-                                                    autoOk
-                                                    variant="inline"
-                                                    inputVariant="outlined"
-                                                    fullWidth
-                                                    margin="dense"
-                                                    format="yyyy/MM/DD"
-                                                    minDate={values["startDate"]}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={6}>
-                                                <Box >
-                                                    <FormControl fullWidth margin="dense" variant="outlined" error={touched["endTime"] && Boolean(errors["endTime"])}>
-                                                        <InputLabel id="demo-simple-select-outlined-label">End Time</InputLabel>
-                                                        <Select
-                                                            labelId="demo-simple-select-outlined-label"
-                                                            id="demo-simple-select-outlined"
-                                                            value={values["endTime"]}
-                                                            onChange={(e) => setFieldValue("endTime", e.target.value)}
-                                                            label="End Time"
-                                                            name="endTime"
-                                                            error={touched["endTime"] && Boolean(errors["endTime"])}
-                                                            MenuProps={MenuProps}
-                                                        >
-                                                            {times.map((_time, index) => (
-                                                                <MenuItem key={index} value={_time}>{_time}</MenuItem>
-                                                            ))}
+                                        </AuthenticatedTemplate>
 
-                                                        </Select>
-                                                        <FormHelperText>{touched["endTime"] && errors["endTime"]}</FormHelperText>
-                                                    </FormControl>
+                                        {eventId && <Fragment>
+                                            <Box mt={2}>
+                                                <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                                            </Box>
+                                            <Box mt={2} >
+                                                <Divider />
+                                                <Box mt={1} >
+                                                    <Comment referenceId={eventId} />
                                                 </Box>
+                                            </Box>
+                                        </Fragment>}
+                                    </Grid>
+                                    <Grid item xs={5}>
+                                        <FormControl fullWidth margin="dense" variant="outlined">
+                                            <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
+                                            <Select
+                                                labelId="demo-simple-select-outlined-label"
+                                                id="demo-simple-select-outlined"
+                                                value={values["status"]}
+                                                onChange={(e) => setFieldValue("status", e.target.value)}
+                                                label="Status"
+                                                name="status"
+                                                error={touched["status"] && Boolean(errors["status"])}
+                                                MenuProps={MenuProps}
+                                            >
+                                                {statusList.map((_status, index) => (
+                                                    <MenuItem key={index} value={_status.status}>{_status.status}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <Box pt={1}>
+                                            <UserDropdown
+                                                name="participant"
+                                                label="Participant"
+                                                errors={errors}
+                                                touched={touched}
+                                                required={false}
+                                                setFieldValue={setFieldValue}
+                                                multiple={true}
+                                                value={values["participant"]}
+                                            />
+                                        </Box>
+                                        <Box pt={1}>
+                                            <Grid container spacing={3}>
+                                                <Grid item xs={6}>
+                                                    <Field
+                                                        component={KeyboardDatePicker}
+                                                        label="Start Date"
+                                                        name="startDate"
+                                                        autoOk
+                                                        variant="inline"
+                                                        inputVariant="outlined"
+                                                        fullWidth
+                                                        margin="dense"
+                                                        format="yyyy/MM/DD"
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    <Box>
+                                                        <FormControl fullWidth margin="dense" variant="outlined">
+                                                            <InputLabel id="demo-simple-select-outlined-label">Start Time</InputLabel>
+                                                            <Select
+                                                                labelId="demo-simple-select-outlined-label"
+                                                                id="demo-simple-select-outlined"
+                                                                value={values["startTime"]}
+                                                                onChange={(e) => setFieldValue("startTime", e.target.value)}
+                                                                label="Start Time"
+                                                                name="startTime"
+                                                                error={touched["startTime"] && Boolean(errors["startTime"])}
+                                                                MenuProps={MenuProps}
+                                                            >
+                                                                {times.map((_time, index) => (
+                                                                    <MenuItem key={index} value={_time}>{_time}</MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Box>
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
-                                    </Box>
-                                    {eventId && <Fragment>
-                                        {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>}
-                                        {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>}
-                                    </Fragment>}
+                                        </Box>
+                                        <Box pt={1}>
+                                            <Grid container spacing={3}>
+                                                <Grid item xs={6}>
+                                                    <Field
+                                                        component={KeyboardDatePicker}
+                                                        label="End Date"
+                                                        name="endDate"
+                                                        autoOk
+                                                        variant="inline"
+                                                        inputVariant="outlined"
+                                                        fullWidth
+                                                        margin="dense"
+                                                        format="yyyy/MM/DD"
+                                                        minDate={values["startDate"]}
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    <Box >
+                                                        <FormControl fullWidth margin="dense" variant="outlined" error={touched["endTime"] && Boolean(errors["endTime"])}>
+                                                            <InputLabel id="demo-simple-select-outlined-label">End Time</InputLabel>
+                                                            <Select
+                                                                labelId="demo-simple-select-outlined-label"
+                                                                id="demo-simple-select-outlined"
+                                                                value={values["endTime"]}
+                                                                onChange={(e) => setFieldValue("endTime", e.target.value)}
+                                                                label="End Time"
+                                                                name="endTime"
+                                                                error={touched["endTime"] && Boolean(errors["endTime"])}
+                                                                MenuProps={MenuProps}
+                                                            >
+                                                                {times.map((_time, index) => (
+                                                                    <MenuItem key={index} value={_time}>{_time}</MenuItem>
+                                                                ))}
+
+                                                            </Select>
+                                                            <FormHelperText>{touched["endTime"] && errors["endTime"]}</FormHelperText>
+                                                        </FormControl>
+                                                    </Box>
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+                                        {eventId && <Fragment>
+                                            {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
+                                                <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                            </Box>}
+                                            {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
+                                                <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                            </Box>}
+                                        </Fragment>}
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Box>
-                    </MuiPickersUtilsProvider>
+                            </Box>
+                        </MuiPickersUtilsProvider>
+                    </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
                     <Button color="primary" onClick={handleClose}>Cancel</Button>
-                    <Button type="submit" color="primary" variant="contained">Save </Button>
+                    <Button type="button" color="primary" variant="contained" onClick={submitForm}>Save </Button>
                 </CustomDialogFooter>
-            </Form>)}
+            </>
+        )}
     </Formik>
     );
 }

@@ -81,54 +81,57 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
     const classes = useStyles();
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <Form autoComplete="off" autoCorrect="off" noValidate >
+            <>
                 <CustomDialogHeader onClose={handleClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
                 <CustomDialogContent>
-                    <MuiPickersUtilsProvider utils={MomentUtils}>
-                        <Box padding={1}>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        variant="outlined"
-                                        type="text"
-                                        label="Note Title"
-                                        required={true}
-                                        name="name"
-                                        fullWidth
-                                        margin="dense"
-                                        value={values["name"]}
-                                        error={touched["name"] && Boolean(errors["name"])}
-                                        helperText={touched["name"] && errors["name"]}
-                                        onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
-                                    />
-                                    <Box mt={2}>
-                                        <RichTextEditor
-                                            className={classes.textEditor}
-                                            value={values["description"]}
-                                            onChange={(value) => setFieldValue("description", value)}
+                    <Form autoComplete="off" autoCorrect="off" noValidate >
+                        <MuiPickersUtilsProvider utils={MomentUtils}>
+                            <Box padding={1}>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12}>
+                                        <TextField
+                                            variant="outlined"
+                                            type="text"
+                                            label="Note Title"
+                                            required={true}
+                                            name="name"
+                                            fullWidth
+                                            margin="dense"
+                                            value={values["name"]}
+                                            error={touched["name"] && Boolean(errors["name"])}
+                                            helperText={touched["name"] && errors["name"]}
+                                            onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
-                                    </Box>
-                                    {noteId && <Fragment>
                                         <Box mt={2}>
-                                            <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                                            <RichTextEditor
+                                                className={classes.textEditor}
+                                                value={values["description"]}
+                                                onChange={(value) => setFieldValue("description", value)}
+                                            />
                                         </Box>
-                                        {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>}
-                                        {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
-                                            <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
-                                        </Box>}
-                                    </Fragment>}
+                                        {noteId && <Fragment>
+                                            <Box mt={2}>
+                                                <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                                            </Box>
+                                            {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
+                                                <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                            </Box>}
+                                            {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
+                                                <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                            </Box>}
+                                        </Fragment>}
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Box>
-                    </MuiPickersUtilsProvider>
+                            </Box>
+                        </MuiPickersUtilsProvider>
+                    </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
                     <Button color="primary" onClick={handleClose}>Cancel</Button>
-                    <Button type="submit" color="primary" variant="contained">Save </Button>
+                    <Button type="button" color="primary" variant="contained" onClick={submitForm}>Save </Button>
                 </CustomDialogFooter>
-            </Form>)}
+            </>
+        )}
     </Formik>
     );
 }

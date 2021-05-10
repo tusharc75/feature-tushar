@@ -261,7 +261,7 @@ export default function ManageOpportunityDialog({
           initialValues={entityData.initialValues}
           validationSchema={yupSchema(entityData.fields)}
           validateOnMount
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({
             values,

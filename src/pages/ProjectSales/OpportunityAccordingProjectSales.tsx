@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Grid,
@@ -32,6 +32,7 @@ import currencies from "./../../constants/currency_with_country.json";
 import NewOpportunityProjectSales from "./NewOpportunityProjectSales";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const Accordion = withStyles({
   root: {
@@ -93,13 +94,15 @@ export default function OpportunityAccordianProjectSales({
   accountName,
   expanded = true,
   recordsPerLine = 2,
-  opportunityPermissions,
+  permissions,
   resource,
   isRedirect,
   collaborators,
   addExisting,
   projectId,
   fetchProjectData,
+  isTeamMember,
+  isManager,
 }) {
   const history = useHistory();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
@@ -121,7 +124,7 @@ export default function OpportunityAccordianProjectSales({
       recordsPerLineInLargeScreen = 6;
       break;
   }
-
+  const { setToastConfig } = useContext(CustomToastContext);
   const [expandOpportunity, setExpandOpportunity] = useState(expanded);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -132,6 +135,7 @@ export default function OpportunityAccordianProjectSales({
   ] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
@@ -168,7 +172,9 @@ export default function OpportunityAccordianProjectSales({
         fetchProjectData();
         setShowConfirmBox(false);
       })
-      .catch((error) => {});
+      .catch((error) => {
+        setToastConfig(error);
+      });
   };
 
   return (
@@ -197,7 +203,10 @@ export default function OpportunityAccordianProjectSales({
           Add Exisiting
         </MenuItem>
       </Menu>
-      <Accordion expanded={expandOpportunity}>
+      <Accordion
+        expanded={expandOpportunity}
+        onChange={() => setExpandOpportunity(!expandOpportunity)}
+      >
         <AccordionSummary
           aria-controls="user-panel-content"
           id="user-panel-header"
@@ -210,22 +219,18 @@ export default function OpportunityAccordianProjectSales({
                 alignItems="center"
                 flexGrow={1}
               >
-                <IconButton
-                  size="small"
-                  onClick={(event) => setExpandOpportunity(!expandOpportunity)}
-                >
-                  {expandOpportunity === true ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </IconButton>
+                {expandOpportunity === true ? (
+                  <ExpandLessIcon />
+                ) : (
+                  <ExpandMoreIcon />
+                )}
+
                 <strong>Opportunity ({opportunities.length})</strong>
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
               <Typography variant="subtitle2">
-                {opportunityPermissions.isUpdate && (
+                {(permissions.isUpdate && isTeamMember) || isManager ? (
                   <IconButton
                     aria-haspopup="true"
                     color="primary"
@@ -234,7 +239,7 @@ export default function OpportunityAccordianProjectSales({
                   >
                     <MoreVert />
                   </IconButton>
-                )}
+                ) : null}
               </Typography>
             </Grid>
           </Grid>
@@ -279,14 +284,22 @@ export default function OpportunityAccordianProjectSales({
                                       }
                                       &nbsp;{obj?.amount ?? ""}
                                     </Typography>
-                                    <Box ml={1} />
-                                    <IconButton
-                                      title={`Remove opportunity ${obj.opportunityName}`}
-                                      size="small"
-                                      onClick={() => handleRemove(obj)}
-                                    >
-                                      <Delete fontSize="small" color="error" />
-                                    </IconButton>
+                                    {(permissions.isUpdate && isTeamMember) ||
+                                    isManager ? (
+                                      <>
+                                        <Box ml={1} />
+                                        <IconButton
+                                          title={`Remove opportunity ${obj.opportunityName}`}
+                                          size="small"
+                                          onClick={() => handleRemove(obj)}
+                                        >
+                                          <Delete
+                                            fontSize="small"
+                                            color="error"
+                                          />
+                                        </IconButton>
+                                      </>
+                                    ) : null}
                                   </Box>
                                 ) : (
                                   ""

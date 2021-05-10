@@ -59,70 +59,32 @@ import Dashboard from "./pages/Dashboard";
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from "./pages/ProfilePage/index";
-// import firebase, { onMessageListener } from "./firebase";
-import CustomNotification from "./components/CustomNotification/CustomNotification";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
-  // const [notification, setNotification] = useState({ open: false, title: null, message: null })
-
-  // const truepush = window["truepush"] || [];
-  // truepush.push(function () {
-  //   truepush.Init({
-  //     id: "608a852cd4fd7034e72c1b43"
-  //   }, function (error) {
-  //     if (error) console.error(error);
-  //   })
-  // })
-
-  // const messaging = firebase.messaging();
-  // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
-  //   if (token) {
-  //     localStorage.setItem("notificationToken", token)
-  //   } else {
-  //     toast.setToastConfig({
-  //       open: true,
-  //       type: "error",
-  //       message: "No registration token available. Request permission to generate one."
-  //     })
-  //   }
-  // }).catch((err) => {
-  //   console.log('An error occurred while retrieving token. ', err);
-  //   // catch error while creating client token
-  // });
-
-  // onMessageListener().then((payload: any) => {
-  //   setNotification({
-  //     open: true,
-  //     title: payload.notification.title,
-  //     message: payload.notification.body
-  //   })
-  //   console.log(payload);
-  // }).catch(err => console.log('failed: ', err));
-
   const location = useLocation();
   const {
     state: { user },
   }: any = useData();
 
   const getNotification = async () => {
-    await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-      notification.setCount(count);
-    }).catch((error) => {
-      toast.setToastConfig(error);
-    });
+    if (localStorage.getItem("token")) {
+      await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+        notification.setCount(count);
+      }).catch((error) => {
+        toast.setToastConfig(error);
+      });
+    }
   }
 
   useEffect(() => {
     try {
       getNotification();
       setInterval(async () => {
-        if (localStorage.getItem("token")) {
-          await getNotification();
-        }
+        await getNotification();
       }, 60000);
     }
     catch (e) {
@@ -364,12 +326,6 @@ function App() {
           }}
         />
       )}
-
-      {/* {
-        notification.open && <CustomNotification open={notification.open}
-          title={notification.title} message={notification.message}
-          close={() => { setNotification({ open: false, title: null, message: null }) }} />
-      } */}
     </ThemeProvider>
   );
 }

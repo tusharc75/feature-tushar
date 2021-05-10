@@ -605,31 +605,11 @@ const UserDetailsPage = () => {
                         height: "352px",
                       }}
                     >
-                      <TableContainer style={{ height: "352px" }}>
-                        <Table
-                          stickyHeader
-                          aria-label="roles"
-                          className="roles-table"
-                        >
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Names</TableCell>
-                              <TableCell>Read</TableCell>
-                              <TableCell>Create</TableCell>
-                              <TableCell>Update</TableCell>
-                              <TableCell>Delete</TableCell>
-                            </TableRow>
-                          </TableHead>
-
-                          <TableBody>
-                            <RoleEngine
-                              field={unionRoleData ? unionRoleData.field : []}
-                              resource={unionRoleData ? unionRoleData.resource : []}
-                              isDisable={true}
-                            />
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
+                      <RoleEngine
+                        field={unionRoleData ? unionRoleData.field : []}
+                        resource={unionRoleData ? unionRoleData.resource : []}
+                        isDisable={true}
+                      />
                     </BoxWithBorder>
                   </Grid>
                 </Grid>
@@ -693,7 +673,7 @@ const UserDetailsPage = () => {
                 </>
               }
               <OpportunityAccordionInUserDetail
-                opportunities={[...opportunityRelatedData?.Owner ?? [],...opportunityRelatedData?.Collaborator ?? []]}
+                opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -702,7 +682,7 @@ const UserDetailsPage = () => {
                 }}
               />
               <LeadAccordionInUserDetailPage
-                leads={[...leadsRelatedData?.Owner ?? [],...leadsRelatedData?.Collaborator ?? []]}
+                leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
                 recordsPerLine={3}
                 expanded={false}
                 userId={id}
@@ -808,7 +788,7 @@ const UserDetailsPage = () => {
             </Paper>
 
             <QuickLinks quickLinks={quickLinks} />
-            
+
           </Grid>
         </Grid>
       </Layout>

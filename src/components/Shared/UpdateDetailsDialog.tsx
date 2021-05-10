@@ -26,6 +26,7 @@ const UpdateDetailsDialog = (props) => {
     isUpdating,
     handleUpdate,
     title,
+    isProjectSales = false,
   } = props;
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
@@ -94,6 +95,9 @@ const UpdateDetailsDialog = (props) => {
 
   const validateEmail = initialVals && initialVals.email ? false : true;
 
+  const fromProjectSales = (fieldName: string) =>
+    isProjectSales && fieldName === "projectManager";
+
   return (
     <Dialog
       open={openDialog}
@@ -131,7 +135,8 @@ const UpdateDetailsDialog = (props) => {
                               fullWidth
                               disabled={
                                 field.fieldData.type === "email" ||
-                                !field.isUpdate
+                                !field.isUpdate ||
+                                fromProjectSales(field.fieldData.fieldName)
                               }
                               values={values}
                               errors={errors}
@@ -169,7 +174,7 @@ const UpdateDetailsDialog = (props) => {
                 onClick={submitForm}
                 disabled={
                   Object.values(simplifyValues(initialVals)).toString() ===
-                  Object.values(simplifyValues(values)).toString() ||
+                    Object.values(simplifyValues(values)).toString() ||
                   isUpdating
                 }
               >

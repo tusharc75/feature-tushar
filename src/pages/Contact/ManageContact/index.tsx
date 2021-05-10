@@ -38,6 +38,8 @@ export default function ManageContactMain(props) {
   const [loading, setLoading] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
   const [accountSource, setAccountSource] = useState([])
+  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
+
   const history = useHistory();
 
   useEffect(() => {
@@ -118,6 +120,7 @@ export default function ManageContactMain(props) {
   const handleDialogClose = () => {
     setShowAccountDialog(false)
   }
+
   const handleGetAddedAccount = ({ data }) => {
     if (data?._id) {
       setAccountSource(prevState => {
@@ -126,6 +129,7 @@ export default function ManageContactMain(props) {
           order: accountSource.length, default: false
         }]
       })
+      setNewAddedAccountId(data._id);
     }
   }
 
@@ -140,6 +144,7 @@ export default function ManageContactMain(props) {
         handleSubmit={handleCreateContact}
         accountSource={accountSource}
         onCreateAccount={() => setShowAccountDialog(true)}
+        accountId={newAddedAccountId}
       />
       {
         showAccountDialog ?

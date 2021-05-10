@@ -63,6 +63,10 @@ export const opportunityProcessFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
+export const localStorageKeys = {
+  currentSelectedRoleType: "currentSelectedRoleType",
+}
+
 export const sidebarResource = {
   brand: "Brand",
   role: "Role",
@@ -530,3 +534,30 @@ export const simplifyValues = (obj, fields) => {
 //     </List>
 //   </div>
 // }
+
+export const formatAmountWithCurrency = (currencyCode, amount) => {
+  if (!currencyCode && !amount)
+    return null;
+
+  const currencyData = currencies.find(
+    (data) => data?.currencyCode === currencyCode
+  );
+
+  if (!currencyData) {
+    return amount;
+  }
+
+  const language = navigator.language.split("-")[0];
+
+  let options = {
+    style: 'currency',
+    currency: currencyCode
+  }
+
+  if (Number.isInteger(amount)) {
+    options["maximumFractionDigits"] = 0
+  }
+
+  return new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1 ');
+
+}

@@ -6,7 +6,6 @@ import Button from '@material-ui/core/Button';
 import { useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import { DataGrid, GridOverlay } from "@material-ui/data-grid";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
@@ -18,9 +17,10 @@ import CreateProduct from "../../components/Product/CreateProduct";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { GiAbstract055 } from 'react-icons/gi';
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 const Product = () => {
     const toastConfig = useContext(CustomToastContext)
@@ -185,7 +185,7 @@ const Product = () => {
             <div className="listing-grid">
                 <DataGrid
                     components={{
-                        Toolbar: DataGridCustomToolbar,
+                        Toolbar: CustomDataGridToolbar,
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
