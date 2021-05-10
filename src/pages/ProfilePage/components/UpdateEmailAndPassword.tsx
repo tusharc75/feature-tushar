@@ -33,7 +33,7 @@ const updateEmailSchema = Yup.object().shape({
 
 });
 
-export default function ManageEmailAndUpdatePassword({
+export default function ManageUpdateEmailAndPassword({
     open,
     onClose,
     isUpdatePassword = false,
