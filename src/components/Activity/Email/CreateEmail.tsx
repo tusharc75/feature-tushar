@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
+export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) => {
     const { instance, accounts, inProgress } = useMsal();
     const azureAccount = useAccount(accounts[0] || {});
     const [initialValues, setInitialValues] = useState(null);
@@ -192,7 +192,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     />
                                                     <Autocomplete
                                                         multiple
-                                                        options={["rajat@vebholic.com"]}
+                                                        options={options}
                                                         freeSolo
                                                         renderTags={(value, getTagProps) =>
                                                             value.map((option, index) => (
@@ -228,7 +228,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose }) => {
                                                     />
                                                     <Autocomplete
                                                         multiple
-                                                        options={[]}
+                                                        options={options}
                                                         freeSolo
                                                         renderTags={(value, getTagProps) =>
                                                             value.map((option, index) => (

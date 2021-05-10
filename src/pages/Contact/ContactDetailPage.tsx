@@ -496,11 +496,7 @@ const ContactDetailsPage = (props) => {
                     ]}
                     handleActivityRefresh={() => { }}
                     emails={
-                      [{
-                        email: contactData?.email ?? '',
-                        name: `${contactData?.firstName ?? ""} ${contactData?.lastName ?? ""}`,
-                        _id: contactData?._id
-                      }]
+                      [contactData?.email ?? '']
                     }
                   />
                 </div>

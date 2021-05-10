@@ -61,9 +61,8 @@ const Activity = (props) => {
     useEffect(() => {
         let data = []
         if (emails && emails.length) {
-            let oldEmails = emailUsersOptions.map(o => o.email)
             emails.map(curEmail => {
-                if (curEmail?.email && oldEmails.indexOf(curEmail.email) < 0) data.push(curEmail)
+                if (curEmail && emailUsersOptions.indexOf(curEmail) < 0) data.push(curEmail)
             })
             setEmailUsersOptions(prevState => { return [...prevState, ...data] })
         }
@@ -116,10 +115,10 @@ const Activity = (props) => {
         axiosInstance()
             .get('/user')
             .then(({ data: { data, count } }) => {
-                let oldEmails = emailUsersOptions.map(o => o.email)
-                data = data.filter(obj => {
-                    if (obj?.email && oldEmails.indexOf(obj.email) < 0) return { ...obj, name: `${obj?.firstName ?? ''} ${obj?.lastName || ''}` }
-                })
+                data = data.reduce((emails, obj) => {
+                    if (obj?.email && emailUsersOptions.indexOf(obj.email) < 0) emails.push(obj.email)
+                    return emails
+                }, [])
                 setEmailUsersOptions(prevState => { return [...prevState, ...data] })
             })
             .catch((err) => {

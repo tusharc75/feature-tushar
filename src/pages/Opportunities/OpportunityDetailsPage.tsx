@@ -107,7 +107,7 @@ function OpportunityDetailsPage() {
     }
   }, [steps])
 
-  
+
 
   const fetchOpportunityData = () => {
     if (selectedEntity) {
@@ -188,15 +188,10 @@ function OpportunityDetailsPage() {
     // }
   }
   const getContactEmails = (contacts) => {
-    return contacts.filter(contact => {
-      if (contact?.email) {
-        return {
-          email: contact?.email ?? '',
-          name: `${contact?.firstName ?? ''} ${contact?.lastName ?? ''}`,
-          _id: contact._id
-        }
-      }
-    })
+    return contacts.reduce((emails, contact) => {
+      if (contact?.email) emails.push(contact.email)
+      return emails
+    }, [])
   }
   const handleContactsEmails = (opportunityData) => {
     let data = []
@@ -233,7 +228,7 @@ function OpportunityDetailsPage() {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Amount"] = data?.amount ? (currencyCodeToSymbol(data?.currency)+ " " + data?.amount) : "";
+    mainPoint["Amount"] = data?.amount ? (currencyCodeToSymbol(data?.currency) + " " + data?.amount) : "";
     mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
 
     setMainPoints(mainPoint);

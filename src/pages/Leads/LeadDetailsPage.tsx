@@ -430,11 +430,7 @@ const LeadDetailsPage = () => {
                     ]}
                     handleActivityRefresh={() => { }}
                     emails={
-                      [{
-                        email: leadData?.email ?? '',
-                        name: `${leadData?.firstName ?? ""} ${leadData?.lastName ?? ""}`,
-                        _id: leadData?._id
-                      }]
+                      [leadData?.email ?? '']
                     }
                   />
                 </div>

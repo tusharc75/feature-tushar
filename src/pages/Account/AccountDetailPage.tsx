@@ -415,7 +415,6 @@ export default function AccountDetailPage(props) {
   const handleCreateContact = () => {
     setShowCreateContactDialog(true);
   };
-
   return (
     <>
       <Layout>
@@ -423,7 +422,7 @@ export default function AccountDetailPage(props) {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8} >
             <Paper>
               {
                 <DetailsPageHeader
@@ -569,16 +568,11 @@ export default function AccountDetailPage(props) {
                         ]}
                         handleActivityRefresh={() => { }}
                         emails={
-                          relatedContacts && relatedContacts.length ?
-                            _.cloneDeep(relatedContacts).filter(contact => {
-                              if (contact?.email) {
-                                return {
-                                  email: contact?.email ?? '',
-                                  name: `${contact?.firstName ?? ''} ${contact?.lastName ?? ''}`,
-                                  _id: contact._id
-                                }
-                              }
-                            }) : []
+                          relatedContacts && relatedContacts.length > 0 ?
+                            _.cloneDeep(relatedContacts).reduce((emails, contact) => {
+                              if (contact?.email) emails.push(contact.email)
+                              return emails
+                            }, []) : []
                         }
                       />
                     </div>
