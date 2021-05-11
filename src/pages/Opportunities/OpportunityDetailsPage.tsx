@@ -69,6 +69,7 @@ function OpportunityDetailsPage() {
   })
   const [supplierAccountOptions, setSupplierAccountOptions] = useState([])
   const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
+  const [contactsEmailsData, setContactsEmailsData] = useState([])
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -122,6 +123,7 @@ function OpportunityDetailsPage() {
           setHeadingLbl(data.opportunityName);
           handleAllowToEditList(data);
           setCopyOfOpportunityDataToUpdate(data);
+          handleContactsEmails(data)
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
@@ -189,6 +191,25 @@ function OpportunityDetailsPage() {
     // else if (supplierAccountOptions && supplierAccountOptions.length) {
     //   ids = [...supplierAccountOptions.map(option => option.optionValue)]
     // }
+  }
+  const getContactEmails = (contacts) => {
+    return contacts.reduce((emails, contact) => {
+      if (contact?.email) emails.push(contact.email)
+      return emails
+    }, [])
+  }
+  const handleContactsEmails = (opportunityData) => {
+    let data = []
+    if (opportunityData && opportunityData?.staticData) {
+      const { customerContacts, supplierContacts } = opportunityData?.staticData
+      if (customerContacts && customerContacts.length) {
+        data = getContactEmails(customerContacts)
+      }
+      if (supplierContacts && supplierContacts.length) {
+        data = [...data, ...getContactEmails(supplierContacts)]
+      }
+      if (data.length > 0) setContactsEmailsData(data)
+    }
   }
 
   const handleContactSelection = (e, id) => {
@@ -349,7 +370,6 @@ function OpportunityDetailsPage() {
   return (
     <>
       <Layout>
-
         <Grid container direction="row">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -553,6 +573,7 @@ function OpportunityDetailsPage() {
                       },
                     ]}
                     handleActivityRefresh={() => { }}
+                    emails={contactsEmailsData}
                   />
                 </div>
               )}
