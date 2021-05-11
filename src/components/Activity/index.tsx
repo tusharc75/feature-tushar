@@ -1,6 +1,6 @@
-import { useState, Fragment } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
+import React, { useState, useEffect, Fragment, useContext } from "react";
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
 import { Task } from "./Task";
 import { CreateTask } from "./Task/CreateTask";
 import { Event } from "./Event";
@@ -11,11 +11,11 @@ import { Note } from "./Note";
 import { CreateNote } from "./Note/CreateNote";
 import { Email } from "./Email";
 import { CreateEmail } from "./Email/CreateEmail";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import Dialog from "@material-ui/core/Dialog";
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import Dialog from '@material-ui/core/Dialog';
 import { makeStyles } from "@material-ui/core";
 import { BiTask } from "react-icons/bi";
 import { VscCalendar } from "react-icons/vsc";
@@ -27,6 +27,8 @@ import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Tooltip } from '@material-ui/core'
 import AddAttachment from './Attachments/ManageAttachment'
 import Attachments from './Attachments/index'
+import axiosInstance from "./../../axios/axiosInstance";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   activityBox: {
@@ -48,16 +50,32 @@ const useStyles = makeStyles((theme) => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh } = props;
+  const { relatedTo, handleActivityRefresh, emails = [] } = props;
+  const toastConfig = useContext(CustomToastContext);
+
   const [type, setType] = useState(null);
   const [open, setOpen] = useState(false);
+  const [emailUsersOptions, setEmailUsersOptions] = useState([])
 
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
+
+  useEffect(() => {
+    fetchUsersEmails()
+  }, [])
+  useEffect(() => {
+    let data = []
+    if (emails && emails.length) {
+      emails.map(curEmail => {
+        if (curEmail && emailUsersOptions.indexOf(curEmail) < 0) data.push(curEmail)
+      })
+      setEmailUsersOptions(prevState => { return [...prevState, ...data] })
+    }
+  }, [emails])
 
   const getIcon = (tab: string) => {
     switch (tab) {
       case "Task":
-        return <BiTask size={20} />;
+        return <BiTask size={20} />
 
       case "Event":
         return <VscCalendar size={20} />;
@@ -98,6 +116,21 @@ const Activity = (props) => {
     setType(temptype);
     handleActivityRefresh();
   };
+
+  const fetchUsersEmails = () => {
+    axiosInstance()
+      .get('/user')
+      .then(({ data: { data, count } }) => {
+        data = data.reduce((emails, obj) => {
+          if (obj?.email && emailUsersOptions.indexOf(obj.email) < 0) emails.push(obj.email)
+          return emails
+        }, [])
+        setEmailUsersOptions(prevState => { return [...prevState, ...data] })
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err)
+      });
+  }
 
   return (
     <Box>
@@ -232,6 +265,7 @@ const Activity = (props) => {
             emailId={null}
             handleClose={handleClose}
             relatedTo={relatedTo}
+            options={emailUsersOptions}
           />
         ) : null}
         {

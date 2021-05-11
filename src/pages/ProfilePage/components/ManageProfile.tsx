@@ -10,7 +10,7 @@ import EditIcon from '@material-ui/icons/Edit'
 import DeleteIcon from "@material-ui/icons/Delete";
 import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
-import UpdateEmailPasswordDialog from './UpdateEmailAndPassword'
+import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword'
 import _ from 'lodash'
 import { useHistory } from "react-router-dom";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -269,7 +269,7 @@ export default function ManageProfile(props) {
 
                 {
                     isPasswordUpdate ?
-                        <UpdateEmailPasswordDialog
+                        <ManageUpdateEmailPasswordDialog
                             isUpdatePassword={true}
                             open={isPasswordUpdate}
                             onFetchUserData={onFetchUserData}
@@ -279,7 +279,7 @@ export default function ManageProfile(props) {
                 }
                 {
                     isEmailUpdate ?
-                        <UpdateEmailPasswordDialog
+                        <ManageUpdateEmailPasswordDialog
                             isUpdateEmail={true}
                             userData={userData}
                             open={isEmailUpdate}

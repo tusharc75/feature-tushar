@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 
 function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-    
+
         <List>
             <ListItem>
                 <ListItemAvatar>
@@ -52,7 +52,7 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                 {
                     contacts.map((obj, index) => {
                         return <>
-                            <Card key={index}>
+                            <Card key={obj?._id ?? `contact${index}`}>
                                 <CardContent className="detailListing">
                                     <Grid container className="detailCardHeader">
                                         <Grid item xs={12} sm={12}>
