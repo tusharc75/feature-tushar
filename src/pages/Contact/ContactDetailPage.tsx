@@ -494,6 +494,9 @@ const ContactDetailsPage = (props) => {
                       },
                     ]}
                     handleActivityRefresh={() => { }}
+                    emails={
+                      [contactData?.email ?? '']
+                    }
                   />
                 </div>
               )}
@@ -539,25 +542,25 @@ const ContactDetailsPage = (props) => {
                         <Box className={`${contactClass.custom_box1}`}>
                           <Card className="contactCard">
                             <CardContent className="detailListing">
-                                <List>
-                                  <ListItem>
-                                    <ListItemAvatar>
-                                      <div data-initials={[contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
-                                      contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()].filter(f => f).join("")}></div>
-                                    </ListItemAvatar>
-                                    <ListItemText className="ml-2"
-                                      primary={
-                                        <Link className="link f_size p-l2"
-                                          to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
-                                          {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
-                                        </Link>
-                                      }
-                                      secondary={
-                                        <React.Fragment>
-                                          <Typography
-                                            component="p"
-                                            variant="body2"
-                                            className="cardDetail">
+                              <List>
+                                <ListItem>
+                                  <ListItemAvatar>
+                                    <div data-initials={[contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
+                                    contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()].filter(f => f).join("")}></div>
+                                  </ListItemAvatar>
+                                  <ListItemText className="ml-2"
+                                    primary={
+                                      <Link className="link f_size p-l2"
+                                        to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                        {contactData?.staticData?.lead?.firstName || ''} {contactData?.staticData?.lead?.lastName || ''}
+                                      </Link>
+                                    }
+                                    secondary={
+                                      <React.Fragment>
+                                        <Typography
+                                          component="p"
+                                          variant="body2"
+                                          className="cardDetail">
                                           {contactData?.staticData?.lead?.title && <span className="d-flex gap-2 align-items-center">
                                             <FiStar size="15" />{contactData?.staticData?.lead?.title}
                                           </span>}
@@ -567,15 +570,15 @@ const ContactDetailsPage = (props) => {
                                           {contactData?.staticData?.lead?.phone && <span className="d-flex gap-2 align-items-center">
                                             <BiPhone size="15" />{contactData?.staticData?.lead?.phone}
                                           </span>}
-                                          </Typography>
-                                        </React.Fragment>
-                                      }
-                                    />
-                                  </ListItem>
-                                </List>
-                          </CardContent>
+                                        </Typography>
+                                      </React.Fragment>
+                                    }
+                                  />
+                                </ListItem>
+                              </List>
+                            </CardContent>
                           </Card>
-                            {/* <Card>
+                          {/* <Card>
                             <CardContent className="detailListing">
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={12} sm={12}>
@@ -599,30 +602,30 @@ const ContactDetailsPage = (props) => {
                 )}
             </Paper>
           </Grid>
-          </Grid>
-          {showConfirmBox ? (
-            <ConfirmationDialog
-              open={showConfirmBox}
-              message={`Are you sure you want to delete this Contact ?`}
-              onClose={() => setShowConfirmBox(false)}
-              onOk={handleDeleteContact}
-            />
-          ) : null}
+        </Grid>
+        {showConfirmBox ? (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this Contact ?`}
+            onClose={() => setShowConfirmBox(false)}
+            onOk={handleDeleteContact}
+          />
+        ) : null}
 
-          {
-            orgChartInFullScreenDialog && <FullScreenDialog
-              heading="Org Chart"
-              open={orgChartInFullScreenDialog}
-              close={() => {
-                setOrgChartInFullScreenDialog(false);
-              }}
-            >
-              <OrgChartContainer data={orgChartData} onClick={(id) => {
-                setOrgChartInFullScreenDialog(false);
-                history.push(`/${contactApi}/detail/${id}`)
-              }} />
-            </FullScreenDialog>
-          }
+        {
+          orgChartInFullScreenDialog && <FullScreenDialog
+            heading="Org Chart"
+            open={orgChartInFullScreenDialog}
+            close={() => {
+              setOrgChartInFullScreenDialog(false);
+            }}
+          >
+            <OrgChartContainer data={orgChartData} onClick={(id) => {
+              setOrgChartInFullScreenDialog(false);
+              history.push(`/${contactApi}/detail/${id}`)
+            }} />
+          </FullScreenDialog>
+        }
       </Layout>
     </>
   );
