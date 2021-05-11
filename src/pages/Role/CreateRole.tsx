@@ -147,62 +147,43 @@ const CreateRole = ({
                   label="Role Name"
                   value={values.name}
                   onChange={(e) =>
-                    setValues({ ...values, name: e.target.value })
+                    setValues({ ...values, name: e.target.value.trimStart() })
                   }
                 />
 
                 <TextField
                   required
                   variant="outlined"
+                  multiline
                   size="small"
                   fullWidth
                   label="Role Description"
                   value={values.description}
                   onChange={(e) =>
-                    setValues({ ...values, description: e.target.value })
+                    setValues({ ...values, description: e.target.value.trimStart() })
                   }
                 />
               </Box>
               <Paper>
-                <TableContainer style={{ maxHeight: 440 }}>
-                  <Table
-                    stickyHeader
-                    aria-label="roles"
-                    className="roles-table"
-                  >
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Names</TableCell>
-                        <TableCell>Read</TableCell>
-                        <TableCell>Create</TableCell>
-                        <TableCell>Update</TableCell>
-                        <TableCell>Delete</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {loading ? (
-                        <TableRow>
-                          <TableCell colSpan={5}>
-                            <Loader
-                              style={{ height: "100%" }}
-                              text="Loading..."
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        field.length &&
-                        resource.length && (
-                          <RoleEngine
-                            field={field}
-                            resource={resource}
-                            setField={setField}
-                            setResource={setResource}
-                          />
-                        )
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+
+                {loading ? (
+                  <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200 }}>
+                    <Loader
+                      style={{ height: "100%" }}
+                      text="Loading..."
+                    />
+                  </div>
+                ) : (
+                  field.length &&
+                  resource.length && (
+                    <RoleEngine
+                      field={field}
+                      resource={resource}
+                      setField={setField}
+                      setResource={setResource}
+                    />
+                  )
+                )}
               </Paper>
             </Box>
           </CustomDialogContent>

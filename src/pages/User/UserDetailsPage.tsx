@@ -480,276 +480,255 @@ const UserDetailsPage = () => {
                   ) : null}
                 </DetailsPageHeader>
               )}
-
-              <Box style={{ padding: "8px", minHeight: "450px" }}>
-                {loading || !userFields.length || !userData ? (
-                  <Grid container spacing={2} style={{ padding: "8px" }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <Tabs className="oms-tab" value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
-                      indicatorColor="primary"
-                      textColor="primary"
-                      aria-label="icon tabs example"
-                    >
-                      <Tab
-                        label="Details"
-                        aria-controls="a11y-tabpanel-0"
-                        id="a11y-tab-0"
-                      />
-                      <Tab
-                        label="Org Chart"
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
-                      />
-                    </Tabs>
-                    <Box hidden={currentTabIndex !== 0}>
-                      <DetailsPage data={userData} fields={userFields} />
-                    </Box>
-                    <Box hidden={currentTabIndex !== 1}>
-                      <OrgChartContainer data={orgChartData} onClick={(id) => {
-                        history.push(`${routes.userDetail.path}/${id}`)
-                      }} />
-                    </Box>
-                  </>
-                )}
-              </Box>
-
-              <Box style={{ padding: "0px", minHeight: "300px" }}>
-                <Box display="flex" padding={1} bgcolor="grey.200">
-                  <Grid container>
-                    <Grid item xs={8}>
-                      <Box display="flex">
-                        <Box padding="5px">
-                          <Typography variant="subtitle2">
-                            Assigned Global Roles ({globalRoles.length || "0"})
-                      </Typography>
-                        </Box>
+                <Box style={{ padding: "8px", minHeight: "450px" }}>
+                  {loading || !userFields.length || !userData ? (
+                    <Grid container spacing={2} style={{ padding: "8px" }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
+                  ) : (
+                    <>
+                      <Tabs className="oms-tab" value={currentTabIndex}
+                        onChange={(index, newValue) => {
+                          setCurrentTabIndex(newValue);
+                        }}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="icon tabs example"
+                      >
+                        <Tab
+                          label="Details"
+                          aria-controls="a11y-tabpanel-0"
+                          id="a11y-tab-0"
+                        />
+                        <Tab
+                          label="Org Chart"
+                          aria-controls="a11y-tabpanel-1"
+                          id="a11y-tab-1"
+                        />
+                      </Tabs>
+                      <Box hidden={currentTabIndex !== 0}>
+                        <DetailsPage data={userData} fields={userFields} />
                       </Box>
-                    </Grid>
-                    <Grid item xs={4} container justify="flex-end">
-                      {permissions.user.isUpdate && (
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={handleOpenDialog}
-                        >
-                          <ControlPoint />
-                        </IconButton>
-                      )}
-                    </Grid>
-                  </Grid>
+                      <Box hidden={currentTabIndex !== 1}>
+                        <OrgChartContainer data={orgChartData} onClick={(id) => {
+                          history.push(`${routes.userDetail.path}/${id}`)
+                        }} />
+                      </Box>
+                    </>
+                  )}
                 </Box>
 
-                <Grid container style={{ padding: "8px" }} spacing={1}>
-                  <Grid item xs={12} sm={12} md={4}>
-                    <BoxWithBorder
-                      style={{
-                        padding: "0px",
-                        height: "352px",
-                      }}
-                    >
-                      {rolesLoading ? (
-                        [1, 2].map((i) => (
-                          <BoxWithBorder
-                            key={i}
-                            style={{ padding: "0px", margin: "8px" }}
-                          >
-                            <Box padding={1}>
-                              <Skeleton
-                                variant="text"
-                                width="100px"
-                                height="20px"
-                              />
-                              <Box marginTop={1} />
-                              <Skeleton variant="text" width="100%" height="15px" />
-                            </Box>
-                          </BoxWithBorder>
-                        ))
-                      ) : !globalRoles.length ? (
-                        <Box textAlign="center" marginTop={2}>
-                          <Typography variant="body2">
-                            User doesn't have any roles
+                <Box style={{ padding: "0px", minHeight: "300px" }}>
+                  <Box display="flex" padding={1} bgcolor="grey.200">
+                    <Grid container>
+                      <Grid item xs={8}>
+                        <Box display="flex">
+                          <Box padding="5px">
+                            <Typography variant="subtitle2">
+                              Assigned Global Roles ({globalRoles.length || "0"})
                       </Typography>
-                        </Box>
-                      ) : (
-                        <Box
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            overflowY: "auto",
-                          }}
-                        >
-                          {userData && (
-                            <UserRoles
-                              permissions={permissions}
-                              data={globalRoles}
-                              unassignRole={handleUnassignRole}
-                              loggedInUser={user?.user}
-                              currentUserId={id}
-
-                            />
-                          )}
-                        </Box>
-                      )}
-                    </BoxWithBorder>
-                  </Grid>
-                  <Grid item xs={12} sm={12} md={8} lg={8}>
-                    <BoxWithBorder
-                      style={{
-                        padding: "0px",
-                        height: "352px",
-                      }}
-                    >
-                      <TableContainer style={{ height: "352px" }}>
-                        <Table
-                          stickyHeader
-                          aria-label="roles"
-                          className="roles-table"
-                        >
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Names</TableCell>
-                              <TableCell>Read</TableCell>
-                              <TableCell>Create</TableCell>
-                              <TableCell>Update</TableCell>
-                              <TableCell>Delete</TableCell>
-                            </TableRow>
-                          </TableHead>
-
-                          <TableBody>
-                            <RoleEngine
-                              field={unionRoleData ? unionRoleData.field : []}
-                              resource={unionRoleData ? unionRoleData.resource : []}
-                              isDisable={true}
-                            />
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </BoxWithBorder>
-                  </Grid>
-                </Grid>
-              </Box>
-
-              {
-                user?.user?.permissions?.doaSetup && <>
-                  <Box style={{ padding: "0px" }}>
-                    <Box display="flex" padding={1}>
-                      <Grid container>
-                        <Grid item xs={8}>
-                          <Box display="flex">
-                            <Box padding="5px">
-                              <Typography variant="subtitle2">
-                                {"DOA Details of " +
-                                  userData?.firstName +
-                                  " " +
-                                  userData?.lastName}
-                              </Typography>
-                            </Box>
                           </Box>
-                        </Grid>
-                        <Grid item container xs={4} justify="flex-end">
-                          {permissions.user.isUpdate && (
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => setDoaDialogOpen(true)}
-                            >
-                              {doa.length > 0 ? "Edit DOA" : "Add DOA"}
-                            </Button>
-                          )}
-                        </Grid>
+                        </Box>
                       </Grid>
-                    </Box>
+                      <Grid item xs={4} container justify="flex-end">
+                        {permissions.user.isUpdate && (
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenDialog}
+                          >
+                            <ControlPoint />
+                          </IconButton>
+                        )}
+                      </Grid>
+                    </Grid>
                   </Box>
+
                   <Grid container style={{ padding: "8px" }} spacing={1}>
-                    <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={12} md={4}>
                       <BoxWithBorder
                         style={{
                           padding: "0px",
+                          height: "352px",
                         }}
                       >
-                        {doa.length > 0 ? (
-                          <NewStepper
-                            heading={" "}
-                            steps={doa}
-                            doaCurrency={doaCurrency}
-                          />
-                        ) : (
+                        {rolesLoading ? (
+                          [1, 2].map((i) => (
+                            <BoxWithBorder
+                              key={i}
+                              style={{ padding: "0px", margin: "8px" }}
+                            >
+                              <Box padding={1}>
+                                <Skeleton
+                                  variant="text"
+                                  width="100px"
+                                  height="20px"
+                                />
+                                <Box marginTop={1} />
+                                <Skeleton variant="text" width="100%" height="15px" />
+                              </Box>
+                            </BoxWithBorder>
+                          ))
+                        ) : !globalRoles.length ? (
                           <Box textAlign="center" marginTop={2}>
                             <Typography variant="body2">
-                              User doesn't have any DOA
-                    </Typography>
+                              User doesn't have any roles
+                      </Typography>
+                          </Box>
+                        ) : (
+                          <Box
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              overflowY: "auto",
+                            }}
+                          >
+                            {userData && (
+                              <UserRoles
+                                permissions={permissions}
+                                data={globalRoles}
+                                unassignRole={handleUnassignRole}
+                                loggedInUser={user?.user}
+                                currentUserId={id}
+
+                              />
+                            )}
                           </Box>
                         )}
                       </BoxWithBorder>
                     </Grid>
+                    <Grid item xs={12} sm={12} md={8} lg={8}>
+                      <BoxWithBorder
+                        style={{
+                          padding: "0px",
+                          height: "352px",
+                        }}
+                      >
+                        <RoleEngine
+                          field={unionRoleData ? unionRoleData.field : []}
+                          resource={unionRoleData ? unionRoleData.resource : []}
+                          isDisable={true}
+                        />
+                      </BoxWithBorder>
+                    </Grid>
                   </Grid>
-                </>
-              }
-              <OpportunityAccordionInUserDetail
-                opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <LeadAccordionInUserDetailPage
-                leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <AccountAccordionDetail
-                type="customer"
-                accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <AccountAccordionDetail
-                type="supplier"
-                accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <ContactAccordionInDetailPage
-                type="customer"
-                contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <ContactAccordionInDetailPage
-                type="supplier"
-                contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
+                </Box>
+
+                {
+                  user?.user?.permissions?.doaSetup && <>
+                    <Box style={{ padding: "0px" }}>
+                      <Box display="flex" padding={1}>
+                        <Grid container>
+                          <Grid item xs={8}>
+                            <Box display="flex">
+                              <Box padding="5px">
+                                <Typography variant="subtitle2">
+                                  {"DOA Details of " +
+                                    userData?.firstName +
+                                    " " +
+                                    userData?.lastName}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Grid>
+                          <Grid item container xs={4} justify="flex-end">
+                            {permissions.user.isUpdate && (
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={() => setDoaDialogOpen(true)}
+                              >
+                                {doa.length > 0 ? "Edit DOA" : "Add DOA"}
+                              </Button>
+                            )}
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    </Box>
+                    <Grid container style={{ padding: "8px" }} spacing={1}>
+                      <Grid item xs={12} sm={12}>
+                        <BoxWithBorder
+                          style={{
+                            padding: "0px",
+                          }}
+                        >
+                          {doa.length > 0 ? (
+                            <NewStepper
+                              heading={" "}
+                              steps={doa}
+                              doaCurrency={doaCurrency}
+                            />
+                          ) : (
+                            <Box textAlign="center" marginTop={2}>
+                              <Typography variant="body2">
+                                User doesn't have any DOA
+                    </Typography>
+                            </Box>
+                          )}
+                        </BoxWithBorder>
+                      </Grid>
+                    </Grid>
+                  </>
+                }
+                <OpportunityAccordionInUserDetail
+                  opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <LeadAccordionInUserDetailPage
+                  leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <AccountAccordionDetail
+                  type="customer"
+                  accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <AccountAccordionDetail
+                  type="supplier"
+                  accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={2}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <ContactAccordionInDetailPage
+                  type="customer"
+                  contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={2}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <ContactAccordionInDetailPage
+                  type="supplier"
+                  contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={2}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>

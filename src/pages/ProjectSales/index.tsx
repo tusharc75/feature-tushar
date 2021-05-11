@@ -1,5 +1,11 @@
 import { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Link as MuiLink } from "@material-ui/core";
+import {
+  Checkbox,
+  Link as MuiLink,
+  Tooltip,
+  IconButton,
+} from "@material-ui/core";
+import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
@@ -9,7 +15,7 @@ import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import ProjectStrategyHeader from "./Header";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
@@ -17,18 +23,19 @@ import { useData } from "../../StateProvider/Provider";
 import CreateProjectStrategy from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 
 const ProjectSales: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions },
+    state: { user, permissions },
   }: any = useData();
 
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +58,7 @@ const ProjectSales: FC = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
+        setProjects(data);
         getRows(data);
         setRowCount(count);
         setCheckAllProjects(false);
@@ -189,6 +197,42 @@ const ProjectSales: FC = () => {
       sortable: false,
       filterable: false,
     },
+    {
+      field: "actions",
+      headerName: "Actions ",
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: any) => {
+        const data = projects?.find((p) => params.row.id === p._id);
+
+        return (
+          <>
+            {permissions?.projectSales.isDelete &&
+            data?.projectManager.optionValue === user.user._id ? (
+              <Tooltip title="Delete">
+                <IconButton
+                  aria-label="Delete"
+                  onClick={() => showConfirmBox(params.row)}
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                className="cursor-stop"
+                title="You do not have permission to delete"
+              >
+                <IconButton aria-label="Delete">
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+          </>
+        );
+      },
+      width: 200,
+    },
   ];
 
   const updateCheckedStatus = (params, ev) => {
@@ -210,8 +254,25 @@ const ProjectSales: FC = () => {
   };
 
   const showConfirmBox = (row) => {
-    setIsConformDialogVisible(true);
+    if (row === null) {
+      if (permissions?.projectSales.isDelete) {
+        const selectedData = projects.filter(
+          (p) => selectedProjects.filter((sp) => sp === p._id).length > 0
+        );
+        const myData = selectedData.filter(
+          (s) => s.projectManager.optionValue === user.user._id
+        );
+
+        if (selectedProjects.length != myData.length) {
+          setShowDeleteWarningConfirmBox(true);
+        } else {
+          setIsConformDialogVisible(true);
+        }
+      }
+    }
+
     if (row && row.id) {
+      setIsConformDialogVisible(true);
       setDeleteRec(row);
     }
   };
@@ -327,7 +388,7 @@ const ProjectSales: FC = () => {
             <ProjectStrategyHeader
               onSearch={handleSearch}
               searchVal={searchVal}
-              permissions={permissions}
+              permissions={permissions?.projectSales}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
@@ -336,7 +397,7 @@ const ProjectSales: FC = () => {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingProjects}

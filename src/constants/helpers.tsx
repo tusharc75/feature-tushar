@@ -59,6 +59,10 @@ export const opportunityProcessFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
+export const localStorageKeys = {
+  currentSelectedRoleType: "currentSelectedRoleType",
+}
+
 export const sidebarResource = {
   brand: "Brand",
   role: "Role",
@@ -536,7 +540,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   );
 
   if (!currencyData) {
-    return `$ ${amount}`;
+    return amount;
   }
 
   const language = navigator.language.split("-")[0];

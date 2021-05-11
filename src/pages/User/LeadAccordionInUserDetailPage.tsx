@@ -41,8 +41,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "#e4e4e4",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",
+        fontWeight: "bold",
+        padding: "0px",
         "&$expanded": {
             minHeight: 46,
         },
@@ -119,7 +122,7 @@ export default function LeadAccordionInUserDetailPage({
 
     }, [leads])
     return <>
-        <Accordion expanded={expandLead}>
+        <Accordion expanded={expandLead} className="omsAccordian accordLead">
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -160,10 +163,8 @@ export default function LeadAccordionInUserDetailPage({
                             }
                         </Typography>
                     </Grid>
-
                 </Grid>
             </AccordionSummary>
-            <Box margin={0.50} />
             <AccordionDetails>
                 <>
                     {
@@ -174,30 +175,22 @@ export default function LeadAccordionInUserDetailPage({
                                         {
                                             leads.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card className="accountCard">
+                                                    <Card>
                                                         <CardContent className="detailListing">
-
-                                                                <Grid item xs={12} sm={8}>
-                                                                    <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
-                                                                        <Typography >{obj?.firstName}  {obj?.lastName} </Typography>
-                                                                    </Link>
-                                                                </Grid>
-                                                            
-
+                                                            <Grid item xs={12} sm={12}>
+                                                                <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
+                                                                    <Typography className="detailName">{obj?.firstName}  {obj?.lastName} </Typography>
+                                                                </Link>
+                                                            </Grid>
                                                             <Grid container>
-                                                                <Grid item xs={12} sm={12}>
+                                                                <Grid item xs={12} sm={6} md={6}>
                                                                     {
-                                                                        obj?.firstName ? <DisplayData label='Name' icon={<HiOutlineUser size={20}/>} value={[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} /> : ''
+                                                                       obj?.company ? <DisplayData label='Company' icon={<BsBuilding size={15} />} value={obj?.company ?? ''} /> : ''
                                                                     }
                                                                 </Grid>
-                                                                <Grid item xs={12} sm={12}>
+                                                                <Grid item xs={12} sm={6} md={6}>
                                                                     {
-                                                                        obj?.status ? <DisplayData label='Status' icon={<BiCustomize size={20}/>} value={obj?.status ?? ''} /> : ''
-                                                                    }
-                                                                </Grid>
-                                                                <Grid item xs={12} sm={12}>
-                                                                    {
-                                                                        obj?.company ? <DisplayData label='Company' icon={<BsBuilding size={20}/>} value={obj?.company ?? ''} /> : ''
+                                                                       obj?.status ? <DisplayData label='Status' icon={<BiCustomize size={15} />} value={obj?.status ?? ''} /> : ''
                                                                     }
                                                                 </Grid>
                                                             </Grid>
@@ -222,7 +215,6 @@ export default function LeadAccordionInUserDetailPage({
                     <FaEye /> View All
                 </Box>
             }
-            <Box margin={1} />
         </Accordion>
 
         {

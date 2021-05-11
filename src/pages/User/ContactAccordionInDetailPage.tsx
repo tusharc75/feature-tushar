@@ -46,8 +46,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "#e4e4e4",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",       
+        fontWeight: "bold",
+        padding:"0px",
         "&$expanded": {
             minHeight: 46,
         },
@@ -134,7 +137,7 @@ export default function ContactAccordionInDetailPage({
 
     }, [contacts])
     return <>
-        <Accordion expanded={expandContact}>
+        <Accordion expanded={expandContact} className="omsAccordian accordContact">
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -178,7 +181,6 @@ export default function ContactAccordionInDetailPage({
 
                 </Grid>
             </AccordionSummary>
-            <Box margin={0.50} />
             <AccordionDetails>
                 <>
                     {
@@ -247,9 +249,7 @@ export default function ContactAccordionInDetailPage({
                     <FaEye /> View All
                 </Box>
             }
-            <Box margin={1} />
         </Accordion>
-
         {
             showCreateContactDialog && <ManageContactDialog
                 open={showCreateContactDialog}

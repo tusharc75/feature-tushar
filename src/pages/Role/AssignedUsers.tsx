@@ -54,7 +54,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                   />
                 </div>
 
-                <CopyToClipboard textToCopy={obj.email} className="mt-4" />
+                <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
                 {permissions.role.isUpdate && (
                   <ListItemSecondaryAction
                     title={

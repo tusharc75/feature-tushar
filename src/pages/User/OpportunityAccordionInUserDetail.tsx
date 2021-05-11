@@ -39,8 +39,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "#e4e4e4",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",       
+        fontWeight: "bold",
+        padding:"0px",
         "&$expanded": {
             minHeight: 46,
         },
@@ -48,6 +51,7 @@ const AccordionSummary = withStyles({
     content: {
         "&$expanded": {
             margin: "12px 0",
+            
         },
     },
     expanded: {},
@@ -61,10 +65,10 @@ const AccordionDetails = withStyles((theme) => ({
 
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value, icon }) {
+function DisplayData({ key, label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <List >
-            <ListItem>
+        <List>
+            <ListItem key={key}>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
@@ -115,14 +119,14 @@ export default function OpportunityAccordionInUserDetail({
 
     }, [opportunities])
     return <>
-        <Accordion expanded={expandOpportunity}>
+        <Accordion expanded={expandOpportunity} className="omsAccordian accordOpportunity">
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
             >
                 <Grid container>
                     <Grid item xs={8}>
-                        <Box display="flex">
+                        <Box display="flex" alignItems="center">
                             <Box>
                                 <IconButton
                                     size="small"
@@ -158,7 +162,6 @@ export default function OpportunityAccordionInUserDetail({
                     </Grid>
                 </Grid>
             </AccordionSummary>
-            <Box margin={0.50} />
             <AccordionDetails>
                 <>
                     {
@@ -169,15 +172,15 @@ export default function OpportunityAccordionInUserDetail({
                                         {
                                             opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card className="accountCard" >
+                                                    <Card>
                                                         <CardContent className="detailListing">
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={8}>
                                                                     {
                                                                         obj.entity === selectedEntity ? <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
-                                                                            <Typography>{obj?.opportunityName}</Typography>
+                                                                            <Typography className="detailName">{obj?.opportunityName}</Typography>
                                                                         </Link> : <span className="d-flex gap-2 align-items-center">
-                                                                            <Typography>{obj.opportunityName}</Typography> <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
+                                                                            <Typography className="detailName">{obj.opportunityName}</Typography> <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
                                                                                 <InfoOutlinedIcon fontSize="small" />
                                                                             </Tooltip>
                                                                         </span>
@@ -191,14 +194,14 @@ export default function OpportunityAccordionInUserDetail({
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
-                                                                <Grid item xs={12} sm={12}>
+                                                                <Grid item xs={12} sm={6} md={6}>
                                                                     {
-                                                                        obj?.stage ? <DisplayData label='Stage' value={obj?.stage ?? ''} icon={<BiCustomize size={20} />} /> : ''
+                                                                        obj?.stage ? <DisplayData key={index} label='Stage' value={obj?.stage ?? ''} icon={<BiCustomize size={15} />} /> : ''
                                                                     }
                                                                 </Grid>
-                                                                <Grid item xs={12} sm={12}>
+                                                                <Grid item xs={12} sm={6} md={6}>
                                                                     {
-                                                                        obj.closeDate ? <DisplayData label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={20} />} /> : ''
+                                                                        obj.closeDate ? <DisplayData key={index} label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={15} />} /> : ''
                                                                     }
                                                                 </Grid>
                                                             </Grid>
@@ -222,7 +225,6 @@ export default function OpportunityAccordionInUserDetail({
                     <FaEye /> View All
                 </Box>
             }
-            <Box margin={1} />
         </Accordion>
 
         {

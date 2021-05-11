@@ -29,6 +29,13 @@
   --lightgrey: lightgrey;
 
   --box-shadow: "rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px";
+
+
+  --colorOpportunity : #d46101;
+  --colorLeads : #1e7e34;
+  --colorContact : #003f57;
+  --colorAccount : red;
+  --colorProject : yellow;
 }
 
 * {
@@ -374,9 +381,9 @@ body::-webkit-scrollbar-thumb {
 }
 
 .subContainer{
-  height: calc(100vh - 116px);
   overflow-y: auto;
   overflow-x: hidden;
+  height: calc(100vh - 116px);
 }
 
 .badge-date {
@@ -517,14 +524,13 @@ body::-webkit-scrollbar-thumb {
 }
 
 .detailCardHeader {
-  // border-bottom: 1px solid #e9e9e9;
+  align-items: center;
   padding: 0 0 6px 0px;
 }
 
 .amount {
   font-weight: 500 !important;
   float: right;
-  color: #514f4f !important;
   font-size: 1rem !important;
   line-height: 1.5rem !important;
 }
@@ -533,6 +539,15 @@ body::-webkit-scrollbar-thumb {
   table {
     border-collapse: collapse;
   }
+  & thead {
+    & tr {
+      border-bottom: 1px solid #e4e4e4;
+      & th {
+        padding: 0px 15px !important;
+      }
+    }
+  }
+
   & tbody {
     & tr {
       border-bottom: 1px solid #e4e4e4;

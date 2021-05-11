@@ -23,7 +23,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "../../components/CustomContainer";
 import styles from "./terms.module.scss"
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import CustomHeader from '../../components/Helpers/CustomHeader'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -31,7 +31,7 @@ import { getSearchQuery } from '../../services/util';
 import { termsAndCondition } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import _ from 'lodash'
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import { IoDocumentTextOutline } from 'react-icons/io5'; 
 
 
@@ -358,7 +358,7 @@ export default function TermsAndCondition(props) {
                         <div className="listing-grid">
                             <DataGrid
                                 components={{
-                                    Toolbar: DataGridCustomToolbar,
+                                    Toolbar: CustomDataGridToolbar,
                                     NoRowsOverlay: CustomDataGridNoDataFound,
                                 }}
                                 scrollbarSize={20}

@@ -2,7 +2,7 @@ import React from "react";
 import { DataGrid } from "@material-ui/data-grid";
 import { Box, Button, TextField, InputAdornment } from "@material-ui/core";
 import { Add, Search } from "@material-ui/icons";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 
 const UserRoles = ({ brand }) => {
   const columns = [

@@ -45,8 +45,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "#e4e4e4",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",       
+        fontWeight: "bold",
+        padding:"0px",
         "&$expanded": {
             minHeight: 46,
         },
@@ -128,7 +131,7 @@ export default function AccountAccordionDetail({
 
     }, [accounts])
     return <>
-        <Accordion expanded={expandAccount}>
+        <Accordion expanded={expandAccount} className="omsAccordian accordAccount">
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -172,7 +175,6 @@ export default function AccountAccordionDetail({
 
                 </Grid>
             </AccordionSummary>
-            <Box margin={0.50} />
             <AccordionDetails>
                 <>
                     {
@@ -183,25 +185,25 @@ export default function AccountAccordionDetail({
                                         {
                                             accounts.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card className="accountCard">
+                                                    <Card>
                                                         <CardContent className="detailListing">
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={12}>
                                                                     <Link className="link" to={type === "customer" ? `${routes.customerAccountDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
-                                                                        <Typography >{obj?.accountName} </Typography>
+                                                                        <Typography className="detailName">{obj?.accountName} </Typography>
                                                                     </Link>
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
                                                                 <Grid container>
-                                                                    <Grid item xs={12} sm={12}>
+                                                                    <Grid item xs={12} sm={6}>
                                                                         {
-                                                                            obj?.industry ? <DisplayData icon={<FaIndustry size={20} />} label='Industry' value={obj?.industry ?? ''} /> : ''
+                                                                            obj?.industry ? <DisplayData icon={<FaIndustry size={15} />} label='Industry' value={obj?.industry ?? ''} /> : ''
                                                                         }
                                                                     </Grid>
-                                                                    <Grid item xs={12} sm={12}>
+                                                                    <Grid item xs={12} sm={6}>
                                                                         {
-                                                                            obj?.phone ? <DisplayData showCopyToText={true} icon={<AiOutlinePhone size={20} />} label='Phone' value={obj?.phone ?? ''} /> : ''
+                                                                            obj?.phone ? <DisplayData showCopyToText={true} icon={<AiOutlinePhone size={15} />} label='Phone' value={obj?.phone ?? ''} /> : ''
                                                                         }
                                                                     </Grid>
 
@@ -227,7 +229,6 @@ export default function AccountAccordionDetail({
                     <FaEye /> View All
                 </Box>
             }
-            <Box margin={1} />
         </Accordion>
         {
             showCreateAccountDialog && <ManageAccountDialog
