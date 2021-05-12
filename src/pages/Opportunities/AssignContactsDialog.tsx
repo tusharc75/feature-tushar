@@ -27,7 +27,8 @@ export default function AssignContactsDialog({
     // roleIds,
     contacts,
     assignedContacts,
-    contactType
+    contactType,
+    notToBeRemovedContacts
 }) {
     const toastConfig = useContext(CustomToastContext);
     const [loadingUsers, setLoadingUsers] = useState(false);
@@ -35,19 +36,12 @@ export default function AssignContactsDialog({
 
     const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
 
-    useEffect(() => {
-        const updatedContacts = [];
-        currentContacts.map(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
-            updatedContacts.push(d);
-        })
-        setCurrentContacts(updatedContacts)
-    }, []);
-
     const handleContactSelection = (e, id) => {
-        const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
-        currentContacts[indexOfContactToChange].isChecked = e.target.checked;
-        setCurrentContacts([...currentContacts]);
+        if (notToBeRemovedContacts.indexOf(id) < 0) {
+            const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
+            currentContacts[indexOfContactToChange].isChecked = e.target.checked;
+            setCurrentContacts([...currentContacts]);
+        }
     };
 
     const getFilteredIds = (data) => {

@@ -51,8 +51,8 @@ export default function AssignSupplierContactsDialog({
         return (contacts && contacts?.[fieldKey] && contacts[fieldKey].length)
     }
     const handleAssignContacts = async () => {
-        setAssigning(true);
 
+        setAssigning(true);
         const dataToSave = {
             _id: opportunityId,
             supplierContacts: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
