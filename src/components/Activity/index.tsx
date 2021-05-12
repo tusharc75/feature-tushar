@@ -25,7 +25,7 @@ import { HiOutlineMail } from "react-icons/hi";
 import { FiPlusSquare } from "react-icons/fi";
 import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Tooltip } from '@material-ui/core'
-import AddAttachment from './Attachments/ManageAttachment'
+import ManageAttachment from './Attachments/ManageAttachment'
 import Attachments from './Attachments/index'
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -172,13 +172,7 @@ const Activity = (props) => {
                     color="primary"
                     size="small"
                     onClick={(event) => handleCreateActivity(event, data)}
-                  >
-                    {
-                      data === "Attachment" ?
-                        <Tooltip title="Upload File">
-                          <FiPlusSquare />
-                        </Tooltip> : <FiPlusSquare />
-                    }
+                  > <FiPlusSquare />
                   </IconButton>
                 </Grid>
               </Grid>
@@ -270,7 +264,7 @@ const Activity = (props) => {
         ) : null}
         {
           type === "Attachment" ? (
-            <AddAttachment
+            <ManageAttachment
               attachmentId={null}
               handleClose={handleClose}
               relatedTo={relatedTo}

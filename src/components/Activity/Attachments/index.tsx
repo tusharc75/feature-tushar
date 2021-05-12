@@ -12,8 +12,9 @@ import { ViewAll } from '../Helpers/ViewAll'
 import ManageAttachment from "./ManageAttachment"
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import ActivityLoader from "../../Helpers/ActivityLoader";
 
-export default function Attachment({ relatedTo, handleActivityRefresh }) {
+export default function Attachments({ relatedTo, handleActivityRefresh }) {
 
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
@@ -29,8 +30,9 @@ export default function Attachment({ relatedTo, handleActivityRefresh }) {
 
     const fetchAttachment = async () => {
         setLoading(true);
-        axiosInstance().get(`/attachment`)
-            .then(({ data }) => {
+        let api = `/attachment?relatedTo=${JSON.stringify(relatedTo)}`
+        axiosInstance().get(api)
+            .then(({ data: { data } }) => {
                 setLoading(false);
                 setAttachments(data)
             })
@@ -82,64 +84,68 @@ export default function Attachment({ relatedTo, handleActivityRefresh }) {
         if (attachmentData && attachmentData?._id) setAttachmentData(null)
         handleActivityRefresh()
     }
-    return (attachments &&
-        <Box className="activityDetailBox">
-            {attachments.length ?
-                <Fragment>
-                    {attachments.map((_attachment, index) => (
-                        <Box key={_attachment._id} className="activity">
-                            <Box>
-                                <Grid container>
-                                    <Grid item xs={10} className="d-flex align-items-center gap-1">
-                                        <Typography variant="subtitle2">{_attachment?.name ?? ''}</Typography>
-                                    </Grid>
-                                    <Grid item xs={2} container justify="flex-end" >
-                                        <IconButton size="small" color="primary" aria-label="delete"
-                                            onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)} >
-                                            <MoreHorizIcon />
-                                        </IconButton>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                            <Box pt={1}>
-                                <Grid container>
-                                    <Grid item xs={12} >
-                                        <ListRelatedTo relatedTo={_attachment.relatedTo} originRelatedTo={relatedTo} />
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        </Box>))}
-                    <ViewAll
-                        type="attachment"
-                        relatedTo={relatedTo}
-                    />
-                </Fragment>
-                : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
-                    <Typography variant="subtitle2">No Past Attachment</Typography>
-                </Box>
-            }
-            <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleCloseMenu}
-            >
-                <MenuItem onClick={handleEdit} >View</MenuItem>
-                <MenuItem onClick={handleDelete} >Delete</MenuItem>
-            </Menu>
-            <Dialog
-                open={open}
-                aria-labelledby="customized-dialog-title"
-                maxWidth="md"
-                onClose={handleClose}
-                fullWidth>
-                <ManageAttachment
-                    attachmentId={attachmentId}
-                    attachmentData={attachmentData}
-                    handleClose={handleClose}
-                    relatedTo={relatedTo} />
-            </Dialog>
-        </Box>
-    );
+    return <Box className="activityDetailBox">
+        {
+            loading ? <ActivityLoader /> :
+                attachments &&
+                <>
+                    {attachments.length ?
+                        <Fragment>
+                            {attachments.map((_attachment, index) => (
+                                <Box key={_attachment._id} className="activity">
+                                    <Box>
+                                        <Grid container>
+                                            <Grid item xs={10} className="d-flex align-items-center gap-1">
+                                                <Typography variant="subtitle2">{_attachment?.name ?? ''}</Typography>
+                                            </Grid>
+                                            <Grid item xs={2} container justify="flex-end" >
+                                                <IconButton size="small" color="primary" aria-label="delete"
+                                                    onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)} >
+                                                    <MoreHorizIcon />
+                                                </IconButton>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                    <Box pt={1}>
+                                        <Grid container>
+                                            <Grid item xs={12} >
+                                                <ListRelatedTo relatedTo={_attachment.relatedTo} originRelatedTo={relatedTo} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                </Box>))}
+                            <ViewAll
+                                type="attachment"
+                                relatedTo={relatedTo}
+                            />
+                        </Fragment>
+                        : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
+                            <Typography variant="subtitle2">No Past Attachment</Typography>
+                        </Box>
+                    }
+                    <Menu
+                        id="simple-menu"
+                        anchorEl={anchorEl}
+                        keepMounted
+                        open={Boolean(anchorEl)}
+                        onClose={handleCloseMenu}
+                    >
+                        <MenuItem onClick={handleEdit} >Edit</MenuItem>
+                        <MenuItem onClick={handleDelete} >Delete</MenuItem>
+                    </Menu>
+                    <Dialog
+                        open={open}
+                        aria-labelledby="customized-dialog-title"
+                        maxWidth="md"
+                        onClose={handleClose}
+                        fullWidth>
+                        <ManageAttachment
+                            attachmentId={attachmentId}
+                            attachmentData={attachmentData}
+                            handleClose={handleClose}
+                            relatedTo={relatedTo} />
+                    </Dialog>
+                </>
+        }
+    </Box>
 }

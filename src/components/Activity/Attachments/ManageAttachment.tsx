@@ -15,8 +15,8 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import TextField from '@material-ui/core/TextField';
 
 const AttachmentSchema = Yup.object().shape({
-    name: Yup.string().required("please add file name"),
-    fileUrl: Yup.string().required("please upload file"),
+    name: Yup.string().required("please add attachment name"),
+    fileUrl: Yup.string().required("please upload attachment"),
 });
 
 export default function ManageAttachment({ relatedTo, attachmentId, handleClose, attachmentData = null }) {
@@ -131,8 +131,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         type="button" color="primary"
                         disabled={loading}
                         loading={loading}
-                        variant="contained" onClick={submitForm}
-                    />
+                        variant="contained" onClick={submitForm}>Save</CustomButton>
                     {/* <Button type="button" color="primary"
                         disabled={loading}
                         variant="contained" onClick={submitForm}>Save </Button> */}
