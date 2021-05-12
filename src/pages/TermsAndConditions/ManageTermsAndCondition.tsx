@@ -146,8 +146,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         isTooltip={true}
                                                         required={false}
                                                         type="fileUpload"
-                                                        accept="application/msword,
-                                                                application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                                        accept=".doc, .docs, .docx"
                                                         values={values}
                                                         errors={errors}
                                                         touched={touched}
