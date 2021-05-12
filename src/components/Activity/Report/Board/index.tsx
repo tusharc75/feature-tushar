@@ -11,10 +11,11 @@ import { GetBoard } from "../../../../axios/activity";
 import Loader from "../../../../components/Loader";
 import { BoardList } from "./BoardList";
 import axiosInstance from "../../../../axios/axiosInstance";
+import { getBordActionUrl } from "../../../../services/util";
 
 const Board = ({ type, filter, activityId }) => {
   const [activities, setActivities] = useState(null);
-
+  const {update:updateUrl} = getBordActionUrl(type);
   useEffect(() => {
     fetchBoard();
   }, [filter, activityId]);
@@ -47,7 +48,7 @@ const Board = ({ type, filter, activityId }) => {
 
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
-      .put(`activity/field/${id}`, { status: updatedData.status })
+      .put(`${updateUrl}${id}`, { status: updatedData.status })
       .then(({ data }) => {
         console.log(data);
       })
