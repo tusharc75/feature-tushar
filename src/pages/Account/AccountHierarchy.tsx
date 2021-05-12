@@ -80,7 +80,7 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
                     columns={columns}
                     options={options}
                 /> :
-                    <Box margin={10}>
+                    <Box margin={1}>
                         <MaterialTable
                             icons={materialTableIcons}
                             data={data}
