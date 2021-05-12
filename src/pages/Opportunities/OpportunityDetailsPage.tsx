@@ -13,7 +13,6 @@ import routes from "../../components/Helpers/Routes";
 import { useData } from "../../StateProvider/Provider";
 import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
@@ -30,7 +29,6 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import currencies from "../../constants/currency_with_country.json";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
-import { stringify } from "query-string";
 
 const recordsPerLine = 2
 function OpportunityDetailsPage() {
@@ -653,7 +651,10 @@ function OpportunityDetailsPage() {
             title="Assign Supplier Contacts"
             onSuccess={() => { fetchOpportunityData(); setShowAddSupplierContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddSupplierContactsDialog(false) }}
-            contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
+            contacts={{
+              supplierContacts: supplierContacts, customerContacts: customerContacts,
+              notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
+            }}
             contactType="supplier"
             supplierAccountOptions={supplierAccountOptions}
             onGetSupplierAccountsContacts={fetchSupplierContactData}
@@ -672,7 +673,10 @@ function OpportunityDetailsPage() {
             title="Assign Customer Contacts"
             onSuccess={() => { fetchOpportunityData(); setShowAddCustomerContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddCustomerContactsDialog(false) }}
-            contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
+            contacts={{
+              supplierContacts: supplierContacts, customerContacts: customerContacts,
+              notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
+            }}
             assignedContacts={opportunityData.staticData?.customerContacts ?? []}
             contactType="customer"
             notToBeRemovedContacts={notToBeRemovedContacts}
