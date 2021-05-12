@@ -50,13 +50,15 @@ export default function AssignSupplierContactsDialog({
     const isDataAvailable = (fieldKey) => {
         return (contacts && contacts?.[fieldKey] && contacts[fieldKey].length)
     }
-    const handleAssignContacts = async () => {
-        setAssigning(true);
 
+    const handleAssignContacts = async () => {
+
+        setAssigning(true);
         const dataToSave = {
             _id: opportunityId,
             supplierContacts: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
-            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : []
+            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
+            notToBeRemoved: contacts && contacts?.notToBeRemoved ? contacts.notToBeRemoved : null
         };
 
         await axiosInstance()
