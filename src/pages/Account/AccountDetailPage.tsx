@@ -49,6 +49,7 @@ import { BsPerson } from 'react-icons/bs'
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
+import _ from 'lodash'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -421,7 +422,7 @@ export default function AccountDetailPage(props) {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8} >
             <Paper>
               {
                 <DetailsPageHeader
@@ -566,6 +567,13 @@ export default function AccountDetailPage(props) {
                           },
                         ]}
                         handleActivityRefresh={() => { }}
+                        emails={
+                          relatedContacts && relatedContacts.length > 0 ?
+                            _.cloneDeep(relatedContacts).reduce((emails, contact) => {
+                              if (contact?.email) emails.push(contact.email)
+                              return emails
+                            }, []) : []
+                        }
                       />
                     </div>
                   )}

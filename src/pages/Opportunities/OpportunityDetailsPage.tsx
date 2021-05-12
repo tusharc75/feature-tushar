@@ -13,7 +13,6 @@ import routes from "../../components/Helpers/Routes";
 import { useData } from "../../StateProvider/Provider";
 import Activity from "../../components/Activity";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import moment from "moment";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
@@ -30,7 +29,6 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import currencies from "../../constants/currency_with_country.json";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
-import { stringify } from "query-string";
 
 const recordsPerLine = 2
 function OpportunityDetailsPage() {
@@ -69,6 +67,8 @@ function OpportunityDetailsPage() {
   })
   const [supplierAccountOptions, setSupplierAccountOptions] = useState([])
   const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
+  const [contactsEmailsData, setContactsEmailsData] = useState([])
+  const [notToBeRemovedContacts, setNotToBeRemovedContacts] = useState([])
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -101,6 +101,17 @@ function OpportunityDetailsPage() {
   }, [id]);
 
   useEffect(() => {
+    if (opportunityData?.staticData?.customerContacts &&
+      opportunityData.staticData?.customerContacts.length &&
+      customerContacts && customerContacts.length === 0) fetchCustomerContactData(false)
+
+    if (opportunityData?.staticData?.supplierContacts &&
+      opportunityData.staticData?.supplierContacts.length &&
+      supplierContacts && supplierContacts.length === 0) fetchSupplierContactData(false)
+
+  }, [opportunityData])
+
+  useEffect(() => {
     if (steps.length > 0) {
       const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == opportunityProcessFieldName.toLowerCase());
       if (processSteps && processSteps.isRead && opportunityData) {
@@ -122,6 +133,15 @@ function OpportunityDetailsPage() {
           setHeadingLbl(data.opportunityName);
           handleAllowToEditList(data);
           setCopyOfOpportunityDataToUpdate(data);
+          handleContactsEmails(data)
+
+          if (data?.staticData?.notToBeRemoved && typeof data.staticData.notToBeRemoved === 'object') {
+            let ids = []
+            Object.keys(data?.staticData?.notToBeRemoved).map(k =>
+              ids = [...ids, ...data.staticData.notToBeRemoved[k]]
+            )
+            setNotToBeRemovedContacts(ids)
+          }
 
           let modifiedData = {};
           Object.assign(modifiedData, data);
@@ -160,6 +180,7 @@ function OpportunityDetailsPage() {
 
   const fetchSupplierContactData = (showDialog, useAccountList = false, accountList = []) => {
     let ids = []
+
     if (opportunityData.supplierAccountName.length > 0 || useAccountList) {
 
       ids = useAccountList ? accountList.map(d => d.optionValue) : opportunityData.supplierAccountName.map(d => d.optionValue);
@@ -190,20 +211,46 @@ function OpportunityDetailsPage() {
     //   ids = [...supplierAccountOptions.map(option => option.optionValue)]
     // }
   }
+  const getContactEmails = (contacts) => {
+    return contacts.reduce((emails, contact) => {
+      if (contact?.email) emails.push(contact.email)
+      return emails
+    }, [])
+  }
+  const handleContactsEmails = (opportunityData) => {
+    let data = []
+    if (opportunityData && opportunityData?.staticData) {
+      const { customerContacts, supplierContacts } = opportunityData?.staticData
+      if (customerContacts && customerContacts.length) {
+        data = getContactEmails(customerContacts)
+      }
+      if (supplierContacts && supplierContacts.length) {
+        data = [...data, ...getContactEmails(supplierContacts)]
+      }
+      if (data.length > 0) setContactsEmailsData(data)
+    }
+  }
 
   const handleContactSelection = (e, id) => {
-    const indexOfContactToChange = supplierContacts.findIndex(d => d._id == id);
-    supplierContacts[indexOfContactToChange].isChecked = e.target.checked;
-    setSupplierContacts([...supplierContacts]);
+    if (notToBeRemovedContacts.indexOf(id) < 0) {
+      const indexOfContactToChange = supplierContacts.findIndex(d => d._id == id);
+      supplierContacts[indexOfContactToChange].isChecked = e.target.checked;
+      setSupplierContacts([...supplierContacts]);
+    }
   };
 
   const fetchCustomerContactData = (showDialog) => {
-    const filterById = JSON.stringify([{ "field": "accountName", "term": opportunityData.customerAccountName.optionValue }])
+    const filterById = JSON.stringify([{ "field": "accountName", "term": opportunityData?.customerAccountName?.optionValue }])
 
     axiosInstance()
       .get(`customer-contact?filterById=${filterById}`)
       .then(({ data: { data } }) => {
-        setCustomerContacts(data)
+        let assignedContacts = opportunityData.staticData?.customerContacts ?? []
+        const updatedContacts = data.map(d => {
+          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+          return d
+        })
+        setCustomerContacts(updatedContacts)
         setShowAddCustomerContactsDialog(showDialog);
       });
   }
@@ -212,7 +259,7 @@ function OpportunityDetailsPage() {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
     mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
-    mainPoint["Amount"] = formatAmountWithCurrency(data?.currency, data?.amount);
+    mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount) : "";
     mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
 
     setMainPoints(mainPoint);
@@ -349,7 +396,6 @@ function OpportunityDetailsPage() {
   return (
     <>
       <Layout>
-
         <Grid container direction="row">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
@@ -496,6 +542,7 @@ function OpportunityDetailsPage() {
                           }}
                           contactsRoute={routes.supplierContact.path}
                           recordsPerLine={recordsPerLine}
+
                         />
                       </Box>
                     }
@@ -515,6 +562,7 @@ function OpportunityDetailsPage() {
                           }}
                           contactsRoute={routes.customerContact.path}
                           recordsPerLine={recordsPerLine}
+
                         />
                       </Box>
                     }
@@ -553,6 +601,7 @@ function OpportunityDetailsPage() {
                       },
                     ]}
                     handleActivityRefresh={() => { }}
+                    emails={contactsEmailsData}
                   />
                 </div>
               )}
@@ -602,7 +651,10 @@ function OpportunityDetailsPage() {
             title="Assign Supplier Contacts"
             onSuccess={() => { fetchOpportunityData(); setShowAddSupplierContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddSupplierContactsDialog(false) }}
-            contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
+            contacts={{
+              supplierContacts: supplierContacts, customerContacts: customerContacts,
+              notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
+            }}
             contactType="supplier"
             supplierAccountOptions={supplierAccountOptions}
             onGetSupplierAccountsContacts={fetchSupplierContactData}
@@ -611,7 +663,6 @@ function OpportunityDetailsPage() {
             selectedSupplierAccountsList={selectedSupplierAccounts}
             handleContactSelection={handleContactSelection}
             loadingSupplierAccounts={loadingSupplierAccounts}
-
           />
         }
 
@@ -622,9 +673,13 @@ function OpportunityDetailsPage() {
             title="Assign Customer Contacts"
             onSuccess={() => { fetchOpportunityData(); setShowAddCustomerContactsDialog(false) }}
             handleCloseDialog={() => { setShowAddCustomerContactsDialog(false) }}
-            contacts={{ supplierContacts: supplierContacts, customerContacts: customerContacts }}
+            contacts={{
+              supplierContacts: supplierContacts, customerContacts: customerContacts,
+              notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
+            }}
             assignedContacts={opportunityData.staticData?.customerContacts ?? []}
             contactType="customer"
+            notToBeRemovedContacts={notToBeRemovedContacts}
           />
         }
 
