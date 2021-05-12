@@ -132,9 +132,6 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         disabled={loading}
                         loading={loading}
                         variant="contained" onClick={submitForm}>Save</CustomButton>
-                    {/* <Button type="button" color="primary"
-                        disabled={loading}
-                        variant="contained" onClick={submitForm}>Save </Button> */}
                 </CustomDialogFooter>
             </>
         )}
