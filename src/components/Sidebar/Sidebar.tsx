@@ -11,6 +11,7 @@ import {
   Toolbar,
   Collapse,
   ListItemIcon,
+  Tooltip,
 } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
 import Header from "../Header/Header";
@@ -234,34 +235,38 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         <div>
           <List className="sidebar-list">
             <Link to="/">
-              <ListItem
-                button
-                selected={location.pathname === "/"}
-                className="list-item"
-              >
-                <ListItemIcon>
-                  <MdDashboard size={15} className="sidebar-icon" />
-                </ListItemIcon>
-                <ListItemText primary="Dashboard" />
-              </ListItem>
+              <Tooltip title={!toggleDrawer ? "Dashboard" : ""}>
+                <ListItem
+                  button
+                  selected={location.pathname === "/"}
+                  className="list-item"
+                >
+                  <ListItemIcon>
+                    <MdDashboard size={15} className="sidebar-icon" />
+                  </ListItemIcon>
+                  <ListItemText primary="Dashboard" />
+                </ListItem>
+              </Tooltip>
             </Link>
 
-            <ListItem
-              button
-              className="list-item"
-              onClick={() => {
-                handleCollapse("Activity");
-                if (!toggleDrawer) {
-                  handleToggleDrawer();
-                }
-              }}
-            >
-              <ListItemIcon>
-                <MdLocalActivity size={15} className="sidebar-icon" />
-              </ListItemIcon>
-              <ListItemText primary="Activities" />
-              {open["Activity"] ? <ExpandLess /> : <ExpandMore />}
-            </ListItem>
+            <Tooltip title={!toggleDrawer ? "Activity" : ""}>
+              <ListItem
+                button
+                className="list-item"
+                onClick={() => {
+                  handleCollapse("Activity");
+                  if (!toggleDrawer) {
+                    handleToggleDrawer();
+                  }
+                }}
+              >
+                <ListItemIcon>
+                  <MdLocalActivity size={15} className="sidebar-icon" />
+                </ListItemIcon>
+                <ListItemText primary="Activities" />
+                {open["Activity"] ? <ExpandLess /> : <ExpandMore />}
+              </ListItem>
+            </Tooltip>
             <Collapse in={open["Activity"]} timeout="auto" unmountOnExit>
               <List component="div" disablePadding className="list-item">
                 {activityTabs.map((item, i) => (
@@ -274,7 +279,11 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       button
                       selected={pathnames.includes(_.lowerCase(item))}
                       className={classes.nested}
-                      onClick={toggleDrawer && handleToggleDrawer}
+                      onClick={() => {
+                        if (toggleDrawer) {
+                          handleToggleDrawer();
+                        }
+                      }}
                     >
                       <ListItemText primary={item} />
                     </ListItem>
@@ -286,27 +295,29 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>
-                  <ListItem
-                    className="list-item"
-                    button
-                    key={listItem.section + "" + i}
-                    onClick={() => {
-                      handleCollapse(listItem.section);
-                      if (!toggleDrawer) {
-                        handleToggleDrawer();
-                      }
-                    }}
-                  >
-                    <ListItemIcon>
-                      {
-                        iconMapping.find((mapping) => {
-                          return mapping.key === listItem.section;
-                        })?.icon
-                      }
-                    </ListItemIcon>
-                    <ListItemText primary={listItem.section} />
-                    {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
-                  </ListItem>
+                  <Tooltip title={!toggleDrawer ? listItem.section : ""}>
+                    <ListItem
+                      className="list-item"
+                      button
+                      key={listItem.section + "" + i}
+                      onClick={() => {
+                        handleCollapse(listItem.section);
+                        if (!toggleDrawer) {
+                          handleToggleDrawer();
+                        }
+                      }}
+                    >
+                      <ListItemIcon>
+                        {
+                          iconMapping.find((mapping) => {
+                            return mapping.key === listItem.section;
+                          })?.icon
+                        }
+                      </ListItemIcon>
+                      <ListItemText primary={listItem.section} />
+                      {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
+                    </ListItem>
+                  </Tooltip>
                   <Collapse
                     in={open[listItem.section]}
                     timeout="auto"
