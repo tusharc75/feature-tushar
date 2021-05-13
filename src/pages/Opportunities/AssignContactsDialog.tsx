@@ -37,11 +37,9 @@ export default function AssignContactsDialog({
     const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
 
     const handleContactSelection = (e, id) => {
-        if (notToBeRemovedContacts.indexOf(id) < 0) {
-            const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
-            currentContacts[indexOfContactToChange].isChecked = e.target.checked;
-            setCurrentContacts([...currentContacts]);
-        }
+        const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
+        currentContacts[indexOfContactToChange].isChecked = e.target.checked;
+        setCurrentContacts([...currentContacts]);
     };
 
     const getFilteredIds = (data) => {
@@ -98,6 +96,7 @@ export default function AssignContactsDialog({
                                 <ListItemIcon>
                                     <Checkbox
                                         edge="start"
+                                        disabled={notToBeRemovedContacts.indexOf(contact._id) >= 0 ? true : false}
                                         onChange={(e) => handleContactSelection(e, contact._id)}
                                         checked={contact.isChecked}
                                         inputProps={{
