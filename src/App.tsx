@@ -22,6 +22,7 @@ import Activitydemo from "./pages/Activity/activitydemo";
 import Activity from "./pages/Activity";
 import Note from "./pages/Activity/Note";
 import Email from "./pages/Activity/Email";
+import Attachments from "./pages/Activity/Attachments";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
 import ProductCategory from "./pages/ProductCategory";
 import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
@@ -270,6 +271,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/activity/note">
             <Note />
+          </PrivateRoute>
+          <PrivateRoute exact path="/activity/attachment">
+            <Attachments />
           </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />

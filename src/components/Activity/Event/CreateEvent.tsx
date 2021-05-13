@@ -104,7 +104,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
         else {
 
 
-            if (!isEmpty(azureAccount) && values.meeting) {
+            if (!isEmpty(azureAccount)) {
                 values.azureId = azureAccount.homeAccountId;
                 values.graphToken = await getAzureAcessToken(instance);
             }
