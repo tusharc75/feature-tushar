@@ -23,14 +23,14 @@ import {
   ExpandLess,
 } from "@material-ui/icons";
 import _ from "lodash";
-import { FaUserTie, FaDatabase, FaHandshake } from 'react-icons/fa';
-import { BsCalendarFill, BsFillPuzzleFill } from 'react-icons/bs';
-import { MdDashboard, MdLocalActivity } from 'react-icons/md';
-import SidebarImage from '../../assets/header-bg.png';
-import Avatar from '@material-ui/core/Avatar';
-import { RiFolderSettingsFill } from 'react-icons/ri';
-import { RiAccountPinCircleFill } from 'react-icons/ri';
-import { SiCivicrm } from 'react-icons/si';
+import { FaUserTie, FaDatabase, FaHandshake } from "react-icons/fa";
+import { BsCalendarFill, BsFillPuzzleFill } from "react-icons/bs";
+import { MdDashboard, MdLocalActivity } from "react-icons/md";
+import SidebarImage from "../../assets/header-bg.png";
+import Avatar from "@material-ui/core/Avatar";
+import { RiFolderSettingsFill } from "react-icons/ri";
+import { RiAccountPinCircleFill } from "react-icons/ri";
+import { SiCivicrm } from "react-icons/si";
 
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "flex-end",
     padding: theme.spacing(0),
-    borderBottom: "2px solid #f5f8f9"
+    borderBottom: "2px solid #f5f8f9",
   },
   menuIcon: {
     width: 22,
@@ -94,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     display: "flex",
     flexDirection: "column",
-    height: "8rem"
+    height: "8rem",
   },
 }));
 
@@ -107,42 +107,43 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const pathnames = location.pathname.split("/").filter((x) => x);
   const iconMapping = [
     {
-      key: 'Brand Admin',
-      icon: <FaUserTie size={15} className="sidebar-icon" />
+      key: "Brand Admin",
+      icon: <FaUserTie size={15} className="sidebar-icon" />,
     },
     {
-      key: 'Master Data',
-      icon: <FaDatabase size={15} className="sidebar-icon" />
+      key: "Master Data",
+      icon: <FaDatabase size={15} className="sidebar-icon" />,
     },
     {
-      key: 'Product Setup',
-      icon: <RiFolderSettingsFill size={15} className="sidebar-icon" />
+      key: "Product Setup",
+      icon: <RiFolderSettingsFill size={15} className="sidebar-icon" />,
     },
     {
-      key: 'Admin Portal',
-      icon: <BsCalendarFill size={15} className="sidebar-icon" />
+      key: "Admin Portal",
+      icon: <BsCalendarFill size={15} className="sidebar-icon" />,
     },
     {
-      key: 'CRM',
-      icon: <FaHandshake size={15} className="sidebar-icon" />
+      key: "CRM",
+      icon: <FaHandshake size={15} className="sidebar-icon" />,
     },
     {
-      key: 'Activities Management',
-      icon: <BsFillPuzzleFill size={15} className="sidebar-icon" />
+      key: "Activities Management",
+      icon: <BsFillPuzzleFill size={15} className="sidebar-icon" />,
     },
     {
-      key: 'Accounts',
-      icon: <RiAccountPinCircleFill size={15} className="sidebar-icon" />
+      key: "Accounts",
+      icon: <RiAccountPinCircleFill size={15} className="sidebar-icon" />,
     },
     {
-      key: 'CRM +',
-      icon: <SiCivicrm size={15} className="sidebar-icon" />
-    }
-    
-    
-  ]
+      key: "CRM +",
+      icon: <SiCivicrm size={15} className="sidebar-icon" />,
+    },
+  ];
   const handleToggleDrawer = () => {
     setToggleDrawer(!toggleDrawer);
+    if (toggleDrawer) {
+      setOpen({});
+    }
   };
 
   const listItems = () => {
@@ -196,6 +197,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     setOpen(tempdata);
   };
 
+  const activityTabs = ["Task", "Case", "Event", "Note", "Email"];
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -231,32 +234,74 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         <div>
           <List className="sidebar-list">
             <Link to="/">
-              <ListItem button selected={location.pathname === "/"} className="list-item">
+              <ListItem
+                button
+                selected={location.pathname === "/"}
+                className="list-item"
+              >
                 <ListItemIcon>
                   <MdDashboard size={15} className="sidebar-icon" />
                 </ListItemIcon>
                 <ListItemText primary="Dashboard" />
               </ListItem>
             </Link>
-            <Link to="/activity">
-              <ListItem button selected={pathnames[0] === "activity"} className="list-item">
-                <ListItemIcon>
-                  <MdLocalActivity size={15} className="sidebar-icon" />
-                </ListItemIcon>
-                <ListItemText primary="Activities" />
-              </ListItem>
-            </Link>
+
+            <ListItem
+              button
+              className="list-item"
+              onClick={() => {
+                handleCollapse("Activity");
+                if (!toggleDrawer) {
+                  handleToggleDrawer();
+                }
+              }}
+            >
+              <ListItemIcon>
+                <MdLocalActivity size={15} className="sidebar-icon" />
+              </ListItemIcon>
+              <ListItemText primary="Activities" />
+              {open["Activity"] ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse in={open["Activity"]} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding className="list-item">
+                {activityTabs.map((item, i) => (
+                  <Link
+                    className="sub-list"
+                    key={i}
+                    to={`/activity/${_.lowerCase(item)}`}
+                  >
+                    <ListItem
+                      button
+                      selected={pathnames.includes(_.lowerCase(item))}
+                      className={classes.nested}
+                      onClick={toggleDrawer && handleToggleDrawer}
+                    >
+                      <ListItemText primary={item} />
+                    </ListItem>
+                  </Link>
+                ))}
+              </List>
+            </Collapse>
+
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>
-                  <ListItem className="list-item"
+                  <ListItem
+                    className="list-item"
                     button
                     key={listItem.section + "" + i}
-                    onClick={() => handleCollapse(listItem.section)} >
-                    <ListItemIcon >
-                      {iconMapping.find((mapping) => {
-                        return (mapping.key === listItem.section)
-                      })?.icon
+                    onClick={() => {
+                      handleCollapse(listItem.section);
+                      if (!toggleDrawer) {
+                        handleToggleDrawer();
+                      }
+                    }}
+                  >
+                    <ListItemIcon>
+                      {
+                        iconMapping.find((mapping) => {
+                          return mapping.key === listItem.section;
+                        })?.icon
                       }
                     </ListItemIcon>
                     <ListItemText primary={listItem.section} />
@@ -269,15 +314,18 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   >
                     <List component="div" disablePadding className="list-item">
                       {listItem.items.map((item, j) => (
-                        <Link className="sub-list"
+                        <Link
+                          className="sub-list"
                           key={j}
-                          to={`/${_.kebabCase(_.lowerCase(item.name))}`}>
+                          to={`/${_.kebabCase(_.lowerCase(item.name))}`}
+                        >
                           <ListItem
                             button
                             selected={pathnames.includes(
                               _.lowerCase(item.name)
                             )}
-                            className={classes.nested}>
+                            className={classes.nested}
+                          >
                             <ListItemText primary={item.name} />
                           </ListItem>
                         </Link>
