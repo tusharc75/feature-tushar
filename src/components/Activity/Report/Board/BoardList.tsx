@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from "react";
-import Box from "@material-ui/core/Box";
-import { BoardBox } from "./BoardBox";
-import update from "immutability-helper";
+import { Box } from "@material-ui/core";
 import { useDrop } from "react-dnd";
+import update from "immutability-helper";
+import { BoardBox } from "./BoardBox";
 
 export const BoardList = ({
   status,
@@ -39,16 +39,16 @@ export const BoardList = ({
       handleChangeStatus(data.id, status);
     },
   });
-  drop(ref);
 
+  drop(ref);
   return (
     <div ref={ref} style={{ height: "calc(100% - 42px)" }}>
       <Box minHeight="100%">
         {subActivity.map((element, index) => (
           <BoardBox
             data={element}
-            key={element._id}
-            id={element._id}
+            key={element?._id}
+            id={element?._id}
             index={index}
             type={type}
             moveCard={moveCard}

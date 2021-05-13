@@ -38,9 +38,13 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const ref = React.useRef(null);
 
-  const [{}, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop({
     accept: "move",
-    drop: () => {},
+    collect(monitor) {
+      return {
+        handlerId: monitor.getHandlerId(),
+      };
+    },
     hover: (item: any, monitor) => {
       if (!ref.current) {
         return;
@@ -67,8 +71,10 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
   });
 
   const [{ isDragging }, drag] = useDrag({
-    item: { id, index },
     type: "move",
+    item: () => {
+      return { id, index };
+    },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -123,7 +129,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
   drag(drop(ref));
 
   return (
-    <div ref={ref}>
+    <div ref={ref} data-handler-id={handlerId}>
       <Box
         onClick={handleActivityOpen}
         className={classes.activitybox}
@@ -132,7 +138,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
         <Box>
           <Grid container spacing={1}>
             <Grid item xs={10}>
-              <Typography variant="subtitle2">{data.name}</Typography>
+              <Typography variant="subtitle2">{data?.name}</Typography>
             </Grid>
             <Grid item xs={2}>
               <IconButton
@@ -146,7 +152,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
           </Grid>
         </Box>
         <Box pt={2}>
-          <ListRelatedTo relatedTo={data.relatedTo} originRelatedTo={[]} />
+          <ListRelatedTo relatedTo={data?.relatedTo} originRelatedTo={[]} />
         </Box>
         <Menu
           id="simple-menu"
