@@ -1012,6 +1012,7 @@ const FormTypes = (props) => {
                 type="file"
               />
             </IconButton>
+
           </label>
           {
             <IconButton
@@ -1026,6 +1027,18 @@ const FormTypes = (props) => {
               <DeleteIcon />
             </IconButton>
           }
+          <Box flex="1">
+            <Typography
+              variant="body2"
+              className="text-truncate"
+              style={{ marginLeft: '4px', display: touched[name] && Boolean(errors[name]) ? "" : "none" }}
+              color={
+                touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
+              }
+            >{touched[name] && Boolean(errors[name])
+              ? errors[name] : null}
+            </Typography>
+          </Box>
         </Box>
       </Box>
     </Fragment>
