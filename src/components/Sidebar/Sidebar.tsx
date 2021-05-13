@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -147,6 +147,12 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     }
   };
 
+  useEffect(() => {
+    if (!toggleDrawer) {
+      setOpen({});
+    }
+  }, [toggleDrawer]);
+
   const listItems = () => {
     if (user) {
       const sections = [];
@@ -267,7 +273,11 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 {open["Activity"] ? <ExpandLess /> : <ExpandMore />}
               </ListItem>
             </Tooltip>
-            <Collapse in={open["Activity"]} timeout="auto" unmountOnExit>
+            <Collapse
+              in={open["Activity"] && toggleDrawer}
+              timeout="auto"
+              unmountOnExit
+            >
               <List component="div" disablePadding className="list-item">
                 {activityTabs.map((item, i) => (
                   <Link
