@@ -53,6 +53,8 @@ import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
 import { FcFlowChart } from 'react-icons/fc';
+import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignedEntities from "./AssignedEntities";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -95,6 +97,10 @@ const UserDetailsPage = () => {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([])
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
+  const [entities, setEntities] = useState<any[]>([])
+  const showRecordsBeforeViewAll = 2;
+  const [showEntities, setShowEntities] = useState(showRecordsBeforeViewAll);
+  const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -121,6 +127,7 @@ const UserDetailsPage = () => {
     },
   ].filter((d) => d.show);
 
+
   const fetchUserData = async () => {
     setLoading(true);
     try {
@@ -132,6 +139,7 @@ const UserDetailsPage = () => {
 
       setHeadingLbl(name);
       setUserData(data);
+      // setEntities(data.entities)
       setCustomizedRoutes([
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
@@ -280,6 +288,10 @@ const UserDetailsPage = () => {
     setShowConfirmBox(true);
   };
 
+  const handleUnassignEntity = (rec) => {
+
+  };
+
   const DeleteUser = () => {
     if (deleteUserRec) {
       if (permissions.user.isDelete) {
@@ -326,6 +338,14 @@ const UserDetailsPage = () => {
 
   const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
+  };
+
+  const entityDialogOpen = () => {
+    setShowAssignEntityDialog(true);
+  };
+
+  const entityDialogClose = () => {
+    setShowAssignEntityDialog(false);
   };
 
   const getRoleUnion = () => {
@@ -426,6 +446,19 @@ const UserDetailsPage = () => {
             handleCloseDialog();
             getRoleUnion();
             fetchUserRoles();
+          }}
+        />
+      )}
+      {showAssignEntityDialog && (
+        <AssignEntityDialog
+          entitiesDialogOpen={showAssignEntityDialog}
+          handleCloseDialog={entityDialogClose}
+          type="entity"
+          ids={[id]}
+          assignedEntity={userData?.entities}
+          onSuccess={() => {
+            fetchUserData();
+            entityDialogClose();
           }}
         />
       )}
@@ -614,6 +647,72 @@ const UserDetailsPage = () => {
                   </Grid>
                 </Grid>
               </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Box
+                    width="100%"
+                    padding={1}
+                    bgcolor="grey.200"
+                    display="flex"
+                    justifyContent="space-between"
+                  >
+                    <Typography variant="subtitle2">
+                      Assigned Entity ({userData?.entities?.length || 0})
+                </Typography>
+                    {permissions.entity.isUpdate && (
+                      <IconButton
+                        title="Assign entities"
+                        color="primary"
+                        size="small"
+                        onClick={entityDialogOpen}
+                      >
+                        <ControlPoint />
+                      </IconButton>
+                    )}
+                  </Box>
+                  <Box padding={1}>
+                    {loading ? (
+                      <Box display="flex">
+                        {[1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              padding: "8px",
+                              margin: "8px",
+                              width: "100%",
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton
+                                variant="text"
+                                width="100px"
+                                height="20px"
+                              />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))}
+                      </Box>
+                    ) :
+                      userData?.entities?.length ? (
+                        <AssignedEntities
+                          entities={userData?.entities}
+                          permissions = {permissions}
+                          userId = {id}
+                        />
+
+
+                      )
+                        : (
+                          <Box textAlign="center" padding={2}>
+                            <Typography>No Entities </Typography>
+                          </Box>
+                        )
+                    }
+                  </Box>
+                </Grid>
+              </Grid>
 
               {
                 user?.user?.permissions?.doaSetup && <>

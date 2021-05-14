@@ -23,9 +23,8 @@ import {
   USER_LOADING,
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
-import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
-import AssignedUsers from "./AssignedUsers";
+import AssignUserDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignedUsers from "../../components/AssignRolesList/AssignedEntities";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -103,7 +102,7 @@ const EntityDetailsPage = () => {
   const fetchEntityUser = () => {
     setUsersLoading(true);
     axiosInstance()
-      .get(`/entity/user/${id}`)
+      .get(`/user?filterById=[{"field": "entities.entity", "term": "${id}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
         setUsersLoading(false);
@@ -226,14 +225,14 @@ const EntityDetailsPage = () => {
     setShowConfirmBox(true);
   };
 
-  const unassignUserRole = () => {
+  const unassignUserEntity = () => {
     if (userDeleteRec?._id) {
       const data = {
         user: userDeleteRec?._id,
-        roles: roles.map((r) => r._id),
+        entities: userDeleteRec?.entities.filter(d => d.entity !== id)
       };
       axiosInstance()
-        .post("/role/un-assign-role", data)
+        .put("/user/assign-entity", data)
         .then(() => {
           setShowConfirmBox(false);
 
@@ -282,10 +281,11 @@ const EntityDetailsPage = () => {
     <>
       {showAssignUserDialog && (
         <AssignUserDialog
-          usersDialogOpen={showAssignUserDialog}
+        entitiesDialogOpen={showAssignUserDialog}
           handleCloseDialog={userDialogClose}
-          roleIds={roles.map((r) => r._id)}
-          assignedUsers={users}
+          type="user"
+          ids={[id]}
+          assignedEntity={null}
           onSuccess={() => {
             fetchEntityUser();
             userDialogClose();
@@ -301,20 +301,6 @@ const EntityDetailsPage = () => {
           fields={entityFields}
           isUpdating={isUpdating}
           handleUpdate={handleUpdateEntity}
-        />
-      )}
-      {openRolesDialog && (
-        <AssignRolesDialog
-          entitiesDialogOpen={openRolesDialog}
-          handleCloseDialog={closeRolesDIalog}
-          type="role"
-          ids={[id]}
-          assignedEntity={roles}
-          onSuccess={() => {
-            fetchEntityRoles();
-            fetchEntityUser();
-            closeRolesDIalog();
-          }}
         />
       )}
       <Layout>
@@ -453,7 +439,9 @@ const EntityDetailsPage = () => {
                         <AssignedUsers
                           permissions={permissions}
                           data={users.slice(0, showUsers)}
-                          unassignUser={handleUnassignUser}
+                          unassignEntity={handleUnassignUser}
+                          selectedEntity={null}
+                          type="entity"
                         />
 
                         <Box marginY={1} />
@@ -483,76 +471,6 @@ const EntityDetailsPage = () => {
               </Grid>
             </Paper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper>
-              <Box style={{ padding: "0px", maxHeight: "450px" }}>
-                <Box
-                  width="100%"
-                  padding={1}
-                  bgcolor="grey.200"
-                  display="flex"
-                  justifyContent="space-between"
-                >
-                  <Typography variant="subtitle2">
-                    Assigned Regional Roles ({roles.length || 0})
-                  </Typography>
-                  <IconButton
-                    disabled={!permissions.role.isUpdate}
-                    color="primary"
-                    size="small"
-                    onClick={handleOpenRolesDialog}
-                  >
-                    <ControlPoint />
-                  </IconButton>
-                </Box>
-                <Box padding={1}>
-                  {rolesLoading ? (
-                    [1, 2].map((i) => (
-                      <BoxWithBorder key={i} style={{ marginBottom: "8px" }}>
-                        <Box padding={1}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="20px"
-                          />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
-                        </Box>
-                      </BoxWithBorder>
-                    ))
-                  ) : roles.length ? (
-                    <>
-                      <Roles
-                        permissions={permissions}
-                        data={roles.slice(0, showRegionalRoles)}
-                        unassignRole={handleUnassignRole}
-                      />
-                      <Box marginY={1} />
-                      {
-                        roles.length > showRecordsBeforeViewAll &&
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => setShowRegionalRoles(showRegionalRoles == roles.length ? showRecordsBeforeViewAll : roles.length)}
-                        >
-                          {
-                            showRegionalRoles == roles.length ? `View less` : `View All (${roles.length})`
-                          }
-                        </Button>
-                      }
-                    </>
-                  ) : (
-                    <Box textAlign="center" padding={2}>
-                      No Assigned Roles
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-
-            </Paper>
-          </Grid>
         </Grid>
 
       </Layout>
@@ -560,9 +478,7 @@ const EntityDetailsPage = () => {
         <ConfirmationDialog
           open={showConfirmBox}
           message={
-            deleteRoleRec
-              ? `Are you sure you want to un-assign role ${deleteRoleRec.name} from entity ${entityData.entityName}`
-              : userDeleteRec
+            userDeleteRec
                 ? `Are you sure you want to un-assign user ${userDeleteRec.firstName} ${userDeleteRec.lastName}?`
                 : `Are you sure you want to delete this entity ?`
           }
@@ -571,10 +487,8 @@ const EntityDetailsPage = () => {
             setShowConfirmBox(false);
           }}
           onOk={
-            deleteRoleRec
-              ? unassignRole
-              : userDeleteRec
-                ? unassignUserRole
+             userDeleteRec
+                ? unassignUserEntity
                 : handleDeleteEntity
           }
         />

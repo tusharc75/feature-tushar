@@ -65,6 +65,7 @@ const RoleDetailsPage = () => {
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
+  const [roleUsers, setRoleUsers] = useState([]);
   const [values, setValues] = useState({
     name: "",
     description: "",
@@ -82,6 +83,12 @@ const RoleDetailsPage = () => {
     // eslint-disable-next-line
   }, [id]);
 
+  useEffect(() => {
+    if (roleData) {
+      fetchUser();
+    }
+    // eslint-disable-next-line
+  }, [roleData]);
   useEffect(() => {
     const data = {
       name: values.name,
@@ -115,7 +122,23 @@ const RoleDetailsPage = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
+
   };
+
+
+  const fetchUser = async () => {
+    setLoading(true);
+    // let api = roleData?.type === 1 ? `user?filterById=[{"field": "role", "term": "${id}"}]` : `/user?filterById=[{"field": "entities.entity", "term": "${id}"}]`
+    try {
+      const {
+        data: { data },
+      } = await axiosInstance().get(roleData?.type === 2 ? `/user?filterById=[{"field": "entities.role", "term": "${id}"}]` : `user?filterById=[{"field": "role", "term": "${id}"}]`);
+      setRoleUsers(data);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const checkError = () => {
 
     return values?.name?.length === 0 || values?.description?.length === 0
@@ -175,7 +198,7 @@ const RoleDetailsPage = () => {
         roles: [id],
       };
       axiosInstance()
-        .post("/role/un-assign-role", data)
+        .put("/user/un-assign-role", data)
         .then(() => {
           setShowConfirmBox(false);
 
@@ -404,7 +427,7 @@ const RoleDetailsPage = () => {
                 </TableContainer> */}
               </Paper>
               <Box marginY={2} />
-              {roleData && roleData.type === 2 && (
+              {/* {roleData && roleData.type === 2 && (
                 <div>
                   <Box
                     padding={1}
@@ -487,7 +510,7 @@ const RoleDetailsPage = () => {
                     )}
                   </Box>
                 </div>
-              )}
+              )} */}
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
@@ -500,7 +523,7 @@ const RoleDetailsPage = () => {
                 alignItems="center"
               >
                 <Typography variant="subtitle2">
-                  Assigned Users ({(roleData && roleData.user.length) || 0})
+                  Assigned Users ({(roleUsers.length) || 0})
                 </Typography>
 
                 {permissions.role.isUpdate && (
@@ -514,7 +537,7 @@ const RoleDetailsPage = () => {
                   </IconButton>
                 )}
               </Box>
-              {roleData && roleData.user && (
+              {roleUsers && (
                 <Box>
                   {loading ? (
                     [1, 2].map((i) => (
@@ -535,27 +558,27 @@ const RoleDetailsPage = () => {
                         </Box>
                       </BoxWithBorder>
                     ))
-                  ) : roleData.user.length ? (
+                  ) : roleUsers.length ? (
                     <>
                       <AssignedUsers
                         permissions={permissions}
                         unassignRole={handleUnassignUser}
-                        data={roleData && roleData.user.slice(0, showUsers)}
+                        data={roleUsers && roleUsers.slice(0, showUsers)}
                         currentUser={user?.user._id}
                       />
                       <Box marginY={1} />
                       {
-                        roleData.user.length > showRecordsBeforeViewAll && <Button
+                        roleUsers.length > showRecordsBeforeViewAll && <Button
                           fullWidth
                           variant="contained"
                           color="primary"
                           size="small"
                           onClick={() => {
-                            setShowUsers(showUsers == roleData.user.length ? showRecordsBeforeViewAll : roleData.user.length)
+                            setShowUsers(showUsers == roleUsers.length ? showRecordsBeforeViewAll : roleUsers.length)
                           }}
                         >
                           {
-                            showUsers == roleData.user.length ? `View less` : `View All (${roleData.user.length})`
+                            showUsers == roleUsers.length ? `View less` : `View All (${roleUsers.length})`
                           }
                         </Button>
                       }
