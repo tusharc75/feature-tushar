@@ -23,6 +23,7 @@ import Activity from "./pages/Activity";
 import Note from "./pages/Activity/Note";
 import Email from "./pages/Activity/Email";
 import Attachments from "./pages/Activity/Attachments";
+import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
 import ProductCategory from "./pages/ProductCategory";
 import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
@@ -73,13 +74,16 @@ function App() {
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
-      await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-        notification.setCount(count);
-      }).catch((error) => {
-        toast.setToastConfig(error);
-      });
+      await axiosInstance()
+        .get(`/user/notification/unseen`)
+        .then(({ data: { count } }) => {
+          notification.setCount(count);
+        })
+        .catch((error) => {
+          toast.setToastConfig(error);
+        });
     }
-  }
+  };
 
   useEffect(() => {
     try {
@@ -87,11 +91,10 @@ function App() {
       setInterval(async () => {
         await getNotification();
       }, 60000);
-    }
-    catch (e) {
+    } catch (e) {
       console.log(e);
     }
-  }, [])
+  }, []);
 
   const conditionalRedirect = (Comp, location) => {
     return !user ? (
@@ -278,6 +281,9 @@ function App() {
           <PrivateRoute exact path="/activity/:type">
             <Activity />
           </PrivateRoute>
+          <PrivateRoute exact path="/calendar">
+            <Calender />
+          </PrivateRoute>
 
           <PrivateRoute exact path="/product-category">
             <ProductCategory />
@@ -313,7 +319,7 @@ function App() {
           <PrivateRoute exact path={routes.productBuilder.path}>
             <ProductBuilder />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productBuilder.path + "/:id"} >
+          <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
             <CreateProductBuilder />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
