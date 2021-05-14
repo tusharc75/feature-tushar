@@ -64,10 +64,12 @@ const Activity = () => {
         <Box>
           <Grid container>
             <Grid item xs={8}>
-              <SearchFilter
-                handleChangeFilter={handleChangeFilter}
-                filter={filter}
-              />
+              <Box m={1}>
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                />
+              </Box>
             </Grid>
             <Grid item xs={4}>
               <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
