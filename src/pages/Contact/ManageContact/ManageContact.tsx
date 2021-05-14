@@ -25,10 +25,10 @@ const useStyles = makeStyles(() => ({
 export default function ManageContact(props) {
 
     const { entityData, handleSubmit, onClose, open, isNew, loading,
-        onCreateAccount, accountSource, contactId = null, accountId = null } = props
+        onCreateAccount, accountResource, contactResource, accountSource, contactId = null, accountId = null } = props
 
     const classes = useStyles();
-    const { state: { user } }: any = useData();
+    const { state: { user, permissions } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
 
     //  Owner, Collaborator Code - Start
@@ -194,7 +194,7 @@ export default function ManageContact(props) {
                                                                                         onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
                                                                                     />
                                                                                 ) : field.fieldName == "accountName" && accountSource !== undefined ? (
-                                                                                    <Grid container spacing={1} alignItems="center">
+                                                                                    <Grid container spacing={1}>
                                                                                         <Grid item xs={10} sm={10} md={10} >
                                                                                             <FormTypes
                                                                                                 values={accountId ? initializeAccountDropdown(values, accountSource) : values}
@@ -213,11 +213,13 @@ export default function ManageContact(props) {
                                                                                             />
                                                                                         </Grid>
                                                                                         <Grid item xs={1} sm={1} md={1}>
-                                                                                            <Tooltip title="Create Account" className={classes.createAccountTooltip} >
-                                                                                                <IconButton onClick={onCreateAccount} size="small">
-                                                                                                    <AddIcon color="primary" />
-                                                                                                </IconButton>
-                                                                                            </Tooltip>
+                                                                                            {
+                                                                                                permissions[accountResource].isCreate && <Tooltip title="Create Account" className={`${classes.createAccountTooltip} mt-1`}>
+                                                                                                    <IconButton onClick={onCreateAccount} size="small">
+                                                                                                        <AddIcon color="primary" />
+                                                                                                    </IconButton>
+                                                                                                </Tooltip>
+                                                                                            }
                                                                                         </Grid>
                                                                                         {
                                                                                             field?.tooltipMessage ?
