@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useContext } from "react";
 import {
   Avatar,
   Box,
@@ -163,7 +163,7 @@ const FormTypes = (props) => {
   const [isFileUploading, setFileUploading] = React.useState(false);
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
   const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
-  const { setToastConfig } = React.useContext(CustomToastContext);
+  const { setToastConfig } = useContext(CustomToastContext);
 
   const fetch = React.useMemo(
     () =>
@@ -221,7 +221,14 @@ const FormTypes = (props) => {
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
-      getImageUrl(file);
+
+      //  1048576 = 1 MB 
+      if (file.size > 1048576) {
+        setToastConfig({ open: true, type: "error", message: "Image must be less than 1 MB size" });
+      } else {
+        getImageUrl(file);
+      }
+      
       event.target.value = "";
     }
   };
@@ -998,6 +1005,7 @@ const FormTypes = (props) => {
             >
               <AddCircleIcon />
               <input
+                max-file-size="1024"
                 onClick={(e: any) => (e.target.value = null)}
                 disabled={isImgUploading}
                 id={name}

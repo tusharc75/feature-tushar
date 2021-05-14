@@ -378,7 +378,8 @@ const ContactDetailsPage = (props) => {
             loading={loading}
             handleSubmit={handleUpdateContact}
             contactId={contactData._id}
-          // contactResource={contactResource}
+            accountResource={accountResource}
+            contactResource={contactResource}
           // contactApi={contactApi}
           />
         )}
