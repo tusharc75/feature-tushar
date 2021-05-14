@@ -4,6 +4,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import Chip from '@material-ui/core/Chip';
 import { SearchActivity } from "../../../axios/activity";
 import { UnCamelCase } from "../../../constants/helpers";
+import { BsSearch } from 'react-icons/bs'
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 const allSearch = [
     { type: "customerAccount", name: "All", isAll: true },
@@ -48,6 +50,7 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
     }
 
     return (<Autocomplete className="custom-autocomplete"
+        style={{ borderRadius: '7px', }}
         multiple={true}
         options={options}
         getOptionLabel={(option) => (option ? option.name : "")}
@@ -67,6 +70,9 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
                 variant="outlined"
                 placeholder="Search"
                 margin="dense"
+                InputProps={{
+                    startAdornment: <InputAdornment position="start"><BsSearch /></InputAdornment>,
+                }}
             />
         )}
         value={value}

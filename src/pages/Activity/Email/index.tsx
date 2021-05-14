@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../../components/Layout";
-import Button from '@material-ui/core/Button';
 import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
 import { useParams, useHistory } from "react-router-dom";
 import queryString from 'query-string';
@@ -14,6 +13,8 @@ import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpe
 import axiosAPI from "../../../axios/axios";
 import { isEmpty } from "lodash";
 import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import CustomContainer from "../../../components/CustomContainer";
+import './index.scss'
 
 const Email = () => {
 
@@ -49,12 +50,10 @@ const Email = () => {
         //     setEmails(data.data)
         //     setLoading(false)
         // }).catch((err) => {})
-            //     }
+        //     }
         await GetEmails(JSON.stringify(filter))
             .then(({ data }) => {
                 setEmails(data)
-                console.log(data);
-                
                 setLoading(false)
             })
             .catch((err) => {
@@ -67,32 +66,29 @@ const Email = () => {
 
     const columns = [
         { field: '_id', headerName: 'id', hide: true },
-        { field: 'subject', headerName: 'Subject', width: 300 },
         {
             field: 'to',
             headerName: 'Recipient',
             width: 200,
-            renderCell: (params) =>{
-            if(typeof params.row.to == "string") return <span>{params.row.to}</span> 
-            return <span>{params.row.to.join(", ")}</span> 
-        }},
+            renderCell: (params) => {
+                if (typeof params.row.to == "string") return <span>{params.row.to}</span>
+                return <span>To: {params.row.to.join(", ")}</span>
+            }
+        },
         {
             field: 'cc',
             headerName: 'CC',
-            width: 200,
-            renderCell: (params) =>{
-            if(isEmpty(params.row.cc)) return <span>---</span>
-            if(typeof params.row.cc == "string") return <span>{params.row.cc}</span> 
-            return <span>{params.row.cc.join(", ")}</span> 
-        }},
-        {
-            field: 'createdBy',
-            headerName: 'Send At',
-            width: 200,
-            renderCell: (params) =>{
-            return <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>
-        }},
-        { field: 'mailbox', headerName: 'mailbox', width: 300 },
+            width: 800,
+            renderCell: (params) => {
+                if (isEmpty(params.row.cc)) return <span>---</span>
+                if (typeof params.row.cc == "string") return <span>{params.row.cc}</span>
+                return <span>{params.row?.subject ?? "(no subject)"}
+                    <> - {params.row.to.join(", ")}</>
+                    <span style={{ marginLeft: '5px', fontSize: '12px' }}>{moment(params.row.createdBy.date).format("ddd MM/DD")}</span>
+                </span>
+            }
+        },
+        // { field: 'mailbox', headerName: 'mailbox', width: 300 },
     ];
 
 
@@ -102,33 +98,34 @@ const Email = () => {
                 <CustomBreadCrumbs routes={[{ title: "Email" }]} />
             </Grid>
         </Grid>
-        <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
-            <Box mb={2}>
-                <Grid container>
-                    <Grid item xs={8}>
-                        <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
+        <CustomContainer>
+            <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
+                <Box mb={2}>
+                    <Grid container>
+                        <Grid item xs={8} className="pl-1">
+                            <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
+                        </Grid>
+                        <Grid xs={4} container justify="flex-end">
+                        </Grid>
                     </Grid>
-                    <Grid xs={4} container justify="flex-end">
-                    </Grid>
-                </Grid>
+                </Box>
+                <div className="listing-grid email-list">
+                    <DataGrid
+                        components={{
+                            Toolbar: CustomDataGridToolbar,
+                            NoRowsOverlay: CustomDataGridNoDataFound,
+                        }}
+                        loading={loading}
+                        rows={emails}
+                        checkboxSelection
+                        columns={columns}
+                        pageSize={10}
+                        density="compact"
+                        getRowId={(row) => row._id}
+                    />
+                </div>
             </Box>
-            <div className="listing-grid">
-                <DataGrid
-                    components={{
-                        Toolbar: CustomDataGridToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    loading={loading}
-                    rows={emails}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={10}
-                    density="compact"
-                    getRowId={(row) => row._id}
-                />
-            </div>
-        </Box>
+        </CustomContainer>
     </Layout>
     );
 }
