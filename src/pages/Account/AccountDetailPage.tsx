@@ -50,6 +50,70 @@ import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 import _ from 'lodash'
+import routes from "./../../components/Helpers/Routes";
+import Graph from "vis-react";
+
+const fontSize = 14;
+const radius = 20;
+
+const Node = ({ node }) => {
+  // colors
+
+  // sizes
+  const sizes = {
+    radius: radius,
+    textSize: fontSize,
+    textX: radius * 1.5,
+    textY: radius / 2,
+  };
+  const sizesImg = {
+    radius: 30,
+    textSize: fontSize,
+    textX: 30 * 1.5,
+    textY: 30 / 2,
+  };
+
+  return (
+    <>
+      <circle
+        fill={`light${node.stroke}`}
+        stroke={node.stroke}
+        r={sizes.radius}
+      />
+      <g style={{ fontSize: sizes.textSize + 'px' }}>
+        <text
+          x={sizes.radius + 7}
+          y={sizes.radius / 2}
+        >
+          {node.label}
+        </text>
+      </g>
+    </>
+  );
+};
+
+const Line = ({ link, ...restProps }) => {
+  return (
+    <line
+      {...restProps}
+      stroke={link.stroke}
+    />
+  )
+};
+
+const data = {
+  nodes: [
+    { id: "account", label: "My Account", stroke: "blue" },
+    { id: "contact 1", label: "My Custom Contact 1", stroke: "blue" },
+    { id: "contact 2", label: "My Custom Contact 2", stroke: "blue" },
+    { id: "contact 3", label: "My Custom Contact 3", stroke: "blue" },
+  ],
+  links: [
+    { "source": "contact 1", "target": "account", stroke: "blue" },
+    { "source": "contact 2", "target": "account", stroke: "blue" },
+    { "source": "contact 3", "target": "account", stroke: "blue" },
+  ]
+};
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -123,6 +187,121 @@ export default function AccountDetailPage(props) {
     fetchAccountData();
     fetchRelatedData();
   }, [id]);
+
+
+
+  const graph = {
+    edges: [
+      {
+        id: "1",
+        from: "609b74d08f92856141aa3581",
+        to: "609b75568f92856141aa3583",
+        color: { color: "teal" }
+      },
+      {
+        id: "2",
+        from: "609b74d08f92856141aa3581",
+        to: "609b74d08f92856141aa3582",
+        color: { color: "teal" }
+      }
+    ],
+    nodes: [
+      {
+        id: "609b74d08f92856141aa3581",
+        label: "Tata Group",
+        route: "customerAccountDetail",
+        color: "lightgreen",
+        value: 50
+      },
+      {
+        id: "609b75568f92856141aa3583",
+        label: "adele dd",
+        route: "customerContactDetail",
+        color: "#97C2FC",
+        value: 20
+      },
+      {
+        id: "609b74d08f92856141aa3582",
+        label: "justine timber",
+        route: "customerContactDetail",
+        color: "#97C2FC",
+        value: 20
+      }
+    ]
+  };
+
+  const options = {
+    layout: {
+      randomSeed: 2
+    },
+    interaction: { hover: true },
+    nodes: {
+      fixed: {
+        x: false,
+        y: false
+      },
+      shape: "dot",
+      // size: 13,
+      borderWidth: 1.5,
+      borderWidthSelected: 2,
+      font: {
+        size: 15,
+        align: "center",
+        bold: {
+          color: "#bbbdc0",
+          size: 15,
+          vadjust: 0,
+          mod: "bold"
+        }
+      }
+    },
+    // edges: {
+    //   width: 0.01,
+    //   color: {
+    //     color: "#D3D3D3",
+    //     highlight: "#797979",
+    //     hover: "#797979",
+    //     opacity: 1.0
+    //   },
+    //   arrows: {
+    //     // to: { enabled: true, scaleFactor: 1, type: "arrow" },
+    //     // middle: { enabled: false, scaleFactor: 1, type: "arrow" },
+    //     from: { enabled: false, scaleFactor: 1, type: "arrow" }
+    //   },
+    //   smooth: {
+    //     type: "continuous",
+    //     roundness: 0
+    //   }
+    // }
+  };
+
+  const events = {
+    select: function (event) {
+      var { nodes, edges } = event;
+      console.log("Selected nodes: ", nodes);
+      console.log("Selected edges: ", edges);
+    },
+    hoverNode: function (event) {
+      console.log("hoverNode", event);
+      // this.neighbourhoodHighlight(event, this.props.searchData);
+    },
+    blurNode: function (event) {
+      console.log("blurNode", event);
+      // this.neighbourhoodHighlightHide(event);
+    },
+    click: function (event) {
+      if (event.nodes.length > 0) {
+        const node = graph.nodes.find(d => d.id === event.nodes[0]);
+        if (node && routes[node.route]) {
+          history.push({
+            pathname: `${routes[node.route].path}/${node.id}`
+          })
+        }
+      }
+      console.log("click", event);
+      // this.redirectToLearn(event, this.props.searchData);
+    }
+  }
 
   const fetchRelatedData = () => {
     axiosInstance()
@@ -415,6 +594,20 @@ export default function AccountDetailPage(props) {
   const handleCreateContact = () => {
     setShowCreateContactDialog(true);
   };
+
+  const getNetwork = data => {
+    console.log("getNetwork", data)
+  };
+
+  const getEdges = data => {
+    console.log("getEdges", data)
+  };
+
+  const getNodes = data => {
+    console.log("getNodes", data)
+  };
+
+
   return (
     <>
       <Layout>
@@ -515,20 +708,45 @@ export default function AccountDetailPage(props) {
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
                       />
+                      {/* <Tab
+                        label="Nodal Structure"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      /> */}
                     </Tabs>
-                    <Box hidden={currentTabIndex !== 0}>
-                      <DetailsPage
-                        data={accountData}
-                        fields={accountFields}
-                      />
-                    </Box>
-                    <Box hidden={currentTabIndex !== 1}>
-                      <AccountHierarchy
-                        data={accountHierarchyData}
-                        currentAccountId={accountData._id}
-                        accountRoute={accountRoute}
-                      />
-                    </Box>
+                    {
+                      currentTabIndex == 0 && <Box>
+                        <DetailsPage
+                          data={accountData}
+                          fields={accountFields}
+                        />
+                      </Box>
+                    }
+
+                    {
+                      currentTabIndex == 1 && <Box>
+                        <AccountHierarchy
+                          data={accountHierarchyData}
+                          currentAccountId={accountData._id}
+                          accountRoute={accountRoute}
+                        />
+                      </Box>
+                    }
+
+                    {/* {
+                      currentTabIndex == 2 && <Box>
+                        <div style={{ height: "500px", width: "100%" }}>
+                          <Graph
+                            graph={graph}
+                            options={options}
+                            getNetwork={getNetwork}
+                            getEdges={getEdges}
+                            getNodes={getNodes}
+                            events={events}
+                          />
+                        </div>
+                      </Box>
+                    } */}
                   </>
                 )}
               </Box>
@@ -718,6 +936,7 @@ export default function AccountDetailPage(props) {
               }}
               loading={loading}
               handleSubmit={onUpdateAccount}
+              accountId={accountData?._id}
             />
           )}
 
