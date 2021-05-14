@@ -232,11 +232,9 @@ function OpportunityDetailsPage() {
   }
 
   const handleContactSelection = (e, id) => {
-    if (notToBeRemovedContacts.indexOf(id) < 0) {
-      const indexOfContactToChange = supplierContacts.findIndex(d => d._id == id);
-      supplierContacts[indexOfContactToChange].isChecked = e.target.checked;
-      setSupplierContacts([...supplierContacts]);
-    }
+    const indexOfContactToChange = supplierContacts.findIndex(d => d._id == id);
+    supplierContacts[indexOfContactToChange].isChecked = e.target.checked;
+    setSupplierContacts([...supplierContacts]);
   };
 
   const fetchCustomerContactData = (showDialog) => {
@@ -663,6 +661,7 @@ function OpportunityDetailsPage() {
             selectedSupplierAccountsList={selectedSupplierAccounts}
             handleContactSelection={handleContactSelection}
             loadingSupplierAccounts={loadingSupplierAccounts}
+            notToBeRemovedContacts={notToBeRemovedContacts}
           />
         }
 

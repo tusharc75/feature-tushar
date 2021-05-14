@@ -34,7 +34,8 @@ export default function AssignSupplierContactsDialog({
     currentContacts,
     selectedSupplierAccountsList,
     loadingSupplierAccounts,
-    onUpdateOpportunity
+    onUpdateOpportunity,
+    notToBeRemovedContacts
 }) {
     const toastConfig = useContext(CustomToastContext);
     const [isAssigning, setAssigning] = useState(false);
@@ -83,6 +84,7 @@ export default function AssignSupplierContactsDialog({
             <ListItemIcon>
                 <Checkbox
                     edge="start"
+                    disabled={notToBeRemovedContacts.indexOf(contact._id) >= 0 ? true : false}
                     onChange={(e) => handleContactSelection(e, contact._id)}
                     checked={contact.isChecked}
                     inputProps={{
