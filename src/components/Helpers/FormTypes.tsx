@@ -1005,7 +1005,6 @@ const FormTypes = (props) => {
             >
               <AddCircleIcon />
               <input
-                max-file-size="1024"
                 onClick={(e: any) => (e.target.value = null)}
                 disabled={isImgUploading}
                 id={name}
