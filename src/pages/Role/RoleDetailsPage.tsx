@@ -4,12 +4,6 @@ import {
   Button,
   TextField,
   Paper,
-  Table,
-  TableContainer,
-  TableHead,
-  TableBody,
-  TableCell,
-  TableRow,
   Grid,
   CircularProgress,
   Typography,
@@ -21,7 +15,6 @@ import { useParams, useHistory } from "react-router-dom";
 
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
-import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -551,11 +544,11 @@ const RoleDetailsPage = () => {
                           color="primary"
                           size="small"
                           onClick={() => {
-                            setShowUsers(showUsers == roleData.user.length ? showRecordsBeforeViewAll : roleData.user.length)
+                            setShowUsers(showUsers === roleData.user.length ? showRecordsBeforeViewAll : roleData.user.length)
                           }}
                         >
                           {
-                            showUsers == roleData.user.length ? `View less` : `View All (${roleData.user.length})`
+                            showUsers === roleData.user.length ? `View less` : `View All (${roleData.user.length})`
                           }
                         </Button>
                       }

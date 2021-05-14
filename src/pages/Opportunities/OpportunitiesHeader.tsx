@@ -1,37 +1,21 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import SearchBox from "../../components/Helpers/SearchBox";
-import { makeStyles } from "@material-ui/core/styles";
 import {
-  FilterList,
-  SortByAlpha,
-  Search,
   AddOutlined,
 } from "@material-ui/icons";
 import {
   Box,
   Grid,
-  Select,
   MenuItem,
-  FormControl,
-  IconButton,
   Button,
   Menu,
 } from "@material-ui/core";
-import { Add, ExpandMore } from "@material-ui/icons";
-
-import styles from "../Leads/Header.module.scss";
+import { ExpandMore } from "@material-ui/icons";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-
-const useStyles = makeStyles((theme) => ({
-  filter_side: {
-    display: "flex",
-    justifyContent: "flex-end",
-  },
-}));
+import styles from "../Leads/Header.module.scss";
 
 function OpportunitiesHeader(props) {
-  const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const openActions = (event) => {

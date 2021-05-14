@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import {
   Box,
   Button,
-  CircularProgress,
   Grid,
   InputAdornment,
 } from "@material-ui/core";
@@ -17,8 +16,6 @@ import {
   getObjKeysWithValues,
   initializeDropdownById,
   opportunity,
-  supplierAccount,
-  customerAccount,
   simplifyValues,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -29,12 +26,11 @@ import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
-import { useLocation, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import currencies from "../../../constants/currency_with_country.json";
 
 const arr = [...Array(9).keys()];
-
 export default function ManageOpportunityDialog({
   open,
   onSuccess,
@@ -46,7 +42,7 @@ export default function ManageOpportunityDialog({
   isRedirectTodetailPage,
   userId = null,
 }) {
-  const { opportunityResource, opportunityApi } = opportunity;
+  const { opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -139,19 +135,19 @@ export default function ManageOpportunityDialog({
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
-          if (!isNew && _f.fieldData.fieldName == "currency") {
+          if (!isNew && _f.fieldData.fieldName === "currency") {
             setCurrencySymbol(
-              currencies.find((d) => d.currencyCode == dataToUpdate["currency"])
+              currencies.find((d) => d.currencyCode === dataToUpdate["currency"])
                 ?.symbolNative
             );
           }
-          if (isNew && userId && _f.fieldData.fieldName == "owner") {
+          if (isNew && userId && _f.fieldData.fieldName === "owner") {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
           }
 
-          if (!isNew && _f.fieldData.fieldName == "currency") {
+          if (!isNew && _f.fieldData.fieldName === "currency") {
             setCurrencySymbol(
-              currencies.find((d) => d.currencyCode == dataToUpdate["currency"])
+              currencies.find((d) => d.currencyCode === dataToUpdate["currency"])
                 ?.symbolNative
             );
           }
@@ -251,7 +247,7 @@ export default function ManageOpportunityDialog({
         onClose={onClose}
       />
 
-      {entityData.fields.length == 0 && (
+      {entityData.fields.length === 0 && (
         <CustomDialogContent>
           <CommonSkeleton lenArray={arr} />
         </CustomDialogContent>
@@ -261,7 +257,7 @@ export default function ManageOpportunityDialog({
           initialValues={entityData.initialValues}
           validationSchema={yupSchema(entityData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,
@@ -290,7 +286,7 @@ export default function ManageOpportunityDialog({
                                   sm={6}
                                   md={6}
                                 >
-                                  {field.fieldName == "owner" ? (
+                                  {field.fieldName === "owner" ? (
                                     <FormTypes
                                       values={values}
                                       errors={errors}
@@ -311,7 +307,7 @@ export default function ManageOpportunityDialog({
                                         );
                                       }}
                                     />
-                                  ) : field.fieldName == "collaborator" ? (
+                                  ) : field.fieldName === "collaborator" ? (
                                     <FormTypes
                                       values={values}
                                       errors={errors}
@@ -331,7 +327,7 @@ export default function ManageOpportunityDialog({
                                         );
                                       }}
                                     />
-                                  ) : field.fieldName == "probability" ? (
+                                  ) : field.fieldName === "probability" ? (
                                     <FormTypes
                                       // {...rest}
                                       values={values}
@@ -360,7 +356,7 @@ export default function ManageOpportunityDialog({
                                         }
                                       }}
                                     />
-                                  ) : field.fieldName == "lostReason" ? (
+                                  ) : field.fieldName === "lostReason" ? (
                                     values["stage"] === "Closed Lost" ? (
                                       <FormTypes
                                         // {...rest}
@@ -378,7 +374,7 @@ export default function ManageOpportunityDialog({
                                         size="small"
                                       />
                                     ) : null
-                                  ) : field.fieldName == "currency" ? (
+                                  ) : field.fieldName === "currency" ? (
                                     <FormTypes
                                       // {...rest}
                                       values={values}
@@ -406,7 +402,7 @@ export default function ManageOpportunityDialog({
                                         }
                                       }}
                                     />
-                                  ) : field.fieldName == "amount" ? (
+                                  ) : field.fieldName === "amount" ? (
                                     <FormTypes
                                       // {...rest}
                                       startAdornment={
