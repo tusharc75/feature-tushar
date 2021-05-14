@@ -213,32 +213,64 @@ Button.MuiButtonBase-root {
 }
 
 @mixin style-accordian($color) {
+  margin: 15px 0 !important;
+  & .detailCard {
+    box-shadow: none !important;
+  }
   & .MuiAccordionSummary-root {
-    color: $color;
-    border-top: 3px solid $color;
+    // color: $color;
+    // border-top: 3px solid $color;
+    box-shadow: 1px 0px 5px #a6a6a6;
+    background: #f6f6f6;
     & .MuiIconButton-root {
-      color: $color;
+      color: var(--primary);
+    }
+    h6 {
+      color: var(--primary);
+      font-weight: 500;
     }
   }
+  .btn-view {
+    background: white !important;
+    color: #898582;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    left: 49%;
+    bottom: -2.5vh;
+    padding: 0;
+    border-radius: 50%;
+  }
   & .detailListing {
-    padding: 12px 12px;
+    padding: 12px;
     padding-bottom: 0 !important;
     background: #e6e6e6;
+
     .MuiListItemAvatar-root {
       min-width: 20px !important;
       color: #515557;
     }
     & .amount {
-      color: $color !important;
+      color: var(--secondary) !important;
     }
-    & span{
-      font-size: 0.80rem;
+    & span {
+      font-size: 0.8rem;
+    }
+
+    & .role {
+      font-weight: 500;
+      margin-left: 10px;
+      margin-left: 2px;
+      font-style: italic;
+      opacity: 0.6;
     }
     & .detailName {
       font-size: 0.8rem;
       font-weight: bold;
     }
     .MuiListItem-gutters {
+      padding: 0;
       padding-left: 4px !important;
       padding-right: 4px !important;
     }
@@ -253,6 +285,7 @@ Button.MuiButtonBase-root {
       text-transform: capitalize !important;
       font-size: 0.8rem !important;
       font-weight: 500;
+      padding: 6px 0;
     }
     .MuiList-padding {
       padding: 0;
@@ -275,4 +308,14 @@ Button.MuiButtonBase-root {
   &.accordProject {
     @include style-accordian(var(--colorProject));
   }
+}
+.MuiAutocomplete-tag {
+  margin: 1px 2px !important;
+}
+.MuiChip-root {
+  height: 26px !important;
+  & .MuiChip-deleteIcon {
+    width: 16px;
+  }
+  
 }

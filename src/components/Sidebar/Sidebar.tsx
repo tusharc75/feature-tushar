@@ -11,6 +11,7 @@ import {
   Toolbar,
   Collapse,
   ListItemIcon,
+  Grid,
 } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
 import Header from "../Header/Header";
@@ -31,6 +32,7 @@ import Avatar from '@material-ui/core/Avatar';
 import { RiFolderSettingsFill } from 'react-icons/ri';
 import { RiAccountPinCircleFill } from 'react-icons/ri';
 import { SiCivicrm } from 'react-icons/si';
+import {IoIosArrowDroprightCircle ,IoIosArrowDropleftCircle } from 'react-icons/io';
 
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -138,8 +140,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       key: 'CRM +',
       icon: <SiCivicrm size={15} className="sidebar-icon" />
     }
-    
-    
+
+
   ]
   const handleToggleDrawer = () => {
     setToggleDrawer(!toggleDrawer);
@@ -201,6 +203,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       <CssBaseline />
       <Header toggleDrawer={handleToggleDrawer} />
       <Drawer
+        //  onMouseEnter={handleToggleDrawer}
+        //   onMouseLeave={handleToggleDrawer}
         variant="permanent"
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: toggleDrawer,
@@ -215,19 +219,23 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       >
         <Toolbar />
         <div className={classes.toolbar}>
-          {/* <div className={classes.sidebarUser}>
-            {
-              user?.user?.avatar ? <Avatar className="d-flex align-items-center gap-1" src={user?.user?.avatar}></Avatar>
-                : <Avatar className="d-flex align-items-center gap-1"></Avatar>
-            }
-            <div className="d-flex align-items-center gap-1">{[user?.user?.firstName, user?.user?.lastName].filter(f => f).join(" ")}</div>
-            <small className="d-flex align-items-center gap-1">{user?.user?.email}</small>
-          </div> */}
-          <IconButton onClick={handleToggleDrawer}>
-            {toggleDrawer ? <ChevronLeft /> : <ChevronRight />}
-          </IconButton>
+          <Grid container>
+            <Grid item md={12} className="d-flex align-items-center gap-1">
+            <span onClick={handleToggleDrawer}>
+                {toggleDrawer ? <IoIosArrowDropleftCircle size={30}/> : <IoIosArrowDroprightCircle size={20}/>}
+              </span>
+              <div className={classes.sidebarUser}>
+                {
+                  user?.user?.avatar ? <Avatar className="d-flex align-items-center gap-1" src={user?.user?.avatar}></Avatar>
+                    : <Avatar className="d-flex align-items-center gap-1"></Avatar>
+                }
+                <div className="d-flex align-items-center gap-1">{[user?.user?.firstName, user?.user?.lastName].filter(f => f).join(" ")}</div>
+                <small className="d-flex align-items-center gap-1">{user?.user?.email}</small>
+              </div>
+            </Grid>
+            
+          </Grid>
         </div>
-
         <div>
           <List className="sidebar-list">
             <Link to="/">

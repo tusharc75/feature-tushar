@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom'
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
-import { FaEye } from 'react-icons/fa';
+import { FaArrowAltCircleDown } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
 import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useData } from '../../StateProvider/Provider';
@@ -23,7 +23,6 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 const Accordion = withStyles({
     root: {
         border: "1px solid rgba(0, 0, 0, .125)",
-        boxShadow: "none",
         "&:not(:last-child)": {
             borderBottom: 0,
         },
@@ -41,9 +40,9 @@ const AccordionSummary = withStyles({
     root: {
         backgroundColor: "white",
         borderBottom: "1px solid #f1ece8",
-        background: "#ffffff",       
+        background: "#ffffff",
         fontWeight: "bold",
-        padding:"0px",
+        padding: "0px",
         "&$expanded": {
             minHeight: 46,
         },
@@ -51,7 +50,7 @@ const AccordionSummary = withStyles({
     content: {
         "&$expanded": {
             margin: "12px 0",
-            
+
         },
     },
     expanded: {},
@@ -72,7 +71,7 @@ function DisplayData({ key, label, value, icon }) {
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
+                <ListItemText primary={ value ? value : '-'} secondary={label} />
             </ListItem>
         </List>
     </div>
@@ -172,10 +171,10 @@ export default function OpportunityAccordionInUserDetail({
                                         {
                                             opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card>
+                                                    <Card className="detailCard">
                                                         <CardContent className="detailListing">
                                                             <Grid container className="detailCardHeader">
-                                                                <Grid item xs={12} sm={8}>
+                                                                <Grid item xs={7} sm={8}>
                                                                     {
                                                                         obj.entity === selectedEntity ? <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
                                                                             <Typography className="detailName">{obj?.opportunityName}</Typography>
@@ -187,10 +186,11 @@ export default function OpportunityAccordionInUserDetail({
                                                                     }
 
                                                                 </Grid>
-                                                                <Grid item xs={12} sm={4}>
-                                                                    <Typography className="amount">
+                                                                <Grid item xs={5} sm={4}>
+                                                                    {obj?.amount && <Typography className="amount">
                                                                         {currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative}
                                                                         &nbsp;{obj?.amount ?? ''}</Typography>
+                                                                    }
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>
@@ -222,7 +222,7 @@ export default function OpportunityAccordionInUserDetail({
                     setMaxRecordsToShow(opportunities.length)
                     // history.push(`/opportunity`)
                 }} p={1} display="flex" justifyContent="center" alignItems="center">
-                    <FaEye /> View All
+                    <FaArrowAltCircleDown size={25} />
                 </Box>
             }
         </Accordion>

@@ -14,7 +14,7 @@ import queryString from 'query-string';
 import { GetReferenceName } from "../../axios/activity";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, Paper } from "@material-ui/core";
 const capitalize = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
@@ -22,9 +22,19 @@ const capitalize = (string) => {
 const useStyles = makeStyles((theme) => ({
     activityContainer: {
         padding: "10px",
-        height: "calc(100vh - 11.4rem)",
-        overflow: "auto"
     },
+    activityHeader: {
+        background: "#dfdfdf",
+        margin: "6px 6px",
+        borderRadius: "6px"
+    },
+    tabBox: {
+        display: "flex",
+        justifyContent: "center",
+        padding: "2px",
+        margin: "5PX"
+    }
+
 }));
 
 const Activity = () => {
@@ -60,13 +70,15 @@ const Activity = () => {
             </Grid>
         </Grid>
         <CustomContainer>
-            <Box>
+            <Box className={classes.activityHeader}>
                 <Grid container>
-                    <Grid item xs={8}>
-                        <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
+                    <Grid item xs={12} md={5} sm={5}>
+                        <Paper className={classes.tabBox}>
+                            <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
+                        </Paper>
                     </Grid>
-                    <Grid xs={4} container>
-                        <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
+                    <Grid item xs={12} md={7} sm={7}>
+                        <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
                     </Grid>
                 </Grid>
             </Box>

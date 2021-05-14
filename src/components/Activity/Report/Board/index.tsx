@@ -1,20 +1,25 @@
 import { useState, useEffect } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 import statusList from "../../Helpers/statusList";
-import { Typography } from "@material-ui/core";
+import { Box, Grid, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import { isMobile, isTablet } from "react-device-detect";
 import { GetBoard } from "../../../../axios/activity";
 import Loader from "../../../../components/Loader";
 import { BoardList } from "./BoardList";
 import axiosInstance from "../../../../axios/axiosInstance";
 
+const useStyles = makeStyles((theme) => ({
+  block: {
+    background:"red"
+  }
+}));
+
 const Board = ({ type, filter, activityId }) => {
   const [activities, setActivities] = useState(null);
-
+  const classes = useStyles();
   useEffect(() => {
     fetchBoard();
   }, [filter, activityId]);
@@ -24,7 +29,7 @@ const Board = ({ type, filter, activityId }) => {
       .then(({ data }) => {
         setActivities(data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleChangeStatus = (activityId: string, status: string) => {
@@ -56,39 +61,32 @@ const Board = ({ type, filter, activityId }) => {
 
   return activities ? (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-      <Grid container>
+
+      <Grid container spacing={1}>
         {statusList.map((data, index) => (
-          <Box
-            key={index}
-            width={300}
-            height={window.innerHeight - 250}
-            mr={2}
-            style={{ overflow: "auto" }}
-            display="block"
-            border={1}
-            borderColor="grey.300"
-            bgcolor="grey.200"
-          >
-            <Box p={1}>
-              <Typography variant="subtitle2">
-                {data.status.toUpperCase()}
-                {" (" +
-                  activities.filter(function (o) {
-                    return o.status === data.status;
-                  }).length +
-                  ")"}
-              </Typography>
-            </Box>
-            <BoardList
-              status={data.status}
-              activity={activities.filter(function (o) {
-                return o.status === data.status;
-              })}
-              fetchBoard={fetchBoard}
-              type={type}
-              handleChangeStatus={handleChangeStatus}
-            />
-          </Box>
+          <Grid item md={4} xs={12} sm={6} key={index}>
+            <div className={classes.block}>
+              <Box p={1}>
+                <Typography variant="subtitle2">
+                  {data.status.toUpperCase()}
+                  {" (" +
+                    activities.filter(function (o) {
+                      return o.status === data.status;
+                    }).length +
+                    ")"}
+                </Typography>
+              </Box>
+              <BoardList
+                status={data.status}
+                activity={activities.filter(function (o) {
+                  return o.status === data.status;
+                })}
+                fetchBoard={fetchBoard}
+                type={type}
+                handleChangeStatus={handleChangeStatus}
+              />
+            </div>
+          </Grid>
         ))}
       </Grid>
     </DndProvider>

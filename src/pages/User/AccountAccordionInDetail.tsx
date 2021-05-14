@@ -15,7 +15,7 @@ import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunity
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline, IoCall } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
-import { FaEye } from 'react-icons/fa';
+import { FaArrowAltCircleDown } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
 import { useData } from '../../StateProvider/Provider';
 import { customerAccount, supplierAccount } from '../../constants/helpers';
@@ -28,7 +28,7 @@ import { AiOutlinePhone } from 'react-icons/ai';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
 const Accordion = withStyles({
     root: {
-        border: "1px solid rgba(0, 0, 0, .125)",
+        border: "1px solid rgba(0, 0, 0, .125) !important",
         boxShadow: "none",
         "&:not(:last-child)": {
             borderBottom: 0,
@@ -72,13 +72,13 @@ const AccordionDetails = withStyles((theme) => ({
 
 function DisplayData({ label, value, icon, showCopyToText = false }) {
     return <div style={{ flexGrow: 1 }}>
-        <List >
+        <List>
             <ListItem>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
                 <ListItemText
-                    primary={value}
+                    primary={ value ? value : 'Add Phone'}
                     secondary={label} />
                 {
                     showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
@@ -186,7 +186,7 @@ export default function AccountAccordionDetail({
                                             accounts.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card>
-                                                        <CardContent className="detailListing">
+                                                        <CardContent className="detailCard detailListing">
                                                             <Grid container className="detailCardHeader">
                                                                 <Grid item xs={12} sm={12}>
                                                                     <Link className="link" to={type === "customer" ? `${routes.customerAccountDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
@@ -196,14 +196,14 @@ export default function AccountAccordionDetail({
                                                             </Grid>
                                                             <Grid container>
                                                                 <Grid container>
-                                                                    <Grid item xs={12} sm={6}>
+                                                                    <Grid item xs={12} sm={5} md={5}>
                                                                         {
-                                                                            obj?.industry ? <DisplayData icon={<FaIndustry size={15} />} label='Industry' value={obj?.industry ?? ''} /> : ''
+                                                                            <DisplayData icon={<FaIndustry size={15} />} label='Industry' value={obj?.industry ?? ''} />
                                                                         }
                                                                     </Grid>
-                                                                    <Grid item xs={12} sm={6}>
+                                                                    <Grid item xs={12} sm={7} md={7}>
                                                                         {
-                                                                            obj?.phone ? <DisplayData showCopyToText={true} icon={<AiOutlinePhone size={15} />} label='Phone' value={obj?.phone ?? ''} /> : ''
+                                                                           <DisplayData showCopyToText={true} icon={<AiOutlinePhone size={15} />} label='Phone' value={obj?.phone ?? ''} />
                                                                         }
                                                                     </Grid>
 
@@ -226,7 +226,7 @@ export default function AccountAccordionDetail({
                     // history.push(`/${type === "customer" ? customerAccount.accountResource : supplierAccount.accountResource}`)
                     setMaxRecordsToShow(accounts.length)
                 }} p={1} display="flex" justifyContent="center" alignItems="center">
-                    <FaEye /> View All
+                     <FaArrowAltCircleDown size={25}/>
                 </Box>
             }
         </Accordion>

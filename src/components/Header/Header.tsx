@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   logo: {
-    width: "110px",
+    width: "140px",
   },
 
   search: {

@@ -14,18 +14,18 @@ import { Link } from 'react-router-dom'
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
-import { BiCustomize } from 'react-icons/bi';
+import { BiCustomize, BiPhone } from 'react-icons/bi';
 import { HiOutlineUser } from 'react-icons/hi';
+import { AiOutlineMail } from 'react-icons/ai';
 import { BsBuilding } from 'react-icons/bs';
 import currencies from './../../constants/currency_with_country.json';
 import { useData } from '../../StateProvider/Provider';
 import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
-import { FaEye } from 'react-icons/fa';
+import { FaArrowAltCircleDown } from 'react-icons/fa';
 
 const Accordion = withStyles({
     root: {
-        border: "1px solid rgba(0, 0, 0, .125)",
-        boxShadow: "none",
+        border: "1px solid rgba(0, 0, 0, .125) !important",
         "&:not(:last-child)": {
             borderBottom: 0,
         },
@@ -73,7 +73,7 @@ function DisplayData({ label, value, icon }) {
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
+                <ListItemText primary={ value ? value : '-'} secondary={label} />
             </ListItem>
         </List>
     </div>
@@ -175,22 +175,29 @@ export default function LeadAccordionInUserDetailPage({
                                         {
                                             leads.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card>
+                                                    <Card className="detailCard">
                                                         <CardContent className="detailListing">
-                                                            <Grid item xs={12} sm={12}>
-                                                                <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
-                                                                    <Typography className="detailName">{obj?.firstName}  {obj?.lastName} </Typography>
-                                                                </Link>
+                                                            <Grid container className="detailCardHeader">
+                                                                <Grid item xs={12} sm={12} md={12}>
+                                                                    <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
+                                                                        <Typography className="detailName">{obj?.firstName}  {obj?.lastName} {obj?.title ? <span className="role">({obj?.title})</span> : ''} </Typography>
+                                                                    </Link>
+                                                                </Grid>
                                                             </Grid>
                                                             <Grid container>
-                                                                <Grid item xs={12} sm={6} md={6}>
+                                                                <Grid item xs={12} sm={12} md={12}>
                                                                     {
-                                                                       obj?.company ? <DisplayData label='Company' icon={<BsBuilding size={15} />} value={obj?.company ?? ''} /> : ''
+                                                                        <DisplayData label='Company' icon={<BsBuilding size={15} />} value={obj?.company ?? ''} />
                                                                     }
                                                                 </Grid>
-                                                                <Grid item xs={12} sm={6} md={6}>
+                                                                <Grid item xs={12} sm={12} md={12}>
                                                                     {
-                                                                       obj?.status ? <DisplayData label='Status' icon={<BiCustomize size={15} />} value={obj?.status ?? ''} /> : ''
+                                                                        <DisplayData label='Email' icon={<AiOutlineMail size={15} />} value={obj?.email ?? ''} />
+                                                                    }
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={12} md={12}>
+                                                                    {
+                                                                       <DisplayData label='phone' icon={<BiPhone size={15} />} value={obj?.phone ?? ''} />
                                                                     }
                                                                 </Grid>
                                                             </Grid>
@@ -206,13 +213,13 @@ export default function LeadAccordionInUserDetailPage({
                 </>
             </AccordionDetails>
             {
-                leads?.length > 0 &&
+                 leads?.length > 0 && leads.length > recordsPerLine &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => {
                     setMaxRecordsToShow(leads.length)
                     // history.push(`/lead`)
                 }}
                     p={1} display="flex" justifyContent="center" alignItems="center">
-                    <FaEye /> View All
+                    <FaArrowAltCircleDown size={25} />
                 </Box>
             }
         </Accordion>

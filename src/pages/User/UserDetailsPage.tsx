@@ -671,6 +671,8 @@ const UserDetailsPage = () => {
                     </Grid>
                   </>
                 }
+
+                <div className="p-3">
                 <OpportunityAccordionInUserDetail
                   opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
                   recordsPerLine={3}
@@ -702,7 +704,7 @@ const UserDetailsPage = () => {
                 <AccountAccordionDetail
                   type="supplier"
                   accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
-                  recordsPerLine={2}
+                  recordsPerLine={3}
                   expanded={false}
                   userId={id}
                   onSuccess={() => {
@@ -712,7 +714,7 @@ const UserDetailsPage = () => {
                 <ContactAccordionInDetailPage
                   type="customer"
                   contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
-                  recordsPerLine={2}
+                  recordsPerLine={3}
                   expanded={false}
                   userId={id}
                   onSuccess={() => {
@@ -722,13 +724,14 @@ const UserDetailsPage = () => {
                 <ContactAccordionInDetailPage
                   type="supplier"
                   contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
-                  recordsPerLine={2}
+                  recordsPerLine={3}
                   expanded={false}
                   userId={id}
                   onSuccess={() => {
                     fetchUserRelatedDetail()
                   }}
                 />
+                </div>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>

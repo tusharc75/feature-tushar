@@ -37,7 +37,7 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 const Accordion = withStyles({
   root: {
-    border: "1px solid rgba(0, 0, 0, .125)",
+    border: "1px solid rgba(0, 0, 0, .125) !important",
     boxShadow: "none",
     "&:not(:last-child)": {
       borderBottom: 0,
