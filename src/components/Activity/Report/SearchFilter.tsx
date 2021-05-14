@@ -61,9 +61,9 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
       renderTags={(value, getTagProps) =>
         value.map((option, index) => (
           <Chip
-            variant={chip.variant || "outlined"}
-            size={chip.size || "medium"}
-            color={chip.color || "primary"}
+            variant={chip?.variant || "outlined"}
+            size={chip?.size || "medium"}
+            color={chip?.color || "primary"}
             label={
               option &&
               capitalize(UnCamelCase(option.type)) + " - " + option.name
@@ -86,9 +86,9 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
           <Grid container alignItems="center" spacing={3}>
             <Grid item>
               <Chip
-                variant={chip.variant || "outlined"}
-                size={chip.size || "medium"}
-                color={chip.color || "primary"}
+                variant={chip?.variant || "outlined"}
+                size={chip?.size || "medium"}
+                color={chip?.color || "primary"}
                 label={
                   option.isAll
                     ? option.name + " " + capitalize(UnCamelCase(option.type))
