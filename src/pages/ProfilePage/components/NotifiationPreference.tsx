@@ -1,16 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { Grid, Box, Tooltip, IconButton, Checkbox, FormControlLabel, Typography } from '@material-ui/core'
+import { useEffect, useState } from 'react'
+import { Grid, Box, Checkbox, FormControlLabel, Typography } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import { useData } from "../../../StateProvider/Provider";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../../axios/axiosInstance";
-import CustomContainer from "../../../components/CustomContainer";
-import SaveButton from '../../../components/Helpers/CustomButton'
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { BsEnvelopeOpen, BsPhone, BsDisplay } from 'react-icons/bs'
@@ -68,14 +62,12 @@ const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
 
 export default function NotifiationPreference(props) {
 
-    const { state: { user } } = useData();
     const [rows, setRows] = useState([])
     const [isAllPreference, setAllPreference] = useState({
         desktop: false,
         mobile: false,
         email: false
     })
-    const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
 
     useEffect(() => {
@@ -104,9 +96,6 @@ export default function NotifiationPreference(props) {
             return { ...obj, [columnName]: !isAllPreference[columnName] }
         })
         setRows(tempRows)
-    }
-
-    const handleSubmit = () => {
     }
 
     const options = [

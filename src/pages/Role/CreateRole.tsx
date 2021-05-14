@@ -7,12 +7,6 @@ import {
   Box,
   TextField,
   Paper,
-  Table,
-  TableContainer,
-  TableHead,
-  TableBody,
-  TableCell,
-  TableRow,
   useTheme,
   useMediaQuery,
 } from "@material-ui/core";
@@ -38,8 +32,6 @@ const CreateRole = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isRedirect, setIsRedirect] = useState(false);
-  const [createdRoleId, setCreatedRoleId] = useState("");
   const [values, setValues] = useState({ name: "", description: "" });
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
