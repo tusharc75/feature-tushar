@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
   IconButton,
@@ -512,10 +511,10 @@ const Opportunities = () => {
     if (params.filterModel.items[0].value) {
       let field = params.filterModel.items[0].columnField
 
-      if (params.filterModel.items[0].columnField == 'createdBy') {
+      if (params.filterModel.items[0].columnField === 'createdBy') {
         field = "createdBy.user"
       }
-      if (params.filterModel.items[0].columnField == 'updatedBy') {
+      if (params.filterModel.items[0].columnField === 'updatedBy') {
         field = "updatedBy.user"
       }
       const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
