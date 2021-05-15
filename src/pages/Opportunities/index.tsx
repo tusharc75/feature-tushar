@@ -272,27 +272,26 @@ const Opportunities = () => {
       width: 300,
       hide: true,
       renderCell: (params) =>
-        params?.row?.supplierAccountName?.length > 0 ? (
-          params.row.supplierAccountName.map((obj, index) => (
-            index < 3 ?
-              (<Link
-                className="link"
-                to={`${routes.supplierAccount.path}/detail/${obj?.optionValue}`}
-              >
-                <Chip
-                  variant="outlined"
-                  size="medium"
-                  clickable={true}
-                  color="secondary"
-                  label={
-                    obj?.optionLabel
-                  }
-                />
-              </Link>) :
-              <Chip variant="outlined" size="small" label="..." />
-          ))
+        params?.row?.supplierAccountName.length > 0 ? (
+          <>
+            <Link
+              className="link"
+              to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName[0].optionValue}`}
+            >
+              {params?.row?.supplierAccountName[0].optionLabel}
+            </Link>
+          &nbsp;
+            {
+              params?.row?.supplierAccountName.length > 1 &&
+              <span>
+                {`${params?.row?.supplierAccountName.length - 1}+`}
+              </span>
+            }
+          </>
+        ) : <NoDataCell />
 
-        ) : <NoDataCell />,
+
+
     },
     {
       field: "customerAccountName",
