@@ -24,7 +24,7 @@ interface InitialData {
     values: object;
 }
 
-export default function ManageUserDialog({ open, close, onSuccess, isNew, userId = null, dataToUpdate }) {
+export default function ManageUserDialog({ open, close, onSuccess, isNew, userId = null, dataToUpdate, redirectToDetailsScreen = true }) {
 
     const { setToastConfig } = useContext(CustomToastContext);
     const theme = useTheme();
@@ -119,11 +119,16 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                     });
                     setSubmitting(false);
 
+                    // if (redirectToDetailsScreen) {
                     history.push({
                         pathname: `/user/detail/${newId}`,
                         state: { location: location }
                     });
                     close();
+                    // }
+                    // else {
+                    //     onSuccess(data.data[0])
+                    // }
                 })
                 .catch((error) => {
                     setToastConfig(error);
