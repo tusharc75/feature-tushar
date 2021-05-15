@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar, Card, CardContent, List } from "@material-ui/core";
+import { Box, Button, Grid, Typography, IconButton, Paper, Card, CardContent, List } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
-import { Skeleton, TabPanel } from "@material-ui/lab";
-import CustomContainer from "../../components/CustomContainer";
+import { Skeleton } from "@material-ui/lab";
 import Layout from "../../components/Layout";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { accountPage } from "../../routes/Accounts";
@@ -25,7 +24,6 @@ import ManageContactDialog from "../Contact/ManageContact/index";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { makeStyles } from "@material-ui/core/styles";
 import {
-  // DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -44,7 +42,6 @@ import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccord
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 import { Link } from 'react-router-dom'
-import { BiFace } from 'react-icons/bi'
 import { BsPerson } from 'react-icons/bs'
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -55,51 +52,6 @@ import Graph from "vis-react";
 
 const fontSize = 14;
 const radius = 20;
-
-const Node = ({ node }) => {
-  // colors
-
-  // sizes
-  const sizes = {
-    radius: radius,
-    textSize: fontSize,
-    textX: radius * 1.5,
-    textY: radius / 2,
-  };
-  const sizesImg = {
-    radius: 30,
-    textSize: fontSize,
-    textX: 30 * 1.5,
-    textY: 30 / 2,
-  };
-
-  return (
-    <>
-      <circle
-        fill={`light${node.stroke}`}
-        stroke={node.stroke}
-        r={sizes.radius}
-      />
-      <g style={{ fontSize: sizes.textSize + 'px' }}>
-        <text
-          x={sizes.radius + 7}
-          y={sizes.radius / 2}
-        >
-          {node.label}
-        </text>
-      </g>
-    </>
-  );
-};
-
-const Line = ({ link, ...restProps }) => {
-  return (
-    <line
-      {...restProps}
-      stroke={link.stroke}
-    />
-  )
-};
 
 const data = {
   nodes: [
@@ -115,7 +67,7 @@ const data = {
   ]
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   container: {
     padding: "0px",
     minHeight: "auto",
@@ -153,7 +105,7 @@ export default function AccountDetailPage(props) {
   }: any = useData();
 
   const [headingLbl, setHeadingLbl] = useState("");
-  const [isUpdating, setUpdating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [accountData, setAccountData] = useState<any>({});
   const [relatedContacts, setRelatedContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
@@ -363,7 +315,7 @@ export default function AccountDetailPage(props) {
           ];
           let newData = [];
 
-          accounts.map((account) => {
+          accounts.forEach((account) => {
             if (isObjectEmpty(account)) return true;
 
             const updatedAccount = {
@@ -543,7 +495,7 @@ export default function AccountDetailPage(props) {
   };
 
   const onUpdateAccount = (values) => {
-    setUpdating(true);
+    setIsUpdating(true);
 
     const updatedData = {
       ...values,
@@ -559,12 +511,12 @@ export default function AccountDetailPage(props) {
           type: "success",
           message: data.message,
         });
-        setUpdating(false);
+        setIsUpdating(false);
         setOpenUpdateDialog(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setUpdating(false);
+        setIsUpdating(false);
       });
   };
 
@@ -580,15 +532,6 @@ export default function AccountDetailPage(props) {
 
   const closeUpdateDIalog = () => {
     setOpenUpdateDialog(false);
-  };
-
-  const handleViewAll = (path, state) => {
-    history.push({
-      pathname: path,
-      state: {
-        ...state,
-      },
-    });
   };
 
   const handleCreateContact = () => {
@@ -715,7 +658,7 @@ export default function AccountDetailPage(props) {
                       /> */}
                     </Tabs>
                     {
-                      currentTabIndex == 0 && <Box>
+                      currentTabIndex === 0 && <Box>
                         <DetailsPage
                           data={accountData}
                           fields={accountFields}
@@ -724,7 +667,7 @@ export default function AccountDetailPage(props) {
                     }
 
                     {
-                      currentTabIndex == 1 && <Box>
+                      currentTabIndex === 1 && <Box>
                         <AccountHierarchy
                           data={accountHierarchyData}
                           currentAccountId={accountData._id}
@@ -734,7 +677,7 @@ export default function AccountDetailPage(props) {
                     }
 
                     {/* {
-                      currentTabIndex == 2 && <Box>
+                      currentTabIndex === 2 && <Box>
                         <div style={{ height: "500px", width: "100%" }}>
                           <Graph
                             graph={graph}
