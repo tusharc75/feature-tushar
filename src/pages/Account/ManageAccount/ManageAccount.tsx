@@ -27,7 +27,7 @@ export default function ManageAccount(props) {
     const [parentAccountDataSource, setParentAccountDataSource] = useState([]);
 
     useEffect(() => {
-        const ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
+        let ownerCollaboratorDropdownData = entityData.fields.filter(d => ["owner", "collaborator"].indexOf(d.fieldName) !== -1);
         if (ownerCollaboratorDropdownData.length > 0) {
             setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
             setOwnerDataSource(ownerCollaboratorDropdownData[0].option)
@@ -41,6 +41,11 @@ export default function ManageAccount(props) {
             }
         }
         sortArray();
+
+        return function cleanup() {
+            ownerCollaboratorDropdownData = [];
+        }
+
     }, [entityData.fields]);
 
 
