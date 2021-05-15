@@ -16,8 +16,7 @@ import { useData } from "../../StateProvider/Provider";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import DeleteButton from "../../components/Helpers/DeleteButton";
-import Roles from "./Roles";
+import { FaEye } from 'react-icons/fa';
 import {
   SET_USER,
   USER_LOADING,
@@ -281,7 +280,7 @@ const EntityDetailsPage = () => {
     <>
       {showAssignUserDialog && (
         <AssignUserDialog
-        entitiesDialogOpen={showAssignUserDialog}
+          entitiesDialogOpen={showAssignUserDialog}
           handleCloseDialog={userDialogClose}
           type="user"
           ids={[id]}
@@ -439,7 +438,7 @@ const EntityDetailsPage = () => {
                       <>
                         <AssignedUsers
                           permissions={permissions}
-                          data={users.slice(0, showUsers)}
+                          user={users.slice(0, showUsers)}
                           unassignEntity={handleUnassignUser}
                           selectedEntity={null}
                           type="entity"
@@ -447,19 +446,15 @@ const EntityDetailsPage = () => {
 
                         <Box marginY={1} />
                         {
-                          users.length > showRecordsBeforeViewAll && <Button
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={() => {
-                              setShowUsers(showUsers == users.length ? showRecordsBeforeViewAll : users.length)
-                            }}
-                          >
-                            {
-                              showUsers == users.length ? `View less` : `View All (${users.length})`
-                            }
-                          </Button>
+                          users.length > showRecordsBeforeViewAll &&
+                          <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
+                            onClick={() => history.push(`/user`, {
+                              id: entityData._id,
+                              name: entityData.entityName,
+                              type: "entity"
+                            })}>
+                            <FaEye /> View All &#8599;
+                          </Box>
                         }
                       </>
                     ) : (
@@ -480,17 +475,17 @@ const EntityDetailsPage = () => {
           open={showConfirmBox}
           message={
             userDeleteRec
-                ? `Are you sure you want to un-assign user ${userDeleteRec.firstName} ${userDeleteRec.lastName}?`
-                : `Are you sure you want to delete this entity ?`
+              ? `Are you sure you want to un-assign user ${userDeleteRec.firstName} ${userDeleteRec.lastName}?`
+              : `Are you sure you want to delete this entity ?`
           }
           onClose={() => {
             setDeleteRoleRec(null);
             setShowConfirmBox(false);
           }}
           onOk={
-             userDeleteRec
-                ? unassignUserEntity
-                : handleDeleteEntity
+            userDeleteRec
+              ? unassignUserEntity
+              : handleDeleteEntity
           }
         />
       ) : null}

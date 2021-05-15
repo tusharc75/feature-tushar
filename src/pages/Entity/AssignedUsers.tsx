@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AssignedUsers = ({   data,
+const AssignedUsers = ({   user,
   unassignEntity,
   permissions,
   selectedEntity,
@@ -38,8 +38,8 @@ const AssignedUsers = ({   data,
   return (
     <div className={classes.demo}>
       <List disablePadding>
-        {data && data.length
-          ? data.map((obj) => (
+        {user && user.length
+          ? user.map((obj) => (
             <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
               <ListItem disableGutters className={classes.list}>
                 <div>
@@ -85,6 +85,7 @@ const AssignedUsers = ({   data,
               </ListItem>
             </BoxWithBorder>
           ))
+          
           : null}
       </List>
     </div>

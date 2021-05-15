@@ -32,7 +32,7 @@ import RoleEngine from "../../components/Shared/RoleEngine";
 import Loader from "../../components/Loader";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedUsers from "./AssignedUsers";
-import AssignedEntities from "./AssignedEntities";
+import { FaEye } from 'react-icons/fa';
 import BoxWithBorder from "../../components/BoxWithBorder";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
@@ -567,23 +567,18 @@ const RoleDetailsPage = () => {
                         unassignRole={handleUnassignUser}
                         data={roleUsers && roleUsers.slice(0, showUsers)}
                         currentUser={user?.user._id}
-                        type = {roleData?.type}
+                        type={roleData?.type}
                       />
                       <Box marginY={1} />
                       {
-                        roleUsers.length > showRecordsBeforeViewAll && <Button
-                          fullWidth
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => {
-                            setShowUsers(showUsers == roleUsers.length ? showRecordsBeforeViewAll : roleUsers.length)
-                          }}
-                        >
-                          {
-                            showUsers == roleUsers.length ? `View less` : `View All (${roleUsers.length})`
-                          }
-                        </Button>
+                        roleUsers.length > showRecordsBeforeViewAll && <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
+                          onClick={() => history.push(`/user`, {
+                            id: roleData._id,
+                            name: roleData.name,
+                            type: roleData.type === 2 ? "regionalRole" : "globalRole"
+                        })}>
+                          <FaEye /> View All &#8599;
+                      </Box>
                       }
                     </>
                   ) : (
