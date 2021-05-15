@@ -295,7 +295,7 @@ const Opportunities = () => {
             {
               params?.row?.supplierAccountName.length > 1 &&
               <span>
-                {`${params?.row?.supplierAccountName.length - 1}+`}
+                {`${params?.row?.supplierAccountName.length - 1}+ Different`}
               </span>
             }
           </>
