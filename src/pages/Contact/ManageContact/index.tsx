@@ -13,7 +13,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAccountDialog from '../../Account/ManageAccount/index'
 
-export default function ManageContactMain(props) {
+export default function ManageContactDialog(props) {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -144,6 +144,8 @@ export default function ManageContactMain(props) {
         handleSubmit={handleCreateContact}
         accountSource={accountSource}
         onCreateAccount={() => setShowAccountDialog(true)}
+        accountResource={accountResource}
+        contactResource={contactResource}
         accountId={newAddedAccountId}
       />
       {

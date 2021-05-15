@@ -27,22 +27,14 @@ export default function AssignContactsDialog({
     // roleIds,
     contacts,
     assignedContacts,
-    contactType
+    contactType,
+    notToBeRemovedContacts
 }) {
     const toastConfig = useContext(CustomToastContext);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [isAssigning, setAssigning] = useState(false);
 
     const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
-
-    useEffect(() => {
-        const updatedContacts = [];
-        currentContacts.map(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
-            updatedContacts.push(d);
-        })
-        setCurrentContacts(updatedContacts)
-    }, []);
 
     const handleContactSelection = (e, id) => {
         const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
@@ -63,7 +55,8 @@ export default function AssignContactsDialog({
         const dataToSave = {
             _id: opportunityId,
             supplierContacts: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
-            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : []
+            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
+            notToBeRemoved: contacts && contacts?.notToBeRemoved ? contacts.notToBeRemoved : null
         };
 
         await axiosInstance()
@@ -103,6 +96,7 @@ export default function AssignContactsDialog({
                                 <ListItemIcon>
                                     <Checkbox
                                         edge="start"
+                                        disabled={notToBeRemovedContacts.indexOf(contact._id) >= 0 ? true : false}
                                         onChange={(e) => handleContactSelection(e, contact._id)}
                                         checked={contact.isChecked}
                                         inputProps={{

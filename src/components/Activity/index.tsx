@@ -17,14 +17,18 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import Dialog from '@material-ui/core/Dialog';
 import { makeStyles } from "@material-ui/core";
-import { BiTask } from 'react-icons/bi';
-import { VscCalendar } from 'react-icons/vsc';
-import { BsBriefcase } from 'react-icons/bs';
-import { GoNote } from 'react-icons/go';
-import { HiOutlineMail } from 'react-icons/hi';
-import { FiPlusSquare } from 'react-icons/fi';
+import { BiTask } from "react-icons/bi";
+import { VscCalendar } from "react-icons/vsc";
+import { BsBriefcase } from "react-icons/bs";
+import { GoNote } from "react-icons/go";
+import { HiOutlineMail } from "react-icons/hi";
+import { FiPlusSquare } from "react-icons/fi";
+import { AiOutlinePaperClip } from 'react-icons/ai'
+import { Tooltip } from '@material-ui/core'
+import Attachments from './Attachments/index'
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageAttachment from "./Attachments/ManageAttachment";
 
 const useStyles = makeStyles((theme) => ({
   activityBox: {
@@ -53,7 +57,7 @@ const Activity = (props) => {
   const [open, setOpen] = useState(false);
   const [emailUsersOptions, setEmailUsersOptions] = useState([])
 
-  const tabs = ["Task", "Event", "Case", "Note", "Email"];
+  const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
   useEffect(() => {
     fetchUsersEmails()
@@ -84,6 +88,9 @@ const Activity = (props) => {
 
       case "Email":
         return <HiOutlineMail size={20} />;
+
+      case "Attachment":
+        return <AiOutlinePaperClip size={22} />
     }
   };
 
@@ -165,8 +172,7 @@ const Activity = (props) => {
                     color="primary"
                     size="small"
                     onClick={(event) => handleCreateActivity(event, data)}
-                  >
-                    <FiPlusSquare />
+                  > <FiPlusSquare />
                   </IconButton>
                 </Grid>
               </Grid>
@@ -202,6 +208,13 @@ const Activity = (props) => {
                   handleActivityRefresh={handleActivityRefresh}
                 />
               ) : null}
+              {
+                type === "Attachment" && data === "Attachment" ? (
+                  <Attachments
+                    relatedTo={relatedTo}
+                    handleActivityRefresh={handleActivityRefresh}
+                  />) : null
+              }
             </Box>
           </Fragment>
         ))}
@@ -249,6 +262,15 @@ const Activity = (props) => {
             options={emailUsersOptions}
           />
         ) : null}
+        {
+          type === "Attachment" ? (
+            <ManageAttachment
+              attachmentId={null}
+              handleClose={handleClose}
+              relatedTo={relatedTo}
+            />
+          ) : null
+        }
       </Dialog>
     </Box>
   );

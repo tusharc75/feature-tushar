@@ -7,9 +7,10 @@ const getAzureAcessToken = async (msalInstance) => {
         return "" 
     }
     const request = {
-        scopes: ["https://graph.microsoft.com/Mail.Send",ResourceUrl+"/OnlineMeetings.ReadWrite"],
+        scopes: ["https://graph.microsoft.com/Mail.Send",ResourceUrl+"/OnlineMeetings.ReadWrite",ResourceUrl+"/Calendars.ReadWrite"],
         account: activeAccount || accounts[0]
     };
+
 
     const authResult = await msalInstance.acquireTokenSilent(request);
 

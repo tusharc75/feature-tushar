@@ -4,12 +4,6 @@ import {
   Button,
   TextField,
   Paper,
-  Table,
-  TableContainer,
-  TableHead,
-  TableBody,
-  TableCell,
-  TableRow,
   Grid,
   CircularProgress,
   Typography,
@@ -21,7 +15,6 @@ import { useParams, useHistory } from "react-router-dom";
 
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
-import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -372,7 +365,7 @@ const RoleDetailsPage = () => {
 
               <Box display="flex" marginTop={2} marginBottom={2} gridGap={10}>
                 <TextField
-                  disabled={!permissions.role.isUpdate}
+                  disabled={(roleData?.type && roleData?.permission) ? true : !permissions.role.isUpdate}
                   required
                   variant="outlined"
                   size="small"
@@ -385,7 +378,7 @@ const RoleDetailsPage = () => {
                 />
 
                 <TextField
-                  disabled={!permissions.role.isUpdate}
+                  disabled={(roleData?.type && roleData?.permission) ? true : !permissions.role.isUpdate}
                   required
                   variant="outlined"
                   size="small"

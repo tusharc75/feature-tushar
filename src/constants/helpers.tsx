@@ -19,9 +19,6 @@ import {
 } from "@material-ui/icons";
 import * as yup from "yup";
 import moment from "moment";
-import ListItem from "@material-ui/core/ListItem/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import { ListItemText } from "@material-ui/core";
 import currencies from './currency_with_country.json';
 
 export const vapidKey =
@@ -57,6 +54,8 @@ export const roleTypes = [
 export const userType = {
   brandAdmin: 2,
 };
+
+export const gridPageSizes = [25, 50, 75];
 
 export const leadProcessFieldName = "leadProcess";
 export const opportunityProcessFieldName = "process";
@@ -522,19 +521,6 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
-// export const DisplayData = ({ label, value, icon }) => {
-//   return <div style={{ flexGrow: 1 }}>
-//     <List>
-//       <ListItem>
-//         <ListItemAvatar>
-//           {icon}
-//         </ListItemAvatar>
-//         <ListItemText primary={value} secondary={label} />
-//       </ListItem>
-//     </List>
-//   </div>
-// }
-
 export const formatAmountWithCurrency = (currencyCode, amount) => {
   if (!currencyCode && !amount)
     return null;
@@ -547,7 +533,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     return amount;
   }
 
-  const language = navigator.language.split("-")[0];
+  const language = currencyData.languages.length > 0 ? currencyData.languages[0] : "en";
 
   let options = {
     style: 'currency',
@@ -559,5 +545,4 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   }
 
   return new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1 ');
-
 }

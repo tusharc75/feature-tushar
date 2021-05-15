@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
@@ -22,6 +22,8 @@ import Activitydemo from "./pages/Activity/activitydemo";
 import Activity from "./pages/Activity";
 import Note from "./pages/Activity/Note";
 import Email from "./pages/Activity/Email";
+import Attachments from "./pages/Activity/Attachments";
+import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
 import ProductCategory from "./pages/ProductCategory";
 import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
@@ -49,9 +51,7 @@ import {
   customerAccount,
   customerContact,
   supplierAccount,
-  supplierContact,
-  profilePage,
-  vapidKey,
+  supplierContact
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
@@ -65,20 +65,22 @@ import axiosInstance from "./axios/axiosInstance";
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
-  const location = useLocation();
   const {
     state: { user },
   }: any = useData();
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
-      await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-        notification.setCount(count);
-      }).catch((error) => {
-        toast.setToastConfig(error);
-      });
+      await axiosInstance()
+        .get(`/user/notification/unseen`)
+        .then(({ data: { count } }) => {
+          notification.setCount(count);
+        })
+        .catch((error) => {
+          toast.setToastConfig(error);
+        });
     }
-  }
+  };
 
   useEffect(() => {
     try {
@@ -86,11 +88,10 @@ function App() {
       setInterval(async () => {
         await getNotification();
       }, 60000);
-    }
-    catch (e) {
+    } catch (e) {
       console.log(e);
     }
-  }, [])
+  }, []);
 
   const conditionalRedirect = (Comp, location) => {
     return !user ? (
@@ -271,8 +272,14 @@ function App() {
           <PrivateRoute exact path="/activity/note">
             <Note />
           </PrivateRoute>
+          <PrivateRoute exact path="/activity/attachment">
+            <Attachments />
+          </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />
+          </PrivateRoute>
+          <PrivateRoute exact path="/calendar">
+            <Calender />
           </PrivateRoute>
 
           <PrivateRoute exact path="/product-category">
@@ -309,7 +316,7 @@ function App() {
           <PrivateRoute exact path={routes.productBuilder.path}>
             <ProductBuilder />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productBuilder.path + "/:id"} >
+          <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
             <CreateProductBuilder />
           </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Grid,
   Box,
@@ -9,12 +9,6 @@ import {
   FormControlLabel,
   Switch,
   IconButton,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
   Paper,
   Tooltip,
   Tabs,
@@ -32,7 +26,6 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
@@ -43,7 +36,6 @@ import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import { userType } from "../../constants/helpers";
-import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -69,7 +61,7 @@ const UserDetailsPage = () => {
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [rolesLoading, setRolesLoading] = useState(false);
-  const [userRelatedLoading, setUserRelatedLoading] = useState(false);
+  // const [userRelatedLoading, setUserRelatedLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [leadsRelatedData, setLeadsRelatedData] = useState(null);
   const [opportunityRelatedData, setOpportunityRelatedData] = useState(null);
@@ -80,15 +72,15 @@ const UserDetailsPage = () => {
   const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
 
-  const [isChangingPermission, setIsChangingPermission] = useState(false);
-  const [hasPermissionToUpdateApprovalProcess, setHasPermissionToUpdateApprovalProcess] = useState(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
+  // const [isChangingPermission, setIsChangingPermission] = useState(false);
+  const [hasPermissionToUpdateApprovalProcess] = useState(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
   const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
   const [userFields, setUserFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [isUpdating, setUpdating] = useState(false);
+  // const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
@@ -148,7 +140,7 @@ const UserDetailsPage = () => {
       let orgChartData = [];
 
       if (data.parentHierarchy && data.parentHierarchy.length > 0) {
-        data.parentHierarchy.map(d => {
+        data.parentHierarchy.forEach(d => {
           orgChartData.push({
             id: d._id,
             name: [d.firstName, d.lastName]
@@ -244,7 +236,7 @@ const UserDetailsPage = () => {
       });
   };
   const fetchUserRelatedDetail = () => {
-    setUserRelatedLoading(true);
+    // setUserRelatedLoading(true);
     axiosInstance()
       .get(`/user/related/${id}`)
       .then(({ data: { data } }) => {
@@ -256,7 +248,7 @@ const UserDetailsPage = () => {
         setOpportunityRelatedData(data["Opportunity"]);
       })
       .catch((error) => {
-        setUserRelatedLoading(false);
+        // setUserRelatedLoading(false);
         toastConfig.setToastConfig(error);
       })
 
@@ -310,27 +302,27 @@ const UserDetailsPage = () => {
     }
   };
 
-  const handleUpdateUser = (values) => {
-    setUpdating(true);
+  // const handleUpdateUser = (values) => {
+  //   setUpdating(true);
 
-    axiosInstance()
-      .put(`/user`, { ...values, _id: id })
-      .then(({ data }) => {
-        fetchUserData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
-        setUserPermissions(data.permissions);
-        setUpdating(false);
-        closeUpdateDialog();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setUpdating(false);
-      });
-  };
+  //   axiosInstance()
+  //     .put(`/user`, { ...values, _id: id })
+  //     .then(({ data }) => {
+  //       fetchUserData();
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         type: "success",
+  //         message: data.message,
+  //       });
+  //       setUserPermissions(data.permissions);
+  //       setUpdating(false);
+  //       closeUpdateDialog();
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //       setUpdating(false);
+  //     });
+  // };
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -879,7 +871,7 @@ const UserDetailsPage = () => {
                                 onChange={handleChangePermissions}
                               />
                             }
-                            label={key == "doaSetup" ? "DOA Setup" : startCase(key)}
+                            label={key === "doaSetup" ? "DOA Setup" : startCase(key)}
                           />
                         </Tooltip>
                       ))
