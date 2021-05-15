@@ -95,7 +95,10 @@ const Opportunities = () => {
     if (permissions && permissions[opportunityResource]) {
       setOpportunityPermissions(permissions[opportunityResource]);
     }
-    // eslint-disable-next-line
+
+    return () => {
+      setOpportunityPermissions(null)
+    }
   }, [permissions]);
 
   useEffect(() => {
@@ -114,7 +117,11 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-    // eslint-disable-next-line
+    
+
+    return () => {
+      setRenderCount(0);
+    }
   }, [query, selectedType, selectedEntity, accountDetails]);
 
   useEffect(() => {
@@ -132,7 +139,11 @@ const Opportunities = () => {
       return res;
     });
     setDataRows([...rows]);
-    // eslint-disable-next-line
+
+    return () => {
+      setDataRows([])
+    }
+
   }, [opportunityData]);
 
   const handleSingleDeleteOpportunity = async () => {
