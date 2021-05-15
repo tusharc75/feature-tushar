@@ -10,9 +10,9 @@ import {
 import { Link } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import { PERMISSION } from "../../constants/Roles";
+// import { PERMISSION } from "../../constants/Roles";
 
-const rolesPermissions = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
+// const rolesPermissions = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
