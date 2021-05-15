@@ -24,7 +24,7 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-import AssignedUsers from "../../components/AssignRolesList/AssignedEntities";
+import AssignedUsers from "./AssignedUsers";
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -285,7 +285,8 @@ const EntityDetailsPage = () => {
           handleCloseDialog={userDialogClose}
           type="user"
           ids={[id]}
-          assignedEntity={null}
+          assignedEntity={users}
+          regionalRole={false}
           onSuccess={() => {
             fetchEntityUser();
             userDialogClose();

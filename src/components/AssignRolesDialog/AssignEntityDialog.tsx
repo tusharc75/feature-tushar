@@ -44,13 +44,14 @@ const AssignEntityDialog = ({
   handleCloseDialog,
   ids,
   type,
-  assignedEntity
+  assignedEntity,
+  regionalRole
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState([]);
   const [role, setRole] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
-  const [selectedData, setSelectedData] = useState([]);
+  const [selectedData, setSelectedData] = useState(regionalRole ? [ids[1]] : []);
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
@@ -65,16 +66,18 @@ const AssignEntityDialog = ({
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleReset = () => {
-    setActiveStep(0);
-  };
 
   useEffect(() => {
     setLoadingData(true);
     axiosInstance()
       .get(`/${type}`)
       .then(({ data: { data } }) => {
-        setData(data);
+        if (type == "user") {
+          setData(data.filter(user => !assignedEntity.some(item => item?._id === user?._id)));
+        }
+        else {
+          setData(data.filter(user => !assignedEntity.some(item => item?.entity._id === user?._id)));
+        }
         setLoadingData(false);
       })
       .catch((error) => {
@@ -85,7 +88,11 @@ const AssignEntityDialog = ({
     axiosInstance()
       .get(`/role?type=2`)
       .then(({ data: { data } }) => {
-        setRole(data);
+
+        regionalRole ?
+          setRole(data.filter(role => !assignedEntity.find(element => element.entity._id === selectedData[0]).role.some(item => item?._id === role?._id)))
+          : setRole(data)
+
         setLoadingData(false);
       })
       .catch((error) => {
@@ -118,29 +125,29 @@ const AssignEntityDialog = ({
       if (curIndex < 0) tempSelectedRole = [...tempSelectedRole, id];
     } else if (curIndex >= 0) {
       tempSelectedRole.splice(curIndex, 1);
-      debugger
     }
     setSelectedRole(tempSelectedRole);
   };
 
   const handleAssignEntity = async () => {
-
     let entityArray = []
-
     if (assignedEntity) {
       if (type === "entity") {
         assignedEntity.map(d => {
-          if (d.entity?._id !== selectedData[0]){
-          entityArray.push({
-            entity: d.entity?._id,
-            role: d.role?.map(r => r._id)
-          })
-        }
+          if (d.entity?._id !== selectedData[0]) {
+            entityArray.push({
+              entity: d.entity?._id,
+              role: d.role?.map(r => r._id)
+            })
+          }
+          else {
+            entityArray.push({
+              entity: selectedData[0],
+              role: regionalRole ? selectedRole.concat(d.role?.map(r => r._id)) : selectedRole
+            })
+          }
         })
-        entityArray.push({
-          entity: selectedData[0],
-          role: selectedRole
-        })
+
       }
     }
     if (selectedData.length) {
@@ -151,7 +158,6 @@ const AssignEntityDialog = ({
           user: ids[0],
           entities: entityArray
         };
-        debugger
       } else {
         dataObj = {
           user: selectedData[0],
@@ -164,7 +170,6 @@ const AssignEntityDialog = ({
         };
 
       }
-
       await axiosInstance()
         .put(`/user/assign-entity`, dataObj)
         .then(() => {
@@ -242,9 +247,9 @@ const AssignEntityDialog = ({
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Assign ${startCase(type)}`} />
+      <CustomDialogHeader title={regionalRole ? `Assign  Regional Role` : `Assign  ${startCase(type)}`} />
       <CustomDialogContent>
-        {loadingData ? (
+        {!regionalRole ? (loadingData ? (
           <Loader text={`Loading ${startCase(type)}`} />
         ) : data.length ? (
           <Stepper activeStep={activeStep} orientation="vertical">
@@ -281,6 +286,27 @@ const AssignEntityDialog = ({
           </Stepper>
         ) : (
           <Typography>{`All ${startCase(type)} has been assigned`}</Typography>
+        )) : role.length ? (<List style={{ padding: 0 }}>
+          {role.map((d) => (
+            <ListItem divider key={d._id}>
+              <ListItemIcon>
+                <Checkbox
+                  edge="start"
+                  onChange={(e) => handleRoleSelection(e, d._id)}
+                  checked={selectedRole.indexOf(d._id) >= 0}
+                  inputProps={{
+                    "aria-labelledby": `checkbox-list-label-${d._id}`,
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary={d.name || ""}
+                secondary={d.description || ""}
+              />
+            </ListItem>
+          ))}
+        </List>) : (
+          <Typography>{`All Regional Role has been assigned`}</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>

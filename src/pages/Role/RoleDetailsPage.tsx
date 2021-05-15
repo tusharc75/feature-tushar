@@ -297,7 +297,7 @@ const RoleDetailsPage = () => {
           usersDialogOpen={showAssignUserDialog}
           handleCloseDialog={userDialogClose}
           roleIds={[id]}
-          assignedUsers={roleData?.user}
+          assignedUsers={roleUsers}
           onSuccess={() => {
             fetchRoleData();
             userDialogClose();
@@ -311,6 +311,8 @@ const RoleDetailsPage = () => {
           type="entity"
           ids={[id]}
           assignedEntity={roleData?.entity}
+          regionalRole={false}
+
           onSuccess={() => {
             fetchRoleData();
             fetchUserData();
@@ -526,7 +528,7 @@ const RoleDetailsPage = () => {
                   Assigned Users ({(roleUsers.length) || 0})
                 </Typography>
 
-                {permissions.role.isUpdate && (
+                {permissions.role.isUpdate && (roleData?.type === 1) && (
                   <IconButton
                     title="Assign users"
                     color="primary"
@@ -565,6 +567,7 @@ const RoleDetailsPage = () => {
                         unassignRole={handleUnassignUser}
                         data={roleUsers && roleUsers.slice(0, showUsers)}
                         currentUser={user?.user._id}
+                        type = {roleData?.type}
                       />
                       <Box marginY={1} />
                       {

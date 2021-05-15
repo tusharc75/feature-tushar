@@ -139,7 +139,7 @@ const UserDetailsPage = () => {
 
       setHeadingLbl(name);
       setUserData(data);
-      // setEntities(data.entities)
+      setEntities(data.entities.filter(e => e.role.length !== 0 || e.entity !== undefined))
       setCustomizedRoutes([
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
@@ -455,7 +455,8 @@ const UserDetailsPage = () => {
           handleCloseDialog={entityDialogClose}
           type="entity"
           ids={[id]}
-          assignedEntity={userData?.entities}
+          assignedEntity={entities}
+          regionalRole={false}
           onSuccess={() => {
             fetchUserData();
             entityDialogClose();
@@ -657,7 +658,7 @@ const UserDetailsPage = () => {
                     justifyContent="space-between"
                   >
                     <Typography variant="subtitle2">
-                      Assigned Entity ({userData?.entities?.length || 0})
+                      Assigned Entity ({entities?.length || 0})
                 </Typography>
                     {permissions.entity.isUpdate && (
                       <IconButton
@@ -695,11 +696,15 @@ const UserDetailsPage = () => {
                         ))}
                       </Box>
                     ) :
-                      userData?.entities?.length ? (
+                      entities?.length ? (
                         <AssignedEntities
-                          entities={userData?.entities}
-                          permissions = {permissions}
-                          userId = {id}
+                          entities={entities}
+                          permissions={permissions}
+                          userId={id}
+                          onSuccess={() => {
+                            fetchUserData();
+                          }}
+
                         />
 
 
