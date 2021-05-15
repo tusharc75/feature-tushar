@@ -27,6 +27,10 @@ import currencies from './currency_with_country.json';
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
 
+export const validations = {
+  email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i
+}
+
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
 
