@@ -14,7 +14,7 @@ const arr = [...Array(9).keys()]
 
 export default function ManageAccount(props) {
     const { entityData, handleSubmit, onClose, open, isNew, loading, accountId = null } = props;
-    console.log(entityData)
+    
     const { state: { user } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
 
