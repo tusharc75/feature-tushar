@@ -106,7 +106,7 @@ export default function AccountDetailPage(props) {
   ] = useState(false);
 
   const [loadingGraphData, setLoadingGraphData] = useState(false);
-  const [graphData, setGraphData] = useState({ edges: [], nodes: [] });
+  const [graphData, setGraphData] = useState({ edges: [], nodes: [], colorPalette: null });
 
   let { id } = useParams();
 
@@ -122,9 +122,9 @@ export default function AccountDetailPage(props) {
     if (currentTabIndex === 2) {
       setLoadingGraphData(true);
 
-      axiosInstance().get(`${accountApi}/nodal-structure/${id}`).then(({ data: { data } }) => {
+      axiosInstance().get(`${accountApi}/nodal-structure/${id}`).then(({ data }) => {
         setLoadingGraphData(false);
-        setGraphData({ edges: data.edges, nodes: data.nodes });
+        setGraphData({ nodes: data.data.nodes, edges: data.data.edges, colorPalette: data.colorPalette });
       }).catch((error) => {
         setLoadingGraphData(false);
         toastConfig.setToastConfig(error);
@@ -132,7 +132,7 @@ export default function AccountDetailPage(props) {
     }
 
     return () => {
-      setGraphData({ edges: [], nodes: [] });
+      setGraphData({ edges: [], nodes: [], colorPalette: null });
     }
   }, [currentTabIndex])
 
@@ -546,20 +546,18 @@ export default function AccountDetailPage(props) {
 
                     {
                       currentTabIndex === 2 && <Box>
-                        <div style={{ height: "500px", width: "100%" }}>
-                          <CustomNodalStructure
-                            id={id}
-                            graphData={graphData}
-                            loadingGraphData={loadingGraphData}
-                            onClick={(node) => {
-                              if (node && routes[node.route]) {
-                                history.push({
-                                  pathname: `${routes[node.route].path}/${node.id}`
-                                })
-                              }
-                            }}
-                          />
-                        </div>
+                        <CustomNodalStructure
+                          id={id}
+                          graphData={graphData}
+                          loadingGraphData={loadingGraphData}
+                          onClick={(node) => {
+                            if (node && routes[node.route]) {
+                              history.push({
+                                pathname: `${routes[node.route].path}/${node.id}`
+                              })
+                            }
+                          }}
+                        />
                       </Box>
                     }
                   </>
