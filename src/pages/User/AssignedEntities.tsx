@@ -73,7 +73,6 @@ export default function AssignedEntities({
   };
 
   const handleDeleteEntity = () => {
-    alert()
     setShowConfirmBox(true);
   };
 
