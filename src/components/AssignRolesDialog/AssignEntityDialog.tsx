@@ -130,34 +130,52 @@ const AssignEntityDialog = ({
   };
 
   const handleAssignEntity = async () => {
-    let entityArray = []
-    if (assignedEntity) {
-      if (type === "entity") {
-        assignedEntity.map(d => {
-          if (d.entity?._id !== selectedData[0]) {
-            entityArray.push({
-              entity: d.entity?._id,
-              role: d.role?.map(r => r._id)
-            })
-          }
-          else {
-            entityArray.push({
-              entity: selectedData[0],
-              role: regionalRole ? selectedRole.concat(d.role?.map(r => r._id)) : selectedRole
-            })
-          }
-        })
 
-      }
-    }
     if (selectedData.length) {
       setAssigning(true);
       let dataObj: any;
+      let entityArray = []
       if (type === "entity") {
-        dataObj = {
-          user: ids[0],
-          entities: entityArray
-        };
+
+        if (assignedEntity.length !== 0) {
+          assignedEntity.map(d => {
+            if (d.entity?._id !== selectedData[0]) {
+              entityArray.push({
+                entity: d.entity?._id,
+                role: d.role?.map(r => r._id)
+              })
+            }
+            else {
+              entityArray.push({
+                entity: selectedData[0],
+                role: regionalRole ? selectedRole.concat(d.role?.map(r => r._id)) : selectedRole
+              })
+            }
+          })
+          if (!assignedEntity.some(item => item?.entity._id === selectedData[0])) {
+            entityArray.push({
+              entity: selectedData[0],
+              role: selectedRole
+            })
+          }
+          dataObj = {
+            user: ids[0],
+            entities: entityArray
+          };
+        }
+        else {
+          dataObj = {
+            user: ids[0],
+            entities: [
+              {
+                entity: selectedData[0],
+                role: selectedRole
+              }
+            ]
+          };
+        }
+
+
       } else {
         dataObj = {
           user: selectedData[0],
@@ -170,6 +188,7 @@ const AssignEntityDialog = ({
         };
 
       }
+
       await axiosInstance()
         .put(`/user/assign-entity`, dataObj)
         .then(() => {
