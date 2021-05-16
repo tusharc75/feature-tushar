@@ -74,7 +74,7 @@ export default function AccountHierarchy({ data, currentAccountId, accountRoute 
     return (
         <>
             {
-                data.length == 1 ? <MaterialTable
+                data.length === 1 ? <MaterialTable
                     icons={materialTableIcons}
                     data={data}
                     columns={columns}

@@ -27,34 +27,34 @@ const RoleEngine = (props) => {
 
     resource.forEach((_resource) => {
 
-      if (_resource.isRead == false && isAnyReadFoundUnchecked == false) {
+      if (_resource.isRead === false && isAnyReadFoundUnchecked === false) {
         field.filter(d => d.fieldData.resource === _resource.name).forEach((_field) => {
-          if (_field.isRead == false && isAnyReadFoundUnchecked == false) {
+          if (_field.isRead === false && isAnyReadFoundUnchecked === false) {
             isAnyReadFoundUnchecked = true
           }
         })
         isAnyReadFoundUnchecked = true
       }
 
-      if (_resource.isCreate == false && isAnyCreateFoundUnchecked == false) {
+      if (_resource.isCreate === false && isAnyCreateFoundUnchecked === false) {
         field.filter(d => d.fieldData.resource === _resource.name).forEach((_field) => {
-          if (_field.isCreate == false && isAnyCreateFoundUnchecked == false) {
+          if (_field.isCreate === false && isAnyCreateFoundUnchecked === false) {
             isAnyCreateFoundUnchecked = true
           }
         })
         isAnyCreateFoundUnchecked = true
       }
 
-      if (_resource.isUpdate == false && isAnyUpdateFoundUnchecked == false) {
+      if (_resource.isUpdate === false && isAnyUpdateFoundUnchecked === false) {
         field.filter(d => d.fieldData.resource === _resource.name).forEach((_field) => {
-          if (_field.isUpdate == false && isAnyUpdateFoundUnchecked == false) {
+          if (_field.isUpdate === false && isAnyUpdateFoundUnchecked === false) {
             isAnyUpdateFoundUnchecked = true
           }
         })
         isAnyUpdateFoundUnchecked = true
       }
 
-      if (_resource.isDelete == false && isAnyDeleteFoundUnchecked == false) {
+      if (_resource.isDelete === false && isAnyDeleteFoundUnchecked === false) {
         isAnyDeleteFoundUnchecked = true
       }
     });

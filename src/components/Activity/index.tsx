@@ -25,10 +25,10 @@ import { HiOutlineMail } from "react-icons/hi";
 import { FiPlusSquare } from "react-icons/fi";
 import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Tooltip } from '@material-ui/core'
-import ManageAttachment from './Attachments/ManageAttachment'
 import Attachments from './Attachments/index'
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ManageAttachment from "./Attachments/ManageAttachment";
 
 const useStyles = makeStyles((theme) => ({
   activityBox: {
