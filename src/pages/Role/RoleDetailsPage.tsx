@@ -35,6 +35,7 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import { PERMISSION } from "../../constants/Roles";
+import { roleTypes } from "../../constants/helpers";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -125,7 +126,7 @@ const RoleDetailsPage = () => {
     try {
       const {
         data: { data },
-      } = await axiosInstance().get(roleData?.type === 2 ? `/user?filterById=[{"field": "entities.role", "term": "${id}"}]` : `user?filterById=[{"field": "role", "term": "${id}"}]`);
+      } = await axiosInstance().get(roleData?.type === roleTypes.find((d) => d.key === "Global")?.value ? `user?filterById=[{"field": "role", "term": "${id}"}]` : `/user?filterById=[{"field": "entities.role", "term": "${id}"}]`);
       setRoleUsers(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -568,8 +569,8 @@ const RoleDetailsPage = () => {
                           onClick={() => history.push(`/user`, {
                             id: roleData._id,
                             name: roleData.name,
-                            type: roleData.type === 2 ? "regionalRole" : "globalRole"
-                        })}>
+                            type: roleData.type === roleTypes.find((d) => d.key === "Global")?.value ? "globalRole" : "regionalRole"
+                          })}>
                           <FaEye /> View All &#8599;
                       </Box>
                       }
