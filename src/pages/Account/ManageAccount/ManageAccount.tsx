@@ -14,7 +14,7 @@ const arr = [...Array(9).keys()]
 
 export default function ManageAccount(props) {
     const { entityData, handleSubmit, onClose, open, isNew, loading, accountId = null } = props;
-
+    console.log(entityData)
     const { state: { user } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
 
@@ -41,8 +41,10 @@ export default function ManageAccount(props) {
         }
         sortArray();
 
-        return function cleanup() {
-            ownerCollaboratorDropdownData = [];
+        return () => {
+            setOwnerCollaboratorCommonDataSource([])
+            setOwnerDataSource([])
+            setCollaboratorDataSource([])
         }
 
     }, [entityData.fields]);
@@ -120,10 +122,10 @@ export default function ManageAccount(props) {
                                                         <h2 className="form-label-style">{form.name}</h2>
                                                         <Box marginY={2}>
                                                             <Grid spacing={3} container>
-                                                                {form.sectionFields.map((field) => (
-                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                {form.sectionFields.map((field, index2) => (
+                                                                    <Grid key={index2} item xs={12} sm={6} md={6}>
                                                                         {
-                                                                            field.fieldName="owner" ? (
+                                                                            field.fieldName === "owner" ? (
                                                                                 <FormTypes values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
