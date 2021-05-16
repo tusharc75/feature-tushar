@@ -1,6 +1,5 @@
 import axios from "axios";
-const BASE_URL = process?.env?.REACT_APP_API_URL 
-// || "https://oms-backend.vebholic.com";
+const BASE_URL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
 
 const axiosAPI = () => {
     const token = localStorage.getItem("token");
