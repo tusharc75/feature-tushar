@@ -546,3 +546,51 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 
   return new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1 ');
 }
+
+export const graphOptions = {
+  layout: {
+    randomSeed: 2
+  },
+  interaction: { hover: true },
+  nodes: {
+    fixed: {
+      x: false,
+      y: false
+    },
+    shape: "dot",
+    // size: 13,
+    borderWidth: 1.5,
+    borderWidthSelected: 2,
+    font: {
+      size: 15,
+      align: "center",
+      bold: {
+        color: "#bbbdc0",
+        size: 15,
+        vadjust: 0,
+        mod: "bold"
+      }
+    },
+    shadow: true,
+  },
+  edges: {
+    width: 0.01,
+    color: {
+      color: "#D3D3D3",
+      highlight: "#797979",
+      hover: "#797979",
+      opacity: 1.0
+    },
+    arrows: {
+      to: { enabled: false, scaleFactor: 1, type: "arrow" },
+      // middle: { enabled: false, scaleFactor: 1, type: "arrow" },
+      from: { enabled: true, scaleFactor: 1, type: "arrow" }
+    },
+    smooth: {
+      type: "continuous",
+      roundness: 0
+    },
+    shadow: true,
+  }
+};
+

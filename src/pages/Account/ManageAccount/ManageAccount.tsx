@@ -9,7 +9,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
 import { useData } from '../../../StateProvider/Provider';
-import _ from 'lodash';
+import CustomButton from '../../../components/Helpers/CustomButton';
 
 const arr = [...Array(9).keys()]
 
@@ -34,16 +34,17 @@ export default function ManageAccount(props) {
             setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
         }
 
-        if (!isNew) {
-            const parentAccountDropdownData = entityData.fields.find(d => d.fieldName == "parentAccount");
-            if (parentAccountDropdownData) {
-                setParentAccountDataSource(parentAccountDropdownData.option.filter(d => d.optionValue !== accountId));
-            }
+        const parentAccountDropdownData = entityData.fields.find(d => d.fieldName === "parentAccount");
+        if (parentAccountDropdownData) {
+            setParentAccountDataSource(isNew ? parentAccountDropdownData.option : parentAccountDropdownData.option.filter(d => d.optionValue !== accountId));
         }
+
         sortArray();
 
-        return function cleanup() {
-            ownerCollaboratorDropdownData = [];
+        return () => {
+            setOwnerCollaboratorCommonDataSource([])
+            setOwnerDataSource([])
+            setCollaboratorDataSource([])
         }
 
     }, [entityData.fields]);
@@ -121,10 +122,10 @@ export default function ManageAccount(props) {
                                                         <h2 className="form-label-style">{form.name}</h2>
                                                         <Box marginY={2}>
                                                             <Grid spacing={3} container>
-                                                                {form.sectionFields.map((field) => (
-                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                {form.sectionFields.map((field, index2) => (
+                                                                    <Grid key={index2} item xs={12} sm={6} md={6}>
                                                                         {
-                                                                            field.fieldName == "owner" ? (
+                                                                            field.fieldName === "owner" ? (
                                                                                 <FormTypes values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -140,7 +141,7 @@ export default function ManageAccount(props) {
                                                                                     disabled={disableOwnerSelection}
                                                                                     onOpen={() => { onOwnerDropdownOpen(values.collaborator) }}
                                                                                 />
-                                                                            ) : field.fieldName == "collaborator" ? (
+                                                                            ) : field.fieldName === "collaborator" ? (
                                                                                 <FormTypes
                                                                                     multiple
                                                                                     values={values}
@@ -157,7 +158,7 @@ export default function ManageAccount(props) {
                                                                                     size="small"
                                                                                     onOpen={() => { onCollaboratorOwnerMultiselectOpen(values.owner) }}
                                                                                 />
-                                                                            ) : field.fieldName == "isShippingAddressSameAsBillingAddress" ? (
+                                                                            ) : field.fieldName === "isShippingAddressSameAsBillingAddress" ? (
                                                                                 <FormTypes
                                                                                     values={values}
                                                                                     errors={errors}
@@ -177,7 +178,7 @@ export default function ManageAccount(props) {
                                                                                         }
                                                                                     }}
                                                                                 />
-                                                                            ) : field.fieldName == "billingAddress" ? (
+                                                                            ) : field.fieldName === "billingAddress" ? (
                                                                                 <FormTypes
                                                                                     values={values}
                                                                                     errors={errors}
@@ -193,12 +194,12 @@ export default function ManageAccount(props) {
                                                                                     size="small"
                                                                                     onChange={(event, newValue) => {
                                                                                         setFieldValue(field.fieldName, newValue?.description ?? "");
-                                                                                        if (values.isShippingAddressSameAsBillingAddress == true) {
+                                                                                        if (values.isShippingAddressSameAsBillingAddress === true) {
                                                                                             setFieldValue("shippingAddress", newValue?.description ?? "")
                                                                                         }
                                                                                     }}
                                                                                 />
-                                                                            ) : field.fieldName == "shippingAddress" ? (
+                                                                            ) : field.fieldName === "shippingAddress" ? (
                                                                                 <FormTypes
                                                                                     values={values}
                                                                                     errors={errors}
@@ -212,12 +213,12 @@ export default function ManageAccount(props) {
                                                                                     fullWidth
                                                                                     isTooltip={true}
                                                                                     size="small"
-                                                                                    disabled={values.isShippingAddressSameAsBillingAddress == true}
+                                                                                    disabled={values.isShippingAddressSameAsBillingAddress === true}
                                                                                     onChange={(event, newValue) => {
                                                                                         setFieldValue(field.fieldName, newValue?.description ?? "");
                                                                                     }}
                                                                                 />
-                                                                            ) : field.fieldName == "parentAccount" ? (
+                                                                            ) : field.fieldName === "parentAccount" ? (
                                                                                 <FormTypes values={values}
                                                                                     errors={errors}
                                                                                     touched={touched}
@@ -263,9 +264,10 @@ export default function ManageAccount(props) {
                                         <Button onClick={onClose} variant="outlined" color="primary" >
                                             Cancel
                                          </Button>
-                                        <Button
+                                        <CustomButton
                                             variant="contained"
                                             color="primary"
+                                            loading={loading}
                                             disabled={
                                                 loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                                                 Object.values(simplifyValues(values, entityData.fields)).toString()
@@ -277,7 +279,7 @@ export default function ManageAccount(props) {
                                             }}
                                         >
                                             Save
-                                        </Button>
+                                        </CustomButton>
                                     </CustomDialogFooter>
                                 </>
                             )}
