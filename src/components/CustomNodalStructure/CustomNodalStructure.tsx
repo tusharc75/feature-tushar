@@ -32,11 +32,6 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
             if (event.nodes.length > 0) {
                 const node = graphData.nodes.find(d => d.id === event.nodes[0]);
                 onClick(node)
-                // if (node && routes[node.route]) {
-                //     history.push({
-                //         pathname: `${routes[node.route].path}/${node.id}`
-                //     })
-                // }
             }
             // console.log("click", event);
             // this.redirectToLearn(event, this.props.searchData);

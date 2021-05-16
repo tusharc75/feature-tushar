@@ -68,9 +68,7 @@ const ProjectSalesDetails = () => {
 
     axiosInstance()
       .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
-      .then(() => {
-        setCurrentTabIndex(0)
-      })
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -105,6 +103,7 @@ const ProjectSalesDetails = () => {
         data: { data },
       } = await axiosInstance().get(`/project-sales/${id}`);
 
+      setCurrentTabIndex(0)
       handleMainPoints(data);
       const name = data.projectName;
       setHeadingLbl(name);
