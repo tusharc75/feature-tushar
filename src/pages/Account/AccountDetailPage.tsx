@@ -25,8 +25,7 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import {
   getObjKeysWithValues,
   isObjectEmpty,
-  sidebarResource,
-  graphOptions,
+  sidebarResource
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -48,10 +47,7 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 import _ from 'lodash'
 import routes from "./../../components/Helpers/Routes";
-import Graph from "vis-react";
-
-const fontSize = 14;
-const radius = 20;
+import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 
 function DisplayData({ label, value, icon }) {
   return <div style={{ flexGrow: 1 }}>
@@ -111,7 +107,6 @@ export default function AccountDetailPage(props) {
 
   const [loadingGraphData, setLoadingGraphData] = useState(false);
   const [graphData, setGraphData] = useState({ edges: [], nodes: [] });
-  const [graphNetwork, setGraphNetwork] = useState<any>(null);
 
   let { id } = useParams();
 
@@ -140,40 +135,6 @@ export default function AccountDetailPage(props) {
       setGraphData({ edges: [], nodes: [] });
     }
   }, [currentTabIndex])
-
-  const events = {
-    select: function (event) {
-      var { nodes, edges } = event;
-      // console.log("Selected nodes: ", nodes);
-      // console.log("Selected edges: ", edges);
-    },
-    hoverNode: function (event) {
-      if (event?.node !== id) {
-        graphNetwork.canvas.body.container.style.cursor = "pointer";
-      } else {
-        graphNetwork.canvas.body.container.style.cursor = "no-drop";
-      }
-      // console.log("hoverNode", event);
-      // this.neighbourhoodHighlight(event, this.props.searchData);
-    },
-    blurNode: function (event) {
-      graphNetwork.canvas.body.container.style.cursor = "default";
-      // console.log("blurNode", event);
-      // this.neighbourhoodHighlightHide(event);
-    },
-    click: function (event) {
-      if (event.nodes.length > 0) {
-        const node = graphData.nodes.find(d => d.id === event.nodes[0]);
-        if (node && routes[node.route]) {
-          history.push({
-            pathname: `${routes[node.route].path}/${node.id}`
-          })
-        }
-      }
-      // console.log("click", event);
-      // this.redirectToLearn(event, this.props.searchData);
-    }
-  }
 
   const fetchRelatedData = () => {
     axiosInstance()
@@ -458,20 +419,6 @@ export default function AccountDetailPage(props) {
     setShowCreateContactDialog(true);
   };
 
-  const getNetwork = data => {
-    setGraphNetwork(data);
-    // console.log("getNetwork", data)
-  };
-
-  const getEdges = data => {
-    // console.log("getEdges", data)
-  };
-
-  const getNodes = data => {
-    // console.log("getNodes", data)
-  };
-
-
   return (
     <>
       <Layout>
@@ -573,7 +520,7 @@ export default function AccountDetailPage(props) {
                         id="a11y-tab-1"
                       />
                       <Tab
-                        label="Nodal Structure"
+                        label="3D Graph"
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
                       />
@@ -600,28 +547,25 @@ export default function AccountDetailPage(props) {
                     {
                       currentTabIndex === 2 && <Box>
                         <div style={{ height: "500px", width: "100%" }}>
-                          {
-                            loadingGraphData ? <div className="d-flex align-items-center justify-content-center h-100 w-100">
-                              <h3>Loading...</h3>
-                            </div> : (
-                              !loadingGraphData && graphData.nodes.length > 0 ? <Graph
-                                graph={graphData}
-                                options={graphOptions}
-                                getNetwork={getNetwork}
-                                getEdges={getEdges}
-                                getNodes={getNodes}
-                                events={events}
-                              /> : <div className="d-flex align-items-center justify-content-center h-100 w-100">
-                                <h3>No data found to display</h3>
-                              </div>
-                            )
-                          }
+                          <CustomNodalStructure
+                            id={id}
+                            graphData={graphData}
+                            loadingGraphData={loadingGraphData}
+                            onClick={(node) => {
+                              if (node && routes[node.route]) {
+                                history.push({
+                                  pathname: `${routes[node.route].path}/${node.id}`
+                                })
+                              }
+                            }}
+                          />
                         </div>
                       </Box>
                     }
                   </>
                 )}
               </Box>
+
               {permissions?.opportunity?.isRead && (
                 <OpportunityInAccordian
                   opportunityPermissions={permissions.opportunity}
