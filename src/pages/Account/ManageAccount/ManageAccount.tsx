@@ -9,12 +9,13 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter'
 import Dialog from '@material-ui/core/Dialog'
 import { useData } from '../../../StateProvider/Provider';
+import CustomButton from '../../../components/Helpers/CustomButton';
 
 const arr = [...Array(9).keys()]
 
 export default function ManageAccount(props) {
     const { entityData, handleSubmit, onClose, open, isNew, loading, accountId = null } = props;
-    
+
     const { state: { user } }: any = useData();
     const [disableOwnerSelection] = useState(!isNew && user.user._id !== entityData.initialValues.owner);
 
@@ -33,12 +34,11 @@ export default function ManageAccount(props) {
             setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option)
         }
 
-        if (!isNew) {
-            const parentAccountDropdownData = entityData.fields.find(d => d.fieldName === "parentAccount");
-            if (parentAccountDropdownData) {
-                setParentAccountDataSource(parentAccountDropdownData.option.filter(d => d.optionValue !== accountId));
-            }
+        const parentAccountDropdownData = entityData.fields.find(d => d.fieldName === "parentAccount");
+        if (parentAccountDropdownData) {
+            setParentAccountDataSource(isNew ? parentAccountDropdownData.option : parentAccountDropdownData.option.filter(d => d.optionValue !== accountId));
         }
+
         sortArray();
 
         return () => {
@@ -264,9 +264,10 @@ export default function ManageAccount(props) {
                                         <Button onClick={onClose} variant="outlined" color="primary" >
                                             Cancel
                                          </Button>
-                                        <Button
+                                        <CustomButton
                                             variant="contained"
                                             color="primary"
+                                            loading={loading}
                                             disabled={
                                                 loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                                                 Object.values(simplifyValues(values, entityData.fields)).toString()
@@ -278,7 +279,7 @@ export default function ManageAccount(props) {
                                             }}
                                         >
                                             Save
-                                        </Button>
+                                        </CustomButton>
                                     </CustomDialogFooter>
                                 </>
                             )}
