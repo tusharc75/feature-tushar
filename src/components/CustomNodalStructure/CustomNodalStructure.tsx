@@ -5,7 +5,7 @@ import Graph from "vis-react";
 export default function CustomNodalStructure({ graphData, onClick, loadingGraphData, id }) {
 
     const { nodes, edges, colorPalette } = graphData;
-    console.log(colorPalette);
+    
     // const [loadingGraphData, setLoadingGraphData] = useState(false);
     // const [graphData, setGraphData] = useState({ edges: [], nodes: [] });
     const [graphNetwork, setGraphNetwork] = useState<any>(null);
