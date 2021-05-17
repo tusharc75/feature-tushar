@@ -33,10 +33,27 @@ const ProductBuilder = (props) => {
     const [product, setProduct] = useState([]);
     const [columns, setColumns] = useState(null);
     const [productData, setProductData] = useState(null);
-
+    const [newVersion,setNewVersion] =useState(false);
+    const [versionNumber,setVersionNumber]= useState(0);
     useEffect(() => {
         fetchProduct();
     }, []);
+
+    useEffect(()=>{
+        fetchVersionDetail();
+    },[]);
+
+    const fetchVersionDetail=()=>{
+        console.log("Fetching Version");
+        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + productBuilderId).then(({ data}) => {
+            console.log(data);
+            setNewVersion(data.newVersion);
+            setVersionNumber(data.version);
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+    };
+
 
 
     let ActionsColoum: any = {
@@ -144,7 +161,8 @@ const ProductBuilder = (props) => {
         axiosInstance().put(`/productbuilder/updateProduct`, data).then(({ data: { data } }) => {
             setLoading(false)
             setProductData(null)
-            fetchProduct()
+            fetchProduct();
+            fetchVersionDetail();
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
@@ -185,7 +203,9 @@ const ProductBuilder = (props) => {
             </Box>
         </Box>
         <Box>
-            <Quote productBuilderId={productBuilderId} />
+            <Quote productBuilderId={productBuilderId}
+            newVersion={newVersion}
+            version={versionNumber} />
         </Box>
         {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
             isAddInBuilder={true} addProductInBuilder={addProductInBuilder}

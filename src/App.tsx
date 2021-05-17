@@ -43,8 +43,10 @@ import CreateProductCost from "./pages/ProductCost/CreateProductCost";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
-
+import QuoteApproval from './pages/Quote-Approval'
 import QuoteBuilderPage from './pages/QuoteBuilder'
+
+import DOA from './pages/DOA'
 
 import {
   termsAndCondition,
@@ -57,6 +59,8 @@ import {
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
+import KpiDashboard from "./pages/KpiDashboard";
+import EditDashboard from './pages/KpiDashboard/EditDashboards';
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
@@ -355,9 +359,27 @@ function App() {
           <PrivateRoute exact path={routes.productBuilder.path + "/:id"} >
             <CreateProductBuilder />
           </PrivateRoute>
-          <PrivateRoute exact path={"quote-builder"} >
+          <PrivateRoute exact path={"/quote-builder/:id"} >
             <QuoteBuilderPage />
           </PrivateRoute>
+          <Route exact path={"/dashboards"}>
+            <KpiDashboard/>
+          </Route>
+          <Route exact path={"/dashboard-edit/:id"}>
+            <EditDashboard edit={true}/>
+          </Route>
+          <Route exact path={"/dashboard/:id"}>
+            <EditDashboard edit={false}/>
+          </Route>
+          //Route available for customers to Accept Reject Quote
+          <Route exact path={"/quote-approval/:id"}>
+              <QuoteApproval/>
+          </Route>
+
+          <Route exact path={"/doa-request"}>
+            <DOA/>
+          </Route>
+          
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>

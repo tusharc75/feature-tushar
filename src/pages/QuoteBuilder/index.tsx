@@ -1,4 +1,5 @@
 import {useContext, useEffect,Fragment,useState, useCallback} from 'react'
+import { useParams, useHistory } from "react-router-dom";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import axiosInstance from '../../axios/axiosInstance'
@@ -11,7 +12,9 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { DataGrid } from "@material-ui/data-grid";
 import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndCondition'
+import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndCondition';
+import ChatRender from '../../components/Chatter';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import {
   Grid as GridDropTable,
   DragDropProvider,
@@ -24,42 +27,30 @@ import {
 } from '@devexpress/dx-react-grid-material-ui';
 
 import {
-    Box,
     Button,
-    Checkbox,
     Radio,
     Grid,
-    Menu,
-    MenuItem,
-    Tooltip,
-    IconButton,
-    Divider,
     Paper
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import { Link } from 'react-router-dom';
-import moment from "moment";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import DeleteIcon from '@material-ui/icons/Delete';
-import { Console } from 'node:console';
-import { getObjKeysWithValues } from '../../constants/helpers';
-import { CheckBox } from '@material-ui/icons';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
     EditorState,
-    Editor,
     convertToRaw,
     convertFromRaw
 } from 'draft-js';
 import draftToHtml from 'draftjs-to-html'
 let termsTimeout;
+var newQuote=false;
+var fetchVersion=false;
 
-
-
+let logo = null;
 const CreatePriceBuilder=(props)=>{
-    //const {priceBuilderId}= props;
-    const {priceBuilderId}= {priceBuilderId:"6093cf0fcee24cd4d39ecda8"}
+    //const {id}= props;
+    const { id } = useParams();
+    //const {id}= {id:"6093cf0fcee24cd4d39ecda8"}
 
     const [currentVersion,setcurrentVersion]=useState(1);
     const [versions,setVersions]=useState([]);
@@ -76,22 +67,34 @@ const CreatePriceBuilder=(props)=>{
     const [rowCount, setRowCount] = useState(0);
     const [RadioIndex,setRadioIndex] =useState(-1);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
+    const [loaded,setLoaded]=useState(false);
     const [editRecord, setEditRecord] = useState<any>({})
     const [tableColumnExtensions,settableColExt] = useState([
       ]);
     const [droppedColumns,setDroppedColumns]=useState([])
     const [QData,setQData]=useState({})
-    const [newQuote,setNewQuote]=useState(true);
-    const [fetchVersion, setFetchVersion]= useState(false);
+    const [editRestriction,setEditRestriction]=useState(false);
+    let DOAlimit=0;
+    const [DOAapprovalreq,setDOAapprovalreq]=useState(false);
+    const [sendtoCustomer,setsendtoCustomer]=useState(true);
+    const [buttonMessage,setButtonMessage]=useState("Send to Customer");
+    var chatterID="0";
     
+    
+    useEffect(()=>{
+        fetchDoaLimit();
+    },[])
+
     useEffect(() => {
         GetQuoteData(0);
     }, []);
+
 
     useEffect(() => {
         fetchTermsAndConditions()
     }, [query, searchVal])
 
+    
     useEffect(() => {
         let rows = data?.map((u) => ({
             ...u,
@@ -132,6 +135,20 @@ const CreatePriceBuilder=(props)=>{
         }
     };
 
+    const fetchDoaLimit=()=>{
+        axiosInstance()
+            .get('doa-request/limit')
+            .then(({ data }) => {
+                console.log("DOA limit is:");
+                console.log(data);
+                DOAlimit=data.limit;           
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setLoading(false);
+            });
+
+    }
     const onFilterChange = useCallback((params) => {
         if (params.filterModel.items[0].value) {
             setQuery((prevState) => ({
@@ -196,8 +213,6 @@ const CreatePriceBuilder=(props)=>{
                             gridData[indexOfRecord].isChecked = true;
                             setRadioIndex(indexOfRecord);
                         }
-                        console.log(gridData);
-                        console.log(params.value);
 
                         setDataRows([...gridData]);
 
@@ -226,49 +241,55 @@ const CreatePriceBuilder=(props)=>{
     ];
 
     const GetQuoteData=(version)=>{
-        if(version===0){
-            axiosInstance()
-            .get('getQuotefromBuilder/'+priceBuilderId)
-            .then(({ data }) => {
-                console.log("Got Data from API");
-                console.log(data);
-                QuoteData(data.Data);
-                console.log(data.Data.version);
-                var versionres=[]
-                for(var i=1;i<data.Data.latestVersion+1;i++){
-                    versionres=[...versionres, i];
-                }
-                console.log(versionres);
-                setVersions(versionres);
-                setcurrentVersion(data.Data.version);
-                console.log("versions are");
-                console.log(versions);
-                console.log("current Version:");
-                console.log(currentVersion);
-                setQData(data.Data);
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
-            
-          
-    }
-    else{
+        setLoaded(false);
         axiosInstance()
-            .get('quote-builder?priceBuilderId='+priceBuilderId+'&version='+version)
+            .get('quote-builder?id='+id+'&version='+version)
             .then(({ data }) => {
                 QuoteData(data.Data);
                 setQData(data.Data);
+                chatterID=data.Data.chatter
+                var totalversions=[]
+                if(version===0){
+                setcurrentVersion(data.Data.latestVersion);
+                }
+                for(var i=1;i<=data.Data.latestVersion;i++){
+                    totalversions.push(i);
+                }
+                setVersions(totalversions);
+                console.log('Chatter ID is:');
+                console.log(chatterID);
+                console.log(data.Data["TotalSellingPrice"]);
+                console.log(DOAlimit);
+                console.log(data.Data["Quote_Status"]);
+                if(data.Data["TotalSellingPrice"]>DOAlimit && data.Data["Quote_Status"]==="Quote Generated"){
+                    console.log("Need DOA");
+                    setDOAapprovalreq(true);
+                    setsendtoCustomer(false);
+                    setButtonMessage("Send for DOA");
+                }
+                else if(data.Data["Quote_Status"]==="Sent for DOA" || data.Data["Quote_Status"]==="Sent to Customer" || data.Data["Quote_Status"]==="Accepted by Customer" || data.Data["Quote_Status"]==="Rejected by Customer")
+                {
+                    console.log("sent for DOA");
+                    setDOAapprovalreq(false);
+                    setsendtoCustomer(false);
+
+                }
+                else if(data.Data["Quote_Status"].includes("DOA rejected"))
+                {
+                    console.log("DOA rejected");
+                    setDOAapprovalreq(true);
+                    setsendtoCustomer(false);
+                    setButtonMessage("Resend for DOA");
+                }
+                setLoaded(true);
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
                 setLoading(false);
             });
-    }
+
     }
     const QuoteData=(data)=>{
-        console.log("getting quote data");
-        console.log(data);
         var TableData=[];
         var Col=[];
         var ColName=[];
@@ -285,27 +306,24 @@ const CreatePriceBuilder=(props)=>{
                 if(ColName.indexOf(DataSet.fieldName)===-1){
                     ColName=[...ColName, DataSet.fieldName];
                     Col=[...Col,{title:DataSet.fieldName, name:DataSet.fieldName}];
-                    console.log(DataSet.fieldName);
                     columnext=[...columnext,{ColumnName:DataSet.fieldName, width:100}];
-                    console.log(columnext);
                 }
                 KeyValue[DataSet.fieldName]=DataSet.fieldValue;
             }
             KeyValuePairs=[...KeyValuePairs,KeyValue];
         }
         if(data.ColumnOrder){
-            setColName(data.ColumnOrder)
+            setColName(data.ColumnOrder);
         }
         else{
-            setColName(ColName)
+            setColName(ColName);
         }
         if(data.HiddenColumns){
-            setDroppedColumns(data.HiddenColumns)
+            setDroppedColumns(data.HiddenColumns);
         }
-        if(fetchVersion===false && data.status==='Quote not generated yet'){
-            setNewQuote(false);
+        if(fetchVersion===false && data.Quote_Status==='Quote not generated yet'){
+            newQuote=true;
         }
-       
 
         for(var j=0;j<KeyValuePairs.length;j++){
                 const DataSet=KeyValuePairs[j];
@@ -320,17 +338,15 @@ const CreatePriceBuilder=(props)=>{
                 }
                 TableData=[...TableData, DataRecord]
         }
-        console.log(TableData);
         setDynamicTableData(TableData);
         setDynamicCol(Col);
         settableColExt(columnext);
-        console.log(tableColumnExtensions)
     };
 
-    const GeneratePdf=(view)=>{
-        console.log(droppedColumns);
-        console.log(ColumnName);
+   
+    const GeneratePdf=(view,send)=>{
         const PdfDoc= new jsPDF('p', 'pt', 'a4');
+        
         var PDFData=[];
         var PdfCol=[];
         dynamicTableData.forEach(dataEntry=>{
@@ -345,30 +361,28 @@ const CreatePriceBuilder=(props)=>{
             })
             PDFData.push(PdfRow);
         });
-        console.log(PDFData);
-        console.log(ColumnName);
-        
         PdfDoc.setFontSize(14);
         var text="Please find the Quoatation Below:"
         var lineHeight = PdfDoc.getLineHeight();
-        console.log(lineHeight);
         var splittedText = PdfDoc.splitTextToSize(text,50)
         PdfDoc.text(text,20,30);
         var lines = splittedText.length
         var blockHeight =(lines-2)*lineHeight;
-        console.log(blockHeight);
+        PDFData=[...PDFData,[{content: `Quote Total : ${QData["TotalSellingPrice"]}`, colSpan: PDFData[0].length, 
+        styles: {halign: 'right',valign: 'middle'}
+        }]];
         autoTable(PdfDoc,{
             margin:{top:20+blockHeight},
             head:[PdfCol],
-            body:PDFData
+            body:PDFData,
+            styles: { halign: 'center', cellWidth:'auto',overflow: 'linebreak'},
+            theme:'grid'
         });
         let finalY= (PdfDoc as any).lastAutoTable.finalY;
-        console.log(finalY);
         if(RadioIndex!==-1){
             let state=convertFromRaw(JSON.parse(dataRows[RadioIndex].description));
             let TNC= EditorState.createWithContent(state)
             var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
-            console.log(markup);
             markup=markup.replaceAll(" ","&nbsp");
             PdfDoc.html(markup,{callback: function (doc) { 
                 if(view){
@@ -381,38 +395,91 @@ const CreatePriceBuilder=(props)=>{
               },x:40,y:finalY+lineHeight,margin:[20,10,20,10]});
         }
         else{
-        if(view){
+        if(view && !send){
             PdfDoc.output('dataurlnewwindow');
         }
-        else{
+        else if(!view && !send){
             PdfDoc.save('Quation.pdf');
+        }
+        if(send){
+            var PDFtoAPIData=PdfDoc.output('blob');
+            console.log(PDFtoAPIData);
+
         }
     }
     }
 
     const handleChangeVersion = (event) => {
         setcurrentVersion(event.target.value);
-        setFetchVersion(true);
-        if(newQuote && event.target.value===Math.max(...versions)){
+        fetchVersion=true;
+        if(newQuote && event.target.value==Math.max(...versions)){
             GetQuoteData(0);
         }
         else{
-            GetQuoteData(1);
+            GetQuoteData(event.target.value);
         }
         
     };
 
+    const handlehiddenChange=(values)=>{
+        if(QData["Quote_Status"]==="DOA Approved"){
+            setEditRestriction(true);
+        }
+        else{
+            setDroppedColumns(values);
+            handleUpdate(ColumnName,values,"");
+        }
+    }
+
+    const handleorder=(values)=>{
+        if(QData["Quote_Status"]==="DOA Approved"){
+            setEditRestriction(true);
+        }
+        else{
+            setColName(values);
+            handleUpdate(values,droppedColumns,"");
+        }
+    }
+
+    const cloneQuote=()=>{
+        axiosInstance().post(`/quote-builder/cloneQuote/`+id+"?version="+currentVersion)
+        .then(({data}) => {
+            GetQuoteData(0);
+        })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+    }
+
+    const handleUpdate=(
+        colorder,
+        hidecol,
+        TNC
+    )=>{
+        const Update={
+            Columnorder:colorder,
+            HiddenColumns:hidecol,
+            status:QData["Quote_Status"]
+        }
+        
+        axiosInstance().post(`/quote-builder/updateQuote/`+id+"?version="+currentVersion, Update)
+        .then(({data}) => {
+
+        })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+
+    }
+
+
     const SendforDOA=()=>{
-        console.log(QData);
-        var newQuoteData={}
-        newQuoteData["inventory"]=QData["inventory"];
-        newQuoteData["Profitability"]=QData["Profitability"];
+        GeneratePdf(false,true);
+        var newQuoteData=QData
         newQuoteData["ColumnOrder"]= ColumnName;
         newQuoteData["HiddenColumns"]= droppedColumns;
-        newQuoteData["priceBuilderId"]= QData["priceBuilderId"];
-        newQuoteData["Quote Status"]="Pending for DOA Approval";
+        newQuoteData["Quote_Status"]="Pending for DOA Approval";
         newQuoteData["Comment"]="-";
-        console.log(newQuoteData);
         axiosInstance()
         .post(`/quote-builder/create`, newQuoteData)
       .then(({data}) => {
@@ -424,7 +491,6 @@ const CreatePriceBuilder=(props)=>{
         GetQuoteData(0);
         })
       .catch((err) => {
-        console.log(err)
         toastConfig.setToastConfig(err);
       });
 
@@ -444,9 +510,10 @@ const CreatePriceBuilder=(props)=>{
                     <GiAbstract055 /> <span className="listingHeader">Quote Builder</span>
                 </Grid>
                 <Grid item xs={6} container justify="flex-end">
-                        <Button onClick={() => GeneratePdf(true)} variant="contained" size="small" color="primary">View</Button> 
-                        <Button onClick={() => GeneratePdf(false)} variant="contained" size="small" color="primary">Download</Button>
-                        <Button onClick={() => SendforDOA()} variant="contained" size="small" color="primary">Send for DOA</Button>
+                        <Button onClick={() => GeneratePdf(true,false)} variant="contained" size="small" color="primary">View</Button> 
+                        <Button onClick={() => GeneratePdf(false,false)} variant="contained" size="small" color="primary">Download</Button>
+                        <Button onClick={() => SendforDOA()} disabled={!DOAapprovalreq && !sendtoCustomer} variant="contained" size="small" color="primary">{buttonMessage}</Button>
+                        <Button onClick={() => cloneQuote()} variant="contained" size="small" color="primary">Clone</Button>
                 </Grid>
             </Grid>
             </div>
@@ -468,13 +535,13 @@ const CreatePriceBuilder=(props)=>{
                                 />
                                 <TableColumnReordering
                                 order={ColumnName}
-                                onOrderChange={setColName}
+                                onOrderChange={(values)=>handleorder(values)}
                                 />
                                 
                                 <TableHeaderRow />
                                 <TableColumnVisibility
                                     hiddenColumnNames={droppedColumns}
-                                    onHiddenColumnNamesChange={setDroppedColumns}
+                                    onHiddenColumnNamesChange={(values)=>handlehiddenChange(values)}
                                 />
                                 <Toolbar/>
                                 <ColumnChooser/>
@@ -492,10 +559,18 @@ const CreatePriceBuilder=(props)=>{
                                     </select>
                                     <div>
                                     Profitability:{QData["Profitability"]}
-                                    </div><div>
-                                    Status: {QData["Quote Status"]}
-                                    </div><div>
-                                    Comment:{QData["Comment"]}
+                                    </div>
+                                    <div>
+                                    Total Cost Price: {QData["TotalCost"]}
+                                    </div>
+                                    <div>
+                                    Total Selling Price: {QData["TotalSellingPrice"]}
+                                    </div>
+                                    <div>
+                                    Status: {QData["Quote_Status"]}
+                                    </div>
+                                    <div>
+                                        {loaded && <ChatRender id={QData["chatter"]}/>}
                                     </div>
                                 </Grid>
                             </Grid> 
@@ -548,6 +623,17 @@ const CreatePriceBuilder=(props)=>{
                                 editRecord={editRecord}
                             />
                         ) : null}
+            
+             <div>
+                 {editRestriction &&
+                <ConfirmationDialog
+                    open={editRestriction}
+                    message={`Cannot change Quote once sent for DOA process or to Customer.Please clone the Quot to make changes.`}
+                    onClose={() => setEditRestriction(false)}
+                    onOk={() => setEditRestriction(false)}
+                />
+            }
+                 </div>           
 
         </Layout>
 
