@@ -34,7 +34,6 @@ import {
   UpdateEvent,
   DeleteEvent,
 } from "../../../axios/activity";
-import { Comment } from "../Comment";
 import { UserDropdown } from "../Helpers/userDropdown";
 import { RelatedToDispay } from "../Helpers/RelatedToDispay";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -543,12 +542,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                           <RelatedToDispay
                             relatedTo={initialValues.relatedTo}
                           />
-                        </Box>
-                        <Box mt={2}>
-                          <Divider />
-                          <Box mt={1}>
-                            <Comment referenceId={eventId} />
-                          </Box>
                         </Box>
                       </Fragment>
                     )}

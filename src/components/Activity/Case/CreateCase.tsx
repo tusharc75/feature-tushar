@@ -35,6 +35,7 @@ import { SubCase } from "./SubCase";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import { useData } from "../../../StateProvider/Provider";
 
 const CaseSchema = Yup.object().shape({
   name: Yup.string().required("please enter case name"),
@@ -45,6 +46,9 @@ const CaseSchema = Yup.object().shape({
 });
 
 export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
+  const {
+    state: { user: user },
+  } = useData();
   const [id, setId] = useState(caseId);
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
@@ -68,7 +72,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
         description: "",
         status: status || "To Do",
         assignee: "",
-        reporter: "",
+        reporter: user._id,
         startDate: new Date(),
         dueDate: new Date(),
       });
@@ -247,6 +251,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                         </Box>
                         <Box pt={1}>
                           <UserDropdown
+                            disabled
                             name="reporter"
                             label="Reporter"
                             errors={errors}
