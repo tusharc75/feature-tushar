@@ -422,10 +422,10 @@ export const getPermissions = (
     let data = [...user?.role?.sideBar];
 
     if (selectedEntity) {
-      if (user?.entity && user.entity.length && selectedEntity) {
+      if (user?.entity && user?.entity.length && selectedEntity) {
         data = [
           ...data,
-          ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
+          ...user?.entity.find((entityObj) => entityObj._id === selectedEntity)
             ?.resource,
         ];
       }
