@@ -1,6 +1,4 @@
-import { profilePage } from "../../constants/helpers";
-
-export default {
+const routes = {
   // account: {
   //   title: "Account",
   //   path: "/account",
@@ -163,3 +161,5 @@ export default {
     path: "/brand-configuration"
   }
 };
+
+export default routes;

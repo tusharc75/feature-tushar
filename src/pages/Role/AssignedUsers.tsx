@@ -7,7 +7,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
 
@@ -54,7 +53,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                   />
                 </div>
 
-                <CopyToClipboard textToCopy={obj.email} className="mt-4" />
+                <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
                 {permissions.role.isUpdate && (
                   <ListItemSecondaryAction
                     title={

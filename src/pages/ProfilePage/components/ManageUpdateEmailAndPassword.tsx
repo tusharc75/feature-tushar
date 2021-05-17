@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -33,7 +33,7 @@ const updateEmailSchema = Yup.object().shape({
 
 });
 
-export default function ManageUpdatePassword({
+export default function ManageUpdateEmailAndPassword({
     open,
     onClose,
     isUpdatePassword = false,
@@ -243,19 +243,25 @@ export default function ManageUpdatePassword({
                                         })
                                         return
                                     }
-                                    if (values.newPassword !== values.confirmPassword) {
-                                        setFieldError("confirmPassword", "new and confirm password should be same")
-                                        setFieldTouched("confirmPassword", true)
-                                        return
-                                    }
-                                    else if (values.newPassword === values.oldPassword) {
-                                        setFieldError("newPassword", "new and old password should be different")
-                                        setFieldTouched("newPassword", true)
-                                        return
-                                    }
-                                    else {
+                                    if (isUpdateEmail) {
                                         handleSubmit(values)
                                     }
+                                    else {
+                                        if (values.newPassword !== values.confirmPassword) {
+                                            setFieldError("confirmPassword", "new and confirm password should be same")
+                                            setFieldTouched("confirmPassword", true)
+                                            return
+                                        }
+                                        else if (values.newPassword === values.oldPassword) {
+                                            setFieldError("newPassword", "new and old password should be different")
+                                            setFieldTouched("newPassword", true)
+                                            return
+                                        }
+                                        else {
+                                            handleSubmit(values)
+                                        }
+                                    }
+
                                 }}
                             >
                                 Update

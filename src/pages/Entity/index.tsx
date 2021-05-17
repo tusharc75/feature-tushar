@@ -15,7 +15,6 @@ import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import EntityHeader from "./Header";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
@@ -29,7 +28,8 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 let entityTimeout: ReturnType<typeof setTimeout>;
 
@@ -441,7 +441,7 @@ const Entity: FC = () => {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingEntities}

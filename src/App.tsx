@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
@@ -22,6 +22,8 @@ import Activitydemo from "./pages/Activity/activitydemo";
 import Activity from "./pages/Activity";
 import Note from "./pages/Activity/Note";
 import Email from "./pages/Activity/Email";
+import Attachments from "./pages/Activity/Attachments";
+import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
 import ProductCategory from "./pages/ProductCategory";
 import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
@@ -53,9 +55,7 @@ import {
   customerAccount,
   customerContact,
   supplierAccount,
-  supplierContact,
-  profilePage,
-  vapidKey,
+  supplierContact
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
@@ -65,79 +65,40 @@ import EditDashboard from './pages/KpiDashboard/EditDashboards';
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from "./pages/ProfilePage/index";
-// import firebase, { onMessageListener } from "./firebase";
-import CustomNotification from "./components/CustomNotification/CustomNotification";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
+import Event from "./pages/Activity/Event";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
-  // const [notification, setNotification] = useState({ open: false, title: null, message: null })
-
-  // const truepush = window["truepush"] || [];
-  // truepush.push(function () {
-  //   truepush.Init({
-  //     id: "608a852cd4fd7034e72c1b43"
-  //   }, function (error) {
-  //     if (error) console.error(error);
-  //   })
-  // })
-
-  // const messaging = firebase.messaging();
-  // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
-  //   if (token) {
-  //     localStorage.setItem("notificationToken", token)
-  //   } else {
-  //     toast.setToastConfig({
-  //       open: true,
-  //       type: "error",
-  //       message: "No registration token available. Request permission to generate one."
-  //     })
-  //   }
-  // }).catch((err) => {
-  //   console.log('An error occurred while retrieving token. ', err);
-  //   // catch error while creating client token
-  // });
-
-  // onMessageListener().then((payload: any) => {
-  //   setNotification({
-  //     open: true,
-  //     title: payload.notification.title,
-  //     message: payload.notification.body
-  //   })
-  //   console.log(payload);
-  // }).catch(err => console.log('failed: ', err));
-
-  const location = useLocation();
   const {
     state: { user },
   }: any = useData();
 
-  useEffect(() => {
-    try {
-      if (localStorage.getItem("token")) {
-        axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+  const getNotification = async () => {
+    if (localStorage.getItem("token")) {
+      await axiosInstance()
+        .get(`/user/notification/unseen`)
+        .then(({ data: { count } }) => {
           notification.setCount(count);
-        }).catch((error) => {
+        })
+        .catch((error) => {
           toast.setToastConfig(error);
         });
-      }
-
-      setInterval(async () => {
-        if (localStorage.getItem("token")) {
-          await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-            notification.setCount(count);
-          }).catch((error) => {
-            toast.setToastConfig(error);
-          });
-        }
-      }, 60000);
     }
-    catch (e) {
+  };
+
+  useEffect(() => {
+    try {
+      getNotification();
+      setInterval(async () => {
+        await getNotification();
+      }, 60000);
+    } catch (e) {
       console.log(e);
     }
-  }, [])
+  }, []);
 
   const conditionalRedirect = (Comp, location) => {
     return !user ? (
@@ -318,8 +279,17 @@ function App() {
           <PrivateRoute exact path="/activity/note">
             <Note />
           </PrivateRoute>
+          <PrivateRoute exact path="/activity/attachment">
+            <Attachments />
+          </PrivateRoute>
+          <PrivateRoute exact path="/activity/event">
+            <Event />
+          </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />
+          </PrivateRoute>
+          <PrivateRoute exact path="/calendar">
+            <Calender />
           </PrivateRoute>
 
           <PrivateRoute exact path="/product-category">
@@ -356,7 +326,7 @@ function App() {
           <PrivateRoute exact path={routes.productBuilder.path}>
             <ProductBuilder />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productBuilder.path + "/:id"} >
+          <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
             <CreateProductBuilder />
           </PrivateRoute>
           <PrivateRoute exact path={"/quote-builder/:id"} >
@@ -394,12 +364,6 @@ function App() {
           }}
         />
       )}
-
-      {/* {
-        notification.open && <CustomNotification open={notification.open}
-          title={notification.title} message={notification.message}
-          close={() => { setNotification({ open: false, title: null, message: null }) }} />
-      } */}
     </ThemeProvider>
   );
 }

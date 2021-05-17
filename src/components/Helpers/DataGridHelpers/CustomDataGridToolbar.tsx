@@ -7,7 +7,7 @@ import {
     GridFilterToolbarButton
 } from '@material-ui/data-grid';
 
-export default function DataGridCustomToolbar() {
+export default function CustomDataGridToolbar() {
     return (
         <React.Fragment>
             <GridToolbarContainer>

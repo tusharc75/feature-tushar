@@ -15,18 +15,16 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import InputField from "../../components/Helpers/InputField";
-import { getObjKeys, yupSchema, getObjKeysWithValues, initializeDropdownById } from "../../constants/helpers";
+import { getObjKeys, yupSchema, getObjKeysWithValues } from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
 import FormTypes from "../../components/Helpers/FormTypes";
-
 
 interface InitialData {
     fields: any[];
     values: object;
 }
 
-export default function ManageUserDialog({ open, close, onSuccess, isNew, userId = null, dataToUpdate }) {
+export default function ManageUserDialog({ open, close, onSuccess, isNew, userId = null, dataToUpdate, redirectToDetailsScreen = true }) {
 
     const { setToastConfig } = useContext(CustomToastContext);
     const theme = useTheme();
@@ -121,11 +119,16 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                     });
                     setSubmitting(false);
 
+                    // if (redirectToDetailsScreen) {
                     history.push({
                         pathname: `/user/detail/${newId}`,
                         state: { location: location }
                     });
                     close();
+                    // }
+                    // else {
+                    //     onSuccess(data.data[0])
+                    // }
                 })
                 .catch((error) => {
                     setToastConfig(error);
@@ -203,7 +206,7 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                                                         {form.sectionFields.map((field) => (
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 {
-                                                                    field.fieldName == "reportsTo" ? (
+                                                                    field.fieldName === "reportsTo" ? (
                                                                         <FormTypes
                                                                             values={values}
                                                                             errors={errors}

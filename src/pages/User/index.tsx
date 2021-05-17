@@ -10,17 +10,16 @@ import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
-import CreateUser from "./CreateUser";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { userType } from './../../constants/helpers'
@@ -462,7 +461,7 @@ const User: FC = () => {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingUsers}

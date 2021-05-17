@@ -19,12 +19,14 @@ import {
 } from "@material-ui/icons";
 import * as yup from "yup";
 import moment from "moment";
-import ListItem from "@material-ui/core/ListItem/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import { ListItemText } from "@material-ui/core";
+import currencies from "./currency_with_country.json";
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
+
+export const validations = {
+  email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+};
 
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
@@ -53,10 +55,16 @@ export const userType = {
   brandAdmin: 2,
 };
 
+export const gridPageSizes = [25, 50, 75];
+
 export const leadProcessFieldName = "leadProcess";
 export const opportunityProcessFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
+
+export const localStorageKeys = {
+  currentSelectedRoleType: "currentSelectedRoleType",
+};
 
 export const sidebarResource = {
   brand: "Brand",
@@ -256,6 +264,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           ? yup.string().required(`${input.fieldLabel} is required`)
           : yup.string();
       });
+    } else if (input.type === "date") {
+      schema[input.fieldName] = input.required
+        ? yup.string().required(`${input.fieldLabel} is required`).nullable()
+        : yup.string().nullable();
     } else {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`)
@@ -285,6 +297,11 @@ export const UnCamelCase = (str) => {
 
 export const isObjectEmpty = (obj) => {
   return Object.keys(obj).length === 0;
+};
+
+export const currencyCodeToSymbol = (currencyCode) => {
+  return currencies.filter((obj) => obj.currencyCode === currencyCode)[0]
+    .symbolNative;
 };
 
 // Function To Set Owner DataSource
@@ -509,15 +526,80 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
-// export const DisplayData = ({ label, value, icon }) => {
-//   return <div style={{ flexGrow: 1 }}>
-//     <List>
-//       <ListItem>
-//         <ListItemAvatar>
-//           {icon}
-//         </ListItemAvatar>
-//         <ListItemText primary={value} secondary={label} />
-//       </ListItem>
-//     </List>
-//   </div>
-// }
+export const formatAmountWithCurrency = (currencyCode, amount) => {
+  if (!currencyCode && !amount) return null;
+
+  const currencyData = currencies.find(
+    (data) => data?.currencyCode === currencyCode
+  );
+
+  if (!currencyData) {
+    return amount;
+  }
+
+  const language =
+    currencyData.languages.length > 0 ? currencyData.languages[0] : "en";
+
+  let options = {
+    style: "currency",
+    currency: currencyCode,
+  };
+
+  if (Number.isInteger(amount)) {
+    options["maximumFractionDigits"] = 0;
+  }
+
+  return new Intl.NumberFormat(
+    `${language}-${currencyData.countryCode}`,
+    options
+  )
+    .format(amount)
+    .replace(/^(\D+)/, "$1 ");
+};
+
+export const graphOptions = {
+  layout: {
+    randomSeed: 2,
+  },
+  interaction: { hover: true },
+  nodes: {
+    fixed: {
+      x: false,
+      y: false,
+    },
+    shape: "dot",
+    // size: 13,
+    borderWidth: 1.5,
+    borderWidthSelected: 2,
+    font: {
+      size: 15,
+      align: "center",
+      bold: {
+        color: "#bbbdc0",
+        size: 15,
+        vadjust: 0,
+        mod: "bold",
+      },
+    },
+    shadow: true,
+  },
+  edges: {
+    width: 0.01,
+    color: {
+      color: "#D3D3D3",
+      highlight: "#797979",
+      hover: "#797979",
+      opacity: 1.0,
+    },
+    arrows: {
+      to: { enabled: false, scaleFactor: 1, type: "arrow" },
+      // middle: { enabled: false, scaleFactor: 1, type: "arrow" },
+      from: { enabled: true, scaleFactor: 1, type: "arrow" },
+    },
+    smooth: {
+      type: "continuous",
+      roundness: 0,
+    },
+    shadow: true,
+  },
+};

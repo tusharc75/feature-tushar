@@ -1,226 +1,380 @@
 [
-  {
-      "countryCode": "BG",
-      "currencyCode": "BGN",
-      "name": "Bulgarian Lev",
-      "symbol": "BGN",
-      "symbolNative": "лв."
-  },
-  {
-      "countryCode": "EU",
-      "currencyCode": "EUR",
-      "name": "Euro",
-      "symbol": "€",
-      "symbolNative": "€"
-  },
-  {
-      "countryCode": "NO",
-      "currencyCode": "NOK",
-      "name": "Norwegian Krone",
-      "symbol": "Nkr",
-      "symbolNative": "kr"
-  },
-  {
-      "countryCode": "BR",
-      "currencyCode": "BRL",
-      "name": "Brazilian Real",
-      "symbol": "R$",
-      "symbolNative": "R$"
-  },
-  {
-      "countryCode": "RU",
-      "currencyCode": "RUB",
-      "name": "Russian Ruble",
-      "symbol": "RUB",
-      "symbolNative": "₽."
-  },
-  {
-      "countryCode": "RO",
-      "currencyCode": "RON",
-      "name": "Romanian Leu",
-      "symbol": "RON",
-      "symbolNative": "RON"
-  },
-  {
-      "countryCode": "JP",
-      "currencyCode": "JPY",
-      "name": "Japanese Yen",
-      "symbol": "¥",
-      "symbolNative": "￥"
-  },
-  {
-      "countryCode": "GB",
-      "currencyCode": "GBP",
-      "name": "Pound Sterling",
-      "symbol": "£",
-      "symbolNative": "£"
-  },
-  {
-      "countryCode": "HR",
-      "currencyCode": "HRK",
-      "name": "Croatian Kuna",
-      "symbol": "kn",
-      "symbolNative": "kn"
-  },
-  {
-      "countryCode": "HU",
-      "currencyCode": "HUF",
-      "name": "Hungarian Forint",
-      "symbol": "Ft",
-      "symbolNative": "Ft"
-  },
-  {
-      "countryCode": "HK",
-      "currencyCode": "HKD",
-      "name": "Hong Kong Dollar",
-      "symbol": "HK$",
-      "symbolNative": "$"
-  },
-  {
-      "countryCode": "PH",
-      "currencyCode": "PHP",
-      "name": "Philippine Peso",
-      "symbol": "₱",
-      "symbolNative": "₱"
-  },
-  {
-      "countryCode": "PL",
-      "currencyCode": "PLN",
-      "name": "Polish Zloty",
-      "symbol": "zł",
-      "symbolNative": "zł"
-  },
-  {
-      "countryCode": "ZA",
-      "currencyCode": "ZAR",
-      "name": "South African Rand",
-      "symbol": "R",
-      "symbolNative": "R"
-  },
-  {
-      "countryCode": "MY",
-      "currencyCode": "MYR",
-      "name": "Malaysian Ringgit",
-      "symbol": "RM",
-      "symbolNative": "RM"
-  },
-  {
-      "countryCode": "MX",
-      "currencyCode": "MXN",
-      "name": "Mexican Peso",
-      "symbol": "MX$",
-      "symbolNative": "$"
-  },
-  {
-      "countryCode": "IL",
-      "currencyCode": "ILS",
-      "name": "Israeli New Shekel",
-      "symbol": "₪",
-      "symbolNative": "₪"
-  },
-  {
-      "countryCode": "NZ",
-      "currencyCode": "NZD",
-      "name": "New Zealand Dollar",
-      "symbol": "NZ$",
-      "symbolNative": "$"
-  },
-  {
-      "countryCode": "CH",
-      "currencyCode": "CHF",
-      "name": "Swiss Franc",
-      "symbol": "CHF",
-      "symbolNative": "CHF"
-  },
-  {
-      "countryCode": "CN",
-      "currencyCode": "CNY",
-      "name": "Chinese Yuan Renminbi",
-      "symbol": "CN¥",
-      "symbolNative": "CN¥"
-  },
-  {
-      "countryCode": "CA",
-      "currencyCode": "CAD",
-      "name": "Canadian Dollar",
-      "symbol": "CA$",
-      "symbolNative": "$"
-  },
-  {
-      "countryCode": "CZ",
-      "currencyCode": "CZK",
-      "name": "Czech Koruna",
-      "symbol": "Kč",
-      "symbolNative": "Kč"
-  },
-  {
-      "countryCode": "KR",
-      "currencyCode": "KRW",
-      "name": "South Korean Won",
-      "symbol": "₩",
-      "symbolNative": "₩"
-  },
-  {
-      "countryCode": "SG",
-      "currencyCode": "SGD",
-      "name": "Singapore Dollar",
-      "symbol": "S$",
-      "symbolNative": "$"
-  },
-  {
-      "countryCode": "SE",
-      "currencyCode": "SEK",
-      "name": "Swedish Krona",
-      "symbol": "Skr",
-      "symbolNative": "kr"
-  },
-  {
-      "countryCode": "DK",
-      "currencyCode": "DKK",
-      "name": "Danish Krone",
-      "symbol": "Dkr",
-      "symbolNative": "kr"
-  },
-  {
-      "countryCode": "US",
-      "currencyCode": "USD",
-      "name": "United States Dollar",
-      "symbol": "$",
-      "symbolNative": "$"
-  },
-  {
-      "countryCode": "TR",
-      "currencyCode": "TRY",
-      "name": "Turkish Lira ",
-      "symbol": "TL",
-      "symbolNative": "TL"
-  },
-  {
-      "countryCode": "TH",
-      "currencyCode": "THB",
-      "name": "Thai Baht",
-      "symbol": "฿",
-      "symbolNative": "฿"
-  },
-  {
-      "countryCode": "AU",
-      "currencyCode": "AUD",
-      "name": "Australian Dollar",
-      "symbol": "AU$",
-      "symbolNative": "$"
-  },
-  {
-      "countryCode": "IN",
-      "currencyCode": "INR",
-      "name": "Indian Rupee",
-      "symbol": "Rs",
-      "symbolNative": "₹"
-  },
-  {
-      "countryCode": "ID",
-      "currencyCode": "IDR",
-      "name": "Indonesian Rupiah",
-      "symbol": "Rp",
-      "symbolNative": "Rp"
-  }
+    {
+        "country": "Australia",
+        "countryCode": "AU",
+        "currencyCode": "AUD",
+        "languages": [
+            "en"
+        ],
+        "name": "Australian Dollar",
+        "symbol": "AU$",
+        "symbolNative": "$"
+    },
+    {
+        "country": "Brazil",
+        "countryCode": "BR",
+        "currencyCode": "BRL",
+        "languages": [
+            "de",
+            "pt"
+        ],
+        "name": "Brazilian Real",
+        "symbol": "R$",
+        "symbolNative": "R$"
+    },
+    {
+        "country": "Bulgaria",
+        "countryCode": "BG",
+        "currencyCode": "BGN",
+        "languages": [
+            "bg"
+        ],
+        "name": "Bulgarian Lev",
+        "symbol": "BGN",
+        "symbolNative": "лв."
+    },
+    {
+        "country": "Canada",
+        "countryCode": "CA",
+        "currencyCode": "CAD",
+        "languages": [
+            "en",
+            "fr"
+        ],
+        "name": "Canadian Dollar",
+        "symbol": "CA$",
+        "symbolNative": "$"
+    },
+    {
+        "country": "China",
+        "countryCode": "CN",
+        "currencyCode": "CNY",
+        "languages": [
+            "zh"
+        ],
+        "name": "Chinese Yuan Renminbi",
+        "symbol": "CN¥",
+        "symbolNative": "CN¥"
+    },
+    {
+        "country": "Croatia",
+        "countryCode": "HR",
+        "currencyCode": "HRK",
+        "languages": [
+            "hr",
+            "it"
+        ],
+        "name": "Croatian Kuna",
+        "symbol": "kn",
+        "symbolNative": "kn"
+    },
+    {
+        "country": "Czech Republic",
+        "countryCode": "CZ",
+        "currencyCode": "CZK",
+        "languages": [
+            "cs",
+            "sk"
+        ],
+        "name": "Czech Koruna",
+        "symbol": "Kč",
+        "symbolNative": "Kč"
+    },
+    {
+        "country": "Denmark",
+        "countryCode": "DK",
+        "currencyCode": "DKK",
+        "languages": [
+            "da",
+            "de"
+        ],
+        "name": "Danish Krone",
+        "symbol": "Dkr",
+        "symbolNative": "kr"
+    },
+    {
+        "country": "Europe",
+        "countryCode": "EU",
+        "currencyCode": "EUR",
+        "languages": [],
+        "name": "Euro",
+        "symbol": "€",
+        "symbolNative": "€"
+    },
+    {
+        "country": "Hong Kong",
+        "countryCode": "HK",
+        "currencyCode": "HKD",
+        "languages": [],
+        "name": "Hong Kong Dollar",
+        "symbol": "HK$",
+        "symbolNative": "$"
+    },
+    {
+        "country": "Hungary",
+        "countryCode": "HU",
+        "currencyCode": "HUF",
+        "languages": [
+            "hu"
+        ],
+        "name": "Hungarian Forint",
+        "symbol": "Ft",
+        "symbolNative": "Ft"
+    },
+    {
+        "country": "India",
+        "countryCode": "IN",
+        "currencyCode": "INR",
+        "languages": [
+            "bn",
+            "en",
+            "fr",
+            "hi",
+            "ml",
+            "pa",
+            "ta",
+            "te"
+        ],
+        "name": "Indian Rupee",
+        "symbol": "Rs",
+        "symbolNative": "₹"
+    },
+    {
+        "country": "Indonesia",
+        "countryCode": "ID",
+        "currencyCode": "IDR",
+        "languages": [
+            "id",
+            "ms"
+        ],
+        "name": "Indonesian Rupiah",
+        "symbol": "Rp",
+        "symbolNative": "Rp"
+    },
+    {
+        "country": "Israel",
+        "countryCode": "IL",
+        "currencyCode": "ILS",
+        "languages": [
+            "ar",
+            "he"
+        ],
+        "name": "Israeli New Shekel",
+        "symbol": "₪",
+        "symbolNative": "₪"
+    },
+    {
+        "country": "Japan",
+        "countryCode": "JP",
+        "currencyCode": "JPY",
+        "languages": [
+            "ja"
+        ],
+        "name": "Japanese Yen",
+        "symbol": "¥",
+        "symbolNative": "￥"
+    },
+    {
+        "country": "Korea, Republic of",
+        "countryCode": "KR",
+        "currencyCode": "KRW",
+        "languages": [
+            "ko"
+        ],
+        "name": "South Korean Won",
+        "symbol": "₩",
+        "symbolNative": "₩"
+    },
+    {
+        "country": "Malaysia",
+        "countryCode": "MY",
+        "currencyCode": "MYR",
+        "languages": [
+            "en",
+            "ms"
+        ],
+        "name": "Malaysian Ringgit",
+        "symbol": "RM",
+        "symbolNative": "RM"
+    },
+    {
+        "country": "Mexico",
+        "countryCode": "MX",
+        "currencyCode": "MXN",
+        "languages": [
+            "es"
+        ],
+        "name": "Mexican Peso",
+        "symbol": "MX$",
+        "symbolNative": "$"
+    },
+    {
+        "country": "New Zealand",
+        "countryCode": "NZ",
+        "currencyCode": "NZD",
+        "languages": [
+            "en"
+        ],
+        "name": "New Zealand Dollar",
+        "symbol": "NZ$",
+        "symbolNative": "$"
+    },
+    {
+        "country": "Norway",
+        "countryCode": "NO",
+        "currencyCode": "NOK",
+        "languages": [
+            "no",
+            "ro"
+        ],
+        "name": "Norwegian Krone",
+        "symbol": "Nkr",
+        "symbolNative": "kr"
+    },
+    {
+        "country": "Philippines",
+        "countryCode": "PH",
+        "currencyCode": "PHP",
+        "languages": [
+            "ar",
+            "en",
+            "es"
+        ],
+        "name": "Philippine Peso",
+        "symbol": "₱",
+        "symbolNative": "₱"
+    },
+    {
+        "country": "Poland",
+        "countryCode": "PL",
+        "currencyCode": "PLN",
+        "languages": [
+            "de",
+            "lt",
+            "pl"
+        ],
+        "name": "Polish Zloty",
+        "symbol": "zł",
+        "symbolNative": "zł"
+    },
+    {
+        "country": "Romania",
+        "countryCode": "RO",
+        "currencyCode": "RON",
+        "languages": [
+            "ro"
+        ],
+        "name": "Romanian Leu",
+        "symbol": "RON",
+        "symbolNative": "RON"
+    },
+    {
+        "country": "Russia",
+        "countryCode": "RU",
+        "currencyCode": "RUB",
+        "languages": [
+            "ru"
+        ],
+        "name": "Russian Ruble",
+        "symbol": "RUB",
+        "symbolNative": "₽."
+    },
+    {
+        "country": "Singapore",
+        "countryCode": "SG",
+        "currencyCode": "SGD",
+        "languages": [
+            "en",
+            "ms",
+            "ta",
+            "zh"
+        ],
+        "name": "Singapore Dollar",
+        "symbol": "S$",
+        "symbolNative": "$"
+    },
+    {
+        "country": "South Africa",
+        "countryCode": "ZA",
+        "currencyCode": "ZAR",
+        "languages": [
+            "af",
+            "en"
+        ],
+        "name": "South African Rand",
+        "symbol": "R",
+        "symbolNative": "R"
+    },
+    {
+        "country": "Sweden",
+        "countryCode": "SE",
+        "currencyCode": "SEK",
+        "languages": [
+            "fi",
+            "ro",
+            "sv"
+        ],
+        "name": "Swedish Krona",
+        "symbol": "Skr",
+        "symbolNative": "kr"
+    },
+    {
+        "country": "Switzerland",
+        "countryCode": "CH",
+        "currencyCode": "CHF",
+        "languages": [
+            "de",
+            "fr",
+            "it"
+        ],
+        "name": "Swiss Franc",
+        "symbol": "CHF",
+        "symbolNative": "CHF"
+    },
+    {
+        "country": "Thailand",
+        "countryCode": "TH",
+        "currencyCode": "THB",
+        "languages": [
+            "th"
+        ],
+        "name": "Thai Baht",
+        "symbol": "฿",
+        "symbolNative": "฿"
+    },
+    {
+        "country": "Turkey",
+        "countryCode": "TR",
+        "currencyCode": "TRY",
+        "languages": [
+            "tr"
+        ],
+        "name": "Turkish Lira ",
+        "symbol": "TL",
+        "symbolNative": "TL"
+    },
+    {
+        "country": "United Kingdom",
+        "countryCode": "GB",
+        "currencyCode": "GBP",
+        "languages": [
+            "en"
+        ],
+        "name": "Pound Sterling",
+        "symbol": "£",
+        "symbolNative": "£"
+    },
+    {
+        "country": "United States",
+        "countryCode": "US",
+        "currencyCode": "USD",
+        "languages": [
+            "en",
+            "es",
+            "fr"
+        ],
+        "name": "United States Dollar",
+        "symbol": "$",
+        "symbolNative": "$"
+    }
 ]

@@ -1,72 +1,218 @@
-import React, { useState, useEffect } from "react";
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
-import { TouchBackend } from 'react-dnd-touch-backend'
-import statusList from '../../Helpers/statusList';
-import { Typography } from '@material-ui/core';
+import { useState, useEffect } from "react";
+import { Box, Grid, Typography, TextField } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { TouchBackend } from "react-dnd-touch-backend";
+import { isEqual, kebabCase, camelCase } from "lodash";
 import { isMobile, isTablet } from "react-device-detect";
+
+import statusList from "../../Helpers/statusList";
 import { GetBoard } from "../../../../axios/activity";
 import Loader from "../../../../components/Loader";
 import { BoardList } from "./BoardList";
-import _ from 'lodash';
-
+import axiosInstance from "../../../../axios/axiosInstance";
 
 const Board = ({ type, filter, activityId }) => {
+  const [activities, setActivities] = useState(null);
+  const [resource, setResource] = useState("");
+  const [resourceData, setResourceData] = useState(null);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [selectedResourceData, setSelectedResourceData] = useState(null);
 
+  useEffect(() => {
+    fetchBoard();
+  }, [type, filter, activityId]);
 
-    const [activity, setActivity] = useState(null);
+  const fetchBoard = async () => {
+    await GetBoard(type, JSON.stringify(filter))
+      .then(({ data }) => {
+        setActivities(data);
+      })
+      .catch((err) => {});
+  };
 
-    useEffect(() => {
-        fetchBoard();
-    }, [filter, activityId]);
+  // Data for Autocomplete
+  useEffect(() => {
+    if (!resource) return;
+    setLoadingResources(true);
+    axiosInstance()
+      .get(`${kebabCase(resource)}?limit=100`)
+      .then(({ data: { data } }) => {
+        if (data.length) {
+          const mappedData = data.map((_d) => getData(resource, _d));
+          setResourceData(mappedData);
+        }
+        setLoadingResources(false);
+      })
+      .catch((error) => {
+        setLoadingResources(false);
+      });
 
-    const fetchBoard = async () => {
-        await GetBoard(type, JSON.stringify(filter))
-            .then(({ data }) => {
-                setActivity(data);
-            })
-            .catch((err) => {
-            });
+    return () => {
+      setSelectedResourceData(null);
+      setResourceData(null);
     };
+    // eslint-disable-next-line
+  }, [resource]);
 
-    const handleChangeStatus = (activityId, status) => {
-        const updatedState = _.map(activity, stateItem => {
-            if (stateItem._id === activityId) {
-                stateItem.status = status;
-            }
-            return stateItem;
-        });
-        setActivity(updatedState)
-        // UpdateActivity(activityId, { field: "status", content: status })
-        //     .then(({ data }) => {
-        //     })
-        //     .catch((err) => {
-        //     });
+  const handleChangeStatus = (activityId: string, status: string) => {
+    const updatedState = activities.map((activity: any) => {
+      if (activity._id === activityId && activity.status !== status) {
+        return {
+          ...activity,
+          status,
+        };
+      }
+
+      return activity;
+    });
+    if (!isEqual(activities, updatedState)) {
+      setActivities(updatedState);
     }
+    const updatedActivity = updatedState.find((a) => a._id === activityId);
+    if (updatedActivity && updatedActivity.status === status) {
+      updateStatus(activityId, updatedActivity);
+    }
+  };
 
-    return (activity ? <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+  const updateStatus = (id: string, updatedData: any) => {
+    axiosInstance()
+      .put(`${type}/${id}`, { status: updatedData.status })
+      .then(({ data }) => {})
+      .catch((err) => console.log(JSON.stringify(err)));
+  };
+
+  const resourceOptions = [
+    "Customer Account",
+    "Customer Contact",
+    "Supplier Account",
+    "Supplier Contact",
+    "Lead",
+    "Opportunity",
+  ];
+
+  const getData = (resource: string, data: any) => {
+    switch (kebabCase(resource)) {
+      case "lead":
+        return {
+          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+          id: data._id,
+        };
+      case "opportunity":
+        return {
+          name: `${data.opportunityName}`,
+          id: data._id,
+        };
+      case "customer-account":
+        return {
+          name: `${data.accountName}`,
+          id: data._id,
+        };
+      case "supplier-account":
+        return {
+          name: `${data.accountName}`,
+          id: data._id,
+        };
+      case "customer-contact":
+        return {
+          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+          id: data._id,
+        };
+      case "supplier-contact":
+        return {
+          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
+          id: data._id,
+        };
+      default:
+        break;
+    }
+  };
+
+  return activities ? (
+    <>
+      <Box display="flex" pb={1}>
+        <Autocomplete
+          options={resourceOptions}
+          getOptionLabel={(option) => option}
+          style={{ width: 200 }}
+          value={resource}
+          onChange={(event, newValue) => {
+            setResource(newValue);
+          }}
+          size="small"
+          renderInput={(params) => (
+            <TextField {...params} label="Select Resource" variant="outlined" />
+          )}
+        />
+        <Box mx={1} />
+        {Boolean(resource) && resourceData && (
+          <Autocomplete
+            disabled={loadingResources}
+            options={resourceData}
+            getOptionLabel={(option: any) => option.name}
+            getOptionSelected={(option: any, value: any) =>
+              option.name === value.name
+            }
+            style={{ width: 250 }}
+            value={selectedResourceData}
+            onChange={(event, newValue) => {
+              setSelectedResourceData(newValue);
+            }}
+            size="small"
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={`Select ${resource}`}
+                variant="outlined"
+              />
+            )}
+          />
+        )}
+      </Box>
+      <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container>
-            {statusList.map((data, index) => (
-                <Box key={index} width={300} height={window.innerHeight - 250} mr={2} style={{ overflow: "auto" }} display="block" border={1} borderColor="grey.300" bgcolor="grey.200">
-                    <Box p={1}>
-                        <Typography variant="subtitle2" >{data.status.toUpperCase()}
-                            {" (" + activity.filter(function (o) { return o.status === data.status }).length + ")"}
-                        </Typography>
-                    </Box>
-                    <BoardList
-                        status={data.status}
-                        activity={activity.filter(function (o) { return o.status === data.status })}
-                        fetchBoard={fetchBoard}
-                        type={type}
-                        handleChangeStatus={handleChangeStatus}
-                    />
-                </Box>
-            ))}
+          {statusList.map((data, index) => (
+            <Box
+              key={index}
+              width={300}
+              height={window.innerHeight - 250}
+              mr={2}
+              style={{ overflow: "auto" }}
+              display="block"
+              border={1}
+              borderColor="grey.300"
+              bgcolor="grey.200"
+            >
+              <Box p={1}>
+                <Typography variant="subtitle2">
+                  {data.status.toUpperCase()}
+                  {" (" +
+                    activities.filter(function (o) {
+                      return o.status === data.status;
+                    }).length +
+                    ")"}
+                </Typography>
+              </Box>
+              <BoardList
+                selectedResource={selectedResourceData}
+                resource={resource}
+                status={data.status}
+                activity={activities.filter(function (o) {
+                  return o.status === data.status;
+                })}
+                fetchBoard={fetchBoard}
+                type={type}
+                handleChangeStatus={handleChangeStatus}
+              />
+            </Box>
+          ))}
         </Grid>
-    </DndProvider> : <Loader text="" />
-    );
-}
+      </DndProvider>
+    </>
+  ) : (
+    <Loader text="" />
+  );
+};
 
 export default Board;

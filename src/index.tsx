@@ -9,16 +9,17 @@ import "./styles/common-styles.scss";
 import "./styles/material-component.scss";
 import "./styles/responsive-styles.scss"
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
-import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
+import { MsalProvider } from "@azure/msal-react";
+import AzureInstance from "./AzureInstance";
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
       <Provider>
         <CustomToastProvider>
-          <CustomNotificationCountProvider>
+          <MsalProvider instance={AzureInstance}>
             <App />
-          </CustomNotificationCountProvider>
+          </MsalProvider>
         </CustomToastProvider>
       </Provider>
     </Router>

@@ -27,7 +27,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import CustomContainer from "../../components/CustomContainer";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import styles from "../Leads/Header.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -44,10 +43,11 @@ import {
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
 import routes from "./../../components/Helpers/Routes";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 const ContactTypes = [
   {
@@ -656,7 +656,7 @@ export default function Contact(props) {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}
