@@ -4,12 +4,6 @@ import {
   Button,
   TextField,
   Paper,
-  Table,
-  TableContainer,
-  TableHead,
-  TableBody,
-  TableCell,
-  TableRow,
   Grid,
   CircularProgress,
   Typography,
@@ -21,7 +15,6 @@ import { useParams, useHistory } from "react-router-dom";
 
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
-import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -32,7 +25,7 @@ import RoleEngine from "../../components/Shared/RoleEngine";
 import Loader from "../../components/Loader";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import AssignedUsers from "./AssignedUsers";
-import AssignedEntities from "./AssignedEntities";
+import { FaEye } from 'react-icons/fa';
 import BoxWithBorder from "../../components/BoxWithBorder";
 import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
 import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
@@ -42,6 +35,7 @@ import {
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
 import { PERMISSION } from "../../constants/Roles";
+import { roleTypes } from "../../constants/helpers";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -65,6 +59,7 @@ const RoleDetailsPage = () => {
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
+  const [roleUsers, setRoleUsers] = useState([]);
   const [values, setValues] = useState({
     name: "",
     description: "",
@@ -82,6 +77,12 @@ const RoleDetailsPage = () => {
     // eslint-disable-next-line
   }, [id]);
 
+  useEffect(() => {
+    if (roleData) {
+      fetchUser();
+    }
+    // eslint-disable-next-line
+  }, [roleData]);
   useEffect(() => {
     const data = {
       name: values.name,
@@ -115,7 +116,28 @@ const RoleDetailsPage = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
+
   };
+
+
+  const fetchUser = async () => {
+    setLoading(true);
+    // let api = roleData?.type === 1 ? `user?filterById=[{"field": "role", "term": "${id}"}]` : `/user?filterById=[{"field": "entities.entity", "term": "${id}"}]`
+    try {
+      const {
+        data: { data },
+      } = await axiosInstance().get(roleData?.type === roleTypes.find((d) => d.key === "Global")?.value ? `user?filterById=[{"field": "role", "term": "${id}"}]` : `/user?filterById=[{"field": "entities.role", "term": "${id}"}]`);
+      setRoleUsers(data);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const checkError = () => {
+
+    return values?.name?.length === 0 || values?.description?.length === 0
+
+  }
 
   const handleUpdateRole = () => {
     setUpdating(true);
@@ -170,9 +192,14 @@ const RoleDetailsPage = () => {
         roles: [id],
       };
       axiosInstance()
-        .post("/role/un-assign-role", data)
+        .put("/user/un-assign-role", data)
         .then(() => {
           setShowConfirmBox(false);
+
+          if ((showUsers - 1) >= 2) {
+            setShowUsers(showUsers - 1)
+          }
+
           fetchRoleData();
           toastConfig.setToastConfig({
             message: "Successfully unassigned user",
@@ -264,7 +291,7 @@ const RoleDetailsPage = () => {
           usersDialogOpen={showAssignUserDialog}
           handleCloseDialog={userDialogClose}
           roleIds={[id]}
-          assignedUsers={roleData?.user}
+          assignedUsers={roleUsers}
           onSuccess={() => {
             fetchRoleData();
             userDialogClose();
@@ -278,6 +305,8 @@ const RoleDetailsPage = () => {
           type="entity"
           ids={[id]}
           assignedEntity={roleData?.entity}
+          regionalRole={false}
+
           onSuccess={() => {
             fetchRoleData();
             fetchUserData();
@@ -314,7 +343,7 @@ const RoleDetailsPage = () => {
                 <DetailsPageHeader heading={headingLbl} showHeading={true}>
                   {permissions.role.isUpdate && !isEditDeleteDisable ? (
                     <Button
-                      disabled={currentData === updatedData || isUpdating}
+                      disabled={currentData === updatedData || isUpdating || checkError()}
                       variant="contained"
                       color="primary"
                       onClick={handleUpdateRole}
@@ -337,7 +366,7 @@ const RoleDetailsPage = () => {
 
               <Box display="flex" marginTop={2} marginBottom={2} gridGap={10}>
                 <TextField
-                  disabled={!permissions.role.isUpdate}
+                  disabled={(roleData?.type && roleData?.permission) ? true : !permissions.role.isUpdate}
                   required
                   variant="outlined"
                   size="small"
@@ -345,12 +374,12 @@ const RoleDetailsPage = () => {
                   label="Role Name"
                   value={values.name}
                   onChange={(e) =>
-                    setValues({ ...values, name: e.target.value })
+                    setValues({ ...values, name: e.target.value.trimStart() })
                   }
                 />
 
                 <TextField
-                  disabled={!permissions.role.isUpdate}
+                  disabled={(roleData?.type && roleData?.permission) ? true : !permissions.role.isUpdate}
                   required
                   variant="outlined"
                   size="small"
@@ -358,60 +387,43 @@ const RoleDetailsPage = () => {
                   label="Role Description"
                   value={values.description}
                   onChange={(e) =>
-                    setValues({ ...values, description: e.target.value })
+                    setValues({ ...values, description: e.target.value.trimStart() })
                   }
                 />
               </Box>
               <Paper>
-                <TableContainer style={{ height: 440 }}>
-                  <Table
-                    stickyHeader
-                    aria-label="roles"
-                    className="roles-table"
-                  >
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Names</TableCell>
-                        <TableCell>Read</TableCell>
-                        <TableCell>Create</TableCell>
-                        <TableCell>Update</TableCell>
-                        <TableCell>Delete</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {loading ? (
-                        <TableRow>
-                          <TableCell colSpan={5}>
-                            <Loader
-                              style={{ height: "100%" }}
-                              text="Loading..."
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        field.length &&
-                        resource.length && (
-                          <RoleEngine
-                            field={field}
-                            resource={resource}
-                            setField={setField}
-                            setResource={setResource}
-                            isDisable={
-                              permissions.role.isUpdate
-                                ? isEditDeleteDisable
-                                  ? true
-                                  : false
-                                : true
-                            }
-                          />
-                        )
-                      )}
-                    </TableBody>
+
+                {loading ? (
+                  <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200 }}>
+                    <Loader
+                      style={{ height: "100%" }}
+                      text="Loading..."
+                    />
+                  </div>
+                ) : (
+                  field.length &&
+                  resource.length && (
+                    <RoleEngine
+                      field={field}
+                      resource={resource}
+                      setField={setField}
+                      setResource={setResource}
+                      isDisable={
+                        permissions.role.isUpdate
+                          ? isEditDeleteDisable
+                            ? true
+                            : false
+                          : true
+                      }
+                    />
+                  )
+                )}
+                {/* </TableBody>
                   </Table>
-                </TableContainer>
+                </TableContainer> */}
               </Paper>
               <Box marginY={2} />
-              {roleData && roleData.type === 2 && (
+              {/* {roleData && roleData.type === 2 && (
                 <div>
                   <Box
                     padding={1}
@@ -494,7 +506,7 @@ const RoleDetailsPage = () => {
                     )}
                   </Box>
                 </div>
-              )}
+              )} */}
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
@@ -507,10 +519,10 @@ const RoleDetailsPage = () => {
                 alignItems="center"
               >
                 <Typography variant="subtitle2">
-                  Assigned Users ({(roleData && roleData.user.length) || 0})
+                  Assigned Users ({(roleUsers.length) || 0})
                 </Typography>
 
-                {permissions.role.isUpdate && (
+                {permissions.role.isUpdate && (roleData?.type === 1) && (
                   <IconButton
                     title="Assign users"
                     color="primary"
@@ -521,7 +533,7 @@ const RoleDetailsPage = () => {
                   </IconButton>
                 )}
               </Box>
-              {roleData && roleData.user && (
+              {roleUsers && (
                 <Box>
                   {loading ? (
                     [1, 2].map((i) => (
@@ -542,25 +554,25 @@ const RoleDetailsPage = () => {
                         </Box>
                       </BoxWithBorder>
                     ))
-                  ) : roleData.user.length ? (
+                  ) : roleUsers.length ? (
                     <>
                       <AssignedUsers
                         permissions={permissions}
                         unassignRole={handleUnassignUser}
-                        data={roleData && roleData.user.slice(0, showUsers)}
+                        data={roleUsers && roleUsers.slice(0, showUsers)}
                         currentUser={user?.user._id}
+                        type={roleData?.type}
                       />
                       <Box marginY={1} />
                       {
-                        roleData.user.length > showRecordsBeforeViewAll && <Button
-                          fullWidth
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => setShowUsers(roleData.user.length)}
-                        >
-                          View All ({roleData.user.length})
-                        </Button>
+                        roleUsers.length > showRecordsBeforeViewAll && <Box className="btn-view gap-1" p={1} display="flex" justifyContent="center" alignItems="center"
+                          onClick={() => history.push(`/user`, {
+                            id: roleData._id,
+                            name: roleData.name,
+                            type: roleData.type === roleTypes.find((d) => d.key === "Global")?.value ? "globalRole" : "regionalRole"
+                          })}>
+                          <FaEye /> View All &#8599;
+                      </Box>
                       }
                     </>
                   ) : (

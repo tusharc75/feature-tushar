@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
   IconButton,
@@ -18,7 +17,6 @@ import OpportunitiesHeader from "./OpportunitiesHeader";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import "./style.scss";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
@@ -30,10 +28,11 @@ import {
 } from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { useHistory } from "react-router-dom";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -96,7 +95,10 @@ const Opportunities = () => {
     if (permissions && permissions[opportunityResource]) {
       setOpportunityPermissions(permissions[opportunityResource]);
     }
-    // eslint-disable-next-line
+
+    return () => {
+      setOpportunityPermissions(null)
+    }
   }, [permissions]);
 
   useEffect(() => {
@@ -115,7 +117,11 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-    // eslint-disable-next-line
+    
+
+    return () => {
+      setRenderCount(0);
+    }
   }, [query, selectedType, selectedEntity, accountDetails]);
 
   useEffect(() => {
@@ -133,7 +139,11 @@ const Opportunities = () => {
       return res;
     });
     setDataRows([...rows]);
-    // eslint-disable-next-line
+
+    return () => {
+      setDataRows([])
+    }
+
   }, [opportunityData]);
 
   const handleSingleDeleteOpportunity = async () => {
@@ -512,10 +522,10 @@ const Opportunities = () => {
     if (params.filterModel.items[0].value) {
       let field = params.filterModel.items[0].columnField
 
-      if (params.filterModel.items[0].columnField == 'createdBy') {
+      if (params.filterModel.items[0].columnField === 'createdBy') {
         field = "createdBy.user"
       }
-      if (params.filterModel.items[0].columnField == 'updatedBy') {
+      if (params.filterModel.items[0].columnField === 'updatedBy') {
         field = "updatedBy.user"
       }
       const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
@@ -589,7 +599,7 @@ const Opportunities = () => {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}

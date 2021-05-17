@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 import Layout from "../../components/Layout";
 import { useData } from '../../StateProvider/Provider';
 import {
@@ -8,9 +8,7 @@ import {
     Menu,
     MenuItem,
     Tooltip,
-    IconButton,
-    Grid,
-    Divider
+    IconButton
 } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
@@ -19,11 +17,10 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import SearchBox from '../../components/Helpers/SearchBox'
 import DeleteIcon from '@material-ui/icons/Delete';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from '../../axios/axiosInstance'
 import CustomContainer from "../../components/CustomContainer";
 import styles from "./terms.module.scss"
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import CustomHeader from '../../components/Helpers/CustomHeader'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -31,26 +28,15 @@ import { getSearchQuery } from '../../services/util';
 import { termsAndCondition } from '../../constants/helpers';
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import _ from 'lodash'
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-import { IoDocumentTextOutline } from 'react-icons/io5'; 
-
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        width: "100%",
-        border: "none",
-        borderRadius: 8,
-        padding: theme.spacing(3, 2),
-    },
-}));
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import { IoDocumentTextOutline } from 'react-icons/io5';
 
 let termsTimeout
 export default function TermsAndCondition(props) {
 
     const { termsAndConditionBreadcrumb } = props
     const toastConfig = useContext(CustomToastContext);
-    const classes = useStyles();
-    const { state: { user, permissions } }: any = useData();
+    const { state: { permissions } }: any = useData();
     const [data, setData] = useState([]);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -62,7 +48,6 @@ export default function TermsAndCondition(props) {
     const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [searchVal, setSearchVal] = useState("");
     const [actionsPermissions, setActionsPermissions] = useState({ isCreate: false, isRead: false, isUpdate: false, isDelete: false, approveAccount: false });
-    const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteRec, setDeleteRec] = useState<any>({})
     const [editRecord, setEditRecord] = useState<any>({})
 
@@ -255,17 +240,14 @@ export default function TermsAndCondition(props) {
             })
         }
         if (recs && recs.length > 0) {
-            setDeleteLoading(true)
             axiosInstance().put(`${termsAndCondition.api}/remove`, { "ids": [...recs] }).then(({ data }) => {
                 toastConfig.setToastConfig({ open: true, type: "success", message: data.message });
                 setShowDeleteConfirmBox(false)
-                setDeleteLoading(false)
                 if (deleteRec) setDeleteRec({})
                 fetchTermsAndConditions()
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
                 setShowDeleteConfirmBox(false)
-                setDeleteLoading(false)
             })
         }
     }
@@ -358,7 +340,7 @@ export default function TermsAndCondition(props) {
                         <div className="listing-grid">
                             <DataGrid
                                 components={{
-                                    Toolbar: DataGridCustomToolbar,
+                                    Toolbar: CustomDataGridToolbar,
                                     NoRowsOverlay: CustomDataGridNoDataFound,
                                 }}
                                 scrollbarSize={20}

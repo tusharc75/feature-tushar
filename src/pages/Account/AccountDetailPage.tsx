@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton, Container, Paper, AppBar, Card, CardContent, List } from "@material-ui/core";
+import { Box, Button, Grid, Typography, IconButton, Paper, Card, CardContent, List } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
-import { Skeleton, TabPanel } from "@material-ui/lab";
-import CustomContainer from "../../components/CustomContainer";
+import { Skeleton } from "@material-ui/lab";
 import Layout from "../../components/Layout";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { accountPage } from "../../routes/Accounts";
@@ -23,12 +22,10 @@ import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import accountClass from "./account.module.scss";
 import ManageContactDialog from "../Contact/ManageContact/index";
 import DeleteButton from "../../components/Helpers/DeleteButton";
-import { makeStyles } from "@material-ui/core/styles";
 import {
-  // DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
-  sidebarResource,
+  sidebarResource
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -44,21 +41,13 @@ import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccord
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 import { Link } from 'react-router-dom'
-import { BiFace } from 'react-icons/bi'
 import { BsPerson } from 'react-icons/bs'
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
-
-const useStyles = makeStyles((theme) => ({
-  container: {
-    padding: "0px",
-    minHeight: "auto",
-  },
-  opportunityTab: {
-    marginTop: "10px",
-  },
-}));
+import _ from 'lodash'
+import routes from "./../../components/Helpers/Routes";
+import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 
 function DisplayData({ label, value, icon }) {
   return <div style={{ flexGrow: 1 }}>
@@ -76,7 +65,7 @@ function DisplayData({ label, value, icon }) {
 export default function AccountDetailPage(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const classes = useStyles();
+
   const {
     account: { accountApi, accountResource, accountPermission, accountRoute },
     accountBreadcrumb,
@@ -88,7 +77,7 @@ export default function AccountDetailPage(props) {
   }: any = useData();
 
   const [headingLbl, setHeadingLbl] = useState("");
-  const [isUpdating, setUpdating] = useState(false);
+  // const [isUpdating, setIsUpdating] = useState(false);
   const [accountData, setAccountData] = useState<any>({});
   const [relatedContacts, setRelatedContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
@@ -115,13 +104,37 @@ export default function AccountDetailPage(props) {
     showAccountHierarchyInFullScreenDialog,
     setShowAccountHierarchyInFullScreenDialog,
   ] = useState(false);
+
+  const [loadingGraphData, setLoadingGraphData] = useState(false);
+  const [graphData, setGraphData] = useState({ edges: [], nodes: [], colorPalette: null });
+
   let { id } = useParams();
 
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);
+    setCurrentTabIndex(0)
     fetchAccountData();
     fetchRelatedData();
   }, [id]);
+
+  useEffect(() => {
+    //  When it is nodal structure tab
+    if (currentTabIndex === 2) {
+      setLoadingGraphData(true);
+
+      axiosInstance().get(`${accountApi}/nodal-structure/${id}`).then(({ data }) => {
+        setLoadingGraphData(false);
+        setGraphData({ nodes: data.data.nodes, edges: data.data.edges, colorPalette: data.colorPalette });
+      }).catch((error) => {
+        setLoadingGraphData(false);
+        toastConfig.setToastConfig(error);
+      });
+    }
+
+    return () => {
+      setGraphData({ edges: [], nodes: [], colorPalette: null });
+    }
+  }, [currentTabIndex])
 
   const fetchRelatedData = () => {
     axiosInstance()
@@ -183,7 +196,7 @@ export default function AccountDetailPage(props) {
           ];
           let newData = [];
 
-          accounts.map((account) => {
+          accounts.forEach((account) => {
             if (isObjectEmpty(account)) return true;
 
             const updatedAccount = {
@@ -363,7 +376,7 @@ export default function AccountDetailPage(props) {
   };
 
   const onUpdateAccount = (values) => {
-    setUpdating(true);
+    setLoading(true);
 
     const updatedData = {
       ...values,
@@ -379,12 +392,12 @@ export default function AccountDetailPage(props) {
           type: "success",
           message: data.message,
         });
-        setUpdating(false);
+        setLoading(false);
         setOpenUpdateDialog(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setUpdating(false);
+        setLoading(false);
       });
   };
 
@@ -402,18 +415,10 @@ export default function AccountDetailPage(props) {
     setOpenUpdateDialog(false);
   };
 
-  const handleViewAll = (path, state) => {
-    history.push({
-      pathname: path,
-      state: {
-        ...state,
-      },
-    });
-  };
-
   const handleCreateContact = () => {
     setShowCreateContactDialog(true);
   };
+
   return (
     <>
       <Layout>
@@ -421,7 +426,7 @@ export default function AccountDetailPage(props) {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+          <Grid item xs={12} sm={12} md={8} lg={8} >
             <Paper>
               {
                 <DetailsPageHeader
@@ -514,23 +519,51 @@ export default function AccountDetailPage(props) {
                         aria-controls="a11y-tabpanel-1"
                         id="a11y-tab-1"
                       />
+                      <Tab
+                        label="3D Graph"
+                        aria-controls="a11y-tabpanel-1"
+                        id="a11y-tab-1"
+                      />
                     </Tabs>
-                    <Box hidden={currentTabIndex !== 0}>
-                      <DetailsPage
-                        data={accountData}
-                        fields={accountFields}
-                      />
-                    </Box>
-                    <Box hidden={currentTabIndex !== 1}>
-                      <AccountHierarchy
-                        data={accountHierarchyData}
-                        currentAccountId={accountData._id}
-                        accountRoute={accountRoute}
-                      />
-                    </Box>
+                    {
+                      currentTabIndex === 0 && <Box>
+                        <DetailsPage
+                          data={accountData}
+                          fields={accountFields}
+                        />
+                      </Box>
+                    }
+
+                    {
+                      currentTabIndex === 1 && <Box>
+                        <AccountHierarchy
+                          data={accountHierarchyData}
+                          currentAccountId={accountData._id}
+                          accountRoute={accountRoute}
+                        />
+                      </Box>
+                    }
+
+                    {
+                      currentTabIndex === 2 && <Box>
+                        <CustomNodalStructure
+                          id={id}
+                          graphData={graphData}
+                          loadingGraphData={loadingGraphData}
+                          onClick={(node) => {
+                            if (node && routes[node.route]) {
+                              history.push({
+                                pathname: `${routes[node.route].path}/${node.id}`
+                              })
+                            }
+                          }}
+                        />
+                      </Box>
+                    }
                   </>
                 )}
               </Box>
+
               {permissions?.opportunity?.isRead && (
                 <OpportunityInAccordian
                   opportunityPermissions={permissions.opportunity}
@@ -566,6 +599,13 @@ export default function AccountDetailPage(props) {
                           },
                         ]}
                         handleActivityRefresh={() => { }}
+                        emails={
+                          relatedContacts && relatedContacts.length > 0 ?
+                            _.cloneDeep(relatedContacts).reduce((emails, contact) => {
+                              if (contact?.email) emails.push(contact.email)
+                              return emails
+                            }, []) : []
+                        }
                       />
                     </div>
                   )}
@@ -710,6 +750,7 @@ export default function AccountDetailPage(props) {
               }}
               loading={loading}
               handleSubmit={onUpdateAccount}
+              accountId={accountData?._id}
             />
           )}
 

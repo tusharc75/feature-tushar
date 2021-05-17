@@ -18,8 +18,8 @@ import _ from 'lodash';
 import moment from "moment";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import { DataGrid, GridOverlay } from "@material-ui/data-grid";
-import DataGridCustomToolbar from "../../../components/Helpers/DataGridCustomToolbar";
-import CustomDataGridNoDataFound from "../../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import CustomDataGridToolbar from "../../Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
@@ -160,7 +160,7 @@ const AddExistingProduct = (props) => {
                 <DataGrid
                     checkboxSelection
                     components={{
-                        Toolbar: DataGridCustomToolbar,
+                        Toolbar: CustomDataGridToolbar,
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}

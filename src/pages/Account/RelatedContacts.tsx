@@ -1,10 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Box, Card, CardContent, Grid, List, Typography } from '@material-ui/core'
-import { makeStyles } from "@material-ui/core/styles";
-import routes from './../../components/Helpers/Routes'
+import { Box, Card, CardContent, Grid, List } from '@material-ui/core'
 import accountClass from "./account.module.scss"
-import { Button } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
 import { BsPerson } from 'react-icons/bs';
@@ -13,23 +10,9 @@ import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        width: "100%",
-        flexGrow: 1,
-    },
-    div1: {
-        display: 'flex',
-        // justifyContent: 'space-between'
-    },
-    span: {
-        width: '50%'
-    }
-}));
-
 function DisplayData({ label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-    
+
         <List>
             <ListItem>
                 <ListItemAvatar>
@@ -43,7 +26,6 @@ function DisplayData({ label, value, icon }) {
 
 function RelatedContacts({ contacts, accountId, accountName, contactApi, contactRoute }) {
 
-    const classes = useStyles();
     const history = useHistory();
 
     return <>
@@ -52,7 +34,7 @@ function RelatedContacts({ contacts, accountId, accountName, contactApi, contact
                 {
                     contacts.map((obj, index) => {
                         return <>
-                            <Card key={index}>
+                            <Card key={obj?._id ?? `contact${index}`}>
                                 <CardContent className="detailListing">
                                     <Grid container className="detailCardHeader">
                                         <Grid item xs={12} sm={12}>

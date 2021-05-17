@@ -9,7 +9,7 @@ import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
@@ -19,8 +19,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CreateRole from "./CreateRole";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { PERMISSION } from "../../constants/Roles";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-import { roleTypes } from "../../constants/helpers";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import { localStorageKeys, roleTypes } from "../../constants/helpers";
 import RoleHeader from "./RoleHeader";
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
@@ -31,7 +31,9 @@ const Roles: FC = () => {
     state: { permissions, selectedEntity },
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
+    roleTypes.find((d) => d.key === localStorage.getItem(localStorageKeys.currentSelectedRoleType)).value :
+    roleTypes.find((d) => d.key === "Global")?.value);
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
@@ -411,7 +413,7 @@ const Roles: FC = () => {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingRoles}
