@@ -99,7 +99,6 @@ const UserDetailsPage = () => {
       getUserFields();
       fetchUserData();
       getRoleUnion();
-      fetchUserRoles();
       fetchDoa();
       fetchUsers()
       fetchUserRelatedDetail()
@@ -132,6 +131,7 @@ const UserDetailsPage = () => {
       setHeadingLbl(name);
       setUserData(data);
       setEntities(data.entities.filter(e => e.role.length !== 0 || e.entity !== undefined))
+      setGloabalRoles(data.role); 
       setCustomizedRoutes([
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
@@ -222,19 +222,6 @@ const UserDetailsPage = () => {
     setUserList(rows);
   };
 
-  const fetchUserRoles = () => {
-    setRolesLoading(true);
-    axiosInstance()
-      .get(`/role?user=${id}`)
-      .then(({ data: { data } }) => {
-        setGloabalRoles(data.filter((d) => d?.type === 1)); // global role --- type 1
-        setRolesLoading(false);
-      })
-      .catch((error) => {
-        setRolesLoading(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
   const fetchUserRelatedDetail = () => {
     // setUserRelatedLoading(true);
     axiosInstance()
@@ -364,7 +351,6 @@ const UserDetailsPage = () => {
         .then(() => {
           setShowConfirmBox(false);
           fetchUserData();
-          fetchUserRoles();
           setUnionRoleData(null);
           getRoleUnion();
           toastConfig.setToastConfig({
@@ -434,7 +420,6 @@ const UserDetailsPage = () => {
           onSuccess={() => {
             handleCloseDialog();
             getRoleUnion();
-            fetchUserRoles();
           }}
         />
       )}

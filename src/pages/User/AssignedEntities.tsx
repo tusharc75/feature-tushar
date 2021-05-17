@@ -186,29 +186,28 @@ export default function AssignedEntities({
             <Box style={{ padding: "0px", minHeight: "300px" }}>
               <Box display="flex" padding={1} bgcolor="grey.200">
 
-
-                <Grid container style={{ padding: "8px" }} spacing={1}>
-                  <Grid item xs={4} container justify="flex-end">
-                    {permissions.user.isDelete ? (
-                      <DeleteButton
-                        text="Delete"
-                        onClick={() => handleDeleteEntity()}
-                      />
-                    ) : null}
-                  </Grid>
-                </Grid>
-
                 <Grid container>
-                  <Grid item xs={8}>
+                  <Grid item xs={10}>
                     <Box display="flex">
-                      <Box padding="5px">
-                        <Typography variant="subtitle2">
-                          Assigned Regional Roles ({currentEntity?.role?.length || "0"})
-              </Typography>
-                      </Box>
+                      <Grid container>
+                        <Grid item xs={4}>
+                          <Typography variant="subtitle2">
+                            Assigned Regional Roles ({currentEntity?.role?.length || "0"})
+                        </Typography>
+                        </Grid>
+                        <Grid item xs={8} justify="flex-start">
+                          {permissions.user.isDelete ? (
+                            <DeleteButton
+                              text="Delete Entity"
+                              onClick={() => handleDeleteEntity()}
+                            />
+                          ) : null}
+                        </Grid>
+                      </Grid>
+
                     </Box>
                   </Grid>
-                  <Grid item xs={4} container justify="flex-end">
+                  <Grid item xs={2} container justify="flex-end">
                     {permissions.user.isUpdate && (
                       <IconButton
                         color="primary"
