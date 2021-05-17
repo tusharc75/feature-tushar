@@ -5,15 +5,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import Chip from "@material-ui/core/Chip";
 import { SearchActivity } from "../../../axios/activity";
 import { UnCamelCase } from "../../../constants/helpers";
-
-const allSearch = [
-  { type: "customerAccount", name: "All", isAll: true },
-  { type: "customerContact", name: "All", isAll: true },
-  { type: "supplierAccount", name: "All", isAll: true },
-  { type: "supplierContact", name: "All", isAll: true },
-  { type: "lead", name: "All", isAll: true },
-  { type: "opportunity", name: "All", isAll: true },
-];
+import { useData } from "../../../StateProvider/Provider";
 
 export const capitalize = (string) => {
   return string && typeof string === "string"
@@ -22,9 +14,24 @@ export const capitalize = (string) => {
 };
 
 export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
+  const {
+    state: {
+      user: { user },
+    },
+  } = useData();
   const [options, setOptions] = React.useState([]);
   const [inputValue, setInputValue] = React.useState("");
   const [value, setValue] = React.useState([]);
+
+  const allSearch = [
+    { type: "customerAccount", name: "All", isAll: true },
+    { type: "customerContact", name: "All", isAll: true },
+    { type: "supplierAccount", name: "All", isAll: true },
+    { type: "supplierContact", name: "All", isAll: true },
+    { type: "lead", name: "All", isAll: true },
+    { type: "opportunity", name: "All", isAll: true },
+    { type: "my", name: user?._id, isAll: true },
+  ];
 
   useEffect(() => {
     setValue(filter);
@@ -65,8 +72,9 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
             size={chip?.size || "medium"}
             color={chip?.color || "primary"}
             label={
-              option &&
-              capitalize(UnCamelCase(option.type)) + " - " + option.name
+              option && option.type === "my"
+                ? "All My"
+                : capitalize(UnCamelCase(option.type)) + " - " + option.name
             }
             {...getTagProps({ index })}
           />
@@ -75,9 +83,9 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
       renderInput={(params) => (
         <TextField
           {...params}
+          size="small"
           variant="outlined"
-          placeholder="Search"
-          margin="dense"
+          placeholder="Search or Filter"
         />
       )}
       value={value}
@@ -91,7 +99,9 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
                 color={chip?.color || "primary"}
                 label={
                   option.isAll
-                    ? option.name + " " + capitalize(UnCamelCase(option.type))
+                    ? option.type === "my"
+                      ? "All My"
+                      : option.name + " " + capitalize(UnCamelCase(option.type))
                     : capitalize(UnCamelCase(option.type))
                 }
               />

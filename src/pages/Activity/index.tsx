@@ -57,7 +57,12 @@ const Activity = () => {
     <Layout>
       <Grid container direction="row">
         <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { title: "Activity", path: "/activity" },
+              { title: capitalize(type) },
+            ]}
+          />
         </Grid>
       </Grid>
       <CustomContainer>

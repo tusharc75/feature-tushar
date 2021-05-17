@@ -63,6 +63,7 @@ import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from "./pages/ProfilePage/index";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
+import Event from "./pages/Activity/Event";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -277,6 +278,9 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/activity/attachment">
             <Attachments />
+          </PrivateRoute>
+          <PrivateRoute exact path="/activity/event">
+            <Event />
           </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />
