@@ -347,7 +347,7 @@ const UserDetailsPage = () => {
         roles: [roleDeleteRec?._id],
       };
       axiosInstance()
-        .post("/role/un-assign-role", data)
+        .put("/user/un-assign-role", data)
         .then(() => {
           setShowConfirmBox(false);
           fetchUserData();
@@ -419,6 +419,7 @@ const UserDetailsPage = () => {
           assignedRoles={globalRoles}
           onSuccess={() => {
             handleCloseDialog();
+            fetchUserData();
             getRoleUnion();
           }}
         />

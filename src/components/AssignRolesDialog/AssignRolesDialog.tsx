@@ -71,7 +71,7 @@ const AssignRolesDialog = ({
       };
 
       await axiosInstance()
-        .post(`/role/assign-role`, dataObj)
+        .put(`/user/assign-role`, dataObj)
         .then(() => {
           setAssigning(false);
           toastConfig.setToastConfig({
