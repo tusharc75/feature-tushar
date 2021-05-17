@@ -178,8 +178,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-          ? 1
-          : 0
+        ? 1
+        : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -189,7 +189,8 @@ const FormTypes = (props) => {
 
     if (type === "location") {
       if (!autocompleteService.current && window.google) {
-        autocompleteService.current = new window.google.maps.places.AutocompleteService();
+        autocompleteService.current =
+          new window.google.maps.places.AutocompleteService();
       }
       if (!autocompleteService.current) {
         return undefined;
@@ -222,13 +223,17 @@ const FormTypes = (props) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
 
-      //  1048576 = 1 MB 
+      //  1048576 = 1 MB
       if (file.size > 1048576) {
-        setToastConfig({ open: true, type: "error", message: "Image must be less than 1 MB size" });
+        setToastConfig({
+          open: true,
+          type: "error",
+          message: "Image must be less than 1 MB size",
+        });
       } else {
         getImageUrl(file);
       }
-      
+
       event.target.value = "";
     }
   };
@@ -484,7 +489,7 @@ const FormTypes = (props) => {
           inputProps: {
             allowNegative: false,
           },
-          startAdornment: startAdornment
+          startAdornment: startAdornment,
         }}
       />
     </InfoLabel>
@@ -511,11 +516,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -544,11 +549,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? null : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -565,14 +570,15 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => {
-            if (fieldData.returnType === "decimal") {
-              handleChange(name, parseFloat(e.target.value))
-            }
-            else {
-              handleChange(name, e.target.value)
-            }
-          }
+          onChange
+            ? onChange
+            : (e) => {
+                if (fieldData.returnType === "decimal") {
+                  handleChange(name, parseFloat(e.target.value));
+                } else {
+                  handleChange(name, e.target.value);
+                }
+              }
         }
       />
     </InfoLabel>
@@ -649,10 +655,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-              handleChange(
-                name,
-                val && val.optionValue ? val.optionValue : ""
-              )
+                handleChange(
+                  name,
+                  val && val.optionValue ? val.optionValue : ""
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -724,17 +730,25 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-              (data) => data.currencyCode === values[name]
-            )[0]
+                (data) => data.currencyCode === values[name]
+              )[0]
             : ""
         }
         options={currencyData}
         getOptionLabel={(option: any) =>
-          option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
+          option
+            ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}`
+            : ""
         }
         getOptionSelected={(option: any, val) => option.currencyCode === val}
-        onChange={onChange ? onChange : (e, val) =>
-          setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
+        onChange={
+          onChange
+            ? onChange
+            : (e, val) =>
+                setFieldValue(
+                  name,
+                  val && val.currencyCode ? val.currencyCode : ""
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -759,7 +773,9 @@ const FormTypes = (props) => {
                 />
               </Grid>
               <Grid item xs>
-                <Typography>{currencyCode} ({symbolNative})</Typography>
+                <Typography>
+                  {currencyCode} ({symbolNative})
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   {name}
                 </Typography>
@@ -779,8 +795,8 @@ const FormTypes = (props) => {
         value={
           values[name]
             ? options.filter((data: any) =>
-              values[name].includes(data.optionValue)
-            )
+                values[name].includes(data.optionValue)
+              )
             : []
         }
         getOptionSelected={(option: any, val: any) =>
@@ -790,10 +806,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-              setFieldValue(
-                name,
-                value.map((val) => val.optionValue)
-              )
+                setFieldValue(
+                  name,
+                  value.map((val) => val.optionValue)
+                )
         }
         renderInput={(params) => (
           <TextField
@@ -894,9 +910,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-              setValue(newValue);
-            }
+                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+                setValue(newValue);
+              }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -1019,7 +1035,6 @@ const FormTypes = (props) => {
                 type="file"
               />
             </IconButton>
-
           </label>
           {
             <IconButton
@@ -1038,12 +1053,15 @@ const FormTypes = (props) => {
             <Typography
               variant="body2"
               className="text-truncate"
-              style={{ marginLeft: '4px', display: touched[name] && Boolean(errors[name]) ? "" : "none" }}
+              style={{
+                marginLeft: "4px",
+                display: touched[name] && Boolean(errors[name]) ? "" : "none",
+              }}
               color={
                 touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
               }
-            >{touched[name] && Boolean(errors[name])
-              ? errors[name] : null}
+            >
+              {touched[name] && Boolean(errors[name]) ? errors[name] : null}
             </Typography>
           </Box>
         </Box>
@@ -1085,10 +1103,10 @@ const FormTypes = (props) => {
             {isFileUploading
               ? `Uploading... ${fileUploadProgress}%`
               : values[name]
-                ? values[name]
-                : touched[name] && Boolean(errors[name])
-                  ? errors[name]
-                  : "No file choosen"}
+              ? values[name]
+              : touched[name] && Boolean(errors[name])
+              ? errors[name]
+              : "No file choosen"}
           </Typography>
         </Box>
         <IconButton
@@ -1133,7 +1151,7 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={label}
-          onChange={(date) => setFieldValue(name, date)}
+          onChange={(date) => setFieldValue(name, date ? date : "")}
           format="MM/dd/yyyy"
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}

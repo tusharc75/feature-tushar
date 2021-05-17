@@ -19,14 +19,14 @@ import {
 } from "@material-ui/icons";
 import * as yup from "yup";
 import moment from "moment";
-import currencies from './currency_with_country.json';
+import currencies from "./currency_with_country.json";
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
 
 export const validations = {
-  email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i
-}
+  email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+};
 
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
@@ -64,7 +64,7 @@ export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
 export const localStorageKeys = {
   currentSelectedRoleType: "currentSelectedRoleType",
-}
+};
 
 export const sidebarResource = {
   brand: "Brand",
@@ -181,8 +181,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -224,30 +224,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .url("Enter valid url eg. https://www.hostname.com")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .url("Enter valid url eg. https://www.hostname.com")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-          .array()
-          .required(`${input.fieldLabel} is required`)
-          .length(1, "Select at least one service access")
+            .array()
+            .required(`${input.fieldLabel} is required`)
+            .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -264,6 +264,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           ? yup.string().required(`${input.fieldLabel} is required`)
           : yup.string();
       });
+    } else if (input.type === "date") {
+      schema[input.fieldName] = input.required
+        ? yup.string().required(`${input.fieldLabel} is required`).nullable()
+        : yup.string().nullable();
     } else {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`)
@@ -296,8 +300,9 @@ export const isObjectEmpty = (obj) => {
 };
 
 export const currencyCodeToSymbol = (currencyCode) => {
-  return currencies.filter((obj) => obj.currencyCode === currencyCode)[0].symbolNative;
-}
+  return currencies.filter((obj) => obj.currencyCode === currencyCode)[0]
+    .symbolNative;
+};
 
 // Function To Set Owner DataSource
 export const getOwnerDropdownDataSource = (
@@ -522,8 +527,7 @@ export const simplifyValues = (obj, fields) => {
 };
 
 export const formatAmountWithCurrency = (currencyCode, amount) => {
-  if (!currencyCode && !amount)
-    return null;
+  if (!currencyCode && !amount) return null;
 
   const currencyData = currencies.find(
     (data) => data?.currencyCode === currencyCode
@@ -533,29 +537,35 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     return amount;
   }
 
-  const language = currencyData.languages.length > 0 ? currencyData.languages[0] : "en";
+  const language =
+    currencyData.languages.length > 0 ? currencyData.languages[0] : "en";
 
   let options = {
-    style: 'currency',
-    currency: currencyCode
-  }
+    style: "currency",
+    currency: currencyCode,
+  };
 
   if (Number.isInteger(amount)) {
-    options["maximumFractionDigits"] = 0
+    options["maximumFractionDigits"] = 0;
   }
 
-  return new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1 ');
-}
+  return new Intl.NumberFormat(
+    `${language}-${currencyData.countryCode}`,
+    options
+  )
+    .format(amount)
+    .replace(/^(\D+)/, "$1 ");
+};
 
 export const graphOptions = {
   layout: {
-    randomSeed: 2
+    randomSeed: 2,
   },
   interaction: { hover: true },
   nodes: {
     fixed: {
       x: false,
-      y: false
+      y: false,
     },
     shape: "dot",
     // size: 13,
@@ -568,8 +578,8 @@ export const graphOptions = {
         color: "#bbbdc0",
         size: 15,
         vadjust: 0,
-        mod: "bold"
-      }
+        mod: "bold",
+      },
     },
     shadow: true,
   },
@@ -579,18 +589,17 @@ export const graphOptions = {
       color: "#D3D3D3",
       highlight: "#797979",
       hover: "#797979",
-      opacity: 1.0
+      opacity: 1.0,
     },
     arrows: {
       to: { enabled: false, scaleFactor: 1, type: "arrow" },
       // middle: { enabled: false, scaleFactor: 1, type: "arrow" },
-      from: { enabled: true, scaleFactor: 1, type: "arrow" }
+      from: { enabled: true, scaleFactor: 1, type: "arrow" },
     },
     smooth: {
       type: "continuous",
-      roundness: 0
+      roundness: 0,
     },
     shadow: true,
-  }
+  },
 };
-

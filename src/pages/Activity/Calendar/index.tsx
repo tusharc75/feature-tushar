@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { Calendar, momentLocalizer } from "react-big-calendar";
-import { TextField, Box } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
-import moment from "moment";
+import { Box, Button, Menu, MenuItem } from "@material-ui/core";
+import { ExpandMore } from "@material-ui/icons";
 import { lowerCase } from "lodash";
+import moment from "moment";
 
+import MyCalendar from "./MyCalendar";
 import { GetBoard } from "../../../axios/activity";
 import Layout from "../../../components/Layout";
 import CustomContainer from "../../../components/CustomContainer";
@@ -15,10 +15,9 @@ import ActivityModelHandler from "../../../components/Activity/ActivityModelHand
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
-const localizer = momentLocalizer(moment);
-
 const BigCalendar = () => {
   const [type, setType] = useState("Task");
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [filter, setFilter] = useState([]);
   const [activityData, setActivityData] = useState(null);
   const [activities, setActivities] = useState([
@@ -28,6 +27,14 @@ const BigCalendar = () => {
       title: "Some title",
     },
   ]);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const fetchBoard = useCallback(() => {
     GetBoard(lowerCase(type), JSON.stringify(filter))
@@ -64,24 +71,35 @@ const BigCalendar = () => {
         <div className="detailContainer">
           <Box p={1}>
             <Box mb={2} display="flex" alignItems="center">
-              <Autocomplete
-                options={activityOptions}
-                getOptionLabel={(option) => option}
-                value={type}
-                onChange={(e, val) => {
-                  setType(val);
-                }}
-                size="small"
-                style={{ width: 150 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Select Activitiy"
-                    variant="outlined"
-                  />
-                )}
-              />
-
+              <Button
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                onClick={handleClick}
+                variant="outlined"
+                endIcon={<ExpandMore />}
+              >
+                {`${type}s`}
+              </Button>
+              <Menu
+                id="simple-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                {activityOptions.map((item, i) => (
+                  <MenuItem
+                    key={i}
+                    selected={item === type}
+                    onClick={() => {
+                      setType(item);
+                      handleClose();
+                    }}
+                  >
+                    {item}s
+                  </MenuItem>
+                ))}
+              </Menu>
               <Box mx={1} />
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
@@ -90,22 +108,15 @@ const BigCalendar = () => {
               />
             </Box>
 
-            <Calendar
-              defaultDate={moment().toDate()}
-              defaultView="month"
-              events={activities}
-              localizer={localizer}
-              style={{ height: "100vh" }}
-              popup={true}
-              onSelectEvent={(event: any) => {
-                setActivityData({
-                  type: lowerCase(type),
-                  id: event._id,
-                });
-              }}
+            <MyCalendar
+              activities={activities}
+              setActivityData={setActivityData}
+              type={lowerCase(type)}
             />
+
             {activityData && (
               <ActivityModelHandler
+                fetchBoard={fetchBoard}
                 setActivityData={setActivityData}
                 fromCalender={true}
                 activityType={activityData.type}
