@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
@@ -51,9 +51,7 @@ import {
   customerAccount,
   customerContact,
   supplierAccount,
-  supplierContact,
-  profilePage,
-  vapidKey,
+  supplierContact
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
@@ -68,7 +66,6 @@ import Event from "./pages/Activity/Event";
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
-  const location = useLocation();
   const {
     state: { user },
   }: any = useData();

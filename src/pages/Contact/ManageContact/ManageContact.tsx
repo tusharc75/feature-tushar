@@ -89,19 +89,23 @@ export default function ManageContact(props) {
     }
     //  Owner, Collaborator Code - End
 
-    const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
-
-        if (Object.keys(errors).length) {
-            entityData.fields.forEach((input) => {
-                if (input.required || values[input.fieldName]) {
-                    setTouched(input.fieldName, true);
-                }
-            });
-        } else {
-            handleSubmit(values, saveAndNew, setValues)
-            setErrors({});
-        }
+    const onSubmit = (values) => {
+        handleSubmit(values, false)
     }
+
+    // const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
+
+    //     if (Object.keys(errors).length) {
+    //         entityData.fields.forEach((input) => {
+    //             if (input.required || values[input.fieldName]) {
+    //                 setTouched(input.fieldName, true);
+    //             }
+    //         });
+    //     } else {
+    //         handleSubmit(values, saveAndNew, setValues)
+    //         setErrors({});
+    //     }
+    // }
 
     const initializeAccountDropdown = (values, accountSource) => {
         if (values && values.hasOwnProperty("accountName")) {
@@ -134,9 +138,10 @@ export default function ManageContact(props) {
                                 validationSchema={yupSchema(entityData.fields)}
                                 // validate={(values) => formValidation(values, entityData.fields)}
                                 validateOnMount
-                                onSubmit={() => { }}
+                                onSubmit={onSubmit}
                             >
                                 {({
+                                    submitForm,
                                     setValues,
                                     setErrors,
                                     values,
@@ -195,7 +200,11 @@ export default function ManageContact(props) {
                                                                                     />
                                                                                 ) : field.fieldName == "accountName" && accountSource !== undefined ? (
                                                                                     <Grid container spacing={1}>
-                                                                                        <Grid item xs={10} sm={10} md={10} >
+                                                                                        <Grid item
+                                                                                            xs={permissions[accountResource].isCreate ? 10 : 11}
+                                                                                            sm={permissions[accountResource].isCreate ? 10 : 11}
+                                                                                            md={permissions[accountResource].isCreate ? 10 : 11}
+                                                                                        >
                                                                                             <FormTypes
                                                                                                 values={accountId ? initializeAccountDropdown(values, accountSource) : values}
                                                                                                 errors={errors}
@@ -212,15 +221,15 @@ export default function ManageContact(props) {
                                                                                                 doNotShowInfoTooltip={true}
                                                                                             />
                                                                                         </Grid>
-                                                                                        <Grid item xs={1} sm={1} md={1}>
-                                                                                            {
-                                                                                                permissions[accountResource].isCreate && <Tooltip title="Create Account" className={`${classes.createAccountTooltip} mt-1`}>
+                                                                                        {
+                                                                                            permissions[accountResource].isCreate && <Grid item xs={1} sm={1} md={1}>
+                                                                                                <Tooltip title="Create Account" className={`${classes.createAccountTooltip} mt-1`}>
                                                                                                     <IconButton onClick={onCreateAccount} size="small">
                                                                                                         <AddIcon color="primary" />
                                                                                                     </IconButton>
                                                                                                 </Tooltip>
-                                                                                            }
-                                                                                        </Grid>
+                                                                                            </Grid>
+                                                                                        }
                                                                                         {
                                                                                             field?.tooltipMessage ?
                                                                                                 <Grid item xs={1} sm={1} md={1}>
@@ -282,12 +291,10 @@ export default function ManageContact(props) {
                                                 disabled={
                                                     loading || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                                                     Object.values(simplifyValues(values, entityData.fields)).toString()
-                                                    // || Object.keys(errors).length > 0 ? true : false
-
                                                 }
                                                 onClick={(e) => {
                                                     e.preventDefault()
-                                                    onSubmit(setFieldTouched, values, setValues, setErrors, false, resetForm, errors)
+                                                    submitForm();
                                                 }}
                                             >
                                                 Save

@@ -1,8 +1,10 @@
-import { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Box,
   Button,
   Grid,
+  IconButton,
+  Tooltip,
   InputAdornment,
 } from "@material-ui/core";
 import { Formik, Form } from "formik";
@@ -17,6 +19,7 @@ import {
   initializeDropdownById,
   opportunity,
   simplifyValues,
+  customerAccount,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -29,6 +32,9 @@ import { useData } from "../../../StateProvider/Provider";
 import { useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
 import currencies from "../../../constants/currency_with_country.json";
+import AddIcon from '@material-ui/icons/AddCircle'
+import InfoIcon from "@material-ui/icons/Info";
+import ManageAccountDialog from "../../Account/ManageAccount";
 
 const arr = [...Array(9).keys()];
 export default function ManageOpportunityDialog({
@@ -47,7 +53,7 @@ export default function ManageOpportunityDialog({
   const history = useHistory();
 
   const {
-    state: { user, selectedEntity },
+    state: { user, selectedEntity, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== dataToUpdate.owner.optionValue
@@ -64,18 +70,36 @@ export default function ManageOpportunityDialog({
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
+  const [accountData, setAccountData] = useState([]);
+  const [newAddedAccountId, setNewAddedAccountId] = useState(null)
 
   useEffect(() => {
-    const ownerCollabOptions = entityData.fields.filter(
+    let ownerCollaboratorOptions = entityData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );
-    if (ownerCollabOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollabOptions[0].option);
-      setOwnerData(ownerCollabOptions[0].option);
-      setCollaboratorData(ownerCollabOptions[0].option);
+    if (ownerCollaboratorOptions.length > 0) {
+      setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
+      setOwnerData(ownerCollaboratorOptions[0].option);
+      setCollaboratorData(ownerCollaboratorOptions[0].option);
     }
+
+    let customerAccountOptions = entityData.fields.find((d) => d.fieldName === "customerAccountName");
+    if (customerAccountOptions) {
+      setAccountData(customerAccountOptions.option);
+    }
+
     sortArray();
+
+    return () => {
+      setOwnerCollaboratorData([])
+      setOwnerData([])
+      setCollaboratorData([])
+      setAccountData([])
+    }
+
   }, [entityData.fields]);
+
 
   const sortArray = () => {
     const sections = [];
@@ -111,6 +135,14 @@ export default function ManageOpportunityDialog({
 
   useEffect(() => {
     getOpportunityFields();
+
+    return () => {
+      setCurrencySymbol(null)
+      setEntityData({
+        fields: [],
+        initialValues: {},
+      });
+    }
   }, []);
 
   const getOpportunityFields = () => {
@@ -127,11 +159,7 @@ export default function ManageOpportunityDialog({
           //  If this dialog opens from account details screen, make that account preselected
 
           if (
-            accountId &&
-            ["customerAccountName", "supplierAccountName"].some(
-              (d) => d === _f.fieldData.fieldName
-            )
-          ) {
+            accountId && ["customerAccountName", "supplierAccountName"].some((d) => d === _f.fieldData.fieldName)) {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
@@ -145,14 +173,7 @@ export default function ManageOpportunityDialog({
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
           }
 
-          if (!isNew && _f.fieldData.fieldName === "currency") {
-            setCurrencySymbol(
-              currencies.find((d) => d.currencyCode === dataToUpdate["currency"])
-                ?.symbolNative
-            );
-          }
-
-          if (!(_f.fieldData.fieldName === "supplierAccountName")) {
+          if (_f.fieldData.fieldName !== "supplierAccountName") {
             newFields.push(_f.fieldData);
           }
         });
@@ -166,24 +187,9 @@ export default function ManageOpportunityDialog({
       });
   };
 
-  const handleSubmit = async (
-    errors,
-    setTouched,
-    values,
-    setValues,
-    setErrors
-  ) => {
-    if (Object.keys(errors).length) {
-      entityData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
-    } else {
-      isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
-    }
-  };
+  const onSubmit = (values) => {
+    isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
+  }
 
   const handleCreateOpportunity = (values) => {
     // values.closeDate = "03/03/2021"
@@ -230,293 +236,368 @@ export default function ManageOpportunityDialog({
       });
   };
 
-  return (
-    <Dialog
-      maxWidth="md"
-      aria-labelledby="customized-dialog-title"
-      onClose={onClose}
-      open={open}
-      disableBackdropClick={true}
-    >
-      <CustomDialogHeader
-        title={
-          isNew
-            ? "Create Opportunity"
-            : `Editing ${dataToUpdate.opportunityName}`
+  const updateAccountDropdown = (data) => {
+    const entityFields = entityData.fields;
+    const customerAccountNameFieldIndex = entityFields.findIndex(d => d.fieldName === "customerAccountName")
+
+    if (customerAccountNameFieldIndex > -1) {
+      entityFields[customerAccountNameFieldIndex].option = [
+        ...entityFields[customerAccountNameFieldIndex].option,
+        {
+          optionValue: data._id,
+          optionLabel: data.accountName,
+          order: entityFields[customerAccountNameFieldIndex].option.length,
+          default: false
         }
+      ]
+
+      setAccountData(entityFields[customerAccountNameFieldIndex].option);
+    }
+  }
+
+
+  return (
+    <>
+      <Dialog
+        maxWidth="md"
+        aria-labelledby="customized-dialog-title"
         onClose={onClose}
-      />
+        open={open}
+        disableBackdropClick={true}
+      >
+        <CustomDialogHeader
+          title={
+            isNew
+              ? "Create Opportunity"
+              : `Editing ${dataToUpdate.opportunityName}`
+          }
+          onClose={onClose}
+        />
 
-      {entityData.fields.length === 0 && (
-        <CustomDialogContent>
-          <CommonSkeleton lenArray={arr} />
-        </CustomDialogContent>
-      )}
-      {entityData.fields.length > 0 && (
-        <Formik
-          initialValues={entityData.initialValues}
-          validationSchema={yupSchema(entityData.fields)}
-          validateOnMount
-          onSubmit={() => { }}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            setFieldValue,
-            setFieldTouched,
-            setErrors,
-            setValues,
-          }) => (
-            <>
-              <CustomDialogContent>
-                <Form>
-                  {formsData &&
-                    formsData.map((form, i) => {
-                      return form.name ? (
-                        <div key={i}>
-                          <h2 className="form-label-style">{form.name}</h2>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field) => (
-                                <Grid
-                                  key={field.fieldName}
-                                  item
-                                  xs={12}
-                                  sm={6}
-                                  md={6}
-                                >
-                                  {field.fieldName === "owner" ? (
-                                    <FormTypes
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={ownerData}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={true}
-                                      size="small"
-                                      disabled={disableOwnerSelection}
-                                      onOpen={() => {
-                                        onOwnerDropdownOpen(
-                                          values["collaborator"]
-                                        );
-                                      }}
-                                    />
-                                  ) : field.fieldName === "collaborator" ? (
-                                    <FormTypes
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={collaboratorData}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={true}
-                                      size="small"
-                                      onOpen={() => {
-                                        onCollabOwnerMultiselectOpen(
-                                          values["owner"]
-                                        );
-                                      }}
-                                    />
-                                  ) : field.fieldName === "probability" ? (
-                                    <FormTypes
-                                      // {...rest}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={true}
-                                      size="small"
-                                      onChange={(e) => {
-                                        if (
-                                          e.target.value &&
-                                          parseFloat(e.target.value) > 100
-                                        ) {
-                                          setFieldValue("probability", "100");
-                                        } else {
-                                          setFieldValue(
-                                            "probability",
-                                            e.target.value
-                                          );
-                                        }
-                                      }}
-                                    />
-                                  ) : field.fieldName === "lostReason" ? (
-                                    values["stage"] === "Closed Lost" ? (
-                                      <FormTypes
-                                        // {...rest}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={true}
-                                        size="small"
-                                      />
-                                    ) : null
-                                  ) : field.fieldName === "currency" ? (
-                                    <FormTypes
-                                      // {...rest}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={true}
-                                      size="small"
-                                      onChange={(e, val) => {
-                                        if (val && val.currencyCode) {
-                                          setFieldValue(
-                                            field.fieldName,
-                                            val.currencyCode
-                                          );
-                                          setCurrencySymbol(val.symbolNative);
-                                        } else {
-                                          setFieldValue(field.fieldName, "");
-                                          setCurrencySymbol(null);
-                                        }
-                                      }}
-                                    />
-                                  ) : field.fieldName === "amount" ? (
-                                    <FormTypes
-                                      // {...rest}
-                                      startAdornment={
-                                        currencySymbol ? (
-                                          <InputAdornment position="start">
-                                            {currencySymbol}
-                                          </InputAdornment>
-                                        ) : (
-                                          ""
-                                        )
-                                      }
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={true}
-                                      size="small"
-                                    />
-                                  ) : (
-                                    <FormTypes
-                                      // {...rest}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={true}
-                                      size="small"
-                                    />
-                                  )}
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </Box>
-                        </div>
-                      ) : (
-                        form.sectionFields.map((field) => (
-                          <FormTypes
-                            // {...rest}
-                            values={values}
-                            errors={errors}
-                            touched={touched}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={field.option}
-                            setFieldValue={setFieldValue}
-                            required={field.required}
-                            fullWidth
-                            isTooltip={true}
-                            size="small"
-                            style={{ visibility: "hidden" }}
-                          />
-                        ))
-                      );
-                    })}
-                </Form>
-              </CustomDialogContent>
+        {entityData.fields.length === 0 && (
+          <CustomDialogContent>
+            <CommonSkeleton lenArray={arr} />
+          </CustomDialogContent>
+        )}
+        {entityData.fields.length > 0 && (
+          <Formik
+            initialValues={entityData.initialValues}
+            validationSchema={yupSchema(entityData.fields)}
+            validateOnMount
+            onSubmit={onSubmit}
+          >
+            {({
+              submitForm,
+              values,
+              errors,
+              touched,
+              setFieldValue,
+              setFieldTouched,
+              setErrors,
+              setValues,
+            }) => (
+              <>
+                <CustomDialogContent>
+                  <Form>
+                    {formsData &&
+                      formsData.map((form, index1) => {
+                        return form.name ? (
+                          <div key={index1}>
+                            <h2 className="form-label-style">{form.name}</h2>
+                            <Box marginY={2}>
+                              <Grid spacing={3} container>
+                                {form.sectionFields.map((field, index2) => (
+                                  <Grid
+                                    key={index2}
+                                    item
+                                    xs={12}
+                                    sm={6}
+                                    md={6}
+                                  >
+                                    {
+                                      field.fieldName == "customerAccountName" ? (
+                                        <Grid container spacing={1}>
+                                          <Grid item
+                                            xs={permissions.customerAccount.isCreate ? 10 : 11}
+                                            sm={permissions.customerAccount.isCreate ? 10 : 11}
+                                            md={permissions.customerAccount.isCreate ? 10 : 11}
+                                          >
+                                            <FormTypes
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={accountData}
+                                              setFieldValue={setFieldValue}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={true}
+                                              size="small"
+                                              doNotShowInfoTooltip={true}
+                                            />
+                                          </Grid>
+                                          {
+                                            permissions.customerAccount.isCreate && <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip title="Create Account" className="mt-1">
+                                                <IconButton onClick={() => { setShowAddCustomerAccountDialog(true) }} size="small">
+                                                  <AddIcon color="primary" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          }
+                                          {
+                                            field?.tooltipMessage ?
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip title={field?.tooltipMessage ?? ""}>
+                                                  <InfoIcon color="disabled" />
+                                                </Tooltip>
+                                              </Grid> : null
+                                          }
+                                        </Grid>
+                                      ) : field.fieldName === "owner" ? (
+                                        <FormTypes
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={ownerData}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                          disabled={disableOwnerSelection}
+                                          onOpen={() => {
+                                            onOwnerDropdownOpen(
+                                              values["collaborator"]
+                                            );
+                                          }}
+                                        />
+                                      ) : field.fieldName === "collaborator" ? (
+                                        <FormTypes
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={collaboratorData}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                          onOpen={() => {
+                                            onCollabOwnerMultiselectOpen(
+                                              values["owner"]
+                                            );
+                                          }}
+                                        />
+                                      ) : field.fieldName === "probability" ? (
+                                        <FormTypes
+                                          // {...rest}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                          onChange={(e) => {
+                                            if (
+                                              e.target.value &&
+                                              parseFloat(e.target.value) > 100
+                                            ) {
+                                              setFieldValue("probability", "100");
+                                            } else {
+                                              setFieldValue(
+                                                "probability",
+                                                e.target.value
+                                              );
+                                            }
+                                          }}
+                                        />
+                                      ) : field.fieldName === "lostReason" ? (
+                                        values["stage"] === "Closed Lost" ? (
+                                          <FormTypes
+                                            // {...rest}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={field.option}
+                                            setFieldValue={setFieldValue}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={true}
+                                            size="small"
+                                          />
+                                        ) : null
+                                      ) : field.fieldName === "currency" ? (
+                                        <FormTypes
+                                          // {...rest}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                          onChange={(e, val) => {
+                                            if (val && val.currencyCode) {
+                                              setFieldValue(
+                                                field.fieldName,
+                                                val.currencyCode
+                                              );
+                                              setCurrencySymbol(val.symbolNative);
+                                            } else {
+                                              setFieldValue(field.fieldName, "");
+                                              setCurrencySymbol(null);
+                                            }
+                                          }}
+                                        />
+                                      ) : field.fieldName === "amount" ? (
+                                        <FormTypes
+                                          // {...rest}
+                                          startAdornment={
+                                            currencySymbol ? (
+                                              <InputAdornment position="start">
+                                                {currencySymbol}
+                                              </InputAdornment>
+                                            ) : (
+                                              ""
+                                            )
+                                          }
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                        />
+                                      ) : (
+                                        <FormTypes
+                                          // {...rest}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                        />
+                                      )}
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Box>
+                          </div>
+                        ) : (
+                          form.sectionFields.map((field) => (
+                            <FormTypes
+                              // {...rest}
+                              values={values}
+                              errors={errors}
+                              touched={touched}
+                              label={field.fieldLabel}
+                              name={field.fieldName}
+                              type={field.type}
+                              options={field.option}
+                              setFieldValue={setFieldValue}
+                              required={field.required}
+                              fullWidth
+                              isTooltip={true}
+                              size="small"
+                              style={{ visibility: "hidden" }}
+                            />
+                          ))
+                        );
+                      })}
+                  </Form>
 
-              <CustomDialogFooter>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  onClick={onClose}
-                >
-                  Cancel
+                  {
+                    showAddCustomerAccountDialog && <ManageAccountDialog
+                      open={showAddCustomerAccountDialog}
+                      onClose={() => {
+                        setShowAddCustomerAccountDialog(false)
+                      }}
+                      id={null}
+                      accountResource={customerAccount.accountResource}
+                      accountApi={customerAccount.accountApi}
+                      isGetAccountData={true}
+                      onGetAddedAccount={({ data }) => {
+                        setNewAddedAccountId(data._id);
+                        updateAccountDropdown(data);
+
+                        setFieldValue("customerAccountName", data._id);
+                      }}
+                      isRedirectToDetailPage={false}
+                    />
+                  }
+
+                </CustomDialogContent>
+
+                <CustomDialogFooter>
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    color="primary"
+                    onClick={onClose}
+                  >
+                    Cancel
                 </Button>
 
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  disabled={
-                    Object.values(
-                      simplifyValues(
-                        entityData.initialValues,
-                        entityData.fields
-                      )
-                    ).toString() ===
-                    Object.values(
-                      simplifyValues(values, entityData.fields)
-                    ).toString()
-                  }
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleSubmit(
-                      errors,
-                      setFieldTouched,
-                      values,
-                      setValues,
-                      setErrors
-                    );
-                  }}
-                >
-                  Save
+                  <CustomButton
+                    loading={loading}
+                    variant="contained"
+                    color="primary"
+                    disabled={
+                      Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                      Object.values(simplifyValues(values, entityData.fields)).toString()
+                    }
+                    onClick={(e) => {
+                      e.preventDefault();
+                      submitForm();
+                    }}
+                  >
+                    Save
                 </CustomButton>
-              </CustomDialogFooter>
-            </>
-          )}
-        </Formik>
-      )}
-    </Dialog>
+                </CustomDialogFooter>
+              </>
+            )}
+
+          </Formik>
+        )}
+      </Dialog>
+
+    </>
   );
 }
 
