@@ -280,6 +280,7 @@ const UserDetailsPage = () => {
     setShowConfirmBox(true);
   };
 
+
   const DeleteUser = () => {
     if (deleteUserRec) {
       if (permissions.user.isDelete) {
@@ -689,6 +690,7 @@ const UserDetailsPage = () => {
                           entities={entities}
                           permissions={permissions}
                           userId={id}
+                          loggedInUser={user?.user}
                           onSuccess={() => {
                             fetchUserData();
                           }}

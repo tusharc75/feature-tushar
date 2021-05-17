@@ -28,6 +28,7 @@ export default function AssignedEntities({
   permissions,
   userId,
   onSuccess,
+  loggedInUser
 }) {
   const [currentEntity, setCurrentEntity] = useState(entities[0]);
   const [unionRoleData, setUnionRoleData] = useState(null);
@@ -242,8 +243,8 @@ export default function AssignedEntities({
                             permissions={permissions}
                             data={currentEntity.role}
                             unassignRole={handleUnassignRole}
-                            loggedInUser={"1"}
-                            currentUserId={"1"}
+                            loggedInUser={loggedInUser}
+                            currentUserId={userId}
 
                           />
                         )}
