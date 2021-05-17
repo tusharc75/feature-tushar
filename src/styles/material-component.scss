@@ -97,6 +97,12 @@
 
 .MuiOutlinedInput-root {
   border-radius: 0 !important;
+
+  .MuiInputAdornment-positionEnd {
+    .MuiIconButton-root {
+      padding: 2px !important;
+    }
+  }
 }
 .MuiOutlinedInput-notchedOutline {
   border-color: #e7e7e7 !important;
