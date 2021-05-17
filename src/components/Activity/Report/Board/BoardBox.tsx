@@ -138,7 +138,16 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
         <Box>
           <Grid container spacing={1}>
             <Grid item xs={10}>
-              <Typography variant="subtitle2">{data?.name}</Typography>
+              <Typography
+                style={{
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+                variant="subtitle2"
+              >
+                {data?.name}
+              </Typography>
             </Grid>
             <Grid item xs={2}>
               <IconButton
@@ -150,6 +159,9 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
               </IconButton>
             </Grid>
           </Grid>
+          <Typography color="textSecondary" variant="body2">
+            {data?.description}
+          </Typography>
         </Box>
         <Box pt={2}>
           <ListRelatedTo relatedTo={data?.relatedTo} originRelatedTo={[]} />
