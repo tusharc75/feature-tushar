@@ -74,7 +74,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
                           color={currentUser === obj._id ? "disabled" : "error"}
                         />
                       </IconButton>
-                     ) }
+                    )}
                   </ListItemSecondaryAction>
                 )}
               </ListItem>

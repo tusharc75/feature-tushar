@@ -127,7 +127,7 @@ export default function AssignedEntities({
   };
   return (
     <>
-      
+
       {showAssignEntityDialog && (
         <AssignEntityDialog
           entitiesDialogOpen={showAssignEntityDialog}

@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AssignedUsers = ({   user,
+const AssignedUsers = ({ user,
   unassignEntity,
   permissions,
   selectedEntity,
@@ -60,7 +60,7 @@ const AssignedUsers = ({   user,
 
                 <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
 
-                
+
                 {permissions.role.isUpdate && (
                   <ListItemSecondaryAction
                     title={
@@ -85,7 +85,7 @@ const AssignedUsers = ({   user,
               </ListItem>
             </BoxWithBorder>
           ))
-          
+
           : null}
       </List>
     </div>
