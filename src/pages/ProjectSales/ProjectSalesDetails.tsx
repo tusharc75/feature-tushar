@@ -61,14 +61,18 @@ const ProjectSalesDetails = () => {
   ]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
-  const [graphData, setGraphData] = useState({ edges: [], nodes: [], colorPalette: null });
+  const [graphData, setGraphData] = useState({
+    edges: [],
+    nodes: [],
+    colorPalette: null,
+  });
 
   useEffect(() => {
     if (!state) return;
 
     axiosInstance()
       .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -79,19 +83,26 @@ const ProjectSalesDetails = () => {
     if (currentTabIndex === 1) {
       setLoadingGraphData(true);
 
-      axiosInstance().get(`/project-sales/nodal-structure/${id}`).then(({ data }) => {
-        setLoadingGraphData(false);
-        setGraphData({ nodes: data.data.nodes, edges: data.data.edges, colorPalette: data.colorPalette });
-      }).catch((error) => {
-        setLoadingGraphData(false);
-        toastConfig.setToastConfig(error);
-      });
+      axiosInstance()
+        .get(`/project-sales/nodal-structure/${id}`)
+        .then(({ data }) => {
+          setLoadingGraphData(false);
+          setGraphData({
+            nodes: data.data.nodes,
+            edges: data.data.edges,
+            colorPalette: data.colorPalette,
+          });
+        })
+        .catch((error) => {
+          setLoadingGraphData(false);
+          toastConfig.setToastConfig(error);
+        });
     }
 
     return () => {
       setGraphData({ edges: [], nodes: [], colorPalette: null });
-    }
-  }, [currentTabIndex])
+    };
+  }, [currentTabIndex]);
 
   /**
    * Get sales strategy data for paticular ID
@@ -103,7 +114,7 @@ const ProjectSalesDetails = () => {
         data: { data },
       } = await axiosInstance().get(`/project-sales/${id}`);
 
-      setCurrentTabIndex(0)
+      setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
       setHeadingLbl(name);
@@ -138,7 +149,7 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["End Date"]: new Date(data.endDate).toDateString() || "",
+      ["End Date"]: data.endDate ? new Date(data.endDate).toDateString() : "",
       ["Value"]: data.value || "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
@@ -338,7 +349,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -362,14 +373,16 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                    !projectSalesFields.length ||
-                    !projectSalesData ? (
+                  !projectSalesFields.length ||
+                  !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
                   ) : (
                     <>
-                      <Tabs className="oms-tab" value={currentTabIndex}
+                      <Tabs
+                        className="oms-tab"
+                        value={currentTabIndex}
                         onChange={(index, newValue) => {
                           setCurrentTabIndex(newValue);
                         }}
@@ -388,17 +401,17 @@ const ProjectSalesDetails = () => {
                           id="a11y-tab-1"
                         />
                       </Tabs>
-                      {
-                        currentTabIndex === 0 && <Box>
+                      {currentTabIndex === 0 && (
+                        <Box>
                           <DetailsPage
                             data={projectSalesData}
                             fields={projectSalesFields}
                           />
                         </Box>
-                      }
+                      )}
 
-                      {
-                        currentTabIndex === 1 && <Box>
+                      {currentTabIndex === 1 && (
+                        <Box>
                           <CustomNodalStructure
                             id={id}
                             graphData={graphData}
@@ -406,15 +419,16 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${node.id}`
-                                })
+                                  pathname: `${routes[node.route].path}/${
+                                    node.id
+                                  }`,
+                                });
                               }
                             }}
                           />
                         </Box>
-                      }
+                      )}
                     </>
-
 
                     // <>
                     //   <Box
@@ -450,7 +464,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -525,8 +539,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-                : ""
+              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
