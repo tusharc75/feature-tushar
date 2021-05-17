@@ -15,7 +15,6 @@ export const UserDropdown = ({
   errors,
   setFieldValue,
   required,
-  disabled,
 }) => {
   const [users, setUsers] = React.useState(null);
 
@@ -88,7 +87,6 @@ export const UserDropdown = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          disabled={disabled}
           variant="outlined"
           label={label}
           placeholder={label}
@@ -109,6 +107,5 @@ UserDropdown.propTypes = {
   multiple: PropTypes.any,
   touched: PropTypes.any,
   errors: PropTypes.any,
-  disabled: PropTypes.any,
   setFieldValue: PropTypes.any,
 };

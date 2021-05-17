@@ -72,7 +72,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
         description: "",
         status: status || "To Do",
         assignee: "",
-        reporter: user._id,
+        reporter: "",
         startDate: new Date(),
         dueDate: new Date(),
       });
@@ -250,7 +250,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                         </Box>
                         <Box pt={1}>
                           <UserDropdown
-                            disabled
                             name="reporter"
                             label="Reporter"
                             errors={errors}
