@@ -177,9 +177,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
               access: true,
             },
           ];
-        } else if (resource && !selectedResourceData) {
-          setSubmitting(false);
-          return;
         } else {
           values.relatedTo = [
             {
@@ -350,15 +347,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                 {...params}
                                 label={`Select ${resource}`}
                                 variant="outlined"
-                                error={
-                                  Boolean(resource) &&
-                                  Boolean(!selectedResourceData)
-                                }
-                                helperText={
-                                  Boolean(resource) &&
-                                  Boolean(!selectedResourceData) &&
-                                  `Select "${resource}" or clear resource field`
-                                }
                                 required={Boolean(resource)}
                               />
                             )}
