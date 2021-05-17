@@ -171,41 +171,43 @@ const Board = ({ type, filter, activityId }) => {
         )}
       </Box>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-        <Grid container>
+        <Grid container spacing={2}>
           {statusList.map((data, index) => (
-            <Box
-              key={index}
-              width={300}
-              height={window.innerHeight - 250}
-              mr={2}
-              style={{ overflow: "auto" }}
-              display="block"
-              border={1}
-              borderColor="grey.300"
-              bgcolor="grey.200"
-            >
-              <Box p={1}>
-                <Typography variant="subtitle2">
-                  {data.status.toUpperCase()}
-                  {" (" +
-                    activities.filter(function (o) {
-                      return o.status === data.status;
-                    }).length +
-                    ")"}
-                </Typography>
+            <Grid item xs={12} sm={6} md={4}>
+              <Box
+                key={index}
+                width="100%"
+                height={window.innerHeight - 250}
+                mr={2}
+                style={{ overflow: "auto" }}
+                display="block"
+                border={1}
+                borderColor="grey.300"
+                bgcolor="grey.200"
+              >
+                <Box p={1}>
+                  <Typography variant="subtitle2">
+                    {data.status.toUpperCase()}
+                    {" (" +
+                      activities.filter(function (o) {
+                        return o.status === data.status;
+                      }).length +
+                      ")"}
+                  </Typography>
+                </Box>
+                <BoardList
+                  selectedResource={selectedResourceData}
+                  resource={resource}
+                  status={data.status}
+                  activity={activities.filter(function (o) {
+                    return o.status === data.status;
+                  })}
+                  fetchBoard={fetchBoard}
+                  type={type}
+                  handleChangeStatus={handleChangeStatus}
+                />
               </Box>
-              <BoardList
-                selectedResource={selectedResourceData}
-                resource={resource}
-                status={data.status}
-                activity={activities.filter(function (o) {
-                  return o.status === data.status;
-                })}
-                fetchBoard={fetchBoard}
-                type={type}
-                handleChangeStatus={handleChangeStatus}
-              />
-            </Box>
+            </Grid>
           ))}
         </Grid>
       </DndProvider>

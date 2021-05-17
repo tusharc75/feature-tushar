@@ -35,6 +35,7 @@ import { SubTask } from "./SubTask";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import { useData } from "../../../StateProvider/Provider";
 
 const TaskSchema = Yup.object().shape({
   name: Yup.string().required("please enter task name"),
@@ -45,6 +46,9 @@ const TaskSchema = Yup.object().shape({
 });
 
 export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
+  const {
+    state: { user: user },
+  } = useData();
   const [id, setId] = useState(taskId);
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);

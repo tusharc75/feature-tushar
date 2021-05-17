@@ -48,7 +48,7 @@ const Activity = () => {
     }
   }, [type, referenceId]);
 
-  const tabs = ["Board", "Roadmap", "Calendar"];
+  const tabs = ["Board", "Roadmap"];
   const handleChangeFilter = (value) => {
     setFilter(value);
   };
@@ -87,9 +87,6 @@ const Activity = () => {
           )}
           {viewType === 1 && (
             <Roadmap type={type} filter={filter} activityId={activityId} />
-          )}
-          {viewType === 2 && (
-            <Calendar type={type} filter={filter} activityId={activityId} />
           )}
         </Box>
       </CustomContainer>
