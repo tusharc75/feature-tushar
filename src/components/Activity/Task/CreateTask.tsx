@@ -1,35 +1,40 @@
-import React, { useState, useEffect, Fragment } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import { UserDropdown } from "../Helpers/userDropdown";
-import statusList from "../Helpers/statusList";
+import { useState, useEffect, Fragment } from "react";
+import PropTypes from "prop-types";
+import {
+  Box,
+  Grid,
+  Button,
+  TextField,
+  Divider,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Breadcrumbs,
+  Typography,
+  CircularProgress,
+} from "@material-ui/core";
+import TableChartIcon from "@material-ui/icons/TableChart";
 import { TextField as TextFieldFormik, Select } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
 import { KeyboardDatePicker } from "formik-material-ui-pickers";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
-import TextField from "@material-ui/core/TextField";
 import * as Yup from "yup";
+import moment from "moment";
+
 import {
   GetTaskDetail,
   CreateNewTask,
   UpdateTask,
 } from "../../../axios/activity";
-import moment from "moment";
-import Divider from "@material-ui/core/Divider";
+import { UserDropdown } from "../Helpers/userDropdown";
+import statusList from "../Helpers/statusList";
 import { Comment } from "../Comment";
 import { RelatedToDispay } from "../Helpers/RelatedToDispay";
-import TableChartIcon from "@material-ui/icons/TableChart";
 import { SubTask } from "./SubTask";
-import PropTypes from "prop-types";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
-import { Breadcrumbs, Link, Typography } from "@material-ui/core";
 
 const TaskSchema = Yup.object().shape({
   name: Yup.string().required("please enter task name"),
@@ -39,10 +44,11 @@ const TaskSchema = Yup.object().shape({
   dueDate: Yup.string().required("please enter due date"),
 });
 
-export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
+export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
   const [id, setId] = useState(taskId);
   const [initialValues, setInitialValues] = useState(null);
-  const [openAddSub, setOpenAddSub] = React.useState(false);
+  const [openAddSub, setOpenAddSub] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchTaskDetail();
@@ -60,7 +66,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
       setInitialValues({
         name: "",
         description: "",
-        status: "To Do",
+        status: status || "To Do",
         assignee: "",
         reporter: "",
         startDate: new Date(),
@@ -70,21 +76,27 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
   };
 
   const handleSave = (values) => {
-    console.log(values);
+    setSubmitting(true);
     values.relatedTo = relatedTo;
     if (id) {
       UpdateTask(id, values)
         .then(({ data }) => {
           handleClose();
+          setSubmitting(false);
         })
-        .catch((err) => {});
+        .catch((err) => {
+          setSubmitting(false);
+        });
     } else {
       values.parentId = null;
       CreateNewTask(values)
         .then(({ data }) => {
           handleClose();
+          setSubmitting(false);
         })
-        .catch((err) => {});
+        .catch((err) => {
+          setSubmitting(false);
+        });
     }
   };
 
@@ -316,16 +328,21 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button color="primary" onClick={handleClose}>
+              <Button
+                disabled={isSubmitting}
+                color="primary"
+                onClick={handleClose}
+              >
                 Cancel
               </Button>
               <Button
+                disabled={isSubmitting}
                 type="button"
                 color="primary"
                 variant="contained"
                 onClick={submitForm}
               >
-                Save{" "}
+                {isSubmitting ? <CircularProgress size={22} /> : "Save"}
               </Button>
             </CustomDialogFooter>
           </>
@@ -338,5 +355,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose }) => {
 CreateTask.propTypes = {
   relatedTo: PropTypes.any,
   taskId: PropTypes.any,
+  status: PropTypes.any,
   handleClose: PropTypes.any,
 };
