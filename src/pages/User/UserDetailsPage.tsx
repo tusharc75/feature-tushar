@@ -280,10 +280,6 @@ const UserDetailsPage = () => {
     setShowConfirmBox(true);
   };
 
-  const handleUnassignEntity = (rec) => {
-
-  };
-
   const DeleteUser = () => {
     if (deleteUserRec) {
       if (permissions.user.isDelete) {
