@@ -19,7 +19,7 @@ import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
 import TextField from '@material-ui/core/TextField';
 
-var levalOrderBy = ["product", "category", "cost", "builder"]
+var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
 const CreateProduct = (props) => {
 
@@ -40,15 +40,17 @@ const CreateProduct = (props) => {
         let _fields = [];
         productData.fields.map((_f) => _fields.push(_f));
 
+        _fields = _.orderBy(_fields, 'order', 'asc');
         _fields = _.sortBy(_fields, function (item) {
             return levalOrderBy.indexOf(item.leval)
         });
 
         setMasterFields(_fields.filter((_f) => _f.leval !== "cost"))
+        setFields(_fields.filter((_f) => _f.leval === "builder-custom"))
 
         let values = { ...productData }
         values.productCategory = values.productCategory._id
-        values.productCost = values.productCost && values.productCost._id && values.productCost._id
+        values.productTemplate = values.productTemplate && values.productTemplate._id && values.productTemplate._id
         delete values.fields
 
         setInitialData({
@@ -76,6 +78,7 @@ const CreateProduct = (props) => {
     }, []);
 
     const handleSubmit = (values) => {
+        values.fields = fields;
         handleSaveProduct(values)
     };
 
@@ -116,6 +119,7 @@ const CreateProduct = (props) => {
 
     const handleAddField = (field) => {
         field.sectionName = sectionName;
+        field.leval = "builder-custom";
         fields.push(field)
         setFields(fields)
         let newField = initialData.fields;
@@ -158,7 +162,7 @@ const CreateProduct = (props) => {
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
                                             <h2 className="form-label-style">{section.name}
-                                                <span style={{ float: "right", marginTop: "-5px" }}>
+                                                <span style={{ float: "right", marginTop: "-10px" }}>
                                                     <IconButton color="primary" size="small" onClick={() => handleOpenAddField(section.name)} >
                                                         <ControlPointIcon />
                                                     </IconButton>
@@ -167,9 +171,29 @@ const CreateProduct = (props) => {
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.leval === "product" ?
+                                                        field.type === "converter" || field.type === "currencyAmount" ?
+                                                            <FormTypes
+                                                                fields={initialData.fields}
+                                                                values={values}
+                                                                errors={errors}
+                                                                touched={touched}
+                                                                label={field.fieldLabel}
+                                                                name={field.fieldName}
+                                                                type={field.type}
+                                                                options={field.option}
+                                                                setFieldValue={setFieldValue}
+                                                                required={field.required}
+                                                                fullWidth
+                                                                isTooltip={field.isTooltip}
+                                                                tooltipMessage={field.tooltipMessage}
+                                                                decimalPlaces={field.decimalPlaces}
+                                                                isvlookupReverse={field.isvlookupReverse}
+                                                                fieldData={field}
+                                                                size="small"
+                                                            /> :
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 <FormTypes
+                                                                    fields={initialData.fields}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
@@ -185,76 +209,10 @@ const CreateProduct = (props) => {
                                                                     decimalPlaces={field.decimalPlaces}
                                                                     isvlookupReverse={field.isvlookupReverse}
                                                                     fieldData={field}
-                                                                    onChange={() => { }}
                                                                     size="small"
+                                                                    disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
                                                                 />
-                                                            </Grid> :
-
-                                                            field.fieldName === "productCost" ?
-                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                    <FormTypes
-                                                                        fields={initialData.fields}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={setFieldValue}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field.isTooltip}
-                                                                        tooltipMessage={field.tooltipMessage}
-                                                                        decimalPlaces={field.decimalPlaces}
-                                                                        disableClearable
-                                                                        onChange={(e, val) => {
-                                                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                            handleChangeProductCost(val && val.optionValue ? val.optionValue : "")
-                                                                        }}
-                                                                        size="small"
-                                                                    />  </Grid> :
-                                                                field.type === "converter" ?
-                                                                    <FormTypes
-                                                                        fields={initialData.fields}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={field.option}
-                                                                        setFieldValue={setFieldValue}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field.isTooltip}
-                                                                        tooltipMessage={field.tooltipMessage}
-                                                                        decimalPlaces={field.decimalPlaces}
-                                                                        isvlookupReverse={field.isvlookupReverse}
-                                                                        fieldData={field}
-                                                                        size="small"
-                                                                    /> :
-                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                        <FormTypes
-                                                                            fields={initialData.fields}
-                                                                            values={values}
-                                                                            errors={errors}
-                                                                            touched={touched}
-                                                                            label={field.fieldLabel}
-                                                                            name={field.fieldName}
-                                                                            type={field.type}
-                                                                            options={field.option}
-                                                                            setFieldValue={setFieldValue}
-                                                                            required={field.required}
-                                                                            fullWidth
-                                                                            isTooltip={field.isTooltip}
-                                                                            tooltipMessage={field.tooltipMessage}
-                                                                            decimalPlaces={field.decimalPlaces}
-                                                                            isvlookupReverse={field.isvlookupReverse}
-                                                                            fieldData={field}
-                                                                            size="small"
-                                                                        />
-                                                                    </Grid>
+                                                            </Grid>
                                                     ))}
                                                 </Grid>
                                             </Box>
