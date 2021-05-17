@@ -1,5 +1,4 @@
 import React, { useState, useEffect, Fragment, useContext } from "react";
-import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
@@ -20,28 +19,25 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
-import CreateProductCategory from "./CreateProductCategory";
 import routes from "../../components/Helpers/Routes";
 
-const ProductCategory = () => {
+const ProductTemplate = () => {
 
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const [loading, setLoading] = useState(true);
-    const [productCategory, setProductCategory] = useState([]);
+    const [productTemplate, setProductTemplate] = useState([]);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [open, setOpen] = useState(false);
-    const [productCategoryId, setProductCategoryId] = useState(null);
 
     useEffect(() => {
-        fetchProductCategory();
+        fetchProductTemplate();
     }, []);
 
-    const fetchProductCategory = () => {
+    const fetchProductTemplate = () => {
         setLoading(true)
-        axiosInstance().get(`/product-category`).then(({ data: { data } }) => {
-            setProductCategory(data);
+        axiosInstance().get(`/product-template`).then(({ data: { data } }) => {
+            setProductTemplate(data);
             setLoading(false)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -49,8 +45,8 @@ const ProductCategory = () => {
     };
 
     const handleDelete = () => {
-        axiosInstance().delete(`/product-category/` + deleteRecord._id).then(() => {
-            fetchProductCategory();
+        axiosInstance().delete(`/product-template/` + deleteRecord._id).then(() => {
+            fetchProductTemplate();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
         }).catch((error) => {
@@ -63,13 +59,12 @@ const ProductCategory = () => {
         { field: 'id', headerName: 'id', hide: true },
         {
             field: "name",
-            headerName: "Product Category",
+            headerName: "Product Template",
             width: 300,
             renderCell: (params) => (
-                <Link className="link" onClick={() => { setProductCategoryId(params.row.id); setOpen(true); }
-                } >
+                <Link className="link" to={`${routes.productTemplate.path}/${params.row.id}`} >
                     {params.row.name}
-                </Link >
+                </Link>
             )
         },
         {
@@ -132,22 +127,24 @@ const ProductCategory = () => {
         }
     ];
 
-
+    const CreateNew = () => {
+        history.push({ pathname: routes.productTemplate.path + "/0" })
+    }
 
     return (<Layout>
         <Grid container>
             <Grid item md={12} sm={12} xs={12}>
-                <CustomBreadCrumbs routes={[{ title: routes.productCategory.title }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title }]} />
             </Grid>
         </Grid>
         <CustomContainer>
             <div className="header-panel">
                 <Grid container>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">{routes.productCategory.title}</span>
+                        <GiAbstract055 /> <span className="listingHeader">{routes.productTemplate.title}</span>
                     </Grid>
                     <Grid xs={6} container justify="flex-end">
-                        <Button onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                        <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                     </Grid>
                 </Grid>
             </div>
@@ -158,7 +155,7 @@ const ProductCategory = () => {
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
-                    rows={productCategory}
+                    rows={productTemplate}
                     disableSelectionOnClick
                     disableMultipleSelection
                     columns={columns}
@@ -169,15 +166,14 @@ const ProductCategory = () => {
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete product category ${deleteRecord?.name} ?`}
+                    message={`Are you sure, you want to delete product template ${deleteRecord?.name} ?`}
                     onClose={() => setShowDeleteConfirmBox(false)}
                     onOk={handleDelete}
                 />
             }
-            {open && <CreateProductCategory productCategoryId={productCategoryId} handleClose={() => { setOpen(false); fetchProductCategory() }} />}
         </CustomContainer>
     </Layout>
     );
 }
 
-export default ProductCategory;
+export default ProductTemplate;

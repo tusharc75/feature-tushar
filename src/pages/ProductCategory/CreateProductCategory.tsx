@@ -1,156 +1,128 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
+import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { useParams, useHistory } from "react-router-dom";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { FormBuilder } from "../../components/FormBuilder";
 import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import { TextField } from "formik-material-ui";
-import Loader from "../../components/Loader";
-import { camelCase } from "../../constants/helpers";
-import { productCategoryPage } from '../../routes/ProductCategory'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import Dialog from '@material-ui/core/Dialog'
+import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
-import CustomContainer from "../../components/CustomContainer";
+import CustomButton from '../../components/Helpers/CustomButton'
+import TextField from '@material-ui/core/TextField';
+import * as Yup from "yup";
+import { useHistory } from "react-router-dom";
+import routes from "../../components/Helpers/Routes";
+
 
 const ProductCategorySchema = Yup.object().shape({
     name: Yup.string()
-        .min(3, "Too Short!")
-        .max(50, "Too Long")
-        .required("category name is required"),
+        .required("please enter name"),
 });
 
 
-const ProductCategory = () => {
+const CreateProductCategory = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
+    const { productCategoryId, handleClose } = props;
+    const [loading, setLoading] = useState(false);
+    const [initialData, setInitialData] = useState({ name: "" });
     const history = useHistory();
-    const { id } = useParams();
-
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [initialValues, setInitialValues] = useState(null);
-    const [section, setSection] = useState([]);
-    const [deleteField, setDeleteField] = useState([]);
 
     useEffect(() => {
-        fetchOneProductCategory();
-    }, [id]);
+        fetchProductCategoryDetail();
+    }, [productCategoryId]);
 
-    const fetchOneProductCategory = () => {
-        if (id === "0") {
-            setInitialValues({ name: "" });
+    const fetchProductCategoryDetail = async () => {
+        if (productCategoryId) {
+            axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
+                setInitialData({ name: data.name });
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
         }
         else {
-            axiosInstance().get(`/productcategory/` + id).then(({ data: { data } }) => {
-                setInitialValues(data);
-                setSection(data.section);
+            setInitialData({ name: "" })
+        }
+    };
+
+
+    const handleSubmit = (values) => {
+        if (productCategoryId) {
+            values._id = productCategoryId
+            axiosInstance().put(`/product-category`, values).then(({ data: { data } }) => {
+                setLoading(false);
+                handleClose()
             }).catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+            });
+        }
+        else {
+            axiosInstance().post(`/product-category`, values).then(({ data: { data } }) => {
+                setLoading(false);
+                handleClose()
+            }).catch((error) => {
+                setLoading(false);
                 toastConfig.setToastConfig(error);
             });
         }
     };
 
-    const handleSave = (values) => {
-        let data: any = {}
-        data.name = values.name;
-
-        let fields: any = []
-        let order = 0;
-        section.forEach(_section => {
-            _section.field.forEach(_field => {
-                let _field_data = _field
-                _field_data._id = _field_data._id.toString();
-                _field_data.sectionName = _section.sectionName
-                if (!isNaN(_field._id)) {
-                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
-                }
-                _field_data.order = ++order
-                fields.push(_field_data)
-            })
-        })
-        data.fields = fields;
-        setIsUpdating(true)
-        if (id === "0") {
-            axiosInstance().post("/productcategory", data).then(({ data: { data } }) => {
-                setIsUpdating(false)
-                history.push({ pathname: productCategoryPage.path });
-            }).catch((error) => {
-                setIsUpdating(false)
-                toastConfig.setToastConfig(error);
-            });
-        }
-        else {
-            data.categoryId = id;
-            data.deleteField = deleteField;
-            axiosInstance().put("/productcategory", data).then(({ data: { data } }) => {
-                setIsUpdating(false)
-                history.push({ pathname: productCategoryPage.path });
-            }).catch((error) => {
-                setIsUpdating(false)
-                toastConfig.setToastConfig(error);
-            });
-        }
-    }
-
-    return (<Layout>
-
-        <Grid container direction="row">
-            <Grid item xs={12}>
-                <CustomBreadCrumbs routes={[{ title: "Product Category", path: productCategoryPage.path }, { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
-            </Grid>
-        </Grid>
-        <CustomContainer>
-            {initialValues ?
-                <Formik initialValues={initialValues} validationSchema={ProductCategorySchema} onSubmit={handleSave}>
-                    {({ submitForm }) => (
-                        <Form>
-                            <Box p={1} bgcolor="white">
-                                <Grid container spacing={1}>
-                                    <Grid item xs={12} sm={3}  >
-                                        <Field
-                                            component={TextField}
-                                            fullWidth
-                                            margin="dense"
-                                            type="text"
-                                            label="Category Name"
-                                            name="name"
-                                            variant="outlined"
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6} container justify="flex-end">
-                                        <Box>
-                                            <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
-                                                Save{isUpdating && <CircularProgress size={24} />}
-                                            </Button>
-                                        </Box>
-                                        <Box ml={1} >
-                                            <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/product-category" })} >Close</Button>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
+    return (<Dialog
+        maxWidth="xs"
+        aria-labelledby="customized-dialog-title"
+        open={true}
+        fullWidth
+    >
+        <Formik
+            enableReinitialize={true}
+            initialValues={initialData}
+            validationSchema={ProductCategorySchema}
+            validateOnMount
+            onSubmit={handleSubmit}>
+            {({ values,
+                errors,
+                touched,
+                setFieldValue,
+                submitForm,
+            }) => (
+                <Fragment>
+                    <CustomDialogHeader title={productCategoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={handleClose}></CustomDialogHeader>
+                    <CustomDialogContent>
+                        <Form autoComplete="off" autoCorrect="off" noValidate >
+                            <Box p={1}>
+                                <TextField
+                                    variant="outlined"
+                                    type="text"
+                                    label="Name"
+                                    required={true}
+                                    name="name"
+                                    fullWidth
+                                    margin="dense"
+                                    value={values["name"]}
+                                    error={touched["name"] && Boolean(errors["name"])}
+                                    helperText={touched["name"] && errors["name"]}
+                                    onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
+                                />
                             </Box>
-                            <Box >
-                                <FormBuilder
-                                    section={section}
-                                    setSection={setSection}
-                                    deleteField={deleteField}
-                                    setDeleteField={setDeleteField}
-                                    isCustomField={true} />
-                            </Box>
-                        </Form>)}
-                </Formik>
-
-                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-        </CustomContainer>
-    </Layout>
+                        </Form>
+                    </CustomDialogContent>
+                    <CustomDialogFooter>
+                        <Button color="primary" onClick={handleClose}>Cancel</Button>
+                        <CustomButton
+                            loading={loading}
+                            variant="contained"
+                            color="primary"
+                            type="submit"
+                            onClick={submitForm}
+                        > Save</CustomButton>
+                    </CustomDialogFooter>
+                </Fragment>
+            )}
+        </Formik>
+    </Dialog>
     );
 }
 
-export default ProductCategory;
+export default CreateProductCategory;
