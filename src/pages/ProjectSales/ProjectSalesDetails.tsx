@@ -10,6 +10,8 @@ import {
 import { Skeleton } from "@material-ui/lab";
 import { ControlPoint } from "@material-ui/icons";
 import { useParams, useHistory, useLocation } from "react-router-dom";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 
 import TeamUsers from "./TeamUsers";
 import Layout from "../../components/Layout";
@@ -27,6 +29,7 @@ import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignDataDialog from "./AssignDataDialog";
 import CustomerStrategy from "./CustomerStrategy";
+import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,6 +59,13 @@ const ProjectSalesDetails = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.projectSales,
   ]);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [loadingGraphData, setLoadingGraphData] = useState(false);
+  const [graphData, setGraphData] = useState({
+    edges: [],
+    nodes: [],
+    colorPalette: null,
+  });
 
   useEffect(() => {
     if (!state) return;
@@ -68,6 +78,32 @@ const ProjectSalesDetails = () => {
       });
   }, []);
 
+  useEffect(() => {
+    //  When it is nodal structure tab
+    if (currentTabIndex === 1) {
+      setLoadingGraphData(true);
+
+      axiosInstance()
+        .get(`/project-sales/nodal-structure/${id}`)
+        .then(({ data }) => {
+          setLoadingGraphData(false);
+          setGraphData({
+            nodes: data.data.nodes,
+            edges: data.data.edges,
+            colorPalette: data.colorPalette,
+          });
+        })
+        .catch((error) => {
+          setLoadingGraphData(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+
+    return () => {
+      setGraphData({ edges: [], nodes: [], colorPalette: null });
+    };
+  }, [currentTabIndex]);
+
   /**
    * Get sales strategy data for paticular ID
    */
@@ -78,6 +114,7 @@ const ProjectSalesDetails = () => {
         data: { data },
       } = await axiosInstance().get(`/project-sales/${id}`);
 
+      setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
       setHeadingLbl(name);
@@ -112,7 +149,7 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["End Date"]: new Date(data.endDate).toDateString() || "",
+      ["End Date"]: data.endDate ? new Date(data.endDate).toDateString() : "",
       ["Value"]: data.value || "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
@@ -343,22 +380,73 @@ const ProjectSalesDetails = () => {
                     </Grid>
                   ) : (
                     <>
-                      <Box
-                        width="100%"
-                        padding={1}
-                        bgcolor="grey.200"
-                        display="flex"
-                        justifyContent="space-between"
+                      <Tabs
+                        className="oms-tab"
+                        value={currentTabIndex}
+                        onChange={(index, newValue) => {
+                          setCurrentTabIndex(newValue);
+                        }}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="icon tabs example"
                       >
-                        <Typography variant="subtitle2">
-                          Project Sales
-                        </Typography>
-                      </Box>
-                      <DetailsPage
-                        data={projectSalesData}
-                        fields={projectSalesFields}
-                      />
+                        <Tab
+                          label="Project Sales"
+                          aria-controls="a11y-tabpanel-0"
+                          id="a11y-tab-0"
+                        />
+                        <Tab
+                          label="3D Graph"
+                          aria-controls="a11y-tabpanel-1"
+                          id="a11y-tab-1"
+                        />
+                      </Tabs>
+                      {currentTabIndex === 0 && (
+                        <Box>
+                          <DetailsPage
+                            data={projectSalesData}
+                            fields={projectSalesFields}
+                          />
+                        </Box>
+                      )}
+
+                      {currentTabIndex === 1 && (
+                        <Box>
+                          <CustomNodalStructure
+                            id={id}
+                            graphData={graphData}
+                            loadingGraphData={loadingGraphData}
+                            onClick={(node) => {
+                              if (node && routes[node.route]) {
+                                history.push({
+                                  pathname: `${routes[node.route].path}/${
+                                    node.id
+                                  }`,
+                                });
+                              }
+                            }}
+                          />
+                        </Box>
+                      )}
                     </>
+
+                    // <>
+                    //   <Box
+                    //     width="100%"
+                    //     padding={1}
+                    //     bgcolor="grey.200"
+                    //     display="flex"
+                    //     justifyContent="space-between"
+                    //   >
+                    //     <Typography variant="subtitle2">
+                    //       Project Sales
+                    //     </Typography>
+                    //   </Box>
+                    //   <DetailsPage
+                    //     data={projectSalesData}
+                    //     fields={projectSalesFields}
+                    //   />
+                    // </>
                   )}
                 </Box>
               </Paper>

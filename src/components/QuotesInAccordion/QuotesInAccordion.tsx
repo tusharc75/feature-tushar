@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
-import CommonSkeleton from '../Helpers/CommonSkeleton'
+import React, { useState } from 'react'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { withStyles, makeStyles } from "@material-ui/core/styles";
-import { displayDate } from '../../services/util';
-import routes from './../../components/Helpers/Routes'
+import { withStyles } from "@material-ui/core/styles";
 import { Link } from 'react-router-dom'
-import { useHistory } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
 import { BsClockHistory } from 'react-icons/bs';
 import { IoCalendarOutline } from 'react-icons/io5';
@@ -71,7 +67,6 @@ function DisplayData({ label, value, icon }) {
 
 export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 }) {
 
-    const history = useHistory();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -105,7 +100,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 
                             <Box>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => setExpandQuote(!expandQuote)} >
+                                    onClick={() => setExpandQuote(!expandQuote)} >
                                     {
                                         expandQuote === true ? (
                                             <ExpandLessIcon />
