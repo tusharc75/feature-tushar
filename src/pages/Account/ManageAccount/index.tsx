@@ -52,6 +52,14 @@ export default function ManageAccountDialog(props) {
     } else {
       getAccountFields();
     }
+
+    return () => {
+      setLoading(false);
+      setEntityData({
+        fields: [],
+        initialValues: {}
+      })
+    }
   }, [user]);
 
   const getAccountFields = () => {

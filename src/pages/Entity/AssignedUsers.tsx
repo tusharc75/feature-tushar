@@ -1,95 +1,95 @@
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, IconButton } from "@material-ui/core";
-import { Delete } from "@material-ui/icons";
+import List from "@material-ui/core/List";
+import { Typography } from "@material-ui/core";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import ListItemText from "@material-ui/core/ListItemText";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
+import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
+import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    // flexGrow: 1,
+    flexGrow: 1,
   },
-  heading: {
-    fontSize: theme.typography.pxToRem(17),
-    flexBasis: "33.33%",
-    flexShrink: 0,
+  demo: {
+    backgroundColor: theme.palette.background.paper,
+    width: "100%",
   },
-  secondaryHeading: {
-    fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary,
+  title: {
+    margin: theme.spacing(4, 0, 2),
   },
-  actionsItems: {
-    color: "grey",
-    float: "right",
+  list: {
+    width: "100%",
+    padding: 0,
   },
 }));
 
-function DisplayData({ label, value, color, showCopyToClipBoard = false }) {
-  return (
-    <div className="cTr">
-      <div className="td1">
-        <Typography
-          color="textSecondary"
-          className="text-truncate"
-          variant="subtitle1"
-        >
-          {label}
-        </Typography>
-      </div>
-      <div className="td2">
-        {" "}
-        <Typography
-          title={value}
-          className="text-truncate"
-          style={{ color: color ? color : "" }}
-        >
-          {value}
-          {showCopyToClipBoard ? <CopyToClipboard textToCopy={value} /> : null}
-        </Typography>
-      </div>
-    </div>
-  );
-}
-
-export default function AssignedUsers({ data, unassignUser, permissions }) {
+const AssignedUsers = ({ user,
+  unassignEntity,
+  permissions,
+  selectedEntity,
+  type }) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
-      {data && data.length ? (
-        <Grid container spacing={1}>
-          {data.map((obj, index) => (
-            <Grid item md={6} xs={12} sm={12} key={index}>
-              <BoxWithBorder>
-                <span className={classes.actionsItems}>
-                  {permissions.role.isUpdate && (
-                    <IconButton onClick={() => unassignUser(obj)} size="small">
-                      <Delete color={"error"} />
-                    </IconButton>
-                  )}
-                </span>
-                <Typography
-                  title={`${obj?.firstName} ${obj?.lastName}` ?? ""}
-                  className="text-capitalize"
-                >
-                  <Link
-                    className="link"
-                    to={`/user/detail/${obj._id}`}
+    <div className={classes.demo}>
+      <List disablePadding>
+        {user && user.length
+          ? user.map((obj) => (
+            <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
+              <ListItem disableGutters className={classes.list}>
+                <div>
+                  <ListItemText
+                    primary={
+                      <Typography>
+                        <Link
+                          className="link"
+                          to={`/user/detail/${obj._id}`}
+                        >
+                          {`${obj.firstName} ${obj.lastName}` || ""}
+                        </Link>
+                      </Typography>
+                    }
+                    secondary={obj.email}
+                  />
+                </div>
+
+                <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
+
+
+                {permissions.role.isUpdate && (
+                  <ListItemSecondaryAction
+                    title={
+                      selectedEntity === obj._id
+                        ? "Primary user can't be unassigned"
+                        : "Unassign User"
+                    }
                   >
-                    {`${obj?.firstName} ${obj?.lastName}` ?? ""}
-                  </Link>
-                </Typography>
-                <DisplayData
-                  label="Email"
-                  value={obj?.email ?? "____"}
-                  color={null}
-                  showCopyToClipBoard={true}
-                />
-              </BoxWithBorder>
-            </Grid>
-          ))}
-        </Grid>
-      ) : null}
+                    <IconButton
+                      size="small"
+                      disabled={selectedEntity === obj._id}
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => unassignEntity(obj)}
+                    >
+                      <DeleteIcon
+                        color={selectedEntity === obj._id ? "disabled" : "error"}
+                      />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                )}
+              </ListItem>
+            </BoxWithBorder>
+          ))
+
+          : null}
+      </List>
     </div>
   );
-}
+};
+
+export default AssignedUsers;

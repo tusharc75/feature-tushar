@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext } from "react";
 import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import { useHistory } from "react-router-dom";
-import { withStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
 import axiosInstance from "../../../axios/axiosInstance";
 import {
@@ -218,7 +217,7 @@ export default function ManageLeadDialog({
         title={
           isNew
             ? "Create Lead"
-            : `Editing ${dataToUpdate.firstName || ""} ${dataToUpdate.lastName}`
+            : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName].filter(f => f).join(" ")}`
         }
         onClose={onClose}
       />
@@ -361,7 +360,6 @@ export default function ManageLeadDialog({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
-
             </>
           )}
         </Formik>

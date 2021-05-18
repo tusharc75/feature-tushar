@@ -14,7 +14,7 @@ import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpe
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import Dialog from '@material-ui/core/Dialog';
-import ManageAttachment from "../../../components/Activity/Attachments/ManageAttachment"
+import ManageAttachment from "../../../components/Activity/Attachments/ManageAttachment";
 
 export default function Attachment(props) {
 

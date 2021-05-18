@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import {
-    Card, CardHeader, IconButton, CardContent, Grid,
+    Card, IconButton, CardContent, Grid,
     List, ListItem, ListItemAvatar, ListItemText, Accordion, AccordionDetails,
     AccordionSummary
 } from '@material-ui/core';
@@ -12,7 +12,6 @@ import { FaEye } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { useHistory } from 'react-router-dom';
 import { AiOutlineMail } from 'react-icons/ai';
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard"
 
@@ -33,9 +32,8 @@ function DisplayData({ label, value, icon, showCopyToText = false }) {
 }
 
 export default function OpportunityContacts({ contacts, title, onAddContact,
-    contactApi, onSetExpanded, isExpanded, contactsRoute, recordsPerLine }) {
+    contactApi, onSetExpanded, isExpanded, recordsPerLine }) {
 
-    const history = useHistory();
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     function ContactDetails({ contacts, contactApi, }) {
         return <>

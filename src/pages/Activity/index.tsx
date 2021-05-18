@@ -48,7 +48,7 @@ const Activity = () => {
     }
   }, [type, referenceId]);
 
-  const tabs = ["Board", "Roadmap", "Calendar"];
+  const tabs = ["Board", "Roadmap"];
   const handleChangeFilter = (value) => {
     setFilter(value);
   };
@@ -57,17 +57,24 @@ const Activity = () => {
     <Layout>
       <Grid container direction="row">
         <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { title: "Activity", path: "/activity" },
+              { title: capitalize(type) },
+            ]}
+          />
         </Grid>
       </Grid>
       <CustomContainer>
         <Box>
           <Grid container>
             <Grid item xs={8}>
-              <SearchFilter
-                handleChangeFilter={handleChangeFilter}
-                filter={filter}
-              />
+              <Box m={1}>
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                />
+              </Box>
             </Grid>
             <Grid item xs={4}>
               <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
@@ -80,9 +87,6 @@ const Activity = () => {
           )}
           {viewType === 1 && (
             <Roadmap type={type} filter={filter} activityId={activityId} />
-          )}
-          {viewType === 2 && (
-            <Calendar type={type} filter={filter} activityId={activityId} />
           )}
         </Box>
       </CustomContainer>

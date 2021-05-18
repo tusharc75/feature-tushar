@@ -379,7 +379,9 @@ const ContactDetailsPage = (props) => {
             handleSubmit={handleUpdateContact}
             contactId={contactData._id}
             account={props?.account}
-          // contactResource={contactResource}
+            // contactResource={contactResource}
+            accountResource={accountResource}
+            contactResource={contactResource}
           // contactApi={contactApi}
           />
         )}
