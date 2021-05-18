@@ -235,7 +235,7 @@ export default function ManageUpdateEmailAndPassword({
                                 loading={loading}
                                 variant="contained"
                                 color="primary"
-                                disabled={loading ? true : (isUpdateEmail && values.email === userData.email || false)}
+                                disabled={loading ? true : ((isUpdateEmail && values.email === userData.email) || false)}
                                 onClick={(e) => {
                                     if (Object.keys(errors).length) {
                                         Object.keys(errors).forEach(key => {

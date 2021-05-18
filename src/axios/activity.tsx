@@ -173,7 +173,7 @@ export const GetNotes = async (filter) => {
 };
 
 export const GetEmails = async (filter) => {
-    const { data } = await api().get(`/activity/emails?filter=${filter}`);
+    const { data } = await api().get(`/email/my?filter=${filter}`);
     return data;
 };
 

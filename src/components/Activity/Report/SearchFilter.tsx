@@ -45,7 +45,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
         .then(({ data }) => {
           setOptions(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [inputValue]);
 
@@ -57,6 +57,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
   return (
     <Autocomplete
       multiple={true}
+      size="small"
       fullWidth
       options={options}
       getOptionLabel={(option) => (option ? option.name : "")}
