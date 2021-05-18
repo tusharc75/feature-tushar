@@ -40,7 +40,7 @@ import { getFormulaValue } from "../../constants/formulaUtility";
 import NumberFormat from "react-number-format";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import InputAdornment from '@material-ui/core/InputAdornment';
+import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
 
 interface NumberFormatCustomProps {
@@ -56,30 +56,15 @@ const withValueLimit = (inputObj, limitVal) => {
 
 const formatDecimal = (value, decimalPlaces) => {
   if (value === "" && isNaN(value)) {
-    return 0
-  }
-  else {
-    return parseFloat(value.toFixed(decimalPlaces))
+    return 0;
+  } else {
+    return parseFloat(value.toFixed(decimalPlaces));
   }
 };
 
 const CustomFormat = (props: NumberFormatCustomProps) => {
   const { inputRef, onChange, ...other } = props;
-  return (
-    <NumberFormat
-      {...other}
-      getInputRef={inputRef}
-      onValueChange={(values) => {
-        // onChange({
-        //   target: {
-        //     name: props.name,
-        //     value: values.formattedValue,
-        //   },
-        // });
-      }}
-      isNumericString
-    />
-  );
+  return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
 };
 
 const InfoLabel = ({
@@ -322,7 +307,7 @@ const FormTypes = (props) => {
   const handleChange = (name, value) => {
     setFieldValue(name, value);
     if (fieldData && fieldData.isMulitFormula) {
-      handleMulitFormula(fieldData, { [name]: value })
+      handleMulitFormula(fieldData, { [name]: value });
     }
     if (type === "vlookupDropdown") {
       handleVlookup(name, value);
@@ -335,67 +320,102 @@ const FormTypes = (props) => {
     data.formulaFields.forEach((_field) => {
       let formulainputFields = {};
       data.formulainputFields.forEach((_input) => {
-        formulainputFields[_input] = alredyDone[_input] ? alredyDone[_input] : values[_input] ? values[_input] : 0;
+        formulainputFields[_input] = alredyDone[_input]
+          ? alredyDone[_input]
+          : values[_input]
+          ? values[_input]
+          : 0;
       });
-      let calValue = getFormulaValue(data.formulaoption[_field], formulainputFields, "decimal", 2);
+      let calValue = getFormulaValue(
+        data.formulaoption[_field],
+        formulainputFields,
+        "decimal",
+        2
+      );
       setFieldValue(_field, calValue);
-      alredyDone[_field] = calValue
+      alredyDone[_field] = calValue;
       handleFormula(_field, calValue, alredyDone);
       if (data.displayUnits && data.displayUnits.length) {
-        handleConverter(data, data.fieldName, data.displayUnits[0], calValue)
+        handleConverter(data, data.fieldName, data.displayUnits[0], calValue);
       }
-    })
-  }
+    });
+  };
 
   const handleFormula = (name, value, alredyDone) => {
-    if (fields && fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true)).length) {
-      fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true)).forEach((_data) => {
-        if (_data.inputFields.includes(name)) {
-          let inputFields = {};
-          _data.inputFields.forEach((_input) => {
-            if (name === _input) {
-              inputFields[_input] = value;
-            } else {
-              inputFields[_input] = alredyDone[_input] ? alredyDone[_input] : values[_input] ? values[_input] : 0;
-            }
-          });
-          let calValue = getFormulaValue(_data.formula, inputFields, _data.returnType, _data.decimalPlaces);
-          calValue = formatDecimal(calValue, 2)
-          let _fieldName = _data.fieldName;
-          if (_data.type === "currencyAmount" || _data.type === "converter") {
-            if (_data.displayCurrency && _data.displayCurrency.length) {
-              _fieldName = _fieldName + "_" + _data.displayCurrency[0].toLowerCase()
-            }
-            if (_data.displayUnits && _data.displayUnits.length) {
-              _fieldName = _fieldName + "_" + _data.displayUnits[0].toLowerCase()
-            }
-            if (alredyDone[_fieldName] === undefined) {
-              setFieldValue(_fieldName, calValue);
-              alredyDone[_fieldName] = calValue;
-              handleFormula(_fieldName, calValue, alredyDone);
+    if (
+      fields &&
+      fields.filter((_f) => _f.type === "formula" || _f.isFormula === true)
+        .length
+    ) {
+      fields
+        .filter((_f) => _f.type === "formula" || _f.isFormula === true)
+        .forEach((_data) => {
+          if (_data.inputFields.includes(name)) {
+            let inputFields = {};
+            _data.inputFields.forEach((_input) => {
+              if (name === _input) {
+                inputFields[_input] = value;
+              } else {
+                inputFields[_input] = alredyDone[_input]
+                  ? alredyDone[_input]
+                  : values[_input]
+                  ? values[_input]
+                  : 0;
+              }
+            });
+            let calValue = getFormulaValue(
+              _data.formula,
+              inputFields,
+              _data.returnType,
+              _data.decimalPlaces
+            );
+            calValue = formatDecimal(calValue, 2);
+            let _fieldName = _data.fieldName;
+            if (_data.type === "currencyAmount" || _data.type === "converter") {
               if (_data.displayCurrency && _data.displayCurrency.length) {
-                handleCurrency(_data, _data.fieldName, _data.displayCurrency[0], calValue)
+                _fieldName =
+                  _fieldName + "_" + _data.displayCurrency[0].toLowerCase();
               }
               if (_data.displayUnits && _data.displayUnits.length) {
-                handleConverter(_data, _data.fieldName, _data.displayUnits[0], calValue)
+                _fieldName =
+                  _fieldName + "_" + _data.displayUnits[0].toLowerCase();
               }
-              if (_data.isMulitFormula) {
-                handleMulitFormula(_data, alredyDone)
+              if (alredyDone[_fieldName] === undefined) {
+                setFieldValue(_fieldName, calValue);
+                alredyDone[_fieldName] = calValue;
+                handleFormula(_fieldName, calValue, alredyDone);
+                if (_data.displayCurrency && _data.displayCurrency.length) {
+                  handleCurrency(
+                    _data,
+                    _data.fieldName,
+                    _data.displayCurrency[0],
+                    calValue
+                  );
+                }
+                if (_data.displayUnits && _data.displayUnits.length) {
+                  handleConverter(
+                    _data,
+                    _data.fieldName,
+                    _data.displayUnits[0],
+                    calValue
+                  );
+                }
+                if (_data.isMulitFormula) {
+                  handleMulitFormula(_data, alredyDone);
+                }
+              }
+            } else {
+              if (alredyDone[_fieldName] === undefined) {
+                setFieldValue(_fieldName, calValue);
+                alredyDone[_fieldName] = calValue;
+                handleFormula(_fieldName, calValue, alredyDone);
+                if (_data.isMulitFormula) {
+                  handleMulitFormula(_data, alredyDone);
+                }
               }
             }
           }
-          else {
-            if (alredyDone[_fieldName] === undefined) {
-              setFieldValue(_fieldName, calValue);
-              alredyDone[_fieldName] = calValue;
-              handleFormula(_fieldName, calValue, alredyDone);
-              if (_data.isMulitFormula) {
-                handleMulitFormula(_data, alredyDone)
-              }
-            }
-          }
-        }
-      });
+        });
     }
   };
 
@@ -413,20 +433,36 @@ const FormTypes = (props) => {
   };
 
   const handleCheckVlookupReverse = (name, value) => {
-    if (fields && fields.filter((_f) => _f.type === "vlookupDropdown" && _f.isvlookupReverse === true).length) {
-      fields.filter((_f) => _f.type === "vlookupDropdown" && _f.isvlookupReverse === true).forEach((_data) => {
-        if (_data.inputFields.includes(name)) {
-          let result = _data.option && _data.option.filter(function (val) {
-            for (var i = 0; i < _data.inputFields.length; i++)
-              if ((_data.inputFields[i] === name ? value.toString() : values[_data.inputFields[i]].toString()) !== val[_data.inputFields[i].toString()])
-                return false;
-            return true;
-          });
-          if (result.length) {
-            setFieldValue(_data.fieldName, result[0].optionLabel);
+    if (
+      fields &&
+      fields.filter(
+        (_f) => _f.type === "vlookupDropdown" && _f.isvlookupReverse === true
+      ).length
+    ) {
+      fields
+        .filter(
+          (_f) => _f.type === "vlookupDropdown" && _f.isvlookupReverse === true
+        )
+        .forEach((_data) => {
+          if (_data.inputFields.includes(name)) {
+            let result =
+              _data.option &&
+              _data.option.filter(function (val) {
+                for (var i = 0; i < _data.inputFields.length; i++)
+                  if (
+                    (_data.inputFields[i] === name
+                      ? value.toString()
+                      : values[_data.inputFields[i]].toString()) !==
+                    val[_data.inputFields[i].toString()]
+                  )
+                    return false;
+                return true;
+              });
+            if (result.length) {
+              setFieldValue(_data.fieldName, result[0].optionLabel);
+            }
           }
-        }
-      });
+        });
     }
   };
 
@@ -434,7 +470,7 @@ const FormTypes = (props) => {
     let fieldName = name + "_" + _unit.toLowerCase();
     setFieldValue(fieldName, value);
     handleFormula(fieldName, value, { fieldName: value });
-    handleConverter(fieldData, name, _unit, value)
+    handleConverter(fieldData, name, _unit, value);
   };
 
   const handleConverter = (data, name, _unit, value) => {
@@ -443,75 +479,123 @@ const FormTypes = (props) => {
       for (var x_unit in data.option[indexConverter]) {
         if (x_unit !== _unit) {
           let calValue = value * data.option[indexConverter][x_unit];
-          calValue = formatDecimal(calValue, 2)
+          calValue = formatDecimal(calValue, 2);
           setFieldValue(name + "_" + x_unit.toLowerCase(), calValue);
           handleFormula(name + "_" + x_unit.toLowerCase(), calValue, {});
         }
       }
     }
-  }
+  };
 
   const handleCurrencyChange = (name, _currency, value) => {
     let fieldName = name + "_" + _currency.toLowerCase();
     setFieldValue(fieldName, value);
     handleFormula(fieldName, value, { fieldName: value });
-    handleCurrency(fieldData, name, _currency, value)
+    handleCurrency(fieldData, name, _currency, value);
   };
 
   const handleCurrency = (data, name, _currency, value) => {
     let indexCurrency = data.currency.indexOf(_currency);
     if (data.isMulitFormula) {
-      handleMulitFormula(data, { [name + "_" + _currency.toLowerCase()]: value })
+      handleMulitFormula(data, {
+        [name + "_" + _currency.toLowerCase()]: value,
+      });
     }
     if (indexCurrency >= 0) {
       for (var x_currency in data.currencyoption[indexCurrency]) {
-        if (data.displayCurrency.includes(x_currency) && x_currency !== _currency) {
+        if (
+          data.displayCurrency.includes(x_currency) &&
+          x_currency !== _currency
+        ) {
           let _fieldName = name + "_" + x_currency.toLowerCase();
-          let calValue = value * data.currencyoption[indexCurrency][x_currency]
-          calValue = formatDecimal(calValue, 2)
+          let calValue = value * data.currencyoption[indexCurrency][x_currency];
+          calValue = formatDecimal(calValue, 2);
           setFieldValue(_fieldName, calValue);
           handleFormula(_fieldName, calValue, {});
         }
       }
     }
-  }
+  };
 
   const handleCurrencyChangeWithConverter = (name, _currency, _unit, value) => {
-    setFieldValue(name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), value);
-    handleFormula(name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), value, {});
+    setFieldValue(
+      name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(),
+      value
+    );
+    handleFormula(
+      name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(),
+      value,
+      {}
+    );
     handleCurrencyConverter(fieldData, name, _currency, _unit, value);
   };
 
   const handleCurrencyConverter = (data, name, _currency, _unit, value) => {
     if (data.isMulitFormula) {
-      handleMulitFormula(data, { [name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]: value })
+      handleMulitFormula(data, {
+        [name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]:
+          value,
+      });
     }
     let indexConverter = data.units.indexOf(_unit);
     let indexCurrency = data.currency.indexOf(_currency);
     if (indexConverter >= 0 && indexCurrency >= 0) {
       for (var x_unit in data.option[indexConverter]) {
         for (var x_currency in data.currencyoption[indexCurrency]) {
-          if (data.displayUnits.includes(x_unit) && data.displayCurrency.includes(x_currency)) {
+          if (
+            data.displayUnits.includes(x_unit) &&
+            data.displayCurrency.includes(x_currency)
+          ) {
             if (x_currency === _currency && x_unit === _unit) {
-            }
-            else if (x_currency !== _currency && x_unit === _unit) {
-              let calValue = value * data.currencyoption[indexCurrency][x_currency]
-              calValue = formatDecimal(calValue, 2)
-              setFieldValue(name + "_" + x_currency.toLowerCase() + "_" + x_unit.toLowerCase(), calValue);
-              handleFormula(name + "_" + x_currency.toLowerCase() + "_" + x_unit.toLowerCase(), calValue, {});
-            }
-            else {
-              let calValue = value * data.option[indexConverter][x_unit]
-              calValue = calValue * data.currencyoption[indexCurrency][x_currency]
-              calValue = formatDecimal(calValue, 2)
-              setFieldValue(name + "_" + x_currency.toLowerCase() + "_" + x_unit.toLowerCase(), calValue);
-              handleFormula(name + "_" + x_currency.toLowerCase() + "_" + x_unit.toLowerCase(), calValue, {});
+            } else if (x_currency !== _currency && x_unit === _unit) {
+              let calValue =
+                value * data.currencyoption[indexCurrency][x_currency];
+              calValue = formatDecimal(calValue, 2);
+              setFieldValue(
+                name +
+                  "_" +
+                  x_currency.toLowerCase() +
+                  "_" +
+                  x_unit.toLowerCase(),
+                calValue
+              );
+              handleFormula(
+                name +
+                  "_" +
+                  x_currency.toLowerCase() +
+                  "_" +
+                  x_unit.toLowerCase(),
+                calValue,
+                {}
+              );
+            } else {
+              let calValue = value * data.option[indexConverter][x_unit];
+              calValue =
+                calValue * data.currencyoption[indexCurrency][x_currency];
+              calValue = formatDecimal(calValue, 2);
+              setFieldValue(
+                name +
+                  "_" +
+                  x_currency.toLowerCase() +
+                  "_" +
+                  x_unit.toLowerCase(),
+                calValue
+              );
+              handleFormula(
+                name +
+                  "_" +
+                  x_currency.toLowerCase() +
+                  "_" +
+                  x_unit.toLowerCase(),
+                calValue,
+                {}
+              );
             }
           }
         }
       }
     }
-  }
+  };
 
   return type === "singleLine" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
@@ -590,6 +674,9 @@ const FormTypes = (props) => {
           inputComponent: CustomFormat as any,
           inputProps: {
             allowNegative: false,
+            onValueChange: (values) => {
+              handleChange(name, values.value);
+            },
           },
           startAdornment: startAdornment,
         }}
@@ -619,11 +706,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? 0 : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? 0 : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -653,11 +740,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-              handleChange(
-                name,
-                e.target.value == "" ? 0 : parseFloat(e.target.value)
-              );
-            }
+                handleChange(
+                  name,
+                  e.target.value == "" ? 0 : parseFloat(e.target.value)
+                );
+              }
         }
       />
     </InfoLabel>
@@ -826,8 +913,8 @@ const FormTypes = (props) => {
       </Grid>
     ))
   ) : type === "currencyAmount" ? (
-    fieldData.displayCurrency.map((_currency, i) => (
-      fieldData.isConverter && fieldData.displayUnits.length ?
+    fieldData.displayCurrency.map((_currency, i) =>
+      fieldData.isConverter && fieldData.displayUnits.length ? (
         fieldData.displayUnits.map((_unit, i) => (
           <Grid key={_unit} item xs={12} sm={6} md={6}>
             <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
@@ -836,33 +923,85 @@ const FormTypes = (props) => {
                 variant="outlined"
                 type="number"
                 label={label + " " + _currency + "/" + _unit}
-                name={name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()}
+                name={
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
+                }
                 required={required}
-                value={values[name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]}
+                value={
+                  values[
+                    name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                  ]
+                }
                 error={
-                  touched[name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] &&
-                  Boolean(errors[name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()])
+                  touched[
+                    name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                  ] &&
+                  Boolean(
+                    errors[
+                      name +
+                        "_" +
+                        _currency.toLowerCase() +
+                        "_" +
+                        _unit.toLowerCase()
+                    ]
+                  )
                 }
                 helperText={
-                  touched[name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] &&
-                  errors[name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]
+                  touched[
+                    name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                  ] &&
+                  errors[
+                    name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                  ]
                 }
                 onChange={
                   onChange
                     ? onChange
-                    : (e) => handleCurrencyChangeWithConverter(name, _currency, _unit, parseFloat(e.target.value))
+                    : (e) =>
+                        handleCurrencyChangeWithConverter(
+                          name,
+                          _currency,
+                          _unit,
+                          parseFloat(e.target.value)
+                        )
                 }
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      {_.result(_.find(currencyList, function (obj) { return obj.currencyCode === _currency }), 'symbolNative')}
+                      {_.result(
+                        _.find(currencyList, function (obj) {
+                          return obj.currencyCode === _currency;
+                        }),
+                        "symbolNative"
+                      )}
                     </InputAdornment>
                   ),
                 }}
               />
             </InfoLabel>
           </Grid>
-        )) :
+        ))
+      ) : (
         <Grid key={_currency} item xs={12} sm={6} md={6}>
           <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
             <TextField
@@ -885,25 +1024,37 @@ const FormTypes = (props) => {
                 onChange
                   ? onChange
                   : (e) => {
-                    if (fieldData.displayCurrency.length > 1) {
-                      handleCurrencyChange(name, _currency, parseFloat(e.target.value))
+                      if (fieldData.displayCurrency.length > 1) {
+                        handleCurrencyChange(
+                          name,
+                          _currency,
+                          parseFloat(e.target.value)
+                        );
+                      } else {
+                        handleChange(
+                          name + "_" + _currency.toLowerCase(),
+                          parseFloat(e.target.value)
+                        );
+                      }
                     }
-                    else {
-                      handleChange(name + "_" + _currency.toLowerCase(), parseFloat(e.target.value))
-                    }
-                  }
               }
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    {_.result(_.find(currencyList, function (obj) { return obj.currencyCode === _currency }), 'symbolNative')}
+                    {_.result(
+                      _.find(currencyList, function (obj) {
+                        return obj.currencyCode === _currency;
+                      }),
+                      "symbolNative"
+                    )}
                   </InputAdornment>
                 ),
               }}
             />
           </InfoLabel>
         </Grid>
-    ))
+      )
+    )
   ) : type === "currency" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
@@ -1327,7 +1478,7 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDatePicker
           {...rest}
-          clearable="true"
+          clearable
           required={required}
           variant="inline"
           inputVariant="outlined"
@@ -1349,6 +1500,7 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDateTimePicker
           {...rest}
+          clearable
           required={required}
           variant="inline"
           inputVariant="outlined"
