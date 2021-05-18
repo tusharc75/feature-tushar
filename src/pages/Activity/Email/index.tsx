@@ -3,15 +3,15 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../../components/Layout";
 import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
-import { useParams, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import queryString from 'query-string';
 import { GetReferenceName, GetEmails } from "../../../axios/activity";
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import axiosAPI from "../../../axios/axios";
-import { isEmpty } from "lodash";
+import { useData } from "../../../StateProvider/Provider";
 import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import CustomContainer from "../../../components/CustomContainer";
 import { Button, MenuItem, Menu, Checkbox, Typography, Tooltip, IconButton } from '@material-ui/core'
@@ -31,6 +31,9 @@ const Email = () => {
 
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
+    const {
+        state: { user },
+    }: any = useData();
     const parsed = queryString.parse(history.location.search);
     const { referenceType, referenceId } = parsed;
 
@@ -75,6 +78,7 @@ const Email = () => {
                     return {
                         ...obj,
                         id: obj._id,
+                        isCreatedByMe: obj?.createdBy?.user === user?.user?._id ? true : false,
                         isChecked: false,
                     }
                 })
@@ -88,6 +92,10 @@ const Email = () => {
 
     const handleChangeFilter = (value) => {
         setFilter(value)
+    }
+
+    const getToEmailList = toList => {
+        return (toList.map(email => email === user?.user?.email ? 'me' : email).join(','))
     }
 
     const columns = [
@@ -129,7 +137,9 @@ const Email = () => {
             width: 200,
             renderCell: (params) => {
                 if (typeof params.row.to == "string") return <span>{params.row.to}</span>
-                return <span>To: {params.row.to.join(", ")}</span>
+                return <span>
+                    {params.row?.isCreatedByMe ? getToEmailList(params.row.to) : params.row?.mailbox ?? ''}
+                </span>
             }
         },
         {
@@ -138,7 +148,7 @@ const Email = () => {
             width: 700,
             renderCell: (params) => {
                 return <div className={emailStyles.emailMessageConatiner} >
-                    <Typography noWrap> {params.row?.subject ?? "(no subject) "} - </Typography>
+                    <Typography > {params.row?.subject ?? "(no subject) "} - </Typography>
                     <Typography noWrap display="inline"
                         className={emailStyles.emailMessage}> {params.row.message ? reactHtmlparser(params.row.message) : null}
                     </Typography>
@@ -253,8 +263,8 @@ const Email = () => {
                         <span className="listingHeader">Emails</span>
                     </Grid>
                     <Grid item xs={6} className={styles.filter_side}>
-                        <Box component="div" className={styles.filter_side_header} >
-                            <Box style={{ width: '600px' }}>
+                        <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
+                            <Box style={{ width: '70%' }}>
                                 <SearchFilter
                                     handleChangeFilter={handleChangeFilter} filter={filter} />
                             </Box>
@@ -292,7 +302,7 @@ const Email = () => {
                     </Grid>
                 </Grid>
             </div>
-            <div className={`listing-grid emailList`}>
+            <div className='listing-grid emailList'>
                 <DataGrid
                     components={{
                         Toolbar: CustomDataGridToolbar,
