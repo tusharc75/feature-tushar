@@ -41,7 +41,7 @@ const Email = () => {
     const [emails, setEmails] = useState([]);
     const [loading, setLoading] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [deleteRec, setDeleteRec] = useState(null)
+    const [deleteRecord, setDeleteRecord] = useState(null)
     const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
     const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -209,7 +209,7 @@ const Email = () => {
         if (row) {
             setIsConformDialogVisible(true);
             if (row && row.id) {
-                setDeleteRec(row);
+                setDeleteRecord(row);
             }
         } else {
             setIsConformDialogVisible(true);
@@ -218,27 +218,25 @@ const Email = () => {
 
     const handleDeleteEmails = async () => {
         setDeleteLoading(true);
-        let recs = [];
-        if (deleteRec?.id) {
-            recs.push(deleteRec?.id);
+        let selectedRecords = [];
+        if (deleteRecord?.id) {
+            selectedRecords.push(deleteRecord?.id);
         } else {
-            emails.forEach((obj) => {
-                if (obj.isChecked) recs.push(obj.id);
-            });
+            selectedRecords = emails.filter(currentObject => currentObject.isChecked).map(o => o.id)
         }
 
-        if (recs && recs.length > 0) {
+        if (selectedRecords && selectedRecords.length > 0) {
             axiosInstance()
-                .put('/email', { emails: [...recs] })
+                .put('/email', { emails: [...selectedRecords] })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
-                        message: "email deleted succesfully",
+                        message: "Email deleted succesfully",
                     });
                     setIsConformDialogVisible(false);
                     setDeleteLoading(false);
-                    if (deleteRec) setDeleteRec({});
+                    if (deleteRecord) setDeleteRecord({});
                     fetchEmails();
                 })
                 .catch((error) => {
@@ -325,9 +323,9 @@ const Email = () => {
             {isConfirmDialogVisible ? (
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure, you want to delete ${deleteRec?.id ? "this email" : "these emails"} ?`}
+                    message={`Are you sure, you want to delete ${deleteRecord?.id ? "this email" : "these emails"} ?`}
                     onClose={() => {
-                        if (deleteRec) setDeleteRec({});
+                        if (deleteRecord) setDeleteRecord({});
                         setIsConformDialogVisible(false);
                     }}
                     okBtnLoading={deleteLoading}
