@@ -13,10 +13,12 @@ import {
   IconButton,
   Tabs,
   Tab,
+  Menu,
+  MenuItem
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { Add, ExpandMore, ControlPoint } from "@material-ui/icons";
-
+import MoreVert from "@material-ui/icons/MoreVert";
 import axiosInstance from "../../axios/axiosInstance";
 import CustomerContacts from "./CustomerContacts";
 import BoxWithBorder from "../../components/BoxWithBorder";
@@ -25,7 +27,8 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
-
+import ManageContactDialog from "../Contact/ManageContact";
+import { customerAccount, customerContact } from "../../constants/helpers";
 const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
@@ -108,6 +111,8 @@ const CustomerStrategy = (props) => {
   const [expandedParent, setExpandedParent] = useState(true);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [collaborators, setCollaborators] = useState([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [showContactCreateDialog, setShowContactCreateDialog] = useState(false)
 
   useEffect(() => {
     if (!users.length) return;
@@ -150,188 +155,267 @@ const CustomerStrategy = (props) => {
       });
   };
 
-  return (
-    <Paper className={classes.root}>
-      <Accordion
-        square={false}
-        expanded={expandedParent}
-        onChange={() => setExpandedParent(!expandedParent)}
-      >
-        <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-          <Box
-            display="flex"
-            alignItems="center"
-            className={clsx(classes.expand, {
-              [classes.expandOpen]: expandedParent,
-            })}
-          >
-            <ExpandMore />
-          </Box>
-          <Box component="span" mx={1} />
-          <Typography variant="subtitle1">Customer Accounts</Typography>
-          {(permissions.isUpdate && isTeamMember) || isManager ? (
-            <IconButton
-              color="primary"
-              size="small"
-              className={classes.addBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleOpenDialog("customer-account");
-              }}
-            >
-              <Add />
-            </IconButton>
-          ) : null}
-        </AccordionSummary>
-        <AccordionDetails>
-          {loading ? (
-            <Typography>Loading...</Typography>
-          ) : customerAccounts.length ? (
-            <Box width="100%">
-              <>
-                <Tabs
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  className="oms-tab"
-                  value={currentTabIndex}
-                  onChange={(index, newValue) => {
-                    setCurrentTabIndex(newValue);
-                  }}
-                  indicatorColor="primary"
-                  textColor="primary"
-                  aria-label="icon tabs example"
-                >
-                  {customerAccounts.map((c, i) => (
-                    <Tab
-                      key={i}
-                      tabIndex={i}
-                      label={c.accountName}
-                      aria-controls={`a11y-tabpanel-${i}`}
-                      id={`a11y-tab-${i}`}
-                    />
-                  ))}
-                </Tabs>
+  const saveCustomerContactToProject = async (id) => {
+    const existingData = customerContacts.map((contact) => contact._id);
 
-                {customerAccounts.map((c, i) => (
-                  <Box mt={2} hidden={currentTabIndex !== i} key={c._id}>
-                    <Grid container spacing={1}>
-                      {/**
+    const dataObj = {
+      customerContact: [id, ...existingData],
+      _id: projectId,
+    };
+
+    await axiosInstance()
+      .put(`/project-sales/add-customer-contact`, dataObj)
+      .then(() => {
+        setToastConfig({
+          message: `Customer Contact added successfully`,
+          type: "success",
+          open: true,
+        });
+        fetchProjectData();
+      })
+      .catch((error) => {
+        setToastConfig(error);
+      });
+
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  return (
+    <>
+
+      <Paper className={classes.root}>
+        <Accordion
+          square={false}
+          expanded={expandedParent}
+          onChange={() => setExpandedParent(!expandedParent)}
+        >
+          <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+            <Box
+              display="flex"
+              alignItems="center"
+              className={clsx(classes.expand, {
+                [classes.expandOpen]: expandedParent,
+              })}
+            >
+              <ExpandMore />
+            </Box>
+            <Box component="span" mx={1} />
+            <Typography variant="subtitle1">Customer Accounts</Typography>
+            {(permissions.isUpdate && isTeamMember) || isManager ? (
+              <IconButton
+                color="primary"
+                size="small"
+                className={classes.addBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenDialog("customer-account");
+                }}
+              >
+                <Add />
+              </IconButton>
+            ) : null}
+          </AccordionSummary>
+          <AccordionDetails>
+            {loading ? (
+              <Typography>Loading...</Typography>
+            ) : customerAccounts.length ? (
+              <Box width="100%">
+                <>
+                  <Tabs
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    className="oms-tab"
+                    value={currentTabIndex}
+                    onChange={(index, newValue) => {
+                      setCurrentTabIndex(newValue);
+                    }}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    aria-label="icon tabs example"
+                  >
+                    {customerAccounts.map((c, i) => (
+                      <Tab
+                        key={i}
+                        tabIndex={i}
+                        label={c.accountName}
+                        aria-controls={`a11y-tabpanel-${i}`}
+                        id={`a11y-tab-${i}`}
+                      />
+                    ))}
+                  </Tabs>
+
+                  {customerAccounts.map((c, i) => (
+                    <Box mt={2} hidden={currentTabIndex !== i} key={c._id}>
+                      <Grid container spacing={1}>
+                        {/**
                        * LEFT SIDE
                        */}
 
-                      <Grid item xs={12} sm={12} md={8} lg={8}>
-                        {/*TODO: Heirarchy Table */}
-                        {permissions?.isRead && (
-                          <OpportunityAccordianProjectSales
-                            opportunities={opportunities.filter(
-                              (o) => o.customerAccountName === c._id
-                            )}
-                            onNewOpportunityAdd={(id) => {
-                              saveOppToProject(id);
-                            }}
-                            permissions={permissions}
-                            accountId={c._id}
-                            accountName={c.accountName}
-                            resource={"customerAccount"}
-                            isRedirect={false}
-                            expanded={true}
-                            collaborators={collaborators}
-                            projectId={projectId}
-                            addExisting={handleOpenDialog}
-                            fetchProjectData={fetchProjectData}
-                            isTeamMember={isTeamMember}
-                            isManager={isManager}
-                          />
-                        )}
-                        <QuotesInAccordion />
-                        <ProjectInAccordion />
-                        <ProductBuilderInAccordion />
-                      </Grid>
-                      {/**
+                        <Grid item xs={12} sm={12} md={8} lg={8}>
+                          {/*TODO: Heirarchy Table */}
+                          {permissions?.isRead && (
+                            <OpportunityAccordianProjectSales
+                              opportunities={opportunities.filter(
+                                (o) => o.customerAccountName === c._id
+                              )}
+                              onNewOpportunityAdd={(id) => {
+                                saveOppToProject(id);
+                              }}
+                              permissions={permissions}
+                              accountId={c._id}
+                              accountName={c.accountName}
+                              resource={"customerAccount"}
+                              isRedirect={false}
+                              expanded={true}
+                              collaborators={collaborators}
+                              projectId={projectId}
+                              addExisting={handleOpenDialog}
+                              fetchProjectData={fetchProjectData}
+                              isTeamMember={isTeamMember}
+                              isManager={isManager}
+                            />
+                          )}
+                          <QuotesInAccordion />
+                          <ProjectInAccordion />
+                          <ProductBuilderInAccordion />
+                        </Grid>
+                        {/**
                        * RIGHT SIDE
                        */}
-                      <Grid item xs={12} sm={12} md={4} lg={4}>
-                        <Paper style={{ overflow: "hidden" }}>
-                          <Box style={{ padding: "0px", maxHeight: "450px" }}>
-                            <Box
-                              width="100%"
-                              padding={1}
-                              bgcolor="grey.200"
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="space-between"
-                            >
-                              <Typography variant="subtitle2">
-                                Customer Contacts
+                        <Menu
+                          id="menu"
+                          anchorEl={anchorEl}
+                          keepMounted
+                          open={Boolean(anchorEl)}
+                          onClose={handleClose}
+                        >
+                          <MenuItem
+                            onClick={() => {
+                              setShowContactCreateDialog(true);
+                              handleClose()
+                            }}
+                          >
+                            Create New
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              handleOpenDialog("customer-contact", c._id)
+                              handleClose();
+                            }}
+                          >
+                            Add Exisiting
+                          </MenuItem>
+                        </Menu>
+                        {
+                          showContactCreateDialog &&
+                          <ManageContactDialog
+                            open={showContactCreateDialog}
+                            onClose={() => {
+                              setShowContactCreateDialog(false);
+                              fetchProjectData();
+                            }}
+                            onSuccess={(obj) => {
+                              if (obj && obj.id) {
+                                saveCustomerContactToProject(obj.id)
+                              }
+                            }}
+                            contactResource={customerContact.contactResource}
+                            accountId={c._id}
+                            contactApi={customerContact.contactApi}
+                            account={customerAccount}
+                            isRedirectToDetailPage={false}
+                          />
+                        }
+                        <Grid item xs={12} sm={12} md={4} lg={4}>
+                          <Paper style={{ overflow: "hidden" }}>
+                            <Box style={{ padding: "0px", maxHeight: "450px" }}>
+                              <Box
+                                width="100%"
+                                padding={1}
+                                bgcolor="grey.200"
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="space-between"
+                              >
+                                <Typography variant="subtitle2">
+                                  Customer Contacts
                               </Typography>
-                              {(permissions.isUpdate && isTeamMember) ||
-                              isManager ? (
-                                <IconButton
-                                  color="primary"
-                                  size="small"
-                                  onClick={() =>
-                                    handleOpenDialog("customer-contact", c._id)
-                                  }
-                                >
-                                  <ControlPoint />
-                                </IconButton>
-                              ) : null}
-                            </Box>
-                            <Box padding={1}>
-                              {loading ? (
-                                [1, 2].map((i) => (
-                                  <BoxWithBorder
-                                    key={i}
-                                    style={{ marginBottom: "8px" }}
+                                {(permissions.isUpdate && isTeamMember) ||
+                                  isManager ? (
+                                  <IconButton
+                                    aria-haspopup="true"
+                                    color="primary"
+                                    size="small"
+                                    onClick={handleClick}
                                   >
-                                    <Box padding={1}>
-                                      <Skeleton
-                                        variant="text"
-                                        width="100px"
-                                        height="20px"
-                                      />
-                                      <Box marginTop={1} />
-                                      <Skeleton
-                                        variant="text"
-                                        width="100%"
-                                        height="15px"
-                                      />
-                                    </Box>
-                                  </BoxWithBorder>
-                                ))
-                              ) : customerContacts.filter(
-                                  (cA) => cA.accountName === c._id
+                                    <MoreVert />
+                                  </IconButton>
+                                ) : null}
+                              </Box>
+                              <Box padding={1}>
+                                {loading ? (
+                                  [1, 2].map((i) => (
+                                    <BoxWithBorder
+                                      key={i}
+                                      style={{ marginBottom: "8px" }}
+                                    >
+                                      <Box padding={1}>
+                                        <Skeleton
+                                          variant="text"
+                                          width="100px"
+                                          height="20px"
+                                        />
+                                        <Box marginTop={1} />
+                                        <Skeleton
+                                          variant="text"
+                                          width="100%"
+                                          height="15px"
+                                        />
+                                      </Box>
+                                    </BoxWithBorder>
+                                  ))
+                                ) : customerContacts.filter(
+                                  (ca) => ca.accountName === c._id
                                 ).length ? (
-                                <>
-                                  <CustomerContacts
-                                    contacts={customerContacts.filter(
-                                      (cA) => cA.accountName === c._id
-                                    )}
-                                    accountId={c._id}
-                                    accountName={c.accountName}
-                                    contactRoute="customer-contact"
-                                  />
-                                </>
-                              ) : (
-                                <Box textAlign="center" padding={2}>
-                                  No Contacts
-                                </Box>
-                              )}
+                                  <>
+                                    <CustomerContacts
+                                      contacts={customerContacts.filter(
+                                        (ca) => ca.accountName === c._id
+                                      )}
+                                      accountId={c._id}
+                                      accountName={c.accountName}
+                                      contactRoute="customer-contact"
+                                    />
+
+                                  </>
+
+                                ) : (
+                                  <Box textAlign="center" padding={2}>
+                                    No Contacts
+                                  </Box>
+                                )}
+                              </Box>
                             </Box>
-                          </Box>
-                        </Paper>
+                          </Paper>
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </Box>
-                ))}
-              </>
-            </Box>
-          ) : (
-            <Typography>No Customer Accounts</Typography>
-          )}
-        </AccordionDetails>
-      </Accordion>
-    </Paper>
+                    </Box>
+                  ))}
+                </>
+              </Box>
+            ) : (
+              <Typography>No Customer Accounts</Typography>
+            )}
+          </AccordionDetails>
+        </Accordion>
+      </Paper>
+    </>
   );
 };
 
