@@ -562,8 +562,14 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     return amount;
   }
 
-  const language =
-    currencyData.languages.length > 0 ? currencyData.languages[0] : "en";
+  //  Make default language "en"
+  let language = "en";
+
+  // Check if that currency's country has multiple language,
+  //  And if it has "en", then pick that one, or else take first of the array of languages
+  if (currencyData.languages.length > 0 && currencyData.languages.some(d => d !== language)) {
+    language = currencyData.languages[0];
+  }
 
   let options = {
     style: "currency",
