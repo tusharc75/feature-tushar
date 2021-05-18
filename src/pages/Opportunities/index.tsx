@@ -294,8 +294,8 @@ const Opportunities = () => {
           &nbsp;
             {
               params?.row?.supplierAccountName.length > 1 &&
-              <span>
-                {`${params?.row?.supplierAccountName.length - 1}+ Different`}
+              <span className="badge-date">
+                {`+${params?.row?.supplierAccountName.length - 1} more..`}
               </span>
             }
           </>
