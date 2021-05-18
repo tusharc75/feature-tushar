@@ -9,6 +9,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
+import { roleTypes } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,7 +63,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
                         : "Unassign User"
                     }
                   >
-                    {type == 1 && (
+                    {type == roleTypes.find((d) => d.key === "Global")?.value && (
                       <IconButton
                         size="small"
                         disabled={currentUser === obj._id}

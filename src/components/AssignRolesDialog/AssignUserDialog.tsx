@@ -36,7 +36,7 @@ const AssignUserDialog = ({
     axiosInstance()
       .get(`/user`)
       .then(({ data: { data } }) => {
-        setUsers(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)))
+        setUsers(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })))
         setLoadingUsers(false);
       })
       .catch((error) => {
@@ -46,16 +46,6 @@ const AssignUserDialog = ({
     // eslint-disable-next-line
   }, []);
 
-  const handleUserSelection = (e, id) => {
-    let tempSelectedUsers = [...selectedUsers];
-    let curIndex = tempSelectedUsers.indexOf(id);
-    if (e.target.checked) {
-      if (curIndex < 0) tempSelectedUsers = [...tempSelectedUsers, id];
-    } else if (curIndex >= 0) {
-      tempSelectedUsers.splice(curIndex, 1);
-    }
-    setSelectedUsers(tempSelectedUsers);
-  };
 
   const handleAssignRoles = async () => {
     if (selectedUsers.length) {
@@ -99,21 +89,25 @@ const AssignUserDialog = ({
           <Loader text="Loading Users" />
         ) : users.length ? (
           <List style={{ padding: 0 }}>
-            {users.map((role) => (
-              <ListItem divider key={role._id}>
+            {users.map((user) => (
+              <ListItem divider key={user._id}>
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
-                    onChange={(e) => handleUserSelection(e, role._id)}
-                    checked={selectedUsers.indexOf(role._id) >= 0}
+                    onChange={(e) => {
+                      user.isChecked = e.target.checked
+                      setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
+                    }
+                    }
+                    checked={user.isChecked}
                     inputProps={{
-                      "aria-labelledby": `checkbox-list-label-${role._id}`,
+                      "aria-labelledby": `checkbox-list-label-${user._id}`,
                     }}
                   />
                 </ListItemIcon>
                 <ListItemText
-                  primary={`${role.firstName} ${role.lastName}`}
-                  secondary={role.email}
+                  primary={`${user.firstName} ${user.lastName}`}
+                  secondary={user.email}
                 />
               </ListItem>
             ))}

@@ -25,7 +25,9 @@ export default function ManageContactDialog(props) {
     contactApi,
     account = {},
     userId = null,
-    isRedirectToDetailPage = true
+    isRedirectToDetailPage = true,
+    contactId = null,
+    handleSubmit = null
   } = props;
   const { accountApi, accountResource, accountPermission, accountRoute } = account
   const {
@@ -43,7 +45,20 @@ export default function ManageContactDialog(props) {
   const history = useHistory();
 
   useEffect(() => {
-    getContactFields();
+    const { entityData } = props
+    if (entityData && entityData?.fields && entityData?.initialValues) {
+      setEntityData({
+        fields: entityData.fields,
+        initialValues: entityData.initialValues,
+      })
+      entityData.fields.some(currentField => {
+        if (currentField.fieldName === "accountName") {
+          setAccountSource(currentField.option)
+          return true
+        }
+      })
+    }
+    else getContactFields();
   }, [user]);
 
   const getContactFields = () => {
@@ -138,15 +153,16 @@ export default function ManageContactDialog(props) {
       <ManageContact
         loading={loading}
         open={open}
-        isNew={true}
+        isNew={contactId ? false : true}
         onClose={onClose}
         entityData={entityData}
-        handleSubmit={handleCreateContact}
+        handleSubmit={handleSubmit ? handleSubmit : handleCreateContact}
         accountSource={accountSource}
         onCreateAccount={() => setShowAccountDialog(true)}
         accountResource={accountResource}
         contactResource={contactResource}
         accountId={newAddedAccountId}
+        contactId={contactId}
       />
       {
         showAccountDialog ?

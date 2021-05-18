@@ -522,7 +522,7 @@ const RoleDetailsPage = () => {
                   Assigned Users ({(roleUsers.length) || 0})
                 </Typography>
 
-                {permissions.role.isUpdate && (roleData?.type === 1) && (
+                {permissions.role.isUpdate && (roleData?.type === roleTypes.find((d) => d.key === "Global")?.value) && (
                   <IconButton
                     title="Assign users"
                     color="primary"
