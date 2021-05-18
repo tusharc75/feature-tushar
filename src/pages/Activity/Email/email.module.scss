@@ -1,0 +1,17 @@
+.emailMessageConatiner {
+    display: flex;
+    p {
+        margin-right: 3px;
+    }
+}
+.emailMessageConatiner .emailMessage {
+    max-width: 65%;
+    display: flex;
+    p {
+        margin-right: 20px;
+    }
+}
+.emailCreatedAt {
+    margin-left: 5px;
+    font-size: 12px;
+}

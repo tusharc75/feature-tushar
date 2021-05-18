@@ -21,7 +21,7 @@ import {
 } from "./../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageContact from "./ManageContact/ManageContact";
+import ManageContact from "./ManageContact/index";
 import DetailsPage from "../../components/Shared/DetailsPage";
 import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
 import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
@@ -378,6 +378,7 @@ const ContactDetailsPage = (props) => {
             loading={loading}
             handleSubmit={handleUpdateContact}
             contactId={contactData._id}
+            account={props?.account}
           // contactResource={contactResource}
           // contactApi={contactApi}
           />

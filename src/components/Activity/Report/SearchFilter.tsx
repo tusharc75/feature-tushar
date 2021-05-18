@@ -51,6 +51,7 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
 
     return (<Autocomplete className="custom-autocomplete"
         style={{ borderRadius: '7px', }}
+        size="small"
         multiple={true}
         options={options}
         getOptionLabel={(option) => (option ? option.name : "")}
@@ -70,9 +71,6 @@ export const SearchFilter = ({ handleChangeFilter, filter }) => {
                 variant="outlined"
                 placeholder="Search"
                 margin="dense"
-                InputProps={{
-                    startAdornment: <InputAdornment position="start"><BsSearch /></InputAdornment>,
-                }}
             />
         )}
         value={value}
