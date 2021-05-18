@@ -4,13 +4,14 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Provider } from "./StateProvider/Provider";
+import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
+import { MsalProvider } from "@azure/msal-react";
+import AzureInstance from "./AzureInstance";
 import "./styles/index.scss";
 import "./styles/common-styles.scss";
 import "./styles/material-component.scss";
 import "./styles/responsive-styles.scss"
-import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
-import { MsalProvider } from "@azure/msal-react";
-import AzureInstance from "./AzureInstance";
+import "./styles/vis-network/vis-network.min.css"
 
 ReactDOM.render(
   <React.StrictMode>
