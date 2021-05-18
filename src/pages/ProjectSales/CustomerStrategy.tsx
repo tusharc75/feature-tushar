@@ -100,7 +100,9 @@ const CustomerStrategy = (props) => {
     users,
     isTeamMember,
     isManager,
+    ownerId,
   } = props;
+
   const classes = useStyles();
   const { setToastConfig } = useContext(CustomToastContext);
   const [expandedParent, setExpandedParent] = useState(true);
@@ -110,12 +112,14 @@ const CustomerStrategy = (props) => {
   useEffect(() => {
     if (!users.length) return;
 
-    const collabs = users.map((u, i) => ({
-      optionValue: u._id,
-      optionLabel: u.firstName + " " + u.lastName,
-      order: i,
-      default: false,
-    }));
+    const collabs = users
+      .filter((u) => u._id !== ownerId)
+      .map((u, i) => ({
+        optionValue: u._id,
+        optionLabel: u.firstName + " " + u.lastName,
+        order: i,
+        default: false,
+      }));
     setCollaborators(collabs);
   }, [users]);
 

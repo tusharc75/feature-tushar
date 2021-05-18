@@ -519,6 +519,7 @@ const ProjectSalesDetails = () => {
           <CustomerStrategy
             isTeamMember={isTeamMember}
             isManager={isManager}
+            ownerId={projectSalesData?.projectManager?.optionValue}
             loading={loading}
             handleOpenDialog={handleOpenDialog}
             customerAccounts={customerAccounts}

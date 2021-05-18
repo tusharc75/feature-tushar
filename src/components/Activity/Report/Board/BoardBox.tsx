@@ -132,7 +132,15 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
   drag(drop(ref));
 
   return (
-    <div ref={ref} data-handler-id={handlerId}>
+    <div
+      ref={ref}
+      data-handler-id={handlerId}
+      title={`Due Date - ${
+        new Date(data?.dueDate).getDate() === new Date().getDate()
+          ? "Today"
+          : new Date(data?.dueDate).toDateString()
+      }`}
+    >
       <Box
         onClick={handleActivityOpen}
         className={classes.activitybox}
@@ -155,8 +163,32 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
                 </Typography>
                 <Chip
                   size="small"
-                  icon={<CalendarToday fontSize="small" />}
+                  icon={
+                    <CalendarToday
+                      style={{
+                        color:
+                          new Date(data?.dueDate).getDate() <
+                          new Date().getDate()
+                            ? "#dc3545"
+                            : new Date(data?.dueDate).getDate() ===
+                              new Date().getDate()
+                            ? "#28a745"
+                            : "#838485",
+                      }}
+                      fontSize="small"
+                    />
+                  }
                   label={new Date(data?.dueDate).toDateString()}
+                  style={{
+                    background: "#eee",
+                    color:
+                      new Date(data?.dueDate).getDate() < new Date().getDate()
+                        ? "#dc3545"
+                        : new Date(data?.dueDate).getDate() ===
+                          new Date().getDate()
+                        ? "#28a745"
+                        : "#838485",
+                  }}
                 />
               </Box>
             </Grid>
