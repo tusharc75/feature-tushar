@@ -138,7 +138,7 @@ export default function Account(props) {
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
       masterAccount:
-        u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "").accountName : "",
+        u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "")?.accountName : "",
       approved: u.staticData?.approved ? u.staticData?.approved : false,
       relatedLead: u.staticData?.lead
     }));
