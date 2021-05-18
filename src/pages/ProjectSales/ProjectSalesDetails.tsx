@@ -72,7 +72,7 @@ const ProjectSalesDetails = () => {
 
     axiosInstance()
       .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -80,9 +80,16 @@ const ProjectSalesDetails = () => {
 
   useEffect(() => {
     //  When it is nodal structure tab
+    initializeGraphData();
+
+    return () => {
+      setGraphData({ edges: [], nodes: [], colorPalette: null });
+    };
+  }, [currentTabIndex]);
+
+  const initializeGraphData = () => {
     if (currentTabIndex === 1) {
       setLoadingGraphData(true);
-
       axiosInstance()
         .get(`/project-sales/nodal-structure/${id}`)
         .then(({ data }) => {
@@ -96,13 +103,9 @@ const ProjectSalesDetails = () => {
         .catch((error) => {
           setLoadingGraphData(false);
           toastConfig.setToastConfig(error);
-        });
+        })
     }
-
-    return () => {
-      setGraphData({ edges: [], nodes: [], colorPalette: null });
-    };
-  }, [currentTabIndex]);
+  }
 
   /**
    * Get sales strategy data for paticular ID
@@ -124,6 +127,7 @@ const ProjectSalesDetails = () => {
       setCustomerAccounts(data.staticData?.customerAccount);
       setOpportunities(data.staticData?.opportunity);
       setCustomerContacts(data.staticData?.customerContact);
+      initializeGraphData();
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -349,7 +353,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -373,8 +377,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                  !projectSalesFields.length ||
-                  !projectSalesData ? (
+                    !projectSalesFields.length ||
+                    !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -419,9 +423,8 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${
-                                    node.id
-                                  }`,
+                                  pathname: `${routes[node.route].path}/${node.id
+                                    }`,
                                 });
                               }
                             }}
@@ -430,7 +433,7 @@ const ProjectSalesDetails = () => {
                       )}
                     </>
 
-                    // <>
+                    // <Box>
                     //   <Box
                     //     width="100%"
                     //     padding={1}
@@ -446,7 +449,7 @@ const ProjectSalesDetails = () => {
                     //     data={projectSalesData}
                     //     fields={projectSalesFields}
                     //   />
-                    // </>
+                    // </Box>
                   )}
                 </Box>
               </Paper>
@@ -464,7 +467,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -494,7 +497,7 @@ const ProjectSalesDetails = () => {
                         </BoxWithBorder>
                       ))
                     ) : teamUsers.length ? (
-                      <>
+                      <Box>
                         <TeamUsers
                           managerId={
                             projectSalesData.projectManager?.optionValue
@@ -504,7 +507,7 @@ const ProjectSalesDetails = () => {
                           removeUser={handleRemoveUser}
                         />
                         <Box marginY={1} />
-                      </>
+                      </Box>
                     ) : (
                       <Box textAlign="center" padding={2}>
                         No Users
@@ -539,8 +542,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-              : ""
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
