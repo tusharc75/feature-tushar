@@ -37,10 +37,9 @@ const AssignRolesDialog = ({
       .get(`/role`)
       .then(({ data: { data } }) => {
         assignedRoles ?
-          setRoles(data.filter(role => role?.type === globalRole && !assignedRoles.some(item => item?._id === role?._id)))
+          setRoles(data.filter(role => role?.type === globalRole && !assignedRoles.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
           :
-          setRoles(data.filter(role => role?.type === globalRole))
-
+          setRoles(data.filter(role => role?.type === globalRole).map(obj => ({ ...obj, isChecked: false })))
         setLoadingRoles(false)
       })
       .catch((error) => {
@@ -49,17 +48,6 @@ const AssignRolesDialog = ({
       });
     // eslint-disable-next-line
   }, []);
-
-  const handleRoleSelection = (e, id) => {
-    let tempSelectedRoles = [...selectedRoles];
-    let curIndex = tempSelectedRoles.indexOf(id);
-    if (e.target.checked) {
-      if (curIndex < 0) tempSelectedRoles = [...tempSelectedRoles, id];
-    } else if (curIndex >= 0) {
-      tempSelectedRoles.splice(curIndex, 1);
-    }
-    setSelectedRoles(tempSelectedRoles);
-  };
 
   const handleAssignRoles = async () => {
     if (selectedRoles.length) {
@@ -108,8 +96,12 @@ const AssignRolesDialog = ({
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
-                    onChange={(e) => handleRoleSelection(e, role._id)}
-                    checked={selectedRoles.indexOf(role._id) >= 0}
+                    onChange={(e) => {
+                      role.isChecked = role.isChecked ? false : true
+                      setSelectedRoles(roles.filter(r => r.isChecked).map(obj => obj._id))
+                    }
+                    }
+                    checked={role.isChecked}
                     inputProps={{
                       "aria-labelledby": `checkbox-list-label-${role._id}`,
                     }}

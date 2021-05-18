@@ -86,12 +86,12 @@ const AssignEntityDialog = ({
       });
 
     axiosInstance()
-      .get(`/role?type=2`)
+      .get(`/role?type=${roleTypes.find((d) => d.key === "Regional")?.value}`)
       .then(({ data: { data } }) => {
 
         regionalRole ?
-          setRole(data.filter(role => !assignedEntity.find(element => element.entity._id === selectedData[0]).role.some(item => item?._id === role?._id)))
-          : setRole(data)
+          setRole(data.filter(role => !assignedEntity.find(element => element.entity._id === selectedData[0]).role.some(item => item?._id === role?._id)).map(obj => ({ ...obj, isChecked: false })))
+          : setRole(data.map(obj => ({ ...obj, isChecked: false })))
 
         setLoadingData(false);
       })
@@ -118,16 +118,6 @@ const AssignEntityDialog = ({
 
   };
 
-  const handleRoleSelection = (e, id) => {
-    let tempSelectedRole = [...selectedRole];
-    let curIndex = tempSelectedRole.indexOf(id);
-    if (e.target.checked) {
-      if (curIndex < 0) tempSelectedRole = [...tempSelectedRole, id];
-    } else if (curIndex >= 0) {
-      tempSelectedRole.splice(curIndex, 1);
-    }
-    setSelectedRole(tempSelectedRole);
-  };
 
   const handleAssignEntity = async () => {
 
@@ -217,8 +207,11 @@ const AssignEntityDialog = ({
               <ListItemIcon>
                 <Checkbox
                   edge="start"
-                  onChange={(e) => handleEntitySelection(e, d._id)}
-                  checked={selectedData.indexOf(d._id) >= 0}
+                  onChange={(e) => {
+                    setSelectedData(selectedData.some(item => item === d._id) ? [] : [d._id])
+                  }
+                  }
+                  checked={selectedData.some(item => item === d._id)}
                   inputProps={{
                     "aria-labelledby": `checkbox-list-label-${d._id}`,
                   }}
@@ -238,8 +231,12 @@ const AssignEntityDialog = ({
               <ListItemIcon>
                 <Checkbox
                   edge="start"
-                  onChange={(e) => handleRoleSelection(e, d._id)}
-                  checked={selectedRole.indexOf(d._id) >= 0}
+                  onChange={(e) => {
+                    d.isChecked = d.isChecked ? false : true
+                    setSelectedRole(role.filter(r => r.isChecked).map(obj => obj._id))
+                  }
+                  }
+                  checked={d.isChecked}
                   inputProps={{
                     "aria-labelledby": `checkbox-list-label-${d._id}`,
                   }}
@@ -311,8 +308,12 @@ const AssignEntityDialog = ({
               <ListItemIcon>
                 <Checkbox
                   edge="start"
-                  onChange={(e) => handleRoleSelection(e, d._id)}
-                  checked={selectedRole.indexOf(d._id) >= 0}
+                  onChange={(e) => {
+                    d.isChecked = d.isChecked ? false : true
+                    setSelectedRole(role.filter(r => r.isChecked).map(obj => obj._id))
+                  }
+                  }
+                  checked={d.isChecked}
                   inputProps={{
                     "aria-labelledby": `checkbox-list-label-${d._id}`,
                   }}

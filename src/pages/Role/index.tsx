@@ -82,7 +82,7 @@ const Roles: FC = () => {
         isChecked: false,
         name: role.name,
         description: role.description,
-        type: `${role.type === 1 ? "Global" : "Regional"} Role`,
+        type: `${role.type === roleTypes.find((d) => d.key === "Global")?.value ? "Global" : "Regional"} Role`,
         createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
         createdBy: role.createdBy,
         updatedBy: role.updatedBy,
