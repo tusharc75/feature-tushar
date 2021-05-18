@@ -586,7 +586,11 @@ export const graphOptions = {
   layout: {
     randomSeed: 2,
   },
-  interaction: { hover: true },
+  interaction: {
+    hover: true,
+    navigationButtons: true,
+    keyboard: true,
+  },
   nodes: {
     fixed: {
       x: false,
@@ -596,26 +600,26 @@ export const graphOptions = {
     // size: 13,
     borderWidth: 1.5,
     borderWidthSelected: 2,
-    font: {
-      size: 15,
-      align: "center",
-      bold: {
-        color: "#bbbdc0",
-        size: 15,
-        vadjust: 0,
-        mod: "bold",
-      },
-    },
+    // font: {
+    //   size: 15,
+    //   align: "center",
+    //   bold: {
+    //     color: "#bbbdc0",
+    //     size: 15,
+    //     vadjust: 0,
+    //     mod: "bold",
+    //   },
+    // },
     shadow: true,
   },
   edges: {
     width: 0.01,
-    color: {
-      color: "#D3D3D3",
-      highlight: "#797979",
-      hover: "#797979",
-      opacity: 1.0,
-    },
+    // color: {
+    //   color: "#D3D3D3",
+    //   highlight: "#797979",
+    //   hover: "#797979",
+    //   opacity: 1.0,
+    // },
     arrows: {
       to: { enabled: false, scaleFactor: 1, type: "arrow" },
       // middle: { enabled: false, scaleFactor: 1, type: "arrow" },

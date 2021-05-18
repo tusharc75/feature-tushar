@@ -1,13 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { graphOptions } from '../../constants/helpers';
 import Graph from "vis-react";
 
 export default function CustomNodalStructure({ graphData, onClick, loadingGraphData, id }) {
 
     const { nodes, edges, colorPalette } = graphData;
-    
-    // const [loadingGraphData, setLoadingGraphData] = useState(false);
-    // const [graphData, setGraphData] = useState({ edges: [], nodes: [] });
+
     const [graphNetwork, setGraphNetwork] = useState<any>(null);
 
     const events = {
@@ -42,7 +40,6 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
 
     const getNetwork = data => {
         setGraphNetwork(data);
-        // console.log("getNetwork", data)
     };
 
     const getEdges = data => {
@@ -55,6 +52,19 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
 
     return (
         <>
+            {
+                colorPalette && Object.keys(colorPalette).length > 0 && <div className="d-flex justify-content-center gap-3 py-3 flex-wrap">
+                    {
+                        Object.keys(colorPalette).map((key, index) => (
+                            <div className="d-flex align-items-center gap-2" key={index}>
+                                <div style={{ background: colorPalette[key], height: 12, width: 12, borderRadius: "50%" }} />
+                                <h4>{key}</h4>
+                            </div>
+                        ))
+                    }
+                </div>
+            }
+
             <div style={{ height: "500px", width: "100%" }}>
                 {
                     loadingGraphData ? <div className="d-flex align-items-center justify-content-center h-100 w-100">
@@ -67,25 +77,13 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
                             getEdges={getEdges}
                             getNodes={getNodes}
                             events={events}
+                            style={{ height: "100%", width: "100%" }}
                         /> : <div className="d-flex align-items-center justify-content-center h-100 w-100">
                             <h3>No data found to display</h3>
                         </div>
                     )
                 }
             </div>
-
-            {
-                colorPalette && Object.keys(colorPalette).length > 0 && <div className="d-flex justify-content-center gap-3 py-3 flex-wrap">
-                    {
-                        Object.keys(colorPalette).map((key, index) => (
-                            <div className="d-flex align-items-center gap-2">
-                                <div style={{ background: colorPalette[key], height: 12, width: 12, borderRadius: "50%" }} />
-                                <h4 key={index}>{key}</h4>
-                            </div>
-                        ))
-                    }
-                </div>
-            }
         </>
     )
 }
