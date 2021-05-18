@@ -26,7 +26,8 @@ import Attachments from "./pages/Activity/Attachments";
 import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
 import ProductCategory from "./pages/ProductCategory";
-import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
+import ProductTemplate from "./pages/ProductTemplate";
+import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
 import User from "./pages/User";
 import Entity from "./pages/Entity";
 import EntityDetailPage from "./pages/Entity/EntityDetailPage";
@@ -45,6 +46,8 @@ import CreateProductCost from "./pages/ProductCost/CreateProductCost";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
+
+import CurrencyConverter from "./pages/CurrencyConverter";
 
 import {
   termsAndCondition,
@@ -286,15 +289,21 @@ function App() {
             <Calender />
           </PrivateRoute>
 
-          <PrivateRoute exact path="/product-category">
-            <ProductCategory />
-          </PrivateRoute>
-          <PrivateRoute exact path="/product-category/:id">
-            <CreateProductCategory />
-          </PrivateRoute>
           <PrivateRoute exact path={routes.product.path}>
             <Product />
           </PrivateRoute>
+
+
+          <PrivateRoute exact path={routes.productCategory.path}>
+            <ProductCategory />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productTemplate.path}>
+            <ProductTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productTemplate.path + "/:id"} >
+            <CreateProductTemplate />
+          </PrivateRoute>
+
           <PrivateRoute exact path={routes.formBuilder.path}>
             <FormBuilder />
           </PrivateRoute>
@@ -323,6 +332,11 @@ function App() {
           <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
             <CreateProductBuilder />
           </PrivateRoute>
+
+          <PrivateRoute exact path={routes.currencyConverter.path}>
+            <CurrencyConverter />
+          </PrivateRoute>
+
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>

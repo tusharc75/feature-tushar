@@ -9,6 +9,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
+import { roleTypes } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
+const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) => {
   const classes = useStyles();
 
   return (
@@ -62,17 +63,19 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                         : "Unassign User"
                     }
                   >
-                    <IconButton
-                      size="small"
-                      disabled={currentUser === obj._id}
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => unassignRole(obj)}
-                    >
-                      <DeleteIcon
-                        color={currentUser === obj._id ? "disabled" : "error"}
-                      />
-                    </IconButton>
+                    {type == roleTypes.find((d) => d.key === "Global")?.value && (
+                      <IconButton
+                        size="small"
+                        disabled={currentUser === obj._id}
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => unassignRole(obj)}
+                      >
+                        <DeleteIcon
+                          color={currentUser === obj._id ? "disabled" : "error"}
+                        />
+                      </IconButton>
+                    )}
                   </ListItemSecondaryAction>
                 )}
               </ListItem>

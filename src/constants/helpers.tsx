@@ -162,15 +162,25 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       obj[key.fieldName] = val ? val : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = val ? val : false;
-    } else if (key.type === "converter") {
+    } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
       key.displayUnits.forEach((_unit) => {
-        obj[key.fieldName + _unit.toLowerCase()] = val;
+        obj[key.fieldName + "_" + _unit.toLowerCase()] = val;
+      });
+    } else if (key.type === "currencyAmount") {
+      key.displayCurrency.forEach((_currency) => {
+        if (key.isConverter && key.displayUnits.length) {
+          key.displayUnits.forEach((_unit) => {
+            obj[key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = val;
+          });
+        }
+        else {
+          obj[key.fieldName + "_" + _currency.toLowerCase()] = val;
+        }
       });
     } else {
       obj[key.fieldName] = val;
     }
   }
-
   return obj;
 };
 
@@ -181,8 +191,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-      ? data.optionValue
-      : "";
+        ? data.optionValue
+        : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -224,30 +234,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .url("Enter valid url eg. https://www.hostname.com")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .url("Enter valid url eg. https://www.hostname.com")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-            .array()
-            .required(`${input.fieldLabel} is required`)
-            .length(1, "Select at least one service access")
+          .array()
+          .required(`${input.fieldLabel} is required`)
+          .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -258,11 +268,26 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)
         : yup.boolean();
-    } else if (input.type === "converter") {
+    } else if (input.type !== "currencyAmount" && (input.type === "converter" || input.isConverter === true)) {
       input.displayUnits.forEach((_unit) => {
-        schema[input.fieldName + _unit.toLowerCase()] = input.required
+        schema[input.fieldName + "_" + _unit.toLowerCase()] = input.required
           ? yup.string().required(`${input.fieldLabel} is required`)
           : yup.string();
+      });
+    } else if (input.type === "currencyAmount") {
+      input.displayCurrency.forEach((_currency) => {
+        if (input.isConverter && input.displayUnits.length) {
+          input.displayUnits.forEach((_unit) => {
+            schema[input.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = input.required
+              ? yup.string().required(`${input.fieldLabel} is required`)
+              : yup.string();
+          });
+        }
+        else {
+          schema[input.fieldName + "_" + _currency.toLowerCase()] = input.required
+            ? yup.string().required(`${input.fieldLabel} is required`)
+            : yup.string();
+        }
       });
     } else if (input.type === "date") {
       schema[input.fieldName] = input.required
@@ -422,10 +447,10 @@ export const getPermissions = (
     let data = [...user?.role?.sideBar];
 
     if (selectedEntity) {
-      if (user?.entity && user.entity.length && selectedEntity) {
+      if (user?.entity && user?.entity.length && selectedEntity) {
         data = [
           ...data,
-          ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
+          ...user?.entity.find((entityObj) => entityObj._id === selectedEntity)
             ?.resource,
         ];
       }
@@ -537,8 +562,14 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     return amount;
   }
 
-  const language =
-    currencyData.languages.length > 0 ? currencyData.languages[0] : "en";
+  //  Make default language "en"
+  let language = "en";
+
+  // Check if that currency's country has multiple language,
+  //  And if it has "en", then pick that one, or else take first of the array of languages
+  if (currencyData.languages.length > 0 && currencyData.languages.some(d => d !== language)) {
+    language = currencyData.languages[0];
+  }
 
   let options = {
     style: "currency",
@@ -561,7 +592,11 @@ export const graphOptions = {
   layout: {
     randomSeed: 2,
   },
-  interaction: { hover: true },
+  interaction: {
+    hover: true,
+    navigationButtons: true,
+    keyboard: true,
+  },
   nodes: {
     fixed: {
       x: false,
@@ -571,26 +606,26 @@ export const graphOptions = {
     // size: 13,
     borderWidth: 1.5,
     borderWidthSelected: 2,
-    font: {
-      size: 15,
-      align: "center",
-      bold: {
-        color: "#bbbdc0",
-        size: 15,
-        vadjust: 0,
-        mod: "bold",
-      },
-    },
+    // font: {
+    //   size: 15,
+    //   align: "center",
+    //   bold: {
+    //     color: "#bbbdc0",
+    //     size: 15,
+    //     vadjust: 0,
+    //     mod: "bold",
+    //   },
+    // },
     shadow: true,
   },
   edges: {
     width: 0.01,
-    color: {
-      color: "#D3D3D3",
-      highlight: "#797979",
-      hover: "#797979",
-      opacity: 1.0,
-    },
+    // color: {
+    //   color: "#D3D3D3",
+    //   highlight: "#797979",
+    //   hover: "#797979",
+    //   opacity: 1.0,
+    // },
     arrows: {
       to: { enabled: false, scaleFactor: 1, type: "arrow" },
       // middle: { enabled: false, scaleFactor: 1, type: "arrow" },

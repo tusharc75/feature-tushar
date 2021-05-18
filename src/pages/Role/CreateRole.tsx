@@ -18,6 +18,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
+import { roleTypes } from "../../constants/helpers";
 
 const CreateRole = ({
   open,
@@ -44,7 +45,7 @@ const CreateRole = ({
   const getInitialData = () => {
     setLoading(true);
     let api =
-      roleType === 1
+      roleType === roleTypes.find((d) => d.key === "Global")?.value
         ? `/field?resource=Role&roleType=${roleType}`
         : `/field?resource=Role&roleType=${roleType}&entity=${selectedEntity}`;
     axiosInstance()

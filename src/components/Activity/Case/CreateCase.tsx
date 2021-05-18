@@ -35,6 +35,7 @@ import { SubCase } from "./SubCase";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import { useData } from "../../../StateProvider/Provider";
 
 const CaseSchema = Yup.object().shape({
   name: Yup.string().required("please enter case name"),
@@ -45,6 +46,9 @@ const CaseSchema = Yup.object().shape({
 });
 
 export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
+  const {
+    state: { user: user },
+  } = useData();
   const [id, setId] = useState(caseId);
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
