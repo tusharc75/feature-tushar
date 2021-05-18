@@ -7,11 +7,18 @@ import Dialog from "@material-ui/core/Dialog";
 import { useHistory } from "react-router-dom";
 
 const ActivityModelHandler = (props) => {
-  const { activityType, activityId, fromCalender, setActivityData } = props;
+  const {
+    activityType,
+    activityId,
+    fromCalender,
+    setActivityData,
+    fetchBoard,
+  } = props;
   const history = useHistory();
 
   const handleClose = () => {
     if (fromCalender) {
+      fetchBoard();
       setActivityData(null);
     } else {
       history.push({

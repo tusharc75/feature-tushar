@@ -1,12 +1,16 @@
 import React from "react";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
+import {
+  Chip,
+  makeStyles,
+  IconButton,
+  Typography,
+  Box,
+  Grid,
+  Menu,
+  MenuItem,
+} from "@material-ui/core";
+import { MoreHoriz, CalendarToday } from "@material-ui/icons";
 import { useDrag, useDrop } from "react-dnd";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
 import { useHistory } from "react-router-dom";
 import { ListRelatedTo } from "../../Helpers/ListRelatedTo";
 import {
@@ -14,7 +18,6 @@ import {
   DeleteCase,
   DeleteTask,
 } from "../../../../axios/activity";
-import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles(() => ({
   activitybox: {
@@ -136,20 +139,40 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
         style={{ opacity }}
       >
         <Box>
-          <Grid container spacing={1}>
-            <Grid item xs={10}>
-              <Typography variant="subtitle2">{data?.name}</Typography>
+          <Grid container>
+            <Grid item xs={11}>
+              <Box display="flex" mr="10px">
+                <Typography
+                  style={{
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    marginRight: "5px",
+                  }}
+                  variant="subtitle2"
+                >
+                  {data?.name}
+                </Typography>
+                <Chip
+                  size="small"
+                  icon={<CalendarToday fontSize="small" />}
+                  label={new Date(data?.dueDate).toDateString()}
+                />
+              </Box>
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={1}>
               <IconButton
                 size="small"
                 aria-label="delete"
                 onClick={handleOpenMenu}
               >
-                <MoreHorizIcon />
+                <MoreHoriz />
               </IconButton>
             </Grid>
           </Grid>
+          <Typography color="textSecondary" variant="body2">
+            {data?.description}
+          </Typography>
         </Box>
         <Box pt={2}>
           <ListRelatedTo relatedTo={data?.relatedTo} originRelatedTo={[]} />

@@ -45,6 +45,8 @@ import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
 import { FcFlowChart } from 'react-icons/fc';
+import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignedEntities from "./AssignedEntities";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -87,13 +89,16 @@ const UserDetailsPage = () => {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([])
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
+  const [entities, setEntities] = useState<any[]>([])
+  const showRecordsBeforeViewAll = 2;
+  const [showEntities, setShowEntities] = useState(showRecordsBeforeViewAll);
+  const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
       getUserFields();
       fetchUserData();
       getRoleUnion();
-      fetchUserRoles();
       fetchDoa();
       fetchUsers()
       fetchUserRelatedDetail()
@@ -113,6 +118,7 @@ const UserDetailsPage = () => {
     },
   ].filter((d) => d.show);
 
+
   const fetchUserData = async () => {
     setLoading(true);
     try {
@@ -124,6 +130,8 @@ const UserDetailsPage = () => {
 
       setHeadingLbl(name);
       setUserData(data);
+      setEntities(data.entities.filter(e => e.role.length !== 0 || e.entity !== undefined))
+      setGloabalRoles(data.role); 
       setCustomizedRoutes([
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
@@ -214,19 +222,6 @@ const UserDetailsPage = () => {
     setUserList(rows);
   };
 
-  const fetchUserRoles = () => {
-    setRolesLoading(true);
-    axiosInstance()
-      .get(`/role?user=${id}`)
-      .then(({ data: { data } }) => {
-        setGloabalRoles(data.filter((d) => d?.type === 1)); // global role --- type 1
-        setRolesLoading(false);
-      })
-      .catch((error) => {
-        setRolesLoading(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
   const fetchUserRelatedDetail = () => {
     // setUserRelatedLoading(true);
     axiosInstance()
@@ -271,6 +266,7 @@ const UserDetailsPage = () => {
     setDeleteUserRec(id);
     setShowConfirmBox(true);
   };
+
 
   const DeleteUser = () => {
     if (deleteUserRec) {
@@ -320,6 +316,14 @@ const UserDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
+  const entityDialogOpen = () => {
+    setShowAssignEntityDialog(true);
+  };
+
+  const entityDialogClose = () => {
+    setShowAssignEntityDialog(false);
+  };
+
   const getRoleUnion = () => {
     axiosInstance()
       .get(`/user/union-role/${id}`)
@@ -343,11 +347,10 @@ const UserDetailsPage = () => {
         roles: [roleDeleteRec?._id],
       };
       axiosInstance()
-        .post("/role/un-assign-role", data)
+        .put("/user/un-assign-role", data)
         .then(() => {
           setShowConfirmBox(false);
           fetchUserData();
-          fetchUserRoles();
           setUnionRoleData(null);
           getRoleUnion();
           toastConfig.setToastConfig({
@@ -416,8 +419,22 @@ const UserDetailsPage = () => {
           assignedRoles={globalRoles}
           onSuccess={() => {
             handleCloseDialog();
+            fetchUserData();
             getRoleUnion();
-            fetchUserRoles();
+          }}
+        />
+      )}
+      {showAssignEntityDialog && (
+        <AssignEntityDialog
+          entitiesDialogOpen={showAssignEntityDialog}
+          handleCloseDialog={entityDialogClose}
+          type="entity"
+          ids={[id]}
+          assignedEntity={entities}
+          regionalRole={false}
+          onSuccess={() => {
+            fetchUserData();
+            entityDialogClose();
           }}
         />
       )}
@@ -606,6 +623,77 @@ const UserDetailsPage = () => {
                   </Grid>
                 </Grid>
               </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Box
+                    width="100%"
+                    padding={1}
+                    bgcolor="grey.200"
+                    display="flex"
+                    justifyContent="space-between"
+                  >
+                    <Typography variant="subtitle2">
+                      Assigned Entity ({entities?.length || 0})
+                </Typography>
+                    {permissions.entity.isUpdate && (
+                      <IconButton
+                        title="Assign entities"
+                        color="primary"
+                        size="small"
+                        onClick={entityDialogOpen}
+                      >
+                        <ControlPoint />
+                      </IconButton>
+                    )}
+                  </Box>
+                  <Box padding={1}>
+                    {loading ? (
+                      <Box display="flex">
+                        {[1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              padding: "8px",
+                              margin: "8px",
+                              width: "100%",
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton
+                                variant="text"
+                                width="100px"
+                                height="20px"
+                              />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))}
+                      </Box>
+                    ) :
+                      entities?.length ? (
+                        <AssignedEntities
+                          entities={entities}
+                          permissions={permissions}
+                          userId={id}
+                          loggedInUser={user?.user}
+                          onSuccess={() => {
+                            fetchUserData();
+                          }}
+
+                        />
+
+
+                      )
+                        : (
+                          <Box textAlign="center" padding={2}>
+                            <Typography>No Entities </Typography>
+                          </Box>
+                        )
+                    }
+                  </Box>
+                </Grid>
+              </Grid>
 
               {
                 user?.user?.permissions?.doaSetup && <>

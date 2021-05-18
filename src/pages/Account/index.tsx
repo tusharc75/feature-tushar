@@ -2,7 +2,6 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { useData } from "../../StateProvider/Provider";
 import {
-  Box,
   Button,
   Checkbox,
   Menu,
@@ -10,7 +9,6 @@ import {
   Tooltip,
   IconButton,
   Grid,
-  Divider,
   Chip,
 } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
@@ -23,7 +21,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import ManageAccountDialog from "./ManageAccount/index";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import { makeStyles } from "@material-ui/core/styles";
 import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import CancelIcon from "@material-ui/icons/Cancel";
@@ -34,19 +31,13 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { FcApproval } from "react-icons/fc";
 import { MdAccountCircle } from "react-icons/md";
 import { getSearchQuery } from "../../services/util";
-import {
-  accountTemplateFileName,
-  downloadExcel,
-  accountImportErrorFileName,
-  sidebarResource,
-} from "../../constants/helpers";
+import { sidebarResource } from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import routes from "./../../components/Helpers/Routes";
 import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
-import CustomLoadingOverlay from "../../components/Helpers/DataGridHelpers/CustomLoadingOverlay";
 
 const AccTypes = [
   {
@@ -64,7 +55,7 @@ export default function Account(props) {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    account: { accountApi, accountResource, accountPermission, accountRoute },
+    account: { accountApi, accountResource, accountRoute },
     accountBreadcrumb,
   } = props;
   const {
@@ -147,7 +138,7 @@ export default function Account(props) {
       canDelete: u?.owner?.optionValue === user?.user._id,
       collaborator: u.collaborator || [],
       masterAccount:
-        u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount == "").accountName : "",
+        u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "").accountName : "",
       approved: u.staticData?.approved ? u.staticData?.approved : false,
       relatedLead: u.staticData?.lead
     }));
@@ -600,7 +591,7 @@ export default function Account(props) {
 
   const approveDisapproveAccounts = () => {
     const selectedAccountIds = dataRows
-      .filter((d) => d.approved == !multipleApproveDisapproveAccount.approved)
+      .filter((d) => d.approved === !multipleApproveDisapproveAccount.approved)
       .map((m) => m._id);
 
     axiosInstance()
@@ -636,10 +627,10 @@ export default function Account(props) {
     if (params.filterModel.items[0].value) {
       let field = params.filterModel.items[0].columnField
 
-      if (params.filterModel.items[0].columnField == 'createdBy') {
+      if (params.filterModel.items[0].columnField === 'createdBy') {
         field = "createdBy.user"
       }
-      if (params.filterModel.items[0].columnField == 'updatedBy') {
+      if (params.filterModel.items[0].columnField === 'updatedBy') {
         field = "updatedBy.user"
       }
       const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])

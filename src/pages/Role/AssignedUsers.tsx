@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
+const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) => {
   const classes = useStyles();
 
   return (
@@ -62,17 +62,19 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                         : "Unassign User"
                     }
                   >
-                    <IconButton
-                      size="small"
-                      disabled={currentUser === obj._id}
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => unassignRole(obj)}
-                    >
-                      <DeleteIcon
-                        color={currentUser === obj._id ? "disabled" : "error"}
-                      />
-                    </IconButton>
+                    {type == 1 && (
+                      <IconButton
+                        size="small"
+                        disabled={currentUser === obj._id}
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => unassignRole(obj)}
+                      >
+                        <DeleteIcon
+                          color={currentUser === obj._id ? "disabled" : "error"}
+                        />
+                      </IconButton>
+                    )}
                   </ListItemSecondaryAction>
                 )}
               </ListItem>

@@ -1,5 +1,5 @@
 import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton, Grid } from "@material-ui/core";
+import { Checkbox, Tooltip, IconButton, Grid, Chip } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
@@ -25,6 +25,8 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { userType } from './../../constants/helpers'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import ManageUserDialog from "./ManageUserDialog";
+import { useHistory } from "react-router-dom";
+import { startCase } from "lodash";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 const User: FC = () => {
@@ -32,6 +34,7 @@ const User: FC = () => {
   const {
     state: { user, permissions },
   }: any = useData();
+  const history = useHistory();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
@@ -48,6 +51,11 @@ const User: FC = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
+  const [entityRoleRedirectDetails, setEntityRoleRedirectDetails] = useState({
+    id: history.location?.state?.id,
+    name: history.location?.state?.name,
+    type: history.location?.state?.type,
+  });
 
   const fetchUsers = useCallback(() => {
     if (userTimeout) {
@@ -59,6 +67,19 @@ const User: FC = () => {
       searchParams = searchVal
         ? { ...searchParams, search: searchVal }
         : { ...searchParams };
+      if (entityRoleRedirectDetails?.id) {
+        switch (entityRoleRedirectDetails?.type) {
+          case "entity":
+            searchParams["filterById"] = JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }]);
+            break;
+          case "regionalRole":
+            searchParams["filterById"] = JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }]);
+            break;
+          case "globalRole":
+            searchParams["filterById"] = JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }]);
+            break;
+        }
+      }
       let api = getSearchQuery("/user", searchParams);
       setLoadingUsers(true);
       axiosInstance()
@@ -75,7 +96,7 @@ const User: FC = () => {
         });
     }, 600);
     // eslint-disable-next-line
-  }, [searchVal, query]);
+  }, [searchVal, query, entityRoleRedirectDetails]);
 
   useEffect(() => {
     fetchUsers();
@@ -457,6 +478,17 @@ const User: FC = () => {
               rolesActionDiabled={Boolean(!selectedUsers.length)}
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
             />
+            {entityRoleRedirectDetails.id && (
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`${startCase(entityRoleRedirectDetails.type)} : ${entityRoleRedirectDetails.name}`}
+                onDelete={() => {
+                  setEntityRoleRedirectDetails({ id: null, name: null, type: null });
+                  // getContacts();
+                }}
+              />
+            )}
           </div>
           <div className="listing-grid">
             <DataGrid

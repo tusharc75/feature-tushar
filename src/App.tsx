@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
@@ -26,7 +26,8 @@ import Attachments from "./pages/Activity/Attachments";
 import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
 import ProductCategory from "./pages/ProductCategory";
-import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
+import ProductTemplate from "./pages/ProductTemplate";
+import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
 import User from "./pages/User";
 import Entity from "./pages/Entity";
 import EntityDetailPage from "./pages/Entity/EntityDetailPage";
@@ -46,14 +47,14 @@ import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 
+import CurrencyConverter from "./pages/CurrencyConverter";
+
 import {
   termsAndCondition,
   customerAccount,
   customerContact,
   supplierAccount,
-  supplierContact,
-  profilePage,
-  vapidKey,
+  supplierContact
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
@@ -63,11 +64,11 @@ import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from "./pages/ProfilePage/index";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
+import Event from "./pages/Activity/Event";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
-  const location = useLocation();
   const {
     state: { user },
   }: any = useData();
@@ -278,6 +279,9 @@ function App() {
           <PrivateRoute exact path="/activity/attachment">
             <Attachments />
           </PrivateRoute>
+          <PrivateRoute exact path="/activity/event">
+            <Event />
+          </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />
           </PrivateRoute>
@@ -285,15 +289,21 @@ function App() {
             <Calender />
           </PrivateRoute>
 
-          <PrivateRoute exact path="/product-category">
-            <ProductCategory />
-          </PrivateRoute>
-          <PrivateRoute exact path="/product-category/:id">
-            <CreateProductCategory />
-          </PrivateRoute>
           <PrivateRoute exact path={routes.product.path}>
             <Product />
           </PrivateRoute>
+
+
+          <PrivateRoute exact path={routes.productCategory.path}>
+            <ProductCategory />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productTemplate.path}>
+            <ProductTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productTemplate.path + "/:id"} >
+            <CreateProductTemplate />
+          </PrivateRoute>
+
           <PrivateRoute exact path={routes.formBuilder.path}>
             <FormBuilder />
           </PrivateRoute>
@@ -322,6 +332,11 @@ function App() {
           <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
             <CreateProductBuilder />
           </PrivateRoute>
+
+          <PrivateRoute exact path={routes.currencyConverter.path}>
+            <CurrencyConverter />
+          </PrivateRoute>
+
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>

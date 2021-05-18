@@ -20,7 +20,7 @@ import currencies from "../../constants/currency_with_country.json";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Skeleton } from "@material-ui/lab";
-import CopyToClipboard from '../Helpers/CopyToClipboard'
+import CopyToClipboard from "../Helpers/CopyToClipboard";
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -154,7 +154,9 @@ const Details = (props: DetailProps) => {
     } else if (input.type === "checkBox") {
       text = values[input.fieldName] === true ? "Yes" : "No";
     } else if (input.type === "date") {
-      text = new Date(values[input.fieldName]).toDateString();
+      text = values[input.fieldName]
+        ? new Date(values[input.fieldName]).toDateString()
+        : "-";
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : "-";
     }
@@ -234,15 +236,16 @@ const Details = (props: DetailProps) => {
                 data[fieldData.fieldName].map((_val: any) => (
                   <React.Fragment key={_val.optionValue}>
                     <Link
-                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue
-                        }`}
-                    // onMouseEnter={(e) =>
-                    //   getPopoverData(
-                    //     e,
-                    //     fieldData.lookupResource,
-                    //     _val.optionValue
-                    //   )
-                    // }
+                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${
+                        _val.optionValue
+                      }`}
+                      // onMouseEnter={(e) =>
+                      //   getPopoverData(
+                      //     e,
+                      //     fieldData.lookupResource,
+                      //     _val.optionValue
+                      //   )
+                      // }
                     >
                       <span className={classes.dataValue}>
                         {_val.optionLabel}
@@ -255,15 +258,16 @@ const Details = (props: DetailProps) => {
               )
             ) : data[fieldData.fieldName] ? (
               <Link
-                to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]
-                  }`}
-              // onMouseEnter={(e) =>
-              //   getPopoverData(
-              //     e,
-              //     fieldData.lookupResource,
-              //     val[fieldData.fieldName]
-              //   )
-              // }
+                to={`/${kebabCase(fieldData.lookupResource)}/detail/${
+                  val[fieldData.fieldName]
+                }`}
+                // onMouseEnter={(e) =>
+                //   getPopoverData(
+                //     e,
+                //     fieldData.lookupResource,
+                //     val[fieldData.fieldName]
+                //   )
+                // }
               >
                 <span className={classes.dataValue}>
                   {data[fieldData.fieldName].optionLabel}
@@ -290,7 +294,9 @@ const Details = (props: DetailProps) => {
               >
                 <span className={classes.dataValue}> {value} </span>
               </MuiLink>
-              {fieldData.type === "email" && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
+              {fieldData.type === "email" && value !== "-" ? (
+                <CopyToClipboard textToCopy={value} />
+              ) : null}
             </>
           ) : (
             <span className={classes.dataValue}> {value} </span>
@@ -310,46 +316,46 @@ const Details = (props: DetailProps) => {
         ? popoverData?.avatar
         : lookupResource === "contact-account" ||
           lookupResource === "supplier-account"
-          ? popoverData?.accountLogo
-          : lookupResource === "contact-contact"
-            ? popoverData?.contactLogo
-            : "";
+        ? popoverData?.accountLogo
+        : lookupResource === "contact-contact"
+        ? popoverData?.contactLogo
+        : "";
     const name =
       lookupResource === "user"
         ? `${popoverData?.firstName} ${popoverData?.lastName}`
         : lookupResource === "customer-account" ||
           lookupResource === "supplier-account"
-          ? popoverData?.accountName
-          : lookupResource === "customer-contact" ||
-            lookupResource === "supplier-contact"
-            ? `${popoverData?.firstName} ${popoverData?.middleName} ${popoverData?.lastName}`
-            : lookupResource === "role"
-              ? popoverData?.name
-              : "";
+        ? popoverData?.accountName
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
+        ? `${popoverData?.firstName} ${popoverData?.middleName} ${popoverData?.lastName}`
+        : lookupResource === "role"
+        ? popoverData?.name
+        : "";
 
     const subInfo =
       lookupResource === "user"
         ? popoverData?.email
         : lookupResource === "customer-account" ||
           lookupResource === "supplier-account"
-          ? popoverData?.description
-          : lookupResource === "customer-contact" ||
-            lookupResource === "supplier-contact"
-            ? popoverData?.email
-            : lookupResource === "role"
-              ? popoverData?.description
-              : "";
+        ? popoverData?.description
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
+        ? popoverData?.email
+        : lookupResource === "role"
+        ? popoverData?.description
+        : "";
 
     const subInfo1 =
       lookupResource === "user"
         ? popoverData?.mobileNo
         : lookupResource === "customer-account" ||
           lookupResource === "supplier-account"
-          ? popoverData?.owner?.optionLabel
-          : lookupResource === "customer-contact" ||
-            lookupResource === "supplier-contact"
-            ? popoverData?.phone
-            : "";
+        ? popoverData?.owner?.optionLabel
+        : lookupResource === "customer-contact" ||
+          lookupResource === "supplier-contact"
+        ? popoverData?.phone
+        : "";
 
     const isRole = lookupResource === "role";
     return (
@@ -412,132 +418,136 @@ const Details = (props: DetailProps) => {
   return (
     <div>
       {formsData?.map((form) => {
-        return form.name && <React.Fragment key={form.name}>
-          <div className="detail-box">
-            <h3 className="form-label-style" title={form.name}>
-              {form.name}
-            </h3>
-            <Grid container>
-              {form.sectionFields.map((field, i) => (
-                <Grid
-                  key={i}
-                  item
-                  xs={12}
-                  sm={dynamicSize(6, field.fieldData.type)}
-                  md={dynamicSize(6, field.fieldData.type)}
-                >
-                  <Grid container alignItems="center">
+        return (
+          form.name && (
+            <React.Fragment key={form.name}>
+              <div className="detail-box">
+                <h3 className="form-label-style" title={form.name}>
+                  {form.name}
+                </h3>
+                <Grid container>
+                  {form.sectionFields.map((field, i) => (
                     <Grid
+                      key={i}
                       item
-                      xs={dynamicSize(6, field.fieldData.type)}
-                      sm={dynamicSize(5, field.fieldData.type)}
-                      md={dynamicSize(5, field.fieldData.type)}
+                      xs={12}
+                      sm={dynamicSize(6, field.fieldData.type)}
+                      md={dynamicSize(6, field.fieldData.type)}
                     >
-                      <Box height="100%" display="flex" alignItems="center">
-                        {field.fieldData.isTooltip && (
-                          <Tooltip title={field.fieldData.tooltipMessage}>
-                            <InfoOutlined
-                              style={{ width: 18, height: 18 }}
-                              color="disabled"
-                            />
-                          </Tooltip>
-                        )}
-                        <Box marginX="2px" />
-                        <h4
-                          title={field.fieldData.fieldLabel}
-                          className={classes.detailLabel}
+                      <Grid container alignItems="center">
+                        <Grid
+                          item
+                          xs={dynamicSize(6, field.fieldData.type)}
+                          sm={dynamicSize(5, field.fieldData.type)}
+                          md={dynamicSize(5, field.fieldData.type)}
                         >
-                          {field.fieldData.fieldLabel}
-                        </h4>
-                      </Box>
-                    </Grid>
-                    <Grid
-                      item
-                      xs={dynamicSize(6, field.fieldData.type)}
-                      sm={dynamicSize(7, field.fieldData.type)}
-                      md={dynamicSize(7, field.fieldData.type)}
-                    >
-                      {field.fieldData.type === "imageUpload" ? (
-                        <Box paddingLeft={2} marginTop={1} marginBottom={4}>
-                          <Avatar
-                            src={initialVals[field.fieldData.fieldName]}
-                          />
-                        </Box>
-                      ) : (
-                        <Box display="flex" alignItems="center">
-                          {field.fieldData.type === "fileUpload" &&
-                            initialVals[field.fieldData.fieldName] ? (
-                            <InsertDriveFile />
-                          ) : null}{" "}
-                          {renderData(initialVals, field.fieldData)}
-                          {field.fieldData.type === "fileUpload"
-                            ? initialVals[field.fieldData.fieldName] &&
-                            (isDownloading ? (
-                              <Box display="flex" alignItems="center">
-                                {downloadProgress === 100
-                                  ? "Downloaded"
-                                  : "Downloading"}
+                          <Box height="100%" display="flex" alignItems="center">
+                            {field.fieldData.isTooltip && (
+                              <Tooltip title={field.fieldData.tooltipMessage}>
+                                <InfoOutlined
+                                  style={{ width: 18, height: 18 }}
+                                  color="disabled"
+                                />
+                              </Tooltip>
+                            )}
+                            <Box marginX="2px" />
+                            <h4
+                              title={field.fieldData.fieldLabel}
+                              className={classes.detailLabel}
+                            >
+                              {field.fieldData.fieldLabel}
+                            </h4>
+                          </Box>
+                        </Grid>
+                        <Grid
+                          item
+                          xs={dynamicSize(6, field.fieldData.type)}
+                          sm={dynamicSize(7, field.fieldData.type)}
+                          md={dynamicSize(7, field.fieldData.type)}
+                        >
+                          {field.fieldData.type === "imageUpload" ? (
+                            <Box paddingLeft={2} marginTop={1} marginBottom={4}>
+                              <Avatar
+                                src={initialVals[field.fieldData.fieldName]}
+                              />
+                            </Box>
+                          ) : (
+                            <Box display="flex" alignItems="center">
+                              {field.fieldData.type === "fileUpload" &&
+                              initialVals[field.fieldData.fieldName] ? (
+                                <InsertDriveFile />
+                              ) : null}{" "}
+                              {renderData(initialVals, field.fieldData)}
+                              {field.fieldData.type === "fileUpload"
+                                ? initialVals[field.fieldData.fieldName] &&
+                                  (isDownloading ? (
+                                    <Box display="flex" alignItems="center">
+                                      {downloadProgress === 100
+                                        ? "Downloaded"
+                                        : "Downloading"}
 
-                                <Box
-                                  marginLeft={1}
-                                  position="relative"
-                                  display="inline-flex"
-                                >
-                                  <CircularProgress
-                                    size={30}
-                                    variant="determinate"
-                                    value={downloadProgress}
-                                  />
-                                  <Box
-                                    top={0}
-                                    left={0}
-                                    bottom={0}
-                                    right={0}
-                                    position="absolute"
-                                    display="flex"
-                                    alignItems="center"
-                                    justifyContent="center"
-                                  >
-                                    <Typography
-                                      variant="caption"
-                                      component="div"
-                                      color="textSecondary"
-                                    >{`${downloadProgress}%`}</Typography>
-                                  </Box>
-                                </Box>
-                              </Box>
-                            ) : (
-                              <IconButton
-                                title={`Download ${initialVals[field.fieldData.fieldName]
-                                  }`}
-                                disabled={isDownloading}
-                                size="small"
-                                onClick={() =>
-                                  downloadFile(
-                                    normalizeValues(
-                                      initialVals,
-                                      field.fieldData
-                                    )
-                                  )
-                                }
-                              >
-                                <GetApp />
-                              </IconButton>
-                            ))
-                            : null}{" "}
-                        </Box>
-                      )}
+                                      <Box
+                                        marginLeft={1}
+                                        position="relative"
+                                        display="inline-flex"
+                                      >
+                                        <CircularProgress
+                                          size={30}
+                                          variant="determinate"
+                                          value={downloadProgress}
+                                        />
+                                        <Box
+                                          top={0}
+                                          left={0}
+                                          bottom={0}
+                                          right={0}
+                                          position="absolute"
+                                          display="flex"
+                                          alignItems="center"
+                                          justifyContent="center"
+                                        >
+                                          <Typography
+                                            variant="caption"
+                                            component="div"
+                                            color="textSecondary"
+                                          >{`${downloadProgress}%`}</Typography>
+                                        </Box>
+                                      </Box>
+                                    </Box>
+                                  ) : (
+                                    <IconButton
+                                      title={`Download ${
+                                        initialVals[field.fieldData.fieldName]
+                                      }`}
+                                      disabled={isDownloading}
+                                      size="small"
+                                      onClick={() =>
+                                        downloadFile(
+                                          normalizeValues(
+                                            initialVals,
+                                            field.fieldData
+                                          )
+                                        )
+                                      }
+                                    >
+                                      <GetApp />
+                                    </IconButton>
+                                  ))
+                                : null}{" "}
+                            </Box>
+                          )}
+                        </Grid>
+                      </Grid>
+                      {field.fieldData.type !== "imageUpload" &&
+                        field.fieldData.type !== "fileUpload"}
                     </Grid>
-                  </Grid>
-                  {field.fieldData.type !== "imageUpload" &&
-                    field.fieldData.type !== "fileUpload"}
+                  ))}
                 </Grid>
-              ))}
-            </Grid>
-          </div>
-        </React.Fragment>
-      }
-      )}
+              </div>
+            </React.Fragment>
+          )
+        );
+      })}
     </div>
   );
 };

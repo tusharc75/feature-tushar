@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Box, Button, CircularProgress, Grid, IconButton, Tooltip } from "@material-ui/core";
+import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import { useHistory } from "react-router-dom";
-import { withStyles } from "@material-ui/core/styles";
 import Dialog from "@material-ui/core/Dialog";
 import axiosInstance from "../../../axios/axiosInstance";
 import {
@@ -22,8 +21,6 @@ import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
-import AddIcon from '@material-ui/icons/AddCircle'
-import InfoIcon from "@material-ui/icons/Info";
 
 const arr = [...Array(9).keys()];
 
@@ -41,7 +38,7 @@ export default function ManageLeadDialog({
   const history = useHistory();
 
   const {
-    state: { user, selectedEntity, permissions },
+    state: { user, selectedEntity },
   }: any = useData();
   const [disableOwnerSelection] = useState(
     !isNew && user.user._id !== dataToUpdate.owner.optionValue
@@ -57,7 +54,6 @@ export default function ManageLeadDialog({
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [addOwner, setAddOwner] = useState(false);
 
   useEffect(() => {
     const ownerCollabOptions = entityData.fields.filter(
@@ -221,7 +217,7 @@ export default function ManageLeadDialog({
         title={
           isNew
             ? "Create Lead"
-            : `Editing ${dataToUpdate.firstName || ""} ${dataToUpdate.lastName}`
+            : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName].filter(f => f).join(" ")}`
         }
         onClose={onClose}
       />
@@ -280,31 +276,11 @@ export default function ManageLeadDialog({
                                     size="small"
                                     disabled={disableOwnerSelection}
                                     onOpen={() => {
-                                      onOwnerDropdownOpen(values["collaborator"]);
+                                      onOwnerDropdownOpen(
+                                        values["collaborator"]
+                                      );
                                     }}
                                   />
-                                  //  <Grid container spacing={1}>
-                                  //   <Grid item xs={11} sm={11} md={11}>
-
-                                  //   </Grid>
-                                  //   <Grid item xs={1} sm={1} md={1}>
-                                  //     {
-                                  //       permissions.user.isCreate && <Tooltip title="Create Account" className="mt-1">
-                                  //         <IconButton onClick={() => { setAddOwner(true) }} size="small">
-                                  //           <AddIcon color="primary" />
-                                  //         </IconButton>
-                                  //       </Tooltip>
-                                  //     }
-                                  //   </Grid>
-                                  //   {
-                                  //     field?.tooltipMessage ?
-                                  //       <Grid item xs={1} sm={1} md={1}>
-                                  //       <Tooltip title={field?.tooltipMessage ?? ""}>
-                                  //           <InfoIcon color="disabled" />
-                                  //         </Tooltip>
-                                  //       </Grid> : null
-                                  //   }
-                                  // </Grid>
                                 ) : field.fieldName == "collaborator" ? (
                                   <FormTypes
                                     values={values}
@@ -387,8 +363,7 @@ export default function ManageLeadDialog({
             </>
           )}
         </Formik>
-      )
-      }
-    </Dialog >
+      )}
+    </Dialog>
   );
 }
