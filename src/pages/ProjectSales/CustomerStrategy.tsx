@@ -320,7 +320,11 @@ const CustomerStrategy = (props) => {
                               setShowContactCreateDialog(false);
                               fetchProjectData();
                             }}
-                            onSuccess={(obj) => { saveCustomerContactToProject(obj?.id) }}
+                            onSuccess={(obj) => {
+                              if (obj && obj.id) {
+                                saveCustomerContactToProject(obj.id)
+                              }
+                            }}
                             contactResource={customerContact.contactResource}
                             accountId={c._id}
                             contactApi={customerContact.contactApi}
@@ -377,24 +381,19 @@ const CustomerStrategy = (props) => {
                                     </BoxWithBorder>
                                   ))
                                 ) : customerContacts.filter(
-                                  (cA) => cA.accountName === c._id
+                                  (ca) => ca.accountName === c._id
                                 ).length ? (
                                   <>
                                     <CustomerContacts
                                       contacts={customerContacts.filter(
-                                        (cA) => cA.accountName === c._id
+                                        (ca) => ca.accountName === c._id
                                       )}
                                       accountId={c._id}
                                       accountName={c.accountName}
                                       contactRoute="customer-contact"
                                     />
 
-
                                   </>
-
-
-
-
 
                                 ) : (
                                   <Box textAlign="center" padding={2}>
