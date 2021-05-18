@@ -21,6 +21,10 @@ import { Vlokup } from "../AddField/vlokup";
 import { Formula } from "../AddField/formula";
 import { Converter } from "../AddField/converter";
 import { Option } from "../AddField/option";
+import { Currency } from "../AddField/currency";
+import { MultipleFormula } from "../AddField/multipleformula";
+
+
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string()
@@ -39,6 +43,7 @@ const LookupResource = [
   { name: "Lead", value: "Lead" },
   { name: "Opportunity", value: "Opportunity" },
   { name: "Product Category", value: "ProductCategory" },
+  { name: "Product Template", value: "ProductTemplate" },
 ]
 
 export const Properties = ({ handleClose, fieldData, sectionId, section, setSection }) => {
@@ -52,15 +57,26 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
       if (!fid.fieldName) {
         fid.fieldName = camelCase(fid.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''));
       }
-      if (fid._id.toString() !== fieldData._id.toString()) {
-        if (fid.type === "converter") {
-          fid.displayUnits && fid.displayUnits.forEach(_unit => {
-            fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + _unit.toLowerCase() })
-          })
-        }
-        else {
-          fields.push(fid)
-        }
+      //if (fid._id.toString() !== fieldData._id.toString()) { }
+      if (fid.type !== "currencyAmount" && (fid.type === "converter" || fid.isConverter === true)) {
+        fid.displayUnits && fid.displayUnits.forEach(_unit => {
+          fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + "_" + _unit.toLowerCase() })
+        })
+      }
+      else if (fid.type === "currencyAmount") {
+        fid.displayCurrency && fid.displayCurrency.forEach(_currency => {
+          if (fid.isConverter) {
+            fid.displayUnits && fid.displayUnits.forEach(_unit => {
+              fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
+            })
+          }
+          else {
+            fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _currency, fieldName: fid.fieldName + "_" + _currency.toLowerCase() })
+          }
+        })
+      }
+      else {
+        fields.push(fid)
       }
     })
   })
@@ -76,6 +92,9 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
             ele.required = values.required
             ele.isTooltip = values.isTooltip
             ele.tooltipMessage = values.tooltipMessage
+            ele.isConverter = values.isConverter
+            ele.isFormula = values.isFormula
+            ele.isMulitFormula = values.isMulitFormula
 
             if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio" || fieldData.type === "process") {
               values.option.forEach((ele, index) => {
@@ -94,11 +113,11 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               ele.lookup = values.lookup
               ele.lookupResource = values.lookupResource
             }
-            if (fieldData.type === "formula") {
+            if (fieldData.type === "formula" || values.isFormula === true) {
               ele.formula = values.formula
               ele.inputFields = values.inputFields
-              ele.returnType = values.returnType
-              ele.decimalPlaces = values.decimalPlaces
+              ele.returnType = values.returnType ? values.returnType : "decimal"
+              ele.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2
             }
             if (fieldData.type === "vlookupDropdown") {
               values.option.forEach((ele) => {
@@ -108,10 +127,19 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               ele.option = values.option
               ele.isvlookupReverse = values.isvlookupReverse
             }
-            if (fieldData.type === "converter") {
+            if (fieldData.type === "converter" || fieldData.isConverter === true) {
               ele.units = values.units
               ele.displayUnits = values.displayUnits
               ele.option = values.option
+            }
+            if (fieldData.type === "currencyAmount") {
+              delete ele.currency
+              ele.displayCurrency = values.displayCurrency
+            }
+            if (fieldData.isMulitFormula) {
+              ele.formulaFields = values.formulaFields
+              ele.formulainputFields = values.formulainputFields
+              ele.formulaoption = values.formulaoption
             }
           }
         })
@@ -121,8 +149,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     handleClose()
   }
 
-  return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={initialValues["type"] === "formula" ||
-    initialValues["type"] === "vlookupDropdown" || initialValues["type"] === "converter" ? "md" : "sm"} open={true}>
+  return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
     <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
       {({ submitForm, touched, errors, setFieldValue, values }) => (
         <Form autoComplete="off" autoCorrect="off" noValidate >
@@ -136,6 +163,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               name="fieldLabel"
               fullWidth
               margin="dense"
+              disabled={!values["editAble"]}
               value={values["fieldLabel"]}
               error={touched["fieldLabel"] && Boolean(errors["fieldLabel"])}
               helperText={touched["fieldLabel"] && errors["fieldLabel"]}
@@ -214,32 +242,88 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                     </FormControl>
                   </Box>}
               </Fragment>}
-
-
+            {values["type"] === "currencyAmount" &&
+              <Currency
+                values={values}
+                setFieldValue={setFieldValue}
+              />
+            }
             {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio" || values["type"] === "process") && !values["lookup"]) &&
               <Option
                 values={values}
                 setFieldValue={setFieldValue}
               />}
-
-            {values["type"] === "formula" && <Formula
+            {(values["type"] === "currencyAmount" || values["type"] === "percent" || values["type"] === "converter") &&
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="isFormula"
+                    checked={values["isFormula"]}
+                    onChange={(e) => {
+                      //setFieldValue("isConverter", false);
+                      setFieldValue("isFormula", e.target.checked)
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Formula"
+              />}
+            {(values["type"] === "formula" || values["isFormula"]) && <Formula
               fields={fields}
               values={values}
               setFieldValue={setFieldValue}
             />}
-
+            {values["type"] === "currencyAmount" &&
+              <Fragment>
+                <br></br>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isConverter"
+                      checked={values["isConverter"]}
+                      onChange={(e) => {
+                        //setFieldValue("isFormula", false);
+                        setFieldValue("isConverter", e.target.checked)
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Converter"
+                />
+              </Fragment>
+            }
+            {(values["type"] === "converter" || values["isConverter"]) && <Converter
+              fields={fields}
+              values={values}
+              setFieldValue={setFieldValue}
+            />}
+            {(values["type"] === "currencyAmount" || values["type"] === "percent" || values["type"] === "converter") &&
+              <><br></br>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isMulitFormula"
+                      checked={values["isMulitFormula"]}
+                      onChange={(e) => {
+                        setFieldValue("isMulitFormula", e.target.checked)
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Multiple Formula"
+                />
+              </>}
+            {(values["isMulitFormula"]) && <MultipleFormula
+              fields={fields}
+              values={values}
+              setFieldValue={setFieldValue}
+            />}
             {values["type"] === "vlookupDropdown" &&
               <Vlokup
                 fields={fields}
                 values={values}
                 setFieldValue={setFieldValue}
               />}
-
-            {values["type"] === "converter" && <Converter
-              fields={fields}
-              values={values}
-              setFieldValue={setFieldValue}
-            />}
 
             <Box pt={1} pb={1}>
               <FormControlLabel

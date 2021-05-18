@@ -21,6 +21,9 @@ import { DataGrid, GridOverlay } from "@material-ui/data-grid";
 import CustomDataGridNoDataFound from "../../Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomDataGridToolbar from "../../Helpers/DataGridHelpers/CustomDataGridToolbar";
 
+
+var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
+
 const AddExistingProduct = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -34,8 +37,6 @@ const AddExistingProduct = (props) => {
         fetchProduct();
     }, []);
 
-
-
     const fetchProduct = () => {
         setLoading(true)
         axiosInstance().get(`/product`).then(({ data: { data } }) => {
@@ -46,17 +47,51 @@ const AddExistingProduct = (props) => {
             let column = [{ field: 'id', headerName: 'id', hide: true }]
             data.forEach((row) => {
                 row.fields.forEach((ele) => {
-                    if (ele.type === "converter") {
-                        ele.displayUnits.forEach((_unit) => {
-                            if (column.filter((_c) => _c.field === ele.fieldName + _unit.toLowerCase() && _c.headerName === ele.fieldLabel + " " + _unit).length === 0) {
-                                let col: any = {}
-                                col.field = ele.fieldName + _unit.toLowerCase()
-                                col.headerName = ele.fieldLabel + " " + _unit
-                                col.width = 180
-                                col.leval = ele.leval
-                                column.push(col)
-                            }
-                        })
+                    if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                        if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                            ele.displayUnits.forEach((_unit) => {
+                                let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+                                let fieldLabel = ele.fieldLabel + " " + _unit
+                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                    let col: any = {}
+                                    col.field = fieldName
+                                    col.headerName = fieldLabel
+                                    col.width = 180
+                                    col.leval = ele.leval
+                                    column.push(col)
+                                }
+                            })
+                        }
+                        else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                            ele.displayUnits.forEach((_unit) => {
+                                ele.displayCurrency.forEach((_currency) => {
+                                    let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                                    let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                                    if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                        let col: any = {}
+                                        col.field = fieldName
+                                        col.headerName = fieldLabel
+                                        col.width = 180
+                                        col.leval = ele.leval
+                                        column.push(col)
+                                    }
+                                })
+                            })
+                        }
+                        else if (ele.type === "currencyAmount") {
+                            ele.displayCurrency.forEach((_currency) => {
+                                let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+                                let fieldLabel = ele.fieldLabel + " " + _currency
+                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                    let col: any = {}
+                                    col.field = fieldName
+                                    col.headerName = fieldLabel
+                                    col.width = 180
+                                    col.leval = ele.leval
+                                    column.push(col)
+                                }
+                            })
+                        }
                     }
                     else {
                         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
@@ -64,6 +99,7 @@ const AddExistingProduct = (props) => {
                             col.field = ele.fieldName
                             col.headerName = ele.fieldLabel
                             col.width = 200
+                            col.leval = ele.leval
                             col.renderCell = (params) => (params.row[ele.fieldName] ?
                                 typeof params.row[ele.fieldName] === 'object' ? params.row[ele.fieldName][ele.fieldName] : params.row[ele.fieldName]
                                 : <NoDataCell />)
@@ -71,6 +107,9 @@ const AddExistingProduct = (props) => {
                         }
                     }
                 })
+            });
+            column = _.sortBy(column, function (item: any) {
+                return levalOrderBy.indexOf(item.leval)
             });
             setColumns(column);
             setProduct(data);
@@ -90,13 +129,13 @@ const AddExistingProduct = (props) => {
             delete _d.fields
             _d.productId = _d._id
             _d.productCategory = _d.productCategory._id
+            _d.productTemplate = _d.productTemplate._id
         })
         addProductInBuilder(rows)
         handleClose()
     }
 
 
-    console.log(columns)
     return (<Dialog
         aria-labelledby="customized-dialog-title"
         open={true}

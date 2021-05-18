@@ -56,6 +56,9 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                 if (type === FieldList.VLOOKUPDROPDOWN.type) {
                     insert_object.inputFields = []
                 }
+                if (type === FieldList.CURRENCYAMOUNT.type) {
+                    insert_object.displayCurrency = ["USD"]
+                }
                 if (index !== null) {
                     row.field.splice(index, 0, insert_object);
                 }

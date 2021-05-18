@@ -45,6 +45,9 @@ const CreateProduct = (props) => {
                     data.fields?.map((_f) => newField.push(_f));
                     data.productData.fields?.map((_f) => newField.push(_f));
                     setFields(data.productData.fields)
+                    if (isClone) {
+                        data.productData.productName = ""
+                    }
                     setInitialData({
                         fields: newField,
                         values: data.productData
@@ -105,21 +108,22 @@ const CreateProduct = (props) => {
         const sections = _.uniq(_.map(fields, 'sectionName'));
         const customData = sections.map((name) => {
             let sectionFields = fields.filter((field) => field.sectionName === name);
+            sectionFields = _.orderBy(sectionFields, 'order', 'asc');
             return { name, sectionFields };
         });
         setProductFields(customData)
     }
 
-    const handleChangeCategory = (value) => {
+    const handleChangeTemplate = (value) => {
         if (value && value !== "") {
-            axiosInstance().get(`/productcategory/fields/` + value).then(({ data: { data } }) => {
+            axiosInstance().get(`/product-template/fields/` + value).then(({ data: { data } }) => {
                 let newField = [...masterFields];
-                data.forEach(_f => {
+                data.fields.filter((f) => f.sectionType !== "cost").forEach(_f => {
                     newField.push(_f)
                 })
                 setInitialData({
                     fields: newField,
-                    values: { ...getObjKeys('', newField), ...ref.current.values },
+                    values: { ...getObjKeys('', newField), ...ref.current.values, unit: data.unit },
                 });
                 EvaluteproductFields(newField)
             });
@@ -138,6 +142,7 @@ const CreateProduct = (props) => {
 
     const handleAddField = (field) => {
         field.sectionName = sectionName;
+        field.leval = "product-custom";
         fields.push(field)
         setFields(fields)
         let newField = initialData.fields;
@@ -179,14 +184,14 @@ const CreateProduct = (props) => {
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
                                             <h2 className="form-label-style">{section.name}
-                                                    <IconButton color="primary" size="small" onClick={() => handleOpenAddField(section.name)} >
-                                                        <ControlPointIcon />
-                                                    </IconButton>
+                                                <IconButton style={{ float: "right", marginTop: "-10px" }} color="primary" size="small" onClick={() => handleOpenAddField(section.name)} >
+                                                    <ControlPointIcon />
+                                                </IconButton>
                                             </h2>
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.fieldName === "productCategory" ?
+                                                        field.fieldName === "productTemplate" ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 <FormTypes
                                                                     fields={initialData.fields}
@@ -206,11 +211,11 @@ const CreateProduct = (props) => {
                                                                     disableClearable
                                                                     onChange={(e, val) => {
                                                                         setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                        handleChangeCategory(val && val.optionValue ? val.optionValue : "")
+                                                                        handleChangeTemplate(val && val.optionValue ? val.optionValue : "")
                                                                     }}
                                                                     size="small"
                                                                 />  </Grid> :
-                                                            field.type === "converter" ?
+                                                            field.type === "converter" || field.type === "currencyAmount" ?
                                                                 <FormTypes
                                                                     fields={initialData.fields}
                                                                     values={values}
@@ -249,6 +254,7 @@ const CreateProduct = (props) => {
                                                                         isvlookupReverse={field.isvlookupReverse}
                                                                         fieldData={field}
                                                                         size="small"
+                                                                        disabled={field.fieldName === "unit" ? true : false}
                                                                     />
                                                                 </Grid>
                                                     ))}
@@ -266,8 +272,8 @@ const CreateProduct = (props) => {
                                 variant="contained"
                                 color="primary"
                                 type="submit"
-                                disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
-                                    Object.values(simplifyValues(values, initialData.fields)).toString()}
+                                // disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
+                                //     Object.values(simplifyValues(values, initialData.fields)).toString()}
                                 onClick={submitForm}
                             > Save</CustomButton>
                         </CustomDialogFooter>
