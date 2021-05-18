@@ -95,7 +95,7 @@ const AssignUserDialog = ({
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
-                      user.isChecked = user.isChecked ? false : true
+                      user.isChecked = e.target.checked
                       setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
                     }
                     }

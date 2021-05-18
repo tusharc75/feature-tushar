@@ -97,7 +97,7 @@ const AssignRolesDialog = ({
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
-                      role.isChecked = role.isChecked ? false : true
+                      role.isChecked = e.target.checked
                       setSelectedRoles(roles.filter(r => r.isChecked).map(obj => obj._id))
                     }
                     }

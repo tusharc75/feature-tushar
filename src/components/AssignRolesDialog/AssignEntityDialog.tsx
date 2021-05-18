@@ -232,7 +232,7 @@ const AssignEntityDialog = ({
                 <Checkbox
                   edge="start"
                   onChange={(e) => {
-                    d.isChecked = d.isChecked ? false : true
+                    d.isChecked = e.target.checked
                     setSelectedRole(role.filter(r => r.isChecked).map(obj => obj._id))
                   }
                   }
@@ -309,7 +309,7 @@ const AssignEntityDialog = ({
                 <Checkbox
                   edge="start"
                   onChange={(e) => {
-                    d.isChecked = d.isChecked ? false : true
+                    d.isChecked = e.target.checked
                     setSelectedRole(role.filter(r => r.isChecked).map(obj => obj._id))
                   }
                   }
