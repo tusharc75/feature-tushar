@@ -100,7 +100,7 @@ export default function ManageContactDialog(props) {
       .then(({ data }) => {
         const newId = data.data._id;
         onClose({ fetch: true });
-        onSuccess({ fetch: true });
+        onSuccess({ fetch: true, id:newId });
         toastConfig.setToastConfig({
           open: true,
           type: "success",

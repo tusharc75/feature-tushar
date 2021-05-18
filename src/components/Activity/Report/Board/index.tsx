@@ -41,7 +41,7 @@ const Board = ({ type, filter, activityId }) => {
       .then(({ data: { data } }) => {
         if (data.length) {
           const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData);
+          setResourceData(mappedData || []);
         }
         setLoadingResources(false);
       })

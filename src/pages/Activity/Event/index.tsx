@@ -15,13 +15,7 @@ const Event = () => {
   const [filter, setFilter] = useState([]);
   const [activityData, setActivityData] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [events, setEvents] = useState([
-    {
-      start: moment().toDate(),
-      end: moment().add(1, "days").toDate(),
-      title: "Some title",
-    },
-  ]);
+  const [events, setEvents] = useState([]);
 
   const fetchBoard = useCallback(() => {
     GetBoard("event", JSON.stringify(filter))
