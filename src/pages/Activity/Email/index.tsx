@@ -156,7 +156,7 @@ const Email = () => {
             }
         },
         {
-            field: 'createdAt', headerName: 'Created At', width: 120,
+            field: 'createdAt', headerName: 'Created At', width: 130,
             renderCell: (params) => (
                 <span className={emailStyles.emailCreatedAt}>
                     { moment(params.row.createdBy.date).format("ddd MM/DD")}
