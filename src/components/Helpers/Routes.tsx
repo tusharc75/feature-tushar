@@ -159,7 +159,19 @@ const routes = {
   brandConfiguration: {
     title: "Brand Configuration",
     path: "/brand-configuration"
-  }
+  },
+  currencyConverter: {
+    title: "Currency Converter",
+    path: "/currency-converter"
+  },
+  productCategory: {
+    title: "Product Category",
+    path: "/product-category"
+  },
+  productTemplate: {
+    title: "Product Template",
+    path: "/product-template"
+  },
 };
 
 export default routes;

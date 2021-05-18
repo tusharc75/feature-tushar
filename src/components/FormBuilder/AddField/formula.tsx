@@ -95,12 +95,13 @@ export const Formula = ({ fields, values, setFieldValue }) => {
                 ))}
             </Select> */}
         </FormControl>
-        <Box pt={0.5} pb={0.5}>
-            {values["inputFields"] && values["inputFields"].map((_field) => (
-                <Chip className="ml-1 cursor-pointer" key={_field} label={_field} onClick={() => handleAddInputField(_field)} />
-            ))}
-        </Box>
-        <Box pt={1}>
+        {(values["inputFields"] && values["inputFields"].length > 0) &&
+            <Box pt={0.5} pb={0.5}>
+                {values["inputFields"].map((_field) => (
+                    <Chip className="ml-1 cursor-pointer" key={_field} label={_field} onClick={() => handleAddInputField(_field)} />
+                ))}
+            </Box>}
+        <Box pt={0.5}>
             <TextField
                 id="standard-basic"
                 name="formula"
@@ -109,7 +110,8 @@ export const Formula = ({ fields, values, setFieldValue }) => {
                 margin="dense"
                 fullWidth
                 multiline
-                rows={8}
+                rows={4}
+                placeholder="Formula (return field1 + field2)"
                 inputRef={inputRef}
                 value={values["formula"]}
                 onChange={(e) => setFieldValue("formula", e.target.value)}

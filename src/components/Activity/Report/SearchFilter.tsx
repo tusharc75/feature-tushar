@@ -73,7 +73,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
             color={chip?.color || "primary"}
             label={
               option && option.type === "my"
-                ? "All My"
+                ? "My activities"
                 : capitalize(UnCamelCase(option.type)) + " - " + option.name
             }
             {...getTagProps({ index })}
@@ -100,7 +100,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
                 label={
                   option.isAll
                     ? option.type === "my"
-                      ? "All My"
+                      ? "My activities"
                       : option.name + " " + capitalize(UnCamelCase(option.type))
                     : capitalize(UnCamelCase(option.type))
                 }

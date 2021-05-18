@@ -440,7 +440,7 @@ const Leads = () => {
       }
     } else {
       if (
-        dataRows.find((d) => d.isChecked && d.owner.optionValue != user._id)
+        dataRows.find((d) => d.isChecked && d.owner.optionValue != user.user._id)
       ) {
         setShowDeleteWarningConfirmBox(true);
       } else {

@@ -9,7 +9,6 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-  Divider,
   Select,
   FormHelperText,
   Checkbox,
@@ -21,7 +20,11 @@ import { Autocomplete } from "@material-ui/lab";
 import { ArrowRightAlt } from "@material-ui/icons";
 import { TextField as TextFieldFormik } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
-import { KeyboardDatePicker } from "formik-material-ui-pickers";
+import {
+  KeyboardDatePicker,
+  KeyboardTimePicker,
+  TimePicker,
+} from "formik-material-ui-pickers";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import * as Yup from "yup";
@@ -34,7 +37,6 @@ import {
   UpdateEvent,
   DeleteEvent,
 } from "../../../axios/activity";
-import { Comment } from "../Comment";
 import { UserDropdown } from "../Helpers/userDropdown";
 import { RelatedToDispay } from "../Helpers/RelatedToDispay";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -47,7 +49,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 
 const EventSchema = Yup.object().shape({
-  name: Yup.string().required("please enter event name"),
+  name: Yup.string().required("Please enter event name"),
 });
 
 const TimeList = () => {
@@ -177,9 +179,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
               access: true,
             },
           ];
-        } else if (resource && !selectedResourceData) {
-          setSubmitting(false);
-          return;
         } else {
           values.relatedTo = [
             {
@@ -205,15 +204,11 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
   function validate(values) {
     const errors = {};
-    if (moment(values.startDate) > moment(values.endDate)) {
-      errors["dueDate"] = "End date must greater then start date";
-    }
+
     if (
-      moment(values.startDate).format("YYYY-MM-DD") ===
-        moment(values.endDate).format("YYYY-MM-DD") &&
-      values.startTime === values.endTime
+      new Date(values.startDate).getTime() >= new Date(values.endDate).getTime()
     ) {
-      errors["endTime"] = "Start Time and End Time should be different";
+      errors["endDate"] = "Start and End Time and Date should be different";
     }
     return errors;
   }
@@ -325,7 +320,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label="Select Resource"
+                              label="Resource"
                               variant="outlined"
                             />
                           )}
@@ -350,15 +345,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                 {...params}
                                 label={`Select ${resource}`}
                                 variant="outlined"
-                                error={
-                                  Boolean(resource) &&
-                                  Boolean(!selectedResourceData)
-                                }
-                                helperText={
-                                  Boolean(resource) &&
-                                  Boolean(!selectedResourceData) &&
-                                  `Select "${resource}" or clear resource field`
-                                }
                                 required={Boolean(resource)}
                               />
                             )}
@@ -388,7 +374,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
                         <Grid item xs={5}>
                           <Box>
-                            <FormControl
+                            {/* <FormControl
                               fullWidth
                               margin="dense"
                               variant="outlined"
@@ -417,7 +403,17 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                   </MenuItem>
                                 ))}
                               </Select>
-                            </FormControl>
+                            </FormControl> */}
+                            <Field
+                              component={KeyboardTimePicker}
+                              label="Start Time"
+                              name="startDate"
+                              autoOk
+                              margin="dense"
+                              variant="inline"
+                              inputVariant="outlined"
+                              fullWidth
+                            />
                           </Box>
                         </Grid>
                       </Grid>
@@ -445,7 +441,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                         </Grid>
                         <Grid item xs={5}>
                           <Box>
-                            <FormControl
+                            {/* <FormControl
                               fullWidth
                               margin="dense"
                               variant="outlined"
@@ -480,7 +476,17 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                               <FormHelperText>
                                 {touched["endTime"] && errors["endTime"]}
                               </FormHelperText>
-                            </FormControl>
+                            </FormControl> */}
+                            <Field
+                              component={KeyboardTimePicker}
+                              label="End Time"
+                              name="endDate"
+                              autoOk
+                              margin="dense"
+                              variant="inline"
+                              inputVariant="outlined"
+                              fullWidth
+                            />
                           </Box>
                         </Grid>
                       </Grid>
@@ -555,12 +561,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                           <RelatedToDispay
                             relatedTo={initialValues.relatedTo}
                           />
-                        </Box>
-                        <Box mt={2}>
-                          <Divider />
-                          <Box mt={1}>
-                            <Comment referenceId={eventId} />
-                          </Box>
                         </Box>
                       </Fragment>
                     )}
