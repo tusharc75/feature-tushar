@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 export default (history = null) => {
-    //const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
-    const baseURL="http://localhost:4000";
+    const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
     let headers: any = {};
 
     if (localStorage.token) {
