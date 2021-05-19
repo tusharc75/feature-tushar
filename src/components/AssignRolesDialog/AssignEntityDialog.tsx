@@ -102,22 +102,6 @@ const AssignEntityDialog = ({
     // eslint-disable-next-line
   }, []);
 
-  const handleEntitySelection = (e, id) => {
-    let tempSelectedEntities = selectedData;
-    let curIndex = tempSelectedEntities.indexOf(id);
-    if (e.target.checked) {
-      if (curIndex < 0) {
-        tempSelectedEntities = [id];
-        setSelectedData(tempSelectedEntities);
-      }
-    } else if (curIndex >= 0) {
-      tempSelectedEntities.splice(curIndex, 1);
-      setSelectedData([]);
-
-    }
-
-  };
-
 
   const handleAssignEntity = async () => {
 
@@ -167,16 +151,35 @@ const AssignEntityDialog = ({
 
 
       } else {
-        dataObj = {
-          user: selectedData[0],
-          entities: [
-            {
+        if (data.filter(user => user._id === selectedData[0]).length !== 0) {
+          const selectedUser = data.find(user => user._id === selectedData[0])
+          const selectedUserEntityArray = selectedUser.entities.filter(e => e.role.length !== 0 || e.entity !== undefined)
+            selectedUserEntityArray.map(d => {
+              entityArray.push({
+                entity: d.entity?._id,
+                role: d.role?.map(r => r._id)
+              })
+            })
+            selectedUserEntityArray.push({
               entity: ids[0],
               role: selectedRole
-            }
-          ]
-        };
-
+            })
+            dataObj = {
+              user: selectedData[0],
+              entities: selectedUserEntityArray
+            };
+        }
+        else {
+          dataObj = {
+            user: selectedData[0],
+            entities: [
+              {
+                entity: ids[0],
+                role: selectedRole
+              }
+            ]
+          };
+        }
       }
 
       await axiosInstance()
