@@ -10,7 +10,6 @@ import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
-import axiosAPI from "../../../axios/axios";
 import { useData } from "../../../StateProvider/Provider";
 import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import CustomContainer from "../../../components/CustomContainer";
@@ -21,8 +20,8 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import MessageDialog from "../../../components/Helpers/MessageDialog";
 import { Delete as DeleteIcon } from "@material-ui/icons";
-import { BsFillEnvelopeOpenFill } from 'react-icons/bs'
 import reactHtmlparser from 'react-html-parser'
+import { HiOutlineMail } from "react-icons/hi";
 import styles from "../../Leads/Header.module.scss";
 import emailStyles from './email.module.scss'
 import './email.scss'
@@ -46,6 +45,8 @@ const Email = () => {
     const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [checkAllEmails, setCheckAllEmails] = useState(false);
+    const [query, setQuery] = useState({ page: 0, limit: 25 });
+    const [rowCount, setRowCount] = useState(0);
 
     useEffect(() => {
         if (referenceType) {
@@ -61,19 +62,14 @@ const Email = () => {
 
     useEffect(() => {
         fetchEmails()
-    }, [filter]);
+    }, [filter, query]);
 
 
     const fetchEmails = async () => {
         setLoading(true)
-        // axiosAPI().get(`/email?relatedTo=${JSON.stringify(filter)}`)
-        // .then(({ data }) => {
-        //     setEmails(data.data)
-        //     setLoading(false)
-        // }).catch((err) => {})
-        //     }
-        await GetEmails(JSON.stringify(filter))
-            .then(({ data }) => {
+
+        await GetEmails(JSON.stringify(filter), { ...query })
+            .then(({ data, count }) => {
                 data = data.map(obj => {
                     return {
                         ...obj,
@@ -83,14 +79,19 @@ const Email = () => {
                     }
                 })
                 setEmails(data)
+                setRowCount(count)
                 setLoading(false)
             })
-            .catch((err) => {
+            .catch((error) => {
                 setLoading(false)
+                toastConfig.setToastConfig(error);
             });
     };
 
     const handleChangeFilter = (value) => {
+        if (query.page !== 0) {
+            setQuery((prevState) => ({ ...prevState, page: 0 }));
+        }
         setFilter(value)
     }
 
@@ -247,6 +248,18 @@ const Email = () => {
         }
     };
 
+    const handlePage = (params) => {
+        if (query.page !== params.page) {
+            setQuery((prevState) => ({ ...prevState, page: params.page }));
+        }
+    };
+
+    const handlePageSize = (params) => {
+        if (params.pageSize !== query.limit) {
+            setQuery({ page: 0, limit: params.pageSize });
+        }
+    };
+
     return (<Layout>
         <Grid container direction="row">
             <Grid item xs={12}>
@@ -256,15 +269,18 @@ const Email = () => {
         <CustomContainer>
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <BsFillEnvelopeOpenFill className="headerLogo" />{" "}
-                        <span className="listingHeader">Emails</span>
+                    <Grid item xs={2} className="d-flex align-items-center gap-1">
+                        <HiOutlineMail className="headerLogo" />{" "}
+                        <span className="listingHeader">Email</span>
                     </Grid>
-                    <Grid item xs={6} className={styles.filter_side}>
+                    <Grid item xs={10} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
-                            <Box style={{ width: '70%' }}>
+                            <Box style={{ width: '90%' }}>
                                 <SearchFilter
-                                    handleChangeFilter={handleChangeFilter} filter={filter} />
+                                    handleChangeFilter={handleChangeFilter}
+                                    filter={filter}
+                                    chip={{ size: "small" }}
+                                />
                             </Box>
                             <Button
                                 className={styles.action_submit_btn}
@@ -299,7 +315,9 @@ const Email = () => {
                         </Box>
                     </Grid>
                 </Grid>
+
             </div>
+
             <div className='listing-grid emailList'>
                 <DataGrid
                     components={{
@@ -309,8 +327,16 @@ const Email = () => {
                     loading={loading}
                     rows={loading ? [] : emails}
                     columns={columns}
-                    pageSize={10}
                     density="compact"
+                    paginationMode="server"
+                    pagination
+                    onPageChange={handlePage}
+                    onPageSizeChange={handlePageSize}
+                    pageSize={query.limit}
+                    page={query.page}
+                    rowCount={rowCount}
+                    rowsPerPageOptions={[25, 50, 75]}
+
                 />
             </div>
             {showDeleteWarningConfirmBox ? (

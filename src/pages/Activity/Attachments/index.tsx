@@ -16,6 +16,8 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import Dialog from '@material-ui/core/Dialog';
 import ManageAttachment from "../../../components/Activity/Attachments/ManageAttachment";
 import CustomContainer from '../../../components/CustomContainer'
+import styles from "../../Leads/Header.module.scss";
+import { AiOutlinePaperClip } from 'react-icons/ai'
 
 export default function Attachment(props) {
 
@@ -107,13 +109,23 @@ export default function Attachment(props) {
         </Grid>
         <CustomContainer>
             <div className="header-panel">
-                <Grid container>
-                    <Grid item xs={8}>
-                        <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
+                <Grid container className={styles.filter_side_container}>
+                    <Grid item xs={2} className="d-flex align-items-center gap-1">
+                        <AiOutlinePaperClip className="headerLogo" />{" "}
+                        <span className="listingHeader">Attachment</span>
                     </Grid>
-                    <Grid xs={4} container justify="flex-end">
+                    <Grid item xs={10} className={styles.filter_side}>
+                        <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
+                            <Box style={{ width: '90%' }}>
+                                <SearchFilter handleChangeFilter={handleChangeFilter}
+                                    filter={filter}
+                                    chip={{ size: "small" }}
+                                />
+                            </Box>
+                        </Box>
                     </Grid>
                 </Grid>
+
             </div>
             <div className="listing-grid">
                 <DataGrid
