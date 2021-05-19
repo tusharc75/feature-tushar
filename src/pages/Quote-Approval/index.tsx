@@ -33,7 +33,7 @@ const QuoteApproval=()=>{
         axios.get(baseURL+"/quote-builder/getQuotefromId/"+id)
             .then(({data})=>{
                 console.log(data);
-                if(data.Quote_Status==="Pending for Customer Approval"){
+                if(data.Quote_Status==="Sent to Customer"){
                     setColumns(data.Columns);
                     setRows(data.Rows);
                     setSellingPrice(data.TotalSellingPrice);

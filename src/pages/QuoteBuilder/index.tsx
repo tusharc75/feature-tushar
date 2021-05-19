@@ -15,6 +15,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndCondition';
 import ChatRender from '../../components/Chatter';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
+import EmailDialog from './EmailDialog'
 import {
   Grid as GridDropTable,
   DragDropProvider,
@@ -42,6 +43,7 @@ import {
     convertFromRaw
 } from 'draft-js';
 import draftToHtml from 'draftjs-to-html'
+import { SettingsCellTwoTone } from '@material-ui/icons';
 let termsTimeout;
 var newQuote=false;
 var fetchVersion=false;
@@ -75,10 +77,15 @@ const CreatePriceBuilder=(props)=>{
     const [QData,setQData]=useState({})
     const [editRestriction,setEditRestriction]=useState(false);
     let DOAlimit=0;
+    const [DOAsetup,setDOAsetup]=useState(false)
     const [DOAapprovalreq,setDOAapprovalreq]=useState(false);
     const [sendtoCustomer,setsendtoCustomer]=useState(true);
     const [buttonMessage,setButtonMessage]=useState("Send to Customer");
+    const [QBId,setQBId]=useState("");
+    const [TandC,setTNC]=useState("");
+    const [sendEmail,setSendEmail]=useState(false)
     var chatterID="0";
+    
     
     
     useEffect(()=>{
@@ -95,10 +102,15 @@ const CreatePriceBuilder=(props)=>{
     }, [query, searchVal])
 
     
+    
     useEffect(() => {
+        console.log("TNC is:");
+        console.log(QData);
+        console.log("TandC");
+        console.log(data);
         let rows = data?.map((u) => ({
             ...u,
-            isChecked: false,
+            isChecked: u._id===QData["TNC"]?true:false,
             id: u._id,
         }));
         setDataRows([...rows]);
@@ -110,6 +122,8 @@ const CreatePriceBuilder=(props)=>{
             setQuery((prevState) => ({ ...prevState, page: params.page }));
         }
     };
+
+    
 
     const handlePageSize = (params) => {
         if (params.pageSize !== query.limit) {
@@ -141,7 +155,8 @@ const CreatePriceBuilder=(props)=>{
             .then(({ data }) => {
                 console.log("DOA limit is:");
                 console.log(data);
-                DOAlimit=data.limit;           
+                setDOAsetup(data.data.doasetup);
+                DOAlimit=data.data.limit;           
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -197,6 +212,10 @@ const CreatePriceBuilder=(props)=>{
                     // disabled={!params.canDelete}
                     checked={params.value}
                     onClick={(ev) => {
+                        if(QData["Quote_Status"]!=="Quote Generated"){
+                            setEditRestriction(true);
+                        }
+                        else{
                         const gridData = dataRows;
                         const indexOfRecord = gridData.findIndex(
                             (d) => d.id === params.row.id
@@ -215,10 +234,12 @@ const CreatePriceBuilder=(props)=>{
                         }
 
                         setDataRows([...gridData]);
-
+                        setTNC(gridData[indexOfRecord]._id);
+                        console.log(gridData[indexOfRecord]._id);
+                        handleUpdate(ColumnName,droppedColumns,gridData[indexOfRecord]._id,"","");
                         const checkedRecords = gridData.filter((d) => d.isChecked === true);
 
-                    }}
+                    }}}
                 />
             ),
             disableColumnMenu: true,
@@ -241,10 +262,14 @@ const CreatePriceBuilder=(props)=>{
     ];
 
     const GetQuoteData=(version)=>{
+        setDOAapprovalreq(false);
+        setsendtoCustomer(true);
+        setButtonMessage("Send to Customer");
         setLoaded(false);
         axiosInstance()
             .get('quote-builder?id='+id+'&version='+version)
             .then(({ data }) => {
+                console.log(data.Data);
                 QuoteData(data.Data);
                 setQData(data.Data);
                 chatterID=data.Data.chatter
@@ -255,28 +280,36 @@ const CreatePriceBuilder=(props)=>{
                 for(var i=1;i<=data.Data.latestVersion;i++){
                     totalversions.push(i);
                 }
+                
+                setQBId(data.Data._id);
                 setVersions(totalversions);
                 console.log('Chatter ID is:');
                 console.log(chatterID);
                 console.log(data.Data["TotalSellingPrice"]);
+                if(data.Data["TNC"]){
+                    setTNC(data.Data["TNC"]);
+                
+                }
                 console.log(DOAlimit);
                 console.log(data.Data["Quote_Status"]);
-                if(data.Data["TotalSellingPrice"]>DOAlimit && data.Data["Quote_Status"]==="Quote Generated"){
+                console.log(DOAsetup);
+
+                if(data.Data["TotalSellingPrice"]>DOAlimit && data.Data["Quote_Status"]==="Quote Generated" && DOAsetup){
                     console.log("Need DOA");
                     setDOAapprovalreq(true);
                     setsendtoCustomer(false);
                     setButtonMessage("Send for DOA");
                 }
-                else if(data.Data["Quote_Status"]==="Sent for DOA" || data.Data["Quote_Status"]==="Sent to Customer" || data.Data["Quote_Status"]==="Accepted by Customer" || data.Data["Quote_Status"]==="Rejected by Customer")
+                else if(data.Data["Quote_Status"]==="Sent for DOA" || data.Data["Quote_Status"]==="Sent to Customer" || data.Data["Quote_Status"]==="Accepted by Customer" || data.Data["Quote_Status"]==="Rejected by Customer" )
                 {
                     console.log("sent for DOA");
                     setDOAapprovalreq(false);
                     setsendtoCustomer(false);
 
                 }
-                else if(data.Data["Quote_Status"].includes("DOA rejected"))
+                else if(data.Data["Quote_Status"].includes("Rejected by DOA"))
                 {
-                    console.log("DOA rejected");
+                    console.log("Rejected by DOA");
                     setDOAapprovalreq(true);
                     setsendtoCustomer(false);
                     setButtonMessage("Resend for DOA");
@@ -385,28 +418,86 @@ const CreatePriceBuilder=(props)=>{
             var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
             markup=markup.replaceAll(" ","&nbsp");
             PdfDoc.html(markup,{callback: function (doc) { 
-                if(view){
+                if(view && !send){
                     doc.output('dataurlnewwindow');
                 }
-                else{
+                else if(!view && !send){
                     doc.save();
+                }
+                if(send){
+                    var PDFtoAPIData=doc.output('blob');
+                    console.log("PDF Data is");
+                    console.log(PDFtoAPIData);
+                    const formdata = new FormData();
+                    formdata.append("file", PDFtoAPIData, "Quotation.pdf");
+                    axiosInstance().post('/user/upload/',formdata,{
+                        headers: {
+                          "content-type": "multipart/form-data"
+                        }
+                      })
+                    .then(({data}) => {
+                        console.log("PDF Response is:");
+                        console.log(data);
+                        handleUpdate(ColumnName,droppedColumns,TandC,"",data.fileName);
+                        axiosInstance().post(`/doa-request/create/`+QBId)
+                            .then(({data}) => {
+                                GetQuoteData(currentVersion);
+                                setButtonMessage("Send to Customer");
+                            })
+                        .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                    });
+                    })
+                    .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    });
+        
+        
                 }
                 
               },x:40,y:finalY+lineHeight,margin:[20,10,20,10]});
         }
         else{
-        if(view && !send){
-            PdfDoc.output('dataurlnewwindow');
+            if(view && !send){
+                PdfDoc.output('dataurlnewwindow');
         }
         else if(!view && !send){
             PdfDoc.save('Quation.pdf');
         }
         if(send){
             var PDFtoAPIData=PdfDoc.output('blob');
+            console.log("PDF Data is");
             console.log(PDFtoAPIData);
+            const formdata = new FormData();
+            formdata.append("file", PDFtoAPIData, "Quotation.pdf");
+            axiosInstance().post('/user/upload/',formdata,{
+                headers: {
+                  "content-type": "multipart/form-data"
+                }
+              })
+            .then(({data}) => {
+                console.log("PDF Response is:");
+                console.log(data);
+                handleUpdate(ColumnName,droppedColumns,TandC,"",data.fileName);
+                axiosInstance().post(`/doa-request/create/`+QBId)
+                    .then(({data}) => {
+                        GetQuoteData(currentVersion);
+                        setButtonMessage("Send to Customer");
+                    })
+                .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+            })
+            .catch((err) => {
+            toastConfig.setToastConfig(err);
+            });
+
 
         }
     }
+        
+
+        
     }
 
     const handleChangeVersion = (event) => {
@@ -422,22 +513,22 @@ const CreatePriceBuilder=(props)=>{
     };
 
     const handlehiddenChange=(values)=>{
-        if(QData["Quote_Status"]==="DOA Approved"){
+        if(QData["Quote_Status"]!=="Quote Generated"){
             setEditRestriction(true);
         }
         else{
             setDroppedColumns(values);
-            handleUpdate(ColumnName,values,"");
+            handleUpdate(ColumnName,values,TandC,"","");
         }
     }
 
     const handleorder=(values)=>{
-        if(QData["Quote_Status"]==="DOA Approved"){
+        if(QData["Quote_Status"]!=="Quote Generated"){
             setEditRestriction(true);
         }
         else{
             setColName(values);
-            handleUpdate(values,droppedColumns,"");
+            handleUpdate(values,droppedColumns,TandC,"","");
         }
     }
 
@@ -454,12 +545,16 @@ const CreatePriceBuilder=(props)=>{
     const handleUpdate=(
         colorder,
         hidecol,
-        TNC
+        TNC,
+        status,
+        PDF
     )=>{
         const Update={
             Columnorder:colorder,
             HiddenColumns:hidecol,
-            status:QData["Quote_Status"]
+            TNC:TNC,
+            status:status===""?QData["Quote_Status"]:status,
+            PDF:PDF
         }
         
         axiosInstance().post(`/quote-builder/updateQuote/`+id+"?version="+currentVersion, Update)
@@ -473,27 +568,21 @@ const CreatePriceBuilder=(props)=>{
     }
 
 
-    const SendforDOA=()=>{
-        GeneratePdf(false,true);
-        var newQuoteData=QData
-        newQuoteData["ColumnOrder"]= ColumnName;
-        newQuoteData["HiddenColumns"]= droppedColumns;
-        newQuoteData["Quote_Status"]="Pending for DOA Approval";
-        newQuoteData["Comment"]="-";
-        axiosInstance()
-        .post(`/quote-builder/create`, newQuoteData)
-      .then(({data}) => {
-        toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
-          });
-        GetQuoteData(0);
-        })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const handleCases=()=>{
+        if(DOAapprovalreq){
+            GeneratePdf(false,true);
+        };
+        if(sendtoCustomer){
+            setSendEmail(true);
+        }
 
+    }
+
+    const onSuccess=()=>{
+        setSendEmail(false)
+        console.log("Success");
+        handleUpdate(ColumnName,droppedColumns,TandC,"Sent to Customer","");
+        GetQuoteData(currentVersion)
     }
 
     
@@ -512,7 +601,7 @@ const CreatePriceBuilder=(props)=>{
                 <Grid item xs={6} container justify="flex-end">
                         <Button onClick={() => GeneratePdf(true,false)} variant="contained" size="small" color="primary">View</Button> 
                         <Button onClick={() => GeneratePdf(false,false)} variant="contained" size="small" color="primary">Download</Button>
-                        <Button onClick={() => SendforDOA()} disabled={!DOAapprovalreq && !sendtoCustomer} variant="contained" size="small" color="primary">{buttonMessage}</Button>
+                        <Button onClick={() => handleCases()} disabled={!DOAapprovalreq && !sendtoCustomer} variant="contained" size="small" color="primary">{buttonMessage}</Button>
                         <Button onClick={() => cloneQuote()} variant="contained" size="small" color="primary">Clone</Button>
                 </Grid>
             </Grid>
@@ -628,12 +717,19 @@ const CreatePriceBuilder=(props)=>{
                  {editRestriction &&
                 <ConfirmationDialog
                     open={editRestriction}
-                    message={`Cannot change Quote once sent for DOA process or to Customer.Please clone the Quot to make changes.`}
+                    message={`Cannot change Quote once sent for DOA process or to Customer.Please clone the Quote to make changes.`}
                     onClose={() => setEditRestriction(false)}
                     onOk={() => setEditRestriction(false)}
                 />
             }
-                 </div>           
+            </div>  
+            <div>
+                {sendEmail && <EmailDialog
+                    handleClose={()=>setSendEmail(false)}
+                    success={onSuccess}
+                    id={QData["_id"]}/>
+                }
+            </div>         
 
         </Layout>
 
