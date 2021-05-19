@@ -30,7 +30,8 @@ const DOAApproval=()=>{
     const [PDFName,setPDFName]=useState("");
     const [buttontext,setButton]=useState("Accept");
     const [QStatus,setQStatus]=useState(true);
-    var DOALimit=0
+    var DOALimit=0;
+    var DOAsetup=false;
 
 
     useEffect(()=>{
@@ -47,7 +48,8 @@ const DOAApproval=()=>{
             .then(({ data }) => {
                 console.log("DOA limit is:");
                 console.log(data);
-                DOALimit=data.limit;           
+                DOAsetup=data.data.doasetup;
+                DOALimit=data.data.limit;           
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -66,7 +68,7 @@ const DOAApproval=()=>{
                     setColumns(data.Columns);
                     setRows(data.Rows);
                     setSellingPrice(data.TotalSellingPrice);
-                    if(DOALimit<data.TotalSellingPrice){
+                    if(DOALimit<data.TotalSellingPrice && DOAsetup){
                         setneedDOA(true);
                         setButton("Send for DOA");
                     }
