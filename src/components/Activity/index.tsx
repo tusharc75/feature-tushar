@@ -24,7 +24,7 @@ import { GoNote } from "react-icons/go";
 import { HiOutlineMail } from "react-icons/hi";
 import { FiPlusSquare } from "react-icons/fi";
 import { AiOutlinePaperClip } from 'react-icons/ai'
-import { Tooltip } from '@material-ui/core'
+import { Chip } from '@material-ui/core'
 import Attachments from './Attachments/index'
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -56,6 +56,15 @@ const Activity = (props) => {
   const [type, setType] = useState(null);
   const [open, setOpen] = useState(false);
   const [emailUsersOptions, setEmailUsersOptions] = useState([])
+  const [totalCount, setTotalCount] = useState({
+    Task: 0,
+    Event: 0,
+    Case: 0,
+    Note: 0,
+    Email: 0,
+    Attachment: 0
+  })
+  console.log('totalCount', totalCount)
 
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
@@ -131,6 +140,12 @@ const Activity = (props) => {
         toastConfig.setToastConfig(err)
       });
   }
+  const handleSetCount = (name, count) => {
+    if (name) {
+      setTotalCount((prevState) => ({ ...prevState, [name]: count }))
+    }
+  }
+
 
   return (
     <Box>
@@ -162,7 +177,7 @@ const Activity = (props) => {
                         color="primary"
                         className="d-flex align-items-center gap-2"
                       >
-                        {getIcon(data)} {data}
+                        {getIcon(data)} {data}  ({totalCount[data]})
                       </Typography>
                     </Box>
                   </Box>
@@ -182,30 +197,35 @@ const Activity = (props) => {
                 <Task
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {type === "Event" && data === "Event" ? (
                 <Event
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {type === "Case" && data === "Case" ? (
                 <Case
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {type === "Note" && data === "Note" ? (
                 <Note
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {type === "Email" && data === "Email" ? (
                 <Email
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {
@@ -213,6 +233,7 @@ const Activity = (props) => {
                   <Attachments
                     relatedTo={relatedTo}
                     handleActivityRefresh={handleActivityRefresh}
+                    onSetCount={handleSetCount}
                   />) : null
               }
             </Box>

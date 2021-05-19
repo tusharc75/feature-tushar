@@ -16,7 +16,7 @@ import { ListRelatedTo } from '../Helpers/ListRelatedTo'
 import { ViewAll } from '../Helpers/ViewAll'
 import { isEmpty } from "lodash";
 
-export const Email = ({ relatedTo, handleActivityRefresh }) => {
+export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
 
     const [open, setOpen] = useState(false);
     const [emails, setEmails] = useState(null);
@@ -28,10 +28,11 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
     }, []);
 
     const fetchEmail = async () => {
-        try{
-         const emails =  await GetEmail(JSON.stringify(relatedTo))
-         setEmails(emails.data)
-        }catch(e) {
+        try {
+            const emails = await GetEmail(JSON.stringify(relatedTo))
+            setEmails(emails.data)
+            onSetCount("Email", emails.data.length)
+        } catch (e) {
             console.log(e);
         }
     };
@@ -82,7 +83,7 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
                         <Box key={_email._id} className="activity">
                             <Box>
                                 <Grid container>
-                                <Grid item xs={10} className="d-flex align-items-center gap-1"> 
+                                    <Grid item xs={10} className="d-flex align-items-center gap-1">
                                         <Typography variant="subtitle2">{_email?.subject}</Typography>
                                     </Grid>
                                     <Grid item xs={2} container justify="flex-end" >

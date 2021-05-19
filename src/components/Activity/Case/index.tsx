@@ -14,7 +14,7 @@ import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 
-export const Case = ({ relatedTo, handleActivityRefresh }) => {
+export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
   const [cases, setCases] = useState(null);
   const [caseId, setCaseId] = useState(null);
@@ -30,6 +30,7 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
     await GetCase(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setCases(data);
+        onSetCount("Case", data.length)
         setLoading(false);
       })
       .catch((err) => {
@@ -63,7 +64,7 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
         fetchCash();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleClose = () => {

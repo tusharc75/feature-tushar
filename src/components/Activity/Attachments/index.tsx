@@ -14,7 +14,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 
-export default function Attachments({ relatedTo, handleActivityRefresh }) {
+export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
 
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false)
@@ -34,6 +34,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh }) {
         axiosInstance().get(api)
             .then(({ data: { data } }) => {
                 setLoading(false);
+                onSetCount("Attachment", data.length)
                 setAttachments(data)
             })
             .catch((error) => {
