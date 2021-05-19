@@ -10,7 +10,6 @@ import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { productCategoryPage } from '../../routes/ProductCategory'
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -20,6 +19,8 @@ import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
+import CreateProductCategory from "./CreateProductCategory";
+import routes from "../../components/Helpers/Routes";
 import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 const ProductCategory = () => {
@@ -30,6 +31,8 @@ const ProductCategory = () => {
     const [productCategory, setProductCategory] = useState([]);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
+    const [open, setOpen] = useState(false);
+    const [productCategoryId, setProductCategoryId] = useState(null);
 
     useEffect(() => {
         fetchProductCategory();
@@ -37,7 +40,7 @@ const ProductCategory = () => {
 
     const fetchProductCategory = () => {
         setLoading(true)
-        axiosInstance().get(`/productcategory`).then(({ data: { data } }) => {
+        axiosInstance().get(`/product-category`).then(({ data: { data } }) => {
             setProductCategory(data);
             setLoading(false)
         }).catch((error) => {
@@ -46,7 +49,7 @@ const ProductCategory = () => {
     };
 
     const handleDelete = () => {
-        axiosInstance().delete(`/productcategory/` + deleteRecord._id).then(() => {
+        axiosInstance().delete(`/product-category/` + deleteRecord._id).then(() => {
             fetchProductCategory();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
@@ -63,9 +66,10 @@ const ProductCategory = () => {
             headerName: "Product Category",
             width: 300,
             renderCell: (params) => (
-                <Link className="link" to={`${productCategoryPage.path}/${params.row.id}`} >
+                <Link className="link" onClick={() => { setProductCategoryId(params.row.id); setOpen(true); }
+                } >
                     {params.row.name}
-                </Link>
+                </Link >
             )
         },
         {
@@ -128,24 +132,22 @@ const ProductCategory = () => {
         }
     ];
 
-    const CreateNew = () => {
-        history.push({ pathname: "/product-category/0" })
-    }
+
 
     return (<Layout>
         <Grid container>
             <Grid item md={12} sm={12} xs={12}>
-                <CustomBreadCrumbs routes={[{ title: "Product Category" }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.productCategory.title }]} />
             </Grid>
         </Grid>
         <CustomContainer>
             <div className="header-panel">
                 <Grid container>
                     <Grid item xs={6} className="d-flex align-items-center gap-1">
-                        <GiAbstract055 /> <span className="listingHeader">Product Category </span>
+                        <GiAbstract055 /> <span className="listingHeader">{routes.productCategory.title}</span>
                     </Grid>
                     <Grid xs={6} container justify="flex-end">
-                        <Button onClick={CreateNew} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                        <Button onClick={() => { setProductCategoryId(null); setOpen(true); }} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                     </Grid>
                 </Grid>
             </div>
@@ -167,11 +169,12 @@ const ProductCategory = () => {
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
-                    message={`Are you sure, you want to delete product ${deleteRecord?.name} ?`}
+                    message={`Are you sure, you want to delete product category ${deleteRecord?.name} ?`}
                     onClose={() => setShowDeleteConfirmBox(false)}
                     onOk={handleDelete}
                 />
             }
+            {open && <CreateProductCategory productCategoryId={productCategoryId} handleClose={() => { setOpen(false); fetchProductCategory() }} />}
         </CustomContainer>
     </Layout>
     );

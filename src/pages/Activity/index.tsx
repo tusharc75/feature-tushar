@@ -58,7 +58,7 @@ const Activity = () => {
     }
   }, [type, referenceId]);
 
-  const tabs = ["Board", "Roadmap", "Calendar"];
+  const tabs = ["Board", "Roadmap"];
   const handleChangeFilter = (value) => {
     setFilter(value);
   };
@@ -67,7 +67,12 @@ const Activity = () => {
     <Layout>
       <Grid container direction="row">
         <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { title: "Activity", path: "/activity" },
+              { title: capitalize(type) },
+            ]}
+          />
         </Grid>
         <CustomContainer>
           <Box className={classes.activityHeader}>
@@ -85,7 +90,6 @@ const Activity = () => {
           <Box className={classes.activityContainer}>
             {viewType === 0 && <Board type={type} filter={filter} activityId={activityId} />}
             {viewType === 1 && <Roadmap type={type} filter={filter} activityId={activityId} />}
-            {viewType === 2 && <Calendar type={type} filter={filter} activityId={activityId} />}
           </Box>
         </CustomContainer>
         {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}

@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Grid,
-  Dialog,
-  Button,
-  TextField,
-  Typography,
-  Tooltip,
-} from "@material-ui/core";
+import { Box, Grid, Typography, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { Add } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
@@ -15,15 +7,13 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { isEqual, kebabCase, camelCase } from "lodash";
-import statusList from "../../Helpers/statusList";
 import { isMobile, isTablet } from "react-device-detect";
+
+import statusList from "../../Helpers/statusList";
 import { GetBoard } from "../../../../axios/activity";
 import Loader from "../../../../components/Loader";
 import { BoardList } from "./BoardList";
 import axiosInstance from "../../../../axios/axiosInstance";
-import { CreateTask } from "../../Task/CreateTask";
-import { CreateEvent } from "../../Event/CreateEvent";
-import { CreateCase } from "../../Case/CreateCase";
 
 const useStyles = makeStyles((theme) => ({
   block: {
@@ -42,8 +32,6 @@ const Board = ({ type, filter, activityId }) => {
   const [activities, setActivities] = useState(null);
   const classes = useStyles();
   const [resource, setResource] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
-  const [createType, setCreateType] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
@@ -69,7 +57,7 @@ const Board = ({ type, filter, activityId }) => {
       .then(({ data: { data } }) => {
         if (data.length) {
           const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData);
+          setResourceData(mappedData || []);
         }
         setLoadingResources(false);
       })
@@ -111,17 +99,6 @@ const Board = ({ type, filter, activityId }) => {
       .catch((err) => console.log(JSON.stringify(err)));
   };
 
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-    setCreateType(type);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setCreateType(null);
-    fetchBoard();
-  };
-
   const resourceOptions = [
     "Customer Account",
     "Customer Contact",
@@ -153,11 +130,10 @@ const Board = ({ type, filter, activityId }) => {
           name: `${data.accountName}`,
           id: data._id,
         };
-      case "customer-contact" || "supplier-contact":
+      case "customer-contact":
         return {
           name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
           id: data._id,
-          type: camelCase(resource),
         };
       case "supplier-contact":
         return {
@@ -172,26 +148,6 @@ const Board = ({ type, filter, activityId }) => {
   return activities ? (
     <>
       <Box display="flex" pb={1}>
-        <Tooltip
-          title={
-            Boolean(!resource)
-              ? "Select Resource"
-              : !selectedResourceData
-                ? `Select ${resource}`
-                : ""
-          }
-        >
-          <span>
-            <Button
-              disabled={Boolean(!resource) || !selectedResourceData}
-              startIcon={<Add />}
-              onClick={handleOpenDialog}
-            >
-              Create {type}
-            </Button>
-          </span>
-        </Tooltip>
-        <Box mx={1} />
         <Autocomplete
           options={resourceOptions}
           getOptionLabel={(option) => option}
@@ -246,6 +202,8 @@ const Board = ({ type, filter, activityId }) => {
                   </Typography>
                 </Box>
                 <BoardList
+                  selectedResource={selectedResourceData}
+                  resource={resource}
                   status={data.status}
                   activity={activities.filter(function (o) {
                     return o.status === data.status;
@@ -260,50 +218,6 @@ const Board = ({ type, filter, activityId }) => {
         </Grid>
 
       </DndProvider>
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        fullWidth
-        maxWidth="md"
-      >
-        {createType === "task" ? (
-          <CreateTask
-            taskId={null}
-            relatedTo={[
-              {
-                type: camelCase(resource),
-                referenceId: selectedResourceData.id,
-                access: true,
-              },
-            ]}
-            handleClose={handleCloseDialog}
-          />
-        ) : createType === "event" ? (
-          <CreateEvent
-            eventId={null}
-            relatedTo={[
-              {
-                type: camelCase(resource),
-                referenceId: selectedResourceData.id,
-                access: true,
-              },
-            ]}
-            handleClose={handleCloseDialog}
-          />
-        ) : createType === "case" ? (
-          <CreateCase
-            caseId={null}
-            relatedTo={[
-              {
-                type: camelCase(resource),
-                referenceId: selectedResourceData.id,
-                access: true,
-              },
-            ]}
-            handleClose={handleCloseDialog}
-          />
-        ) : null}
-      </Dialog>
     </>
   ) : (
     <Loader text="" />

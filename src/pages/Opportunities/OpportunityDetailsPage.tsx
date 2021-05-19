@@ -17,7 +17,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
 import _ from "lodash";
 import {
-  customerAccount, supplierAccount, yyyyMMDD, currencyCodeToSymbol,
+  customerAccount, supplierAccount, yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
   getObjKeysWithValues, opportunityProcessFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
@@ -26,7 +26,6 @@ import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import currencies from "../../constants/currency_with_country.json";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
 
@@ -44,10 +43,9 @@ function OpportunityDetailsPage() {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [opportunityFields, setOpportunityFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
-  const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex] = useState(0);
 
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [steps, setSteps] = useState([]);
@@ -74,9 +72,10 @@ function OpportunityDetailsPage() {
     setOpenUpdateDialog(true);
   };
 
-  const closeUpdateDialog = () => {
-    setOpenUpdateDialog(false);
-  };
+  // const closeUpdateDialog = () => {
+  //   setOpenUpdateDialog(false);
+  // };
+
   let { id } = useParams();
 
   const [opportunityPermissions, setOpportunityPermissions] = useState({
@@ -113,9 +112,9 @@ function OpportunityDetailsPage() {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == opportunityProcessFieldName.toLowerCase());
+      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === opportunityProcessFieldName.toLowerCase());
       if (processSteps && processSteps.isRead && opportunityData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == opportunityData[opportunityProcessFieldName]) + 1;
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === opportunityData[opportunityProcessFieldName]) + 1;
         setActiveStep(currentStepToShow);
       }
     }
@@ -131,7 +130,12 @@ function OpportunityDetailsPage() {
         .then(({ data: { data } }) => {
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
-          handleAllowToEditList(data);
+
+          setAllowedToEdit([...data.collaborator ?? [], data.owner].some(
+            (d) => d?.optionValue === user?.user?._id
+          ))
+
+          // handleAllowToEditList(data);
           setCopyOfOpportunityDataToUpdate(data);
           handleContactsEmails(data)
 
@@ -158,10 +162,10 @@ function OpportunityDetailsPage() {
             supplierContacts: true,
             customerContacts: true
           }
-          if (data?.staticData?.supplierContacts && data.staticData.supplierContacts.length == 0) {
+          if (data?.staticData?.supplierContacts && data.staticData.supplierContacts.length === 0) {
             tempExpanded.supplierContacts = false
           }
-          if (data?.staticData?.customerContacts && data.staticData.customerContacts.length == 0) {
+          if (data?.staticData?.customerContacts && data.staticData.customerContacts.length === 0) {
             tempExpanded.customerContacts = false
           }
           setExpanded(tempExpanded)
@@ -193,10 +197,11 @@ function OpportunityDetailsPage() {
 
           let assignedContacts = opportunityData.staticData?.supplierContacts ?? []
           const updatedContacts = [];
-          data.map(d => {
+          data.forEach(d => {
             d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
             updatedContacts.push(d);
           })
+
           setSupplierContacts(updatedContacts)
           setLoadingSupplierAccounts(false)
           if (!useAccountList) setShowAddSupplierContactsDialog(showDialog);
@@ -232,7 +237,7 @@ function OpportunityDetailsPage() {
   }
 
   const handleContactSelection = (e, id) => {
-    const indexOfContactToChange = supplierContacts.findIndex(d => d._id == id);
+    const indexOfContactToChange = supplierContacts.findIndex(d => d._id === id);
     supplierContacts[indexOfContactToChange].isChecked = e.target.checked;
     setSupplierContacts([...supplierContacts]);
   };
@@ -277,7 +282,7 @@ function OpportunityDetailsPage() {
               setSupplierAccountOptions(fieldData.option.map(option => ({ ...option, isSelected: false })))
             }
           }
-          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == opportunityProcessFieldName.toLowerCase());
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === opportunityProcessFieldName.toLowerCase());
           if (processSteps && processSteps.isRead) {
             setSteps(processSteps.fieldData.option.map(m => {
               return {
@@ -290,30 +295,6 @@ function OpportunityDetailsPage() {
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
-    }
-  };
-
-  const handleAllowToEditList = (opportunityDetails) => {
-    const userId = user?.user?._id;
-    let allowToEdit = false;
-
-    if (userId) {
-      allowToEdit =
-        opportunityDetails.owner?.optionValue &&
-        opportunityDetails.owner.optionValue === userId;
-
-      if (
-        !allowToEdit &&
-        opportunityDetails.collaborator &&
-        opportunityDetails.collaborator.length > 0
-      ) {
-        allowToEdit =
-          opportunityDetails.collaborator.findIndex(
-            (d) => d.optionValue === userId
-          ) > -1;
-      }
-
-      if (allowToEdit) setAllowedToEdit(allowToEdit);
     }
   };
 
@@ -340,30 +321,32 @@ function OpportunityDetailsPage() {
       setShowConfirmBox(false);
     }
   };
+
   const goBackToListing = () => {
     history.push({
       pathname: routes.opportunity.path,
     });
   };
 
-  const quickLinks = [
-    {
-      label: "Call a log",
-      count: 0,
-    },
-    {
-      label: "New Task",
-      count: 0,
-    },
-    {
-      label: "Email",
-      count: 0,
-    },
-    {
-      label: "New Event",
-      count: 0,
-    },
-  ];
+  // const quickLinks = [
+  //   {
+  //     label: "Call a log",
+  //     count: 0,
+  //   },
+  //   {
+  //     label: "New Task",
+  //     count: 0,
+  //   },
+  //   {
+  //     label: "Email",
+  //     count: 0,
+  //   },
+  //   {
+  //     label: "New Event",
+  //     count: 0,
+  //   },
+  // ];
+
   const handleUpdateOpportunity = (supplierAccounts) => {
 
     let newFields = [];
@@ -426,12 +409,8 @@ function OpportunityDetailsPage() {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {handleAllowToEditList ? (
+                  {allowedToEdit ? (
                     <Button
-                      disabled={
-                        opportunityData.owner.optionValue !== user.user._id &&
-                        opportunityData.collaborator.length === 0
-                      }
                       variant="contained"
                       color="primary"
                       size="small"
@@ -461,7 +440,7 @@ function OpportunityDetailsPage() {
                   <div className="actionview">
                     <div className="d-flex justify-content-center">
                       {
-                        activeStep != steps.length ?
+                        activeStep !== steps.length ?
                           isProcessing ? <Button variant="contained"
                             color="primary"
                             size="small"
@@ -534,12 +513,10 @@ function OpportunityDetailsPage() {
                           onAddContact={() => {
                             fetchSupplierContactData(true);
                           }}
-                          onSetExpanded={(key) => {
+                          onSetExpanded={() => {
                             setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
                           }}
-                          contactsRoute={routes.supplierContact.path}
                           recordsPerLine={recordsPerLine}
-
                         />
                       </Box>
                     }
@@ -554,12 +531,10 @@ function OpportunityDetailsPage() {
                           onAddContact={() => {
                             fetchCustomerContactData(true);
                           }}
-                          onSetExpanded={(key) => {
+                          onSetExpanded={() => {
                             setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
                           }}
-                          contactsRoute={routes.customerContact.path}
                           recordsPerLine={recordsPerLine}
-
                         />
                       </Box>
                     }

@@ -10,9 +10,9 @@ import {
 import { Link } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import { PERMISSION } from "../../constants/Roles";
+// import { PERMISSION } from "../../constants/Roles";
 
-const rolesPermissions = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
+// const rolesPermissions = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -76,7 +76,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                   {permissions.user.isUpdate && (
                     <ListItemSecondaryAction
                       title={
-                          currentUserId === loggedInUser._id
+                        currentUserId === loggedInUser._id
                           ? "Role can not be deleted"
                           : "Unassign Role"
                       }

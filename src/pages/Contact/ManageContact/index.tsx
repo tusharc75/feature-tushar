@@ -13,7 +13,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAccountDialog from '../../Account/ManageAccount/index'
 
-export default function ManageContactMain(props) {
+export default function ManageContactDialog(props) {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -25,7 +25,9 @@ export default function ManageContactMain(props) {
     contactApi,
     account = {},
     userId = null,
-    isRedirectToDetailPage = true
+    isRedirectToDetailPage = true,
+    contactId = null,
+    handleSubmit = null
   } = props;
   const { accountApi, accountResource, accountPermission, accountRoute } = account
   const {
@@ -43,7 +45,20 @@ export default function ManageContactMain(props) {
   const history = useHistory();
 
   useEffect(() => {
-    getContactFields();
+    const { entityData } = props
+    if (entityData && entityData?.fields && entityData?.initialValues) {
+      setEntityData({
+        fields: entityData.fields,
+        initialValues: entityData.initialValues,
+      })
+      entityData.fields.some(currentField => {
+        if (currentField.fieldName === "accountName") {
+          setAccountSource(currentField.option)
+          return true
+        }
+      })
+    }
+    else getContactFields();
   }, [user]);
 
   const getContactFields = () => {
@@ -85,7 +100,7 @@ export default function ManageContactMain(props) {
       .then(({ data }) => {
         const newId = data.data._id;
         onClose({ fetch: true });
-        onSuccess({ fetch: true });
+        onSuccess({ fetch: true, id:newId });
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -138,13 +153,16 @@ export default function ManageContactMain(props) {
       <ManageContact
         loading={loading}
         open={open}
-        isNew={true}
+        isNew={contactId ? false : true}
         onClose={onClose}
         entityData={entityData}
-        handleSubmit={handleCreateContact}
+        handleSubmit={handleSubmit ? handleSubmit : handleCreateContact}
         accountSource={accountSource}
         onCreateAccount={() => setShowAccountDialog(true)}
+        accountResource={accountResource}
+        contactResource={contactResource}
         accountId={newAddedAccountId}
+        contactId={contactId}
       />
       {
         showAccountDialog ?

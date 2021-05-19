@@ -166,7 +166,8 @@ const ProductCost = () => {
                                     setSection={setSection}
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
-                                    isCustomField={true} />
+                                    isCustomField={true}
+                                />
                             </Box>
                         </Form>)}
                 </Formik>

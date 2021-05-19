@@ -206,7 +206,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     setOpen(tempdata);
   };
 
-  const activityTabs = ["Task", "Case", "Event", "Note", "Email"];
+  const activityTabs = ["Task", "Case", "Event", "Note", "Email", "Attachment"];
 
   return (
     <div className={classes.root}>

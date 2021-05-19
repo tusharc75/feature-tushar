@@ -250,6 +250,14 @@ const LeadDetailsPage = () => {
           leadApi={leadApi}
         />
       )}
+      {showConfirmBox ? (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this Lead`}
+          onClose={() => setShowConfirmBox(false)}
+          onOk={handleDeleteLead}
+        />
+      ) : null}
       <Layout>
 
         <Grid container direction="row">

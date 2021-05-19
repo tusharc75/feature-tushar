@@ -189,7 +189,7 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
                             </Box>
                         </Grid>
                         <Grid item xs={2} container justify="flex-end">
-                            <IconButton disabled={!data.editAble} aria-label="setting" onClick={handleClick} >
+                            <IconButton aria-label="setting" onClick={handleClick} >
                                 <MoreHorizIcon fontSize="small" />
                             </IconButton>
                             <Menu
@@ -200,7 +200,7 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
                                 onClose={handleClose}
                             >
                                 <MenuItem onClick={() => handleClickOpenPropertie(data)}  >Edit Properties</MenuItem>
-                                <MenuItem onClick={() => deleteField(data._id)} >Delete</MenuItem>
+                                {data.editAble && <MenuItem onClick={() => deleteField(data._id)} >Delete</MenuItem>}
                             </Menu>
                             {propertie_open ? <Properties
                                 handleClose={handleClosePropertie}

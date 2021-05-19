@@ -95,43 +95,44 @@ const CreateFormBuilder = (props) => {
             <CustomBreadCrumbs routes={[routes.formBuilder, { title: "Resource" }]} />
         </Grid>
         <CustomContainer>
-        {section ?
-            <Fragment>
-                <Box p={1} pb={0} bgcolor="white" >
-                    <Grid container spacing={1}>
-                        <Grid item xs={3}>
-                            <Typography variant="caption">Brand </Typography>
-                            <Typography variant="body1">{brandName}</Typography>
+            {section ?
+                <Fragment>
+                    <Box p={1} pb={0} bgcolor="white" >
+                        <Grid container spacing={1}>
+                            <Grid item xs={3}>
+                                <Typography variant="caption">Brand </Typography>
+                                <Typography variant="body1">{brandName}</Typography>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Typography variant="caption">Resource </Typography>
+                                <Typography variant="body1">{resource}</Typography>
+                            </Grid>
+                            <Grid item xs={6} container justify="flex-end">
+                                <Box>
+                                    <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant="contained" >
+                                        Save
+                                        {isUpdating && <CircularProgress size={24} />}
+                                    </Button>
+                                </Box>
+                                <Box ml={1} >
+                                    <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/form-builder" })} >Close</Button>
+                                </Box>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={3}>
-                            <Typography variant="caption">Resource </Typography>
-                            <Typography variant="body1">{resource}</Typography>
-                        </Grid>
-                        <Grid item xs={6} container justify="flex-end">
-                            <Box>
-                                <Button disabled={isUpdating} color="primary" size="small" onClick={handleSave} variant="contained" >
-                                    Save
-                                    {isUpdating && <CircularProgress size={24} />}
-                                </Button>
-                            </Box>
-                            <Box ml={1} >
-                                <Button color="primary" variant="contained" size="small" onClick={() => history.push({ pathname: "/form-builder" })} >Close</Button>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Box>
-                <Box >
-                    <FormBuilder
-                        section={section}
-                        setSection={setSection}
-                        deleteField={deleteField}
-                        setDeleteField={setDeleteField}
-                        isCustomField={false} />
-                </Box>
-            </Fragment>
-            :
-            <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-        }
+                    </Box>
+                    <Box >
+                        <FormBuilder
+                            section={section}
+                            setSection={setSection}
+                            deleteField={deleteField}
+                            setDeleteField={setDeleteField}
+                            isCustomField={false}
+                        />
+                    </Box>
+                </Fragment>
+                :
+                <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+            }
         </CustomContainer>
     </Layout >
     );

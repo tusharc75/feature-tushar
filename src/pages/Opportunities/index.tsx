@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
   IconButton,
@@ -96,7 +95,10 @@ const Opportunities = () => {
     if (permissions && permissions[opportunityResource]) {
       setOpportunityPermissions(permissions[opportunityResource]);
     }
-    // eslint-disable-next-line
+
+    return () => {
+      setOpportunityPermissions(null)
+    }
   }, [permissions]);
 
   useEffect(() => {
@@ -115,7 +117,11 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-    // eslint-disable-next-line
+    
+
+    return () => {
+      setRenderCount(0);
+    }
   }, [query, selectedType, selectedEntity, accountDetails]);
 
   useEffect(() => {
@@ -133,7 +139,11 @@ const Opportunities = () => {
       return res;
     });
     setDataRows([...rows]);
-    // eslint-disable-next-line
+
+    return () => {
+      setDataRows([])
+    }
+
   }, [opportunityData]);
 
   const handleSingleDeleteOpportunity = async () => {
@@ -512,10 +522,10 @@ const Opportunities = () => {
     if (params.filterModel.items[0].value) {
       let field = params.filterModel.items[0].columnField
 
-      if (params.filterModel.items[0].columnField == 'createdBy') {
+      if (params.filterModel.items[0].columnField === 'createdBy') {
         field = "createdBy.user"
       }
-      if (params.filterModel.items[0].columnField == 'updatedBy') {
+      if (params.filterModel.items[0].columnField === 'updatedBy') {
         field = "updatedBy.user"
       }
       const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])

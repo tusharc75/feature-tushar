@@ -7,7 +7,7 @@ import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
@@ -26,6 +26,7 @@ import { AiOutlineMail } from 'react-icons/ai';
 import { HiOutlineUser } from 'react-icons/hi';
 import { AiOutlinePhone } from 'react-icons/ai';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
+
 const Accordion = withStyles({
     root: {
         border: "1px solid rgba(0, 0, 0, .125) !important",

@@ -8,10 +8,8 @@ import { profileMenuItems } from '../../constants/helpers'
 import ManageProfile from './components/ManageProfile'
 import NotifiationPreference from './components/NotifiationPreference'
 import axiosInstance from "../../axios/axiosInstance";
-import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomContainer from '../../components/CustomContainer';
-const _ = require('lodash')
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -35,7 +33,6 @@ const useStyles = makeStyles((theme) => ({
 export default function ProfilePage(props) {
 
     const { profileBreadCrumbs } = props
-    const { state: { user }, dispatch }: any = useData();
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
     const [userData, setUserData] = useState(null)
     const [otherDetails, setOtherDetails] = useState(null)
@@ -50,7 +47,7 @@ export default function ProfilePage(props) {
     }
 
     useEffect(() => {
-        if (userFields.length == 0) {
+        if (userFields.length === 0) {
             getUserFields()
             fetchUserData()
         }
