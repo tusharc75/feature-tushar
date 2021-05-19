@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -83,7 +84,7 @@ export default function LeadAccordionInUserDetailPage({
 }) {
     const history = useHistory();
     const {
-        state: { permissions },
+        state: { permissions, selectedEntity },
     }: any = useData();
 
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
@@ -177,27 +178,37 @@ export default function LeadAccordionInUserDetailPage({
                                                     <Card className="accountCard">
                                                         <CardContent className="detailListing">
 
-                                                                <Grid item xs={12} sm={8}>
-                                                                    <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
-                                                                        <Typography >{obj?.firstName}  {obj?.lastName} </Typography>
-                                                                    </Link>
-                                                                </Grid>
-                                                            
+                                                            <Grid item xs={12} sm={8}>
+                                                                {
+                                                                    obj.entity === selectedEntity ? (
+                                                                        <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
+                                                                            <Typography >{obj?.firstName}  {obj?.lastName} </Typography>
+                                                                        </Link>
+
+                                                                    ) : <span className="d-flex gap-2 align-items-center">
+                                                                        <Typography>{obj.firstName} {obj.lastName}</Typography> <Tooltip title={`${obj.firstName} ${obj.lastName} belongs to different entity`}>
+                                                                            <InfoOutlinedIcon fontSize="small" />
+                                                                        </Tooltip>
+                                                                    </span>
+                                                                }
+
+                                                            </Grid>
+
 
                                                             <Grid container>
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.firstName ? <DisplayData label='Name' icon={<HiOutlineUser size={20}/>} value={[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} /> : ''
+                                                                        obj?.firstName ? <DisplayData label='Name' icon={<HiOutlineUser size={20} />} value={[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.status ? <DisplayData label='Status' icon={<BiCustomize size={20}/>} value={obj?.status ?? ''} /> : ''
+                                                                        obj?.status ? <DisplayData label='Status' icon={<BiCustomize size={20} />} value={obj?.status ?? ''} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12}>
                                                                     {
-                                                                        obj?.company ? <DisplayData label='Company' icon={<BsBuilding size={20}/>} value={obj?.company ?? ''} /> : ''
+                                                                        obj?.company ? <DisplayData label='Company' icon={<BsBuilding size={20} />} value={obj?.company ?? ''} /> : ''
                                                                     }
                                                                 </Grid>
                                                             </Grid>

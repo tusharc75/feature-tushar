@@ -13,7 +13,9 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Tooltip,
 } from "@material-ui/core";
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { Delete } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -33,6 +35,7 @@ import NewOpportunityProjectSales from "./NewOpportunityProjectSales";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { useData } from '../../StateProvider/Provider';
 
 const Accordion = withStyles({
   root: {
@@ -106,6 +109,9 @@ export default function OpportunityAccordianProjectSales({
   users,
 }) {
   const history = useHistory();
+  const {
+    state: { selectedEntity },
+  }: any = useData();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
   switch (recordsPerLine) {
@@ -262,14 +268,24 @@ export default function OpportunityAccordianProjectSales({
                           <CardContent className="detailListing">
                             <Grid container className="detailCardHeader">
                               <Grid item xs={12} sm={8}>
-                                <Link
-                                  className="link"
-                                  to={`${routes.opportunityDetail.path}/${obj._id}`}
-                                >
-                                  <Typography>
-                                    {obj?.opportunityName}{" "}
-                                  </Typography>
-                                </Link>
+                                {
+                                  obj.entity === selectedEntity ? (
+                                    <Link
+                                      className="link"
+                                      to={`${routes.opportunityDetail.path}/${obj._id}`}
+                                    >
+                                      <Typography>
+                                        {obj?.opportunityName}{" "}
+                                      </Typography>
+                                    </Link>
+
+                                  ) : <span className="d-flex gap-2 align-items-center">
+                                    <Typography>{obj.opportunityName}</Typography> <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
+                                      <InfoOutlinedIcon fontSize="small" />
+                                    </Tooltip>
+                                  </span>
+                                }
+
                               </Grid>
                               <Grid item xs={12} sm={4}>
                                 {obj?.amount ? (
@@ -284,7 +300,7 @@ export default function OpportunityAccordianProjectSales({
                                       &nbsp;{obj?.amount ?? ""}
                                     </Typography>
                                     {(permissions.isUpdate && isTeamMember) ||
-                                    isManager ? (
+                                      isManager ? (
                                       <>
                                         <Box ml={1} />
                                         <IconButton
