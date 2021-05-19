@@ -98,17 +98,6 @@ const Note = () => {
                 <CustomBreadCrumbs routes={[{ title: "Note" }]} />
             </Grid>
         </Grid>
-        <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
-            <Box mb={2}>
-                <Grid container>
-                    <Grid item xs={8}>
-                        <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
-                    </Grid>
-                    <Grid xs={4} container justify="flex-end">
-                    </Grid>
-                </Grid>
-            </Box>
-        </Box>
 
         <CustomContainer>
             <div className="header-panel">
