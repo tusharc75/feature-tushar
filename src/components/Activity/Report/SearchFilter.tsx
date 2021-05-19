@@ -67,6 +67,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
   return (
     <Autocomplete
       multiple={true}
+      size="small"
       fullWidth
       loading={loading}
       options={options}

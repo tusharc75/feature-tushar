@@ -36,8 +36,6 @@ const EntityDetailsPage = () => {
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [roles, setRoles] = useState([]);
-  const [rolesLoading, setRolesLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [entityData, setEntityData] = useState(null);
@@ -61,7 +59,6 @@ const EntityDetailsPage = () => {
     if (id) {
       getEntityFields();
       fetchEntityData();
-      fetchEntityRoles();
       fetchEntityUser();
     }
     // eslint-disable-next-line
@@ -82,20 +79,6 @@ const EntityDetailsPage = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const fetchEntityRoles = () => {
-    setRolesLoading(true);
-    axiosInstance()
-      .get(`/role?entity=${id}`)
-      .then(({ data: { data } }) => {
-        setRoles(data);
-        setRolesLoading(false);
-      })
-      .catch((err) => {
-        setRolesLoading(false);
-        toastConfig.setToastConfig(err);
-      });
   };
 
   const fetchEntityUser = () => {
@@ -191,32 +174,6 @@ const EntityDetailsPage = () => {
         toastConfig.setToastConfig(error);
         setUpdating(false);
       });
-  };
-
-  const handleUnassignRole = (roleRec) => {
-    setShowConfirmBox(true);
-    setDeleteRoleRec(roleRec);
-  };
-
-  const unassignRole = () => {
-    if (deleteRoleRec && deleteRoleRec._id) {
-      axiosInstance()
-        .put(`/entity/remove-role`, { entities: [id], role: deleteRoleRec._id })
-        .then(({ data }) => {
-          fetchEntityRoles();
-          toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
-          });
-          setShowConfirmBox(false);
-          fetchUserData();
-        })
-        .catch((error) => {
-          setShowConfirmBox(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
   };
 
   const handleUnassignUser = (rec) => {
