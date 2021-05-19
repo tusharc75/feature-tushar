@@ -1,21 +1,40 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 import { Box, Button, Dialog } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import moment from "moment";
+import { useHistory } from "react-router-dom";
+import queryString from "query-string";
 
 import MyCalendar from "../Calendar/MyCalendar";
-import { GetBoard } from "../../../axios/activity";
+import { GetBoard, GetReferenceName } from "../../../axios/activity";
 import Layout from "../../../components/Layout";
 import CustomContainer from "../../../components/CustomContainer";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
 import { CreateEvent } from "../../../components/Activity/Event/CreateEvent";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
 const Event = () => {
+  const history = useHistory();
+  const { setToastConfig } = useContext(CustomToastContext);
   const [filter, setFilter] = useState([]);
   const [activityData, setActivityData] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [events, setEvents] = useState([]);
+  const parsed = queryString.parse(history.location.search);
+  const { referenceType, referenceId, activityType, activityId } = parsed;
+
+  useEffect(() => {
+    if (referenceType) {
+      GetReferenceName(referenceType, referenceId)
+        .then(({ data }) => {
+          setFilter([
+            { _id: referenceId, type: referenceType, name: data.name },
+          ]);
+        })
+        .catch((err) => {});
+    }
+  }, [referenceId]);
 
   const fetchBoard = useCallback(() => {
     GetBoard("event", JSON.stringify(filter))
@@ -31,7 +50,9 @@ const Event = () => {
 
         setEvents(newData);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setToastConfig(err);
+      });
   }, [filter]);
 
   useEffect(() => {
