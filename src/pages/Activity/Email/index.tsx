@@ -1,29 +1,51 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../../components/Layout";
-import Button from '@material-ui/core/Button';
 import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
-import { useParams, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import queryString from 'query-string';
 import { GetReferenceName, GetEmails } from "../../../axios/activity";
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import axiosAPI from "../../../axios/axios";
-import { isEmpty } from "lodash";
+import { useData } from "../../../StateProvider/Provider";
 import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import CustomContainer from "../../../components/CustomContainer";
+import { Button, MenuItem, Menu, Checkbox, Typography, Tooltip, IconButton } from '@material-ui/core'
+import { ExpandMore } from "@material-ui/icons";
+import axiosInstance from "../../../axios/axiosInstance";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import MessageDialog from "../../../components/Helpers/MessageDialog";
+import { Delete as DeleteIcon } from "@material-ui/icons";
+import { BsFillEnvelopeOpenFill } from 'react-icons/bs'
+import reactHtmlparser from 'react-html-parser'
+import styles from "../../Leads/Header.module.scss";
+import emailStyles from './email.module.scss'
+import './email.scss'
 
 const Email = () => {
 
+    const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
+    const {
+        state: { user },
+    }: any = useData();
     const parsed = queryString.parse(history.location.search);
     const { referenceType, referenceId } = parsed;
 
     const [filter, setFilter] = useState([]);
     const [emails, setEmails] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [deleteRecord, setDeleteRecord] = useState(null)
+    const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
+    const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [checkAllEmails, setCheckAllEmails] = useState(false);
 
     useEffect(() => {
         if (referenceType) {
@@ -49,15 +71,22 @@ const Email = () => {
         //     setEmails(data.data)
         //     setLoading(false)
         // }).catch((err) => {})
-            //     }
+        //     }
         await GetEmails(JSON.stringify(filter))
             .then(({ data }) => {
+                data = data.map(obj => {
+                    return {
+                        ...obj,
+                        id: obj._id,
+                        isCreatedByMe: obj?.createdBy?.user === user?.user?._id ? true : false,
+                        isChecked: false,
+                    }
+                })
                 setEmails(data)
-                console.log(data);
-                
                 setLoading(false)
             })
             .catch((err) => {
+                setLoading(false)
             });
     };
 
@@ -65,36 +94,158 @@ const Email = () => {
         setFilter(value)
     }
 
+    const getToEmailList = toList => {
+        return (toList.map(email => email === user?.user?.email ? 'me' : email).join(','))
+    }
+
     const columns = [
-        { field: '_id', headerName: 'id', hide: true },
-        { field: 'subject', headerName: 'Subject', width: 300 },
+        {
+            field: "isChecked",
+            headerName: "Checkbox",
+            renderHeader: () => (
+                <Checkbox
+                    color="primary"
+                    checked={checkAllEmails}
+                    onChange={(ev) => {
+                        setCheckAllEmails(ev.target.checked);
+                        const gridData = emails;
+                        gridData.map((d) => {
+                            d.isChecked = ev.target.checked;
+                            return d;
+                        });
+                        setEmails([...gridData]);
+                    }}
+                />
+            ),
+            renderCell: (params) => (
+                <Checkbox
+                    color="primary"
+                    checked={params.value}
+                    onChange={(ev) => {
+                        updateCheckedStatus(params, ev);
+                    }}
+                />
+            ),
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            width: 75,
+        },
         {
             field: 'to',
             headerName: 'Recipient',
             width: 200,
-            renderCell: (params) =>{
-            if(typeof params.row.to == "string") return <span>{params.row.to}</span> 
-            return <span>{params.row.to.join(", ")}</span> 
-        }},
+            renderCell: (params) => {
+                if (typeof params.row.to == "string") return <span>{params.row.to}</span>
+                return <span>
+                    {params.row?.isCreatedByMe ? getToEmailList(params.row.to) : params.row?.mailbox ?? ''}
+                </span>
+            }
+        },
         {
             field: 'cc',
-            headerName: 'CC',
-            width: 200,
-            renderCell: (params) =>{
-            if(isEmpty(params.row.cc)) return <span>---</span>
-            if(typeof params.row.cc == "string") return <span>{params.row.cc}</span> 
-            return <span>{params.row.cc.join(", ")}</span> 
-        }},
+            headerName: 'Subject - Message',
+            width: 700,
+            renderCell: (params) => {
+                return <div className={emailStyles.emailMessageConatiner} >
+                    <Typography > {params.row?.subject ?? "(no subject) "} - </Typography>
+                    <Typography noWrap display="inline"
+                        className={emailStyles.emailMessage}> {params.row.message ? reactHtmlparser(params.row.message) : null}
+                    </Typography>
+                </div >
+            }
+        },
         {
-            field: 'createdBy',
-            headerName: 'Send At',
-            width: 200,
-            renderCell: (params) =>{
-            return <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>
-        }},
-        { field: 'mailbox', headerName: 'mailbox', width: 300 },
+            field: 'createdAt', headerName: 'Created At', width: 130,
+            renderCell: (params) => (
+                <span className={emailStyles.emailCreatedAt}>
+                    { moment(params.row.createdBy.date).format("ddd MM/DD")}
+                </span >)
+        },
+        {
+            field: "actions",
+            headerName: "Actions ",
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            renderCell: (params: any) => (
+                <Tooltip title="Delete">
+                    <IconButton
+                        aria-label="Delete"
+                        onClick={() => showConfirmBox(params.row)}>
+                        <DeleteIcon fontSize="small" color="error" />
+                    </IconButton>
+                </Tooltip>
+            ),
+            width: 100,
+        },
     ];
 
+    const updateCheckedStatus = (params, ev) => {
+        const gridData = [...emails];
+        const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
+        gridData[indexOfRecord].isChecked = ev.target.checked;
+
+        setEmails([...gridData]);
+
+        const checkedRecords = gridData.filter((d) => d.isChecked === true);
+
+        if (checkedRecords.length === gridData.length) {
+            setCheckAllEmails(true);
+        } else {
+            setCheckAllEmails(false);
+        }
+    };
+
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
+    const showConfirmBox = (row) => {
+        if (row) {
+            setIsConformDialogVisible(true);
+            if (row && row.id) {
+                setDeleteRecord(row);
+            }
+        } else {
+            setIsConformDialogVisible(true);
+        }
+    };
+
+    const handleDeleteEmails = async () => {
+        setDeleteLoading(true);
+        let selectedRecords = [];
+        if (deleteRecord?.id) {
+            selectedRecords.push(deleteRecord?.id);
+        } else {
+            selectedRecords = emails.filter(currentObject => currentObject.isChecked).map(o => o.id)
+        }
+
+        if (selectedRecords && selectedRecords.length > 0) {
+            axiosInstance()
+                .put('/email', { emails: [...selectedRecords] })
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: "success",
+                        message: "Email deleted succesfully",
+                    });
+                    setIsConformDialogVisible(false);
+                    setDeleteLoading(false);
+                    if (deleteRecord) setDeleteRecord({});
+                    fetchEmails();
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                    setIsConformDialogVisible(false);
+                    setDeleteLoading(false);
+                });
+        }
+    };
 
     return (<Layout>
         <Grid container direction="row">
@@ -102,34 +253,87 @@ const Email = () => {
                 <CustomBreadCrumbs routes={[{ title: "Email" }]} />
             </Grid>
         </Grid>
-        <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
-            <Box mb={2}>
-                <Grid container>
-                    <Grid item xs={8}>
-                        <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
+        <CustomContainer>
+            <div className="header-panel">
+                <Grid container className={styles.filter_side_container}>
+                    <Grid item xs={6} className="d-flex align-items-center gap-1">
+                        <BsFillEnvelopeOpenFill className="headerLogo" />{" "}
+                        <span className="listingHeader">Emails</span>
                     </Grid>
-                    <Grid xs={4} container justify="flex-end">
+                    <Grid item xs={6} className={styles.filter_side}>
+                        <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
+                            <Box style={{ width: '70%' }}>
+                                <SearchFilter
+                                    handleChangeFilter={handleChangeFilter} filter={filter} />
+                            </Box>
+                            <Button
+                                className={styles.action_submit_btn}
+                                variant="outlined"
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                aria-controls="action-menu"
+                            >
+                                Actions <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left",
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}>
+                                <MenuItem
+                                    onClick={() => {
+                                        showConfirmBox(null);
+                                        closeActions();
+                                    }}
+                                >
+                                    Delete
+                                    </MenuItem>
+                            </Menu>
+                        </Box>
                     </Grid>
                 </Grid>
-            </Box>
-            <div className="listing-grid">
+            </div>
+            <div className='listing-grid emailList'>
                 <DataGrid
                     components={{
                         Toolbar: CustomDataGridToolbar,
                         NoRowsOverlay: CustomDataGridNoDataFound,
                     }}
                     loading={loading}
-                    rows={emails}
-                    disableSelectionOnClick
-                    disableMultipleSelection
+                    rows={loading ? [] : emails}
                     columns={columns}
                     pageSize={10}
                     density="compact"
-                    getRowId={(row) => row._id}
                 />
             </div>
-        </Box>
-    </Layout>
+            {showDeleteWarningConfirmBox ? (
+                <MessageDialog
+                    open={showDeleteWarningConfirmBox}
+                    message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+                    onClose={() => setShowDeleteWarningConfirmBox(false)}
+                />
+            ) : null}
+            {isConfirmDialogVisible ? (
+                <ConfirmationDialog
+                    open={isConfirmDialogVisible}
+                    message={`Are you sure, you want to delete ${deleteRecord?.id ? "this email" : "these emails"} ?`}
+                    onClose={() => {
+                        if (deleteRecord) setDeleteRecord({});
+                        setIsConformDialogVisible(false);
+                    }}
+                    okBtnLoading={deleteLoading}
+                    onOk={handleDeleteEmails}
+                />
+            ) : null}
+        </CustomContainer>
+    </Layout >
     );
 }
 

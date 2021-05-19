@@ -15,6 +15,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import Dialog from '@material-ui/core/Dialog';
 import ManageAttachment from "../../../components/Activity/Attachments/ManageAttachment";
+import CustomContainer from '../../../components/CustomContainer'
 
 export default function Attachment(props) {
 
@@ -98,14 +99,14 @@ export default function Attachment(props) {
     ];
 
 
-    return <> (<Layout>
-        <Grid container direction="row">
-            <Grid item xs={12}>
+    return <Layout>
+        <Grid container>
+            <Grid item md={12} sm={12} xs={12}>
                 <CustomBreadCrumbs routes={[{ title: "Attachment" }]} />
             </Grid>
         </Grid>
-        <Box mt={2} p={2} pt={1} pl={1} bgcolor="white" >
-            <Box mb={2}>
+        <CustomContainer>
+            <div className="header-panel">
                 <Grid container>
                     <Grid item xs={8}>
                         <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
@@ -113,7 +114,7 @@ export default function Attachment(props) {
                     <Grid xs={4} container justify="flex-end">
                     </Grid>
                 </Grid>
-            </Box>
+            </div>
             <div className="listing-grid">
                 <DataGrid
                     components={{
@@ -129,24 +130,23 @@ export default function Attachment(props) {
                     density="compact"
                 />
             </div>
-        </Box>
-        {open ?
-            < Dialog
-                open={open}
-                aria-labelledby="customized-dialog-title"
-                maxWidth={"md"}
-                onClose={handleClose}
-                fullWidth
-            >
-                <ManageAttachment
-                    attachmentId={attachmentData?.id}
-                    handleClose={handleClose}
-                    attachmentData={attachmentData}
-                />
-            </Dialog>
-            : null
-        }
+            {open ?
+                < Dialog
+                    open={open}
+                    aria-labelledby="customized-dialog-title"
+                    maxWidth={"md"}
+                    onClose={handleClose}
+                    fullWidth
+                >
+                    <ManageAttachment
+                        attachmentId={attachmentData?.id}
+                        handleClose={handleClose}
+                        attachmentData={attachmentData}
+                    />
+                </Dialog>
+                : null
+            }
+        </CustomContainer>
+
     </Layout>
-    )
-    </>
 }

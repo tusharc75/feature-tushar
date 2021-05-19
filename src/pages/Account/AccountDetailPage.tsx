@@ -119,22 +119,27 @@ export default function AccountDetailPage(props) {
 
   useEffect(() => {
     //  When it is nodal structure tab
-    if (currentTabIndex === 2) {
-      setLoadingGraphData(true);
-
-      axiosInstance().get(`${accountApi}/nodal-structure/${id}`).then(({ data }) => {
-        setLoadingGraphData(false);
-        setGraphData({ nodes: data.data.nodes, edges: data.data.edges, colorPalette: data.colorPalette });
-      }).catch((error) => {
-        setLoadingGraphData(false);
-        toastConfig.setToastConfig(error);
-      });
-    }
+    initializeGraphData();
 
     return () => {
       setGraphData({ edges: [], nodes: [], colorPalette: null });
     }
   }, [currentTabIndex])
+
+  const initializeGraphData = () => {
+    if (currentTabIndex === 2) {
+      setLoadingGraphData(true);
+      setGraphData({ nodes: [], edges: [], colorPalette: null });
+
+      axiosInstance().get(`${accountApi}/nodal-structure/${id}`).then(({ data }) => {
+        setLoadingGraphData(false);
+        setGraphData({ nodes: [...data.data.nodes], edges: [...data.data.edges], colorPalette: data.colorPalette });
+      }).catch((error) => {
+        setLoadingGraphData(false);
+        toastConfig.setToastConfig(error);
+      });
+    }
+  }
 
   const fetchRelatedData = () => {
     axiosInstance()
@@ -150,19 +155,18 @@ export default function AccountDetailPage(props) {
             ? data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
             : []
         );
-
+        initializeGraphData();
         setRelatedContactsLoading(false);
       });
   };
 
-  const fetchAccountData = async () => {
+  const fetchAccountData = () => {
     setLoading(true);
 
     axiosInstance()
       .get(`/${accountApi}/${id}`)
       .then(({ data: { data } }) => {
         setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
-
         setHeadingLbl(data.accountName || "");
         handleMainPonts(data);
         setAccountData(data);
@@ -241,6 +245,8 @@ export default function AccountDetailPage(props) {
         } else {
           setLoading(false);
         }
+
+        initializeGraphData();
       })
       .catch(() => {
         setLoading(false);

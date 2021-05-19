@@ -20,13 +20,7 @@ const BigCalendar = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [filter, setFilter] = useState([]);
   const [activityData, setActivityData] = useState(null);
-  const [activities, setActivities] = useState([
-    {
-      start: moment().toDate(),
-      end: moment().add(1, "days").toDate(),
-      title: "Some title",
-    },
-  ]);
+  const [activities, setActivities] = useState([]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);

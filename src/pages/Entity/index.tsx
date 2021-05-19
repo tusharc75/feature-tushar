@@ -27,7 +27,7 @@ import {
   USER_LOADING,
   SET_SELECTED_ENTITY,
 } from "../../StateProvider/actionTypes";
-import AssignRolesDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
 import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
@@ -41,12 +41,13 @@ const Entity: FC = () => {
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
+  const [usersDialogOpen, setUsersDialogOpen] = useState(false);
   const [selectedEntities, setSelectedEntities] = useState<any[]>([]);
 
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
-
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [loadingEntities, setLoadingEntities] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllEntities, setCheckAllEntities] = useState(false);
@@ -90,17 +91,37 @@ const Entity: FC = () => {
     fetchEntities();
   }, [fetchEntities]);
 
+  const fetchEntityUser = () => {
+    setUsersLoading(true);
+    axiosInstance()
+      .get(`/user?filterById=[{"field": "entities.entity", "term": "${selectedEntities[0]}"}]`)
+      .then(({ data: { data } }) => {
+        setUsers(data);
+        setUsersLoading(false);
+      })
+      .catch((err) => {
+        setUsersLoading(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  useEffect(() => {
+    if (selectedEntities.length === 1) {
+      fetchEntityUser();
+    }
+  }, [selectedEntities]);
+
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((entity: any) => ({
-          id: entity._id,
-          isChecked: false,
-          name: entity.entityName,
-          address: entity.address,
-          createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-          createdBy: entity?.createdBy,
-          updatedBy: entity?.updatedBy,
-        }))
+        id: entity._id,
+        isChecked: false,
+        name: entity.entityName,
+        address: entity.address,
+        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
+        createdBy: entity?.createdBy,
+        updatedBy: entity?.updatedBy,
+      }))
       : [];
     setDataRows(rows);
   };
@@ -361,11 +382,11 @@ const Entity: FC = () => {
   };
 
   const handleOpenDialog = () => {
-    setRolesDialogOpen(true);
+    setUsersDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
-    setRolesDialogOpen(false);
+    setUsersDialogOpen(false);
   };
 
   const fetchUserData = () => {
@@ -410,13 +431,14 @@ const Entity: FC = () => {
           fetchData={fetchEntities}
         />
       )}
-      {rolesDialogOpen && (
-        <AssignRolesDialog
-          entitiesDialogOpen={rolesDialogOpen}
+      {usersDialogOpen && (
+        <AssignUsersDialog
+          entitiesDialogOpen={usersDialogOpen}
           handleCloseDialog={handleCloseDialog}
-          type="role"
+          type="user"
           ids={selectedEntities}
-          assignedEntity={null}
+          assignedEntity={users}
+          regionalRole={false}
           onSuccess={() => {
             fetchEntities();
             handleCloseDialog();
@@ -433,8 +455,8 @@ const Entity: FC = () => {
               entityPermissions={permissions?.entity}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              openRolesDialog={handleOpenDialog}
-              rolesActionDiabled={Boolean(!selectedEntities.length)}
+              openUserDialog={handleOpenDialog}
+              userActionDiabled={selectedEntities.length !== 1} //single select entity can assign user
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
             />
           </div>
@@ -474,9 +496,8 @@ const Entity: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

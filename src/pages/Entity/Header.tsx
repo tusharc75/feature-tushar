@@ -14,8 +14,8 @@ const EntityHeader = (props) => {
     entityPermissions,
     showConfirmBox,
     canDelete,
-    openRolesDialog,
-    rolesActionDiabled,
+    openUserDialog,
+    userActionDiabled,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -93,13 +93,13 @@ const EntityHeader = (props) => {
                 )} */}
                 {entityPermissions.isUpdate && (
                   <MenuItem
-                    disabled={rolesActionDiabled}
+                    disabled={userActionDiabled}
                     onClick={() => {
-                      openRolesDialog();
+                      openUserDialog();
                       closeActions();
                     }}
                   >
-                    Assign Roles
+                    Assign User
                   </MenuItem>
                 )}
               </Menu>

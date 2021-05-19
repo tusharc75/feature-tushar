@@ -19,7 +19,7 @@ import Quote from "./Quote";
 var _ = require('lodash');
 
 
-var levalOrderBy = ["product", "category", "cost", "builder"]
+var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
 const ProductBuilder = (props) => {
 
@@ -88,17 +88,54 @@ const ProductBuilder = (props) => {
             let column = [{ field: 'id', headerName: 'id', hide: true }]
             data.forEach((row) => {
                 row.fields.forEach((ele) => {
-                    if (ele.type === "converter") {
-                        ele.displayUnits.forEach((_unit) => {
-                            if (column.filter((_c) => _c.field === ele.fieldName + _unit.toLowerCase() && _c.headerName === ele.fieldLabel + " " + _unit).length === 0) {
-                                let col: any = {}
-                                col.field = ele.fieldName + _unit.toLowerCase()
-                                col.headerName = ele.fieldLabel + " " + _unit
-                                col.width = 180
-                                col.leval = ele.leval
-                                column.push(col)
-                            }
-                        })
+                    if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                        if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                            ele.displayUnits.forEach((_unit) => {
+                                let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+                                let fieldLabel = ele.fieldLabel + " " + _unit
+                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                    let col: any = {}
+                                    col.field = fieldName
+                                    col.headerName = fieldLabel
+                                    col.width = 180
+                                    col.order = ele.order
+                                    col.leval = ele.leval
+                                    column.push(col)
+                                }
+                            })
+                        }
+                        else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                            ele.displayUnits.forEach((_unit) => {
+                                ele.displayCurrency.forEach((_currency) => {
+                                    let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                                    let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                                    if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                        let col: any = {}
+                                        col.field = fieldName
+                                        col.headerName = fieldLabel
+                                        col.width = 180
+                                        col.order = ele.order
+                                        col.leval = ele.leval
+                                        column.push(col)
+                                    }
+                                })
+                            })
+                        }
+                        else if (ele.type === "currencyAmount") {
+                            ele.displayCurrency.forEach((_currency) => {
+                                let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+                                let fieldLabel = ele.fieldLabel + " " + _currency
+                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                    let col: any = {}
+                                    col.field = fieldName
+                                    col.headerName = fieldLabel
+                                    col.width = 180
+                                    col.order = ele.order
+                                    col.leval = ele.leval
+                                    column.push(col)
+                                }
+                            })
+                        }
                     }
                     else {
                         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
@@ -118,12 +155,14 @@ const ProductBuilder = (props) => {
                                     typeof params.row[ele.fieldName] === 'object' ? params.row[ele.fieldName][ele.fieldName] : params.row[ele.fieldName]
                                     : <NoDataCell />)
                             }
+                            col.order = ele.order
                             col.leval = ele.leval
                             column.push(col)
                         }
                     }
                 })
             });
+            column = _.orderBy(column, 'order', 'asc');
             column = _.sortBy(column, function (item) {
                 return levalOrderBy.indexOf(item.leval)
             });

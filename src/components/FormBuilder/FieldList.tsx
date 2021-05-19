@@ -119,6 +119,11 @@ const FieldList = {
     type: "process",
     icon: "far fa-calendar-check",
   },
+  CURRENCYAMOUNT: {
+    label: "Currency Amount",
+    type: "currencyAmount",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;

@@ -45,7 +45,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
         .then(({ data }) => {
           setOptions(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [inputValue]);
 
@@ -57,6 +57,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
   return (
     <Autocomplete
       multiple={true}
+      size="small"
       fullWidth
       options={options}
       getOptionLabel={(option) => (option ? option.name : "")}
@@ -73,7 +74,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
             color={chip?.color || "primary"}
             label={
               option && option.type === "my"
-                ? "All My"
+                ? "My activities"
                 : capitalize(UnCamelCase(option.type)) + " - " + option.name
             }
             {...getTagProps({ index })}
@@ -100,7 +101,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
                 label={
                   option.isAll
                     ? option.type === "my"
-                      ? "All My"
+                      ? "My activities"
                       : option.name + " " + capitalize(UnCamelCase(option.type))
                     : capitalize(UnCamelCase(option.type))
                 }
