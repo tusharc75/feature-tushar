@@ -112,14 +112,12 @@ const CustomerStrategy = (props) => {
   useEffect(() => {
     if (!users.length) return;
 
-    const collabs = users
-      .filter((u) => u._id !== ownerId)
-      .map((u, i) => ({
-        optionValue: u._id,
-        optionLabel: u.firstName + " " + u.lastName,
-        order: i,
-        default: false,
-      }));
+    const collabs = users.map((u, i) => ({
+      optionValue: u._id,
+      optionLabel: u.firstName + " " + u.lastName,
+      order: i,
+      default: false,
+    }));
     setCollaborators(collabs);
   }, [users]);
 
@@ -235,7 +233,13 @@ const CustomerStrategy = (props) => {
                             resource={"customerAccount"}
                             isRedirect={false}
                             expanded={true}
-                            collaborators={collaborators}
+                            collaborators={collaborators.filter(
+                              (u) => u.optionValue !== ownerId
+                            )}
+                            users={collaborators.map((u) => ({
+                              ...u,
+                              default: u.optionValue === ownerId,
+                            }))}
                             projectId={projectId}
                             addExisting={handleOpenDialog}
                             fetchProjectData={fetchProjectData}
