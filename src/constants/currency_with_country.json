@@ -126,8 +126,8 @@
         "countryCode": "IN",
         "currencyCode": "INR",
         "languages": [
-            "bn",
             "en",
+            "bn",
             "fr",
             "hi",
             "ml",
@@ -236,8 +236,8 @@
         "countryCode": "PH",
         "currencyCode": "PHP",
         "languages": [
-            "ar",
             "en",
+            "ar",
             "es"
         ],
         "name": "Philippine Peso",
@@ -298,8 +298,8 @@
         "countryCode": "ZA",
         "currencyCode": "ZAR",
         "languages": [
-            "af",
-            "en"
+            "en",
+            "af"
         ],
         "name": "South African Rand",
         "symbol": "R",
