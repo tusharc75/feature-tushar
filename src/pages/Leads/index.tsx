@@ -21,9 +21,6 @@ import { leadDetailPage } from "../../routes/Lead";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import {
-  downloadExcel,
-  leadTemplateFileName,
-  leadImportErrorFileName,
   leadProcessFieldName,
 } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
@@ -59,7 +56,6 @@ const Leads = () => {
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [anchorEl, setAnchorEl] = useState(null);
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllLeads, setCheckAllLeads] = useState(false);

@@ -2,17 +2,19 @@ import React, { useState, useEffect } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../../components/Layout";
-import Button from '@material-ui/core/Button';
 import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
-import { useParams, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import queryString from 'query-string';
 import { GetReferenceName, GetNotes } from "../../../axios/activity";
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import ActivityModelHandler from "../../../components/Activity/ActivityModelHandler";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import CustomContainer from "../../../components/CustomContainer";
+import styles from "../../Leads/Header.module.scss";
+import { GoNote } from "react-icons/go";
 
 const Note = () => {
 
@@ -106,6 +108,29 @@ const Note = () => {
                     </Grid>
                 </Grid>
             </Box>
+        </Box>
+
+        <CustomContainer>
+            <div className="header-panel">
+                <Grid container className={styles.filter_side_container}>
+                    <Grid item xs={2} className="d-flex align-items-center gap-1">
+                        <GoNote className="headerLogo" />{" "}
+                        <span className="listingHeader">Note</span>
+                    </Grid>
+                    <Grid item xs={10} className={styles.filter_side}>
+                        <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
+                            <Box style={{ width: '90%' }}>
+                                <SearchFilter
+                                    handleChangeFilter={handleChangeFilter}
+                                    filter={filter}
+                                    chip={{ size: "small" }}
+                                />
+                            </Box>
+                        </Box>
+                    </Grid>
+                </Grid>
+            </div>
+
             <div className="listing-grid">
                 <DataGrid
                     components={{
@@ -121,9 +146,10 @@ const Note = () => {
                     density="compact"
                 />
             </div>
-        </Box>
-        {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
+            {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
+        </CustomContainer>
     </Layout>
+
     );
 }
 
