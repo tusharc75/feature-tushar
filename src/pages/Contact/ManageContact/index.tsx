@@ -4,14 +4,13 @@ import {
   getObjKeys,
   initializeDropdownById,
   sidebarResource,
-
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import _ from "lodash";
-import { useHistory } from 'react-router-dom';
+import { useHistory } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageAccountDialog from '../../Account/ManageAccount/index'
+import ManageAccountDialog from "../../Account/ManageAccount/index";
 
 export default function ManageContactDialog(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -27,9 +26,13 @@ export default function ManageContactDialog(props) {
     userId = null,
     isRedirectToDetailPage = true,
     contactId = null,
-    handleSubmit = null
+    handleSubmit = null,
+    collaborators,
+    owners,
+    fromProject,
   } = props;
-  const { accountApi, accountResource, accountPermission, accountRoute } = account
+  const { accountApi, accountResource, accountPermission, accountRoute } =
+    account;
   const {
     state: { user, selectedEntity },
   }: any = useData();
@@ -39,26 +42,25 @@ export default function ManageContactDialog(props) {
   });
   const [loading, setLoading] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
-  const [accountSource, setAccountSource] = useState([])
+  const [accountSource, setAccountSource] = useState([]);
   const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
   const history = useHistory();
 
   useEffect(() => {
-    const { entityData } = props
+    const { entityData } = props;
     if (entityData && entityData?.fields && entityData?.initialValues) {
       setEntityData({
         fields: entityData.fields,
         initialValues: entityData.initialValues,
-      })
-      entityData.fields.some(currentField => {
+      });
+      entityData.fields.some((currentField) => {
         if (currentField.fieldName === "accountName") {
-          setAccountSource(currentField.option)
-          return true
+          setAccountSource(currentField.option);
+          return true;
         }
-      })
-    }
-    else getContactFields();
+      });
+    } else getContactFields();
   }, [user]);
 
   const getContactFields = () => {
@@ -72,15 +74,22 @@ export default function ManageContactDialog(props) {
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
             if (accountId && _f.fieldData.fieldName === "accountName") {
-              _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
+              _f = initializeDropdownById(
+                _f,
+                _f.fieldData.fieldName,
+                accountId
+              );
             }
 
             if (userId && _f.fieldData.fieldName == "owner") {
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
             }
 
-            if (_f?.fieldData?.fieldName && _f.fieldData.fieldName === "accountName") {
-              setAccountSource(_f.fieldData.option)
+            if (
+              _f?.fieldData?.fieldName &&
+              _f.fieldData.fieldName === "accountName"
+            ) {
+              setAccountSource(_f.fieldData.option);
             }
             newFields.push(_f.fieldData);
           });
@@ -100,14 +109,14 @@ export default function ManageContactDialog(props) {
       .then(({ data }) => {
         const newId = data.data._id;
         onClose({ fetch: true });
-        onSuccess({ fetch: true, id:newId });
+        onSuccess({ fetch: true, id: newId });
         toastConfig.setToastConfig({
           open: true,
           type: "success",
           message: data.message,
         });
         if (isRedirectToDetailPage) {
-          history.push(`${contactApi}/detail/${newId}`)
+          history.push(`${contactApi}/detail/${newId}`);
         }
         setLoading(false);
       })
@@ -133,20 +142,25 @@ export default function ManageContactDialog(props) {
   // }
 
   const handleDialogClose = () => {
-    setShowAccountDialog(false)
-  }
+    setShowAccountDialog(false);
+  };
 
   const handleGetAddedAccount = ({ data }) => {
     if (data?._id) {
-      setAccountSource(prevState => {
-        return [...prevState, {
-          optionValue: data._id, optionLabel: data.accountName,
-          order: accountSource.length, default: false
-        }]
-      })
+      setAccountSource((prevState) => {
+        return [
+          ...prevState,
+          {
+            optionValue: data._id,
+            optionLabel: data.accountName,
+            order: accountSource.length,
+            default: false,
+          },
+        ];
+      });
       setNewAddedAccountId(data._id);
     }
-  }
+  };
 
   return (
     <>
@@ -163,20 +177,25 @@ export default function ManageContactDialog(props) {
         contactResource={contactResource}
         accountId={newAddedAccountId}
         contactId={contactId}
+        collaborators={collaborators}
+        owners={owners}
+        fromProject={fromProject}
       />
-      {
-        showAccountDialog ?
-          <ManageAccountDialog
-            open={showAccountDialog}
-            onClose={handleDialogClose}
-            id={null}
-            accountResource={accountResource}
-            accountApi={accountApi}
-            isGetAccountData={true}
-            onGetAddedAccount={handleGetAddedAccount}
-            isRedirectToDetailPage={false}
-          /> : null
-      }
+      {showAccountDialog ? (
+        <ManageAccountDialog
+          open={showAccountDialog}
+          onClose={handleDialogClose}
+          id={null}
+          accountResource={accountResource}
+          accountApi={accountApi}
+          isGetAccountData={true}
+          onGetAddedAccount={handleGetAddedAccount}
+          isRedirectToDetailPage={false}
+          fromProject={fromProject}
+          owners={owners}
+          collaborators={collaborators}
+        />
+      ) : null}
     </>
   );
 }

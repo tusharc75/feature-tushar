@@ -73,6 +73,7 @@ const Activity = () => {
                 <SearchFilter
                   handleChangeFilter={handleChangeFilter}
                   filter={filter}
+                  chip={{ size: "small" }}
                 />
               </Box>
             </Grid>
