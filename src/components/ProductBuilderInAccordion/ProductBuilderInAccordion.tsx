@@ -15,11 +15,9 @@ import { useHistory } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
-
 const Accordion = withStyles({
     root: {
-        border: "1px solid rgba(0, 0, 0, .125) !important",
-        boxShadow: "none",
+        border: "1px solid rgba(0, 0, 0, .125)",
         "&:not(:last-child)": {
             borderBottom: 0,
         },
@@ -35,15 +33,19 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "rgba(0, 0, 0, .03)",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",
+        fontWeight: "bold",
+        padding: "0px",
         "&$expanded": {
-            minHeight: 56,
+            minHeight: 46,
         },
     },
     content: {
         "&$expanded": {
             margin: "12px 0",
+
         },
     },
     expanded: {},
@@ -53,7 +55,8 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
+    }
+
 }))(MuiAccordionDetails);
 
 export default function ProductBuilderInAccordion({ expanded = true, recordsPerLine = 2 }) {
@@ -81,7 +84,7 @@ export default function ProductBuilderInAccordion({ expanded = true, recordsPerL
 
     const [expandProductBuilder, setExpandProductBuilder] = useState(expanded);
     return <>
-        <Accordion expanded={expandProductBuilder}>
+        <Accordion expanded={expandProductBuilder} className="omsAccordian accordOpportunity">
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -130,8 +133,8 @@ export default function ProductBuilderInAccordion({ expanded = true, recordsPerL
                                 <Grid container spacing={1}>
                                     {
                                         <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
-                                            <Card style={{ minWidth: "100%" }}>
-                                                <CardContent>
+                                            <Card className="detailCard">
+                                                <CardContent className="detailListing">
                                                     <Grid container className="detailCardHeader">
                                                         <Grid item xs={12} sm={8}>
                                                             <Link className="link">
@@ -140,9 +143,9 @@ export default function ProductBuilderInAccordion({ expanded = true, recordsPerL
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container>
-                                                        <Grid item xs={12} sm={12} className="p-2">
-                                                        <Typography >This is Product one Description</Typography> 
-                                                                </Grid>
+                                                        <Grid item xs={12} sm={12} className="pb-2 pt-1">
+                                                            <Typography >This is Product one Description</Typography>
+                                                        </Grid>
                                                     </Grid>
                                                 </CardContent>
                                             </Card>
@@ -154,10 +157,10 @@ export default function ProductBuilderInAccordion({ expanded = true, recordsPerL
                     }
                 </>
             </AccordionDetails>
-            <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
+            {/* <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
                 <FaEye /> View All &#8599;
             </Box>
-            <Box margin={1} />
+            <Box margin={1} /> */}
         </Accordion>
 
         {/* {

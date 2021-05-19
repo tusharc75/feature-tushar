@@ -13,9 +13,7 @@ import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
 import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
-import { BiCustomize, BiPhone } from 'react-icons/bi';
-import { HiOutlineUser } from 'react-icons/hi';
+import { BiPhone } from 'react-icons/bi';
 import { AiOutlineMail } from 'react-icons/ai';
 import { BsBuilding } from 'react-icons/bs';
 import currencies from './../../constants/currency_with_country.json';

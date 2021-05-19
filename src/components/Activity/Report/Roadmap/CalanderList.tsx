@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     },
     calenderHighlights: {
         color: "white",
-        background: theme.palette.secondary.main,
+        background: "red",
         borderRadius: "4px",
         padding: "2px 5px",
         display: "flex",

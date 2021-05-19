@@ -380,9 +380,9 @@ body::-webkit-scrollbar-thumb {
 .detail-container {
   position: absolute;
   top: 99px;
-  padding: 10px;
-  // width: calc(100% - 2.8rem) !important;
-  // margin: 0 1.5rem;
+  // padding: 10px;
+  width: calc(100% - 2.8rem) !important;
+  margin: 0 1.5rem;
 }
 
 .subContainer{

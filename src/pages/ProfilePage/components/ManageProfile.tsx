@@ -219,7 +219,7 @@ export default function ManageProfile(props) {
                             {otherDetails && Object.keys(otherDetails).map((k, i) => (
                                 <span className="d-flex align-items-center gap-1">
                                     { k === "EmployeeNumber" && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
-                                    { k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil onClick={() => setEmailUpdate(true)} /></> : null}
+                                    { k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil className="cursor-pointer" onClick={() => setEmailUpdate(true)} /></> : null}
                                 </span>
                             ))
                             }
