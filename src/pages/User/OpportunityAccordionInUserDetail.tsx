@@ -71,7 +71,7 @@ function DisplayData({ key, label, value, icon }) {
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={ value ? value : '-'} secondary={label} />
+                <ListItemText primary={value ? value : '-'} secondary={label} />
             </ListItem>
         </List>
     </div>
@@ -187,10 +187,9 @@ export default function OpportunityAccordionInUserDetail({
 
                                                                 </Grid>
                                                                 <Grid item xs={5} sm={4}>
-                                                                    {obj?.amount && <Typography className="amount">
-                                                                        {currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative}
+                                                                    <Typography className="amount">
+                                                                        {obj?.amount ? currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative : ''}
                                                                         &nbsp;{obj?.amount ?? ''}</Typography>
-                                                                    }
                                                                 </Grid>
                                                             </Grid>
                                                             <Grid container>

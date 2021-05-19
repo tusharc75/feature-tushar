@@ -34,3 +34,13 @@ export const getErrorMessage = (err) => {
 export const displayDate = (date) => {
   return date ? moment(date).format("MMM-DD-YYYY") : "";
 };
+
+export const getBordActionUrl = (type) =>{
+  switch (type.toLowerCase()){
+    case "task":
+      return {update:"task/",delete:"task/"}
+    default:
+      return {update:"activity/field/",delete:""}
+  }
+
+}

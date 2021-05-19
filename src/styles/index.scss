@@ -1,7 +1,9 @@
 :root {
-  --primary: #003f57; //#003f57;
-  --primary-light: #005a77;
-  --secondary: #d46101;
+  --primary: #163340; //#003f57;
+  --primary-light: #163340;
+  --secondary: #047d1c;
+  --tertiary: #a0fffb;
+  --tertiary-light: #75e2dd;
   --error: #dc3545;
   --info: #03afe2;
   --success: #28a745;
@@ -291,6 +293,7 @@ body::-webkit-scrollbar-thumb {
   border-bottom: 3px solid var(--secondary);
   margin-bottom: 10px;
   padding: 0 0 0 2px;
+  text-align: left;
 }
 
 .link {
@@ -371,13 +374,15 @@ body::-webkit-scrollbar-thumb {
   background: white;
   border-radius: 10px 10px 0 0;
   box-shadow: 2px 3px 5px #6f6d6d;
+  height: calc(100vh - 15.5vh);
 }
 
 .detail-container {
   position: absolute;
   top: 99px;
-  width: calc(100% - 2.8rem) !important;
-  padding: 0 1.5rem;
+  padding: 10px;
+  // width: calc(100% - 2.8rem) !important;
+  // margin: 0 1.5rem;
 }
 
 .subContainer{
@@ -515,7 +520,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .btn-view {
-  background: #fff3ef;
+  background: #eaffee;
   color: var(--secondary);
   font-weight: bold;
   border: 1px solid var(--secondary);

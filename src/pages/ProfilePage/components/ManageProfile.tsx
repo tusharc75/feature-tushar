@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Grid, Box, useTheme, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button } from '@material-ui/core'
+import { Grid, Box, useTheme, Tooltip, IconButton, CircularProgress, Avatar, Typography, Divider, Button, makeStyles } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -7,20 +7,45 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import UpdateDetailsDialog from "../../../components/Shared/UpdateDetailsDialog";
 import DetailsPage from "../../../components/Shared/DetailsPage";
 import EditIcon from '@material-ui/icons/Edit'
-import DeleteIcon from "@material-ui/icons/Delete";
 import { SET_USER } from "../../../StateProvider/actionTypes";
 import styles from "../profilePage.module.scss"
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword'
 import _ from 'lodash'
 import { useHistory } from "react-router-dom";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
-import CopyToClipboard from '../../../components/Helpers/CopyToClipboard'
+import CopyToClipboard from '../../../components/Helpers/CopyToClipboard';
+import { HiPencil } from 'react-icons/hi';
+import { IoMdTrash } from 'react-icons/io';
+import { HiOutlinePencilAlt } from 'react-icons/hi';
+
+const useStyles = makeStyles((theme) => ({
+    profileEdit: {
+        position: "absolute",
+        bottom: 0,
+        right: 0,
+        background: theme.palette.primary.main,
+        padding: "1px",
+        color: "white",
+        border: "3px solid white",
+        borderRadius: "50%"
+    },
+    profileDelete: {
+        position: "absolute",
+        right: "-16px",
+        top: "42px",
+        background: theme.palette.error.main,
+        color: "white",
+        border: "3px solid white",
+        borderRadius: "50%"
+    },
+}));
 
 export default function ManageProfile(props) {
-
+    const classes = useStyles();
     const { displayUserDetails, displayUserProfileImage, userFields,
         userData, loading, userLoading, onFetchUserData, otherDetails } = props
-
+    console.log(displayUserDetails);
+    console.log(otherDetails);
     const { state: { user }, dispatch }: any = useData();
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
@@ -143,69 +168,85 @@ export default function ManageProfile(props) {
                                         >
                                             {isUploading && <CircularProgress size={22} />}
                                         </Box>
-                                    </Box>
-                                    {
-                                        userData?.avatar ?
-                                            <Box>
+                                        {
+                                            userData?.avatar ?
+                                                <div className={classes.profileDelete}>
+                                                    <IconButton
+                                                        disabled={Boolean(!userData?.avatar)}
+                                                        title="Remove picture"
+                                                        size="small"
+                                                        aria-label="delete picture"
+                                                        component="span"
+                                                        onClick={() => setShowDeleteConfirmBox(true)}
+                                                    >
+                                                        <IoMdTrash color="white" size={15} />
+                                                    </IconButton>
+                                                </div> : null
+                                        }
+                                        <div className={classes.profileEdit}>
+                                            <label htmlFor="avatar">
                                                 <IconButton
-                                                    disabled={Boolean(!userData?.avatar)}
-                                                    title="Remove picture"
-                                                    color="secondary"
+                                                    title="Add picture"
                                                     size="small"
-                                                    aria-label="delete picture"
-                                                    component="span"
-                                                    onClick={() => setShowDeleteConfirmBox(true)}
-                                                >
-                                                    <DeleteIcon />
+                                                    aria-label="upload picture"
+                                                    component="span">
+                                                    <HiPencil color="white" size={15} />
+                                                    <input
+                                                        disabled={isUploading}
+                                                        id="avatar"
+                                                        name="avatar"
+                                                        onChange={handleUploadImage}
+                                                        accept="image/x-png,image/gif,image/jpeg"
+                                                        style={{
+                                                            opacity: "0",
+                                                            position: "absolute",
+                                                            zIndex: -1,
+                                                        }}
+                                                        onClick={(e: any) => (e.target.value = null)}
+                                                        type="file"
+                                                    />
                                                 </IconButton>
-                                            </Box> : null
-                                    }
-
+                                            </label>
+                                        </div>
+                                    </Box>
                                 </Box>
                             </>
 
                         </div>
                         <Typography variant="h5" className="text-capitalize" ><strong>{`${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`}</strong></Typography>
-                        <label htmlFor="avatar">
-                            <IconButton
-                                title="Add picture"
-                                color="primary"
-                                size="small"
-                                aria-label="upload picture"
-                                component="span">
-                                <Typography>{"{click here to change your image}"}</Typography>
-                                <input
-                                    disabled={isUploading}
-                                    id="avatar"
-                                    name="avatar"
-                                    onChange={handleUploadImage}
-                                    accept="image/x-png,image/gif,image/jpeg"
-                                    style={{
-                                        opacity: "0",
-                                        position: "absolute",
-                                        zIndex: -1,
-                                    }}
-                                    onClick={(e: any) => (e.target.value = null)}
-                                    type="file"
-                                />
-                            </IconButton>
-                        </label>
+                        <Divider />
+                        <div>
+                            {otherDetails && Object.keys(otherDetails).map((k, i) => (
+                                <span className="d-flex align-items-center gap-1">
+                                    { k === "EmployeeNumber" && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
+                                    { k === "Email" && otherDetails[k] ? <> <span> Email : {otherDetails[k]}</span> <HiPencil onClick={() => setEmailUpdate(true)} /></> : null}
+                                </span>
+                            ))
+                            }
+                        </div>
+                        <Divider />
+
+                        <Button color="primary"
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            onClick={() => setPasswordUpdate(true)}>Change Password</Button>
                         <Divider />
                     </div>
                     : null
             }
+
+
             <div style={{ borderRadius: 8, minWidth: "300px" }}>
                 {
                     displayUserDetails ?
                         <>
-                            <div className={styles.editProfileContainer}>
+                            <Box style={{ padding: "8px" }}>
                                 <Tooltip title="Edit">
                                     <IconButton onClick={handleOpenUpdateDialog} style={{ float: 'right', marginBottom: '5px' }}>
-                                        <EditIcon color="primary" />
+                                        <HiOutlinePencilAlt color="primary" />
                                     </IconButton>
                                 </Tooltip>
-                            </div>
-                            <Box style={{ padding: "8px" }}>
                                 {loading || userLoading ? (
                                     <Grid container spacing={2} style={{ padding: "8px" }}>
                                         <CommonSkeleton lenArray={[...Array(7).keys()]} />
@@ -214,59 +255,9 @@ export default function ManageProfile(props) {
                                     : (
                                         <DetailsPage data={userData} fields={filteredUserFields} />
                                     )}
-                                {
-                                    <Grid container spacing={2} style={{ padding: '10px 20px' }}>
-                                        {otherDetails ? Object.keys(otherDetails).map((k, i) => (
-                                            <Grid item xs={12} md={6} sm={6} key={i} >
-                                                <Grid container alignItems="center">
-                                                    <Grid item xs={6} md={5} sm={5}>
-                                                        <Box height="100%" display="flex" alignItems="center">
-                                                            <Box marginX="2px" />
-                                                            <h4
-                                                                title={k}
-                                                                className={styles.userProfileFieldText}
-                                                                style={{
-                                                                    color: theme.palette.text.secondary,
-                                                                    fontWeight: "normal",
-                                                                }}>
-                                                                {k}
-                                                            </h4>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={6} md={7} sm={7}><Typography
-                                                        align="left"
-                                                        title={otherDetails[k] || "_ _ _"}
-                                                        className={styles.userProfileFieldText}
-                                                        variant="body2"
-                                                    >{otherDetails[k] || "_ _ _"}
-                                                        {k === "Email" ? <CopyToClipboard textToCopy={otherDetails[k]} /> : null}
-                                                    </Typography>
-
-                                                    </Grid>
-                                                </Grid>
-                                                <Box marginY={1} />
-                                            </Grid>)) : null
-                                        }
-                                    </Grid>
-                                }
                             </Box>
-                            <Grid container spacing={6} style={{ marginTop: '10px' }}>
-                                <Grid item sm={6}>
-                                    <Button color="primary"
-                                        fullWidth
-                                        variant="outlined"
-                                        onClick={() => setEmailUpdate(true)}>Update Email</Button>
-                                </Grid>
-                                <Grid item sm={6}>
-                                    <Button color="primary"
-                                        fullWidth
-                                        variant="outlined"
-                                        onClick={() => setPasswordUpdate(true)}>Update Password</Button>
-                                </Grid>
-                            </Grid>
                         </> : null
                 }
-
                 {
                     isPasswordUpdate ?
                         <ManageUpdateEmailPasswordDialog

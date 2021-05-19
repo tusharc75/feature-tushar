@@ -15,23 +15,23 @@
 
 .headerbox {
   padding: 10px 26px 112px 26px;;
-  background:  var(--primary-light);
+  background:  var(--primary);
   width: 100%;
   background-image: url("../../assets/header-bg.png");
   background-blend-mode: overlay;
 
   ol {
     li {
-       color: #ffffffad  !important;
+       color: var(--tertiary-light)  !important;
       a {
         margin: 0px 4px;
         font-size: 1rem;
-        color: #ffffffad !important;
+        color: var(--tertiary-light) !important;
       }
       p {
         margin: 0px 4px;
         font-size: 1rem;
-        color: #ffffffad !important;
+        color: var(--tertiary-light) !important;
       }
     }
   }
@@ -91,4 +91,17 @@
 }
 .sidebar-icon {
   color: var(--primary);
+}
+
+
+.profileBox{
+  margin-right: 1rem !important;
+  // margin-top: 0.5rem !important;
+  background: #ececec;
+  border-radius: 4px;
+  padding: 10px 5px;
+}
+
+.bgbox{
+  background: #ececec;
 }

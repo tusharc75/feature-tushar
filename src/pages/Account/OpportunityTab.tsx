@@ -1,12 +1,17 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardContent, Grid, IconButton } from '@material-ui/core'
+import { Card, CardContent, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
 import { Delete } from '@material-ui/icons'
 import Typography from '@material-ui/core/Typography';
 import { Link } from 'react-router-dom'
 import accountClass from "./account.module.scss"
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
+import { IoCalendarOutline } from 'react-icons/io5';
+import { BiCustomize } from 'react-icons/bi';
+import { FaArrowAltCircleDown } from 'react-icons/fa';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import currencies from './../../constants/currency_with_country.json';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -46,19 +51,19 @@ const useStyles = makeStyles((theme) => ({
     // },
 }));
 
-function DisplayData({ label, value, color = "" }) {
-
+function DisplayData({ key, label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-            <Grid item sm={6} xs={6} md={4}>
-                <Typography>{label}</Typography>
-            </Grid>
-            <Grid item sm={6} xs={6} md={8}>
-                <Typography>{value}</Typography>
-            </Grid>
-        </Grid>
+        <List>
+            <ListItem key={key}>
+                <ListItemAvatar>
+                    {icon}
+                </ListItemAvatar>
+                <ListItemText primary={value ? value : '-'} secondary={label} />
+            </ListItem>
+        </List>
     </div>
 }
+
 
 export default function OpportunityTab({ data }) {
 
@@ -72,18 +77,37 @@ export default function OpportunityTab({ data }) {
                         {
                             data.map((obj, index) => (
                                 <Grid item xs={12} sm={12} md={6} key={index}>
+                                    <Card className="detailCard">
+                                        <CardContent className="detailListing">
+                                            <Grid container className="detailCardHeader">
+                                                <Grid item xs={7} sm={8}>
+                                                    {
+                                                         <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                                            <Typography className="detailName">{obj?.opportunityName}</Typography>
+                                                        </Link> 
+                                                    }
 
-                                    <Card style={{ minWidth: "100%" }} variant="outlined">
-                                        <CardContent>
-                                            <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
-                                                <Typography className="mb-2">{obj?.opportunityName}</Typography>
-                                            </Link>
-                                            <DisplayData label='Stage' value={obj?.stage?.optionLabel ?? ''} />
-                                            <DisplayData label='Amount' value={obj?.amount ?? ''} />
-                                            <DisplayData label='Close Date' value={displayDate(obj.closeDate)} />
+                                                </Grid>
+                                                <Grid item xs={5} sm={4}>
+                                                    <Typography className="amount">
+                                                        {obj?.amount ? currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative : ''}
+                                                                        &nbsp;{obj?.amount ?? ''}</Typography>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid container>
+                                                <Grid item xs={12} sm={6} md={6}>
+                                                    {
+                                                        obj?.stage ? <DisplayData key={index} label='Stage' value={obj?.stage?.optionLabel ?? ''} icon={<BiCustomize size={15} />} /> : ''
+                                                    }
+                                                </Grid>
+                                                <Grid item xs={12} sm={6} md={6}>
+                                                    {
+                                                        obj.closeDate ? <DisplayData key={index} label='Closing Date' value={displayDate(obj.closeDate)} icon={< IoCalendarOutline size={15} />} /> : ''
+                                                    }
+                                                </Grid>
+                                            </Grid>
                                         </CardContent>
                                     </Card>
-
                                 </Grid>
                             ))
                         }

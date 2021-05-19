@@ -163,14 +163,12 @@ export default function Roadmap({ type, filter, activityId }) {
                     </Box>
                 </Box>
             </Box>
-            <Box display="flex" justifyContent="flex-end">
-                <Box>
+            <Box display="flex" justifyContent="flex-end" className="m-2">
                     <ButtonGroup disableElevation color="primary">
                         <Button variant={calendarType === "week" ? "contained" : "outlined"} onClick={() => handelChangeCalendarType("week")}  >Weeks</Button>
                         <Button variant={calendarType === "month" ? "contained" : "outlined"} onClick={() => handelChangeCalendarType("month")} >Months</Button>
                         <Button variant={calendarType === "quater" ? "contained" : "outlined"} onClick={() => handelChangeCalendarType("quater")} >Quaters</Button>
                     </ButtonGroup>
-                </Box>
             </Box>
         </Box>
         : <Loader text="" />

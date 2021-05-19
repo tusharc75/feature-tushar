@@ -78,7 +78,7 @@ function DisplayData({ label, value, icon, showCopyToText = false }) {
                     {icon}
                 </ListItemAvatar>
                 <ListItemText
-                    primary={ value ? value : 'Add Phone'}
+                    primary={ value ? value : '-'}
                     secondary={label} />
                 {
                     showCopyToText ? <CopyToClipboard textToCopy={value} /> : null

@@ -347,7 +347,7 @@ const RoleDetailsPage = () => {
 
               <Box display="flex" marginTop={2} marginBottom={2} gridGap={10}>
                 <TextField
-                  disabled={!permissions.role.isUpdate}
+                  disabled={(roleData?.type && roleData?.permission) ? true : !permissions.role.isUpdate}
                   required
                   variant="outlined"
                   size="small"
@@ -360,7 +360,7 @@ const RoleDetailsPage = () => {
                 />
 
                 <TextField
-                  disabled={!permissions.role.isUpdate}
+                  disabled={(roleData?.type && roleData?.permission) ? true : !permissions.role.isUpdate}
                   required
                   variant="outlined"
                   size="small"

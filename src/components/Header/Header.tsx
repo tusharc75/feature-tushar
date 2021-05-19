@@ -49,10 +49,11 @@ const useStyles = makeStyles((theme) => ({
     zIndex: theme.zIndex.drawer + 1,
   },
   toolbar: {
+    // color:theme.palette.info.light,
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
       paddingRight: 0,
-    },
+    }
   },
   menuButton: {
     marginRight: theme.spacing(2),

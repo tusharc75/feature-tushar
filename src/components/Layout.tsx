@@ -10,6 +10,7 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     width: "100%",
     overflow: "hidden",
+    minHeight: "calc(100vh - 55px)",
   },
 }));
 

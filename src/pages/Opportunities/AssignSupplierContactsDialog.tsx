@@ -34,7 +34,8 @@ export default function AssignSupplierContactsDialog({
     currentContacts,
     selectedSupplierAccountsList,
     loadingSupplierAccounts,
-    onUpdateOpportunity
+    onUpdateOpportunity,
+    notToBeRemovedContacts
 }) {
     const toastConfig = useContext(CustomToastContext);
     const [isAssigning, setAssigning] = useState(false);
@@ -50,13 +51,15 @@ export default function AssignSupplierContactsDialog({
     const isDataAvailable = (fieldKey) => {
         return (contacts && contacts?.[fieldKey] && contacts[fieldKey].length)
     }
-    const handleAssignContacts = async () => {
-        setAssigning(true);
 
+    const handleAssignContacts = async () => {
+
+        setAssigning(true);
         const dataToSave = {
             _id: opportunityId,
             supplierContacts: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
-            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : []
+            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
+            notToBeRemoved: contacts && contacts?.notToBeRemoved ? contacts.notToBeRemoved : null
         };
 
         await axiosInstance()
@@ -81,6 +84,7 @@ export default function AssignSupplierContactsDialog({
             <ListItemIcon>
                 <Checkbox
                     edge="start"
+                    disabled={notToBeRemovedContacts.indexOf(contact._id) >= 0 ? true : false}
                     onChange={(e) => handleContactSelection(e, contact._id)}
                     checked={contact.isChecked}
                     inputProps={{
