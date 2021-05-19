@@ -1,6 +1,11 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
-import { Grid, TextField, Typography } from "@material-ui/core";
+import {
+  CircularProgress,
+  Grid,
+  TextField,
+  Typography,
+} from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import Chip from "@material-ui/core/Chip";
 import { SearchActivity } from "../../../axios/activity";
@@ -22,6 +27,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
   const [options, setOptions] = React.useState([]);
   const [inputValue, setInputValue] = React.useState("");
   const [value, setValue] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   const allSearch = [
     { type: "customerAccount", name: "All", isAll: true },
@@ -41,11 +47,15 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
     if (inputValue === "") {
       setOptions(allSearch);
     } else {
+      setLoading(true);
       SearchActivity(inputValue)
         .then(({ data }) => {
+          setLoading(false);
           setOptions(data);
         })
-        .catch((err) => {});
+        .catch((err) => {
+          setLoading(false);
+        });
     }
   }, [inputValue]);
 
@@ -58,6 +68,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
     <Autocomplete
       multiple={true}
       fullWidth
+      loading={loading}
       options={options}
       getOptionLabel={(option) => (option ? option.name : "")}
       filterSelectedOptions={false}
@@ -86,6 +97,17 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
           size="small"
           variant="outlined"
           placeholder="Search or Filter"
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <React.Fragment>
+                {loading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : null}
+                {params.InputProps.endAdornment}
+              </React.Fragment>
+            ),
+          }}
         />
       )}
       value={value}
