@@ -11,6 +11,7 @@ import {
   Toolbar,
   Collapse,
   ListItemIcon,
+  Grid,
   Tooltip,
 } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
@@ -24,15 +25,16 @@ import {
   ExpandLess,
 } from "@material-ui/icons";
 import _ from "lodash";
-import { FaUserTie, FaDatabase, FaHandshake } from "react-icons/fa";
-import { BsCalendarFill, BsFillPuzzleFill } from "react-icons/bs";
-import { MdDashboard, MdLocalActivity } from "react-icons/md";
-import SidebarImage from "../../assets/header-bg.png";
-import Avatar from "@material-ui/core/Avatar";
-import { RiFolderSettingsFill } from "react-icons/ri";
-import { RiAccountPinCircleFill } from "react-icons/ri";
-import { SiCivicrm } from "react-icons/si";
-
+import { FaUserTie, FaDatabase, FaHandshake } from 'react-icons/fa';
+import { BsCalendarFill, BsFillPuzzleFill } from 'react-icons/bs';
+import { MdDashboard, MdLocalActivity } from 'react-icons/md';
+import SidebarImage from '../../assets/header-bg.png';
+import Avatar from '@material-ui/core/Avatar';
+import { RiFolderSettingsFill } from 'react-icons/ri';
+import { RiAccountPinCircleFill } from 'react-icons/ri';
+import { SiCivicrm } from 'react-icons/si';
+import { IoIosArrowDroprightCircle, IoIosArrowDropleftCircle } from 'react-icons/io';
+import { AccountCircle } from "@material-ui/icons";
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -211,6 +213,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       <CssBaseline />
       <Header toggleDrawer={handleToggleDrawer} />
       <Drawer
+        onMouseEnter={handleToggleDrawer}
+        onMouseLeave={handleToggleDrawer}
         variant="permanent"
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: toggleDrawer,
@@ -224,22 +228,17 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         }}
       >
         <Toolbar />
-        <div className={classes.toolbar}>
-          {/* <div className={classes.sidebarUser}>
-            {
-              user?.user?.avatar ? <Avatar className="d-flex align-items-center gap-1" src={user?.user?.avatar}></Avatar>
-                : <Avatar className="d-flex align-items-center gap-1"></Avatar>
-            }
-            <div className="d-flex align-items-center gap-1">{[user?.user?.firstName, user?.user?.lastName].filter(f => f).join(" ")}</div>
-            <small className="d-flex align-items-center gap-1">{user?.user?.email}</small>
-          </div> */}
-          <IconButton onClick={handleToggleDrawer}>
-            {toggleDrawer ? <ChevronLeft /> : <ChevronRight />}
-          </IconButton>
-        </div>
-
         <div>
           <List className="sidebar-list">
+            <ListItem
+              button
+              className="list-item"
+            >
+              <ListItemIcon>
+                {toggleDrawer ? <AccountCircle className="sidebar-icon" /> : <ChevronRight className="sidebar-icon" />}
+              </ListItemIcon>
+              <ListItemText primary={[user?.user?.firstName, user?.user?.lastName].filter(f => f).join(" ")} />
+            </ListItem>
             <Link to="/">
               <Tooltip title={!toggleDrawer ? "Dashboard" : ""}>
                 <ListItem

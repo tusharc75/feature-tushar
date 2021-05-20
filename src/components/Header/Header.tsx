@@ -52,14 +52,14 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
       paddingRight: 0,
-    },
+    }
   },
   menuButton: {
     marginRight: theme.spacing(2),
   },
 
   logo: {
-    width: "110px",
+    width: "140px",
   },
 
   search: {
