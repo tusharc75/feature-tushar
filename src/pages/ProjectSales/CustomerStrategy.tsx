@@ -14,11 +14,12 @@ import {
   Tabs,
   Tab,
   Menu,
-  MenuItem
+  MenuItem,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import { Add, ExpandMore, ControlPoint } from "@material-ui/icons";
+import { ExpandMore } from "@material-ui/icons";
 import MoreVert from "@material-ui/icons/MoreVert";
+
 import axiosInstance from "../../axios/axiosInstance";
 import CustomerContacts from "./CustomerContacts";
 import BoxWithBorder from "../../components/BoxWithBorder";
@@ -29,6 +30,8 @@ import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccord
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import ManageContactDialog from "../Contact/ManageContact";
 import { customerAccount, customerContact } from "../../constants/helpers";
+import ManageAccountDialog from "../Account/ManageAccount";
+
 const Accordion = withStyles({
   root: {
     border: "1px solid rgba(0, 0, 0, .125)",
@@ -112,19 +115,20 @@ const CustomerStrategy = (props) => {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [collaborators, setCollaborators] = useState([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [showContactCreateDialog, setShowContactCreateDialog] = useState(false)
+  const [showContactCreateDialog, setShowContactCreateDialog] = useState(false);
+  const [showAccountCreateDialog, setShowAccountCreateDialog] = useState(false);
+  const [dialogType, setDialogType] = useState(null);
+  const [accId, setAccId] = useState(null);
 
   useEffect(() => {
     if (!users.length) return;
 
-    const collabs = users
-      .filter((u) => u._id !== ownerId)
-      .map((u, i) => ({
-        optionValue: u._id,
-        optionLabel: u.firstName + " " + u.lastName,
-        order: i,
-        default: false,
-      }));
+    const collabs = users.map((u, i) => ({
+      optionValue: u._id,
+      optionLabel: u.firstName + " " + u.lastName,
+      order: i,
+      default: false,
+    }));
     setCollaborators(collabs);
   }, [users]);
 
@@ -145,6 +149,29 @@ const CustomerStrategy = (props) => {
       .then(() => {
         setToastConfig({
           message: `Opportunity added successfully`,
+          type: "success",
+          open: true,
+        });
+        fetchProjectData();
+      })
+      .catch((error) => {
+        setToastConfig(error);
+      });
+  };
+
+  const saveCustomerAccountToProject = async (id) => {
+    const existingData = customerAccounts.map((contact) => contact._id);
+
+    const dataObj = {
+      customerAccount: [id, ...existingData],
+      _id: projectId,
+    };
+
+    await axiosInstance()
+      .put(`/project-sales/add-customer-account`, dataObj)
+      .then(() => {
+        setToastConfig({
+          message: `Customer Contact added successfully`,
           type: "success",
           open: true,
         });
@@ -176,19 +203,62 @@ const CustomerStrategy = (props) => {
       .catch((error) => {
         setToastConfig(error);
       });
-
   };
+
+  /* Actions for more icon */
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    type: string
+  ) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
+    setDialogType(type);
+  };
+
+  const renderMenu = (id: string = "") => {
+    return (
+      <Menu
+        id="menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem
+          onClick={() => {
+            if (dialogType === "customer-contact") {
+              setShowContactCreateDialog(true);
+            }
+            if (dialogType === "customer-account") {
+              setShowAccountCreateDialog(true);
+            }
+            handleClose();
+          }}
+        >
+          Create New
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (dialogType === "customer-account") {
+              handleOpenDialog(dialogType);
+            }
+            if (dialogType === "customer-contact") {
+              handleOpenDialog(dialogType, id);
+            }
+            handleClose();
+          }}
+        >
+          Add Exisiting
+        </MenuItem>
+      </Menu>
+    );
   };
 
   return (
     <>
-
       <Paper className={classes.root}>
         <Accordion
           square={false}
@@ -209,15 +279,13 @@ const CustomerStrategy = (props) => {
             <Typography variant="subtitle1">Customer Accounts</Typography>
             {(permissions.isUpdate && isTeamMember) || isManager ? (
               <IconButton
+                aria-haspopup="true"
                 color="primary"
                 size="small"
                 className={classes.addBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenDialog("customer-account");
-                }}
+                onClick={(e) => handleClick(e, "customer-account")}
               >
-                <Add />
+                <MoreVert />
               </IconButton>
             ) : null}
           </AccordionSummary>
@@ -254,8 +322,8 @@ const CustomerStrategy = (props) => {
                     <Box mt={2} hidden={currentTabIndex !== i} key={c._id}>
                       <Grid container spacing={1}>
                         {/**
-                       * LEFT SIDE
-                       */}
+                         * LEFT SIDE
+                         */}
 
                         <Grid item xs={12} sm={12} md={8} lg={8}>
                           {/*TODO: Heirarchy Table */}
@@ -273,7 +341,13 @@ const CustomerStrategy = (props) => {
                               resource={"customerAccount"}
                               isRedirect={false}
                               expanded={true}
-                              collaborators={collaborators}
+                              collaborators={collaborators.filter(
+                                (u) => u.optionValue !== ownerId
+                              )}
+                              users={collaborators.map((u) => ({
+                                ...u,
+                                default: u.optionValue === ownerId,
+                              }))}
                               projectId={projectId}
                               addExisting={handleOpenDialog}
                               fetchProjectData={fetchProjectData}
@@ -286,52 +360,9 @@ const CustomerStrategy = (props) => {
                           <ProductBuilderInAccordion />
                         </Grid>
                         {/**
-                       * RIGHT SIDE
-                       */}
-                        <Menu
-                          id="menu"
-                          anchorEl={anchorEl}
-                          keepMounted
-                          open={Boolean(anchorEl)}
-                          onClose={handleClose}
-                        >
-                          <MenuItem
-                            onClick={() => {
-                              setShowContactCreateDialog(true);
-                              handleClose()
-                            }}
-                          >
-                            Create New
-                          </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              handleOpenDialog("customer-contact", c._id)
-                              handleClose();
-                            }}
-                          >
-                            Add Exisiting
-                          </MenuItem>
-                        </Menu>
-                        {
-                          showContactCreateDialog &&
-                          <ManageContactDialog
-                            open={showContactCreateDialog}
-                            onClose={() => {
-                              setShowContactCreateDialog(false);
-                              fetchProjectData();
-                            }}
-                            onSuccess={(obj) => {
-                              if (obj && obj.id) {
-                                saveCustomerContactToProject(obj.id)
-                              }
-                            }}
-                            contactResource={customerContact.contactResource}
-                            accountId={c._id}
-                            contactApi={customerContact.contactApi}
-                            account={customerAccount}
-                            isRedirectToDetailPage={false}
-                          />
-                        }
+                         * RIGHT SIDE
+                         */}
+
                         <Grid item xs={12} sm={12} md={4} lg={4}>
                           <Paper style={{ overflow: "hidden" }}>
                             <Box style={{ padding: "0px", maxHeight: "450px" }}>
@@ -345,14 +376,17 @@ const CustomerStrategy = (props) => {
                               >
                                 <Typography variant="subtitle2">
                                   Customer Contacts
-                              </Typography>
+                                </Typography>
                                 {(permissions.isUpdate && isTeamMember) ||
-                                  isManager ? (
+                                isManager ? (
                                   <IconButton
                                     aria-haspopup="true"
                                     color="primary"
                                     size="small"
-                                    onClick={handleClick}
+                                    onClick={(e) => {
+                                      handleClick(e, "customer-contact");
+                                      setAccId(c._id);
+                                    }}
                                   >
                                     <MoreVert />
                                   </IconButton>
@@ -381,8 +415,8 @@ const CustomerStrategy = (props) => {
                                     </BoxWithBorder>
                                   ))
                                 ) : customerContacts.filter(
-                                  (ca) => ca.accountName === c._id
-                                ).length ? (
+                                    (ca) => ca.accountName === c._id
+                                  ).length ? (
                                   <>
                                     <CustomerContacts
                                       contacts={customerContacts.filter(
@@ -392,9 +426,7 @@ const CustomerStrategy = (props) => {
                                       accountName={c.accountName}
                                       contactRoute="customer-contact"
                                     />
-
                                   </>
-
                                 ) : (
                                   <Box textAlign="center" padding={2}>
                                     No Contacts
@@ -407,6 +439,59 @@ const CustomerStrategy = (props) => {
                       </Grid>
                     </Box>
                   ))}
+                  {dialogType && renderMenu(accId)}
+                  {showContactCreateDialog && accId && (
+                    <ManageContactDialog
+                      open={showContactCreateDialog}
+                      onClose={() => {
+                        setShowContactCreateDialog(false);
+                        setDialogType(null);
+                        setAccId(null);
+                      }}
+                      onSuccess={(obj) => {
+                        if (obj && obj.id) {
+                          saveCustomerContactToProject(obj.id);
+                        }
+                      }}
+                      contactResource={customerContact.contactResource}
+                      accountId={accId}
+                      contactApi={customerContact.contactApi}
+                      account={customerAccount}
+                      isRedirectToDetailPage={false}
+                      collaborators={collaborators.filter(
+                        (u) => u.optionValue !== ownerId
+                      )}
+                      owners={collaborators.map((u) => ({
+                        ...u,
+                        default: u.optionValue === ownerId,
+                      }))}
+                      fromProject={true}
+                    />
+                  )}
+                  {showAccountCreateDialog && (
+                    <ManageAccountDialog
+                      open={showAccountCreateDialog}
+                      onClose={({ id }) => {
+                        setShowAccountCreateDialog(false);
+                        if (id) {
+                          saveCustomerAccountToProject(id);
+                        }
+                        setDialogType(null);
+                        setAccId(null);
+                      }}
+                      accountResource={"customerAccount"}
+                      accountApi={"customer-account"}
+                      isRedirectToDetailPage={false}
+                      collaborators={collaborators.filter(
+                        (u) => u.optionValue !== ownerId
+                      )}
+                      owners={collaborators.map((u) => ({
+                        ...u,
+                        default: u.optionValue === ownerId,
+                      }))}
+                      fromProject={true}
+                    />
+                  )}
                 </>
               </Box>
             ) : (

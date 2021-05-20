@@ -6,7 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
-import { isEqual, kebabCase, camelCase } from "lodash";
+import { isEqual, kebabCase } from "lodash";
 import { isMobile, isTablet } from "react-device-detect";
 
 import statusList from "../../Helpers/statusList";
@@ -95,8 +95,8 @@ const Board = ({ type, filter, activityId }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => { })
-      .catch((err) => console.log(JSON.stringify(err)));
+      .then(({ data }) => {})
+      .catch((err) => {});
   };
 
   const resourceOptions = [

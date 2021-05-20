@@ -17,8 +17,10 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
+import DashboardView from '../../components/Charts/DashboardView'
 import ProductBuilder from "../../components/productBuilder";
 import axios from "axios";
+import { Dashboard } from "@material-ui/icons";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -28,8 +30,9 @@ const ProductBuilderSchema = Yup.object().shape({
 });
 
 
-const CreateProductBuilder = () => {
-
+const EditDashboards = (props) => {
+    const {edit}=props
+    console.log(edit);
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
@@ -37,70 +40,39 @@ const CreateProductBuilder = () => {
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
-    const [section, setSection] = useState([]);
     const [deleteField, setDeleteField] = useState([]);
-    const [newVersion,setNewVersion]=useState(false);
-    const [versionNumber,setVersionNumber]=useState(0);
 
 
     useEffect(() => {
-        fetchOneProductBuilder();
-        
+        fetchDashboard();
     }, [id]);
 
-    useEffect(()=>{
-        fetchVersionDetail();
-    },[initialValues,section]);
 
-    const fetchOneProductBuilder = () => {
+    const fetchDashboard = () => {
         if (id === "0") {
             setInitialValues({ name: "" });
         }
         else {
-            axiosInstance().get(`/productBuilder/` + id).then(({ data: { data } }) => {
+            axiosInstance().get(`/dashboard/` + id).then(({ data: { data } }) => {
                 console.log(data);
                 setInitialValues(data);
-                setSection(data.section);
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
         }
     };
 
-    const fetchVersionDetail=()=>{
-        console.log("Fetching Version");
-        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + id).then(({ data: { data } }) => {
-            setNewVersion(data.newVersion);
-            setVersionNumber(data.version);
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
-    };
-
+    
     const handleSave = (values) => {
         let data: any = {}
-        data.name = values.name;
+        data.name = initialValues.name;
+        data.Charts= values;
 
-        let fields: any = []
-        let order = 0;
-        section.forEach(_section => {
-            _section.field.forEach(_field => {
-                let _field_data = _field
-                _field_data._id = _field_data._id.toString();
-                _field_data.sectionName = _section.sectionName
-                if (!isNaN(_field._id)) {
-                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
-                }
-                _field_data.order = ++order
-                fields.push(_field_data)
-            })
-        })
-        data.fields = fields;
         setIsUpdating(true)
         if (id === "0") {
-            axiosInstance().post("/productBuilder", data).then(({ data: { data } }) => {
+            axiosInstance().post("/dashboard", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
-                history.push({ pathname: routes.productBuilder.path });
+                history.push({ pathname: '/dashboards' });
             }).catch((error) => {
                 setIsUpdating(false)
                 toastConfig.setToastConfig(error);
@@ -109,9 +81,9 @@ const CreateProductBuilder = () => {
         else {
             data.BuilderId = id;
             data.deleteField = deleteField;
-            axiosInstance().put("/productBuilder", data).then(({ data: { data } }) => {
+            axiosInstance().put("/dashboard/"+id, data).then(({ data: { data } }) => {
                 setIsUpdating(false)
-                history.push({ pathname: routes.productBuilder.path });
+                history.push({ pathname: '/dashboards' });
             }).catch((error) => {
                 setIsUpdating(false)
                 toastConfig.setToastConfig(error);
@@ -123,7 +95,7 @@ const CreateProductBuilder = () => {
 
         <Grid container direction="row">
             <Grid item xs={12}>
-                <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title, path: routes.productBuilder.path },
+                <CustomBreadCrumbs routes={[{ title: "Dashboards", path: "/dashboards" },
                 { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
             </Grid>
         </Grid>
@@ -135,15 +107,7 @@ const CreateProductBuilder = () => {
                             <Box p={1} bgcolor="white">
                                 <Grid container spacing={1}>
                                     <Grid item xs={12} sm={3}  >
-                                        <Field
-                                            component={TextField}
-                                            fullWidth
-                                            margin="dense"
-                                            type="text"
-                                            label="Name"
-                                            name="name"
-                                            variant="outlined"
-                                        />
+                                        {initialValues.name}
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                     </Grid>
@@ -154,12 +118,12 @@ const CreateProductBuilder = () => {
                                             </Button>
                                         </Box> */}
                                         <Box ml={1} >
-                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} >Close</Button>
+                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: "/dashboards" })} >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
+                                <DashboardView edit={edit} handleSave={handleSave} Charts={initialValues.Charts}/>
                             </Box>
-                            <ProductBuilder productBuilderId={id} />
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
@@ -168,4 +132,4 @@ const CreateProductBuilder = () => {
     );
 }
 
-export default CreateProductBuilder;
+export default EditDashboards;

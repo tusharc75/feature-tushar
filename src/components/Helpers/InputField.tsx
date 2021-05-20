@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Box } from "@material-ui/core";
+import { Grid, Box, InputAdornment } from "@material-ui/core";
 
 import FormTypes from "./FormTypes";
 
 const InputField = (props) => {
   const { fieldsData, errors, touched, values, setFieldValue, ...rest } = props;
   const [formsData, setFormsData] = useState([]);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
     sortArray();
@@ -58,6 +59,15 @@ const InputField = (props) => {
                   >
                     <FormTypes
                       {...rest}
+                      startAdornment={
+                        currencySymbol ? (
+                          <InputAdornment position="start">
+                            {currencySymbol}
+                          </InputAdornment>
+                        ) : (
+                          ""
+                        )
+                      }
                       values={values}
                       errors={errors}
                       touched={touched}
@@ -69,6 +79,22 @@ const InputField = (props) => {
                       required={field.required}
                       isTooltip={field.isTooltip}
                       tooltipMessage={field.tooltipMessage}
+                      onChange={
+                        field.fieldName === "currency"
+                          ? (e, val) => {
+                              if (val && val.currencyCode) {
+                                setFieldValue(
+                                  field.fieldName,
+                                  val.currencyCode
+                                );
+                                setCurrencySymbol(val.symbolNative);
+                              } else {
+                                setFieldValue(field.fieldName, "");
+                                setCurrencySymbol(null);
+                              }
+                            }
+                          : null
+                      }
                     />
                   </Grid>
                 ))}

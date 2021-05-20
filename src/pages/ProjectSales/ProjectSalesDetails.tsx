@@ -30,6 +30,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import AssignDataDialog from "./AssignDataDialog";
 import CustomerStrategy from "./CustomerStrategy";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
+import { formatAmountWithCurrency } from "../../constants/helpers";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -117,11 +118,15 @@ const ProjectSalesDetails = () => {
         data: { data },
       } = await axiosInstance().get(`/project-sales/${id}`);
 
+      data.amount = formatAmountWithCurrency(data.currency, data.amount);
+      data.value = formatAmountWithCurrency(data.currency, data.value);
+
+      setProjectSalesData(data);
       setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
+
       setHeadingLbl(name);
-      setProjectSalesData(data);
       setCustomizedRoutes([routes.projectSales, { title: data.projectName }]);
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
