@@ -7,18 +7,43 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
+import { grey } from '@material-ui/core/colors';
 let dayname = moment.weekdaysShort();
 
 const useStyles = makeStyles((theme) => ({
     fontBold: {
-        fontWeight: 700
+        fontWeight: 500,
+        color: theme.palette.primary.main
     },
     minusMargin: {
         margin: "-1px"
     },
     tdWidth: {
-        maxWidth: "14.28%!important",
-        minWidth: "14.28%!important"
+        width: "14.2857%!important"
+    },
+    calHeader: {
+        fontSize: theme.spacing(2),
+        color: "#a8a6a6",
+        background: "white"
+    },
+    calTask: {
+        backgroundColor: "#efefef",
+        borderLeft: "3px solid #d46101",
+        fontSize: "0.70rem",
+        color: "#5a5959",
+        fontWeight: 500,
+        padding: "3px"
+    },
+    calContent: {
+        display: "flex",
+        justifyContent: "space-between",
+        margin: "-1px",
+        flexDirection: "column",
+        background: "white"
+    },
+    tableContent: {
+        height: "calc(100vh - 31vh)",
+        overflow: "auto"
     }
 }));
 
@@ -112,45 +137,45 @@ export default function BigCalander({ type, activity }) {
     const classes = useStyles();
 
     return (<Box>
-        <Box pt={1} display="flex" flexDirection="row">
-            <Box>
-                <IconButton aria-label="delete" onClick={() => handlechange("pre")} >
+        <Box display="flex" flexDirection="row" className="gap-2" p={1} bgcolor="grey.200">
+            <Box className="d-flex align-items-center">
+                <IconButton className="p-0" aria-label="delete" onClick={() => handlechange("pre")} >
                     <ChevronLeftIcon />
                 </IconButton>
-                <IconButton aria-label="delete" onClick={() => handlechange("next")} >
+                <IconButton className="p-0" aria-label="delete" onClick={() => handlechange("next")} >
                     <ChevronRightIcon />
                 </IconButton>
             </Box>
-            <Box display="block">
-                <Box ml={2} mt={2}>
-                    <Typography className={classes.fontBold}>{moment(month, 'MM').format('MMMM')} - {year}</Typography>
-                </Box>
+            <Box className="d-flex align-items-center">
+                <Typography className={classes.fontBold}>{moment(month, 'MM').format('MMMM')} - {year}</Typography>
             </Box>
         </Box>
-
-        <Box p={2}>
+        <Box className={classes.tableContent}>
             <table style={{ width: "100%" }}>
                 <thead>
                     <tr>
                         {dayname.map((day, key) => (
                             <td key={key} className={classes.tdWidth}>
-                                <Box className={classes.minusMargin} border={1} borderColor="grey.300" p={2} bgcolor="grey.200" >
-                                    <Typography className={classes.fontBold}>{day}</Typography>
+                                <Box border={0.7} borderColor="grey.200" className={classes.minusMargin} bgcolor="white" p={1}>
+                                    <Typography className={classes.calHeader}>{day}</Typography>
                                 </Box>
                             </td>
                         ))}
                     </tr>
+                </thead>
+                <tbody>
                     {days.map((_days, key) => (
                         <tr key={key}>
                             {_days.map((_day, key) => (
                                 <td key={key} className={classes.tdWidth}>
-                                    <Box className={classes.minusMargin} border={1} borderColor="grey.300" minHeight={100} maxHeight={100} >
+                                    <Box className={classes.calContent} border={0.7} borderColor="grey.200" minHeight={100} maxHeight={100} >
                                         <Box pl={1} pt={1}>
                                             <Typography className={_day.month == month ? classes.fontBold : ""}>{_day.day}</Typography>
                                         </Box>
                                         {(activity.filter((data) => moment(data.dueDate).format("YYYY-MM-DD") === (year + "-" + (_day.month.toString()).padStart(2, "0") + "-" + (_day.day.toString()).padStart(2, "0")))).map((_data, key) => (
-                                            key === 0 && <Box style={{ cursor: "pointer" }} key={key} p={0.5} m={1} border={1} bgcolor="grey.100" borderColor="grey.300" onClick={() => handleActivityOpen(_data._id)}>
-                                                <Typography >{_data.name}</Typography>
+                                            key === 0 &&
+                                            <Box style={{ cursor: "pointer" }} key={key} onClick={() => handleActivityOpen(_data._id)}>
+                                                <Typography className={classes.calTask}>{_data.name}</Typography>
                                             </Box>
                                         ))}
                                     </Box>
@@ -158,7 +183,8 @@ export default function BigCalander({ type, activity }) {
                             ))}
                         </tr>
                     ))}
-                </thead>
+                </tbody>
+
             </table>
         </Box>
     </Box>
