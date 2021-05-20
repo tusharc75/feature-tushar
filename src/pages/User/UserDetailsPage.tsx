@@ -483,7 +483,7 @@ const UserDetailsPage = () => {
                   {permissions.user.isDelete ? (
                     <DeleteButton
                       text="Delete"
-                      disabled={user?.user?._id === id}
+                      disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
                       onClick={() => handleDeleteUser(id)}
                     />
                   ) : null}

@@ -242,19 +242,27 @@ const Roles: FC = () => {
         <>
           {permissions.role.isDelete ? (
             <span title="Delete Role">
-              <IconButton
+              {
+                rolePermissionArray.indexOf(params?.row?.permission) >= 0 ? (
+                  <Tooltip
+                  className="cursor-stop"
+                  title={params.row.type === "Global" ? "Global brand admin role can not be deleted" : "Regional brand admin role can not be deleted"}
+                >
+                  <IconButton aria-label="Delete">
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                ):(<IconButton
                 aria-label="Delete"
                 onClick={() => showConfirmBox(params.row)}
-                disabled={
-                  rolePermissionArray.indexOf(params?.row?.permission) >= 0
-                }
+                
               >
-                {rolePermissionArray.indexOf(params?.row?.permission) >= 0 ? (
-                  <DeleteIcon fontSize="small" color="disabled" />
-                ) : (
+                
                   <DeleteIcon fontSize="small" color="error" />
-                )}
-              </IconButton>
+              
+              </IconButton>)
+              }
+              
             </span>
           ) : (
             <Tooltip
