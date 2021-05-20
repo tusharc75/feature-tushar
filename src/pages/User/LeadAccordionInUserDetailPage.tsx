@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { withStyles, makeStyles } from "@material-ui/core/styles";
-import { displayDate } from '../../services/util';
+import { withStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { HiOutlineUser } from 'react-icons/hi';
 import { BsBuilding } from 'react-icons/bs';
-import currencies from './../../constants/currency_with_country.json';
 import { useData } from '../../StateProvider/Provider';
 import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
 import { FaEye } from 'react-icons/fa';
