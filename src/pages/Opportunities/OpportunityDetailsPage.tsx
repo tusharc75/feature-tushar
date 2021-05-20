@@ -29,7 +29,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
 
-const recordsPerLine = 2
+const recordsPerLine = 3;
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -500,45 +500,38 @@ function OpportunityDetailsPage() {
                         fields={opportunityFields}
                       />
                     </Box>
-
-                    <hr />
-
-                    {
-                      opportunityData && <Box padding="8px">
-                        <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
-                          title="Supplier Contacts"
-                          contactApi={supplierContact.contactApi}
-                          isExpanded={expanded.supplierContacts}
-                          onAddContact={() => {
-                            fetchSupplierContactData(true);
-                          }}
-                          onSetExpanded={() => {
-                            setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
-                          }}
-                          recordsPerLine={recordsPerLine}
-                        />
-                      </Box>
-                    }
-
-                    {
-                      opportunityData && <Box padding="8px" marginTop="1rem">
-                        <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
-                          title="Customer Contacts"
-                          isExpanded={expanded["customerContacts"]}
-                          contactApi={customerContact.contactApi}
-                          onAddContact={() => {
-                            fetchCustomerContactData(true);
-                          }}
-                          onSetExpanded={() => {
-                            setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
-                          }}
-                          recordsPerLine={recordsPerLine}
-                        />
-                      </Box>
-                    }
-
+                    <div className="p-3">
+                      {
+                        opportunityData && <OpportunityContacts
+                            contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
+                            title="Supplier Contacts"
+                            contactApi={supplierContact.contactApi}
+                            isExpanded={expanded.supplierContacts}
+                            onAddContact={() => {
+                              fetchSupplierContactData(true);
+                            }}
+                            onSetExpanded={() => {
+                              setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
+                            }}
+                            recordsPerLine={recordsPerLine}
+                          />
+                      }
+                      {
+                        opportunityData && <OpportunityContacts
+                            contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
+                            title="Customer Contacts"
+                            isExpanded={expanded["customerContacts"]}
+                            contactApi={customerContact.contactApi}
+                            onAddContact={() => {
+                              fetchCustomerContactData(true);
+                            }}
+                            onSetExpanded={() => {
+                              setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
+                            }}
+                            recordsPerLine={recordsPerLine}
+                          />
+                      }
+                    </div>
                   </TabPanel>
                   <TabPanel value={currentTabIndex} index={1}>
                     <Activity />
