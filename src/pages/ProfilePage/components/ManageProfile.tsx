@@ -44,8 +44,6 @@ export default function ManageProfile(props) {
     const classes = useStyles();
     const { displayUserDetails, displayUserProfileImage, userFields,
         userData, loading, userLoading, onFetchUserData, otherDetails } = props
-    console.log(displayUserDetails);
-    console.log(otherDetails);
     const { state: { user }, dispatch }: any = useData();
     const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
