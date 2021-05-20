@@ -154,12 +154,6 @@ const AssignEntityDialog = ({
         if (data.filter(user => user._id === selectedData[0]).length !== 0) {
           const selectedUser = data.find(user => user._id === selectedData[0])
           const selectedUserEntityArray = selectedUser.entities.filter(e => e.role.length !== 0 || e.entity !== undefined)
-            selectedUserEntityArray.map(d => {
-              entityArray.push({
-                entity: d.entity?._id,
-                role: d.role?.map(r => r._id)
-              })
-            })
             selectedUserEntityArray.push({
               entity: ids[0],
               role: selectedRole
