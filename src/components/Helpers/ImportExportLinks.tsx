@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   links: {
-    color: "#ffffffbd", //  textDark
+    color: theme.palette.info.light, //  textDark
     fontSize: 15,
   },
   linkDivider: {

@@ -267,7 +267,7 @@ const EntityDetailsPage = () => {
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper>
+            <Paper className="subContainer">
               {!entityData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />

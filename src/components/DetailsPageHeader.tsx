@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "4px",
     margin: "8px 0px 8px 10px",
     boxShadow: "2px 2px 4px #747474",
-    background: "linear-gradient(to bottom right, #005d7c  0%, #013445 100%)",
+    background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
     border: "#03232e"
   },
   labelColor: {
