@@ -603,25 +603,26 @@ export default function AccountDetailPage(props) {
                   </>
                 )}
               </Box>
-
-              {permissions?.opportunity?.isRead && (
-                <OpportunityInAccordian
-                  opportunityPermissions={permissions.opportunity}
-                  opportunities={opportunities}
-                  onNewOpportunityAdd={() => {
-                    fetchRelatedData();
-                  }}
-                  accountId={accountData._id}
-                  accountName={accountData.accountName}
-                  recordsPerLine={3}
-                  resource={accountResource}
-                  isRedirect={false}
-                />
-              )}
-              <ProjectInAccordion />
-              <QuotesInAccordion />
-              <ProductBuilderInAccordion />
-              <LeadInAccordion />
+              <div className="p-3">
+                {permissions?.opportunity?.isRead && (
+                  <OpportunityInAccordian
+                    opportunityPermissions={permissions.opportunity}
+                    opportunities={opportunities}
+                    onNewOpportunityAdd={() => {
+                      fetchRelatedData();
+                    }}
+                    accountId={accountData._id}
+                    accountName={accountData.accountName}
+                    recordsPerLine={3}
+                    resource={accountResource}
+                    isRedirect={false}
+                  />
+                )}
+                <ProjectInAccordion />
+                <QuotesInAccordion />
+                <ProductBuilderInAccordion />
+                <LeadInAccordion />
+              </div>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>

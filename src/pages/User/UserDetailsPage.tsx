@@ -131,7 +131,7 @@ const UserDetailsPage = () => {
       setHeadingLbl(name);
       setUserData(data);
       setEntities(data.entities.filter(e => e.role.length !== 0 || e.entity !== undefined))
-      setGloabalRoles(data.role); 
+      setGloabalRoles(data.role);
       setCustomizedRoutes([
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
@@ -445,7 +445,7 @@ const UserDetailsPage = () => {
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper>
+            <Paper className="subContainer">
               {!userData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -694,7 +694,6 @@ const UserDetailsPage = () => {
                   </Box>
                 </Grid>
               </Grid>
-
               {
                 user?.user?.permissions?.doaSetup && <>
                   <Box style={{ padding: "0px" }}>
@@ -752,68 +751,70 @@ const UserDetailsPage = () => {
                   </Grid>
                 </>
               }
-              <OpportunityAccordionInUserDetail
-                opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <LeadAccordionInUserDetailPage
-                leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <AccountAccordionDetail
-                type="customer"
-                accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <AccountAccordionDetail
-                type="supplier"
-                accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <ContactAccordionInDetailPage
-                type="customer"
-                contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <ContactAccordionInDetailPage
-                type="supplier"
-                contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
+              <div className="p-3">
+                <OpportunityAccordionInUserDetail
+                  opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <LeadAccordionInUserDetailPage
+                  leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <AccountAccordionDetail
+                  type="customer"
+                  accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <AccountAccordionDetail
+                  type="supplier"
+                  accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <ContactAccordionInDetailPage
+                  type="customer"
+                  contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <ContactAccordionInDetailPage
+                  type="supplier"
+                  contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+              </div>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper>
+            <Paper className="subContainer">
               <Box className="detailHeader">
                 <h2 className="listingHeader single">Approval Process</h2>
               </Box>
@@ -865,10 +866,8 @@ const UserDetailsPage = () => {
                   </FormGroup>
                 </FormControl>
               </Box>
+              <QuickLinks quickLinks={quickLinks} />
             </Paper>
-
-            <QuickLinks quickLinks={quickLinks} />
-
           </Grid>
         </Grid>
       </Layout>
