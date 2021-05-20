@@ -14,6 +14,7 @@ import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import Dialog from '@material-ui/core/Dialog';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo'
 import { ViewAll } from '../Helpers/ViewAll'
+import { useData } from "../../../StateProvider/Provider"
 import { isEmpty } from "lodash";
 
 export const Email = ({ relatedTo, handleActivityRefresh }) => {
@@ -22,16 +23,34 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
     const [emails, setEmails] = useState(null);
     const [emailId, setEmailId] = useState(null);
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const {
+        state: { user },
+    }: any = useData();
 
     useEffect(() => {
         fetchEmail();
     }, []);
 
     const fetchEmail = async () => {
-        try{
-         const emails =  await GetEmail(JSON.stringify(relatedTo))
-         setEmails(emails.data)
-        }catch(e) {
+        try {
+            const emails = await GetEmail(JSON.stringify(relatedTo))
+            if (emails.data && emails.data.length > 0) {
+                emails.data = emails.data.filter(obj => {
+                    let isAllowedToShow = false
+                    if (obj.cc && obj.cc.length) {
+                        isAllowedToShow = obj.cc.indexOf(user?.user?.email) >= 0
+                    }
+                    if (!isAllowedToShow && obj.to && obj.to.length) {
+                        isAllowedToShow = obj.to.indexOf(user?.user?.email) >= 0
+                    }
+                    if (!isAllowedToShow && obj?.sender) {
+                        isAllowedToShow = obj?.sender === user?.user?._id
+                    }
+                    return isAllowedToShow
+                })
+            }
+            setEmails(emails.data)
+        } catch (e) {
             console.log(e);
         }
     };
@@ -82,7 +101,7 @@ export const Email = ({ relatedTo, handleActivityRefresh }) => {
                         <Box key={_email._id} className="activity">
                             <Box>
                                 <Grid container>
-                                <Grid item xs={10} className="d-flex align-items-center gap-1"> 
+                                    <Grid item xs={10} className="d-flex align-items-center gap-1">
                                         <Typography variant="subtitle2">{_email?.subject}</Typography>
                                     </Grid>
                                     <Grid item xs={2} container justify="flex-end" >
