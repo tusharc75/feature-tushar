@@ -3,8 +3,8 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import {
     Card, IconButton, CardContent, Grid,
-    List, ListItem, ListItemAvatar, ListItemText, Accordion, AccordionDetails,
-    AccordionSummary
+    List, ListItem, ListItemAvatar, ListItemText,
+    withStyles
 } from '@material-ui/core';
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { BiFace } from 'react-icons/bi';
@@ -13,16 +13,61 @@ import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { AiOutlineMail } from 'react-icons/ai';
-import CopyToClipboard from "../../components/Helpers/CopyToClipboard"
+import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
+import { BiPhone } from 'react-icons/bi';
+import MuiAccordion from "@material-ui/core/Accordion";
+import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
+import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
+import { FaArrowAltCircleDown } from 'react-icons/fa';
 
-function DisplayData({ label, value, icon, showCopyToText = false }) {
+const Accordion = withStyles({
+    root: {
+        border: "1px solid rgba(0, 0, 0, .125) !important",
+        boxShadow: "none",
+        "&:not(:last-child)": {
+            borderBottom: 0,
+        },
+        "&:before": {
+            display: "none",
+        },
+        "&$expanded": {
+            margin: "auto",
+        },
+    },
+    expanded: {},
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+    root: {
+        backgroundColor: "#e4e4e4",
+        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        "&$expanded": {
+            minHeight: 46,
+        },
+    },
+    content: {
+        "&$expanded": {
+            margin: "12px 0",
+        },
+    },
+    expanded: {},
+})(MuiAccordionSummary);
+
+const AccordionDetails = withStyles((theme) => ({
+    root: {
+        padding: theme.spacing(1),
+        display: "block",
+    }
+}))(MuiAccordionDetails);
+
+function DisplayData({ key, label, value, icon, showCopyToText = false }) {
     return <div style={{ flexGrow: 1 }}>
         <List>
-            <ListItem>
+            <ListItem key={key}>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
+                <ListItemText primary={value ? value : '-'} secondary={label} />
                 {
                     showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
                 }
@@ -30,7 +75,6 @@ function DisplayData({ label, value, icon, showCopyToText = false }) {
         </List>
     </div>
 }
-
 export default function OpportunityContacts({ contacts, title, onAddContact,
     contactApi, onSetExpanded, isExpanded, recordsPerLine }) {
 
@@ -41,68 +85,41 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                 contacts && contacts.length ? <Grid container spacing={2}>
                     {
                         [...contacts].slice(0, maxRecordsToShow).map((obj, index) => {
-                            return <Grid key={index} item xs={12} sm={12} md={6}>
-                                <Card>
+                            return <Grid key={index} item xs={12} sm={6} md={4}>
+                                <Card className="detailCard">
                                     <CardContent className="detailListing">
                                         <Grid container className="detailCardHeader">
                                             <Grid item xs={12} sm={12}>
-                                                <Link className="link f_size" to={`/${contactApi}/detail/${obj._id}`}>
-                                                    {`${obj.firstName || ''}  ${obj.lastName || ''}`}
-                                                </Link>
+                                                {
+                                                    <Link className="link" to={`/${contactApi}/detail/${obj._id}`}>
+                                                        <Typography className="detailName"> {`${obj.firstName || ''}  ${obj.lastName || ''}`}{obj.title && <span className="role">( {obj.title} )</span> }</Typography>
+                                                    </Link>
+                                                }
                                             </Grid>
                                         </Grid>
                                         <Grid container>
-                                            <Grid item xs={12} sm={12}>
-                                                <DisplayData label='Title' value={obj.title || ''} icon={< BiFace size={20} />} />
+                                            <Grid item xs={12} sm={12} md={12}>
+                                                {
+                                                    <DisplayData key="2" label='Email'  showCopyToText={true}  icon={<AiOutlineMail size={15} />} value={obj.email || ''} />
+                                                }
                                             </Grid>
-                                            <Grid item xs={12} sm={12}>
-                                                <DisplayData label='Phone' value={obj.phone || ''}
-                                                    icon={<AiOutlineMail size={20} />}
-                                                    showCopyToText={true}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={12}>
-                                                <DisplayData label='Email' value={obj.email || ''}
-                                                    icon={<AiOutlineMail size={20} />}
-                                                    showCopyToText={true}
-                                                />
+                                            <Grid item xs={12} sm={12} md={12}>
+                                                {
+                                                    <DisplayData key="3" label='Phone' showCopyToText={true} icon={<BiPhone size={15} />}  value={obj.phone || ''} />
+                                                }
                                             </Grid>
                                         </Grid>
                                     </CardContent>
                                 </Card>
                             </Grid>
-
-                            // <Box margin={1} />
                         })
                     }
                 </Grid> : <Typography className="m-2">No Contacts found</Typography>
-
-
             }
         </>
     }
-
-    // return (
-    //     <>
-    //         <Card>
-    //             <CardHeader
-    //                 action={
-    //                     <IconButton aria-label="settings" onClick={onAddContact}>
-    //                         <ControlPointIcon />
-    //                     </IconButton>
-    //                 }
-    //                 subheader={title}
-    //             />
-    //             <CardContent>
-    //                 <ContactDetails contacts={contacts} contactApi={contactApi} />
-    //             </CardContent>
-    //         </Card>
-
-    //     </>
-    // )
-    return <Accordion expanded={isExpanded}>
-        <AccordionSummary
-            aria-controls="user-panel-content"
+    return <Accordion expanded={isExpanded} className="omsAccordian accordOpportunity">
+        <AccordionSummary aria-controls="user-panel-content"
             id="user-panel-header"
         >
             <Grid container>
@@ -148,9 +165,8 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                 <Box margin={1} className="btn-view gap-1" p={1} display="flex" justifyContent="center"
                     alignItems="center"
                     onClick={() => setMaxRecordsToShow(contacts.length)}>
-                    <FaEye /> View All
+                   <FaArrowAltCircleDown size={25} />
                 </Box>
-                <Box margin={1} />
             </> : null
         }
     </Accordion>
