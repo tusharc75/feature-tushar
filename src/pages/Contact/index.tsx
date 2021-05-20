@@ -314,17 +314,19 @@ export default function Contact(props) {
 
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let field = params.filterModel.items[0].columnField
-
-      if (params.filterModel.items[0].columnField == 'createdBy') {
-        field = "createdBy.user"
-      }
-      if (params.filterModel.items[0].columnField == 'updatedBy') {
-        field = "updatedBy.user"
-      }
-      let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
-      if (params.filterModel.items[0].columnField == 'name') {
-        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+      let deepFilter ;
+      switch (params.filterModel.items[0].columnField) {
+        case 'createdBy':
+          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'updatedBy':
+          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'name':
+          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+          break;
+        default:
+          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
       }
       setQuery((prevState) => ({
         ...prevState,
