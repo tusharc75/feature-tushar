@@ -9,15 +9,12 @@ import {
   Button,
   LinearProgress,
   Box,
-  Link as MuiLink,
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import { TextField } from "formik-material-ui";
-
 import demoImg from "../../assets/clip-hardworking-man.png";
 import { useData } from "../../StateProvider/Provider";
 import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
-
 import axiosInstance from './../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { vapidKey } from "../../constants/helpers";
@@ -26,6 +23,7 @@ import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } f
 import { isEmpty } from "lodash";
 import getAzureAcessToken from "../../components/Azure/getAzureAccessToken";
 import { AzureLogin } from "../../components/Azure/Azure";
+import ForgetPassword from "./ForgetPassword";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -213,9 +211,9 @@ const Login = () => {
               </Formik>
               <br />
               <Box className={classes.bottomLinks}>
-                <MuiLink to='/forget-password' component={Link}>
+                <Link to='/forget-password'>
                   Forgot Password?
-                  </MuiLink>
+                </Link>
               </Box>
               <Box >
                 <AuthenticatedTemplate>

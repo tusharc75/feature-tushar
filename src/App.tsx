@@ -25,7 +25,7 @@ import Email from "./pages/Activity/Email";
 import Attachments from "./pages/Activity/Attachments";
 import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
-import ForgetPassword from './pages/Auth/ForgetPassowrd';
+import ForgetPassword from './pages/Auth/ForgetPassword';
 import ProductCategory from "./pages/ProductCategory";
 import ProductTemplate from "./pages/ProductTemplate";
 import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
