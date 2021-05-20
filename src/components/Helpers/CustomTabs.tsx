@@ -4,6 +4,7 @@ import { Typography, Tabs, Tab } from "@material-ui/core";
 
 const AntTabs = withStyles((theme) => ({
   root: {
+    minHeight:"38px"
     // borderBottom: "1px solid #e8e8e8",
   },
   indicator: {

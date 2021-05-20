@@ -15,7 +15,7 @@ import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunity
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline, IoBriefcase } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
-import { FaEye } from 'react-icons/fa';
+import { FaArrowAltCircleDown } from 'react-icons/fa';
 import currencies from './../../constants/currency_with_country.json';
 import { customerContact, supplierContact, customerAccount, supplierAccount } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
@@ -29,7 +29,7 @@ import CopyToClipboard from "../../components/Helpers/CopyToClipboard"
 
 const Accordion = withStyles({
     root: {
-        border: "1px solid rgba(0, 0, 0, .125)",
+        border: "1px solid rgba(0, 0, 0, .125) !important",
         boxShadow: "none",
         "&:not(:last-child)": {
             borderBottom: 0,
@@ -46,8 +46,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "#e4e4e4",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",
+        fontWeight: "bold",
+        padding: "0px",
         "&$expanded": {
             minHeight: 46,
         },
@@ -134,7 +137,7 @@ export default function ContactAccordionInDetailPage({
 
     }, [contacts])
     return <>
-        <Accordion expanded={expandContact}>
+        <Accordion expanded={expandContact} className="omsAccordian accordContact">
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -178,7 +181,6 @@ export default function ContactAccordionInDetailPage({
 
                 </Grid>
             </AccordionSummary>
-            <Box margin={0.50} />
             <AccordionDetails>
                 <>
                     {
@@ -189,44 +191,48 @@ export default function ContactAccordionInDetailPage({
                                         {
                                             contacts.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
-                                                    <Card className="contactCard">
+                                                    <Card className="detailCard">
                                                         <CardContent className="detailListing">
-                                                            <List>
-                                                                <ListItem>
-                                                                    <ListItemAvatar>
-                                                                        {
-                                                                            obj?.contactLogo ? <Avatar className="d-flex align-items-center gap-1" src={obj?.contactLogo}></Avatar>
-                                                                                : <div data-initials={[obj?.firstName?.charAt(0).toUpperCase(),
-                                                                                obj?.lastName?.charAt(0).toUpperCase()].filter(f => f).join("")}></div>
-                                                                        }
-                                                                    </ListItemAvatar>
-                                                                    <ListItemText className="ml-2"
-                                                                        primary={
-                                                                            <Link className="link" to={type === "customer" ? `${routes.customerContactDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
-                                                                                <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
-                                                                            </Link>
-                                                                        }
-                                                                        secondary={
-                                                                            <React.Fragment>
-                                                                                <Typography
-                                                                                    component="p"
-                                                                                    variant="body2"
-                                                                                    className="cardDetail">
-                                                                                    {obj?.title && <span className="d-flex gap-2 align-items-center">
-                                                                                        <FiStar size="15" />{obj?.title}
-                                                                                    </span>}
-                                                                                    {obj?.phone && <span className="d-flex gap-2 align-items-center">
-                                                                                        <AiOutlineMail size="15" />{obj?.phone}  <CopyToClipboard textToCopy={obj?.phone} />
-                                                                                    </span>}
-                                                                                    {obj?.email && <span className="d-flex gap-2 align-items-center">
-                                                                                        <BiPhone size="15" />{obj?.email}  <CopyToClipboard textToCopy={obj?.email} />
-                                                                                    </span>}
-                                                                                </Typography>
-                                                                            </React.Fragment>
-                                                                        }
-                                                                    />
-                                                                </ListItem>
-                                                            </List>
+                                                            <Grid container>
+                                                                <Grid item xs={12} sm={12}>
+                                                                    <List>
+                                                                        <ListItem>
+                                                                            <ListItemAvatar>
+                                                                                {
+                                                                                    obj?.contactLogo ? <Avatar className="d-flex align-items-center gap-1" src={obj?.contactLogo}></Avatar>
+                                                                                        : <div data-initials={[obj?.firstName?.charAt(0).toUpperCase(),
+                                                                                        obj?.lastName?.charAt(0).toUpperCase()].filter(f => f).join("")}></div>
+                                                                                }
+                                                                            </ListItemAvatar>
+                                                                            <ListItemText className="ml-2"
+                                                                                primary={
+                                                                                    <Link className="link" to={type === "customer" ? `${routes.customerContactDetail.path}/${obj._id}` : `${routes.supplierContactDetail.path}/${obj._id}`}>
+                                                                                        <Typography >{[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} </Typography>
+                                                                                    </Link>
+                                                                                }
+                                                                                secondary={
+                                                                                    <React.Fragment>
+                                                                                        <Typography
+                                                                                            component="p"
+                                                                                            variant="body2"
+                                                                                            className="cardDetail">
+                                                                                            {obj?.title && <span className="d-flex gap-2 align-items-center">
+                                                                                                <FiStar size="15" />{obj?.title}
+                                                                                            </span>}
+                                                                                            {obj?.phone && <span className="d-flex gap-2 align-items-center">
+                                                                                                <BiPhone size="15" />{obj?.phone}  <CopyToClipboard textToCopy={obj?.phone} />
+                                                                                            </span>}
+                                                                                            {obj?.email && <span className="d-flex gap-2 align-items-center">
+                                                                                                <AiOutlineMail size="15" />{obj?.email}  <CopyToClipboard textToCopy={obj?.email} />
+                                                                                            </span>}
+                                                                                        </Typography>
+                                                                                    </React.Fragment>
+                                                                                }
+                                                                            />
+                                                                        </ListItem>
+                                                                    </List>
+                                                                </Grid>
+                                                            </Grid>
                                                         </CardContent>
                                                     </Card>
                                                 </Grid>
@@ -244,12 +250,10 @@ export default function ContactAccordionInDetailPage({
                     // history.push(`/${type === "customer" ? "customer-contact" : "supplier-contact"}`)
                     setMaxRecordsToShow(contacts.length)
                 }} p={1} display="flex" justifyContent="center" alignItems="center">
-                    <FaEye /> View All
+                    <FaArrowAltCircleDown size={25} />
                 </Box>
             }
-            <Box margin={1} />
         </Accordion>
-
         {
             showCreateContactDialog && <ManageContactDialog
                 open={showCreateContactDialog}

@@ -1,7 +1,9 @@
 :root {
-  --primary: #003f57;
-  --primary-light: #003f57;
-  --secondary: #d46101;
+  --primary: #163340; //#003f57;
+  --primary-light: #163340;
+  --secondary: #047d1c;
+  --tertiary: #a0fffb;
+  --tertiary-light: #75e2dd;
   --error: #dc3545;
   --info: #03afe2;
   --success: #28a745;
@@ -29,6 +31,13 @@
   --lightgrey: lightgrey;
 
   --box-shadow: "rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px";
+
+
+  --colorOpportunity : #d46101;
+  --colorLeads : #1e7e34;
+  --colorContact : #003f57;
+  --colorAccount : red;
+  --colorProject : yellow;
 }
 
 * {
@@ -284,6 +293,7 @@ body::-webkit-scrollbar-thumb {
   border-bottom: 3px solid var(--secondary);
   margin-bottom: 10px;
   padding: 0 0 0 2px;
+  text-align: left;
 }
 
 .link {
@@ -364,15 +374,21 @@ body::-webkit-scrollbar-thumb {
   background: white;
   border-radius: 10px 10px 0 0;
   box-shadow: 2px 3px 5px #6f6d6d;
+  height: calc(100vh - 15.5vh);
 }
 
 .detail-container {
   position: absolute;
   top: 99px;
+  // padding: 10px;
   width: calc(100% - 2.8rem) !important;
-  padding: 0 1.5rem;
-  height: calc(100vh - 100px);
-  overflow: auto;
+  margin: 0 1.5rem;
+}
+
+.subContainer{
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100vh - 116px);
 }
 
 .badge-date {
@@ -504,7 +520,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .btn-view {
-  background: #fff3ef;
+  background: #eaffee;
   color: var(--secondary);
   font-weight: bold;
   border: 1px solid var(--secondary);
@@ -513,14 +529,13 @@ body::-webkit-scrollbar-thumb {
 }
 
 .detailCardHeader {
-  // border-bottom: 1px solid #e9e9e9;
+  align-items: center;
   padding: 0 0 6px 0px;
 }
 
 .amount {
   font-weight: 500 !important;
   float: right;
-  color: #514f4f !important;
   font-size: 1rem !important;
   line-height: 1.5rem !important;
 }
@@ -567,4 +582,8 @@ body::-webkit-scrollbar-thumb {
   height: 43px;
   line-height: 46px;
   text-align: center;
-}
+  }
+
+  .cursor-pointer{
+    cursor: pointer;
+  }
