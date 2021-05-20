@@ -1,26 +1,21 @@
 import { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
-    AppBar,
     Box,
     Button,
     Container,
     CssBaseline,
     Grid,
     LinearProgress,
-    Link as MuiLink,
     Paper,
-    Toolbar,
     Typography,
 } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import { TextField } from 'formik-material-ui';
 import * as Yup from 'yup';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-
+import axiosInstance from '../../axios/axiosInstance';
 import demoImg from '../../assets/clip-hardworking-man.png';
-import { SVG } from '../../assets';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme) => ({
@@ -80,33 +75,31 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const LoginSchema = Yup.object().shape({
+const emailValidationSchema = Yup.object().shape({
     email: Yup.string().email().required(),
 });
 
 const ForgetPassword = () => {
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
-    const [isSubmitting, setSubmitting] = useState(false);
-
-    const URL = 'http://localhost:4000';
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (values) => {
-        setSubmitting(true);
-        axios
-            .post(`${URL}/user/forget-password`, {
+        setIsSubmitting(true);
+        axiosInstance()
+            .post(`/user/forget-password`, {
                 email: values.email,
             })
             .then(({ data }) => {
-                setSubmitting(false);
+                setIsSubmitting(false);
                 toastConfig.setToastConfig({
-                    message: 'Reset email has been sent successfully',
+                    message: data.message,
                     type: 'success',
                     open: true,
                 });
             })
             .catch((err) => {
-                setSubmitting(false);
+                setIsSubmitting(false);
                 toastConfig.setToastConfig(err);
             });
     };
@@ -129,7 +122,7 @@ const ForgetPassword = () => {
                                     initialValues={{
                                         email: '',
                                     }}
-                                    validationSchema={LoginSchema}
+                                    validationSchema={emailValidationSchema}
                                     onSubmit={handleSubmit}>
                                     {({ submitForm }) => (
                                         <Form className={classes.form}>
@@ -150,14 +143,14 @@ const ForgetPassword = () => {
                                                 disabled={isSubmitting}
                                                 onClick={submitForm}>
                                                 Submit
-                      </Button>
+                                            </Button>
                                         </Form>
                                     )}
                                 </Formik>
                                 <Box className={classes.bottomLinks}>
-                                    <MuiLink to='/login' component={Link}>
+                                    <Link to='/login'>
                                         Go To Login
-                  </MuiLink>
+                                </Link>
                                 </Box>
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} className={classes.image}>
