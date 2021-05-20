@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: theme.palette.common.white,
     },
     profileSidebar: {
-        borderRight: `2px solid ${theme.palette.primary.light}`
+        // borderRight: `2px solid ${theme.palette.primary.light}`
     }
 }));
 export default function ProfilePage(props) {
@@ -97,15 +97,16 @@ export default function ProfilePage(props) {
             </Grid>
         </Grid>
         <CustomContainer>
-            <Grid container className={classes.profileContainer} spacing={2}>
+            <Grid container className="p-3">
                 <Grid item sm={3} lg={3} md={3} className={classes.profileSidebar} >
                     <ProfileSidebar onItemClick={handleItemClick}
                         activeLink={activeItem}
                         userData={userData}
                         onFetchUserData={fetchUserData}
+                        otherDetails={otherDetails}
                     />
                 </Grid>
-                <Grid item sm={9} md={9} lg={9} >
+                <Grid item sm={9} md={9} lg={9} className="bgbox">
                     {
                         activeItem === profileMenuItems.profile ?
                             <ManageProfile displayUserDetails={true}

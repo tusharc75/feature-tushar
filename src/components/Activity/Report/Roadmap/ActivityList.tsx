@@ -43,15 +43,15 @@ export default function ActivityList({ activity, treeList, expanded, selected, h
             }
 
             let label = <Box width={"100%"} height={50}>
-                <Box display="flex" ml={1} mt={2} mb={1} width={"100%"} style={{ position: "absolute" }}>
+                <Box display="flex" mt={2} mb={1} width={"100%"} style={{ position: "absolute" }}>
                     <Grid container>
                         <Grid item xs={9}>
                             <Typography variant="body2">{data.name}</Typography>
                         </Grid>
                         <Grid xs={3} container justify="flex-end">
-                            <Box mr={2}>
+                            {/* <Box mr={2}> */}
                                 {/* <Chip size="small" label={data.type} color="primary" /> */}
-                            </Box>
+                            {/* </Box> */}
                         </Grid>
                     </Grid>
                 </Box>

@@ -1,7 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from 'react-router-dom';
+import { useHistory } from "react-router-dom";
 import ManageAccount from "./ManageAccount";
-import { getObjKeys, sidebarResource, initializeDropdownById } from "../../../constants/helpers";
+import {
+  getObjKeys,
+  sidebarResource,
+  initializeDropdownById,
+} from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import _ from "lodash";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -10,7 +14,20 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 export default function ManageAccountDialog(props) {
   const toastConfig = useContext(CustomToastContext);
 
-  const { open, onClose, id, accountResource, accountApi, isGetAccountData, onGetAddedAccount, isRedirectToDetailPage = true, userId = null } = props;
+  const {
+    open,
+    onClose,
+    id,
+    accountResource,
+    accountApi,
+    isGetAccountData,
+    onGetAddedAccount,
+    owners,
+    collaborators,
+    fromProject,
+    isRedirectToDetailPage = true,
+    userId = null,
+  } = props;
   const {
     state: { user },
   }: any = useData();
@@ -57,9 +74,9 @@ export default function ManageAccountDialog(props) {
       setLoading(false);
       setEntityData({
         fields: [],
-        initialValues: {}
-      })
-    }
+        initialValues: {},
+      });
+    };
   }, [user]);
 
   const getAccountFields = () => {
@@ -71,12 +88,11 @@ export default function ManageAccountDialog(props) {
         data
           .filter((d) => d.isCreate)
           .map((_f) => {
-
             if (userId && _f.fieldData.fieldName == "owner") {
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
             }
 
-            newFields.push(_f.fieldData)
+            newFields.push(_f.fieldData);
           });
 
         setEntityData({
@@ -94,8 +110,8 @@ export default function ManageAccountDialog(props) {
       .post(`/${accountApi}`, values)
       .then(({ data }) => {
         const newId = data.data._id;
-        onClose({ fetch: true });
-        if (isGetAccountData) onGetAddedAccount(data)
+        onClose({ fetch: true, id: newId });
+        if (isGetAccountData) onGetAddedAccount(data);
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -120,6 +136,9 @@ export default function ManageAccountDialog(props) {
       onClose={onClose}
       entityData={entityData}
       handleSubmit={handleCreateAccount}
+      owners={owners}
+      collaborators={collaborators}
+      fromProject={fromProject}
     />
   );
 }

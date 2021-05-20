@@ -3,16 +3,26 @@ import { Typography, Box, Tooltip } from "@material-ui/core";
 import { TreeView, TreeItem } from "@material-ui/lab";
 import moment from "moment";
 
-const useStyles = makeStyles(() => ({
-  label: {
-    paddingLeft: 0,
-  },
-  iconContainer: {
-    display: "none",
-  },
-  group: {
-    marginLeft: 0,
-  },
+
+const useStyles = makeStyles((theme) => ({
+    label: {
+        paddingLeft: 0
+    },
+    iconContainer: {
+        display: "none"
+    },
+    group: {
+        marginLeft: 0
+    },
+    calenderHighlights: {
+        color: "white",
+        background: "red",
+        borderRadius: "4px",
+        padding: "2px 5px",
+        display: "flex",
+        alignItems: "center",
+        overflow: "hidden"
+    }
 }));
 
 export default function CalanderList({
@@ -43,7 +53,6 @@ export default function CalanderList({
               moment(data.dueDate).format("YYYY/MM/DD")
             }
             placement="right"
-            aria-label="add"
           >
             <Box
               minWidth={calendarType !== "week" ? "100px" : ""}

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { Box, Grid, makeStyles } from "@material-ui/core";
+import React, { useState, useEffect } from "react";
+import { Box, Grid, makeStyles, Paper } from "@material-ui/core";
 import Layout from "../../components/Layout";
 import CustomTabs from "../../components/Helpers/CustomTabs";
 import Board from "../../components/Activity/Report/Board";
 import Roadmap from "../../components/Activity/Report/Roadmap";
-import Calendar from "../../components/Activity/Report/Calendar";
+// import Calendar from "../../components/Activity/Report/Calendar";
 import { SearchFilter } from "../../components/Activity/Report/SearchFilter";
 import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
 import { useParams, useHistory } from "react-router-dom";
@@ -18,12 +18,22 @@ const capitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   activityContainer: {
-    padding: "10px",
-    height: "calc(100vh - 11.4rem)",
-    overflow: "auto",
+    padding: "0 10px 10px",
   },
+  activityHeader: {
+    background: "#dfdfdf",
+    margin: "6px 6px",
+    borderRadius: "6px"
+  },
+  tabBox: {
+    display: "flex",
+    justifyContent: "center",
+    padding: "2px",
+    margin: "5PX"
+  }
+
 }));
 
 const Activity = () => {
@@ -44,7 +54,7 @@ const Activity = () => {
             { _id: referenceId, type: referenceType, name: data.name },
           ]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [type, referenceId]);
 
@@ -64,38 +74,26 @@ const Activity = () => {
             ]}
           />
         </Grid>
-      </Grid>
-      <CustomContainer>
-        <Box>
-          <Grid container>
-            <Grid item xs={8}>
-              <Box m={1}>
-                <SearchFilter
-                  handleChangeFilter={handleChangeFilter}
-                  filter={filter}
-                />
-              </Box>
+        <CustomContainer>
+          <Box className={classes.activityHeader}>
+            <Grid container>
+              <Grid item xs={12} md={5} sm={5}>
+                <Paper className={classes.tabBox}>
+                  <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={7} sm={7}>
+                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
+              </Grid>
             </Grid>
-            <Grid item xs={4}>
-              <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
-            </Grid>
-          </Grid>
-        </Box>
-        <Box className={classes.activityContainer}>
-          {viewType === 0 && (
-            <Board type={type} filter={filter} activityId={activityId} />
-          )}
-          {viewType === 1 && (
-            <Roadmap type={type} filter={filter} activityId={activityId} />
-          )}
-        </Box>
-      </CustomContainer>
-      {activityType !== undefined && (
-        <ActivityModelHandler
-          activityType={activityType}
-          activityId={activityId}
-        />
-      )}
+          </Box>
+          <Box className={classes.activityContainer}>
+            {viewType === 0 && <Board type={type} filter={filter} activityId={activityId} />}
+            {viewType === 1 && <Roadmap type={type} filter={filter} activityId={activityId} />}
+          </Box>
+        </CustomContainer>
+        {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
+       </Grid>
     </Layout>
   );
 };

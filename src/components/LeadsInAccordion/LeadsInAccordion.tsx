@@ -15,12 +15,11 @@ import ManageLeadDialog from '../../pages/Leads/ManageLeadDialog/ManageLeadDialo
 import { useHistory } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
 import { BsBuilding } from 'react-icons/bs';
-import { IoCalendarOutline } from 'react-icons/io5';
-
+import { BiPhone } from 'react-icons/bi';
+import { AiOutlineMail } from 'react-icons/ai';
 const Accordion = withStyles({
     root: {
         border: "1px solid rgba(0, 0, 0, .125)",
-        boxShadow: "none",
         "&:not(:last-child)": {
             borderBottom: 0,
         },
@@ -36,15 +35,19 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "rgba(0, 0, 0, .03)",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",
+        fontWeight: "bold",
+        padding: "0px",
         "&$expanded": {
-            minHeight: 56,
+            minHeight: 46,
         },
     },
     content: {
         "&$expanded": {
             margin: "12px 0",
+
         },
     },
     expanded: {},
@@ -57,15 +60,14 @@ const AccordionDetails = withStyles((theme) => ({
     },
 }))(MuiAccordionDetails);
 
-
-function DisplayData({ label, value, icon }) {
+function DisplayData({ key, label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <List >
-            <ListItem>
+        <List>
+            <ListItem key={key}>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
+                <ListItemText primary={value ? value : '-'} secondary={label} />
             </ListItem>
         </List>
     </div>
@@ -102,7 +104,7 @@ export default function LeadInAccordion({
 
 
     return <>
-        <Accordion expanded={expandLead}>
+        <Accordion expanded={expandLead} className="omsAccordian accordLead">
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -152,30 +154,34 @@ export default function LeadInAccordion({
                                 <Grid container spacing={1}>
                                     {
 
-                                        <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
-                                            <Card style={{ minWidth: "100%" }}>
-                                                <CardContent className="detailListing">
-                                                    <Grid container className="detailCardHeader">
-                                                        <Grid item xs={12} sm={12}>
-                                                            <Link className="link">
-                                                                <Typography >Samsher Singh</Typography>
-                                                            </Link>
-                                                        </Grid>
+                                        <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}> <Card className="detailCard">
+                                            <CardContent className="detailListing">
+                                                <Grid container className="detailCardHeader">
+                                                    <Grid item xs={12} sm={12} md={12}>
+                                                        <Link className="link">
+                                                            <Typography className="detailName">Samsher Singh <span className="role">(Manager)</span> </Typography>
+                                                        </Link>
                                                     </Grid>
-                                                    <Grid container>
-                                                        <Grid item xs={12} sm={12}>
-                                                            {
-                                                                <DisplayData label='Company' value="adani" icon={<BsBuilding size={20} />} />
-                                                            }
-                                                        </Grid>
-                                                        <Grid item xs={12} sm={12}>
-                                                            {
-                                                                 <DisplayData label='Status' value="Active" icon={<IoCalendarOutline size={20} />} />
-                                                            }
-                                                        </Grid>
+                                                </Grid>
+                                                <Grid container>
+                                                    <Grid item xs={12} sm={12} md={12}>
+                                                        {
+                                                            <DisplayData key="1" label='Company' icon={<BsBuilding size={15} />} value="Adani" />
+                                                        }
                                                     </Grid>
-                                                </CardContent>
-                                            </Card>
+                                                    <Grid item xs={12} sm={12} md={12}>
+                                                        {
+                                                            <DisplayData key="2" label='Email' icon={<AiOutlineMail size={15} />} value="samsher@adani.com" />
+                                                        }
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={12} md={12}>
+                                                        {
+                                                            <DisplayData key="3" label='phone' icon={<BiPhone size={15} />} value="2131232124" />
+                                                        }
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Card>
                                         </Grid>
                                     }
                                 </Grid>
@@ -184,10 +190,10 @@ export default function LeadInAccordion({
                     }
                 </>
             </AccordionDetails>
-            <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
+            {/* <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
                 <FaEye /> View All &#8599;
             </Box>
-            <Box margin={1} />
+            <Box margin={1} /> */}
         </Accordion>
 
         {/* {

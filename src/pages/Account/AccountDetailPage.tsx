@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Grid, Typography, IconButton, Paper, Card, CardContent, List } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  Grid,
+  Typography,
+  IconButton,
+  Paper,
+  Card,
+  CardContent,
+  List,
+} from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import { reverse as _reverse } from "lodash";
 import { Skeleton } from "@material-ui/lab";
@@ -25,7 +35,7 @@ import DeleteButton from "../../components/Helpers/DeleteButton";
 import {
   getObjKeysWithValues,
   isObjectEmpty,
-  sidebarResource
+  sidebarResource,
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -34,32 +44,39 @@ import QuickLinks, {
   IQuickLinks,
 } from "../../components/QuickLinks/QuickLinks";
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
-import { FcFlowChart, FcContacts, FcBinoculars, FcConferenceCall, FcMultipleSmartphones, FcMoneyTransfer } from 'react-icons/fc';
+import {
+  FcFlowChart,
+  FcContacts,
+  FcBinoculars,
+  FcConferenceCall,
+  FcMultipleSmartphones,
+  FcMoneyTransfer,
+} from "react-icons/fc";
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
-import { Link } from 'react-router-dom'
-import { BsPerson } from 'react-icons/bs'
-import ListItem from '@material-ui/core/ListItem/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import { ListItemText } from '@material-ui/core';
-import _ from 'lodash'
+import { Link } from "react-router-dom";
+import { BsPerson } from "react-icons/bs";
+import ListItem from "@material-ui/core/ListItem/ListItem";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import { ListItemText } from "@material-ui/core";
+import _ from "lodash";
 import routes from "./../../components/Helpers/Routes";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 
 function DisplayData({ label, value, icon }) {
-  return <div style={{ flexGrow: 1 }}>
-    <List>
-      <ListItem>
-        <ListItemAvatar>
-          {icon}
-        </ListItemAvatar>
-        <ListItemText primary={value} secondary={label} />
-      </ListItem>
-    </List>
-  </div>
+  return (
+    <div style={{ flexGrow: 1 }}>
+      <List>
+        <ListItem>
+          <ListItemAvatar>{icon}</ListItemAvatar>
+          <ListItemText primary={value} secondary={label} />
+        </ListItem>
+      </List>
+    </div>
+  );
 }
 
 export default function AccountDetailPage(props) {
@@ -83,10 +100,8 @@ export default function AccountDetailPage(props) {
   const [opportunities, setOpportunities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [
-    showApproveDisapproveConfirmBox,
-    setShowApproveDisapproveConfirmBox,
-  ] = useState(false);
+  const [showApproveDisapproveConfirmBox, setShowApproveDisapproveConfirmBox] =
+    useState(false);
   const [accountFields, setAccountFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([]);
@@ -94,10 +109,8 @@ export default function AccountDetailPage(props) {
   const [accountHierarchyData, setAccountHierarchyData] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [relatedContactsLoading, setRelatedContactsLoading] = useState(false);
-  const [
-    showCreateOpportunityDialog,
-    setShowCreateOpportunityDialog,
-  ] = useState(false);
+  const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] =
+    useState(false);
   const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
   const [
@@ -106,13 +119,17 @@ export default function AccountDetailPage(props) {
   ] = useState(false);
 
   const [loadingGraphData, setLoadingGraphData] = useState(false);
-  const [graphData, setGraphData] = useState({ edges: [], nodes: [], colorPalette: null });
+  const [graphData, setGraphData] = useState({
+    edges: [],
+    nodes: [],
+    colorPalette: null,
+  });
 
   let { id } = useParams();
 
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);
-    setCurrentTabIndex(0)
+    setCurrentTabIndex(0);
     fetchAccountData();
     fetchRelatedData();
   }, [id]);
@@ -123,36 +140,49 @@ export default function AccountDetailPage(props) {
 
     return () => {
       setGraphData({ edges: [], nodes: [], colorPalette: null });
-    }
-  }, [currentTabIndex])
+    };
+  }, [currentTabIndex]);
 
   const initializeGraphData = () => {
     if (currentTabIndex === 2) {
       setLoadingGraphData(true);
       setGraphData({ nodes: [], edges: [], colorPalette: null });
 
-      axiosInstance().get(`${accountApi}/nodal-structure/${id}`).then(({ data }) => {
-        setLoadingGraphData(false);
-        setGraphData({ nodes: [...data.data.nodes], edges: [...data.data.edges], colorPalette: data.colorPalette });
-      }).catch((error) => {
-        setLoadingGraphData(false);
-        toastConfig.setToastConfig(error);
-      });
+      axiosInstance()
+        .get(`${accountApi}/nodal-structure/${id}`)
+        .then(({ data }) => {
+          setLoadingGraphData(false);
+          setGraphData({
+            nodes: [...data.data.nodes],
+            edges: [...data.data.edges],
+            colorPalette: data.colorPalette,
+          });
+        })
+        .catch((error) => {
+          setLoadingGraphData(false);
+          toastConfig.setToastConfig(error);
+        });
     }
-  }
+  };
 
   const fetchRelatedData = () => {
     axiosInstance()
       .get(`/${accountApi}/related/${id}`)
       .then(({ data: { data } }) => {
         setRelatedContacts(
-          data[sidebarResource[contactResource]] && data[sidebarResource[contactResource]]["Account_Name"]
+          data[sidebarResource[contactResource]] &&
+            data[sidebarResource[contactResource]]["Account_Name"]
             ? data[sidebarResource[contactResource]]["Account_Name"]
             : []
         );
         setOpportunities(
-          data.Opportunity && data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
-            ? data.Opportunity[sidebarResource[accountResource].replaceAll(" ", "_")]
+          data.Opportunity &&
+            data.Opportunity[
+              sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
+            ? data.Opportunity[
+                sidebarResource[accountResource].replaceAll(" ", "_")
+              ]
             : []
         );
         initializeGraphData();
@@ -171,7 +201,7 @@ export default function AccountDetailPage(props) {
         handleMainPonts(data);
         setAccountData(data);
         setCanEdit(
-          [...data?.collaborator ?? [], data?.owner].some(
+          [...(data?.collaborator ?? []), data?.owner].some(
             (obj) => obj.optionValue === user.user._id
           )
         );
@@ -190,9 +220,9 @@ export default function AccountDetailPage(props) {
               current: true,
               parentAccount: data.parentAccount
                 ? {
-                  _id: data.parentAccount.optionValue,
-                  accountName: data.parentAccount.optionLabel,
-                }
+                    _id: data.parentAccount.optionValue,
+                    accountName: data.parentAccount.optionLabel,
+                  }
                 : null,
               // parentAccountName: data.parentAccount?.optionLabel,
               // parentAccount: data.parentAccount?.optionValue
@@ -284,14 +314,14 @@ export default function AccountDetailPage(props) {
       icon: <FcFlowChart />,
       // icon: <TiFlowChildren />,
       show: true,
-      class: "account"
+      class: "account",
     },
     {
       label: "Projects",
       count: 0,
       show: true,
       icon: <FcMultipleSmartphones />,
-      class: "project"
+      class: "project",
     },
     {
       label: "Opportunity",
@@ -314,14 +344,14 @@ export default function AccountDetailPage(props) {
       count: 0,
       show: true,
       icon: <FcMoneyTransfer />,
-      class: "quotes"
+      class: "quotes",
     },
     {
       label: "Accounts Teams",
       count: 0,
       show: true,
       icon: <FcConferenceCall />,
-      class: "teams"
+      class: "teams",
     },
     {
       label: "Contacts",
@@ -392,7 +422,6 @@ export default function AccountDetailPage(props) {
     axiosInstance()
       .put(`/${accountApi}`, updatedData)
       .then(({ data }) => {
-        fetchAccountData();
         toastConfig.setToastConfig({
           open: true,
           type: "success",
@@ -400,6 +429,7 @@ export default function AccountDetailPage(props) {
         });
         setLoading(false);
         setOpenUpdateDialog(false);
+        fetchAccountData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -432,7 +462,7 @@ export default function AccountDetailPage(props) {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} >
+          <Grid item xs={12} sm={12} md={8} lg={8}>
             <Paper>
               {
                 <DetailsPageHeader
@@ -450,13 +480,17 @@ export default function AccountDetailPage(props) {
                           variant="contained"
                           size="small"
                           color={
-                            accountData.staticData?.approved ? "secondary" : "primary"
+                            accountData.staticData?.approved
+                              ? "secondary"
+                              : "primary"
                           }
                           onClick={() => {
                             setShowApproveDisapproveConfirmBox(true);
                           }}
                         >
-                          {accountData.staticData?.approved ? "Disapprove" : "Approve"}
+                          {accountData.staticData?.approved
+                            ? "Disapprove"
+                            : "Approve"}
                         </Button>
                       </>
                     )}
@@ -473,16 +507,16 @@ export default function AccountDetailPage(props) {
                           onClick={handleOpneUpdateDialog}
                         >
                           Edit
-                    </Button>
+                        </Button>
                       </>
                     )}
 
                   {permissions &&
-                    permissions[accountResource] &&
-                    permissions[accountResource].isDelete &&
-                    accountData?.owner?.optionValue &&
-                    user?.user?._id &&
-                    accountData.owner.optionValue === user.user._id ? (
+                  permissions[accountResource] &&
+                  permissions[accountResource].isDelete &&
+                  accountData?.owner?.optionValue &&
+                  user?.user?._id &&
+                  accountData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -495,11 +529,7 @@ export default function AccountDetailPage(props) {
                   <Grid container spacing={2}>
                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
                       <Grid item sm={6} md={6}>
-                        <Skeleton
-                          variant="text"
-                          width="100px"
-                          height="16px"
-                        />
+                        <Skeleton variant="text" width="100px" height="16px" />
                         <Box marginY={1} />
                         <Skeleton width="100%" height="50px" />
                       </Grid>
@@ -507,7 +537,9 @@ export default function AccountDetailPage(props) {
                   </Grid>
                 ) : (
                   <>
-                    <Tabs className="oms-tab" value={currentTabIndex}
+                    <Tabs
+                      className="oms-tab"
+                      value={currentTabIndex}
                       onChange={(index, newValue) => {
                         setCurrentTabIndex(newValue);
                       }}
@@ -531,27 +563,27 @@ export default function AccountDetailPage(props) {
                         id="a11y-tab-1"
                       />
                     </Tabs>
-                    {
-                      currentTabIndex === 0 && <Box>
+                    {currentTabIndex === 0 && (
+                      <Box>
                         <DetailsPage
                           data={accountData}
                           fields={accountFields}
                         />
                       </Box>
-                    }
+                    )}
 
-                    {
-                      currentTabIndex === 1 && <Box>
+                    {currentTabIndex === 1 && (
+                      <Box>
                         <AccountHierarchy
                           data={accountHierarchyData}
                           currentAccountId={accountData._id}
                           accountRoute={accountRoute}
                         />
                       </Box>
-                    }
+                    )}
 
-                    {
-                      currentTabIndex === 2 && <Box>
+                    {currentTabIndex === 2 && (
+                      <Box>
                         <CustomNodalStructure
                           id={id}
                           graphData={graphData}
@@ -559,35 +591,38 @@ export default function AccountDetailPage(props) {
                           onClick={(node) => {
                             if (node && routes[node.route]) {
                               history.push({
-                                pathname: `${routes[node.route].path}/${node.id}`
-                              })
+                                pathname: `${routes[node.route].path}/${
+                                  node.id
+                                }`,
+                              });
                             }
                           }}
                         />
                       </Box>
-                    }
+                    )}
                   </>
                 )}
               </Box>
-
-              {permissions?.opportunity?.isRead && (
-                <OpportunityInAccordian
-                  opportunityPermissions={permissions.opportunity}
-                  opportunities={opportunities}
-                  onNewOpportunityAdd={() => {
-                    fetchRelatedData();
-                  }}
-                  accountId={accountData._id}
-                  accountName={accountData.accountName}
-                  recordsPerLine={3}
-                  resource={accountResource}
-                  isRedirect={false}
-                />
-              )}
-              <ProjectInAccordion />
-              <QuotesInAccordion />
-              <ProductBuilderInAccordion />
-              <LeadInAccordion />
+              <div className="p-3">
+                {permissions?.opportunity?.isRead && (
+                  <OpportunityInAccordian
+                    opportunityPermissions={permissions.opportunity}
+                    opportunities={opportunities}
+                    onNewOpportunityAdd={() => {
+                      fetchRelatedData();
+                    }}
+                    accountId={accountData._id}
+                    accountName={accountData.accountName}
+                    recordsPerLine={3}
+                    resource={accountResource}
+                    isRedirect={false}
+                  />
+                )}
+                <ProjectInAccordion />
+                <QuotesInAccordion />
+                <ProductBuilderInAccordion />
+                <LeadInAccordion />
+              </div>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
@@ -604,13 +639,18 @@ export default function AccountDetailPage(props) {
                             access: true,
                           },
                         ]}
-                        handleActivityRefresh={() => { }}
+                        handleActivityRefresh={() => {}}
                         emails={
-                          relatedContacts && relatedContacts.length > 0 ?
-                            _.cloneDeep(relatedContacts).reduce((emails, contact) => {
-                              if (contact?.email) emails.push(contact.email)
-                              return emails
-                            }, []) : []
+                          relatedContacts && relatedContacts.length > 0
+                            ? _.cloneDeep(relatedContacts).reduce(
+                                (emails, contact) => {
+                                  if (contact?.email)
+                                    emails.push(contact.email);
+                                  return emails;
+                                },
+                                []
+                              )
+                            : []
                         }
                       />
                     </div>
@@ -635,7 +675,7 @@ export default function AccountDetailPage(props) {
                               style={{ margin: "0 10px" }}
                             >
                               Related Contacts
-                              </Typography>
+                            </Typography>
                             {permissions[contactResource].isCreate && (
                               <span>
                                 <IconButton
@@ -654,7 +694,9 @@ export default function AccountDetailPage(props) {
                             <>
                               <Box className={`${accountClass.custom_box1}`}>
                                 <RelatedContacts
-                                  contacts={_reverse(relatedContacts.slice(0, 2))}
+                                  contacts={_reverse(
+                                    relatedContacts.slice(0, 2)
+                                  )}
                                   accountId={accountData._id}
                                   accountName={accountData.accountName}
                                   contactApi={contactApi}
@@ -668,8 +710,8 @@ export default function AccountDetailPage(props) {
                     </Grid>
                   )}
 
-
-                {accountData?.staticData?.lead && permissions &&
+                {accountData?.staticData?.lead &&
+                  permissions &&
                   permissions.lead &&
                   permissions.lead.isRead && (
                     <Grid item xs={12}>
@@ -693,17 +735,32 @@ export default function AccountDetailPage(props) {
                               <Box className={`${accountClass.custom_box1}`}>
                                 <Card>
                                   <CardContent className="detailListing">
-                                    <Grid container className="detailCardHeader">
+                                    <Grid
+                                      container
+                                      className="detailCardHeader"
+                                    >
                                       <Grid item xs={12} sm={12}>
-                                        <Link className="link f_size"
-                                          to={`/lead/detail/${accountData?.staticData?.lead?._id}`}>
-                                          {accountData?.staticData?.lead?.firstName || ''} {accountData?.staticData?.lead?.lastName || ''}
+                                        <Link
+                                          className="link f_size"
+                                          to={`/lead/detail/${accountData?.staticData?.lead?._id}`}
+                                        >
+                                          {accountData?.staticData?.lead
+                                            ?.firstName || ""}{" "}
+                                          {accountData?.staticData?.lead
+                                            ?.lastName || ""}
                                         </Link>
                                       </Grid>
                                     </Grid>
                                     <Grid container>
                                       <Grid item xs={12} sm={6}>
-                                        <DisplayData label='Title' value={accountData?.staticData?.lead?.title || '-'} icon={<BsPerson size={20} />} />
+                                        <DisplayData
+                                          label="Title"
+                                          value={
+                                            accountData?.staticData?.lead
+                                              ?.title || "-"
+                                          }
+                                          icon={<BsPerson size={20} />}
+                                        />
                                       </Grid>
                                     </Grid>
                                   </CardContent>
@@ -723,8 +780,9 @@ export default function AccountDetailPage(props) {
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
-              message={`Are you sure you want to delete this Account ${accountData.accountName || ""
-                }`}
+              message={`Are you sure you want to delete this Account ${
+                accountData.accountName || ""
+              }`}
               onClose={() => setShowConfirmBox(false)}
               onOk={handleDeleteAcc}
             />
@@ -732,8 +790,9 @@ export default function AccountDetailPage(props) {
           {showApproveDisapproveConfirmBox ? (
             <ConfirmationDialog
               open={showApproveDisapproveConfirmBox}
-              message={`Are you sure you want to ${accountData.staticData?.approved ? "disapprove" : "approve"
-                } this Account ?`}
+              message={`Are you sure you want to ${
+                accountData.staticData?.approved ? "disapprove" : "approve"
+              } this Account ?`}
               onClose={() => setShowApproveDisapproveConfirmBox(false)}
               onOk={handleApproveDisapprove}
             />

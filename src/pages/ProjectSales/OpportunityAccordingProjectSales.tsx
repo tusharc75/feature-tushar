@@ -36,7 +36,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 
 const Accordion = withStyles({
   root: {
-    border: "1px solid rgba(0, 0, 0, .125)",
+    border: "1px solid rgba(0, 0, 0, .125) !important",
     boxShadow: "none",
     "&:not(:last-child)": {
       borderBottom: 0,
@@ -103,6 +103,7 @@ export default function OpportunityAccordianProjectSales({
   fetchProjectData,
   isTeamMember,
   isManager,
+  users,
 }) {
   const history = useHistory();
   let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
@@ -129,10 +130,8 @@ export default function OpportunityAccordianProjectSales({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [removeRec, setRemoveRec] = useState(null);
-  const [
-    showCreateOpportunityDialog,
-    setShowCreateOpportunityDialog,
-  ] = useState(false);
+  const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] =
+    useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -376,7 +375,6 @@ export default function OpportunityAccordianProjectSales({
       ) : null}
       {showCreateOpportunityDialog && (
         <NewOpportunityProjectSales
-          isNew={true}
           open={showCreateOpportunityDialog}
           onClose={() => setShowCreateOpportunityDialog(false)}
           onSuccess={(id) => {
@@ -384,9 +382,9 @@ export default function OpportunityAccordianProjectSales({
             onNewOpportunityAdd(id);
           }}
           accountId={accountId}
-          resource={resource}
           isRedirectTodetailPage={isRedirect}
           collaborators={collaborators}
+          users={users}
         />
       )}
     </>

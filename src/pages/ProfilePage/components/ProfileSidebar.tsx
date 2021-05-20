@@ -1,49 +1,56 @@
 import React from 'react'
 import { Grid, Typography, Icon } from '@material-ui/core'
-import { BsShieldShaded, BsFillGearFill } from 'react-icons/bs'
-import { HiSpeakerphone, HiUserCircle, HiUsers } from 'react-icons/hi'
+import { BiCheckShield } from 'react-icons/bi';
 import { profileMenuItems } from '../../../constants/helpers'
 import ManageProfile from './ManageProfile'
 import styles from "../profilePage.module.scss"
+import { CgProfile } from 'react-icons/cg';
+import { IoMdNotificationsOutline } from 'react-icons/io';
+import { FiUsers } from 'react-icons/fi';
+import { IoSettingsOutline } from 'react-icons/io5';
 
-export default function Sidebar({ onItemClick, activeLink, userData, onFetchUserData, ...rest }) {
+
+
+export default function Sidebar({ onItemClick, activeLink, userData, onFetchUserData, otherDetails, ...rest }) {
     const userMenu = [
         {
             label: "My Profile",
             show: true,
-            icon: <HiUserCircle />,
+            icon: <CgProfile size={20} />,
             id: profileMenuItems.profile
         },
         {
             label: "Notification Preference",
             show: true,
-            icon: <HiSpeakerphone />,
+            icon: <IoMdNotificationsOutline size={20} />,
             id: profileMenuItems.notification
         },
         {
             label: "Security and Privacy",
             show: true,
-            icon: <BsShieldShaded />,
+            icon: <BiCheckShield size={20} />,
             id: profileMenuItems.securityPrivacy
         },
         {
             label: "Users",
             show: true,
-            icon: <HiUsers />,
+            icon: <FiUsers size={20} />,
             id: profileMenuItems.users
         },
         {
             label: "Setting",
             show: true,
-            icon: <BsFillGearFill />,
+            icon: <IoSettingsOutline size={20} />,
             id: profileMenuItems.setting
         },
     ]
-    return <Grid container spacing={4} >
-        <ManageProfile displayUserProfileImage={true} userData={userData}
-            onFetchUserData={onFetchUserData}
-        />
+    return <Grid container justify="center">
         <Grid item sm={12} lg={12} md={12}>
+            <ManageProfile displayUserProfileImage={true} userData={userData}
+                onFetchUserData={onFetchUserData} otherDetails={otherDetails}
+            />
+        </Grid>
+        <Grid item sm={12} lg={12} md={12} className="profileBox">
             <div className="d-flex flex-column gap-4 px-4 pt-2 pb-3" >
                 {
                     userMenu.map((k, index) => {
