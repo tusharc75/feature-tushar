@@ -9,7 +9,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
-import { roleTypes } from "../../constants/helpers";
+import { roleTypes, userType } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -60,19 +60,19 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
                     title={
                       currentUser === obj._id
                         ? "Primary user can't be unassigned"
-                        : "Unassign User"
+                        : obj.userType && obj.userType === userType.brandAdmin ? "Brand Admin Can not be deleted" : "Unassign User"
                     }
                   >
                     {type == roleTypes.find((d) => d.key === "Global")?.value && (
                       <IconButton
                         size="small"
-                        disabled={currentUser === obj._id}
+                        disabled={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin)}
                         edge="end"
                         aria-label="delete"
                         onClick={() => unassignRole(obj)}
                       >
                         <DeleteIcon
-                          color={currentUser === obj._id ? "disabled" : "error"}
+                          color={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin) ? "disabled" : "error"}
                         />
                       </IconButton>
                     )}

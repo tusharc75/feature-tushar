@@ -25,6 +25,7 @@ import Email from "./pages/Activity/Email";
 import Attachments from "./pages/Activity/Attachments";
 import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
+import ForgetPassword from './pages/Auth/ForgetPassword';
 import ProductCategory from "./pages/ProductCategory";
 import ProductTemplate from "./pages/ProductTemplate";
 import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
@@ -125,6 +126,13 @@ function App() {
             path="/create-password"
             render={({ location }) =>
               conditionalRedirect(PasswordSetup, location)
+            }
+          />
+          <Route
+            exact
+            path="/forget-password"
+            render={({ location }) =>
+              conditionalRedirect(ForgetPassword, location)
             }
           />
           <PrivateRoute exact path="/">
@@ -346,25 +354,25 @@ function App() {
             <QuoteBuilderPage />
           </Route>
           <Route exact path={"/dashboards"}>
-            <KpiDashboard/>
+            <KpiDashboard />
           </Route>
           <Route exact path={"/dashboard-edit/:id"}>
-            <EditDashboard edit={true}/>
+            <EditDashboard edit={true} />
           </Route>
           <Route exact path={"/dashboard/:id"}>
-            <EditDashboard edit={false}/>
+            <EditDashboard edit={false} />
           </Route>
           //Route available for customers to Accept Reject Quote
           <Route exact path={"/quote-approval/:id"}>
-              <QuoteApproval/>
+            <QuoteApproval />
           </Route>
 
           <Route exact path={"/doa-request"}>
-            <DOARequest/>
+            <DOARequest />
           </Route>
 
           <Route exact path={"/doa-request/:id"}>
-            <DOAapproval/>
+            <DOAapproval />
           </Route>
 
           {/* <Route exact path="/crm/account" component={Account} /> */}

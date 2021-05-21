@@ -35,20 +35,16 @@ import { SubTask } from "./SubTask";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
-import { useData } from "../../../StateProvider/Provider";
 
 const TaskSchema = Yup.object().shape({
-  name: Yup.string().required("please enter task name"),
-  assignee: Yup.string().required("please select assignee"),
-  reporter: Yup.string().required("please select reporter"),
-  startDate: Yup.string().required("please enter start date"),
-  dueDate: Yup.string().required("please enter due date"),
+  name: Yup.string().required("Please enter task name"),
+  assignee: Yup.string().required("Please select assignee"),
+  reporter: Yup.string().required(),
+  startDate: Yup.string().required("Please enter start date"),
+  dueDate: Yup.string().required("Please enter due date"),
 });
 
 export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
-  const {
-    state: { user: user },
-  } = useData();
   const [id, setId] = useState(taskId);
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
@@ -131,18 +127,19 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                 <Box padding={1}>
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <Box mb={2}>
-                      <Breadcrumbs separator="›" aria-label="breadcrumb">
+                      <Breadcrumbs separator="/" aria-label="breadcrumb">
                         {initialValues.parent &&
                           initialValues.parent.map((_p, index) => {
                             return (
-                              <Typography
+                              <Button
                                 key={index}
-                                onClick={() => setId(_p._id)}
                                 className="cursor-pointer"
-                                variant="body1"
+                                onClick={() => setId(_p._id)}
+                                color="primary"
+                                size="large"
                               >
                                 {_p.name}
-                              </Typography>
+                              </Button>
                             );
                           })}
                       </Breadcrumbs>
@@ -187,7 +184,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                                 onClick={() => setOpenAddSub(true)}
                                 startIcon={<TableChartIcon />}
                               >
-                                {" "}
                                 Add a child Task
                               </Button>
                             </Box>
@@ -254,7 +250,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                             label="Reporter"
                             errors={errors}
                             touched={touched}
-                            required={true}
+                            required={false}
                             setFieldValue={setFieldValue}
                             multiple={false}
                             value={values["reporter"]}

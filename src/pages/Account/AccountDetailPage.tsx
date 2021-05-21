@@ -618,10 +618,10 @@ export default function AccountDetailPage(props) {
                     isRedirect={false}
                   />
                 )}
-                <ProjectInAccordion />
-                <QuotesInAccordion />
-                <ProductBuilderInAccordion />
-                <LeadInAccordion />
+                <ProjectInAccordion recordsPerLine={3} />
+                <QuotesInAccordion recordsPerLine={3} />
+                <ProductBuilderInAccordion recordsPerLine={3} />
+                <LeadInAccordion recordsPerLine={3} />
               </div>
             </Paper>
           </Grid>
