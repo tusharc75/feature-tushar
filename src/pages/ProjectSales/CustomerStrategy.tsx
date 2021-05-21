@@ -341,9 +341,7 @@ const CustomerStrategy = (props) => {
                               resource={"customerAccount"}
                               isRedirect={false}
                               expanded={true}
-                              collaborators={collaborators.filter(
-                                (u) => u.optionValue !== ownerId
-                              )}
+                              collaborators={collaborators}
                               users={collaborators.map((u) => ({
                                 ...u,
                                 default: u.optionValue === ownerId,
@@ -458,9 +456,7 @@ const CustomerStrategy = (props) => {
                       contactApi={customerContact.contactApi}
                       account={customerAccount}
                       isRedirectToDetailPage={false}
-                      collaborators={collaborators.filter(
-                        (u) => u.optionValue !== ownerId
-                      )}
+                      collaborators={collaborators}
                       owners={collaborators.map((u) => ({
                         ...u,
                         default: u.optionValue === ownerId,
@@ -482,9 +478,7 @@ const CustomerStrategy = (props) => {
                       accountResource={"customerAccount"}
                       accountApi={"customer-account"}
                       isRedirectToDetailPage={false}
-                      collaborators={collaborators.filter(
-                        (u) => u.optionValue !== ownerId
-                      )}
+                      collaborators={collaborators}
                       owners={collaborators.map((u) => ({
                         ...u,
                         default: u.optionValue === ownerId,
