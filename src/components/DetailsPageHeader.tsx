@@ -54,8 +54,6 @@ const DetailsPageHeader = (props) => {
                   <span className="d-flex align-items-center gap-2"><span className="listingHeader">{heading}</span> {
                     isApproved && <Tooltip title="Approved"><CheckCircleIcon color="primary" /></Tooltip>
                   }</span>
-
-
                 </Typography>
               </>
             ) : null}
