@@ -479,14 +479,7 @@ const CreatePriceBuilder=(props)=>{
                 console.log("PDF Response is:");
                 console.log(data);
                 handleUpdate(ColumnName,droppedColumns,TandC,"",data.fileName);
-                axiosInstance().post(`/doa-request/create/`+QBId)
-                    .then(({data}) => {
-                        GetQuoteData(currentVersion);
-                        setButtonMessage("Send to Customer");
-                    })
-                .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
+                
             })
             .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -569,10 +562,28 @@ const CreatePriceBuilder=(props)=>{
 
 
     const handleCases=()=>{
+        console.log("HandleCases");
+        console.log(DOAapprovalreq);
+        console.log(sendtoCustomer);
         if(DOAapprovalreq){
-            GeneratePdf(false,true);
+            if(!QData["PDF"]){
+                GeneratePdf(false,true);
+            }
+            axiosInstance().post(`/doa-request/create/`+QBId)
+                    .then(({data}) => {
+                        GetQuoteData(currentVersion);
+                        setButtonMessage("Send to Customer");
+                    })
+                .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
         };
         if(sendtoCustomer){
+            console.log(QData);
+            console.log(QData["PDF"])
+            if(!QData["PDF"]){
+                GeneratePdf(false,true);
+            }
             setSendEmail(true);
         }
 
