@@ -50,7 +50,7 @@ const Roles: FC = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
 
-  const fetchRoles =  async () => {
+  const fetchRoles = async () => {
     let searchParams: any = { ...query, type: selectedType };
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
@@ -71,7 +71,7 @@ const Roles: FC = () => {
       });
     // eslint-disable-next-line
   }
-  
+
   useEffect(() => {
     let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
 
@@ -245,24 +245,24 @@ const Roles: FC = () => {
               {
                 rolePermissionArray.indexOf(params?.row?.permission) >= 0 ? (
                   <Tooltip
-                  className="cursor-stop"
-                  title={params.row.type === "Global" ? "Global brand admin role can not be deleted" : "Regional brand admin role can not be deleted"}
+                    className="cursor-stop"
+                    title={params.row.type === "Global Role" ? "Global brand admin role can not be deleted" : "Regional brand admin role can not be deleted"}
+                  >
+                    <IconButton aria-label="Delete">
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                ) : (<IconButton
+                  aria-label="Delete"
+                  onClick={() => showConfirmBox(params.row)}
+
                 >
-                  <IconButton aria-label="Delete">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                ):(<IconButton
-                aria-label="Delete"
-                onClick={() => showConfirmBox(params.row)}
-                
-              >
-                
+
                   <DeleteIcon fontSize="small" color="error" />
-              
-              </IconButton>)
+
+                </IconButton>)
               }
-              
+
             </span>
           ) : (
             <Tooltip

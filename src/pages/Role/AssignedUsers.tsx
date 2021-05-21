@@ -60,7 +60,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
                     title={
                       currentUser === obj._id
                         ? "Primary user can't be unassigned"
-                        : obj.userType && obj.userType === userType.brandAdmin ? "Brand Admin Can not be deleted":"Unassign User"
+                        : obj.userType && obj.userType === userType.brandAdmin ? "Brand Admin Can not be deleted" : "Unassign User"
                     }
                   >
                     {type == roleTypes.find((d) => d.key === "Global")?.value && (
