@@ -37,11 +37,11 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 
 const TaskSchema = Yup.object().shape({
-  name: Yup.string().required("please enter task name"),
-  assignee: Yup.string().required("please select assignee"),
-  reporter: Yup.string().required("please select reporter"),
-  startDate: Yup.string().required("please enter start date"),
-  dueDate: Yup.string().required("please enter due date"),
+  name: Yup.string().required("Please enter task name"),
+  assignee: Yup.string().required("Please select assignee"),
+  reporter: Yup.string().required(),
+  startDate: Yup.string().required("Please enter start date"),
+  dueDate: Yup.string().required("Please enter due date"),
 });
 
 export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
@@ -250,7 +250,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                             label="Reporter"
                             errors={errors}
                             touched={touched}
-                            required={true}
+                            required={false}
                             setFieldValue={setFieldValue}
                             multiple={false}
                             value={values["reporter"]}

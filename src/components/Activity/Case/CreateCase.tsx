@@ -37,11 +37,11 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 
 const CaseSchema = Yup.object().shape({
-  name: Yup.string().required("please enter case name"),
-  assignee: Yup.string().required("please select assignee"),
-  reporter: Yup.string().required("please select reporter"),
-  startDate: Yup.string().required("please enter start date"),
-  dueDate: Yup.string().required("please enter due date"),
+  name: Yup.string().required("Please enter case name"),
+  assignee: Yup.string().required("Please select assignee"),
+  reporter: Yup.string().required(),
+  startDate: Yup.string().required("Please enter start date"),
+  dueDate: Yup.string().required("Please enter due date"),
 });
 
 export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
@@ -251,7 +251,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                             label="Reporter"
                             errors={errors}
                             touched={touched}
-                            required={true}
+                            required={false}
                             setFieldValue={setFieldValue}
                             multiple={false}
                             value={values["reporter"]}
