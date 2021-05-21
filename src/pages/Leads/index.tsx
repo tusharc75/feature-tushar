@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback, useReducer } from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import {
   Grid,
   Tooltip,
@@ -8,13 +8,11 @@ import {
   TablePagination
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { DataGrid, setGridPageActionCreator } from "@material-ui/data-grid";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import Layout from "../../components/Layout";
 import LeadsHeader from "./LeadsHeader";
 import axiosInstance from "../../axios/axiosInstance";
-import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
@@ -32,14 +30,12 @@ import { lead } from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import { SiConvertio } from "react-icons/si";
-import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import { AiOutlineLoading } from 'react-icons/ai'
+import "./style.scss";
 
 const LeadTypes = [
   {
@@ -180,7 +176,7 @@ const Leads = () => {
   // const [loading, setLoading] = useState(false);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRec, setDeleteRec] = useState<any>({});
+  const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
   const [leadsPermissions, setLeadsPermissions] = useState({
     isCreate: false,
     isUpdate: false,
@@ -378,7 +374,6 @@ const Leads = () => {
 
             let res = {
               ...u,
-              isChecked: false,
               id: u._id,
               name: name,
               owner: u.owner,
@@ -519,12 +514,12 @@ const Leads = () => {
   const showConfirmBox = (row) => {
     if (row) {
       setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRec(row);
+      if (row) {
+        setDeleteRecord({ id: row._id, name: row.name });
       }
     } else {
       if (
-        dataRows.find((d) => d.isChecked && d.owner.optionValue != user.user._id)
+        selectedRecords.find((d) => d.owner.optionValue != user.user._id)
       ) {
         setShowDeleteWarningConfirmBox(true);
       } else {
@@ -533,65 +528,13 @@ const Leads = () => {
     }
   };
 
-  const updateCheckedStatus = (params, ev) => {
-    const gridData = [...dataRows];
-    const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-    gridData[indexOfRecord].isChecked = ev.target.checked;
-
-    dispatch({ type: "update", data: gridData })
-    // setDataRows([...gridData]);
-
-    const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-    if (checkedRecords.length === gridData.length) {
-      setCheckAllLeads(true);
-    } else {
-      setCheckAllLeads(false);
-    }
-  };
-
-  // const handlePage = (pageOptions) => {
-  //   if (pageOptions.newPageTrue) {
-
-  //   }
-  //   // dispatch({ type: "pageChange", page: pageNumber })
-  //   // if (query.page !== params.page) {
-  //   //   setQuery((prevState) => ({ ...prevState, page: params.page }));
-  //   // }
-  // };
-
-  const handlePageSize = (pageSize) => {
-    dispatch({ type: "pageSizeChange", limit: pageSize })
-    // if (params.pageSize !== query.limit) {
-    //   setQuery({ page: 0, limit: params.pageSize });
-    // }
-  };
-
-  // const handleSortModelChange = (params) => {
-  //   if (params?.sortModel && params.sortModel.length > 0) {
-  //     let temp = { ...params.sortModel[0] };
-  //     setQuery((prevState) => ({
-  //       ...prevState,
-  //       page: 0,
-  //       sortBy: temp.field,
-  //       orderBy: temp.sort,
-  //     }));
-  //   }
-  // };
-
   const handleDeleteLeads = async () => {
-    setOkButtonLoading(true);
-    let recs = [];
-    if (deleteRec?._id) {
-      recs.push(deleteRec?._id);
-    } else {
-      dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj._id);
-      });
-    }
-    if (recs && recs.length > 0) {
+    if (deleteRecord.id || selectedRecords.length > 0) {
+      setOkButtonLoading(true);
+
       axiosInstance()
-        .put(`${leadApi}/remove?entity=${selectedEntity}`, { ids: [...recs] })
+        .put(`${leadApi}/remove?entity=${selectedEntity}`,
+          { ids: deleteRecord.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -600,7 +543,7 @@ const Leads = () => {
           });
           setIsConformDialogVisible(false);
           setOkButtonLoading(false);
-          if (deleteRec) setDeleteRec({});
+          if (deleteRecord.id) { setDeleteRecord({ id: null, name: null }); }
           fetchLeads();
         })
         .catch((error) => {
@@ -614,7 +557,7 @@ const Leads = () => {
   const convertLeadToOpportunity = () => {
     const ids = convertLeadToOpportunityConfirmationDialog.id
       ? [convertLeadToOpportunityConfirmationDialog.id]
-      : dataRows.filter((d) => d.isChecked == true).map((m) => m._id);
+      : selectedRecords.map((m) => m._id);
 
     axiosInstance()
       .post(`${leadApi}/to-opportunity`, { ids: ids })
@@ -691,10 +634,6 @@ const Leads = () => {
             leadPermissions={leadsPermissions}
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
-            // allowToDelete={
-            //   selectedRecords.length == 0 || !selectedRecords.some(d => d.owner?.optionValue != user?.user?._id)
-            //   // !dataRows.some((d) => d.isChecked && d.owner != user?.user?._id)
-            // }
             icon={<HiUserGroup className="headerLogo" />}
             heading="Leads"
             allowToConvertLeadToOpportunity={
@@ -775,6 +714,7 @@ const Leads = () => {
               loadingOverlayComponentParams={{
                 loadingMessage: 'Loading...',
               }}
+              animateRows={false}
               suppressAnimationFrame={true}
               suppressMaintainUnsortedOrder={true}
 
@@ -841,10 +781,10 @@ const Leads = () => {
           isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete Lead ${deleteRec.name || ""
+              message={`Are you sure, you want to delete Lead ${deleteRecord.name || ""
                 }?`}
               onClose={() => {
-                if (deleteRec) setDeleteRec({});
+                if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
                 setIsConformDialogVisible(false);
               }}
               okBtnLoading={okButtonLoading}
