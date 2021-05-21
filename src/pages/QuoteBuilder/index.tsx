@@ -86,7 +86,7 @@ const CreatePriceBuilder = (props) => {
     const [QData, setQData] = useState({})
     const [editRestriction, setEditRestriction] = useState(false);
     let DOAlimit = 0;
-    const [DOAsetup, setDOAsetup] = useState(false)
+    var DOAsetup=false;
     const [DOAapprovalreq, setDOAapprovalreq] = useState(false);
     const [sendtoCustomer, setsendtoCustomer] = useState(true);
     const [buttonMessage, setButtonMessage] = useState("Send to Customer");
@@ -165,7 +165,7 @@ const CreatePriceBuilder = (props) => {
             .then(({ data }) => {
                 console.log("DOA limit is:");
                 console.log(data);
-                setDOAsetup(data.data.doasetup);
+                DOAsetup=data.data.doasetup;
                 DOAlimit = data.data.limit;
             })
             .catch((err) => {
@@ -305,7 +305,7 @@ const CreatePriceBuilder = (props) => {
                 console.log(data.Data["Quote_Status"]);
                 console.log(DOAsetup);
 
-                if (data.Data["TotalSellingPrice"] > DOAlimit && data.Data["Quote_Status"] === "Quote Generated" && DOAsetup) {
+                if (data.Data["TotalSellingPriceamount"] > DOAlimit && data.Data["Quote_Status"] === "Quote Generated" && DOAsetup) {
                     console.log("Need DOA");
                     setDOAapprovalreq(true);
                     setsendtoCustomer(false);
@@ -641,16 +641,20 @@ const CreatePriceBuilder = (props) => {
                             <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
                                 <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel">
                                     <div className="quoteBox">
-                                        <span>Profitability</span>
-                                        <span>{QData["Profitability"]}</span>
+                                        <span>Total Profit</span>
+                                        <span>{QData["TotalProfitamount"]} {QData["TotalProfitcurr"]}</span>
                                     </div>
                                     <div className="quoteBox">
                                         <span>Total Cost Price</span>
-                                        <span>{QData["TotalCost"]}</span>
+                                        <span>{QData["TotalCostamount"]} {QData["TotalCostcurr"]}</span>
                                     </div>
                                     <div className="quoteBox">
-                                        <span>Total Selling Price </span>
-                                        <span>{QData["TotalSellingPrice"]}</span>
+                                        <span>Total Selling Price</span>
+                                        <span>{QData["TotalSellingPriceamount"]} {QData["TotalSellingPricecurr"]}</span>
+                                    </div>
+                                    <div className="quoteBox">
+                                        <span>Total Margin</span>
+                                        <span> {QData["TotalMarginamount"]} {QData["TotalMargincurr"]}</span>
                                     </div>
                                     <div className="quoteBox">
                                         <span>Status</span>
@@ -695,7 +699,7 @@ const CreatePriceBuilder = (props) => {
                                                 NoRowsOverlay: CustomDataGridNoDataFound,
                                             }}
                                             scrollbarSize={20}
-                                            rows={loading ? [] : dataRows}
+                                            rows={dataRows}
                                             columns={columns}
                                             loading={loading}
                                             disableSelectionOnClick
@@ -709,8 +713,6 @@ const CreatePriceBuilder = (props) => {
                                             rowCount={rowCount}
                                             rowsPerPageOptions={[25, 50, 75]}
                                             onSortModelChange={handleSortModelChange}
-                                            // onRowClick={handleRowClick}
-                                            density="compact"
                                             onFilterModelChange={onFilterChange}
                                         />
                                     </Grid>

@@ -22,7 +22,6 @@ export default function ChatRender({ id }) {
       setMessages(data.Messages);
       setUser(data.currentUser)
     }).catch((error) => {
-      toastConfig.setToastConfig(error);
     });
   }
 
@@ -71,8 +70,8 @@ export default function ChatRender({ id }) {
       </div>
       <div className="chat-input">
         <form>
-          <input type="text" id="chat-input" placeholder="Send a message..." defaultValue={newMessage} onChange={handleChange} />
-          <button type="button" className="chat-submit" id="chat-submit" onClick={() => sendMessage()}><SendIcon /></button>
+          <input type="text" id="chat-input" placeholder="Send a message..." value={newMessage} onChange={handleChange} />
+          <button type="button" className="chat-submit" id="chat-submit" onClick={() => sendMessage()} disabled={newMessage===""}><SendIcon/></button>
         </form>
       </div>
     </div>
