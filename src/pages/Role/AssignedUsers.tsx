@@ -66,13 +66,13 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
                     {type == roleTypes.find((d) => d.key === "Global")?.value && (
                       <IconButton
                         size="small"
-                        disabled={currentUser === obj._id || (obj.userType && obj.userType) === userType.brandAdmin}
+                        disabled={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin)}
                         edge="end"
                         aria-label="delete"
                         onClick={() => unassignRole(obj)}
                       >
                         <DeleteIcon
-                          color={currentUser === obj._id || (obj.userType && obj.userType) === userType.brandAdmin ? "disabled" : "error"}
+                          color={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin) ? "disabled" : "error"}
                         />
                       </IconButton>
                     )}
