@@ -59,13 +59,12 @@ function LeadsHeader(props) {
         onCreate,
         leadPermissions,
         showConfirmBox,
-        allowToDelete,
         icon,
         heading,
         allowToConvertLeadToOpportunity,
         showLeadToOpportunityConfirmationDialog,
         selectedLeads
-    } = props
+    } = props;
 
     return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6} className="d-flex align-items-center gap-1">
@@ -137,17 +136,17 @@ function LeadsHeader(props) {
                                 closeActions();
                                 showConfirmBox(null)
                             }}
-                            disabled={allowToDelete}
+                            disabled={selectedLeads.length == 0 || selectedLeads.some(d => d.owner?.optionValue != userId)}
                         >Delete</MenuItem>
 
                         {
                             allowToConvertLeadToOpportunity && <MenuItem
                                 onClick={() => {
                                     closeActions();
-                                    if (selectedLeads.some((d) => d.isChecked && d.staticData["convertedToOpportunity"])) {
+                                    if (selectedLeads.some((d) => d.staticData["convertedToOpportunity"])) {
                                         setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
                                     }
-                                    else if (selectedLeads.some((d) => d.isChecked && (!d[leadProcessFieldName] || d[leadProcessFieldName].toLowerCase() != "qualified"))) {
+                                    else if (selectedLeads.some((d) => (!d[leadProcessFieldName] || d[leadProcessFieldName].toLowerCase() != "qualified"))) {
                                         setMessageDialog({ open: true, message: `You have selected lead(s) which are not qualified yet to be converted into opportunity` })
                                     }
                                     else {

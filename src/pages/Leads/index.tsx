@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback, useReducer } from "react";
 import {
   Grid,
   Tooltip,
   IconButton,
   Checkbox,
+  Button,
+  TablePagination
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { DataGrid } from "@material-ui/data-grid";
+import { DataGrid, setGridPageActionCreator } from "@material-ui/data-grid";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import Layout from "../../components/Layout";
@@ -21,6 +23,7 @@ import { leadDetailPage } from "../../routes/Lead";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import {
+  gridPageSizes,
   leadProcessFieldName,
 } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
@@ -35,6 +38,8 @@ import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import { AiOutlineLoading } from 'react-icons/ai'
 
 const LeadTypes = [
   {
@@ -47,24 +52,133 @@ const LeadTypes = [
   },
 ];
 
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loading: action.loading
+      }
+
+    case "initialize":
+      return {
+        ...state,
+        dataRows: action.data,
+        rowCount: action.count,
+        loading: false
+      }
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      }
+
+    case "update":
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      }
+
+    case "filter":
+      return {
+        ...state,
+        loading: true,
+        filters: action.filters,
+        page: 0
+      }
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: true
+      }
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loading: true
+      }
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page
+      }
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: true
+      }
+
+    case "complete":
+      return {
+        ...state,
+        loading: false
+      }
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: [],
+  sorting: [],
+  selectedRecords: []
+}
+
+const columns = [
+  { field: "name", headerName: "Name", filter: "agTextColumnFilter", cellRenderer: "nameRenderer" },
+  { field: "relatedOpportunity", headerName: "Related Opportunity", filter: "agTextColumnFilter", cellRenderer: "relatedOpportunityRenderer" },
+  { field: "title", headerName: "Title", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+  { field: "company", headerName: "Company", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+  { field: "createdBy", headerName: "Created By", filter: "agTextColumnFilter", cellRenderer: "createdByRenderer" },
+  { field: "updatedBy", headerName: "Updated By", filter: "agTextColumnFilter", cellRenderer: "updatedByRenderer" },
+  { field: "phone", headerName: "Phone", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+  { field: "mobile", headerName: "Mobile", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+  { field: "email", headerName: "Email", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+  { field: "owner", headerName: "Owner Alies", filter: "agTextColumnFilter", cellRenderer: "optionLabelRenderer" },
+];
+
+
 let leadTimeout;
 const Leads = () => {
+  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const [gridApi, setGridApi] = useState(null);
 
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-  const [searchVal, setSearchVal] = useState("");
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
+  // const [searchVal, setSearchVal] = useState("");
+  // const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllLeads, setCheckAllLeads] = useState(false);
-  const [dataRows, setDataRows] = useState([]);
-  const [rowCount, setRowCount] = useState(0);
+  // const [dataRows, setDataRows] = useState([]);
+  // const [rowCount, setRowCount] = useState(0);
   const [renderCount, setRenderCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
-  const [leadData, setLeadData] = useState([]);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [leadsPermissions, setLeadsPermissions] = useState({
@@ -77,7 +191,16 @@ const Leads = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
-  const history = useHistory();
+
+  const dummyData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => {
+    let object: any = {};
+
+    columns.forEach((column) => {
+      object[column.field] = "Loading..."
+    })
+
+    return object;
+  })
 
   const [
     convertLeadToOpportunityConfirmationDialog,
@@ -95,7 +218,7 @@ const Leads = () => {
   }, [permissions]);
 
   useEffect(() => {
-    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (leadTimeout) {
       clearTimeout(leadTimeout);
     }
@@ -103,68 +226,200 @@ const Leads = () => {
     leadTimeout = setTimeout(() => {
       fetchLeads();
     }, millisec);
-  }, [searchVal]);
+  }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
       fetchLeads();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query, , selectedType, selectedEntity]);
+  }, [page, limit, selectedType, filters, sorting]);
 
-  useEffect(() => {
-    let rows = leadData?.map((u) => {
-      let name = [u.firstName, u.middleName, u.lastName]
-        .filter((d) => d)
-        .join(" ");
+  const CommonRenderer = params => <CustomRenderCell value={params?.value} />;
 
-      let res = {
-        ...u,
-        isChecked: false,
-        id: u._id,
-        name: name,
-        owner: u.owner,
-        isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
-          (d) => d?.optionValue == user?.user?._id
-        ),
-        relatedOpportunity: u.staticData?.convertedToOpportunity && u.staticData?.opportunity
-      };
-      return res;
-    });
-    setDataRows([...rows]);
-  }, [leadData]);
+  const OptionLabelRenderer = params => <CustomRenderCell value={params.value?.optionLabel ?? ""} />;
 
-  const fetchLeads = async () => {
+  const NameRenderer = params => <Link className="link"
+    to={`${leadDetailPage.path}/${params.data._id}`} >
+    {params?.value ?? ""}
+  </Link>;
+
+  const RelatedOpportunityRenderer = params => <>
+    {
+      params.value ?
+        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data?._id}`} title={params.data?.opportunityName}>
+          {params.data?.opportunityName}
+        </Link>
+        : <NoDataCell />
+    }
+  </>
+
+  const CreatedByRenderer = params => params.value && params.value.user ? (
+    <h5 className="createBy">
+      {params.value.user.firstName}
+      <span
+        className="createdAtTime badge-date"
+        title={`${params.value.user.firstName} • ${moment(
+          params?.value?.date?.slice(0, 10)
+        ).format("MMM Do, YYYY")}`}
+      >
+        {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
+      </span>
+    </h5>
+  ) : (
+    <NoDataCell />
+  );
+
+  const UpdatedByRenderer = params => params.value && params.value.user ? (
+    <h5 className="updateBy">
+      {params.value.user.firstName}
+      <span title={params.value.date} className="updatedAtTime badge-date">
+        {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+      </span>
+    </h5>
+  ) : (
+    <NoDataCell />
+  )
+
+  const ActionsRenderer = params => <>
+    {
+      hasPermissionToConvertInOpportunity &&
+      generateLeadToOpportunityButton(params.data)
+    }
+
+    <GridDeleteIcon
+      hasDeletePermission={leadsPermissions.isDelete}
+      ownerId={params.data.owner.optionValue}
+      userId={user?.user?._id}
+      onDelete={() => showConfirmBox(params.data)}
+      entity="lead"
+    />
+  </>
+
+  const CustomLoadingOverlay = (params) => <div
+    className="ag-custom-loading-cell"
+    style={{ paddingLeft: '10px', lineHeight: '25px' }}
+  >
+    <AiOutlineLoading />
+    <span className="pl-2 font-size-3">{params.loadingMessage}</span>
+  </div>
+
+  const CustomLoadingCellRenderer = (params) => <div
+    className="ag-custom-loading-cell p-3"
+  >
+    <AiOutlineLoading />
+    <h4>{params.loadingMessage}</h4>
+  </div>
+
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    relatedOpportunityRenderer: RelatedOpportunityRenderer,
+    commonRenderer: CommonRenderer,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    optionLabelRenderer: OptionLabelRenderer,
+    actionsRenderer: ActionsRenderer,
+    customLoadingOverlay: CustomLoadingOverlay,
+    // customLoadingCellRenderer: CustomLoadingCellRenderer,
+    // customNoRowsOverlay: CustomNoRowsOverlay
+  };
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
+
+    if (filters.length > 0) {
+      const updatedFilters = [];
+
+      filters.map(d => {
+        let columnName = d.columnName;
+
+        if (d.columnName == 'createdBy') {
+          columnName = "createdBy.user"
+        } else if (d.columnName == 'updatedBy') {
+          columnName = "updatedBy.user"
+        }
+
+        updatedFilters.push({
+          field: columnName,
+          term: d.value
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+
+  const fetchLeads = () => {
     if (selectedEntity) {
-      setLoading(true);
-      let searchParams: any = {
-        ...query,
-        entity: selectedEntity,
-        filterLeads: selectedType,
-      };
-      searchParams = searchVal
-        ? { ...searchParams, search: searchVal }
-        : { ...searchParams };
-      let api = getSearchQuery(leadApi, searchParams);
-      try {
-        axiosInstance()
-          .get(api)
-          .then(({ data }) => {
-            setRowCount(data.count);
-            setLeadData(data.data);
-            setCheckAllLeads(false);
-            setLoading(false);
-          });
-      } catch (err) {
-        setLoading(false);
+      const queryString = getQueryString();
+      dispatch({ type: "loading", loading: true });
+
+      if (gridApi) {
+        gridApi.showLoadingOverlay();
       }
+
+      axiosInstance()
+        .get(`${leadApi}${queryString}`)
+        .then(({ data: { data, count } }) => {
+
+          let rows = data.map((u) => {
+            let name = [u.firstName, u.middleName, u.lastName]
+              .filter((d) => d)
+              .join(" ");
+
+            let res = {
+              ...u,
+              isChecked: false,
+              id: u._id,
+              name: name,
+              owner: u.owner,
+              isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
+                (d) => d.optionValue == user?.user?._id
+              ),
+              relatedOpportunity: u.staticData?.convertedToOpportunity && u.staticData?.opportunity
+            };
+            return res;
+          });
+
+          dispatch({ type: "initialize", data: rows, count: count });
+
+          if (gridApi) {
+            //   gridApi.setRowData(rows);
+            setTimeout(() => {
+              gridApi.hideOverlay();
+            }, 1500);
+            // } else {
+            //   dispatch({ type: "initialize", data: rows, count: count });
+
+            // dispatch({ type: "loading", loading: false })
+          }
+
+          setCheckAllLeads(false);
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+          if (gridApi) {
+            gridApi.hideOverlay();
+          }
+          // dispatch({ type: "loading", loading: false })
+        });
     }
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
+    dispatch({ type: "search", search: e.target.value });
+    // if (query.page !== 0) {
+    //   setQuery((prevState) => ({ ...prevState, page: 0 }));
+    // }
+    // setSearchVal(e.target.value);
   };
 
   const handleLeadTypeSel = (filteredValue) => {
@@ -205,7 +460,7 @@ const Leads = () => {
 
     return dontHavePermissions.length > 0 ? (
       <>
-        <Tooltip
+        <Tooltip className="cursor-stop"
           title={`To convert lead to opportunity, you must need create permission of ${dontHavePermissions.join(
             ", "
           )}`}
@@ -217,7 +472,7 @@ const Leads = () => {
       </>
     ) : staticData && staticData["convertedToOpportunity"] ? (
       <>
-        <Tooltip title="This lead is already converted to opportunity">
+        <Tooltip className="cursor-stop" title="This lead is already converted to opportunity">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
@@ -225,7 +480,7 @@ const Leads = () => {
       </>
     ) : !isAllowedToUpdate ? (
       <>
-        <Tooltip title="You are not allowed to convert as you are neither owner nor collaborator">
+        <Tooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
@@ -233,7 +488,7 @@ const Leads = () => {
       </>
     ) : !isCurrentLeadStatusQualified ? (
       <>
-        <Tooltip title="To covert this lead to opportunity, Lead status must be qualified">
+        <Tooltip className="cursor-stop" title="To covert this lead to opportunity, Lead status must be qualified">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
@@ -261,173 +516,6 @@ const Leads = () => {
     );
   };
 
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllLeads}
-          onChange={(ev) => {
-            setCheckAllLeads(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              d.isChecked = ev.target.checked;
-              return d;
-            });
-            setDataRows([...gridData]);
-          }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev);
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      width: 250,
-      renderCell: (params) => (
-        <>
-          <Link
-            className="link"
-            to={`${leadDetailPage.path}/${params.row._id}`}
-          >
-            {params?.value ?? ""}
-          </Link>
-        </>
-      ),
-      sortable: false,
-      filterable: false,
-    },
-    {
-      field: "relatedOpportunity",
-      headerName: "Related Opportunity",
-      width: 300,
-      renderCell: (params) => (
-        <>
-          {
-            params.value ?
-              <Link className="link" to={`${routes.opportunityDetail.path}/${params.value?._id}`} title={params.value?.opportunityName}>
-                {params.value?.opportunityName}
-              </Link>
-              : <NoDataCell />
-          }
-        </>
-      ),
-    },
-    {
-      field: "title",
-      headerName: "Title",
-      width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
-    },
-    {
-      field: "company",
-      headerName: "Company",
-      width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
-    },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      renderCell: (params) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params.value.user.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params?.value?.date?.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      renderCell: (params) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="updateBy">
-            {params.value.user.firstName}
-            <span title={params.value.date} className="updatedAtTime badge-date">
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "phone",
-      headerName: "Phone",
-      width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
-    },
-    {
-      field: "mobile",
-      headerName: "Mobile",
-      width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      width: 250,
-      hide: true,
-      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
-    },
-    // { field: "status", headerName: "Lead Status", width: 200 },
-    {
-      field: "owner",
-      headerName: "Owner Alies",
-      width: 250,
-      hide: true,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <>
-          {hasPermissionToConvertInOpportunity &&
-            generateLeadToOpportunityButton(params.row)}
-
-          <GridDeleteIcon
-            hasDeletePermission={leadsPermissions.isDelete}
-            ownerId={params.row.owner.optionValue}
-            userId={user?.user?._id}
-            onDelete={() => showConfirmBox(params.row)}
-            entity="lead"
-          />
-        </>
-      ),
-      width: 200,
-    },
-  ];
-
   const showConfirmBox = (row) => {
     if (row) {
       setIsConformDialogVisible(true);
@@ -450,7 +538,8 @@ const Leads = () => {
     const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
     gridData[indexOfRecord].isChecked = ev.target.checked;
 
-    setDataRows([...gridData]);
+    dispatch({ type: "update", data: gridData })
+    // setDataRows([...gridData]);
 
     const checkedRecords = gridData.filter((d) => d.isChecked === true);
 
@@ -461,29 +550,34 @@ const Leads = () => {
     }
   };
 
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
+  // const handlePage = (pageOptions) => {
+  //   if (pageOptions.newPageTrue) {
+
+  //   }
+  //   // dispatch({ type: "pageChange", page: pageNumber })
+  //   // if (query.page !== params.page) {
+  //   //   setQuery((prevState) => ({ ...prevState, page: params.page }));
+  //   // }
+  // };
+
+  const handlePageSize = (pageSize) => {
+    dispatch({ type: "pageSizeChange", limit: pageSize })
+    // if (params.pageSize !== query.limit) {
+    //   setQuery({ page: 0, limit: params.pageSize });
+    // }
   };
 
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
-  };
+  // const handleSortModelChange = (params) => {
+  //   if (params?.sortModel && params.sortModel.length > 0) {
+  //     let temp = { ...params.sortModel[0] };
+  //     setQuery((prevState) => ({
+  //       ...prevState,
+  //       page: 0,
+  //       sortBy: temp.field,
+  //       orderBy: temp.sort,
+  //     }));
+  //   }
+  // };
 
   const handleDeleteLeads = async () => {
     setOkButtonLoading(true);
@@ -548,30 +642,21 @@ const Leads = () => {
       });
   };
 
-  const onFilterChange = useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let deepFilter ;
-      switch (params.filterModel.items[0].columnField) {
-        case 'createdBy':
-          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'updatedBy':
-          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
-          break;
-        default:
-          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
-      }
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter
-      }));
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
+  //  If you want to do something once grid binding done
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  }
+
+  const generateColumns = columns.map((column: any, index) => {
+    return <AgGridColumn
+      key={index}
+      field={column.field}
+      headerName={column.headerName}
+      filter={column.filter}
+      cellRenderer={column.cellRenderer ?? null}>
+    </AgGridColumn>
+  })
+
 
   return (
     <Layout>
@@ -602,13 +687,14 @@ const Leads = () => {
             onTypeChange={handleLeadTypeSel}
             options={LeadTypes}
             onSearch={handleSearch}
-            searchVal={searchVal}
+            searchVal={search}
             leadPermissions={leadsPermissions}
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
-            allowToDelete={
-              !dataRows.some((d) => d.isChecked && d.owner != user?.user?._id)
-            }
+            // allowToDelete={
+            //   selectedRecords.length == 0 || !selectedRecords.some(d => d.owner?.optionValue != user?.user?._id)
+            //   // !dataRows.some((d) => d.isChecked && d.owner != user?.user?._id)
+            // }
             icon={<HiUserGroup className="headerLogo" />}
             heading="Leads"
             allowToConvertLeadToOpportunity={
@@ -616,7 +702,7 @@ const Leads = () => {
               permissions["customerContact"].isCreate &&
               permissions["opportunity"].isCreate
             }
-            selectedLeads={dataRows.filter((d) => d.isChecked)}
+            selectedLeads={selectedRecords}
             showLeadToOpportunityConfirmationDialog={() => {
               setConvertLeadToOpportunityConfirmationDialog({
                 open: true,
@@ -639,70 +725,154 @@ const Leads = () => {
             leadApi={leadApi}
           />
         )}
-        <div className="listing-grid">
-          <DataGrid
-            components={{
-              Toolbar: CustomDataGridToolbar,
-              NoRowsOverlay: CustomDataGridNoDataFound,
-            }}
-            rows={loading ? [] : dataRows}
-            columns={columns}
-            loading={loading}
-            disableSelectionOnClick
-            disableMultipleSelection
-            paginationMode="server"
-            pagination
-            onPageChange={handlePage}
-            onPageSizeChange={handlePageSize}
-            pageSize={query.limit}
-            page={query.page}
-            rowCount={rowCount}
-            rowsPerPageOptions={[25, 50, 75]}
-            onSortModelChange={handleSortModelChange}
-            density="compact"
-            onFilterModelChange={onFilterChange}
-            filterMode="server"
-          />
-        </div>
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
-        {isConfirmDialogVisible ? (
-          <ConfirmationDialog
-            open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete Lead ${deleteRec.name || ""
-              }?`}
-            onClose={() => {
-              if (deleteRec) setDeleteRec({});
-              setIsConformDialogVisible(false);
-            }}
-            okBtnLoading={okButtonLoading}
-            onOk={handleDeleteLeads}
-          />
-        ) : null}
+        {/* <div className="listing-grid"> */}
 
-        {convertLeadToOpportunityConfirmationDialog.open ? (
-          <ConfirmationDialog
-            open={convertLeadToOpportunityConfirmationDialog.open}
-            message={convertLeadToOpportunityConfirmationDialog.message}
-            onClose={() => {
-              setConvertLeadToOpportunityConfirmationDialog({
-                open: false,
-                id: null,
-                leadName: null,
-                message: null,
-              });
-            }}
-            okBtnLoading={okButtonLoading}
-            onOk={convertLeadToOpportunity}
-          />
-        ) : null}
-      </CustomContainer>
-    </Layout>
+        {/* <div>
+          {
+            !loading && <div className="height-100 width-100 d-flex align-items-center justify-content-center">
+              Loading.....
+            </div>
+          }
+        </div> */}
+
+        <div className="ag-theme-material listing-grid">
+
+          <div style={{ height: "100%", width: "100%" }}>
+
+            <AgGridReact
+              rowData={dataRows}
+              onGridReady={onGridReady}
+              // suppressDragLeaveHidesColumns={true}
+              defaultColDef={{
+                resizable: true,
+                floatingFilter: true,
+                sortable: true,
+                width: 250,
+                suppressMenu: true,
+                // headerCheckboxSelection: true,
+                // checkboxSelection: true,
+                floatingFilterComponentParams: { suppressFilterButton: true }
+              }}
+              onSortChanged={(e) => {
+                dispatch({ type: "sort", sorting: e.api.getSortModel() })
+              }}
+              onFilterChanged={(e) => {
+                const filterModel = {};
+                Object.assign(filterModel, e.api.getFilterModel());
+                let filterList = [];
+
+                Object.keys(filterModel).map(field => {
+                  filterList.push({
+                    columnName: field,
+                    value: filterModel[field].filter
+                  })
+                })
+                dispatch({ type: "filter", filters: filterList });
+              }}
+              enableCellTextSelection={true}
+              ensureDomOrder={true}
+              loadingOverlayComponent={'customLoadingOverlay'}
+              loadingOverlayComponentParams={{
+                loadingMessage: 'Loading...',
+              }}
+              suppressAnimationFrame={true}
+              suppressMaintainUnsortedOrder={true}
+
+              // loadingCellRenderer={'customLoadingCellRenderer'}
+              // loadingCellRendererParams={{
+              //   loadingMessage: 'One moment please...',
+              // }}
+
+              suppressRowClickSelection={true}
+              rowSelection={'multiple'}
+              frameworkComponents={frameworkComponents}
+              onSelectionChanged={(event: any) => {
+                dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
+              }}
+              immutableData={true}
+              getRowNodeId={(data) => {
+                return data._id;
+              }}
+            >
+              <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
+                headerCheckboxSelection={true}
+                headerCheckboxSelectionFilteredOnly={true}
+                checkboxSelection={true}
+                resizable={false} sortable={false}
+              >
+              </AgGridColumn>
+
+              {generateColumns}
+
+              <AgGridColumn width={150} headerName="Actions" pinned="right" lockPinned={true}
+                resizable={false} sortable={false}
+                filter={false} cellRenderer="actionsRenderer">
+              </AgGridColumn>
+
+            </AgGridReact>
+          </div>
+
+        </div>
+
+        <TablePagination
+          component="div"
+          count={rowCount}
+          page={page}
+          onChangePage={(event, newPage) => {
+            dispatch({ type: "pageChange", page: newPage })
+          }}
+          rowsPerPage={limit}
+          onChangeRowsPerPage={(event) => {
+            dispatch({ type: "pageSizeChange", limit: event.target.value })
+          }}
+          rowsPerPageOptions={pageSizes}
+        />
+
+        {
+          showDeleteWarningConfirmBox ? (
+            <MessageDialog
+              open={showDeleteWarningConfirmBox}
+              message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+              onClose={() => setShowDeleteWarningConfirmBox(false)}
+            />
+          ) : null
+        }
+        {
+          isConfirmDialogVisible ? (
+            <ConfirmationDialog
+              open={isConfirmDialogVisible}
+              message={`Are you sure, you want to delete Lead ${deleteRec.name || ""
+                }?`}
+              onClose={() => {
+                if (deleteRec) setDeleteRec({});
+                setIsConformDialogVisible(false);
+              }}
+              okBtnLoading={okButtonLoading}
+              onOk={handleDeleteLeads}
+            />
+          ) : null
+        }
+
+        {
+          convertLeadToOpportunityConfirmationDialog.open ? (
+            <ConfirmationDialog
+              open={convertLeadToOpportunityConfirmationDialog.open}
+              message={convertLeadToOpportunityConfirmationDialog.message}
+              onClose={() => {
+                setConvertLeadToOpportunityConfirmationDialog({
+                  open: false,
+                  id: null,
+                  leadName: null,
+                  message: null,
+                });
+              }}
+              okBtnLoading={okButtonLoading}
+              onOk={convertLeadToOpportunity}
+            />
+          ) : null
+        }
+      </CustomContainer >
+    </Layout >
   );
 };
 
