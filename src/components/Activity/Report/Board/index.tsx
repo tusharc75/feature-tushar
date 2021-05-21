@@ -19,13 +19,13 @@ const useStyles = makeStyles((theme) => ({
   block: {
     background: "#f0f0f0",
     borderRadius: "4px",
-    minHeight:'calc(100vh - 33.5vh)',
-    height: "100%"
+    minHeight: "calc(100vh - 33.5vh)",
+    height: "100%",
   },
-  activityMainBlock:{
+  activityMainBlock: {
     height: "calc(100vh - 32vh)",
-    overflow:"auto"
-  }
+    overflow: "auto",
+  },
 }));
 
 const Board = ({ type, filter, activityId }) => {
@@ -45,7 +45,7 @@ const Board = ({ type, filter, activityId }) => {
       .then(({ data }) => {
         setActivities(data);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   // Data for Autocomplete
@@ -216,7 +216,6 @@ const Board = ({ type, filter, activityId }) => {
             </Grid>
           ))}
         </Grid>
-
       </DndProvider>
     </>
   ) : (
