@@ -76,7 +76,6 @@ export default function ChatRender({ id }) {
         </form>
       </div>
     </div>
-
     {/* <div className="chatWindow">
       <ul className="chat" id="chatList">
         {messages.map(data => (
