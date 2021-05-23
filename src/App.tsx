@@ -84,9 +84,7 @@ function App() {
       await axiosInstance()
         .get(`/user/notification/unseen`)
         .then(({ data: { count } }) => {
-          if (count != 0) {
-            notification.setCount(count);
-          }
+          if (count > 0) { notification.setCount(count); }
         })
         .catch((error) => {
           toast.setToastConfig(error);
