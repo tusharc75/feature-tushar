@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useReducer } from "react";
+import React, { useState, useEffect, useContext, useReducer, useCallback } from "react";
 import {
   Grid,
   Tooltip,
@@ -22,6 +22,7 @@ import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import {
   gridPageSizes,
+  isObjectEmpty,
   leadProcessFieldName,
 } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
@@ -35,6 +36,7 @@ import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import { AiOutlineLoading } from 'react-icons/ai'
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import "./style.scss";
 
 const LeadTypes = [
@@ -134,24 +136,10 @@ const intialState = {
   limit: 25,
   pageSizes: gridPageSizes,
   search: "",
-  filters: [],
+  filters: {},
   sorting: [],
   selectedRecords: []
 }
-
-const columns = [
-  { field: "name", headerName: "Name", filter: "agTextColumnFilter", cellRenderer: "nameRenderer" },
-  { field: "relatedOpportunity", headerName: "Related Opportunity", filter: "agTextColumnFilter", cellRenderer: "relatedOpportunityRenderer" },
-  { field: "title", headerName: "Title", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-  { field: "company", headerName: "Company", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-  { field: "createdBy", headerName: "Created By", filter: "agTextColumnFilter", cellRenderer: "createdByRenderer" },
-  { field: "updatedBy", headerName: "Updated By", filter: "agTextColumnFilter", cellRenderer: "updatedByRenderer" },
-  { field: "phone", headerName: "Phone", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-  { field: "mobile", headerName: "Mobile", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-  { field: "email", headerName: "Email", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-  { field: "owner", headerName: "Owner Alies", filter: "agTextColumnFilter", cellRenderer: "optionLabelRenderer" },
-];
-
 
 let leadTimeout;
 const Leads = () => {
@@ -161,6 +149,7 @@ const Leads = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [gridApi, setGridApi] = useState(null);
+  const [columnApi, setColumnApi] = useState(null);
 
   const {
     state: { user, selectedEntity, permissions },
@@ -188,15 +177,15 @@ const Leads = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
 
-  const dummyData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => {
-    let object: any = {};
+  // const dummyData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => {
+  //   let object: any = {};
 
-    columns.forEach((column) => {
-      object[column.field] = "Loading..."
-    })
+  //   columns.forEach((column) => {
+  //     object[column.field] = "Loading..."
+  //   })
 
-    return object;
-  })
+  //   return object;
+  // })
 
   const [
     convertLeadToOpportunityConfirmationDialog,
@@ -315,6 +304,7 @@ const Leads = () => {
     optionLabelRenderer: OptionLabelRenderer,
     actionsRenderer: ActionsRenderer,
     customLoadingOverlay: CustomLoadingOverlay,
+    customFloatingFilter: CustomFloatingFilter,
     // customLoadingCellRenderer: CustomLoadingCellRenderer,
     // customNoRowsOverlay: CustomNoRowsOverlay
   };
@@ -322,24 +312,26 @@ const Leads = () => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
 
-    if (filters.length > 0) {
+    if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      filters.map(d => {
-        let columnName = d.columnName;
+      console.log(filters);
 
-        if (d.columnName == 'createdBy') {
-          columnName = "createdBy.user"
-        } else if (d.columnName == 'updatedBy') {
-          columnName = "updatedBy.user"
-        }
+      // filters.map(d => {
+      //   let columnName = d.columnName;
 
-        updatedFilters.push({
-          field: columnName,
-          term: d.value
-        })
-      });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+      //   if (d.columnName == 'createdBy') {
+      //     columnName = "createdBy.user"
+      //   } else if (d.columnName == 'updatedBy') {
+      //     columnName = "updatedBy.user"
+      //   }
+
+      //   updatedFilters.push({
+      //     field: columnName,
+      //     term: d.value
+      //   })
+      // });
+      // deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
     }
 
     if (sorting.length > 0) {
@@ -352,7 +344,6 @@ const Leads = () => {
 
     return deepFilter;
   };
-
 
   const fetchLeads = () => {
     if (selectedEntity) {
@@ -407,7 +398,7 @@ const Leads = () => {
           // dispatch({ type: "loading", loading: false })
         });
     }
-  };
+  }
 
   const handleSearch = (e) => {
     dispatch({ type: "search", search: e.target.value });
@@ -588,7 +579,51 @@ const Leads = () => {
   //  If you want to do something once grid binding done
   const onGridReady = (params) => {
     setGridApi(params.api);
+    setColumnApi(params.columnApi)
+    console.log(params.columnApi);
+    debugger;
   }
+
+  const onCustomFilter = (field, operator, value) => {
+    if (value) {
+      filters[field] = {
+        operator: operator,
+        value: value
+      }
+
+      dispatch({ type: "filter", filters: filters })
+    } else {
+      const { [field]: removedField, ...restFilters } = filters;
+      dispatch({ type: "filter", filters: restFilters })
+    }
+  }
+
+  const columns = [
+    {
+      field: "name", headerName: "Name", filter: "agTextColumnFilter", cellRenderer: "nameRenderer",
+      floatingFilterComponent: "customFloatingFilter", floatingFilterComponentParams: {
+        suppressFilterButton: true,
+        onCustomFilter: onCustomFilter,
+        field: "name"
+      }
+    },
+    { field: "relatedOpportunity", headerName: "Related Opportunity", filter: "agTextColumnFilter", cellRenderer: "relatedOpportunityRenderer" },
+    { field: "title", headerName: "Title", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    {
+      field: "company", headerName: "Company", filter: "customFloatingFilter", cellRenderer: "commonRenderer",
+      floatingFilterComponent: "customFloatingFilter", floatingFilterComponentParams: {
+        suppressFilterButton: true,
+        onCustomFilter: onCustomFilter,
+        field: "company"
+      }
+    },
+    { field: "createdBy", headerName: "Created By", filter: "agTextColumnFilter", cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", filter: "agTextColumnFilter", cellRenderer: "updatedByRenderer" },
+    { field: "phone", headerName: "Phone", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    { field: "mobile", headerName: "Mobile", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    { field: "email", headerName: "Email", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    { field: "owner", headerName: "Owner Alies", filter: "agTextColumnFilter", cellRenderer: "optionLabelRenderer" },
+  ];
 
   const generateColumns = columns.map((column: any, index) => {
     return <AgGridColumn
@@ -596,7 +631,10 @@ const Leads = () => {
       field={column.field}
       headerName={column.headerName}
       filter={column.filter}
-      cellRenderer={column.cellRenderer ?? null}>
+      cellRenderer={column.cellRenderer ?? null}
+      floatingFilterComponent={column.floatingFilterComponent ?? null}
+      floatingFilterComponentParams={column.floatingFilterComponentParams ?? null}
+    >
     </AgGridColumn>
   })
 
@@ -682,6 +720,8 @@ const Leads = () => {
               rowData={dataRows}
               onGridReady={onGridReady}
               // suppressDragLeaveHidesColumns={true}
+              rowHeight={40}
+              frameworkComponents={frameworkComponents}
               defaultColDef={{
                 resizable: true,
                 floatingFilter: true,
@@ -695,19 +735,20 @@ const Leads = () => {
               onSortChanged={(e) => {
                 dispatch({ type: "sort", sorting: e.api.getSortModel() })
               }}
-              onFilterChanged={(e) => {
-                const filterModel = {};
-                Object.assign(filterModel, e.api.getFilterModel());
-                let filterList = [];
+              // onFilterChanged={(e) => {
+              //   debugger;
+              //   const filterModel = {};
+              //   Object.assign(filterModel, e.api.getFilterModel());
+              //   let filterList = [];
 
-                Object.keys(filterModel).map(field => {
-                  filterList.push({
-                    columnName: field,
-                    value: filterModel[field].filter
-                  })
-                })
-                dispatch({ type: "filter", filters: filterList });
-              }}
+              //   Object.keys(filterModel).map(field => {
+              //     filterList.push({
+              //       columnName: field,
+              //       value: filterModel[field].filter
+              //     })
+              //   })
+              //   dispatch({ type: "filter", filters: filterList });
+              // }}
               enableCellTextSelection={true}
               ensureDomOrder={true}
               loadingOverlayComponent={'customLoadingOverlay'}
@@ -725,7 +766,6 @@ const Leads = () => {
 
               suppressRowClickSelection={true}
               rowSelection={'multiple'}
-              frameworkComponents={frameworkComponents}
               onSelectionChanged={(event: any) => {
                 dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
               }}
