@@ -48,7 +48,7 @@ const QuoteApproval = () => {
     const [sellingPrice, setSellingPrice] = useState(0);
     const[currency,setCurrency]=useState("");
 
-    const baseURL = "http://localhost:4000";
+    const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com"
     useEffect(() => {
         fetchQuote()
     }, []);
