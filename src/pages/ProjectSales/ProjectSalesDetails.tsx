@@ -28,7 +28,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignDataDialog from "./AssignDataDialog";
-import CustomerStrategy from "./CustomerStrategy";
+import CustomerAccounts from "./CustomerAccounts";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 import { formatAmountWithCurrency } from "../../constants/helpers";
 
@@ -73,7 +73,7 @@ const ProjectSalesDetails = () => {
 
     axiosInstance()
       .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -104,9 +104,9 @@ const ProjectSalesDetails = () => {
         .catch((error) => {
           setLoadingGraphData(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
-  }
+  };
 
   /**
    * Get sales strategy data for paticular ID
@@ -358,7 +358,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -382,8 +382,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                    !projectSalesFields.length ||
-                    !projectSalesData ? (
+                  !projectSalesFields.length ||
+                  !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -428,8 +428,9 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${node.id
-                                    }`,
+                                  pathname: `${routes[node.route].path}/${
+                                    node.id
+                                  }`,
                                 });
                               }
                             }}
@@ -460,7 +461,7 @@ const ProjectSalesDetails = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper  className="subContainer">
+              <Paper className="subContainer">
                 <Box style={{ padding: "0px", maxHeight: "450px" }}>
                   <Box
                     width="100%"
@@ -472,7 +473,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -524,7 +525,7 @@ const ProjectSalesDetails = () => {
             </Grid>
           </Grid>
           <Box my={1} />
-          <CustomerStrategy
+          <CustomerAccounts
             isTeamMember={isTeamMember}
             isManager={isManager}
             ownerId={projectSalesData?.projectManager?.optionValue}
@@ -548,8 +549,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-                : ""
+              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

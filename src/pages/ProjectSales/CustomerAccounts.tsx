@@ -209,6 +209,7 @@ const CustomerStrategy = (props) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   const handleClick = (
     event: React.MouseEvent<HTMLButtonElement>,
     type: string
@@ -246,7 +247,7 @@ const CustomerStrategy = (props) => {
             if (dialogType === "customer-account") {
               handleOpenDialog(dialogType);
             }
-            if (dialogType === "customer-contact") {
+            if (dialogType === "customer-contact" && accId) {
               handleOpenDialog(dialogType, id);
             }
             handleClose();
@@ -260,6 +261,55 @@ const CustomerStrategy = (props) => {
 
   return (
     <>
+      {dialogType && renderMenu()}
+      {showAccountCreateDialog && (
+        <ManageAccountDialog
+          open={showAccountCreateDialog}
+          onClose={({ id }) => {
+            setShowAccountCreateDialog(false);
+            if (id) {
+              saveCustomerAccountToProject(id);
+            }
+            setDialogType(null);
+            setAccId(null);
+          }}
+          accountResource={"customerAccount"}
+          accountApi={"customer-account"}
+          isRedirectToDetailPage={false}
+          collaborators={collaborators}
+          owners={collaborators.map((u) => ({
+            ...u,
+            default: u.optionValue === ownerId,
+          }))}
+          fromProject={true}
+        />
+      )}
+      {showContactCreateDialog && accId && (
+        <ManageContactDialog
+          open={showContactCreateDialog}
+          onClose={() => {
+            setShowContactCreateDialog(false);
+            setDialogType(null);
+            setAccId(null);
+          }}
+          onSuccess={(obj) => {
+            if (obj && obj.id) {
+              saveCustomerContactToProject(obj.id);
+            }
+          }}
+          contactResource={customerContact.contactResource}
+          accountId={accId}
+          contactApi={customerContact.contactApi}
+          account={customerAccount}
+          isRedirectToDetailPage={false}
+          collaborators={collaborators}
+          owners={collaborators.map((u) => ({
+            ...u,
+            default: u.optionValue === ownerId,
+          }))}
+          fromProject={true}
+        />
+      )}
       <Paper className={classes.root}>
         <Accordion
           square={false}
@@ -284,7 +334,9 @@ const CustomerStrategy = (props) => {
                 color="primary"
                 size="small"
                 className={classes.addBtn}
-                onClick={(e) => handleClick(e, "customer-account")}
+                onClick={(e) => {
+                  handleClick(e, "customer-account");
+                }}
               >
                 <MoreVert />
               </IconButton>
@@ -342,9 +394,7 @@ const CustomerStrategy = (props) => {
                               resource={"customerAccount"}
                               isRedirect={false}
                               expanded={true}
-                              collaborators={collaborators.filter(
-                                (u) => u.optionValue !== ownerId
-                              )}
+                              collaborators={collaborators}
                               users={collaborators.map((u) => ({
                                 ...u,
                                 default: u.optionValue === ownerId,
@@ -440,59 +490,6 @@ const CustomerStrategy = (props) => {
                       </Grid>
                     </Box>
                   ))}
-                  {dialogType && renderMenu(accId)}
-                  {showContactCreateDialog && accId && (
-                    <ManageContactDialog
-                      open={showContactCreateDialog}
-                      onClose={() => {
-                        setShowContactCreateDialog(false);
-                        setDialogType(null);
-                        setAccId(null);
-                      }}
-                      onSuccess={(obj) => {
-                        if (obj && obj.id) {
-                          saveCustomerContactToProject(obj.id);
-                        }
-                      }}
-                      contactResource={customerContact.contactResource}
-                      accountId={accId}
-                      contactApi={customerContact.contactApi}
-                      account={customerAccount}
-                      isRedirectToDetailPage={false}
-                      collaborators={collaborators.filter(
-                        (u) => u.optionValue !== ownerId
-                      )}
-                      owners={collaborators.map((u) => ({
-                        ...u,
-                        default: u.optionValue === ownerId,
-                      }))}
-                      fromProject={true}
-                    />
-                  )}
-                  {showAccountCreateDialog && (
-                    <ManageAccountDialog
-                      open={showAccountCreateDialog}
-                      onClose={({ id }) => {
-                        setShowAccountCreateDialog(false);
-                        if (id) {
-                          saveCustomerAccountToProject(id);
-                        }
-                        setDialogType(null);
-                        setAccId(null);
-                      }}
-                      accountResource={"customerAccount"}
-                      accountApi={"customer-account"}
-                      isRedirectToDetailPage={false}
-                      collaborators={collaborators.filter(
-                        (u) => u.optionValue !== ownerId
-                      )}
-                      owners={collaborators.map((u) => ({
-                        ...u,
-                        default: u.optionValue === ownerId,
-                      }))}
-                      fromProject={true}
-                    />
-                  )}
                 </>
               </Box>
             ) : (

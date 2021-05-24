@@ -25,15 +25,18 @@ import {
   ExpandLess,
 } from "@material-ui/icons";
 import _ from "lodash";
-import { FaUserTie, FaDatabase, FaHandshake } from 'react-icons/fa';
-import { BsCalendarFill, BsFillPuzzleFill } from 'react-icons/bs';
-import { MdDashboard, MdLocalActivity } from 'react-icons/md';
-import SidebarImage from '../../assets/header-bg.png';
-import Avatar from '@material-ui/core/Avatar';
-import { RiFolderSettingsFill } from 'react-icons/ri';
-import { RiAccountPinCircleFill } from 'react-icons/ri';
-import { SiCivicrm } from 'react-icons/si';
-import { IoIosArrowDroprightCircle, IoIosArrowDropleftCircle } from 'react-icons/io';
+import { FaUserTie, FaDatabase, FaHandshake } from "react-icons/fa";
+import { BsCalendarFill, BsFillPuzzleFill } from "react-icons/bs";
+import { MdDashboard, MdLocalActivity } from "react-icons/md";
+import SidebarImage from "../../assets/header-bg.png";
+import Avatar from "@material-ui/core/Avatar";
+import { RiFolderSettingsFill } from "react-icons/ri";
+import { RiAccountPinCircleFill } from "react-icons/ri";
+import { SiCivicrm } from "react-icons/si";
+import {
+  IoIosArrowDroprightCircle,
+  IoIosArrowDropleftCircle,
+} from "react-icons/io";
 import { AccountCircle } from "@material-ui/icons";
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
@@ -206,7 +209,15 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     setOpen(tempdata);
   };
 
-  const activityTabs = ["Task", "Case", "Event", "Note", "Email", "Attachment"];
+  const activityTabs = [
+    "Task",
+    "Case",
+    "Event",
+    "Note",
+    "Email",
+    "Attachment",
+    "Calendar",
+  ];
 
   return (
     <div className={classes.root}>
@@ -230,14 +241,19 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         <Toolbar />
         <div>
           <List className="sidebar-list">
-            <ListItem
-              button
-              className="list-item"
-            >
+            <ListItem button className="list-item">
               <ListItemIcon>
-                {toggleDrawer ? <AccountCircle className="sidebar-icon" /> : <ChevronRight className="sidebar-icon" />}
+                {toggleDrawer ? (
+                  <AccountCircle className="sidebar-icon" />
+                ) : (
+                  <ChevronRight className="sidebar-icon" />
+                )}
               </ListItemIcon>
-              <ListItemText primary={[user?.user?.firstName, user?.user?.lastName].filter(f => f).join(" ")} />
+              <ListItemText
+                primary={[user?.user?.firstName, user?.user?.lastName]
+                  .filter((f) => f)
+                  .join(" ")}
+              />
             </ListItem>
             <Link to="/">
               <Tooltip title={!toggleDrawer ? "Dashboard" : ""}>
@@ -282,7 +298,11 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   <Link
                     className="sub-list"
                     key={i}
-                    to={`/activity/${_.lowerCase(item)}`}
+                    to={
+                      item === "Calendar"
+                        ? "/calendar"
+                        : `/activity/${_.lowerCase(item)}`
+                    }
                   >
                     <ListItem
                       button

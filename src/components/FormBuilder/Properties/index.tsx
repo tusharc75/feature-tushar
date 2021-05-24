@@ -131,6 +131,9 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               ele.units = values.units
               ele.displayUnits = values.displayUnits
               ele.option = values.option
+              if (fieldData.type === "formula" || values.isFormula === true) {
+                ele.formulaOnConverter = values.formulaOnConverter
+              }
             }
             if (fieldData.type === "currencyAmount") {
               delete ele.currency
@@ -141,6 +144,11 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               ele.formulainputFields = values.formulainputFields
               ele.formulaoption = values.formulaoption
             }
+            ele.isDefaultValue = values.isDefaultValue ? values.isDefaultValue : false
+            ele.defaultValue = ""
+            if (ele.isDefaultValue) {
+              ele.defaultValue = values.defaultValue
+            }
           }
         })
       }
@@ -149,10 +157,16 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     handleClose()
   }
 
+  const onKeyPress = (event) => {
+    if (event.which === 13) {
+      event.preventDefault();
+    }
+  }
+
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
-    <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
+    <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} >
       {({ submitForm, touched, errors, setFieldValue, values }) => (
-        <Form autoComplete="off" autoCorrect="off" noValidate >
+        <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
           <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`} onClose={handleClose}></CustomDialogHeader>
           <CustomDialogContent>
             <TextField
@@ -348,6 +362,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                 }
                 label="Show Tooltip"
               />
+
               {values["isTooltip"] &&
                 <TextField
                   variant="outlined"
@@ -361,6 +376,33 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                   error={touched["tooltipMessage"] && Boolean(errors["tooltipMessage"])}
                   helperText={touched["tooltipMessage"] && errors["tooltipMessage"]}
                   onChange={(e) => setFieldValue("tooltipMessage", e.target.value.trimStart())}
+                />
+              }
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="isDefaultValue"
+                    checked={values["isDefaultValue"]}
+                    onChange={(e) => setFieldValue("isDefaultValue", e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Default Value"
+              />
+              {values["isDefaultValue"] &&
+                <TextField
+                  variant="outlined"
+                  type="text"
+                  label="Default Value"
+                  required={true}
+                  name="defaultValue"
+                  fullWidth
+                  margin="dense"
+                  value={values["defaultValue"]}
+                  error={touched["defaultValue"] && Boolean(errors["defaultValue"])}
+                  helperText={touched["defaultValue"] && errors["defaultValue"]}
+                  onChange={(e) => setFieldValue("defaultValue", e.target.value.trimStart())}
                 />
               }
             </Box>
