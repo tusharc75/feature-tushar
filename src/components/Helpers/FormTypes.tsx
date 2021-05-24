@@ -174,8 +174,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -320,11 +320,11 @@ const FormTypes = (props) => {
     data.formulaFields.forEach((_field) => {
       let formulainputFields = {};
       data.formulainputFields.forEach((_input) => {
-        formulainputFields[_input] = alredyDone[_input]
+        formulainputFields[_input] = alredyDone[_input] || alredyDone[_input] === 0
           ? alredyDone[_input]
           : values[_input]
-          ? values[_input]
-          : 0;
+            ? values[_input]
+            : 0;
       });
       let calValue = getFormulaValue(
         data.formulaoption[_field],
@@ -332,6 +332,7 @@ const FormTypes = (props) => {
         "decimal",
         2
       );
+      console.log(calValue)
       setFieldValue(_field, calValue);
       alredyDone[_field] = calValue;
       handleFormula(_field, calValue, alredyDone);
@@ -343,9 +344,7 @@ const FormTypes = (props) => {
 
   const handleFormula = (name, value, alredyDone) => {
     if (
-      fields &&
-      fields.filter((_f) => _f.type === "formula" || _f.isFormula === true)
-        .length
+      fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length
     ) {
       fields
         .filter((_f) => _f.type === "formula" || _f.isFormula === true)
@@ -359,8 +358,8 @@ const FormTypes = (props) => {
                 inputFields[_input] = alredyDone[_input]
                   ? alredyDone[_input]
                   : values[_input]
-                  ? values[_input]
-                  : 0;
+                    ? values[_input]
+                    : 0;
               }
             });
             let calValue = getFormulaValue(
@@ -371,14 +370,12 @@ const FormTypes = (props) => {
             );
             calValue = formatDecimal(calValue, 2);
             let _fieldName = _data.fieldName;
-            if (_data.type === "currencyAmount" || _data.type === "converter") {
+            if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
               if (_data.displayCurrency && _data.displayCurrency.length) {
-                _fieldName =
-                  _fieldName + "_" + _data.displayCurrency[0].toLowerCase();
+                _fieldName = _fieldName + "_" + _data.displayCurrency[0].toLowerCase();
               }
               if (_data.displayUnits && _data.displayUnits.length) {
-                _fieldName =
-                  _fieldName + "_" + _data.displayUnits[0].toLowerCase();
+                _fieldName = _fieldName + "_" + (_data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter.toLowerCase() : _data.displayUnits[0].toLowerCase())
               }
               if (alredyDone[_fieldName] === undefined) {
                 setFieldValue(_fieldName, calValue);
@@ -396,7 +393,7 @@ const FormTypes = (props) => {
                   handleConverter(
                     _data,
                     _data.fieldName,
-                    _data.displayUnits[0],
+                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
                     calValue
                   );
                 }
@@ -553,18 +550,18 @@ const FormTypes = (props) => {
               calValue = formatDecimal(calValue, 2);
               setFieldValue(
                 name +
-                  "_" +
-                  x_currency.toLowerCase() +
-                  "_" +
-                  x_unit.toLowerCase(),
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
                 calValue
               );
               handleFormula(
                 name +
-                  "_" +
-                  x_currency.toLowerCase() +
-                  "_" +
-                  x_unit.toLowerCase(),
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
                 calValue,
                 {}
               );
@@ -575,18 +572,18 @@ const FormTypes = (props) => {
               calValue = formatDecimal(calValue, 2);
               setFieldValue(
                 name +
-                  "_" +
-                  x_currency.toLowerCase() +
-                  "_" +
-                  x_unit.toLowerCase(),
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
                 calValue
               );
               handleFormula(
                 name +
-                  "_" +
-                  x_currency.toLowerCase() +
-                  "_" +
-                  x_unit.toLowerCase(),
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
                 calValue,
                 {}
               );
@@ -706,11 +703,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? 0 : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? 0 : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -740,11 +737,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? 0 : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? 0 : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -764,12 +761,12 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                if (fieldData.returnType === "decimal") {
-                  handleChange(name, parseFloat(e.target.value));
-                } else {
-                  handleChange(name, e.target.value);
-                }
+              if (fieldData.returnType === "decimal") {
+                handleChange(name, parseFloat(e.target.value));
+              } else {
+                handleChange(name, e.target.value);
               }
+            }
         }
       />
     </InfoLabel>
@@ -846,10 +843,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                handleChange(
-                  name,
-                  val && val.optionValue ? val.optionValue : ""
-                )
+              handleChange(
+                name,
+                val && val.optionValue ? val.optionValue : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -933,57 +930,57 @@ const FormTypes = (props) => {
                 required={required}
                 value={
                   values[
-                    name +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase()
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
                   ]
                 }
                 error={
                   touched[
-                    name +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase()
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
                   ] &&
                   Boolean(
                     errors[
-                      name +
-                        "_" +
-                        _currency.toLowerCase() +
-                        "_" +
-                        _unit.toLowerCase()
+                    name +
+                    "_" +
+                    _currency.toLowerCase() +
+                    "_" +
+                    _unit.toLowerCase()
                     ]
                   )
                 }
                 helperText={
                   touched[
-                    name +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase()
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
                   ] &&
                   errors[
-                    name +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase()
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
                   ]
                 }
                 onChange={
                   onChange
                     ? onChange
                     : (e) =>
-                        handleCurrencyChangeWithConverter(
-                          name,
-                          _currency,
-                          _unit,
-                          parseFloat(e.target.value)
-                        )
+                      handleCurrencyChangeWithConverter(
+                        name,
+                        _currency,
+                        _unit,
+                        parseFloat(e.target.value)
+                      )
                 }
                 InputProps={{
                   startAdornment: (
@@ -1024,19 +1021,19 @@ const FormTypes = (props) => {
                 onChange
                   ? onChange
                   : (e) => {
-                      if (fieldData.displayCurrency.length > 1) {
-                        handleCurrencyChange(
-                          name,
-                          _currency,
-                          parseFloat(e.target.value)
-                        );
-                      } else {
-                        handleChange(
-                          name + "_" + _currency.toLowerCase(),
-                          parseFloat(e.target.value)
-                        );
-                      }
+                    if (fieldData.displayCurrency.length > 1) {
+                      handleCurrencyChange(
+                        name,
+                        _currency,
+                        parseFloat(e.target.value)
+                      );
+                    } else {
+                      handleChange(
+                        name + "_" + _currency.toLowerCase(),
+                        parseFloat(e.target.value)
+                      );
                     }
+                  }
               }
               InputProps={{
                 startAdornment: (
@@ -1064,8 +1061,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-                (data) => data.currencyCode === values[name]
-              )[0]
+              (data) => data.currencyCode === values[name]
+            )[0]
             : ""
         }
         options={currencyData}
@@ -1079,10 +1076,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                setFieldValue(
-                  name,
-                  val && val.currencyCode ? val.currencyCode : ""
-                )
+              setFieldValue(
+                name,
+                val && val.currencyCode ? val.currencyCode : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -1129,8 +1126,8 @@ const FormTypes = (props) => {
         value={
           values[name]
             ? options.filter((data: any) =>
-                values[name].includes(data.optionValue)
-              )
+              values[name].includes(data.optionValue)
+            )
             : []
         }
         getOptionSelected={(option: any, val: any) =>
@@ -1140,10 +1137,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -1244,9 +1241,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+              setValue(newValue);
+            }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -1437,10 +1434,10 @@ const FormTypes = (props) => {
             {isFileUploading
               ? `Uploading... ${fileUploadProgress}%`
               : values[name]
-              ? values[name]
-              : touched[name] && Boolean(errors[name])
-              ? errors[name]
-              : "No file choosen"}
+                ? values[name]
+                : touched[name] && Boolean(errors[name])
+                  ? errors[name]
+                  : "No file choosen"}
           </Typography>
         </Box>
         <IconButton

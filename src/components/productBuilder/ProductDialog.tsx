@@ -49,8 +49,8 @@ const CreateProduct = (props) => {
         setFields(_fields.filter((_f) => _f.leval === "builder-custom"))
 
         let values = { ...productData }
-        values.productCategory = values.productCategory._id
-        values.productTemplate = values.productTemplate && values.productTemplate._id && values.productTemplate._id
+        values.productCategory = values.productCategory.optionValue
+        values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue
         delete values.fields
 
         setInitialData({
