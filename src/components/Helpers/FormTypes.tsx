@@ -149,6 +149,8 @@ const FormTypes = (props) => {
     fieldData,
     startAdornment,
     accept,
+    usePubllicUrlforFileUpload = false,
+    doNotShowUploadedFile = false,
     ...rest
   } = props;
 
@@ -174,8 +176,8 @@ const FormTypes = (props) => {
       a.name.toUpperCase() < b.name.toUpperCase()
         ? -1
         : a.name.toUpperCase() > b.name.toUpperCase()
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -279,8 +281,9 @@ const FormTypes = (props) => {
     let formData = new FormData();
     formData.append("file", file);
     setFileUploading(true);
+    let uploadUrl = usePubllicUrlforFileUpload ? "/user/upload-public" : "/user/upload"
     axiosInstance()
-      .post("/user/upload", formData, {
+      .post(uploadUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (pE) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
@@ -294,7 +297,8 @@ const FormTypes = (props) => {
         },
       })
       .then(({ data }) => {
-        setFieldValue(name, data.fileName);
+        if (usePubllicUrlforFileUpload) setFieldValue(name, data.fileUrl);
+        else setFieldValue(name, data.fileName);
         setFileUploading(false);
       })
       .catch((err) => {
@@ -323,8 +327,8 @@ const FormTypes = (props) => {
         formulainputFields[_input] = alredyDone[_input]
           ? alredyDone[_input]
           : values[_input]
-          ? values[_input]
-          : 0;
+            ? values[_input]
+            : 0;
       });
       let calValue = getFormulaValue(
         data.formulaoption[_field],
@@ -359,8 +363,8 @@ const FormTypes = (props) => {
                 inputFields[_input] = alredyDone[_input]
                   ? alredyDone[_input]
                   : values[_input]
-                  ? values[_input]
-                  : 0;
+                    ? values[_input]
+                    : 0;
               }
             });
             let calValue = getFormulaValue(
@@ -553,18 +557,18 @@ const FormTypes = (props) => {
               calValue = formatDecimal(calValue, 2);
               setFieldValue(
                 name +
-                  "_" +
-                  x_currency.toLowerCase() +
-                  "_" +
-                  x_unit.toLowerCase(),
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
                 calValue
               );
               handleFormula(
                 name +
-                  "_" +
-                  x_currency.toLowerCase() +
-                  "_" +
-                  x_unit.toLowerCase(),
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
                 calValue,
                 {}
               );
@@ -575,18 +579,18 @@ const FormTypes = (props) => {
               calValue = formatDecimal(calValue, 2);
               setFieldValue(
                 name +
-                  "_" +
-                  x_currency.toLowerCase() +
-                  "_" +
-                  x_unit.toLowerCase(),
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
                 calValue
               );
               handleFormula(
                 name +
-                  "_" +
-                  x_currency.toLowerCase() +
-                  "_" +
-                  x_unit.toLowerCase(),
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
                 calValue,
                 {}
               );
@@ -706,11 +710,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? 0 : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? 0 : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -740,11 +744,11 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                handleChange(
-                  name,
-                  e.target.value == "" ? 0 : parseFloat(e.target.value)
-                );
-              }
+              handleChange(
+                name,
+                e.target.value == "" ? 0 : parseFloat(e.target.value)
+              );
+            }
         }
       />
     </InfoLabel>
@@ -764,12 +768,12 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e) => {
-                if (fieldData.returnType === "decimal") {
-                  handleChange(name, parseFloat(e.target.value));
-                } else {
-                  handleChange(name, e.target.value);
-                }
+              if (fieldData.returnType === "decimal") {
+                handleChange(name, parseFloat(e.target.value));
+              } else {
+                handleChange(name, e.target.value);
               }
+            }
         }
       />
     </InfoLabel>
@@ -846,10 +850,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                handleChange(
-                  name,
-                  val && val.optionValue ? val.optionValue : ""
-                )
+              handleChange(
+                name,
+                val && val.optionValue ? val.optionValue : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -933,57 +937,57 @@ const FormTypes = (props) => {
                 required={required}
                 value={
                   values[
-                    name +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase()
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
                   ]
                 }
                 error={
                   touched[
-                    name +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase()
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
                   ] &&
                   Boolean(
                     errors[
-                      name +
-                        "_" +
-                        _currency.toLowerCase() +
-                        "_" +
-                        _unit.toLowerCase()
+                    name +
+                    "_" +
+                    _currency.toLowerCase() +
+                    "_" +
+                    _unit.toLowerCase()
                     ]
                   )
                 }
                 helperText={
                   touched[
-                    name +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase()
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
                   ] &&
                   errors[
-                    name +
-                      "_" +
-                      _currency.toLowerCase() +
-                      "_" +
-                      _unit.toLowerCase()
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
                   ]
                 }
                 onChange={
                   onChange
                     ? onChange
                     : (e) =>
-                        handleCurrencyChangeWithConverter(
-                          name,
-                          _currency,
-                          _unit,
-                          parseFloat(e.target.value)
-                        )
+                      handleCurrencyChangeWithConverter(
+                        name,
+                        _currency,
+                        _unit,
+                        parseFloat(e.target.value)
+                      )
                 }
                 InputProps={{
                   startAdornment: (
@@ -1024,19 +1028,19 @@ const FormTypes = (props) => {
                 onChange
                   ? onChange
                   : (e) => {
-                      if (fieldData.displayCurrency.length > 1) {
-                        handleCurrencyChange(
-                          name,
-                          _currency,
-                          parseFloat(e.target.value)
-                        );
-                      } else {
-                        handleChange(
-                          name + "_" + _currency.toLowerCase(),
-                          parseFloat(e.target.value)
-                        );
-                      }
+                    if (fieldData.displayCurrency.length > 1) {
+                      handleCurrencyChange(
+                        name,
+                        _currency,
+                        parseFloat(e.target.value)
+                      );
+                    } else {
+                      handleChange(
+                        name + "_" + _currency.toLowerCase(),
+                        parseFloat(e.target.value)
+                      );
                     }
+                  }
               }
               InputProps={{
                 startAdornment: (
@@ -1064,8 +1068,8 @@ const FormTypes = (props) => {
           currencyData.filter((data) => data.currencyCode === values[name])
             .length
             ? currencyData.filter(
-                (data) => data.currencyCode === values[name]
-              )[0]
+              (data) => data.currencyCode === values[name]
+            )[0]
             : ""
         }
         options={currencyData}
@@ -1079,10 +1083,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, val) =>
-                setFieldValue(
-                  name,
-                  val && val.currencyCode ? val.currencyCode : ""
-                )
+              setFieldValue(
+                name,
+                val && val.currencyCode ? val.currencyCode : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -1129,8 +1133,8 @@ const FormTypes = (props) => {
         value={
           values[name]
             ? options.filter((data: any) =>
-                values[name].includes(data.optionValue)
-              )
+              values[name].includes(data.optionValue)
+            )
             : []
         }
         getOptionSelected={(option: any, val: any) =>
@@ -1140,10 +1144,10 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (e, value: any[]) =>
-                setFieldValue(
-                  name,
-                  value.map((val) => val.optionValue)
-                )
+              setFieldValue(
+                name,
+                value.map((val) => val.optionValue)
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -1244,9 +1248,9 @@ const FormTypes = (props) => {
           onChange
             ? onChange
             : (event, newValue) => {
-                setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                setValue(newValue);
-              }
+              setOptions(newValue ? [newValue, ...optionsList] : optionsList);
+              setValue(newValue);
+            }
         }
         onInputChange={(event, newInputValue) => {
           setFieldValue(name, newInputValue);
@@ -1424,36 +1428,39 @@ const FormTypes = (props) => {
             Upload File
           </Button>
         </label>
-        <Box marginX={1} />
-
-        <Box flex="1">
-          <Typography
-            variant="body2"
-            className="text-truncate"
-            color={
-              touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
-            }
-          >
-            {isFileUploading
-              ? `Uploading... ${fileUploadProgress}%`
-              : values[name]
-              ? values[name]
-              : touched[name] && Boolean(errors[name])
-              ? errors[name]
-              : "No file choosen"}
-          </Typography>
-        </Box>
-        <IconButton
-          disabled={Boolean(!values[name])}
-          title="Remove File"
-          color="secondary"
-          size="small"
-          aria-label="delete picture"
-          component="span"
-          onClick={() => setFieldValue(name, "")}
-        >
-          <DeleteIcon />
-        </IconButton>
+        {
+          doNotShowUploadedFile ? null : <>
+            <Box marginX={1} />
+            <Box flex="1">
+              <Typography
+                variant="body2"
+                className="text-truncate"
+                color={
+                  touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
+                }
+              >
+                {isFileUploading
+                  ? `Uploading... ${fileUploadProgress}%`
+                  : values[name]
+                    ? values[name]
+                    : touched[name] && Boolean(errors[name])
+                      ? errors[name]
+                      : "No file choosen"}
+              </Typography>
+            </Box>
+            <IconButton
+              disabled={Boolean(!values[name])}
+              title="Remove File"
+              color="secondary"
+              size="small"
+              aria-label="delete picture"
+              component="span"
+              onClick={() => setFieldValue(name, "")}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </>
+        }
       </Box>
     </Fragment>
   ) : type === "url" ? (

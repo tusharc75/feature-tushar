@@ -14,7 +14,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 const FullScreenDialog = (props) => {
-  const { open, close, children, heading } = props;
+  const { open, close, children, heading, className = "", ...rest } = props;
 
   return (
     <Dialog
@@ -22,6 +22,7 @@ const FullScreenDialog = (props) => {
       open={open}
       onClose={close}
       TransitionComponent={Transition}
+      className={className}
     >
       <CustomDialogHeader title={heading} onClose={close} />
 

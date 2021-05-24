@@ -20,12 +20,21 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import MessageDialog from "../../../components/Helpers/MessageDialog";
 import { Delete as DeleteIcon } from "@material-ui/icons";
-import reactHtmlparser from 'react-html-parser'
+import reactHtmlparser, { convertNodeToElement } from 'react-html-parser'
 import { HiOutlineMail } from "react-icons/hi";
+import Dialog from '@material-ui/core/Dialog';
+import { CreateEmail } from '../../../components/Activity/Email/CreateEmail'
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import _ from 'lodash'
 import styles from "../../Leads/Header.module.scss";
 import emailStyles from './email.module.scss'
 import './email.scss'
 
+const tabs = {
+    Inbox: 1,
+    Sent: 2
+}
 const Email = () => {
 
     const toastConfig = useContext(CustomToastContext);
@@ -37,6 +46,7 @@ const Email = () => {
     const { referenceType, referenceId } = parsed;
 
     const [filter, setFilter] = useState([]);
+    const [emailsCopy, setEmailsCopy] = useState([]);
     const [emails, setEmails] = useState([]);
     const [loading, setLoading] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
@@ -47,6 +57,9 @@ const Email = () => {
     const [checkAllEmails, setCheckAllEmails] = useState(false);
     const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [rowCount, setRowCount] = useState(0);
+    const [open, setOpen] = useState(false);
+    const [emailId, setEmailId] = useState(null);
+    const [currentTab, setCurrentTab] = useState(1)
 
     useEffect(() => {
         if (referenceType) {
@@ -79,6 +92,7 @@ const Email = () => {
                     }
                 })
                 setEmails(data)
+                setEmailsCopy(data)
                 setRowCount(count)
                 setLoading(false)
             })
@@ -95,8 +109,15 @@ const Email = () => {
         setFilter(value)
     }
 
-    const getToEmailList = toList => {
-        return (toList.map(email => email === user?.user?.email ? 'me' : email).join(','))
+    const getToEmailList = (toList) => {
+        return (currentTab === tabs.Sent ? "To: " : "") + (toList.map(email => email === user?.user?.email ? 'me' : email).join(','))
+    }
+
+    const transform = (node, index) => {
+        if (node.type === 'tag' && ["h2", "h1", "h3", "h4", "h5", "h6", "strong", "em", "u", "ul", "ol", "li", "del"].indexOf(node.name) >= 0) {
+            node.name = 'p';
+            return convertNodeToElement(node, index, transform);
+        }
     }
 
     const columns = [
@@ -151,7 +172,7 @@ const Email = () => {
                 return <div className={emailStyles.emailMessageConatiner} >
                     <Typography > {params.row?.subject ?? "(no subject) "} - </Typography>
                     <Typography noWrap display="inline"
-                        className={emailStyles.emailMessage}> {params.row.message ? reactHtmlparser(params.row.message) : null}
+                        className={emailStyles.emailMessage}> {params.row.message ? reactHtmlparser(params.row.message, { transform }) : null}
                     </Typography>
                 </div >
             }
@@ -259,6 +280,19 @@ const Email = () => {
             setQuery({ page: 0, limit: params.pageSize });
         }
     };
+    const handleClose = () => {
+        setEmailId(null)
+        setOpen(false)
+    }
+    const handleTab = (e, currentTab) => {
+        let filteredEmails = [...emailsCopy]
+        if (currentTab === tabs.Sent) {
+            filteredEmails = _.cloneDeep(emailsCopy).filter(email => email.isCreatedByMe)
+        }
+        setRowCount(filteredEmails.length)
+        setEmails(filteredEmails)
+        setCurrentTab(currentTab)
+    }
 
     return (<Layout>
         <Grid container direction="row">
@@ -269,11 +303,23 @@ const Email = () => {
         <CustomContainer>
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
-                    <Grid item xs={2} className="d-flex align-items-center gap-1">
+                    <Grid item xs={3} className="d-flex align-items-center gap-1">
                         <HiOutlineMail className="headerLogo" />{" "}
-                        <span className="listingHeader">Email</span>
+                        <span className="listingHeader">Email({rowCount}) </span>
+                        <ToggleButtonGroup
+                            size="small"
+                            className="ml-8"
+                            value={currentTab}
+                            exclusive
+                            onChange={handleTab}>
+                            {Object.keys(tabs).map((k, index) => (
+                                <ToggleButton value={tabs[k]} key={index} className="pl-2">
+                                    {k} {currentTab === tabs[k] ? `(${rowCount})` : ""}
+                                </ToggleButton>
+                            ))}
+                        </ToggleButtonGroup>
                     </Grid>
-                    <Grid item xs={10} className={styles.filter_side}>
+                    <Grid item xs={9} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
                             <Box style={{ width: '90%' }}>
                                 <SearchFilter
@@ -336,7 +382,11 @@ const Email = () => {
                     page={query.page}
                     rowCount={rowCount}
                     rowsPerPageOptions={[25, 50, 75]}
-
+                    onRowClick={(e) => {
+                        setOpen(true)
+                        setEmailId(e.id)
+                    }}
+                    disableColumnSelector={false}
                 />
             </div>
             {showDeleteWarningConfirmBox ? (
@@ -358,6 +408,18 @@ const Email = () => {
                     onOk={handleDeleteEmails}
                 />
             ) : null}
+            {
+                open ?
+                    <Dialog
+                        open={open}
+                        aria-labelledby="customized-dialog-title"
+                        maxWidth="md"
+                        onClose={handleClose}
+                        fullWidth
+                    >
+                        <CreateEmail emailId={emailId} handleClose={handleClose} relatedTo={filter} />
+                    </Dialog> : null
+            }
         </CustomContainer>
     </Layout >
     );

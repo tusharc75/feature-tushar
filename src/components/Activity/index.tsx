@@ -30,6 +30,7 @@ import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAttachment from "./Attachments/ManageAttachment";
 
+
 const useStyles = makeStyles((theme) => ({
   activityBox: {
     padding: "1px 1px 9px 1px",
@@ -56,6 +57,7 @@ const Activity = (props) => {
   const [type, setType] = useState(null);
   const [open, setOpen] = useState(false);
   const [emailUsersOptions, setEmailUsersOptions] = useState([])
+  const [countFetched, setCountFetched] = useState(false)
   const [totalCount, setTotalCount] = useState({
     Task: 0,
     Event: 0,
@@ -64,13 +66,20 @@ const Activity = (props) => {
     Email: 0,
     Attachment: 0
   })
-  console.log('totalCount', totalCount)
+
 
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
   useEffect(() => {
     fetchUsersEmails()
   }, [])
+
+  useEffect(() => {
+    if (Boolean(relatedTo[0]?.referenceId) && !countFetched) {
+      fetchTotalCounts()
+    }
+  }, [relatedTo[0]?.referenceId])
+
   useEffect(() => {
     let data = []
     if (emails && emails.length) {
@@ -80,6 +89,19 @@ const Activity = (props) => {
       setEmailUsersOptions(prevState => { return [...prevState, ...data] })
     }
   }, [emails])
+
+  const fetchTotalCounts = () => {
+
+    axiosInstance()
+      .get(`/activity/resource/count?relatedTo=${JSON.stringify(relatedTo)}`)
+      .then(({ data: { data } }) => {
+        setTotalCount(data)
+        setCountFetched(true)
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      })
+  }
 
   const getIcon = (tab: string) => {
     switch (tab) {

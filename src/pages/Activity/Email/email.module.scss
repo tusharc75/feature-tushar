@@ -11,10 +11,76 @@
     display: flex;
     p {
         max-width: 80%;
-        margin-right: 20px;
+        margin-right: 5px;
     }
 }
 .emailCreatedAt {
     margin-left: 5px;
     font-size: 12px;
+}
+.emailRichTextEditorCustomControls {
+    display: inline-block;
+    margin: 0 3px 0 0;
+    padding: 1px 2px;
+    height: 28px;
+    line-height: 22px;
+    box-sizing: border-box;
+    background: none #fdfdfd;
+    border: 1px solid #999;
+    border-radius: 2px;
+    color: #333;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.createEmailContainer {
+    padding: 12px;
+    .container {
+        position: relative;
+        // width: 50%;
+        // max-width: 300px;
+        padding: 2px;
+        text-align: center;
+        color: var(--secondary);
+    }
+
+    .image {
+        width: 100%;
+        height: auto;
+    }
+
+    .overlay {
+        position: absolute;
+        height: 50px;
+        margin: 20px;
+        right: 0;
+        bottom: 0;
+        background: rgb(0, 0, 0);
+        background: rgba(0, 0, 0, 0.5); /* Black see-through */
+        color: #f1f1f1;
+        width: 50px;
+        transition: 0.5s ease;
+        opacity: 0;
+        color: white;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .container:hover .overlay {
+        opacity: 1;
+    }
+
+    .deleteIcon {
+        color: var(--white);
+    }
+}
+.emailAttachments {
+    text-decoration: underline;
+}
+.emailAttachments:hover {
+    color: var(--link);
+}
+.textEditor {
+    .IconButton__icon-image___1gW7U {
+        display: none;
+    }
 }
