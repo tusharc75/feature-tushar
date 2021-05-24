@@ -88,9 +88,17 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     xs={10}
                     className="d-flex align-items-center gap-1"
                   >
-                    <Typography variant="subtitle2">{_task.name} </Typography>{" "}
+                    <Typography
+                      variant="subtitle2"
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setTaskId(_task._id);
+                        setOpen(true);
+                      }}
+                    >
+                      {_task.name}
+                    </Typography>
                     <span className="activity-date">
-                      {" "}
                       Due On : {moment(_task.dueDate).format("MMM DD YYYY")}
                     </span>
                   </Grid>

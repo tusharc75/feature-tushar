@@ -88,7 +88,16 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     xs={10}
                     className="d-flex align-items-center gap-1"
                   >
-                    <Typography variant="subtitle2">{_event.name}</Typography>
+                    <Typography
+                      variant="subtitle2"
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setEventId(_event._id);
+                        setOpen(true);
+                      }}
+                    >
+                      {_event.name}
+                    </Typography>
                     <span className="activity-date">
                       End Date : {moment(_event.endDate).format("MMM DD YYYY")}
                     </span>

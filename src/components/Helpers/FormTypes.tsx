@@ -324,7 +324,7 @@ const FormTypes = (props) => {
     data.formulaFields.forEach((_field) => {
       let formulainputFields = {};
       data.formulainputFields.forEach((_input) => {
-        formulainputFields[_input] = alredyDone[_input]
+        formulainputFields[_input] = alredyDone[_input] || alredyDone[_input] === 0
           ? alredyDone[_input]
           : values[_input]
             ? values[_input]
@@ -336,6 +336,7 @@ const FormTypes = (props) => {
         "decimal",
         2
       );
+      console.log(calValue)
       setFieldValue(_field, calValue);
       alredyDone[_field] = calValue;
       handleFormula(_field, calValue, alredyDone);
@@ -347,9 +348,7 @@ const FormTypes = (props) => {
 
   const handleFormula = (name, value, alredyDone) => {
     if (
-      fields &&
-      fields.filter((_f) => _f.type === "formula" || _f.isFormula === true)
-        .length
+      fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length
     ) {
       fields
         .filter((_f) => _f.type === "formula" || _f.isFormula === true)
@@ -375,14 +374,12 @@ const FormTypes = (props) => {
             );
             calValue = formatDecimal(calValue, 2);
             let _fieldName = _data.fieldName;
-            if (_data.type === "currencyAmount" || _data.type === "converter") {
+            if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
               if (_data.displayCurrency && _data.displayCurrency.length) {
-                _fieldName =
-                  _fieldName + "_" + _data.displayCurrency[0].toLowerCase();
+                _fieldName = _fieldName + "_" + _data.displayCurrency[0].toLowerCase();
               }
               if (_data.displayUnits && _data.displayUnits.length) {
-                _fieldName =
-                  _fieldName + "_" + _data.displayUnits[0].toLowerCase();
+                _fieldName = _fieldName + "_" + (_data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter.toLowerCase() : _data.displayUnits[0].toLowerCase())
               }
               if (alredyDone[_fieldName] === undefined) {
                 setFieldValue(_fieldName, calValue);
@@ -400,7 +397,7 @@ const FormTypes = (props) => {
                   handleConverter(
                     _data,
                     _data.fieldName,
-                    _data.displayUnits[0],
+                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
                     calValue
                   );
                 }
@@ -1459,8 +1456,7 @@ const FormTypes = (props) => {
             >
               <DeleteIcon />
             </IconButton>
-          </>
-        }
+          </>}
       </Box>
     </Fragment>
   ) : type === "url" ? (

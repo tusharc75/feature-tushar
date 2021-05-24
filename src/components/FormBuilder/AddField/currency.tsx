@@ -45,7 +45,6 @@ export const Currency = ({ values, setFieldValue }) => {
                 id="tags-filled"
                 options={currency}
                 value={values["displayCurrency"] ? values["displayCurrency"] : []}
-                freeSolo
                 renderTags={(value: string[], getTagProps) =>
                     value.map((option: string, index: number) => (
                         <Chip variant="outlined" label={option} {...getTagProps({ index })} />

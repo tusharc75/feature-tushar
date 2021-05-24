@@ -402,6 +402,7 @@ const UserDetailsPage = () => {
     setRolesDialogOpen(false);
   };
 
+  const isLoggedInUserBrandAdmin = 'userType' in user?.user;
   return (
     <>
       {openUpdateDialog && (
@@ -476,6 +477,7 @@ const UserDetailsPage = () => {
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
+                      disabled={!isLoggedInUserBrandAdmin && userData?.userType}
                     >
                       Edit
                     </Button>
@@ -483,7 +485,7 @@ const UserDetailsPage = () => {
                   {permissions.user.isDelete ? (
                     <DeleteButton
                       text="Delete"
-                      disabled={user?.user?._id === id}
+                      disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
                       onClick={() => handleDeleteUser(id)}
                     />
                   ) : null}
@@ -546,6 +548,7 @@ const UserDetailsPage = () => {
                           color="primary"
                           size="small"
                           onClick={handleOpenDialog}
+                          disabled={!isLoggedInUserBrandAdmin && userData?.userType}
                         >
                           <ControlPoint />
                         </IconButton>

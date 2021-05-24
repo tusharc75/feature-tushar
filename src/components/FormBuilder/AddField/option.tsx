@@ -28,7 +28,7 @@ export const Option = ({ values, setFieldValue }) => {
     const AddRemoveValue = (type, index) => {
         let data = [...values["option"]]
         if (type === "add") {
-            data.splice((index + 1), 0, { optionLabel: "" });
+            data.splice((index + 1), 0, { optionLabel: "Option " + (data.length + 1), optionValue: "Option " + (data.length + 1) });
         }
         else {
             if (data.length !== 1) {
@@ -41,7 +41,7 @@ export const Option = ({ values, setFieldValue }) => {
 
     return (<Box pt={2} pb={2}>
         <Typography variant="body2">Options</Typography>
-        <Box border={1} mt={1} p={1} bgcolor="grey.100" borderColor="grey.300">
+        <Box border={1} mt={1} p={1} bgcolor="grey.100" borderColor="grey.300" maxHeight={300} style={{ overflow: "auto" }}>
             {values["option"] && values["option"].map((data, index) => (
                 <Box key={index} bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300" >
                     <Grid container spacing={1}>

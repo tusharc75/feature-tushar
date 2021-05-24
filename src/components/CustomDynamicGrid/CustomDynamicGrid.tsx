@@ -34,7 +34,7 @@ export default function CustomDynamicGrid({ columns, data, options, fixedLeftCol
     columns = columns.map(column => {
         return {
             title: column["title"], field: column["field"],
-            render: (rowData: any) => <div style={{ width: column["width"] ? column["width"] : commonFieldWidth }}>
+            render: column.render ? column.render : (rowData: any) => <div style={{ width: column["width"] ? column["width"] : commonFieldWidth }}>
                 {rowData[column["field"]]}
             </div>
         }

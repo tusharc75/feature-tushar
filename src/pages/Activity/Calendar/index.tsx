@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { Box, Button, Menu, MenuItem } from "@material-ui/core";
+import React, { useState, useEffect, useCallback } from "react";
+import { Box, Button, Grid, Menu, MenuItem } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import { lowerCase } from "lodash";
 import moment from "moment";
@@ -44,7 +44,7 @@ const BigCalendar = () => {
 
         setActivities(newData);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [type, filter]);
 
   useEffect(() => {
@@ -59,68 +59,70 @@ const BigCalendar = () => {
 
   return (
     <Layout>
-      <CustomBreadCrumbs routes={[{ title: "Calendar" }]} />
-
+      <Grid container>
+        <Grid item md={12} sm={12} xs={12}>
+          <CustomBreadCrumbs routes={[{ title: "Calendar" }]} />
+        </Grid>
+      </Grid>
       <CustomContainer>
-        <div className="detailContainer">
-          <Box p={1}>
-            <Box mb={2} display="flex" alignItems="center">
-              <Button
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                onClick={handleClick}
-                variant="outlined"
-                endIcon={<ExpandMore />}
-              >
-                {`${type}s`}
-              </Button>
-              <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                {activityOptions.map((item, i) => (
-                  <MenuItem
-                    key={i}
-                    selected={item === type}
-                    onClick={() => {
-                      setType(item);
-                      handleClose();
-                    }}
-                  >
-                    {item}s
-                  </MenuItem>
-                ))}
-              </Menu>
-              <Box mx={1} />
-              <SearchFilter
-                handleChangeFilter={handleChangeFilter}
-                filter={filter}
-                chip={{ variant: "default", size: "small", color: "default" }}
-              />
-            </Box>
-
-            <MyCalendar
-              activities={activities}
-              setActivityData={setActivityData}
-              type={lowerCase(type)}
+        <Grid container className="greyBox">
+          <Grid item xs={12} md={2} sm={3}>
+            <Button
+              aria-controls="simple-menu"
+              aria-haspopup="true"
+              onClick={handleClick}
+              size="small"
+              variant="outlined"
+              endIcon={<ExpandMore />}
+            >
+              {`${type}s`}
+            </Button>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              {activityOptions.map((item, i) => (
+                <MenuItem
+                  key={i}
+                  selected={item === type}
+                  onClick={() => {
+                    setType(item);
+                    handleClose();
+                  }}
+                >
+                  {item}s
+                </MenuItem>
+              ))}
+            </Menu>
+          </Grid>
+          <Grid item xs={12} md={10} sm={9}>
+            <SearchFilter
+              handleChangeFilter={handleChangeFilter}
+              filter={filter}
+              chip={{ variant: "default", size: "small", color: "default" }}
             />
+          </Grid>
+        </Grid>
+        <MyCalendar
+          activities={activities}
+          setActivityData={setActivityData}
+          type={lowerCase(type)}
+        />
 
-            {activityData && (
-              <ActivityModelHandler
-                fetchBoard={fetchBoard}
-                setActivityData={setActivityData}
-                fromCalender={true}
-                activityType={activityData.type}
-                activityId={activityData.id}
-              />
-            )}
-          </Box>
-        </div>
+        {activityData && (
+          <ActivityModelHandler
+            fetchBoard={fetchBoard}
+            setActivityData={setActivityData}
+            fromCalender={true}
+            activityType={activityData.type}
+            activityId={activityData.id}
+          />
+        )}
       </CustomContainer>
-    </Layout>
+    </Layout >
   );
 };
 

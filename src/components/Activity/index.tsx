@@ -1,6 +1,21 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
+import { useState, useEffect, Fragment, useContext } from "react";
+import {
+  makeStyles,
+  Dialog,
+  Typography,
+  IconButton,
+  Grid,
+  Box,
+} from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { BiTask } from "react-icons/bi";
+import { VscCalendar } from "react-icons/vsc";
+import { BsBriefcase } from "react-icons/bs";
+import { GoNote } from "react-icons/go";
+import { HiOutlineMail } from "react-icons/hi";
+import { FiPlusSquare } from "react-icons/fi";
+import { AiOutlinePaperClip } from "react-icons/ai";
 import { Task } from "./Task";
 import { CreateTask } from "./Task/CreateTask";
 import { Event } from "./Event";
@@ -11,24 +26,12 @@ import { Note } from "./Note";
 import { CreateNote } from "./Note/CreateNote";
 import { Email } from "./Email";
 import { CreateEmail } from "./Email/CreateEmail";
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import Dialog from '@material-ui/core/Dialog';
-import { makeStyles } from "@material-ui/core";
-import { BiTask } from "react-icons/bi";
-import { VscCalendar } from "react-icons/vsc";
-import { BsBriefcase } from "react-icons/bs";
-import { GoNote } from "react-icons/go";
-import { HiOutlineMail } from "react-icons/hi";
-import { FiPlusSquare } from "react-icons/fi";
-import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Chip } from '@material-ui/core'
 import Attachments from './Attachments/index'
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAttachment from "./Attachments/ManageAttachment";
+import Chatter from "./Chatter";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -67,7 +70,6 @@ const Activity = (props) => {
     Attachment: 0
   })
 
-
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
   useEffect(() => {
@@ -81,14 +83,17 @@ const Activity = (props) => {
   }, [relatedTo[0]?.referenceId])
 
   useEffect(() => {
-    let data = []
+    let data = [];
     if (emails && emails.length) {
-      emails.map(curEmail => {
-        if (curEmail && emailUsersOptions.indexOf(curEmail) < 0) data.push(curEmail)
-      })
-      setEmailUsersOptions(prevState => { return [...prevState, ...data] })
+      emails.map((curEmail) => {
+        if (curEmail && emailUsersOptions.indexOf(curEmail) < 0)
+          data.push(curEmail);
+      });
+      setEmailUsersOptions((prevState) => {
+        return [...prevState, ...data];
+      });
     }
-  }, [emails])
+  }, [emails]);
 
   const fetchTotalCounts = () => {
 
@@ -106,7 +111,7 @@ const Activity = (props) => {
   const getIcon = (tab: string) => {
     switch (tab) {
       case "Task":
-        return <BiTask size={20} />
+        return <BiTask size={20} />;
 
       case "Event":
         return <VscCalendar size={20} />;
@@ -121,7 +126,7 @@ const Activity = (props) => {
         return <HiOutlineMail size={20} />;
 
       case "Attachment":
-        return <AiOutlinePaperClip size={22} />
+        return <AiOutlinePaperClip size={22} />;
     }
   };
 
@@ -150,16 +155,19 @@ const Activity = (props) => {
 
   const fetchUsersEmails = () => {
     axiosInstance()
-      .get('/user')
+      .get("/user")
       .then(({ data: { data, count } }) => {
         data = data.reduce((emails, obj) => {
-          if (obj?.email && emailUsersOptions.indexOf(obj.email) < 0) emails.push(obj.email)
-          return emails
-        }, [])
-        setEmailUsersOptions(prevState => { return [...prevState, ...data] })
+          if (obj?.email && emailUsersOptions.indexOf(obj.email) < 0)
+            emails.push(obj.email);
+          return emails;
+        }, []);
+        setEmailUsersOptions((prevState) => {
+          return [...prevState, ...data];
+        });
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err)
+        toastConfig.setToastConfig(err);
       });
   }
   const handleSetCount = (name, count) => {
@@ -209,7 +217,9 @@ const Activity = (props) => {
                     color="primary"
                     size="small"
                     onClick={(event) => handleCreateActivity(event, data)}
-                  > <FiPlusSquare />
+                  >
+                    {" "}
+                    <FiPlusSquare />
                   </IconButton>
                 </Grid>
               </Grid>
@@ -261,6 +271,9 @@ const Activity = (props) => {
             </Box>
           </Fragment>
         ))}
+        {relatedTo && relatedTo[0].referenceId ? (
+          <Chatter relatedTo={relatedTo} />
+        ) : null}
       </Box>
       <Dialog
         open={open}
@@ -305,15 +318,13 @@ const Activity = (props) => {
             options={emailUsersOptions}
           />
         ) : null}
-        {
-          type === "Attachment" ? (
-            <ManageAttachment
-              attachmentId={null}
-              handleClose={handleClose}
-              relatedTo={relatedTo}
-            />
-          ) : null
-        }
+        {type === "Attachment" ? (
+          <ManageAttachment
+            attachmentId={null}
+            handleClose={handleClose}
+            relatedTo={relatedTo}
+          />
+        ) : null}
       </Dialog>
     </Box>
   );

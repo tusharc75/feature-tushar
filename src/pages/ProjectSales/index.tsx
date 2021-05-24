@@ -14,7 +14,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import ProjectStrategyHeader from "./Header";
+import ProjectHeader from "./Header";
 import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
@@ -43,15 +43,14 @@ const ProjectSales: FC = () => {
   const [checkAllProjects, setCheckAllProjects] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [selectedType, setselectedType] = useState(1);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [
-    showDeleteWarningConfirmBox,
-    setShowDeleteWarningConfirmBox,
-  ] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
+    useState(false);
   const [renderCount, setRenderCount] = useState(0);
 
   const fetchProjects = async () => {
-    let searchParams: any = { ...query };
+    let searchParams: any = { ...query, filterAccounts: selectedType };
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
@@ -71,7 +70,12 @@ const ProjectSales: FC = () => {
         setLoadingProjects(false);
       });
     // eslint-disable-next-line
-  }
+  };
+
+  const handleProtectFilter = (filterValues) => {
+    setselectedType(filterValues);
+    setCheckAllProjects(false);
+  };
 
   useEffect(() => {
     let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
@@ -89,7 +93,7 @@ const ProjectSales: FC = () => {
     if (renderCount > 0) {
       fetchProjects();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query]);
+  }, [query, selectedType]);
 
   const getRows = (data: []) => {
     const rows = data.length
@@ -233,7 +237,7 @@ const ProjectSales: FC = () => {
             ) : (
               <Tooltip
                 className="cursor-stop"
-                title="You do not have permission to delete"
+                title="You have to be a project owner to delete"
               >
                 <IconButton aria-label="Delete">
                   <DeleteIcon fontSize="small" />
@@ -374,25 +378,43 @@ const ProjectSales: FC = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let deepFilter ;
+      let deepFilter;
       switch (params.filterModel.items[0].columnField) {
-        case 'createdBy':
-          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+        case "createdBy":
+          deepFilter = JSON.stringify([
+            {
+              field: "createdBy.user.concatedName",
+              term: params.filterModel.items[0].value,
+            },
+          ]);
           break;
-        case 'updatedBy':
-          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+        case "updatedBy":
+          deepFilter = JSON.stringify([
+            {
+              field: "updatedBy.user.concatedName",
+              term: params.filterModel.items[0].value,
+            },
+          ]);
           break;
-        case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+        case "name":
+          deepFilter = JSON.stringify([
+            { field: "firstName", term: params.filterModel.items[0].value },
+            { field: "middleName", term: params.filterModel.items[0].value },
+            { field: "lastName", term: params.filterModel.items[0].value },
+          ]);
           break;
         default:
-          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
+          deepFilter = JSON.stringify([
+            {
+              field: params.filterModel.items[0].columnField,
+              term: params.filterModel.items[0].value,
+            },
+          ]);
       }
       setQuery((prevState) => ({
         ...prevState,
-        deepFilter
+        deepFilter,
       }));
-
     } else {
       setQuery({ page: 0, limit: 25 });
     }
@@ -411,10 +433,12 @@ const ProjectSales: FC = () => {
         <CustomBreadCrumbs routes={[routes.projectSales]} />
         <div className="main-container">
           <div className="header-panel">
-            <ProjectStrategyHeader
+            <ProjectHeader
               onSearch={handleSearch}
               searchVal={searchVal}
               permissions={permissions?.projectSales}
+              selectedType={selectedType}
+              handleFilterChange={handleProtectFilter}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}

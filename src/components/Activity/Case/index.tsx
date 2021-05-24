@@ -88,7 +88,16 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     xs={10}
                     className="d-flex align-items-center gap-1"
                   >
-                    <Typography variant="subtitle2">{_case.name}</Typography>
+                    <Typography
+                      variant="subtitle2"
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setCaseId(_case._id);
+                        setOpen(true);
+                      }}
+                    >
+                      {_case.name}
+                    </Typography>
                     <span className="activity-date">
                       Due Date : {moment(_case.dueDate).format("MMM DD YYYY")}
                     </span>
