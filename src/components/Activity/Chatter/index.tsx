@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -7,12 +7,13 @@ import {
   makeStyles,
   Typography,
 } from "@material-ui/core";
+import { Skeleton } from "@material-ui/lab";
 import { Send } from "@material-ui/icons";
 import moment from "moment";
 
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
-import { Skeleton } from "@material-ui/lab";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   messageBubble: {
@@ -34,6 +35,7 @@ const Chatter = (props) => {
   } = useData();
   const classes = useStyles();
 
+  const { setToastConfig } = useContext(CustomToastContext);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [chatterId, setChatterId] = useState("");
@@ -67,7 +69,7 @@ const Chatter = (props) => {
           setLoading(false);
         })
         .catch((err) => {
-          console.log(err);
+          setToastConfig(err);
           setLoading(false);
         });
     }
@@ -84,7 +86,7 @@ const Chatter = (props) => {
         console.log(data);
       })
       .catch((err) => {
-        console.log(err);
+        setToastConfig(err);
       });
   };
 
@@ -96,7 +98,7 @@ const Chatter = (props) => {
         setMessages(data.Messages);
       })
       .catch((err) => {
-        console.log(err);
+        setToastConfig(err);
       });
     setMessage("");
   };
@@ -153,6 +155,7 @@ const Chatter = (props) => {
                 <div ref={msgBoxRef}>
                   <Box display="flex">
                     <Avatar
+                      title={msg.userName}
                       style={{
                         width: "28px",
                         height: "28px",
