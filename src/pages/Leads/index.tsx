@@ -3,9 +3,16 @@ import {
   Grid,
   Tooltip,
   IconButton,
+  Box,
   Checkbox,
   Button,
-  TablePagination
+  TablePagination,
+  Popover,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormLabel,
+  Switch
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -37,6 +44,8 @@ import CustomContainer from "../../components/CustomContainer";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import { AiOutlineLoading } from 'react-icons/ai'
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import ViewWeekIcon from '@material-ui/icons/ViewWeek';
+import { isMobile, isTablet } from "react-device-detect";
 import "./style.scss";
 
 const LeadTypes = [
@@ -148,6 +157,7 @@ const Leads = () => {
 
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
   const [gridApi, setGridApi] = useState(null);
   const [columnApi, setColumnApi] = useState(null);
 
@@ -176,6 +186,25 @@ const Leads = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
+
+  const [openColumnSelection, setOpenColumnSelection] = useState(false)
+  const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [columns, setColumns] = useState([
+    {
+      field: "name", headerName: "Name", show: true, disabled: true, filter: "agTextColumnFilter", cellRenderer: "nameRenderer",
+    },
+    { field: "relatedOpportunity", headerName: "Related Opportunity", show: true, filter: "agTextColumnFilter", cellRenderer: "relatedOpportunityRenderer" },
+    { field: "title", headerName: "Title", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    {
+      field: "company", headerName: "Company", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer",
+    },
+    { field: "createdBy", headerName: "Created By", show: true, filter: "agTextColumnFilter", cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, filter: "agTextColumnFilter", cellRenderer: "updatedByRenderer" },
+    { field: "phone", headerName: "Phone", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    { field: "mobile", headerName: "Mobile", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    { field: "email", headerName: "Email", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    { field: "owner", headerName: "Owner Alies", show: true, filter: "agTextColumnFilter", cellRenderer: "optionLabelRenderer" },
+  ]);
 
   // const dummyData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => {
   //   let object: any = {};
@@ -315,23 +344,21 @@ const Leads = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      console.log(filters);
+      Object.keys(filters).map(field => {
+        let updatedColumnName = field;
 
-      // filters.map(d => {
-      //   let columnName = d.columnName;
+        if (field == 'createdBy') {
+          updatedColumnName = "createdBy.user"
+        } else if (field == 'updatedBy') {
+          updatedColumnName = "updatedBy.user"
+        }
 
-      //   if (d.columnName == 'createdBy') {
-      //     columnName = "createdBy.user"
-      //   } else if (d.columnName == 'updatedBy') {
-      //     columnName = "updatedBy.user"
-      //   }
-
-      //   updatedFilters.push({
-      //     field: columnName,
-      //     term: d.value
-      //   })
-      // });
-      // deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+        updatedFilters.push({
+          field: updatedColumnName,
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
     }
 
     if (sorting.length > 0) {
@@ -378,24 +405,13 @@ const Leads = () => {
 
           dispatch({ type: "initialize", data: rows, count: count });
 
-          if (gridApi) {
-            //   gridApi.setRowData(rows);
-            setTimeout(() => {
-              gridApi.hideOverlay();
-            }, 1500);
-            // } else {
-            //   dispatch({ type: "initialize", data: rows, count: count });
-
-            // dispatch({ type: "loading", loading: false })
-          }
-
-          setCheckAllLeads(false);
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-          if (gridApi) {
+          if (gridApi && rows.length > 0) {
             gridApi.hideOverlay();
           }
-          // dispatch({ type: "loading", loading: false })
+          setCheckAllLeads(false);
+
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
         });
     }
   }
@@ -580,8 +596,6 @@ const Leads = () => {
   const onGridReady = (params) => {
     setGridApi(params.api);
     setColumnApi(params.columnApi)
-    console.log(params.columnApi);
-    debugger;
   }
 
   const onCustomFilter = (field, operator, value) => {
@@ -598,46 +612,21 @@ const Leads = () => {
     }
   }
 
-  const columns = [
-    {
-      field: "name", headerName: "Name", filter: "agTextColumnFilter", cellRenderer: "nameRenderer",
-      floatingFilterComponent: "customFloatingFilter", floatingFilterComponentParams: {
-        suppressFilterButton: true,
-        onCustomFilter: onCustomFilter,
-        field: "name"
-      }
-    },
-    { field: "relatedOpportunity", headerName: "Related Opportunity", filter: "agTextColumnFilter", cellRenderer: "relatedOpportunityRenderer" },
-    { field: "title", headerName: "Title", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-    {
-      field: "company", headerName: "Company", filter: "customFloatingFilter", cellRenderer: "commonRenderer",
-      floatingFilterComponent: "customFloatingFilter", floatingFilterComponentParams: {
-        suppressFilterButton: true,
-        onCustomFilter: onCustomFilter,
-        field: "company"
-      }
-    },
-    { field: "createdBy", headerName: "Created By", filter: "agTextColumnFilter", cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", filter: "agTextColumnFilter", cellRenderer: "updatedByRenderer" },
-    { field: "phone", headerName: "Phone", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-    { field: "mobile", headerName: "Mobile", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-    { field: "email", headerName: "Email", filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-    { field: "owner", headerName: "Owner Alies", filter: "agTextColumnFilter", cellRenderer: "optionLabelRenderer" },
-  ];
-
   const generateColumns = columns.map((column: any, index) => {
     return <AgGridColumn
       key={index}
       field={column.field}
       headerName={column.headerName}
-      filter={column.filter}
+      filter={column.filter ?? null}
+      filterParams={column.filterParams ?? null}
       cellRenderer={column.cellRenderer ?? null}
       floatingFilterComponent={column.floatingFilterComponent ?? null}
-      floatingFilterComponentParams={column.floatingFilterComponentParams ?? null}
+      floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        suppressFilterButton: true,
+      }}
     >
     </AgGridColumn>
   })
-
 
   return (
     <Layout>
@@ -712,14 +701,70 @@ const Leads = () => {
           }
         </div> */}
 
+        <Box className="listing-grid-header-options border px-2 py-1 border-bottom-0">
+          <Button aria-describedby="columnSelection"
+            size="small"
+            startIcon={<ViewWeekIcon />}
+            color="primary" onClick={(event) => {
+              setOpenColumnSelection(true)
+              setOpenColumnSelectionAnchorEl(event.currentTarget);
+            }}>
+            Columns
+          </Button>
+          <Popover
+            id="columnSelection"
+            open={openColumnSelection}
+            anchorEl={openColumnSelectionAnchorEl}
+            onClose={() => {
+              setOpenColumnSelectionAnchorEl(null);
+              setOpenColumnSelection(false)
+            }}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+          >
+            <FormControl component="fieldset" className="px-3 py-2">
+              <FormGroup>
+                {
+                  columns.map((column: any, index) => {
+                    return <Tooltip title={column.disabled ? "Main columns are always visible" : ""}>
+                      <FormControlLabel key={index} className="my-1" name={column.field}
+                        control={<Switch size="small" disabled={column.disabled} checked={column.show} onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                          const newColumns = [...columns];
+
+                          const getFieldIndex = columns.findIndex(d => d.field === column.field);
+                          newColumns[getFieldIndex].show = event.target.checked;
+                          setColumns(newColumns);
+
+                          const hiddenColumns = newColumns.filter(d => !d.show).map(m => m.field);
+                          const nonHiddenColumns = newColumns.filter(d => d.show).map(m => m.field);
+                          columnApi.setColumnsVisible(hiddenColumns, false);
+                          columnApi.setColumnsVisible(nonHiddenColumns, true);
+                        }}
+                        />}
+                        label={column.headerName}
+                      />
+                    </Tooltip>
+                  })
+                }
+              </FormGroup>
+            </FormControl>
+          </Popover>
+        </Box>
+
         <div className="ag-theme-material listing-grid">
 
-          <div style={{ height: "100%", width: "100%" }}>
+          <div style={{ height: "100%", width: "100%" }} className="border">
 
             <AgGridReact
               rowData={dataRows}
               onGridReady={onGridReady}
-              // suppressDragLeaveHidesColumns={true}
+              suppressDragLeaveHidesColumns={true}
               rowHeight={40}
               frameworkComponents={frameworkComponents}
               defaultColDef={{
@@ -730,25 +775,14 @@ const Leads = () => {
                 suppressMenu: true,
                 // headerCheckboxSelection: true,
                 // checkboxSelection: true,
-                floatingFilterComponentParams: { suppressFilterButton: true }
+                // floatingFilterComponentParams: { suppressFilterButton: true }
               }}
               onSortChanged={(e) => {
                 dispatch({ type: "sort", sorting: e.api.getSortModel() })
               }}
-              // onFilterChanged={(e) => {
-              //   debugger;
-              //   const filterModel = {};
-              //   Object.assign(filterModel, e.api.getFilterModel());
-              //   let filterList = [];
-
-              //   Object.keys(filterModel).map(field => {
-              //     filterList.push({
-              //       columnName: field,
-              //       value: filterModel[field].filter
-              //     })
-              //   })
-              //   dispatch({ type: "filter", filters: filterList });
-              // }}
+              onFilterChanged={(e) => {
+                dispatch({ type: "filter", filters: e.api.getFilterModel() });
+              }}
               enableCellTextSelection={true}
               ensureDomOrder={true}
               loadingOverlayComponent={'customLoadingOverlay'}
@@ -784,7 +818,9 @@ const Leads = () => {
 
               {generateColumns}
 
-              <AgGridColumn width={150} headerName="Actions" pinned="right" lockPinned={true}
+              <AgGridColumn width={150} headerName="Actions"
+                pinned={(isMobile || isTablet) ? false : "right"}
+                lockPinned={(isMobile || isTablet) ? false : true}
                 resizable={false} sortable={false}
                 filter={false} cellRenderer="actionsRenderer">
               </AgGridColumn>

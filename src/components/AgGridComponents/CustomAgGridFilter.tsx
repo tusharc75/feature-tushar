@@ -59,7 +59,6 @@ export default forwardRef((props: any, ref) => {
 
     // expose AG Grid Filter Lifecycle callbacks
     useImperativeHandle(ref, () => {
-        console.log(ref)
         return {
             onParentModelChanged(parentModel) {
                 // When the filter is empty we will receive a null value here
@@ -71,7 +70,6 @@ export default forwardRef((props: any, ref) => {
                     setCurrentValue(parentModel.filter);
                 }
             }
-
         }
     });
 
@@ -79,15 +77,28 @@ export default forwardRef((props: any, ref) => {
         if (input.target.value === '') {
             // clear the filter
             props.parentFilterInstance(instance => {
-                props.onCustomFilter(props.field, null, null);
-                // instance.onFloatingFilterChanged(null, null);
+                instance.onFloatingFilterChanged(null, null);
             });
             return;
         }
 
         setCurrentValue(input.target.value);
         props.parentFilterInstance(instance => {
-            props.onCustomFilter(props.field, "contains", input.target.value);
+            instance.onFloatingFilterChanged("contains", input.target.value);
+
+            // instance
+            //     .getFrameworkComponentInstance()
+            //     .myCustomFilter(input.target);
+
+            // props.customFunction(props.field, "contains", input.target.value)
+            // instance.onFloatingFilterChanged("contains", input.target.value)
+
+            // instance
+            // .getFrameworkComponentInstance()
+            // .onParentModelChanged()
+
+            // .customFunction(input.target.value)
+            // props.onCustomFilter(props.field, "contains", input.target.value);
             // instance.onFloatingFilterChanged("contains", input.target.value);
         });
     }

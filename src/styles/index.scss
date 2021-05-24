@@ -30,6 +30,8 @@
   --grey: #838485;
   --lightgrey: lightgrey;
 
+  --common-border-color: #dee2e6;
+
   --box-shadow: "rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px";
 
   --colorOpportunity: #d46101;
@@ -293,8 +295,13 @@ body::-webkit-scrollbar-thumb {
 }
 
 .listing-grid {
-  height: calc(100vh - 16rem);
+  height: calc(100vh - 18rem);
   padding: 0 0.3rem 0.3rem;
+}
+
+.listing-grid-header-options {
+  margin: 0 0.3rem 0rem;
+  background: #f0f2f3 !important;
 }
 
 .form-label-style:nth-child(1) {
