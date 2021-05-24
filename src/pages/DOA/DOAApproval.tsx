@@ -198,7 +198,7 @@ const DOAApproval=()=>{
                     </Paper>
                     </Grid>
                  <Grid item xs={12} sm={12} md={4} lg={4}>
-                     <ChatRender id={QData["chatter"]} />
+                     <ChatRender id={QData["chatter"]} isLoaded={true}/>
                  </Grid>
              </Grid>
         </Layout>

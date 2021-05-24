@@ -250,3 +250,19 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 .pull-right {
     text-align: right !important;
 }
+
+
+.positionRelative{
+    position:relative;
+}
+
+.positionAbsoluteBottom{
+    position: absolute;
+    bottom: 0;
+}
+.centerItem{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+}
