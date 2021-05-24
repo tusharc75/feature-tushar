@@ -112,11 +112,17 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
     handleAddField(data)
   }
 
+  const onKeyPress = (event) => {
+    if (event.which === 13) {
+      event.preventDefault();
+    }
+  }
+
 
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
     <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
       {({ submitForm, touched, errors, setFieldValue, values }) => (
-        <Form autoComplete="off" autoCorrect="off" noValidate >
+        <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
           <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"} onClose={handleClose}></CustomDialogHeader>
           <CustomDialogContent>
             <FormControl fullWidth margin="dense" variant="outlined">

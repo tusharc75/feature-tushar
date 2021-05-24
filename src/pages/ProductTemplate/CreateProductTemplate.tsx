@@ -19,8 +19,9 @@ import CustomContainer from "../../components/CustomContainer";
 import DefaultFields from './defaultFields';
 import { Autocomplete } from "@material-ui/lab";
 import TextField from '@material-ui/core/TextField';
-
+import queryString from "query-string";
 import _ from 'lodash';
+import { useLocation } from 'react-router-dom';
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
@@ -36,10 +37,11 @@ const ProductTemplateSchema = Yup.object().shape({
 
 const ProductTemplate = () => {
 
-    const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
+    const toastConfig = useContext(CustomToastContext)
 
+    const [isClone, setisClone] = useState(history.location.state?.isClone ? true : false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
     const [section, setSection] = useState([]);
@@ -49,17 +51,19 @@ const ProductTemplate = () => {
 
     useEffect(() => {
         fetchOneProductTemplate();
-    }, [id]);
+    }, [id, isClone]);
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
             setInitialValues({ name: "", productCategory: "", unit: "" });
             const _data = []
             const _section = _.uniq(_.map(DefaultFields, 'sectionName'));
+
             _section.forEach((element: any, index: number) => {
                 _data.push({
                     sectionId: index,
                     sectionName: element,
+                    sectionType: "cost",
                     field: DefaultFields.filter((el: any) => el.sectionName === element),
                 });
             });
@@ -67,6 +71,9 @@ const ProductTemplate = () => {
         }
         else {
             axiosInstance().get(`/product-template/` + id).then(({ data: { data } }) => {
+                if (isClone) {
+                    data.name = ""
+                }
                 setInitialValues(data);
                 setSection(data.section);
             }).catch((error) => {
@@ -102,27 +109,21 @@ const ProductTemplate = () => {
         let fields: any = []
         let order = 0;
         section.forEach(_section => {
-            let is_sectionType = false
-            if (_section.field.filter((data) => data.sectionType === "cost").length) {
-                is_sectionType = true
-            }
             _section.field.forEach(_field => {
                 let _field_data = _field
                 _field_data._id = _field_data._id.toString();
-                _field_data.sectionName = _section.sectionName
-                if (is_sectionType) {
-                    _field_data.sectionType = "cost"
-                }
                 if (!isNaN(_field._id)) {
                     _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
                 }
+                _field_data.sectionName = _section.sectionName
+                _field_data.sectionType = _section.sectionType
                 _field_data.order = ++order
                 fields.push(_field_data)
             })
         })
         data.fields = fields;
         setIsUpdating(true)
-        if (id === "0") {
+        if (id === "0" || isClone) {
             axiosInstance().post("/product-template", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
                 history.push({ pathname: routes.productTemplate.path });
@@ -148,7 +149,7 @@ const ProductTemplate = () => {
 
         <Grid container direction="row">
             <Grid item xs={12}>
-                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
             </Grid>
         </Grid>
         <CustomContainer>
