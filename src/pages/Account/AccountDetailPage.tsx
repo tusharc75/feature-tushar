@@ -621,7 +621,11 @@ export default function AccountDetailPage(props) {
                 <ProjectInAccordion recordsPerLine={3} />
                 <QuotesInAccordion recordsPerLine={3} />
                 <ProductBuilderInAccordion recordsPerLine={3} />
-                <LeadInAccordion recordsPerLine={3} />
+                {permissions?.lead?.isRead && accountData.staticData?.lead && (
+                <LeadInAccordion 
+                recordsPerLine={3} 
+                lead={accountData.staticData?.lead}/>
+                )}
               </div>
             </Paper>
           </Grid>

@@ -216,6 +216,7 @@ const CustomerStrategy = (props) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setDialogType(type);
+    renderMenu(accId)
   };
 
   const renderMenu = (id: string = "") => {

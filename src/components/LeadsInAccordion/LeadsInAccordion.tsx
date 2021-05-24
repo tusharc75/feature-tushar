@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Grid, Box, IconButton, Typography, Card, CardContent, Button, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
-import CommonSkeleton from '../Helpers/CommonSkeleton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles, makeStyles } from "@material-ui/core/styles";
-import { displayDate } from '../../services/util';
-import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageLeadDialog from '../../pages/Leads/ManageLeadDialog/ManageLeadDialog'
 import { useHistory } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
 import { BsBuilding } from 'react-icons/bs';
@@ -76,6 +71,7 @@ function DisplayData({ key, label, value, icon }) {
 export default function LeadInAccordion({
     expanded = true,
     recordsPerLine = 3,
+    lead
 }) {
 
     const history = useHistory();
@@ -100,7 +96,6 @@ export default function LeadInAccordion({
     }
 
     const [expandLead, setExpandLead] = useState(expanded);
-    const [showCreateLeadDialog, setShowCreateLeadDialog] = useState(false);
 
 
     return <>
@@ -132,17 +127,6 @@ export default function LeadInAccordion({
                             </Box>
                         </Box>
                     </Grid>
-                    <Grid item xs={4} container justify="flex-end">
-                        {
-                            <IconButton
-                                color="primary"
-                                size="small"
-                                onClick={() => { setShowCreateLeadDialog(true) }}
-                            >
-                                <ControlPointIcon />
-                            </IconButton>
-                        }
-                    </Grid>
                 </Grid>
             </AccordionSummary>
             <AccordionDetails>
@@ -159,24 +143,24 @@ export default function LeadInAccordion({
                                                 <Grid container className="detailCardHeader">
                                                     <Grid item xs={12} sm={12} md={12}>
                                                         <Link className="link">
-                                                            <Typography className="detailName">Samsher Singh <span className="role">(Manager)</span> </Typography>
+                                                            <Typography className="detailName">{`${lead.firstName} ${lead.middleName} ${lead.lastName}`}<span className="role">{lead.title?`(${lead.title})`:""}</span> </Typography>
                                                         </Link>
                                                     </Grid>
                                                 </Grid>
                                                 <Grid container>
                                                     <Grid item xs={12} sm={12} md={12}>
                                                         {
-                                                            <DisplayData key="1" label='Company' icon={<BsBuilding size={15} />} value="Adani" />
+                                                            <DisplayData key="1" label='Company' icon={<BsBuilding size={15} />} value={lead.company} />
                                                         }
                                                     </Grid>
                                                     <Grid item xs={12} sm={12} md={12}>
                                                         {
-                                                            <DisplayData key="2" label='Email' icon={<AiOutlineMail size={15} />} value="samsher@adani.com" />
+                                                            <DisplayData key="2" label='Email' icon={<AiOutlineMail size={15} />} value={lead.email} />
                                                         }
                                                     </Grid>
                                                     <Grid item xs={12} sm={12} md={12}>
                                                         {
-                                                            <DisplayData key="3" label='phone' icon={<BiPhone size={15} />} value="2131232124" />
+                                                            <DisplayData key="3" label='phone' icon={<BiPhone size={15} />} value={lead.phone || lead.mobile} />
                                                         }
                                                     </Grid>
                                                 </Grid>
