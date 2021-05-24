@@ -122,7 +122,7 @@ const Leads = () => {
         isChecked: false,
         id: u._id,
         name: name,
-        owner: u.owner,
+        owner: u.owner.optionValue,
         isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
           (d) => d?.optionValue == user?.user?._id
         ),
@@ -607,7 +607,7 @@ const Leads = () => {
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
             allowToDelete={
-              !dataRows.some((d) => d.isChecked && d.owner != user?.user?._id)
+              !dataRows.some((d) => d.isChecked && d.owner?.optionValue != user?.user?._id)
             }
             icon={<HiUserGroup className="headerLogo" />}
             heading="Leads"
