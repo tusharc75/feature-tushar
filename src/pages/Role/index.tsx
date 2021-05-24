@@ -24,6 +24,7 @@ import { localStorageKeys, roleTypes } from "../../constants/helpers";
 import RoleHeader from "./RoleHeader";
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
+let roleTimeout;
 
 const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,13 +43,14 @@ const Roles: FC = () => {
   const [checkAllRoles, setCheckAllRoles] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [renderCount, setRenderCount] = useState(0);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
 
-  const fetchRoles = useCallback(() => {
+  const fetchRoles = async () => {
     let searchParams: any = { ...query, type: selectedType };
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
@@ -68,11 +70,25 @@ const Roles: FC = () => {
         setLoadingRoles(false);
       });
     // eslint-disable-next-line
-  }, [searchVal, query, selectedType]);
+  }
 
   useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+
+    if (roleTimeout) {
+      clearTimeout(roleTimeout);
+    }
+
+    roleTimeout = setTimeout(() => {
+      fetchRoles();
+    }, millisec);
+  }, [searchVal]);
+
+  useEffect(() => {
+    if (renderCount > 0) {
+      fetchRoles();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [query, selectedType]);
 
   const getRows = (data: []) => {
     const rows = data.length
@@ -158,6 +174,8 @@ const Roles: FC = () => {
           {params.value}
         </p>
       ),
+      sortable: false,
+      filterable: false,
     },
     // {
     //   field: "createdAt",
@@ -224,19 +242,27 @@ const Roles: FC = () => {
         <>
           {permissions.role.isDelete ? (
             <span title="Delete Role">
-              <IconButton
-                aria-label="Delete"
-                onClick={() => showConfirmBox(params.row)}
-                disabled={
-                  rolePermissionArray.indexOf(params?.row?.permission) >= 0
-                }
-              >
-                {rolePermissionArray.indexOf(params?.row?.permission) >= 0 ? (
-                  <DeleteIcon fontSize="small" color="disabled" />
-                ) : (
+              {
+                rolePermissionArray.indexOf(params?.row?.permission) >= 0 ? (
+                  <Tooltip
+                    className="cursor-stop"
+                    title={params.row.type === "Global Role" ? "Global brand admin role can not be deleted" : "Regional brand admin role can not be deleted"}
+                  >
+                    <IconButton aria-label="Delete">
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                ) : (<IconButton
+                  aria-label="Delete"
+                  onClick={() => showConfirmBox(params.row)}
+
+                >
+
                   <DeleteIcon fontSize="small" color="error" />
-                )}
-              </IconButton>
+
+                </IconButton>)
+              }
+
             </span>
           ) : (
             <Tooltip
@@ -363,11 +389,19 @@ const Roles: FC = () => {
 
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let field = params.filterModel.items[0].columnField
+      if (params.filterModel.items[0].columnField === 'createdBy') {
+        field = "createdBy.user"
+      }
+      if (params.filterModel.items[0].columnField === 'updatedBy') {
+        field = "updatedBy.user"
+      }
+      const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
+
     } else {
       setQuery({ page: 0, limit: 25 });
     }
@@ -432,6 +466,7 @@ const Roles: FC = () => {
               rowsPerPageOptions={[25, 50, 75]}
               density="compact"
               onFilterModelChange={onFilterChange}
+              filterMode="server"
             />
           </div>
 

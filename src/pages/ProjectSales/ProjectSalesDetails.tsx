@@ -30,6 +30,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import AssignDataDialog from "./AssignDataDialog";
 import CustomerStrategy from "./CustomerStrategy";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
+import { formatAmountWithCurrency } from "../../constants/helpers";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -117,11 +118,15 @@ const ProjectSalesDetails = () => {
         data: { data },
       } = await axiosInstance().get(`/project-sales/${id}`);
 
+      data.amount = formatAmountWithCurrency(data.currency, data.amount);
+      data.value = formatAmountWithCurrency(data.currency, data.value);
+
+      setProjectSalesData(data);
       setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
+
       setHeadingLbl(name);
-      setProjectSalesData(data);
       setCustomizedRoutes([routes.projectSales, { title: data.projectName }]);
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
@@ -327,7 +332,7 @@ const ProjectSalesDetails = () => {
         <div className="detail-container">
           <Grid container spacing={1}>
             <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Paper>
+              <Paper className="subContainer">
                 {!projectSalesData ? (
                   <Box padding={1}>
                     <Skeleton variant="text" width="150px" height="30px" />
@@ -455,7 +460,7 @@ const ProjectSalesDetails = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper style={{ overflow: "hidden" }}>
+              <Paper  className="subContainer">
                 <Box style={{ padding: "0px", maxHeight: "450px" }}>
                   <Box
                     width="100%"

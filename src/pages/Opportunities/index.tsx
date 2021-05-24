@@ -117,7 +117,7 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-    
+
 
     return () => {
       setRenderCount(0);
@@ -281,16 +281,25 @@ const Opportunities = () => {
       field: "supplierAccountName",
       headerName: "Supplier Account Name",
       width: 300,
-      renderCell: (params) => (
-        <Link
-          className="link"
-          to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName?.optionValue}`}
-        >
-          {params?.row?.supplierAccountName?.optionLabel
-            ? params.row.supplierAccountName.optionLabel
-            : ""}
-        </Link>
-      ),
+      hide: true,
+      renderCell: (params) =>
+        params?.row?.supplierAccountName.length > 0 ? (
+          <>
+            <h5 className="createBy">
+              <Link className="link"
+                to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName[0].optionValue}`}
+              >
+                {params?.row?.supplierAccountName[0].optionLabel}
+              </Link>
+              {
+                params?.row?.supplierAccountName.length > 1 &&
+                <span className="createdAtTime badge-date">
+                  {`+${params?.row?.supplierAccountName.length - 1} more..`}
+                </span>
+              }
+            </h5>
+          </>
+        ) : <NoDataCell />
     },
     {
       field: "customerAccountName",
@@ -520,15 +529,20 @@ const Opportunities = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let field = params.filterModel.items[0].columnField
-
-      if (params.filterModel.items[0].columnField === 'createdBy') {
-        field = "createdBy.user"
+      let deepFilter;
+      switch (params.filterModel.items[0].columnField) {
+        case 'createdBy':
+          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'updatedBy':
+          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'name':
+          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+          break;
+        default:
+          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
       }
-      if (params.filterModel.items[0].columnField === 'updatedBy') {
-        field = "updatedBy.user"
-      }
-      const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
       setQuery((prevState) => ({
         ...prevState,
         deepFilter

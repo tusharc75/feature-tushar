@@ -9,6 +9,7 @@ import {
     Popper,
     ListItemIcon,
     Typography,
+    Avatar,
 } from "@material-ui/core";
 import { useData } from "./../StateProvider/Provider";
 import { AccountCircle } from "@material-ui/icons";
@@ -30,9 +31,13 @@ export default function UserProfile(props) {
                 aria-label="account of current user"
                 aria-haspopup="true"
                 color="inherit"
-                onClick={onToggle}
+                className="pt-0 pb-0"
             >
-                <AccountCircle />
+                {
+                    user?.user?.avatar ? <Avatar  onClick={onToggle} className="" src={user?.user?.avatar}></Avatar>
+                        :  <AccountCircle  onClick={onToggle}/> 
+                }
+
             </IconButton>
             <Popper
                 open={open}

@@ -87,7 +87,16 @@ export const Note = ({ relatedTo, handleActivityRefresh }) => {
                     xs={10}
                     className="d-flex align-items-center gap-1"
                   >
-                    <Typography variant="subtitle2">{_note.name}</Typography>
+                    <Typography
+                      variant="subtitle2"
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setNoteId(_note._id);
+                        setOpen(true);
+                      }}
+                    >
+                      {_note.name}
+                    </Typography>
                     <span className="activity-date">
                       Created :{" "}
                       {moment(_note.createdBy.date).format("MMM DD YYYY")}

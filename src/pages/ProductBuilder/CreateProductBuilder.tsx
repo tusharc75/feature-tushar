@@ -18,6 +18,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ProductBuilder from "../../components/productBuilder";
+import axios from "axios";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -32,15 +33,24 @@ const CreateProductBuilder = () => {
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
+    console.log(id);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
     const [section, setSection] = useState([]);
     const [deleteField, setDeleteField] = useState([]);
+    const [newVersion,setNewVersion]=useState(false);
+    const [versionNumber,setVersionNumber]=useState(0);
+
 
     useEffect(() => {
         fetchOneProductBuilder();
+        
     }, [id]);
+
+    useEffect(()=>{
+        fetchVersionDetail();
+    },[initialValues,section]);
 
     const fetchOneProductBuilder = () => {
         if (id === "0") {
@@ -48,12 +58,23 @@ const CreateProductBuilder = () => {
         }
         else {
             axiosInstance().get(`/productBuilder/` + id).then(({ data: { data } }) => {
+                console.log(data);
                 setInitialValues(data);
                 setSection(data.section);
             }).catch((error) => {
                 toastConfig.setToastConfig(error);
             });
         }
+    };
+
+    const fetchVersionDetail=()=>{
+        console.log("Fetching Version");
+        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + id).then(({ data: { data } }) => {
+            setNewVersion(data.newVersion);
+            setVersionNumber(data.version);
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
     };
 
     const handleSave = (values) => {

@@ -321,7 +321,7 @@ const RoleDetailsPage = () => {
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper>
+            <Paper className="subContainer">
               {!roleData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -510,7 +510,7 @@ const RoleDetailsPage = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper>
+            <Paper className="subContainer">
               <Box
                 padding={1}
                 bgcolor="grey.200"

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Box, Grid, Typography, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
+import { Add } from "@material-ui/icons";
+import { makeStyles } from "@material-ui/core/styles";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
-import { isEqual, kebabCase, camelCase } from "lodash";
+import { isEqual, kebabCase } from "lodash";
 import { isMobile, isTablet } from "react-device-detect";
 
 import statusList from "../../Helpers/statusList";
@@ -13,8 +15,22 @@ import Loader from "../../../../components/Loader";
 import { BoardList } from "./BoardList";
 import axiosInstance from "../../../../axios/axiosInstance";
 
+const useStyles = makeStyles((theme) => ({
+  block: {
+    background: "#f0f0f0",
+    borderRadius: "4px",
+    minHeight: "calc(100vh - 33.5vh)",
+    height: "100%",
+  },
+  activityMainBlock: {
+    height: "calc(100vh - 32vh)",
+    overflow: "auto",
+  },
+}));
+
 const Board = ({ type, filter, activityId }) => {
   const [activities, setActivities] = useState(null);
+  const classes = useStyles();
   const [resource, setResource] = useState("");
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
@@ -80,7 +96,7 @@ const Board = ({ type, filter, activityId }) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
       .then(({ data }) => {})
-      .catch((err) => console.log(JSON.stringify(err)));
+      .catch((err) => {});
   };
 
   const resourceOptions = [
@@ -171,20 +187,10 @@ const Board = ({ type, filter, activityId }) => {
         )}
       </Box>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-        <Grid container spacing={2}>
+        <Grid container spacing={1} className={classes.activityMainBlock}>
           {statusList.map((data, index) => (
-            <Grid item xs={12} sm={6} md={4}>
-              <Box
-                key={index}
-                width="100%"
-                height={window.innerHeight - 250}
-                mr={2}
-                style={{ overflow: "auto" }}
-                display="block"
-                border={1}
-                borderColor="grey.300"
-                bgcolor="grey.200"
-              >
+            <Grid item md={3} xs={12} sm={4} key={index}>
+              <div className={classes.block}>
                 <Box p={1}>
                   <Typography variant="subtitle2">
                     {data.status.toUpperCase()}
@@ -206,7 +212,7 @@ const Board = ({ type, filter, activityId }) => {
                   type={type}
                   handleChangeStatus={handleChangeStatus}
                 />
-              </Box>
+              </div>
             </Grid>
           ))}
         </Grid>

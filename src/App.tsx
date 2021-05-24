@@ -25,6 +25,7 @@ import Email from "./pages/Activity/Email";
 import Attachments from "./pages/Activity/Attachments";
 import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
+import ForgetPassword from './pages/Auth/ForgetPassword';
 import ProductCategory from "./pages/ProductCategory";
 import ProductTemplate from "./pages/ProductTemplate";
 import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
@@ -46,7 +47,9 @@ import CreateProductCost from "./pages/ProductCost/CreateProductCost";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
-
+import QuoteApproval from './pages/Quote-Approval'
+import QuoteBuilderPage from './pages/QuoteBuilder'
+import DOARequest from './pages/DOA'
 import CurrencyConverter from "./pages/CurrencyConverter";
 
 import {
@@ -58,6 +61,8 @@ import {
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
+import KpiDashboard from "./pages/KpiDashboard";
+import EditDashboard from './pages/KpiDashboard/EditDashboards';
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
@@ -65,6 +70,7 @@ import UserProfilePage from "./pages/ProfilePage/index";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
+import DOAapproval from './pages/DOA/DOAApproval'
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -78,7 +84,7 @@ function App() {
       await axiosInstance()
         .get(`/user/notification/unseen`)
         .then(({ data: { count } }) => {
-          notification.setCount(count);
+          if (count > 0) { notification.setCount(count); }
         })
         .catch((error) => {
           toast.setToastConfig(error);
@@ -120,6 +126,13 @@ function App() {
             path="/create-password"
             render={({ location }) =>
               conditionalRedirect(PasswordSetup, location)
+            }
+          />
+          <Route
+            exact
+            path="/forget-password"
+            render={({ location }) =>
+              conditionalRedirect(ForgetPassword, location)
             }
           />
           <PrivateRoute exact path="/">
@@ -336,6 +349,31 @@ function App() {
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
+
+          <Route exact path={"/quote-builder/:id"} >
+            <QuoteBuilderPage />
+          </Route>
+          <Route exact path={"/dashboards"}>
+            <KpiDashboard />
+          </Route>
+          <Route exact path={"/dashboard-edit/:id"}>
+            <EditDashboard edit={true} />
+          </Route>
+          <Route exact path={"/dashboard/:id"}>
+            <EditDashboard edit={false} />
+          </Route>
+          //Route available for customers to Accept Reject Quote
+          <Route exact path={"/quote-approval/:id"}>
+            <QuoteApproval />
+          </Route>
+
+          <Route exact path={"/doa-request"}>
+            <DOARequest />
+          </Route>
+
+          <Route exact path={"/doa-request/:id"}>
+            <DOAapproval />
+          </Route>
 
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
