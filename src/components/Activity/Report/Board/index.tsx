@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Box, Grid, Typography, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import { Add } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
