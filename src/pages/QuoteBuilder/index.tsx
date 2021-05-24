@@ -57,6 +57,8 @@ var newQuote = false;
 var fetchVersion = false;
 
 let logo = null;
+var companyName=""
+var companyAddress=""
 
 const CreatePriceBuilder = (props) => {
     //const {id}= props;
@@ -124,6 +126,12 @@ const CreatePriceBuilder = (props) => {
             id: u._id,
         }));
         setDataRows([...rows]);
+        for(var i=0;i<rows.length;i++){
+            if(rows[i].isChecked){
+                setRadioIndex(i);
+                break;
+            }
+        }
     }, [data])
 
 
@@ -145,6 +153,48 @@ const CreatePriceBuilder = (props) => {
         setShowCreateDialog(false)
         setEditRecord({})
         if (params?.fetchData) fetchTermsAndConditions()
+    }
+
+    const createImagePDF=(view, send)=>{ 
+        axiosInstance()
+        .get('/user/brandInfo')
+        .then(({ data }) => {
+            companyName=data.data.name;
+            companyAddress=data.data.address
+            fetchImage(data.data.logo,function(dataUri) {
+                logo = dataUri;
+                GeneratePdf(view,send)
+               
+            });
+        })
+        .catch((err) => {
+            toastConfig.setToastConfig(err);
+            setLoading(false);
+        });
+        
+    }
+
+
+    const fetchImage=(Url,cb)=> {
+        var image = new Image();
+        image.setAttribute('crossOrigin', 'anonymous'); //getting images from external domain
+
+        image.onload = function () {
+            var canvas = document.createElement('canvas');
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight; 
+            console.log(image.naturalWidth);
+            //next three lines for white background in case png has a transparent background
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';  /// set white fill style
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            canvas.getContext('2d').drawImage(image,0,0);
+
+            cb(canvas.toDataURL('image/jpeg'));
+        };
+
+        image.src = Url;
     }
 
     const handleSortModelChange = (params) => {
@@ -389,6 +439,14 @@ const CreatePriceBuilder = (props) => {
     const GeneratePdf = (view, send) => {
         const PdfDoc = new jsPDF('p', 'pt', 'a4');
 
+        const pagewidth= PdfDoc.internal.pageSize.width;
+        if(logo!==null){
+        PdfDoc.addImage(logo, 'JPEG', pagewidth-80, 0, 70, 50);
+        }
+        PdfDoc.setFontSize(26);
+        PdfDoc.text(companyName,20,30);
+        PdfDoc.setFontSize(14);
+        PdfDoc.text(companyAddress,20,45);
         var PDFData = [];
         var PdfCol = [];
         dynamicTableData.forEach(dataEntry => {
@@ -407,11 +465,11 @@ const CreatePriceBuilder = (props) => {
         var text = "Please find the Quoatation Below:"
         var lineHeight = PdfDoc.getLineHeight();
         var splittedText = PdfDoc.splitTextToSize(text, 50)
-        PdfDoc.text(text, 20, 30);
+        PdfDoc.text(text, 20, 90);
         var lines = splittedText.length
-        var blockHeight = (lines - 2) * lineHeight;
+        var blockHeight = (lines) * lineHeight;
         PDFData = [...PDFData, [{
-            content: `Quote Total : ${QData["TotalSellingPrice"]}`, colSpan: PDFData[0].length,
+            content: `Quote Total : ${QData["TotalSellingPriceamount"]} ${QData["TotalSellingPricecurr"]}`, colSpan: PDFData[0].length,
             styles: { halign: 'right', valign: 'middle' }
         }]];
         autoTable(PdfDoc, {
@@ -466,7 +524,7 @@ const CreatePriceBuilder = (props) => {
 
                     }
 
-                }, x: 40, y: finalY + lineHeight, margin: [20, 10, 20, 10]
+                }, x: 20, y: finalY + lineHeight, margin: [20, 10, 20, 10]
             });
         }
         else {
@@ -632,8 +690,8 @@ const CreatePriceBuilder = (props) => {
                                 </div>
                             </Grid>
                             <Grid item xs={12} md={7} sm={6} className="d-flex align-items-center gap-1" container justify="flex-end">
-                                <Button onClick={() => GeneratePdf(true, false)} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">View</Button>
-                                <Button onClick={() => GeneratePdf(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
+                                <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">View</Button>
+                                <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
                                 <Button onClick={() => handleCases()} disabled={!DOAapprovalreq && !sendtoCustomer} startIcon={<BiMailSend />}  variant="contained" size="small" color="primary">{buttonMessage}</Button>
                             </Grid>
                         </Grid>
@@ -706,6 +764,7 @@ const CreatePriceBuilder = (props) => {
                                             disableMultipleSelection
                                             paginationMode="server"
                                             pagination
+                                            autoHeight
                                             onPageChange={handlePage}
                                             onPageSizeChange={handlePageSize}
                                             pageSize={query.limit}

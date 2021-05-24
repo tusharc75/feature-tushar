@@ -189,6 +189,7 @@ const DOAApproval=()=>{
                                      </div>
                                 </Grid>
                                 <DataGrid
+                                autoHeight
                                     columns={columns}
                                     rows={rows}
                                 getRowId ={(row) => row.id}/>
