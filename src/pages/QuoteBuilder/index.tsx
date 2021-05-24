@@ -18,7 +18,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import EmailDialog from './EmailDialog';
 import { FiDownloadCloud } from 'react-icons/fi';
 import { FaRegClone } from 'react-icons/fa';
-import { Tooltip } from '@material-ui/core'
+import { Box, Fab, Tooltip } from '@material-ui/core'
 import {
     Grid as GridDropTable,
     DragDropProvider,
@@ -51,7 +51,17 @@ import { SettingsCellTwoTone } from '@material-ui/icons';
 import { makeStyles } from "@material-ui/core/styles";
 import { BiMailSend } from 'react-icons/bi';
 import { AiOutlineEye } from 'react-icons/ai';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import { AppBar } from '@material-ui/core';
 
+const useStyles = makeStyles((theme) => ({
+    fab: {
+        position: 'absolute',
+        bottom: theme.spacing(2),
+        right: theme.spacing(2),
+    },
+}));
 let termsTimeout;
 var newQuote = false;
 var fetchVersion = false;
@@ -60,7 +70,14 @@ let logo = null;
 var companyName=""
 var companyAddress=""
 
+interface TabPanelProps {
+    children?: React.ReactNode;
+    index: any;
+    value: any;
+}
+
 const CreatePriceBuilder = (props) => {
+    const classes = useStyles();
     //const {id}= props;
     const { id } = useParams();
     //const {id}= {id:"6093cf0fcee24cd4d39ecda8"}
@@ -88,7 +105,7 @@ const CreatePriceBuilder = (props) => {
     const [QData, setQData] = useState({})
     const [editRestriction, setEditRestriction] = useState(false);
     let DOAlimit = 0;
-    var DOAsetup=false;
+    var DOAsetup = false;
     const [DOAapprovalreq, setDOAapprovalreq] = useState(false);
     const [sendtoCustomer, setsendtoCustomer] = useState(true);
     const [buttonMessage, setButtonMessage] = useState("Send to Customer");
@@ -96,23 +113,25 @@ const CreatePriceBuilder = (props) => {
     const [TandC, setTNC] = useState("");
     const [sendEmail, setSendEmail] = useState(false)
     var chatterID = "0";
+    const [showChattingBox, setShowChattingBox] = useState(true);
 
-
-
+    function a11yProps(index: any) {
+        return {
+            id: `full-width-tab-${index}`,
+            'aria-controls': `full-width-tabpanel-${index}`,
+        };
+    }
 
     useEffect(() => {
         fetchDoaLimit();
     }, [])
 
-    useEffect(() => {
-        GetQuoteData(0);
-    }, []);
+    
 
 
     useEffect(() => {
         fetchTermsAndConditions()
     }, [query, searchVal])
-
 
 
     useEffect(() => {
@@ -215,8 +234,9 @@ const CreatePriceBuilder = (props) => {
             .then(({ data }) => {
                 console.log("DOA limit is:");
                 console.log(data);
-                DOAsetup=data.data.doasetup;
+                DOAsetup = data.data.doasetup;
                 DOAlimit = data.data.limit;
+                GetQuoteData(0);
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -666,14 +686,38 @@ const CreatePriceBuilder = (props) => {
         GetQuoteData(currentVersion)
     }
 
+    const [value, setValue] = React.useState(0);
 
+    const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+        setValue(newValue);
+    };
+
+    function TabPanel(props: TabPanelProps) {
+        const { children, value, index, ...other } = props;
+
+        return (
+            <div
+                role="tabpanel"
+                hidden={value !== index}
+                id={`simple-tabpanel-${index}`}
+                aria-labelledby={`simple-tab-${index}`}
+                {...other}
+            >
+                {value === index && (
+                    <Box>
+                        <Typography>{children}</Typography>
+                    </Box>
+                )}
+            </div>
+        );
+    }
     return (
         <Layout>
             <Grid container direction="row">
                 <CustomBreadCrumbs routes={[{ title: "Quote Builder" }]} />
             </Grid>
             <Grid container spacing={1} className="detail-container">
-                <Grid item xs={12} sm={12} md={8} lg={8}>
+                <Grid item xs={12} sm={12} md={8} lg={8} className="positionRelative">
                     <Paper className="subContainer">
                         <Grid container className="detailHeader">
                             <Grid item xs={12} md={5} sm={6} className="d-flex align-items-center gap-1">
@@ -695,8 +739,14 @@ const CreatePriceBuilder = (props) => {
                                 <Button onClick={() => handleCases()} disabled={!DOAapprovalreq && !sendtoCustomer} startIcon={<BiMailSend />}  variant="contained" size="small" color="primary">{buttonMessage}</Button>
                             </Grid>
                         </Grid>
-                        <Grid container>
-                            <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+                        <Tabs className="oms-tab"
+                            indicatorColor="primary"
+                            textColor="primary" value={value} onChange={handleChange} aria-label="simple tabs example">
+                            <Tab label="Product" {...a11yProps(0)} />
+                            <Tab label="Terms & Conditions" {...a11yProps(1)} />
+                        </Tabs>
+                        <TabPanel value={value} index={0}>
+                            <Grid container>
                                 <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel">
                                     <div className="quoteBox">
                                         <span>Total Profit</span>
@@ -721,70 +771,73 @@ const CreatePriceBuilder = (props) => {
                                     <div>
                                     </div>
                                 </Grid>
-                                <GridDropTable
-                                    rows={dynamicTableData}
-                                    columns={dynamicCol} >
-                                    <DragDropProvider />
-                                    <Table
-                                        columnExtensions={tableColumnExtensions}
-                                    />
-                                    <TableColumnReordering
-                                        order={ColumnName}
-                                        onOrderChange={(values) => handleorder(values)}
-                                    />
-
-                                    <TableHeaderRow />
-                                    <TableColumnVisibility
-                                        hiddenColumnNames={droppedColumns}
-                                        onHiddenColumnNamesChange={(values) => handlehiddenChange(values)}
-                                    />
-                                    <Toolbar />
-                                    <ColumnChooser />
-                                </GridDropTable>
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-                                <Grid container className="detailHeader">
-                                    <Grid item xs={12} md={4} sm={6} className="d-flex align-items-center gap-1">
-                                        <GiAbstract055 color="primary" /><span className="listingHeader">Terms and Conditons</span>
-                                    </Grid>
-                                    <Grid item xs={12} md={8} sm={6} className="d-flex align-items-center gap-1" container justify="flex-end">
-                                        <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                                    </Grid>
-                                    <Grid item xs={12} container justify="flex-end">
-                                        <DataGrid
-                                            components={{
-                                                Toolbar: DataGridCustomToolbar,
-                                                NoRowsOverlay: CustomDataGridNoDataFound,
-                                            }}
-                                            scrollbarSize={20}
-                                            rows={dataRows}
-                                            columns={columns}
-                                            loading={loading}
-                                            disableSelectionOnClick
-                                            disableMultipleSelection
-                                            paginationMode="server"
-                                            pagination
-                                            autoHeight
-                                            onPageChange={handlePage}
-                                            onPageSizeChange={handlePageSize}
-                                            pageSize={query.limit}
-                                            page={query.page}
-                                            rowCount={rowCount}
-                                            rowsPerPageOptions={[25, 50, 75]}
-                                            onSortModelChange={handleSortModelChange}
-                                            onFilterModelChange={onFilterChange}
+                                <Grid item xs={12} sm={12} md={12} lg={12} spacing={2} className="productTable">
+                                    <GridDropTable
+                                        rows={dynamicTableData}
+                                        columns={dynamicCol} >
+                                        <DragDropProvider />
+                                        <Table
+                                            columnExtensions={tableColumnExtensions}
                                         />
+                                        <TableColumnReordering
+                                            order={ColumnName}
+                                            onOrderChange={(values) => handleorder(values)}
+                                        />
+                                        <TableHeaderRow />
+                                        <TableColumnVisibility
+                                            hiddenColumnNames={droppedColumns}
+                                            onHiddenColumnNamesChange={(values) => handlehiddenChange(values)}
+                                        />
+                                        <Toolbar />
+                                        <ColumnChooser />
+                                    </GridDropTable>
+                                </Grid>
+                            </Grid>
+                        </TabPanel>
+                        <TabPanel value={value} index={1}>
+                            <Grid container>
+                                <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+                                    <Grid container>
+                                        <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center p-2 gap-1" container justify="flex-start">
+                                            <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add Terms & Conditions</Button>
+                                        </Grid>
+                                        <Grid item xs={12} className="listing-grid">
+                                            <DataGrid
+                                                components={{
+                                                    Toolbar: DataGridCustomToolbar,
+                                                    NoRowsOverlay: CustomDataGridNoDataFound,
+                                                }}
+                                                scrollbarSize={20}
+                                                rows={dataRows}
+                                                columns={columns}
+                                                loading={loading}
+                                                disableSelectionOnClick
+                                                disableMultipleSelection
+                                                paginationMode="server"
+                                                pagination
+                                                onPageChange={handlePage}
+                                                onPageSizeChange={handlePageSize}
+                                                pageSize={query.limit}
+                                                page={query.page}
+                                                rowCount={rowCount}
+                                                rowsPerPageOptions={[25, 50, 75]}
+                                                onSortModelChange={handleSortModelChange}
+                                                onFilterModelChange={onFilterChange}
+                                            />
+                                        </Grid>
                                     </Grid>
                                 </Grid>
                             </Grid>
-                        </Grid>
+                        </TabPanel>
                     </Paper>
                 </Grid>
                 <Grid item xs={12} sm={12} md={4} lg={4}>
-                    <ChatRender id={QData["chatter"]} />
+                    {showChattingBox && <ChatRender id={QData["chatter"]} isLoaded={loaded} />}
                 </Grid>
-            </Grid>
-
+                {/* <Fab aria-label="Chat" onClick={() => setShowChattingBox( !showChattingBox) }  className={classes.fab}>
+                   <AddIcon />
+                </Fab> */}
+            </Grid >
             {
                 showCreateDialog ? (
                     <ManageTermsAndCondition
@@ -796,7 +849,6 @@ const CreatePriceBuilder = (props) => {
                     />
                 ) : null
             }
-
             <div>
                 {editRestriction &&
                     <ConfirmationDialog
@@ -814,12 +866,8 @@ const CreatePriceBuilder = (props) => {
                     id={QData["_id"]} />
                 }
             </div>
-
-        </Layout >
-
-
+        </Layout>
     );
-
 }
 
 export default CreatePriceBuilder;

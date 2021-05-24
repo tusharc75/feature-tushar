@@ -16,15 +16,28 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { Link } from 'react-router-dom'
 import Quote from "./Quote";
+import { AiFillPlusCircle } from 'react-icons/ai';
+import { BiLayerPlus } from 'react-icons/bi';
+import { makeStyles } from '@material-ui/core';
+
 var _ = require('lodash');
 
-
+const useStyles = makeStyles((theme) => ({
+    alignButtons: {
+        top: "16px",
+        left: "36%",
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
+        justifyContent: "center",
+        position: "absolute"
+    }
+}));
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
 const ProductBuilder = (props) => {
-
     const { productBuilderId } = props;
-
+    const classes = useStyles();
     const toastConfig = useContext(CustomToastContext)
     const [isAddNewProduct, setIsAddNewProduct] = useState(false);
     const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
@@ -32,19 +45,19 @@ const ProductBuilder = (props) => {
     const [product, setProduct] = useState([]);
     const [columns, setColumns] = useState(null);
     const [productData, setProductData] = useState(null);
-    const [newVersion,setNewVersion] =useState(false);
-    const [versionNumber,setVersionNumber]= useState(0);
+    const [newVersion, setNewVersion] = useState(false);
+    const [versionNumber, setVersionNumber] = useState(0);
     useEffect(() => {
         fetchProduct();
     }, []);
 
-    useEffect(()=>{
+    useEffect(() => {
         fetchVersionDetail();
-    },[]);
+    }, []);
 
-    const fetchVersionDetail=()=>{
+    const fetchVersionDetail = () => {
         console.log("Fetching Version");
-        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + productBuilderId).then(({ data}) => {
+        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + productBuilderId).then(({ data }) => {
             console.log(data);
             setNewVersion(data.newVersion);
             setVersionNumber(data.version);
@@ -221,9 +234,16 @@ const ProductBuilder = (props) => {
 
     return (<Box p={1}>
         <Box>
-            <Button variant="contained" size="small" color="primary" onClick={() => { setIsAddNewProduct(true); }}>New</Button>
-            <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => { setIsAddExistingProduct(true); }}>Add Existing</Button>
-            <Box mt={2} height={500}>
+            <Grid container>
+                <Grid item xs={12} md={12} sm={12} className={classes.alignButtons}>
+                    <Button variant="outlined" size="small" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true); }}>New</Button>
+                    <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true); }}>Add Existing</Button>
+                    <Quote productBuilderId={productBuilderId}
+                        newVersion={newVersion}
+                        version={versionNumber} />
+                </Grid>
+            </Grid>
+            <Box height={500}>
                 {columns &&
                     <DataGrid
                         checkboxSelection
@@ -239,11 +259,6 @@ const ProductBuilder = (props) => {
                         density="compact"
                     />}
             </Box>
-        </Box>
-        <Box>
-            <Quote productBuilderId={productBuilderId}
-            newVersion={newVersion}
-            version={versionNumber} />
         </Box>
         {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
             isAddInBuilder={true} addProductInBuilder={addProductInBuilder}

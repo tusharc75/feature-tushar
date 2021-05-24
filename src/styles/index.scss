@@ -632,3 +632,34 @@ body::-webkit-scrollbar-thumb {
 .termsBox {
   height: calc(100vh - 10vh);
 }
+
+.productBox{
+  height: calc(100vh - 10vh);
+  overflow: auto;
+}
+.productTable{
+  table {
+    border-collapse: collapse;
+  }
+  & thead {
+    & tr {
+      border-bottom: 1px solid #e4e4e4;
+      background: #53ac65;
+      padding: 4px;
+      & th {
+        padding: 0px 15px !important;
+        color: white;
+      }
+    }
+  }
+
+  & tbody {
+    & tr {
+      border-bottom: 1px solid #e4e4e4;
+      & td {
+        padding: 4px 15px !important;
+        font-size: 0.80rem;
+      }
+    }
+  }
+}

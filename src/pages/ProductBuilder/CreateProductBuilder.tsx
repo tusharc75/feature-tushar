@@ -18,6 +18,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ProductBuilder from "../../components/productBuilder";
+import { BiArrowBack } from 'react-icons/bi';
 import axios from "axios";
 
 const ProductBuilderSchema = Yup.object().shape({
@@ -154,7 +155,7 @@ const CreateProductBuilder = () => {
                                             </Button>
                                         </Box> */}
                                         <Box ml={1} >
-                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} >Close</Button>
+                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} startIcon={<BiArrowBack />}>Back</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>

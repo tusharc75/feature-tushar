@@ -46,9 +46,7 @@ const DOAApproval=()=>{
         fetchDOA()
     },[]);
 
-    useEffect(()=>{
-        fetchQuote()
-    },[]);
+    
 
     const fetchDOA=()=>{
         axiosInstance()
@@ -57,7 +55,8 @@ const DOAApproval=()=>{
                 console.log("DOA limit is:");
                 console.log(data);
                 DOAsetup=data.data.doasetup;
-                DOALimit=data.data.limit;           
+                DOALimit=data.data.limit;     
+                fetchQuote();      
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -199,7 +198,7 @@ const DOAApproval=()=>{
                     </Paper>
                     </Grid>
                  <Grid item xs={12} sm={12} md={4} lg={4}>
-                     <ChatRender id={QData["chatter"]} />
+                     <ChatRender id={QData["chatter"]} isLoaded={true}/>
                  </Grid>
              </Grid>
         </Layout>
