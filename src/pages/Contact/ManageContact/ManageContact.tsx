@@ -308,6 +308,7 @@ export default function ManageContact(props) {
                                                   )
                                                 : values
                                             }
+                                            disabled={fromProject}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
@@ -332,6 +333,7 @@ export default function ManageContact(props) {
                                               <IconButton
                                                 onClick={onCreateAccount}
                                                 size="small"
+                                                disabled={fromProject}
                                               >
                                                 <AddIcon color="primary" />
                                               </IconButton>
