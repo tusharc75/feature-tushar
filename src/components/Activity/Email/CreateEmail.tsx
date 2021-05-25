@@ -448,7 +448,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 size="small"
                                                                 setFieldValue={(name, file) => {
                                                                     setFieldValue("file", file);
-                                                                    console.log('file', file);
                                                                     setOtherAttachment((prevState) => ([...prevState, file]))
                                                                 }}
                                                                 usePubllicUrlforFileUpload={true}
@@ -533,7 +532,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                 /> : null
         }
 
-        {!emailId && <UnauthenticatedTemplate>
+        {/* {!emailId && <UnauthenticatedTemplate>
             <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
                 backdropFilter: "blur(2px)",
                 color: "#F9FAFB",
@@ -544,7 +543,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                     <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
                 </Box>
             </Box>
-        </UnauthenticatedTemplate>}
+        </UnauthenticatedTemplate>} */}
     </>
 
 }
