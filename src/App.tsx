@@ -312,9 +312,6 @@ function App() {
           <PrivateRoute exact path="/activity/attachment">
             <Attachments />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/event">
-            <Event />
-          </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />
           </PrivateRoute>

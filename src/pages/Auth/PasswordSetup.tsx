@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Container,
@@ -10,11 +10,12 @@ import {
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import { TextField } from "formik-material-ui";
-import axios from "axios";
 import queryString from "query-string";
 import { useHistory, Redirect } from "react-router-dom";
 
 import demoImg from "../../assets/clip-hardworking-man.png";
+import axiosInstance from "../../axios/axiosInstance";
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -55,32 +56,34 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PasswordSetup = () => {
+  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const classes = useStyles();
-  const [isSubmitting, setSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { email, token } = queryString.parse(window.location.search);
 
-  const URL = "https://oms-backend.vebholic.com";
-
   const handleSubmit = async (values) => {
-    setSubmitting(true);
+    setIsSubmitting(true);
 
-    axios
+    axiosInstance(null, { Authorization: `Bearer ${token}` })
       .post(
-        `${URL}/user/create-password`,
+        `/user/create-password`,
         {
           password: values.password,
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
       )
       .then(({ data }) => {
-        setSubmitting(false);
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
         history.push("/login");
       })
       .catch((err) => {
-        setSubmitting(false);
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(err);
       });
   };
 
