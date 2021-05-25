@@ -36,7 +36,7 @@ export default function Attachment(props) {
     const [open, setOpen] = useState(false)
     const [attachmentData, setAttachmentData] = useState(null)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
+    const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false);
     const toastConfig = useContext(CustomToastContext);
     const {
@@ -89,7 +89,7 @@ export default function Attachment(props) {
     }
     const showConfirmBox = (row) => {
         if (row) {
-            setIsConformDialogVisible(true);
+            setIsConfirmDialogVisible(true);
             if (row && row.id) {
                 setDeleteRecord(row);
             }
@@ -98,7 +98,6 @@ export default function Attachment(props) {
 
     const handleDeleteEmails = async () => {
         setDeleteLoading(true);
-        let selectedRecords = [];
         if (deleteRecord?.id)
             axiosInstance()
                 .delete(`/attachment/${deleteRecord?.id}`)
@@ -108,14 +107,14 @@ export default function Attachment(props) {
                         type: "success",
                         message: data.message,
                     });
-                    setIsConformDialogVisible(false);
+                    setIsConfirmDialogVisible(false);
                     setDeleteLoading(false);
                     if (deleteRecord) setDeleteRecord(null);
                     fetchAttachments();
                 })
                 .catch((error) => {
                     toastConfig.setToastConfig(error);
-                    setIsConformDialogVisible(false);
+                    setIsConfirmDialogVisible(false);
                     setDeleteLoading(false);
                 });
     };
@@ -125,7 +124,7 @@ export default function Attachment(props) {
             field: 'name', headerName: 'Name',
             width: 300,
             renderCell: (params) =>
-                <a style={{ cursor: 'pointer' }}
+                <a className="link cursor-pointer"
                     onClick={() => handleActivityOpen(params.row)}>{params.row.name}</a>
         },
         {
@@ -182,11 +181,11 @@ export default function Attachment(props) {
                                 chip={{ size: "small" }}
                             />
                             <Button
-                                style={{ marginLeft: '10px' }}
+
                                 variant="contained"
                                 color="primary"
                                 size="small"
-                                className={styles.add_submit_btn}
+                                className={`${styles.add_submit_btn} ml-10`}
                                 onClick={() => setOpen(true)}
                                 startIcon={<AddOutlined />}>
                                 Add
@@ -233,8 +232,8 @@ export default function Attachment(props) {
                     open={isConfirmDialogVisible}
                     message={`Are you sure, you want to delete ${deleteRecord?.id ? "this attachment ?" : ""}`}
                     onClose={() => {
-                        if (deleteRecord) setDeleteRecord({});
-                        setIsConformDialogVisible(false);
+                        if (deleteRecord) setDeleteRecord(null);
+                        setIsConfirmDialogVisible(false);
                     }}
                     okBtnLoading={deleteLoading}
                     onOk={handleDeleteEmails}

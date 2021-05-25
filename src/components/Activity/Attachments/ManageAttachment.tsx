@@ -26,7 +26,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     const [initialValues, setInitialValues] = useState(null);
     const [loading, setLoading] = useState(false)
     const [downloadProgress, setDownloadProgress] = useState(0);
-    const [isDownloading, setDownloading] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
@@ -87,7 +87,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
 
     const downloadFile = (fileName) => {
         setDownloadProgress(0);
-        setDownloading(true);
+        setIsDownloading(true);
         axiosInstance()
             .get(`user/download?fileName=${fileName}`, {
                 responseType: "blob",
@@ -105,7 +105,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         });
                         setTimeout(() => {
                             setDownloadProgress(0);
-                            setDownloading(false);
+                            setIsDownloading(false);
                         }, 2000);
                     }
                 },
@@ -117,11 +117,11 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                 link.setAttribute("download", fileName);
                 document.body.appendChild(link);
                 link.click();
-                setTimeout(() => setDownloading(false), 2000);
+                setTimeout(() => setIsDownloading(false), 2000);
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
-                setDownloading(false);
+                setIsDownloading(false);
             });
     };
 
