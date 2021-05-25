@@ -191,7 +191,7 @@ const Leads = () => {
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [columns, setColumns] = useState([
     {
-      field: "name", headerName: "Name", show: true, disabled: true, filter: "agTextColumnFilter", cellRenderer: "nameRenderer",
+      field: "concatedName", headerName: "Name", show: true, disabled: true, filter: "agTextColumnFilter", cellRenderer: "nameRenderer",
     },
     { field: "relatedOpportunity", headerName: "Related Opportunity", show: true, filter: "agTextColumnFilter", cellRenderer: "relatedOpportunityRenderer" },
     { field: "title", headerName: "Title", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
@@ -330,7 +330,7 @@ const Leads = () => {
     commonRenderer: CommonRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    optionLabelRenderer: OptionLabelRenderer,
+    // optionLabelRenderer: OptionLabelRenderer,
     actionsRenderer: ActionsRenderer,
     customLoadingOverlay: CustomLoadingOverlay,
     customFloatingFilter: CustomFloatingFilter,
@@ -344,7 +344,7 @@ const Leads = () => {
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`
     }
-    
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -390,14 +390,10 @@ const Leads = () => {
         .then(({ data: { data, count } }) => {
 
           let rows = data.map((u) => {
-            let name = [u.firstName, u.middleName, u.lastName]
-              .filter((d) => d)
-              .join(" ");
-
             let res = {
               ...u,
               id: u._id,
-              name: name,
+              concatedName: u.concatedName,
               owner: u.owner?.optionLabel,
               ownerId: u.owner?.optionValue,
               isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
@@ -407,12 +403,12 @@ const Leads = () => {
             };
             return res;
           });
-          console.log(rows);
+
+          if (gridApi && rows.length > 0) {
+            gridApi.hideOverlay();
+          }
           dispatch({ type: "initialize", data: rows, count: count });
 
-          // if (gridApi && rows.length > 0) {
-          //   gridApi.hideOverlay();
-          // }
           setCheckAllLeads(false);
 
         }).catch((error) => {
@@ -444,9 +440,7 @@ const Leads = () => {
 
   const generateLeadToOpportunityButton = ({
     _id,
-    firstName,
-    middleName,
-    lastName,
+    concatedName,
     staticData,
     [leadProcessFieldName]: leadProcess,
     isAllowedToUpdate,
@@ -506,14 +500,11 @@ const Leads = () => {
         <IconButton
           aria-label="Convert to opportunity"
           onClick={() => {
-            const leadName = [firstName, middleName, lastName]
-              .filter((d) => d)
-              .join(" ");
             setConvertLeadToOpportunityConfirmationDialog({
               open: true,
               id: _id,
-              leadName: leadName,
-              message: `Are you sure, You want to convert ${leadName} to opportunity ?`,
+              leadName: concatedName,
+              message: `Are you sure, You want to convert ${concatedName} to opportunity ?`,
             });
           }}
         >
@@ -527,7 +518,7 @@ const Leads = () => {
     if (row) {
       setIsConformDialogVisible(true);
       if (row) {
-        setDeleteRecord({ id: row._id, name: row.name });
+        setDeleteRecord({ id: row._id, name: row.concatedName });
       }
     } else {
       if (
@@ -798,6 +789,9 @@ const Leads = () => {
               suppressAnimationFrame={true}
               suppressMaintainUnsortedOrder={true}
 
+              rowBuffer={limit}
+              // suppressMaxRenderedRowRestriction={true}
+
               // loadingCellRenderer={'customLoadingCellRenderer'}
               // loadingCellRendererParams={{
               //   loadingMessage: 'One moment please...',
@@ -808,10 +802,10 @@ const Leads = () => {
               onSelectionChanged={(event: any) => {
                 dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
               }}
-              immutableData={true}
-              getRowNodeId={(data) => {
-                return data._id;
-              }}
+            // immutableData={true}
+            // getRowNodeId={(data) => {
+            //   return data._id;
+            // }}
             >
               <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
                 headerCheckboxSelection={true}
