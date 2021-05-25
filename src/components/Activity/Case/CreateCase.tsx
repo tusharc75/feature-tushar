@@ -251,7 +251,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                             label="Reporter"
                             errors={errors}
                             touched={touched}
-                            required={false}
+                            required={true}
                             setFieldValue={setFieldValue}
                             multiple={false}
                             value={values["reporter"]}

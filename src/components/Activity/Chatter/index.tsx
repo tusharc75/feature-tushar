@@ -62,9 +62,9 @@ const Chatter = (props) => {
       axiosInstance()
         .get(`/chatter/resource?relatedTo=${JSON.stringify(relatedTo)}`)
         .then(({ data: { data } }) => {
-          if (data && data.length) {
-            setMessages(data && data[0].Messages);
-            setChatterId(data && data[0]._id);
+          if (data) {
+            setMessages(data.Messages);
+            setChatterId(data._id);
           } else {
             createChatter();
           }

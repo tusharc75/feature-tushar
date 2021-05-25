@@ -12,32 +12,47 @@ const Reminder = () => {
   const [events, setEvents] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [cases, setCases] = useState([]);
+  const [loadingTasks, setLoadingTasks] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [loadingCases, setLoadingCases] = useState(false);
 
   const fetchTasks = useCallback(() => {
+    setLoadingTasks(true);
     axiosInstance()
       .get("/task/my")
       .then(({ data: { data } }) => {
+        setLoadingTasks(false);
         setTasks(data);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setLoadingTasks(false);
+      });
   }, []);
 
   const fetchEvents = useCallback(() => {
-    axiosInstance()
-      .get("/case/my")
-      .then(({ data: { data } }) => {
-        setEvents(data);
-      })
-      .catch((err) => {});
-  }, []);
-
-  const fetchCases = useCallback(() => {
+    setLoadingEvents(true);
     axiosInstance()
       .get("/event/my")
       .then(({ data: { data } }) => {
+        setLoadingEvents(false);
+        setEvents(data);
+      })
+      .catch((err) => {
+        setLoadingEvents(false);
+      });
+  }, []);
+
+  const fetchCases = useCallback(() => {
+    setLoadingCases(true);
+    axiosInstance()
+      .get("/case/my")
+      .then(({ data: { data } }) => {
+        setLoadingCases(false);
         setCases(data);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setLoadingCases(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -46,7 +61,7 @@ const Reminder = () => {
     fetchCases();
   }, []);
 
-  const dynamicChip = (data: string) => (
+  const dynamicChip = (data: string, type: string = null) => (
     <Chip
       size="small"
       icon={
@@ -62,9 +77,13 @@ const Reminder = () => {
           fontSize="small"
         />
       }
-      label={moment(data).format("MMM, DD HH:MM")}
+      label={
+        type
+          ? moment(data).format("MMM, DD HH:MM")
+          : moment(data).format("MMM, DD")
+      }
       style={{
-        background: "#eee",
+        background: "#dfdfdf",
         color:
           new Date(data).getDate() < new Date().getDate()
             ? "#dc3545"
@@ -94,15 +113,14 @@ const Reminder = () => {
                         key={event._id}
                         p={1}
                         mb={1}
-                        bgcolor="#fafafa"
-                        boxShadow={1}
+                        bgcolor="#f5f5f5"
                         borderRadius={2}
                       >
                         <Box display="flex" justifyContent="space-between">
                           <Typography variant="body1" className="text-truncate">
                             {event.name}
                           </Typography>
-                          {dynamicChip(event?.dueDate)}
+                          {dynamicChip(event?.startDate, "event")}
                         </Box>
 
                         <Typography variant="body2" color="textSecondary">
@@ -116,6 +134,15 @@ const Reminder = () => {
                         </Box>
                       </Box>
                     ))}
+                    <Box textAlign="center">
+                      <Typography>
+                        {loadingEvents
+                          ? "Loading..."
+                          : !events.length
+                          ? "No Events"
+                          : null}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={4} lg={3}>
@@ -128,8 +155,7 @@ const Reminder = () => {
                         key={task._id}
                         p={1}
                         mb={1}
-                        bgcolor="#fafafa"
-                        boxShadow={1}
+                        bgcolor="#f5f5f5"
                         borderRadius={2}
                       >
                         <Box display="flex" justifyContent="space-between">
@@ -153,6 +179,15 @@ const Reminder = () => {
                         </Box>
                       </Box>
                     ))}
+                    <Box textAlign="center">
+                      <Typography>
+                        {loadingTasks
+                          ? "Loading..."
+                          : !tasks.length
+                          ? "No Tasks"
+                          : null}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={4} lg={3}>
@@ -165,8 +200,7 @@ const Reminder = () => {
                         key={cas._id}
                         p={1}
                         mb={1}
-                        bgcolor="#fafafa"
-                        boxShadow={1}
+                        bgcolor="#f5f5f5"
                         borderRadius={2}
                       >
                         <Box display="flex" justifyContent="space-between">
@@ -174,7 +208,7 @@ const Reminder = () => {
                             {cas.name}
                           </Typography>
 
-                          {dynamicChip(cas?.endDate)}
+                          {dynamicChip(cas?.dueDate)}
                         </Box>
 
                         <Typography variant="caption" color="textSecondary">
@@ -192,6 +226,15 @@ const Reminder = () => {
                         </Box>
                       </Box>
                     ))}
+                    <Box textAlign="center">
+                      <Typography>
+                        {loadingCases
+                          ? "Loading..."
+                          : !events.length
+                          ? "No Cases"
+                          : null}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Grid>
               </Grid>
