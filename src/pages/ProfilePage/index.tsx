@@ -8,10 +8,8 @@ import { profileMenuItems } from '../../constants/helpers'
 import ManageProfile from './components/ManageProfile'
 import NotifiationPreference from './components/NotifiationPreference'
 import axiosInstance from "../../axios/axiosInstance";
-import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomContainer from '../../components/CustomContainer';
-const _ = require('lodash')
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -29,13 +27,12 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: theme.palette.common.white,
     },
     profileSidebar: {
-        borderRight: `2px solid ${theme.palette.primary.light}`
+        // borderRight: `2px solid ${theme.palette.primary.light}`
     }
 }));
 export default function ProfilePage(props) {
 
     const { profileBreadCrumbs } = props
-    const { state: { user }, dispatch }: any = useData();
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
     const [userData, setUserData] = useState(null)
     const [otherDetails, setOtherDetails] = useState(null)
@@ -50,7 +47,7 @@ export default function ProfilePage(props) {
     }
 
     useEffect(() => {
-        if (userFields.length == 0) {
+        if (userFields.length === 0) {
             getUserFields()
             fetchUserData()
         }
@@ -100,15 +97,16 @@ export default function ProfilePage(props) {
             </Grid>
         </Grid>
         <CustomContainer>
-            <Grid container className={classes.profileContainer} spacing={2}>
+            <Grid container className="p-3">
                 <Grid item sm={3} lg={3} md={3} className={classes.profileSidebar} >
                     <ProfileSidebar onItemClick={handleItemClick}
                         activeLink={activeItem}
                         userData={userData}
                         onFetchUserData={fetchUserData}
+                        otherDetails={otherDetails}
                     />
                 </Grid>
-                <Grid item sm={9} md={9} lg={9} >
+                <Grid item sm={9} md={9} lg={9} className="bgbox">
                     {
                         activeItem === profileMenuItems.profile ?
                             <ManageProfile displayUserDetails={true}

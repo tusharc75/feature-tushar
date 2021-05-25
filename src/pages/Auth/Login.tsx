@@ -1,4 +1,5 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { Link } from 'react-router-dom';
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Container,
@@ -7,18 +8,22 @@ import {
   Paper,
   Button,
   LinearProgress,
+  Box,
 } from "@material-ui/core";
 import { Formik, Form, Field } from "formik";
 import { TextField } from "formik-material-ui";
-
 import demoImg from "../../assets/clip-hardworking-man.png";
 import { useData } from "../../StateProvider/Provider";
 import { SET_USER, SET_SELECTED_ENTITY } from "../../StateProvider/actionTypes";
-
 import axiosInstance from './../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import firebase from 'firebase';
 import { vapidKey } from "../../constants/helpers";
+import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from "@azure/msal-react";
+import { isEmpty } from "lodash";
+import getAzureAcessToken from "../../components/Azure/getAzureAccessToken";
+import { AzureLogin } from "../../components/Azure/Azure";
+import ForgetPassword from "./ForgetPassword";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -57,14 +62,59 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.primary.main,  //  darkBg
     },
   },
+  bottomLinks: {
+    marginTop: theme.spacing(2),
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
 }));
 
 const Login = () => {
+  const notification = useContext(CustomNotificationCountContext);
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
   const classes = useStyles();
   const [isSubmitting, setSubmitting] = useState(false);
+  const { instance, accounts, inProgress } = useMsal();
+  const account = useAccount(accounts[0] || {});
+  const [counter, setCounter] = useState(0);
+  const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
+  useEffect(() => {
 
+    if (!isEmpty(account)) {
+      (async () => {
+        try {
+          const graphToken = await getAzureAcessToken(instance);
+          const res = await axiosInstance().post('/user/login/azure', {
+            "graph-token": graphToken
+          })
+          const { data } = res.data
+          localStorage.setItem("token", data.token);
+          dispatch({ type: SET_USER, payload: data });
+          if (data?.role?.selectedEntity?._id) {
+            dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
+          }
+        } catch (e) {
+          setCounter(18);
+          setInvalidAzureLogin(true);
+          toastConfig.setToastConfig(e);
+        }
+      })()
+
+    }
+  }, [account])
+
+  useEffect(() => {
+    if (invalidAzureLogin) {
+      if (invalidAzureLogin && counter) {
+        setTimeout(() => setCounter(counter - 1), 1000)
+      }
+      else {
+        instance.logout();
+        setInvalidAzureLogin(false);
+      }
+    }
+  }, [invalidAzureLogin, counter])
   const handleSubmit = async (values) => {
     setSubmitting(true);
     const data = {
@@ -82,21 +132,11 @@ const Login = () => {
           dispatch({ type: SET_SELECTED_ENTITY, payload: data.role.selectedEntity._id });
         }
 
-        // const messaging = firebase.messaging();
-        // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
-        //   if (token) {
-        //     localStorage.setItem("notificationToken", token)
-        //   } else {
-        //     toastConfig.setToastConfig({
-        //       open: true,
-        //       type: "error",
-        //       message: "No registration token available. Request permission to generate one."
-        //     })
-        //   }
-        // }).catch((err) => {
-        //   console.log('An error occurred while retrieving token. ', err);
-        //   // catch error while creating client token
-        // });
+        axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
+          notification.setCount(count);
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
       })
       .catch((error) => {
         setSubmitting(false);
@@ -169,7 +209,34 @@ const Login = () => {
                   </Form>
                 )}
               </Formik>
+              <br />
+              <Box className={classes.bottomLinks}>
+                <Link to='/forget-password'>
+                  Forgot Password?
+                </Link>
+              </Box>
+              <Box >
+                <AuthenticatedTemplate>
+                  {invalidAzureLogin ? <span>Not authorized loging out in {counter}</span> : <Button
+                    variant="contained"
+                    style={{ width: "100%" }}
+                    color="secondary"
+                    disabled={isSubmitting}
+                    onClick={() => instance.logoutPopup()}
+                  >
+                    Azure Log Out
+                      </Button>
+                  }
+
+
+                </AuthenticatedTemplate>
+                <UnauthenticatedTemplate>
+                  <AzureLogin></AzureLogin>
+                </UnauthenticatedTemplate>
+              </Box>
+
             </Grid>
+
             <Grid item xs={12} sm={12} md={6} className={classes.image}>
               <img src={demoImg} alt="illustration" style={{ width: "100%" }} />
             </Grid>

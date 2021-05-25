@@ -26,7 +26,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { Vlokup } from "./vlokup";
 import { Formula } from "./formula";
 import { Converter } from "./converter";
-
+import { Currency } from "./currency";
 import Divider from '@material-ui/core/Divider';
 
 const FieldSchema = Yup.object().shape({
@@ -51,18 +51,24 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
   const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
     type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
     tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "" }], formula: "return ", isvlookupReverse: false,
-    units: [], displayUnits: []
+    units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false,
   });
+
   const ref = useRef(null);
 
   const handleSave = (values) => {
 
     let data: any = {}
+    data._id = values._id
+    data.type = values.type
     data.fieldLabel = values.fieldLabel
     data.fieldName = camelCase(values.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
     data.required = values.required
     data.isTooltip = values.isTooltip
     data.tooltipMessage = values.tooltipMessage
+    data.isConverter = values.isConverter
+    data.isFormula = values.isFormula
+    data.isMulitFormula = values.isMulitFormula
 
     if (values.type === "dropDown" || values.type === "multiSelect" || values.type === "radio" || values.type === "process") {
       values.option.forEach((ele, index) => {
@@ -81,11 +87,11 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
       data.lookup = values.lookup
       data.lookupResource = values.lookupResource
     }
-    if (values.type === "formula") {
+    if (values.type === "formula" || values.isFormula) {
       data.formula = values.formula
       data.inputFields = values.inputFields
-      data.returnType = values.returnType
-      data.decimalPlaces = values.decimalPlaces
+      data.returnType = values.returnType ? values.returnType : "decimal"
+      data.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2
     }
     if (values.type === "vlookupDropdown") {
       values.option.forEach((ele) => {
@@ -95,19 +101,28 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
       data.option = values.option
       data.isvlookupReverse = values.isvlookupReverse
     }
-    if (values.type === "converter") {
+    if (values.type === "converter" || values.isConverter) {
       data.units = values.units
       data.displayUnits = values.displayUnits
       data.option = values.option
     }
+    if (values.type === "currencyAmount") {
+      data.displayCurrency = values.displayCurrency
+    }
     handleAddField(data)
+  }
+
+  const onKeyPress = (event) => {
+    if (event.which === 13) {
+      event.preventDefault();
+    }
   }
 
 
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
     <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
       {({ submitForm, touched, errors, setFieldValue, values }) => (
-        <Form autoComplete="off" autoCorrect="off" noValidate >
+        <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
           <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"} onClose={handleClose}></CustomDialogHeader>
           <CustomDialogContent>
             <FormControl fullWidth margin="dense" variant="outlined">
@@ -128,6 +143,7 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
                 <MenuItem value={"formula"}>Formula</MenuItem>
                 <MenuItem value={"vlookupDropdown"}>Vlookup Dropdown</MenuItem>
                 <MenuItem value={"converter"}>Converter</MenuItem>
+                {/* <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem> */}
               </Select>
             </FormControl>
             <TextField
@@ -187,7 +203,27 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
               </Grid>}
 
 
-            {values["type"] === "formula" && <Formula
+            {values["type"] === "currencyAmount" && <Currency
+              values={values}
+              setFieldValue={setFieldValue}
+            />}
+
+            {(values["type"] === "currencyAmount" || values["type"] === "percent") &&
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="isFormula"
+                    checked={values["isFormula"]}
+                    onChange={(e) => {
+                      setFieldValue("isFormula", e.target.checked)
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Formula"
+              />}
+
+            {(values["type"] === "formula" || values["isFormula"]) && <Formula
               fields={fields}
               values={values}
               setFieldValue={setFieldValue}
@@ -200,7 +236,25 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
                 setFieldValue={setFieldValue}
               />}
 
-            {values["type"] === "converter" && <Converter
+            {values["type"] === "currencyAmount" &&
+              <Fragment>
+                <br></br>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isConverter"
+                      checked={values["isConverter"]}
+                      onChange={(e) => {
+                        setFieldValue("isConverter", e.target.checked)
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Converter"
+                />
+              </Fragment>
+            }
+            {(values["type"] === "converter" || values["isConverter"]) && <Converter
               fields={fields}
               values={values}
               setFieldValue={setFieldValue}

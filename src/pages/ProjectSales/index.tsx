@@ -1,5 +1,11 @@
 import { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Link as MuiLink } from "@material-ui/core";
+import {
+  Checkbox,
+  Link as MuiLink,
+  Tooltip,
+  IconButton,
+} from "@material-ui/core";
+import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
@@ -8,8 +14,8 @@ import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import ProjectStrategyHeader from "./Header";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import ProjectHeader from "./Header";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
@@ -17,32 +23,34 @@ import { useData } from "../../StateProvider/Provider";
 import CreateProjectStrategy from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 
+let projectSalesTimeout;
 const ProjectSales: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions },
+    state: { user, permissions },
   }: any = useData();
 
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
   const [dataRows, setDataRows] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllProjects, setCheckAllProjects] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [selectedType, setselectedType] = useState(1);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [
-    showDeleteWarningConfirmBox,
-    setShowDeleteWarningConfirmBox,
-  ] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
+    useState(false);
+  const [renderCount, setRenderCount] = useState(0);
 
-  const fetchProjects = useCallback(() => {
-    let searchParams: any = { ...query };
+  const fetchProjects = async () => {
+    let searchParams: any = { ...query, filterAccounts: selectedType };
     searchParams = searchVal
       ? { ...searchParams, search: searchVal }
       : { ...searchParams };
@@ -51,6 +59,7 @@ const ProjectSales: FC = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
+        setProjects(data);
         getRows(data);
         setRowCount(count);
         setCheckAllProjects(false);
@@ -61,18 +70,37 @@ const ProjectSales: FC = () => {
         setLoadingProjects(false);
       });
     // eslint-disable-next-line
-  }, [searchVal, query]);
+  };
+
+  const handleProtectFilter = (filterValues) => {
+    setselectedType(filterValues);
+    setCheckAllProjects(false);
+  };
 
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+
+    if (projectSalesTimeout) {
+      clearTimeout(projectSalesTimeout);
+    }
+
+    projectSalesTimeout = setTimeout(() => {
+      fetchProjects();
+    }, millisec);
+  }, [searchVal]);
+
+  useEffect(() => {
+    if (renderCount > 0) {
+      fetchProjects();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [query, selectedType]);
 
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((project: any) => ({
           id: project._id,
           isChecked: false,
-          name: project.projectName,
+          projectName: project.projectName,
           projectOwner: project.projectOwner?.optionLabel,
           createdAt: moment(project.createdAt).format("MMM Do, YYYY"),
           createdBy: project?.createdBy,
@@ -116,7 +144,7 @@ const ProjectSales: FC = () => {
       width: 75,
     },
     {
-      field: "name",
+      field: "projectName",
       headerName: "Name",
       width: 250,
       renderCell: (params: any) => (
@@ -146,8 +174,6 @@ const ProjectSales: FC = () => {
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params: any) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -186,8 +212,42 @@ const ProjectSales: FC = () => {
           <NoDataCell />
         ),
       disableColumnMenu: true,
+    },
+    {
+      field: "actions",
+      headerName: "Actions ",
+      disableColumnMenu: true,
       sortable: false,
       filterable: false,
+      renderCell: (params: any) => {
+        const data = projects?.find((p) => params.row.id === p._id);
+
+        return (
+          <>
+            {permissions?.projectSales.isDelete &&
+            data?.projectManager.optionValue === user.user._id ? (
+              <Tooltip title="Delete">
+                <IconButton
+                  aria-label="Delete"
+                  onClick={() => showConfirmBox(params.row)}
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                className="cursor-stop"
+                title="You have to be a project owner to delete"
+              >
+                <IconButton aria-label="Delete">
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+          </>
+        );
+      },
+      width: 200,
     },
   ];
 
@@ -210,8 +270,25 @@ const ProjectSales: FC = () => {
   };
 
   const showConfirmBox = (row) => {
-    setIsConformDialogVisible(true);
+    if (row === null) {
+      if (permissions?.projectSales.isDelete) {
+        const selectedData = projects.filter(
+          (p) => selectedProjects.filter((sp) => sp === p._id).length > 0
+        );
+        const myData = selectedData.filter(
+          (s) => s.projectManager.optionValue === user.user._id
+        );
+
+        if (selectedProjects.length != myData.length) {
+          setShowDeleteWarningConfirmBox(true);
+        } else {
+          setIsConformDialogVisible(true);
+        }
+      }
+    }
+
     if (row && row.id) {
+      setIsConformDialogVisible(true);
       setDeleteRec(row);
     }
   };
@@ -301,10 +378,42 @@ const ProjectSales: FC = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let deepFilter;
+      switch (params.filterModel.items[0].columnField) {
+        case "createdBy":
+          deepFilter = JSON.stringify([
+            {
+              field: "createdBy.user.concatedName",
+              term: params.filterModel.items[0].value,
+            },
+          ]);
+          break;
+        case "updatedBy":
+          deepFilter = JSON.stringify([
+            {
+              field: "updatedBy.user.concatedName",
+              term: params.filterModel.items[0].value,
+            },
+          ]);
+          break;
+        case "name":
+          deepFilter = JSON.stringify([
+            { field: "firstName", term: params.filterModel.items[0].value },
+            { field: "middleName", term: params.filterModel.items[0].value },
+            { field: "lastName", term: params.filterModel.items[0].value },
+          ]);
+          break;
+        default:
+          deepFilter = JSON.stringify([
+            {
+              field: params.filterModel.items[0].columnField,
+              term: params.filterModel.items[0].value,
+            },
+          ]);
+      }
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter,
       }));
     } else {
       setQuery({ page: 0, limit: 25 });
@@ -324,10 +433,12 @@ const ProjectSales: FC = () => {
         <CustomBreadCrumbs routes={[routes.projectSales]} />
         <div className="main-container">
           <div className="header-panel">
-            <ProjectStrategyHeader
+            <ProjectHeader
               onSearch={handleSearch}
               searchVal={searchVal}
-              permissions={permissions}
+              permissions={permissions?.projectSales}
+              selectedType={selectedType}
+              handleFilterChange={handleProtectFilter}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
@@ -336,7 +447,7 @@ const ProjectSales: FC = () => {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingProjects}
@@ -355,6 +466,7 @@ const ProjectSales: FC = () => {
               rowsPerPageOptions={[25, 50, 75]}
               density="compact"
               onFilterModelChange={onFilterChange}
+              filterMode="server"
             />
           </div>
         </div>

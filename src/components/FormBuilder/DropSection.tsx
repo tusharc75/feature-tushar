@@ -33,16 +33,16 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
     const addField = (sectionId, type, index) => {
         let data = [...section];
         data.forEach((row) => {
-            row.field = row.field.filter(i => i.fieldId)
+            row.field = row.field.filter(i => i._id)
             if (row.sectionId.toString() === sectionId.toString()) {
                 let count = row.field.filter(i => i.type === type).length
                 let option = []
                 if (type === FieldList.DROPDOWN.type || type === FieldList.MULTISELECT.type || type === FieldList.RADIO.type
                     || type === FieldList.VLOOKUPDROPDOWN.type || type === FieldList.PROCESS.type) {
-                    option = [{ optionLabel: "Option 1" }]
+                    option = [{ optionLabel: "Option 1", optionValue: "Option 1" }]
                 }
                 let insert_object: any = {
-                    fieldId: (parseInt((Math.random() * 100000).toString())), fieldLabel: FieldList[type.toUpperCase()].label + " " + (count + 1), type: type, option: option,
+                    _id: (parseInt((Math.random() * 100000).toString())), fieldLabel: FieldList[type.toUpperCase()].label + " " + (count + 1), type: type, option: option,
                     required: true, isTooltip: false, tooltipMessage: "", editAble: true, order: 0
                 }
                 if (type === FieldList.FORMULA.type) {
@@ -55,6 +55,9 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                 }
                 if (type === FieldList.VLOOKUPDROPDOWN.type) {
                     insert_object.inputFields = []
+                }
+                if (type === FieldList.CURRENCYAMOUNT.type) {
+                    insert_object.displayCurrency = ["USD"]
                 }
                 if (index !== null) {
                     row.field.splice(index, 0, insert_object);
@@ -70,13 +73,13 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
     const addCustomField = (sectionId, fieldData) => {
         let data = [...section];
         data.forEach((row) => {
-            row.field = row.field.filter(i => i.fieldId)
+            row.field = row.field.filter(i => i._id)
             if (row.sectionId.toString() === sectionId.toString()) {
                 delete fieldData.brand
                 delete fieldData.createdBy
                 delete fieldData.updatedBy
                 delete fieldData._id
-                row.field.push({ fieldId: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 })
+                row.field.push({ _id: (parseInt((Math.random() * 100000).toString())), ...fieldData, editAble: true, order: 0 })
             }
         })
         setSection(data);
@@ -152,11 +155,11 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                 if (data.sectionId.toString() !== sectionId.toString()) {
                     let sect = [...section]
                     sect.forEach((row) => {
-                        row.field = row.field.filter(i => i.fieldId)
+                        row.field = row.field.filter(i => i._id)
                     })
                     let sect_index = sect.findIndex(x => x.sectionId.toString() === data.sectionId.toString());
-                    const dragField = sect[sect_index].field.filter(i => i.fieldId.toString() === data.id.toString());
-                    sect[sect_index].field = (sect[sect_index].field.filter(i => i.fieldId.toString() !== data.id.toString()))
+                    const dragField = sect[sect_index].field.filter(i => i._id.toString() === data.id.toString());
+                    sect[sect_index].field = (sect[sect_index].field.filter(i => i._id.toString() !== data.id.toString()))
                     if (dragField.length > 0) {
                         let sect_drop_index = sect.findIndex(x => x.sectionId.toString() === sectionId.toString());
                         sect[sect_drop_index].field.splice(data.index, 0, dragField[0]);
@@ -172,7 +175,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
         if (sec_id.toString() === sectionId.toString()) {
             let data = [...section]
             data.forEach((row) => {
-                row.field = row.field.filter(i => i.fieldId)
+                row.field = row.field.filter(i => i._id)
                 if (row.sectionId.toString() === sectionId.toString()) {
                     if (type === "fieldmove") {
                         const dragField = row.field[dragIndex];
@@ -198,7 +201,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
             let sect_index = data.findIndex(x => x.sectionId.toString() === sec_id.toString());
             const dragField = data[sect_index].field[dragIndex];
             if (dragField) {
-                data[sect_index].field = (data[sect_index].field.filter(i => i.fieldId.toString() !== dragField.fieldId.toString()))
+                data[sect_index].field = (data[sect_index].field.filter(i => i._id.toString() !== dragField._id.toString()))
                 let sect_drop_index = data.findIndex(x => x.sectionId.toString() === sectionId.toString());
                 data[sect_drop_index].field.splice(hoverIndex, 0, dragField);
             }
@@ -268,8 +271,8 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                     <Grid container spacing={1}>
                         {data.field.length > 0 ?
                             data.field.map((ele, i) => (
-                                <DropField key={ele.fieldId} index={i} id={ele.fieldId}
-                                    sectionId={sectionId} section={section} setSection={setSection} fieldId={ele.fieldId} data={ele}
+                                <DropField key={ele._id} index={i} id={ele._id}
+                                    sectionId={sectionId} section={section} setSection={setSection} fieldId={ele._id} data={ele}
                                     movefield={movefield}
                                     fieldHoverId={fieldHoverId} setFieldHoverId={setFieldHoverId} addDeleteField={addDeleteField}
                                 />

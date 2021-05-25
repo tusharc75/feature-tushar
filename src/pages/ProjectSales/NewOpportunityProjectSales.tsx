@@ -6,11 +6,8 @@ import { useHistory } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 
 import {
-  getOwnerDropdownDataSource,
-  getCollaboratorDropdownDataSource,
   getObjKeys,
   yupSchema,
-  getObjKeysWithValues,
   initializeDropdownById,
   opportunity,
   simplifyValues,
@@ -23,7 +20,6 @@ import CustomButton from "../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../StateProvider/Provider";
-import currencies from "../../constants/currency_with_country.json";
 
 const arr = [...Array(9).keys()];
 
@@ -31,24 +27,18 @@ export default function NewOpportunityProjectSales({
   open,
   onSuccess,
   onClose,
-  isNew,
-  dataToUpdate,
   accountId,
-  resource, // either called from customer account or supplier account
   isRedirectTodetailPage,
-  userId = null,
   collaborators,
+  users,
 }) {
   const { opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
   const {
-    state: { user, selectedEntity },
+    state: { selectedEntity },
   }: any = useData();
-  const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate.owner.optionValue
-  );
 
   const [opportunityData, setOpportunityData] = useState({
     fields: [],
@@ -56,21 +46,10 @@ export default function NewOpportunityProjectSales({
   });
 
   const [formsData, setFormsData] = useState([]);
-  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-  const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
-    const ownerCollabOptions = opportunityData.fields.filter(
-      (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-    );
-    if (ownerCollabOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollabOptions[0].option);
-      setOwnerData(ownerCollabOptions[0].option);
-      setCollaboratorData(ownerCollabOptions[0].option);
-    }
     sortArray();
   }, [opportunityData.fields]);
 
@@ -94,16 +73,6 @@ export default function NewOpportunityProjectSales({
     setFormsData(customData);
   };
 
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerData(
-      getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData)
-    );
-  };
-
-  const onCollabOwnerMultiselectOpen = () => {
-    setCollaboratorData(collaborators);
-  };
-
   useEffect(() => {
     getOpportunityFields();
   }, []);
@@ -113,10 +82,7 @@ export default function NewOpportunityProjectSales({
       .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         const newFields = [];
-        console.log(data);
-        const filterData = isNew
-          ? data.filter((d) => d.isCreate)
-          : data.filter((d) => d.isUpdate);
+        const filterData = data.filter((d) => d.isCreate);
 
         filterData.map((_f) => {
           //  If this dialog opens from account details screen, make that account preselected
@@ -130,23 +96,6 @@ export default function NewOpportunityProjectSales({
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
-          if (!isNew && _f.fieldData.fieldName == "currency") {
-            setCurrencySymbol(
-              currencies.find((d) => d.currencyCode == dataToUpdate["currency"])
-                ?.symbolNative
-            );
-          }
-          if (isNew && userId && _f.fieldData.fieldName == "owner") {
-            _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
-          }
-
-          if (!isNew && _f.fieldData.fieldName == "currency") {
-            setCurrencySymbol(
-              currencies.find((d) => d.currencyCode == dataToUpdate["currency"])
-                ?.symbolNative
-            );
-          }
-
           if (!(_f.fieldData.fieldName === "supplierAccountName")) {
             newFields.push(_f.fieldData);
           }
@@ -154,9 +103,7 @@ export default function NewOpportunityProjectSales({
 
         setOpportunityData({
           fields: newFields,
-          initialValues: isNew
-            ? getObjKeys("", newFields)
-            : getObjKeysWithValues(dataToUpdate, newFields),
+          initialValues: getObjKeys("", newFields),
         });
       });
   };
@@ -170,12 +117,11 @@ export default function NewOpportunityProjectSales({
       });
       setErrors({ ...errors });
     } else {
-      isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
+      handleCreateOpportunity(values);
     }
   };
 
   const handleCreateOpportunity = (values) => {
-    // values.closeDate = "03/03/2021"
     if (accountId) values["supplierAccountName"] = [accountId];
     setLoading(true);
     axiosInstance()
@@ -198,27 +144,6 @@ export default function NewOpportunityProjectSales({
       });
   };
 
-  const handleUpdateOpportunity = (values) => {
-    values = { ...values, _id: dataToUpdate._id };
-    setLoading(true);
-
-    axiosInstance()
-      .put(`${opportunityApi}?entity=${selectedEntity}`, values)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
-        setLoading(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setLoading(false);
-      });
-  };
-
   return (
     <Dialog
       maxWidth="md"
@@ -227,14 +152,7 @@ export default function NewOpportunityProjectSales({
       open={open}
       disableBackdropClick={true}
     >
-      <CustomDialogHeader
-        title={
-          isNew
-            ? "Create Opportunity"
-            : `Editing ${dataToUpdate.opportunityName}`
-        }
-        onClose={onClose}
-      />
+      <CustomDialogHeader title="Create Opportunity" onClose={onClose} />
 
       {opportunityData.fields.length == 0 && (
         <CustomDialogContent>
@@ -255,7 +173,6 @@ export default function NewOpportunityProjectSales({
             setFieldValue,
             setFieldTouched,
             setErrors,
-            setValues,
           }) => (
             <>
               <CustomDialogContent>
@@ -283,18 +200,12 @@ export default function NewOpportunityProjectSales({
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={ownerData}
+                                      options={users}
                                       setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
                                       isTooltip={true}
                                       size="small"
-                                      disabled={disableOwnerSelection}
-                                      onOpen={() => {
-                                        onOwnerDropdownOpen(
-                                          values["collaborator"]
-                                        );
-                                      }}
                                     />
                                   ) : field.fieldName == "collaborator" ? (
                                     <FormTypes
@@ -304,7 +215,9 @@ export default function NewOpportunityProjectSales({
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={collaborators}
+                                      options={collaborators.filter(
+                                        (u) => values["owner"] !== u.optionValue
+                                      )}
                                       setFieldValue={setFieldValue}
                                       required={field.required}
                                       fullWidth
@@ -414,6 +327,10 @@ export default function NewOpportunityProjectSales({
                                   ) : (
                                     <FormTypes
                                       // {...rest}
+                                      disabled={
+                                        field.fieldName ===
+                                        "customerAccountName"
+                                      }
                                       values={values}
                                       errors={errors}
                                       touched={touched}

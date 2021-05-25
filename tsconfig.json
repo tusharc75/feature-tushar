@@ -26,7 +26,8 @@
     "noImplicitAny": false,
     "strictNullChecks": false,
     "downlevelIteration": true,
-    "checkJs": false
+    "checkJs": false,
+    "removeComments": true
   },
   "include": [
     "./src/**/*"

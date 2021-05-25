@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Grid,
   Box,
@@ -9,12 +9,6 @@ import {
   FormControlLabel,
   Switch,
   IconButton,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
   Paper,
   Tooltip,
   Tabs,
@@ -32,7 +26,6 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import DetailsPageHeader from "../../components/DetailsPageHeader";
 import DetailsPage from "../../components/Shared/DetailsPage";
-import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { useData } from "../../StateProvider/Provider";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
@@ -43,7 +36,6 @@ import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
 import { userType } from "../../constants/helpers";
-import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -53,6 +45,8 @@ import OrgChartContainer from "../../components/OrgChart/OrgChartContainer";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks";
 import { FcFlowChart } from 'react-icons/fc';
+import AssignEntityDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
+import AssignedEntities from "./AssignedEntities";
 
 const UserDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -67,7 +61,7 @@ const UserDetailsPage = () => {
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [rolesLoading, setRolesLoading] = useState(false);
-  const [userRelatedLoading, setUserRelatedLoading] = useState(false);
+  // const [userRelatedLoading, setUserRelatedLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [leadsRelatedData, setLeadsRelatedData] = useState(null);
   const [opportunityRelatedData, setOpportunityRelatedData] = useState(null);
@@ -78,15 +72,15 @@ const UserDetailsPage = () => {
   const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
 
-  const [isChangingPermission, setIsChangingPermission] = useState(false);
-  const [hasPermissionToUpdateApprovalProcess, setHasPermissionToUpdateApprovalProcess] = useState(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
+  // const [isChangingPermission, setIsChangingPermission] = useState(false);
+  const [hasPermissionToUpdateApprovalProcess] = useState(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
   const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
   const [userFields, setUserFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [isUpdating, setUpdating] = useState(false);
+  // const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
@@ -95,13 +89,16 @@ const UserDetailsPage = () => {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([])
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
+  const [entities, setEntities] = useState<any[]>([])
+  const showRecordsBeforeViewAll = 2;
+  const [showEntities, setShowEntities] = useState(showRecordsBeforeViewAll);
+  const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
       getUserFields();
       fetchUserData();
       getRoleUnion();
-      fetchUserRoles();
       fetchDoa();
       fetchUsers()
       fetchUserRelatedDetail()
@@ -121,6 +118,7 @@ const UserDetailsPage = () => {
     },
   ].filter((d) => d.show);
 
+
   const fetchUserData = async () => {
     setLoading(true);
     try {
@@ -132,6 +130,8 @@ const UserDetailsPage = () => {
 
       setHeadingLbl(name);
       setUserData(data);
+      setEntities(data.entities.filter(e => e.role.length !== 0 || e.entity !== undefined))
+      setGloabalRoles(data.role);
       setCustomizedRoutes([
         routes.user,
         { title: `${data.firstName} ${data.lastName}` },
@@ -140,7 +140,7 @@ const UserDetailsPage = () => {
       let orgChartData = [];
 
       if (data.parentHierarchy && data.parentHierarchy.length > 0) {
-        data.parentHierarchy.map(d => {
+        data.parentHierarchy.forEach(d => {
           orgChartData.push({
             id: d._id,
             name: [d.firstName, d.lastName]
@@ -222,21 +222,8 @@ const UserDetailsPage = () => {
     setUserList(rows);
   };
 
-  const fetchUserRoles = () => {
-    setRolesLoading(true);
-    axiosInstance()
-      .get(`/role?user=${id}`)
-      .then(({ data: { data } }) => {
-        setGloabalRoles(data.filter((d) => d?.type === 1)); // global role --- type 1
-        setRolesLoading(false);
-      })
-      .catch((error) => {
-        setRolesLoading(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
   const fetchUserRelatedDetail = () => {
-    setUserRelatedLoading(true);
+    // setUserRelatedLoading(true);
     axiosInstance()
       .get(`/user/related/${id}`)
       .then(({ data: { data } }) => {
@@ -248,7 +235,7 @@ const UserDetailsPage = () => {
         setOpportunityRelatedData(data["Opportunity"]);
       })
       .catch((error) => {
-        setUserRelatedLoading(false);
+        // setUserRelatedLoading(false);
         toastConfig.setToastConfig(error);
       })
 
@@ -280,6 +267,7 @@ const UserDetailsPage = () => {
     setShowConfirmBox(true);
   };
 
+
   const DeleteUser = () => {
     if (deleteUserRec) {
       if (permissions.user.isDelete) {
@@ -298,27 +286,27 @@ const UserDetailsPage = () => {
     }
   };
 
-  const handleUpdateUser = (values) => {
-    setUpdating(true);
+  // const handleUpdateUser = (values) => {
+  //   setUpdating(true);
 
-    axiosInstance()
-      .put(`/user`, { ...values, _id: id })
-      .then(({ data }) => {
-        fetchUserData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
-        });
-        setUserPermissions(data.permissions);
-        setUpdating(false);
-        closeUpdateDialog();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setUpdating(false);
-      });
-  };
+  //   axiosInstance()
+  //     .put(`/user`, { ...values, _id: id })
+  //     .then(({ data }) => {
+  //       fetchUserData();
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         type: "success",
+  //         message: data.message,
+  //       });
+  //       setUserPermissions(data.permissions);
+  //       setUpdating(false);
+  //       closeUpdateDialog();
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //       setUpdating(false);
+  //     });
+  // };
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -326,6 +314,14 @@ const UserDetailsPage = () => {
 
   const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
+  };
+
+  const entityDialogOpen = () => {
+    setShowAssignEntityDialog(true);
+  };
+
+  const entityDialogClose = () => {
+    setShowAssignEntityDialog(false);
   };
 
   const getRoleUnion = () => {
@@ -351,11 +347,10 @@ const UserDetailsPage = () => {
         roles: [roleDeleteRec?._id],
       };
       axiosInstance()
-        .post("/role/un-assign-role", data)
+        .put("/user/un-assign-role", data)
         .then(() => {
           setShowConfirmBox(false);
           fetchUserData();
-          fetchUserRoles();
           setUnionRoleData(null);
           getRoleUnion();
           toastConfig.setToastConfig({
@@ -407,6 +402,7 @@ const UserDetailsPage = () => {
     setRolesDialogOpen(false);
   };
 
+  const isLoggedInUserBrandAdmin = 'userType' in user?.user;
   return (
     <>
       {openUpdateDialog && (
@@ -424,8 +420,22 @@ const UserDetailsPage = () => {
           assignedRoles={globalRoles}
           onSuccess={() => {
             handleCloseDialog();
+            fetchUserData();
             getRoleUnion();
-            fetchUserRoles();
+          }}
+        />
+      )}
+      {showAssignEntityDialog && (
+        <AssignEntityDialog
+          entitiesDialogOpen={showAssignEntityDialog}
+          handleCloseDialog={entityDialogClose}
+          type="entity"
+          ids={[id]}
+          assignedEntity={entities}
+          regionalRole={false}
+          onSuccess={() => {
+            fetchUserData();
+            entityDialogClose();
           }}
         />
       )}
@@ -436,7 +446,7 @@ const UserDetailsPage = () => {
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper>
+            <Paper className="subContainer">
               {!userData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -467,6 +477,7 @@ const UserDetailsPage = () => {
                       color="primary"
                       size="small"
                       onClick={handleOpenUpdateDialog}
+                      disabled={!isLoggedInUserBrandAdmin && userData?.userType}
                     >
                       Edit
                     </Button>
@@ -474,7 +485,7 @@ const UserDetailsPage = () => {
                   {permissions.user.isDelete ? (
                     <DeleteButton
                       text="Delete"
-                      disabled={user?.user?._id === id}
+                      disabled={user?.user?._id === id || userData?.userType === userType.brandAdmin}
                       onClick={() => handleDeleteUser(id)}
                     />
                   ) : null}
@@ -537,6 +548,7 @@ const UserDetailsPage = () => {
                           color="primary"
                           size="small"
                           onClick={handleOpenDialog}
+                          disabled={!isLoggedInUserBrandAdmin && userData?.userType}
                         >
                           <ControlPoint />
                         </IconButton>
@@ -605,36 +617,86 @@ const UserDetailsPage = () => {
                         height: "352px",
                       }}
                     >
-                      <TableContainer style={{ height: "352px" }}>
-                        <Table
-                          stickyHeader
-                          aria-label="roles"
-                          className="roles-table"
-                        >
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Names</TableCell>
-                              <TableCell>Read</TableCell>
-                              <TableCell>Create</TableCell>
-                              <TableCell>Update</TableCell>
-                              <TableCell>Delete</TableCell>
-                            </TableRow>
-                          </TableHead>
-
-                          <TableBody>
-                            <RoleEngine
-                              field={unionRoleData ? unionRoleData.field : []}
-                              resource={unionRoleData ? unionRoleData.resource : []}
-                              isDisable={true}
-                            />
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
+                      <RoleEngine
+                        field={unionRoleData ? unionRoleData.field : []}
+                        resource={unionRoleData ? unionRoleData.resource : []}
+                        isDisable={true}
+                      />
                     </BoxWithBorder>
                   </Grid>
                 </Grid>
               </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Box
+                    width="100%"
+                    padding={1}
+                    bgcolor="grey.200"
+                    display="flex"
+                    justifyContent="space-between"
+                  >
+                    <Typography variant="subtitle2">
+                      Assigned Entity ({entities?.length || 0})
+                </Typography>
+                    {permissions.entity.isUpdate && (
+                      <IconButton
+                        title="Assign entities"
+                        color="primary"
+                        size="small"
+                        onClick={entityDialogOpen}
+                      >
+                        <ControlPoint />
+                      </IconButton>
+                    )}
+                  </Box>
+                  <Box padding={1}>
+                    {loading ? (
+                      <Box display="flex">
+                        {[1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              padding: "8px",
+                              margin: "8px",
+                              width: "100%",
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton
+                                variant="text"
+                                width="100px"
+                                height="20px"
+                              />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))}
+                      </Box>
+                    ) :
+                      entities?.length ? (
+                        <AssignedEntities
+                          entities={entities}
+                          permissions={permissions}
+                          userId={id}
+                          loggedInUser={user?.user}
+                          onSuccess={() => {
+                            fetchUserData();
+                          }}
 
+                        />
+
+
+                      )
+                        : (
+                          <Box textAlign="center" padding={2}>
+                            <Typography>No Entities </Typography>
+                          </Box>
+                        )
+                    }
+                  </Box>
+                </Grid>
+              </Grid>
               {
                 user?.user?.permissions?.doaSetup && <>
                   <Box style={{ padding: "0px" }}>
@@ -692,68 +754,70 @@ const UserDetailsPage = () => {
                   </Grid>
                 </>
               }
-              <OpportunityAccordionInUserDetail
-                opportunities={[...opportunityRelatedData?.Owner ?? [],...opportunityRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <LeadAccordionInUserDetailPage
-                leads={[...leadsRelatedData?.Owner ?? [],...leadsRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <AccountAccordionDetail
-                type="customer"
-                accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <AccountAccordionDetail
-                type="supplier"
-                accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <ContactAccordionInDetailPage
-                type="customer"
-                contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
-              <ContactAccordionInDetailPage
-                type="supplier"
-                contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
-                recordsPerLine={3}
-                expanded={false}
-                userId={id}
-                onSuccess={() => {
-                  fetchUserRelatedDetail()
-                }}
-              />
+              <div className="p-3">
+                <OpportunityAccordionInUserDetail
+                  opportunities={[...opportunityRelatedData?.Owner ?? [], ...opportunityRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <LeadAccordionInUserDetailPage
+                  leads={[...leadsRelatedData?.Owner ?? [], ...leadsRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <AccountAccordionDetail
+                  type="customer"
+                  accounts={[...customerAccountRelatedData?.Owner ?? [], ...customerAccountRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <AccountAccordionDetail
+                  type="supplier"
+                  accounts={[...supplierAccountRelatedData?.Owner ?? [], ...supplierAccountRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <ContactAccordionInDetailPage
+                  type="customer"
+                  contacts={[...customerContactRelatedData?.Owner ?? [], ...customerContactRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+                <ContactAccordionInDetailPage
+                  type="supplier"
+                  contacts={[...supplierContactRelatedData?.Owner ?? [], ...supplierContactRelatedData?.Collaborator ?? []]}
+                  recordsPerLine={3}
+                  expanded={false}
+                  userId={id}
+                  onSuccess={() => {
+                    fetchUserRelatedDetail()
+                  }}
+                />
+              </div>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper>
+            <Paper className="subContainer">
               <Box className="detailHeader">
                 <h2 className="listingHeader single">Approval Process</h2>
               </Box>
@@ -795,7 +859,7 @@ const UserDetailsPage = () => {
                                 onChange={handleChangePermissions}
                               />
                             }
-                            label={key == "doaSetup" ? "DOA Setup" : startCase(key)}
+                            label={key === "doaSetup" ? "DOA Setup" : startCase(key)}
                           />
                         </Tooltip>
                       ))
@@ -805,10 +869,8 @@ const UserDetailsPage = () => {
                   </FormGroup>
                 </FormControl>
               </Box>
+              <QuickLinks quickLinks={quickLinks} />
             </Paper>
-
-            <QuickLinks quickLinks={quickLinks} />
-            
           </Grid>
         </Grid>
       </Layout>

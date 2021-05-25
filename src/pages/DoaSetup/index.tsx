@@ -23,7 +23,6 @@ import DoaHeader from "./DoaHeader";
 import { GiHiveMind } from "react-icons/gi";
 import routes from './../../components/Helpers/Routes';
 import { useData } from "../../StateProvider/Provider";
-import DataGridCustomToolbar from '../../components/Helpers/DataGridCustomToolbar';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { FcPlus } from "react-icons/fc";
 import { useCallback } from "react";
@@ -32,8 +31,9 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import moment from "moment";
 import { FaUserAltSlash, FaUserCheck } from "react-icons/fa";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 const useStyles = makeStyles((theme) => ({
   actionBtn: {
@@ -491,7 +491,7 @@ export default function Doa() {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}

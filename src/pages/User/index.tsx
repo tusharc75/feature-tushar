@@ -1,5 +1,5 @@
 import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton, Grid } from "@material-ui/core";
+import { Checkbox, Tooltip, IconButton, Grid, Chip } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
@@ -10,22 +10,23 @@ import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
-import CreateUser from "./CreateUser";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { userType } from './../../constants/helpers'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import ManageUserDialog from "./ManageUserDialog";
+import { useHistory } from "react-router-dom";
+import { startCase } from "lodash";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 const User: FC = () => {
@@ -33,6 +34,7 @@ const User: FC = () => {
   const {
     state: { user, permissions },
   }: any = useData();
+  const history = useHistory();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
@@ -49,6 +51,11 @@ const User: FC = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
+  const [entityRoleRedirectDetails, setEntityRoleRedirectDetails] = useState({
+    id: history.location?.state?.id,
+    name: history.location?.state?.name,
+    type: history.location?.state?.type,
+  });
 
   const fetchUsers = useCallback(() => {
     if (userTimeout) {
@@ -60,6 +67,19 @@ const User: FC = () => {
       searchParams = searchVal
         ? { ...searchParams, search: searchVal }
         : { ...searchParams };
+      if (entityRoleRedirectDetails?.id) {
+        switch (entityRoleRedirectDetails?.type) {
+          case "entity":
+            searchParams["filterById"] = JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }]);
+            break;
+          case "regionalRole":
+            searchParams["filterById"] = JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }]);
+            break;
+          case "globalRole":
+            searchParams["filterById"] = JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }]);
+            break;
+        }
+      }
       let api = getSearchQuery("/user", searchParams);
       setLoadingUsers(true);
       axiosInstance()
@@ -76,7 +96,7 @@ const User: FC = () => {
         });
     }, 600);
     // eslint-disable-next-line
-  }, [searchVal, query]);
+  }, [searchVal, query, entityRoleRedirectDetails]);
 
   useEffect(() => {
     fetchUsers();
@@ -151,8 +171,6 @@ const User: FC = () => {
           </Tooltip> : ""}
         </>
       ),
-      sortable: false,
-      filterable: false,
     },
     {
       field: "status",
@@ -207,8 +225,6 @@ const User: FC = () => {
       headerName: "Created By",
       width: 250,
       disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
       renderCell: (params: any) =>
         params?.value && params?.value?.user ? (
           <h5 className="createBy">
@@ -230,8 +246,6 @@ const User: FC = () => {
       field: "updatedBy",
       headerName: "Updated By",
       width: 250,
-      sortable: false,
-      filterable: false,
       renderCell: (params) =>
         params?.value?.user ? (
           <h5 className="updateBy">
@@ -261,14 +275,27 @@ const User: FC = () => {
         ) : (
           <>
             {permissions.user.isDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
+
+              params.row.isBrandAdmin ? (
+                <Tooltip
+                  className="cursor-stop"
+                  title="Brand Admin Can not be Deleted"
                 >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
+                  <IconButton aria-label="Delete">
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              ) :
+                (<Tooltip
+                  title="Delete"
+                >
+                  <IconButton
+                    aria-label="Delete"
+                    onClick={() => showConfirmBox(params.row)}
+                  >
+                    <DeleteIcon fontSize="small" color='error' />
+                  </IconButton>
+                </Tooltip>)
             ) : (
               <Tooltip
                 className="cursor-stop"
@@ -309,7 +336,7 @@ const User: FC = () => {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.id === user?.user._id)) {
+      if (dataRows.some((d) => d.isChecked && (d.id === user?.user._id || d.isBrandAdmin))) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -411,10 +438,23 @@ const User: FC = () => {
 
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
+      let deepFilter;
+      switch (params.filterModel.items[0].columnField) {
+        case 'createdBy':
+          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'updatedBy':
+          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'name':
+          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+          break;
+        default:
+          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
+      }
       setQuery((prevState) => ({
         ...prevState,
-        [params.filterModel.items[0].columnField]:
-          params.filterModel.items[0].value,
+        deepFilter
       }));
     } else {
       setQuery({ page: 0, limit: 25 });
@@ -458,11 +498,22 @@ const User: FC = () => {
               rolesActionDiabled={Boolean(!selectedUsers.length)}
               canDelete={dataRows.filter((d) => d.isChecked).length === 0}
             />
+            {entityRoleRedirectDetails.id && (
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`${startCase(entityRoleRedirectDetails.type)} : ${entityRoleRedirectDetails.name}`}
+                onDelete={() => {
+                  setEntityRoleRedirectDetails({ id: null, name: null, type: null });
+                  // getContacts();
+                }}
+              />
+            )}
           </div>
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               loading={loadingUsers}
@@ -481,6 +532,7 @@ const User: FC = () => {
               rowsPerPageOptions={[25, 50, 75]}
               density="compact"
               onFilterModelChange={onFilterChange}
+              filterMode="server"
             />
           </div>
         </CustomContainer>

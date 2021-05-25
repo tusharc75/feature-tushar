@@ -19,12 +19,14 @@ import {
 } from "@material-ui/icons";
 import * as yup from "yup";
 import moment from "moment";
-import ListItem from "@material-ui/core/ListItem/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import { ListItemText } from "@material-ui/core";
+import currencies from "./currency_with_country.json";
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
+
+export const validations = {
+  email: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+};
 
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
@@ -53,10 +55,16 @@ export const userType = {
   brandAdmin: 2,
 };
 
+export const gridPageSizes = [25, 50, 75];
+
 export const leadProcessFieldName = "leadProcess";
 export const opportunityProcessFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
+
+export const localStorageKeys = {
+  currentSelectedRoleType: "currentSelectedRoleType",
+};
 
 export const sidebarResource = {
   brand: "Brand",
@@ -141,28 +149,42 @@ export const profileMenuItems = {
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
   for (const key of arr) {
+    let value = key.isDefaultValue ? key.defaultValue : val
     if (key.type === "dropDown") {
       const option = key.option?.find((data: any) => data.default === true);
-      obj[key.fieldName] = val ? val : option ? option.optionValue : "";
+      obj[key.fieldName] = value ? value : option ? option.optionValue : "";
     } else if (key.type === "multiSelect") {
       const defaultOptions = key.option?.filter(
         (item: any) => item.default === true
       );
       const options = defaultOptions?.map((data: any) => data.optionValue);
-      obj[key.fieldName] = val ? val : options;
+      obj[key.fieldName] = value ? value : options;
     } else if (key.type === "date") {
-      obj[key.fieldName] = val ? val : new Date();
+      obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
-      obj[key.fieldName] = val ? val : false;
-    } else if (key.type === "converter") {
+      obj[key.fieldName] = value ? value : false;
+    } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
       key.displayUnits.forEach((_unit) => {
-        obj[key.fieldName + _unit.toLowerCase()] = val;
+        obj[key.fieldName + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;
       });
-    } else {
-      obj[key.fieldName] = val;
+    } else if (key.type === "currencyAmount") {
+      key.displayCurrency.forEach((_currency) => {
+        if (key.isConverter && key.displayUnits.length) {
+          key.displayUnits.forEach((_unit) => {
+            obj[key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
+          });
+        }
+        else {
+          obj[key.fieldName + "_" + _currency.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
+        }
+      });
+    } else if (key.type === "decimal") {
+      obj[key.fieldName] = value && value !== "" ? parseFloat(value) : value;;
+    }
+    else {
+      obj[key.fieldName] = value;
     }
   }
-
   return obj;
 };
 
@@ -173,8 +195,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-      ? data.optionValue
-      : "";
+        ? data.optionValue
+        : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -216,30 +238,30 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .url("Enter valid url eg. https://www.hostname.com")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .url("Enter valid url eg. https://www.hostname.com")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().url("Enter valid url eg. https://www.hostname.com");
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-            .string()
-            .min(10, "Mobile number is too short")
-            .required(`${input.fieldLabel} is required`)
+          .string()
+          .min(10, "Mobile number is too short")
+          .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-            .array()
-            .required(`${input.fieldLabel} is required`)
-            .length(1, "Select at least one service access")
+          .array()
+          .required(`${input.fieldLabel} is required`)
+          .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -250,12 +272,31 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)
         : yup.boolean();
-    } else if (input.type === "converter") {
+    } else if (input.type !== "currencyAmount" && (input.type === "converter" || input.isConverter === true)) {
       input.displayUnits.forEach((_unit) => {
-        schema[input.fieldName + _unit.toLowerCase()] = input.required
+        schema[input.fieldName + "_" + _unit.toLowerCase()] = input.required
           ? yup.string().required(`${input.fieldLabel} is required`)
           : yup.string();
       });
+    } else if (input.type === "currencyAmount") {
+      input.displayCurrency.forEach((_currency) => {
+        if (input.isConverter && input.displayUnits.length) {
+          input.displayUnits.forEach((_unit) => {
+            schema[input.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = input.required
+              ? yup.string().required(`${input.fieldLabel} is required`)
+              : yup.string();
+          });
+        }
+        else {
+          schema[input.fieldName + "_" + _currency.toLowerCase()] = input.required
+            ? yup.string().required(`${input.fieldLabel} is required`)
+            : yup.string();
+        }
+      });
+    } else if (input.type === "date") {
+      schema[input.fieldName] = input.required
+        ? yup.string().required(`${input.fieldLabel} is required`).nullable()
+        : yup.string().nullable();
     } else {
       schema[input.fieldName] = input.required
         ? yup.string().required(`${input.fieldLabel} is required`)
@@ -285,6 +326,11 @@ export const UnCamelCase = (str) => {
 
 export const isObjectEmpty = (obj) => {
   return Object.keys(obj).length === 0;
+};
+
+export const currencyCodeToSymbol = (currencyCode) => {
+  return currencies.filter((obj) => obj.currencyCode === currencyCode)[0]
+    .symbolNative;
 };
 
 // Function To Set Owner DataSource
@@ -405,10 +451,10 @@ export const getPermissions = (
     let data = [...user?.role?.sideBar];
 
     if (selectedEntity) {
-      if (user?.entity && user.entity.length && selectedEntity) {
+      if (user?.entity && user?.entity.length && selectedEntity) {
         data = [
           ...data,
-          ...user.entity.find((entityObj) => entityObj._id === selectedEntity)
+          ...user?.entity.find((entityObj) => entityObj._id === selectedEntity)
             ?.resource,
         ];
       }
@@ -509,15 +555,90 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
-// export const DisplayData = ({ label, value, icon }) => {
-//   return <div style={{ flexGrow: 1 }}>
-//     <List>
-//       <ListItem>
-//         <ListItemAvatar>
-//           {icon}
-//         </ListItemAvatar>
-//         <ListItemText primary={value} secondary={label} />
-//       </ListItem>
-//     </List>
-//   </div>
-// }
+export const formatAmountWithCurrency = (currencyCode, amount) => {
+  if (!currencyCode && !amount) return null;
+
+  const currencyData = currencies.find(
+    (data) => data?.currencyCode === currencyCode
+  );
+
+  if (!currencyData) {
+    return amount;
+  }
+
+  //  Make default language "en"
+  let language = "en";
+
+  // Check if that currency's country has multiple language,
+  //  And if it has "en", then pick that one, or else take first of the array of languages
+  if (currencyData.languages.length > 0 && currencyData.languages.some(d => d !== language)) {
+    language = currencyData.languages[0];
+  }
+
+  let options = {
+    style: "currency",
+    currency: currencyCode,
+  };
+
+  if (Number.isInteger(amount)) {
+    options["maximumFractionDigits"] = 0;
+  }
+
+  return new Intl.NumberFormat(
+    `${language}-${currencyData.countryCode}`,
+    options
+  )
+    .format(amount)
+    .replace(/^(\D+)/, "$1 ");
+};
+
+export const graphOptions = {
+  layout: {
+    randomSeed: 2,
+  },
+  interaction: {
+    hover: true,
+    navigationButtons: true,
+    keyboard: true,
+  },
+  nodes: {
+    fixed: {
+      x: false,
+      y: false,
+    },
+    shape: "dot",
+    // size: 13,
+    borderWidth: 1.5,
+    borderWidthSelected: 2,
+    // font: {
+    //   size: 15,
+    //   align: "center",
+    //   bold: {
+    //     color: "#bbbdc0",
+    //     size: 15,
+    //     vadjust: 0,
+    //     mod: "bold",
+    //   },
+    // },
+    shadow: true,
+  },
+  edges: {
+    width: 0.01,
+    // color: {
+    //   color: "#D3D3D3",
+    //   highlight: "#797979",
+    //   hover: "#797979",
+    //   opacity: 1.0,
+    // },
+    arrows: {
+      to: { enabled: false, scaleFactor: 1, type: "arrow" },
+      // middle: { enabled: false, scaleFactor: 1, type: "arrow" },
+      from: { enabled: true, scaleFactor: 1, type: "arrow" },
+    },
+    smooth: {
+      type: "continuous",
+      roundness: 0,
+    },
+    shadow: true,
+  },
+};

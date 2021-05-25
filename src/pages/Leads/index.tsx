@@ -18,13 +18,9 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { leadDetailPage } from "../../routes/Lead";
 
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import {
-  downloadExcel,
-  leadTemplateFileName,
-  leadImportErrorFileName,
   leadProcessFieldName,
 } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
@@ -33,11 +29,12 @@ import { lead } from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import { SiConvertio } from "react-icons/si";
 import "./style.scss";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 const LeadTypes = [
   {
@@ -59,7 +56,6 @@ const Leads = () => {
   }: any = useData();
   const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [anchorEl, setAnchorEl] = useState(null);
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllLeads, setCheckAllLeads] = useState(false);
@@ -126,7 +122,7 @@ const Leads = () => {
         isChecked: false,
         id: u._id,
         name: name,
-        owner: u.owner,
+        owner: u.owner.optionValue,
         isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
           (d) => d?.optionValue == user?.user?._id
         ),
@@ -440,7 +436,7 @@ const Leads = () => {
       }
     } else {
       if (
-        dataRows.find((d) => d.isChecked && d.owner.optionValue != user._id)
+        dataRows.find((d) => d.isChecked && d.owner.optionValue != user.user._id)
       ) {
         setShowDeleteWarningConfirmBox(true);
       } else {
@@ -554,17 +550,19 @@ const Leads = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let field = params.filterModel.items[0].columnField
-
-      if (params.filterModel.items[0].columnField == 'createdBy') {
-        field = "createdBy.user"
-      }
-      if (params.filterModel.items[0].columnField == 'updatedBy') {
-        field = "updatedBy.user"
-      }
-      let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
-      if (params.filterModel.items[0].columnField == 'name') {
-        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+      let deepFilter ;
+      switch (params.filterModel.items[0].columnField) {
+        case 'createdBy':
+          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'updatedBy':
+          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'name':
+          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+          break;
+        default:
+          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
       }
       setQuery((prevState) => ({
         ...prevState,
@@ -609,7 +607,7 @@ const Leads = () => {
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
             allowToDelete={
-              !dataRows.some((d) => d.isChecked && d.owner != user?.user?._id)
+              !dataRows.some((d) => d.isChecked && d.owner?.optionValue != user?.user?._id)
             }
             icon={<HiUserGroup className="headerLogo" />}
             heading="Leads"
@@ -644,7 +642,7 @@ const Leads = () => {
         <div className="listing-grid">
           <DataGrid
             components={{
-              Toolbar: DataGridCustomToolbar,
+              Toolbar: CustomDataGridToolbar,
               NoRowsOverlay: CustomDataGridNoDataFound,
             }}
             rows={loading ? [] : dataRows}

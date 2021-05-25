@@ -17,14 +17,14 @@ export const theme = createMuiTheme({
   },
   palette: {
     primary: {
-      light: "#003f57",
-      main: "#003f57",
+      light:  "#091823", //"#003f57",
+      main:  "#163340",//"#003f57",
       // dark: "#115293"
     },
     secondary: {  //  Dark Color
       // main: "#212121",
       light: "#e33371",
-      main: "#d46101",
+      main: "#047d1c",
       dark: "#9a0036"
     },
     error: {
@@ -35,7 +35,7 @@ export const theme = createMuiTheme({
       contrastText: '#fff'
     },
     info: {
-      light: "#64b5f6",
+      light: "#75e2dd",
       main: "#2196f3",
       dark: "#1976d2"
     },
@@ -43,7 +43,7 @@ export const theme = createMuiTheme({
       light: "#81c784",
       main: "#4caf50",
       dark: "#388e3c"
-    },
+    }
     // darkBg: "#09445A",
     // lightBg: "#91A2A9",
     // textDark: "#082D3A",

@@ -27,7 +27,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import CustomContainer from "../../components/CustomContainer";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { getSearchQuery } from "../../services/util";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import styles from "../Leads/Header.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -44,10 +43,11 @@ import {
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
 import routes from "./../../components/Helpers/Routes";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 const ContactTypes = [
   {
@@ -314,17 +314,19 @@ export default function Contact(props) {
 
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let field = params.filterModel.items[0].columnField
-
-      if (params.filterModel.items[0].columnField == 'createdBy') {
-        field = "createdBy.user"
-      }
-      if (params.filterModel.items[0].columnField == 'updatedBy') {
-        field = "updatedBy.user"
-      }
-      let deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
-      if (params.filterModel.items[0].columnField == 'name') {
-        deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+      let deepFilter ;
+      switch (params.filterModel.items[0].columnField) {
+        case 'createdBy':
+          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'updatedBy':
+          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'name':
+          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+          break;
+        default:
+          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
       }
       setQuery((prevState) => ({
         ...prevState,
@@ -656,7 +658,7 @@ export default function Contact(props) {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}

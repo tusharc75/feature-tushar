@@ -10,9 +10,9 @@ import {
 import { Link } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import { PERMISSION } from "../../constants/Roles";
+// import { PERMISSION } from "../../constants/Roles";
 
-const rolesPermissions = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
+// const rolesPermissions = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -39,6 +39,8 @@ interface props {
 
 const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserId }: props) => {
   const classes = useStyles();
+
+  const isLoggedInUserBrandAdmin = 'userType' in loggedInUser;
 
   return (
     <div className={classes.root}>
@@ -76,13 +78,13 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                   {permissions.user.isUpdate && (
                     <ListItemSecondaryAction
                       title={
-                          currentUserId === loggedInUser._id
+                        currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin
                           ? "Role can not be deleted"
                           : "Unassign Role"
                       }
                     >
                       <IconButton
-                        disabled={currentUserId === loggedInUser._id}
+                        disabled={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin}
                         size="small"
                         edge="end"
                         aria-label="delete"
@@ -97,7 +99,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                           //     ? "disabled"
                           //     : "error"
                           // }
-                          color={currentUserId === loggedInUser._id ? "disabled" : "error"}
+                          color={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "disabled" : "error"}
                         />
                       </IconButton>
                     </ListItemSecondaryAction>
