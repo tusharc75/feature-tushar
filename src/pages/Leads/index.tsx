@@ -260,8 +260,8 @@ const Leads = () => {
   const RelatedOpportunityRenderer = params => <>
     {
       params.value ?
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data?._id}`} title={params.data?.opportunityName}>
-          {params.data?.opportunityName}
+        <Link className="link" to={`${routes.opportunityDetail.path}/${params.value?._id}`} title={params.value?.opportunityName}>
+          {params.value?.opportunityName}
         </Link>
         : <NoDataCell />
     }
