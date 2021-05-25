@@ -14,15 +14,15 @@
   }
 }
 .userDetail {
+  background: #ececec;
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 7% 11%;
+  margin-right: 1rem;
+  border-radius: 4px;
 }
-.editProfileContainer {
-  display: flex;
-  justify-content: flex-end;
-}
+
 .profileAvatarContainer {
   display: flex;
   justify-content: center;

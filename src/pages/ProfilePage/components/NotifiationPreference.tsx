@@ -1,16 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { Grid, Box, Tooltip, IconButton, Checkbox, FormControlLabel, Typography } from '@material-ui/core'
+import { useEffect, useState } from 'react'
+import { Grid, Box, Checkbox, FormControlLabel, Typography } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import { useData } from "../../../StateProvider/Provider";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../../axios/axiosInstance";
-import CustomContainer from "../../../components/CustomContainer";
-import SaveButton from '../../../components/Helpers/CustomButton'
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { BsEnvelopeOpen, BsPhone, BsDisplay } from 'react-icons/bs'
@@ -27,6 +21,9 @@ const useStyles = makeStyles((theme) => ({
         color: "primary",
         marginBottom: '12px',
         marginLeft: "5px",
+    },
+    label: {
+        marginLeft: "1px"
     }
 }));
 
@@ -37,11 +34,13 @@ let notificationPreferenceTitles = ['Activity in all unassigned conversation', '
 ]
 
 const RenderCheckBox = ({ name, val, id, onChange }) => (
-    <FormControlLabel
-        control={<Checkbox size="small" checked={val}
-            onChange={(e) => onChange(e.target.checked, id, name)} name={name} />}
-        label={name}
-    />
+    // <FormControlLabel
+    //     control={<Checkbox size="small" checked={val}
+    //         onChange={(e) => onChange(e.target.checked, id, name)} name={name} />}
+    //     label={name}
+    // />
+    <Checkbox checked={val}
+        onChange={(e) => onChange(e.target.checked, id, name)} name={name} />
 )
 
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
@@ -63,14 +62,17 @@ const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
 
 export default function NotifiationPreference(props) {
 
-    const { state: { user } } = useData();
     const [rows, setRows] = useState([])
-    const toastConfig = useContext(CustomToastContext);
+    const [isAllPreference, setAllPreference] = useState({
+        desktop: false,
+        mobile: false,
+        email: false
+    })
     const classes = useStyles();
 
     useEffect(() => {
         let rows = notificationPreferenceTitles.map((str, i) => {
-            return { id: "preference" + i, title: str, Desktop: false, Mobile: false, Email: false }
+            return { id: "preference" + i, title: str, desktop: false, mobile: false, email: false }
         })
         setRows(rows)
     }, [])
@@ -82,8 +84,20 @@ export default function NotifiationPreference(props) {
         })
         setRows(tempRows)
     }
-    const handleSubmit = () => {
+
+    const handleSelectAll = (columnName) => {
+        setAllPreference(prevState => {
+            return {
+                ...prevState,
+                [columnName]: !prevState[columnName]
+            }
+        })
+        let tempRows = rows.map(obj => {
+            return { ...obj, [columnName]: !isAllPreference[columnName] }
+        })
+        setRows(tempRows)
     }
+
     const options = [
         {
             icon: <BsDisplay size={60} className={classes.notificationIcon} />,
@@ -131,21 +145,49 @@ export default function NotifiationPreference(props) {
             </Box>
             <TableContainer component={Paper}>
                 <Table>
+                    <TableRow>
+                        <TableCell component="th" scope="row" className={classes.tableCell}>
+                        </TableCell>
+                        <TableCell padding="checkbox" >
+                            <FormControlLabel
+                                className={classes.label}
+                                control={<Checkbox
+                                    onChange={() => handleSelectAll("desktop")} title="Desktop" />}
+                                label="Desktop"
+                            />
+                        </TableCell>
+                        <TableCell padding="checkbox">
+                            <FormControlLabel
+                                className={classes.label}
+                                control={<Checkbox
+                                    onChange={() => handleSelectAll("mobile")} title="Mobile" />}
+                                label="Mobile"
+                            />
+                        </TableCell>
+                        <TableCell padding="checkbox">
+                            <FormControlLabel
+                                className={classes.label}
+                                control={<Checkbox
+                                    onChange={() => handleSelectAll("email")} title="Email" />}
+                                label="Email"
+                            />
+                        </TableCell>
+                    </TableRow>
                     <TableBody>
                         {rows.map((row) => (
                             <TableRow key={row?.id}>
                                 <TableCell component="th" scope="row" className={classes.tableCell}>
                                     {row.title}
                                 </TableCell>
-                                <TableCell padding="checkbox" align="right">
-                                    <RenderCheckBox name="Desktop" val={row.Desktop} id={row.id} onChange={handleChange} />
+                                <TableCell padding="checkbox" align="left">
+                                    <RenderCheckBox name="desktop" val={row.desktop} id={row.id} onChange={handleChange} />
                                 </TableCell>
-                                <TableCell padding="checkbox" align="right">
-                                    <RenderCheckBox name="Mobile" val={row.Mobile}
+                                <TableCell padding="checkbox" align="left">
+                                    <RenderCheckBox name="mobile" val={row.mobile}
                                         onChange={handleChange} id={row.id} />
                                 </TableCell>
-                                <TableCell padding="checkbox" align="right">
-                                    <RenderCheckBox name="Email" val={row.Email} onChange={handleChange} id={row.id} /></TableCell>
+                                <TableCell padding="checkbox" align="left">
+                                    <RenderCheckBox name="email" val={row.email} onChange={handleChange} id={row.id} /></TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -153,5 +195,4 @@ export default function NotifiationPreference(props) {
             </TableContainer>
         </Box>
     </>
-
 }

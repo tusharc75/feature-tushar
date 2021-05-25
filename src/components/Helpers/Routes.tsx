@@ -1,6 +1,4 @@
-import { profilePage } from "../../constants/helpers";
-
-export default {
+const routes = {
   // account: {
   //   title: "Account",
   //   path: "/account",
@@ -152,10 +150,28 @@ export default {
   },
   productCost: {
     title: "Product Cost",
-    path: "/product-cost",
+    path: "/product-cost"
+  },
+  productBuilder: {
+    title: "Product Builder",
+    path: "/product-builder"
   },
   brandConfiguration: {
     title: "Brand Configuration",
     path: "/brand-configuration"
-  }
+  },
+  currencyConverter: {
+    title: "Currency Converter",
+    path: "/currency-converter"
+  },
+  productCategory: {
+    title: "Product Category",
+    path: "/product-category"
+  },
+  productTemplate: {
+    title: "Product Template",
+    path: "/product-template"
+  },
 };
+
+export default routes;

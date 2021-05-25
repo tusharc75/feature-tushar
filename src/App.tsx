@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { ThemeProvider } from "@material-ui/core";
-import { Redirect, Route, Switch, useLocation } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { theme } from "./constants/AppConfig";
 import Login from "./pages/Auth/Login";
@@ -22,9 +22,13 @@ import Activitydemo from "./pages/Activity/activitydemo";
 import Activity from "./pages/Activity";
 import Note from "./pages/Activity/Note";
 import Email from "./pages/Activity/Email";
+import Attachments from "./pages/Activity/Attachments";
+import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
+import ForgetPassword from "./pages/Auth/ForgetPassword";
 import ProductCategory from "./pages/ProductCategory";
-import CreateProductCategory from "./pages/ProductCategory/CreateProductCategory";
+import ProductTemplate from "./pages/ProductTemplate";
+import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
 import User from "./pages/User";
 import Entity from "./pages/Entity";
 import EntityDetailPage from "./pages/Entity/EntityDetailPage";
@@ -40,7 +44,13 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 
 import ProductCost from "./pages/ProductCost";
 import CreateProductCost from "./pages/ProductCost/CreateProductCost";
+import ProductBuilder from "./pages/ProductBuilder";
+import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
+import QuoteApproval from "./pages/Quote-Approval";
+import QuoteBuilderPage from "./pages/QuoteBuilder";
+import DOARequest from "./pages/DOA";
+import CurrencyConverter from "./pages/CurrencyConverter";
 
 import {
   termsAndCondition,
@@ -48,94 +58,70 @@ import {
   customerContact,
   supplierAccount,
   supplierContact,
-  profilePage,
-  vapidKey,
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
+import KpiDashboard from "./pages/KpiDashboard";
+import EditDashboard from "./pages/KpiDashboard/EditDashboards";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
 import UserProfilePage from "./pages/ProfilePage/index";
-// import firebase, { onMessageListener } from "./firebase";
-import CustomNotification from "./components/CustomNotification/CustomNotification";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
+import Event from "./pages/Activity/Event";
+import DOAapproval from "./pages/DOA/DOAApproval";
+import Reminder from "./pages/Reminder";
+import ResetPassword from "./pages/Auth/ResetPassword";
+import queryString from "query-string";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
-  // const [notification, setNotification] = useState({ open: false, title: null, message: null })
-
-  // const truepush = window["truepush"] || [];
-  // truepush.push(function () {
-  //   truepush.Init({
-  //     id: "608a852cd4fd7034e72c1b43"
-  //   }, function (error) {
-  //     if (error) console.error(error);
-  //   })
-  // })
-
-  // const messaging = firebase.messaging();
-  // messaging.getToken({ vapidKey: vapidKey }).then((token) => {
-  //   if (token) {
-  //     localStorage.setItem("notificationToken", token)
-  //   } else {
-  //     toast.setToastConfig({
-  //       open: true,
-  //       type: "error",
-  //       message: "No registration token available. Request permission to generate one."
-  //     })
-  //   }
-  // }).catch((err) => {
-  //   console.log('An error occurred while retrieving token. ', err);
-  //   // catch error while creating client token
-  // });
-
-  // onMessageListener().then((payload: any) => {
-  //   setNotification({
-  //     open: true,
-  //     title: payload.notification.title,
-  //     message: payload.notification.body
-  //   })
-  //   console.log(payload);
-  // }).catch(err => console.log('failed: ', err));
-
-  const location = useLocation();
   const {
     state: { user },
   }: any = useData();
 
-  useEffect(() => {
-    try {
-      if (localStorage.getItem("token")) {
-        axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-          notification.setCount(count);
-        }).catch((error) => {
+  const getNotification = async () => {
+    if (localStorage.getItem("token")) {
+      await axiosInstance()
+        .get(`/user/notification/unseen`)
+        .then(({ data: { count } }) => {
+          if (count > 0) {
+            notification.setCount(count);
+          }
+        })
+        .catch((error) => {
           toast.setToastConfig(error);
         });
-      }
-
-      setInterval(async () => {
-        if (localStorage.getItem("token")) {
-          await axiosInstance().get(`/user/notification/unseen`).then(({ data: { count } }) => {
-            notification.setCount(count);
-          }).catch((error) => {
-            toast.setToastConfig(error);
-          });
-        }
-      }, 60000);
     }
-    catch (e) {
+  };
+
+  useEffect(() => {
+    try {
+      getNotification();
+      setInterval(async () => {
+        await getNotification();
+      }, 60000);
+    } catch (e) {
       console.log(e);
     }
-  }, [])
+  }, []);
 
   const conditionalRedirect = (Comp, location) => {
+
+    let redirectToAnotherScreen = null;
+    if (location && location.search) {
+      const parsedParams = queryString.parse(location.search);
+      if (parsedParams.redirect) {
+        redirectToAnotherScreen = parsedParams.redirect;
+      }
+    }
+
     return !user ? (
       <Comp />
     ) : (
-      <Redirect to={{ pathname: "/", state: { from: location } }} />
+      <Redirect to={{ pathname: redirectToAnotherScreen ? redirectToAnotherScreen : "/", state: { from: location } }} />
     );
   };
 
@@ -145,7 +131,7 @@ function App() {
         {/* <Switch location={location} key={location.key}> */}
         <Switch>
           <Route
-            exact
+            // exact
             path="/login"
             render={({ location }) => conditionalRedirect(Login, location)}
           />
@@ -154,6 +140,20 @@ function App() {
             path="/create-password"
             render={({ location }) =>
               conditionalRedirect(PasswordSetup, location)
+            }
+          />
+          <Route
+            exact
+            path="/forget-password"
+            render={({ location }) =>
+              conditionalRedirect(ForgetPassword, location)
+            }
+          />
+          <Route
+            exact
+            path="/reset-password"
+            render={({ location }) =>
+              conditionalRedirect(ResetPassword, location)
             }
           />
           <PrivateRoute exact path="/">
@@ -177,7 +177,6 @@ function App() {
           <PrivateRoute exact path="/new-opp">
             <AddNewOpportunity />
           </PrivateRoute>
-
           <PrivateRoute exact path="/doa">
             <Doa />
           </PrivateRoute>
@@ -310,18 +309,29 @@ function App() {
           <PrivateRoute exact path="/activity/note">
             <Note />
           </PrivateRoute>
+          <PrivateRoute exact path="/activity/attachment">
+            <Attachments />
+          </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />
           </PrivateRoute>
-
-          <PrivateRoute exact path="/product-category">
-            <ProductCategory />
+          <PrivateRoute exact path="/calendar">
+            <Calender />
           </PrivateRoute>
-          <PrivateRoute exact path="/product-category/:id">
-            <CreateProductCategory />
+          <PrivateRoute exact path="/reminder">
+            <Reminder />
           </PrivateRoute>
           <PrivateRoute exact path={routes.product.path}>
             <Product />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productCategory.path}>
+            <ProductCategory />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productTemplate.path}>
+            <ProductTemplate />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productTemplate.path + "/:id"}>
+            <CreateProductTemplate />
           </PrivateRoute>
           <PrivateRoute exact path={routes.formBuilder.path}>
             <FormBuilder />
@@ -337,13 +347,43 @@ function App() {
               termsAndConditionBreadcrumb={routes.termsAndConditions}
             />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.productCost.path}>
             <ProductCost />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productCost.path + "/:id"}>
             <CreateProductCost />
           </PrivateRoute>
+          <PrivateRoute exact path={routes.productBuilder.path}>
+            <ProductBuilder />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
+            <CreateProductBuilder />
+          </PrivateRoute>
+          <PrivateRoute exact path={routes.currencyConverter.path}>
+            <CurrencyConverter />
+          </PrivateRoute>
+          <Route exact path={"/quote-builder/:id"}>
+            <QuoteBuilderPage />
+          </Route>
+          <Route exact path={"/dashboards"}>
+            <KpiDashboard />
+          </Route>
+          <Route exact path={"/dashboard-edit/:id"}>
+            <EditDashboard edit={true} />
+          </Route>
+          <Route exact path={"/dashboard/:id"}>
+            <EditDashboard edit={false} />
+          </Route>
+          //Route available for customers to Accept Reject Quote
+          <Route exact path={"/quote-approval/:id"}>
+            <QuoteApproval />
+          </Route>
+          <Route exact path={"/doa-request"}>
+            <DOARequest />
+          </Route>
+          <Route exact path={"/doa-request/:id"}>
+            <DOAapproval />
+          </Route>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>
@@ -358,12 +398,6 @@ function App() {
           }}
         />
       )}
-
-      {/* {
-        notification.open && <CustomNotification open={notification.open}
-          title={notification.title} message={notification.message}
-          close={() => { setNotification({ open: false, title: null, message: null }) }} />
-      } */}
     </ThemeProvider>
   );
 }

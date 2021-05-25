@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useContext } from "react";
 import {
   Avatar,
   Box,
@@ -40,6 +40,8 @@ import { getFormulaValue } from "../../constants/formulaUtility";
 import NumberFormat from "react-number-format";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import currencyList from "../../constants/currency_with_country.json";
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -52,23 +54,17 @@ const withValueLimit = (inputObj, limitVal) => {
   if (value <= limitVal) return inputObj;
 };
 
+const formatDecimal = (value, decimalPlaces) => {
+  if (value === "" && isNaN(value)) {
+    return 0;
+  } else {
+    return parseFloat(value.toFixed(decimalPlaces));
+  }
+};
+
 const CustomFormat = (props: NumberFormatCustomProps) => {
   const { inputRef, onChange, ...other } = props;
-  return (
-    <NumberFormat
-      {...other}
-      getInputRef={inputRef}
-      onValueChange={(values) => {
-        onChange({
-          target: {
-            name: props.name,
-            value: values.formattedValue,
-          },
-        });
-      }}
-      isNumericString
-    />
-  );
+  return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
 };
 
 const InfoLabel = ({
@@ -153,6 +149,8 @@ const FormTypes = (props) => {
     fieldData,
     startAdornment,
     accept,
+    usePublicUrlforFileUpload = false,
+    doNotShowUploadedFile = false,
     ...rest
   } = props;
 
@@ -163,7 +161,7 @@ const FormTypes = (props) => {
   const [isFileUploading, setFileUploading] = React.useState(false);
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
   const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
-  const { setToastConfig } = React.useContext(CustomToastContext);
+  const { setToastConfig } = useContext(CustomToastContext);
 
   const fetch = React.useMemo(
     () =>
@@ -189,7 +187,8 @@ const FormTypes = (props) => {
 
     if (type === "location") {
       if (!autocompleteService.current && window.google) {
-        autocompleteService.current = new window.google.maps.places.AutocompleteService();
+        autocompleteService.current =
+          new window.google.maps.places.AutocompleteService();
       }
       if (!autocompleteService.current) {
         return undefined;
@@ -221,7 +220,18 @@ const FormTypes = (props) => {
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
-      getImageUrl(file);
+
+      //  1048576 = 1 MB
+      if (file.size > 1048576) {
+        setToastConfig({
+          open: true,
+          type: "error",
+          message: "Image must be less than 1 MB size",
+        });
+      } else {
+        getImageUrl(file);
+      }
+
       event.target.value = "";
     }
   };
@@ -271,8 +281,9 @@ const FormTypes = (props) => {
     let formData = new FormData();
     formData.append("file", file);
     setFileUploading(true);
+    let uploadUrl = usePublicUrlforFileUpload ? "/user/upload-public" : "/user/upload"
     axiosInstance()
-      .post("/user/upload", formData, {
+      .post(uploadUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (pE) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
@@ -286,7 +297,7 @@ const FormTypes = (props) => {
         },
       })
       .then(({ data }) => {
-        setFieldValue(name, data.fileName);
+        setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
         setFileUploading(false);
       })
       .catch((err) => {
@@ -298,17 +309,48 @@ const FormTypes = (props) => {
 
   const handleChange = (name, value) => {
     setFieldValue(name, value);
+    if (fieldData && fieldData.isMulitFormula) {
+      handleMulitFormula(fieldData, { [name]: value });
+    }
     if (type === "vlookupDropdown") {
       handleVlookup(name, value);
     }
-    handleFormula(name, value);
+    handleFormula(name, value, { [name]: value });
     handleCheckVlookupReverse(name, value);
   };
 
-  const handleFormula = (name, value) => {
-    if (fields && fields.filter((_f) => _f.type === "formula").length) {
+  const handleMulitFormula = (data, alredyDone) => {
+    data.formulaFields.forEach((_field) => {
+      let formulainputFields = {};
+      data.formulainputFields.forEach((_input) => {
+        formulainputFields[_input] = alredyDone[_input] || alredyDone[_input] === 0
+          ? alredyDone[_input]
+          : values[_input]
+            ? values[_input]
+            : 0;
+      });
+      let calValue = getFormulaValue(
+        data.formulaoption[_field],
+        formulainputFields,
+        "decimal",
+        2
+      );
+      console.log(calValue)
+      setFieldValue(_field, calValue);
+      alredyDone[_field] = calValue;
+      handleFormula(_field, calValue, alredyDone);
+      if (data.displayUnits && data.displayUnits.length) {
+        handleConverter(data, data.fieldName, data.displayUnits[0], calValue);
+      }
+    });
+  };
+
+  const handleFormula = (name, value, alredyDone) => {
+    if (
+      fields && fields.filter((_f) => _f.type === "formula" || _f.isFormula === true).length
+    ) {
       fields
-        .filter((_f) => _f.type === "formula")
+        .filter((_f) => _f.type === "formula" || _f.isFormula === true)
         .forEach((_data) => {
           if (_data.inputFields.includes(name)) {
             let inputFields = {};
@@ -316,7 +358,11 @@ const FormTypes = (props) => {
               if (name === _input) {
                 inputFields[_input] = value;
               } else {
-                inputFields[_input] = values[_input] ? values[_input] : "";
+                inputFields[_input] = alredyDone[_input]
+                  ? alredyDone[_input]
+                  : values[_input]
+                    ? values[_input]
+                    : 0;
               }
             });
             let calValue = getFormulaValue(
@@ -325,7 +371,49 @@ const FormTypes = (props) => {
               _data.returnType,
               _data.decimalPlaces
             );
-            setFieldValue(_data.fieldName, calValue);
+            calValue = formatDecimal(calValue, 2);
+            let _fieldName = _data.fieldName;
+            if (_data.type === "currencyAmount" || _data.type === "converter" || _data.isConverter) {
+              if (_data.displayCurrency && _data.displayCurrency.length) {
+                _fieldName = _fieldName + "_" + _data.displayCurrency[0].toLowerCase();
+              }
+              if (_data.displayUnits && _data.displayUnits.length) {
+                _fieldName = _fieldName + "_" + (_data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter.toLowerCase() : _data.displayUnits[0].toLowerCase())
+              }
+              if (alredyDone[_fieldName] === undefined) {
+                setFieldValue(_fieldName, calValue);
+                alredyDone[_fieldName] = calValue;
+                handleFormula(_fieldName, calValue, alredyDone);
+                if (_data.displayCurrency && _data.displayCurrency.length) {
+                  handleCurrency(
+                    _data,
+                    _data.fieldName,
+                    _data.displayCurrency[0],
+                    calValue
+                  );
+                }
+                if (_data.displayUnits && _data.displayUnits.length) {
+                  handleConverter(
+                    _data,
+                    _data.fieldName,
+                    _data.formulaOnConverter && _data.formulaOnConverter !== "" ? _data.formulaOnConverter : _data.displayUnits[0],
+                    calValue
+                  );
+                }
+                if (_data.isMulitFormula) {
+                  handleMulitFormula(_data, alredyDone);
+                }
+              }
+            } else {
+              if (alredyDone[_fieldName] === undefined) {
+                setFieldValue(_fieldName, calValue);
+                alredyDone[_fieldName] = calValue;
+                handleFormula(_fieldName, calValue, alredyDone);
+                if (_data.isMulitFormula) {
+                  handleMulitFormula(_data, alredyDone);
+                }
+              }
+            }
           }
         });
     }
@@ -378,21 +466,132 @@ const FormTypes = (props) => {
     }
   };
 
-  const handleConverterChange = (name, unit, value) => {
-    setFieldValue(name + unit.toLowerCase(), value);
-    handleFormula(name + unit.toLowerCase(), value);
-    let index = fieldData.units.indexOf(unit);
-    if (index >= 0) {
-      for (var x in fieldData.option[index]) {
-        if (x !== unit) {
-          setFieldValue(
-            name + x.toLowerCase(),
-            value * fieldData.option[index][x]
-          );
-          handleFormula(
-            name + x.toLowerCase(),
-            value * fieldData.option[index][x]
-          );
+  const handleConverterChange = (name, _unit, value) => {
+    let fieldName = name + "_" + _unit.toLowerCase();
+    setFieldValue(fieldName, value);
+    handleFormula(fieldName, value, { fieldName: value });
+    handleConverter(fieldData, name, _unit, value);
+  };
+
+  const handleConverter = (data, name, _unit, value) => {
+    let indexConverter = data.units.indexOf(_unit);
+    if (indexConverter >= 0) {
+      for (var x_unit in data.option[indexConverter]) {
+        if (x_unit !== _unit) {
+          let calValue = value * data.option[indexConverter][x_unit];
+          calValue = formatDecimal(calValue, 2);
+          setFieldValue(name + "_" + x_unit.toLowerCase(), calValue);
+          handleFormula(name + "_" + x_unit.toLowerCase(), calValue, {});
+        }
+      }
+    }
+  };
+
+  const handleCurrencyChange = (name, _currency, value) => {
+    let fieldName = name + "_" + _currency.toLowerCase();
+    setFieldValue(fieldName, value);
+    handleFormula(fieldName, value, { fieldName: value });
+    handleCurrency(fieldData, name, _currency, value);
+  };
+
+  const handleCurrency = (data, name, _currency, value) => {
+    let indexCurrency = data.currency.indexOf(_currency);
+    if (data.isMulitFormula) {
+      handleMulitFormula(data, {
+        [name + "_" + _currency.toLowerCase()]: value,
+      });
+    }
+    if (indexCurrency >= 0) {
+      for (var x_currency in data.currencyoption[indexCurrency]) {
+        if (
+          data.displayCurrency.includes(x_currency) &&
+          x_currency !== _currency
+        ) {
+          let _fieldName = name + "_" + x_currency.toLowerCase();
+          let calValue = value * data.currencyoption[indexCurrency][x_currency];
+          calValue = formatDecimal(calValue, 2);
+          setFieldValue(_fieldName, calValue);
+          handleFormula(_fieldName, calValue, {});
+        }
+      }
+    }
+  };
+
+  const handleCurrencyChangeWithConverter = (name, _currency, _unit, value) => {
+    setFieldValue(
+      name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(),
+      value
+    );
+    handleFormula(
+      name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(),
+      value,
+      {}
+    );
+    handleCurrencyConverter(fieldData, name, _currency, _unit, value);
+  };
+
+  const handleCurrencyConverter = (data, name, _currency, _unit, value) => {
+    if (data.isMulitFormula) {
+      handleMulitFormula(data, {
+        [name + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()]:
+          value,
+      });
+    }
+    let indexConverter = data.units.indexOf(_unit);
+    let indexCurrency = data.currency.indexOf(_currency);
+    if (indexConverter >= 0 && indexCurrency >= 0) {
+      for (var x_unit in data.option[indexConverter]) {
+        for (var x_currency in data.currencyoption[indexCurrency]) {
+          if (
+            data.displayUnits.includes(x_unit) &&
+            data.displayCurrency.includes(x_currency)
+          ) {
+            if (x_currency === _currency && x_unit === _unit) {
+            } else if (x_currency !== _currency && x_unit === _unit) {
+              let calValue =
+                value * data.currencyoption[indexCurrency][x_currency];
+              calValue = formatDecimal(calValue, 2);
+              setFieldValue(
+                name +
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
+                calValue
+              );
+              handleFormula(
+                name +
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
+                calValue,
+                {}
+              );
+            } else {
+              let calValue = value * data.option[indexConverter][x_unit];
+              calValue =
+                calValue * data.currencyoption[indexCurrency][x_currency];
+              calValue = formatDecimal(calValue, 2);
+              setFieldValue(
+                name +
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
+                calValue
+              );
+              handleFormula(
+                name +
+                "_" +
+                x_currency.toLowerCase() +
+                "_" +
+                x_unit.toLowerCase(),
+                calValue,
+                {}
+              );
+            }
+          }
         }
       }
     }
@@ -432,7 +631,7 @@ const FormTypes = (props) => {
         onChange={(e) => {
           const regex = /^[a-zA-Z ]+$/i;
           if (e.target.value === "" || regex.test(e.target.value.trim())) {
-            setFieldValue(name, e.target.value);
+            setFieldValue(name, e.target.value.trim());
           }
         }}
       />
@@ -475,8 +674,11 @@ const FormTypes = (props) => {
           inputComponent: CustomFormat as any,
           inputProps: {
             allowNegative: false,
+            onValueChange: (values) => {
+              handleChange(name, values.value);
+            },
           },
-          startAdornment: startAdornment
+          startAdornment: startAdornment,
         }}
       />
     </InfoLabel>
@@ -485,27 +687,28 @@ const FormTypes = (props) => {
       <TextField
         {...rest}
         variant="outlined"
+        type="number"
         label={label}
         required={required}
         name={name}
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
-        InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            decimalScale: decimalPlaces ? decimalPlaces : 2,
-            onValueChange: (values: any) =>
-              setFieldValue(name, values.formattedValue),
-          },
-        }}
+        // InputProps={{
+        //   inputComponent: CustomFormat as any,
+        //   inputProps: {
+        //     decimalScale: decimalPlaces ? decimalPlaces : 2,
+        //     onValueChange: (values: any) =>
+        //       setFieldValue(name, values.formattedValue),
+        //   },
+        // }}
         onChange={
           onChange
             ? onChange
             : (e) => {
               handleChange(
                 name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
+                e.target.value == "" ? 0 : parseFloat(e.target.value)
               );
             }
         }
@@ -515,6 +718,7 @@ const FormTypes = (props) => {
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <TextField
         {...rest}
+        type="number"
         variant="outlined"
         label={label}
         required={required}
@@ -523,13 +727,13 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            isAllowed: (props) => withValueLimit(props, 100),
-            decimalScale: 2,
-            onValueChange: (values: any) =>
-              setFieldValue(name, values.formattedValue),
-          },
+          // inputComponent: CustomFormat as any,
+          // inputProps: {
+          //   isAllowed: (props) => withValueLimit(props, 100),
+          //   decimalScale: 2,
+          //   onValueChange: (values: any) =>
+          //     setFieldValue(name, values.formattedValue),
+          // },
           endAdornment: "%",
         }}
         onChange={
@@ -538,7 +742,7 @@ const FormTypes = (props) => {
             : (e) => {
               handleChange(
                 name,
-                e.target.value == "" ? null : parseFloat(e.target.value)
+                e.target.value == "" ? 0 : parseFloat(e.target.value)
               );
             }
         }
@@ -549,7 +753,7 @@ const FormTypes = (props) => {
       <TextField
         {...rest}
         variant="outlined"
-        type="text"
+        type={fieldData.returnType === "decimal" ? "number" : "text"}
         label={label}
         name={name}
         required={required}
@@ -557,7 +761,15 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         onChange={
-          onChange ? onChange : (e) => handleChange(name, e.target.value)
+          onChange
+            ? onChange
+            : (e) => {
+              if (fieldData.returnType === "decimal") {
+                handleChange(name, parseFloat(e.target.value));
+              } else {
+                handleChange(name, e.target.value);
+              }
+            }
         }
       />
     </InfoLabel>
@@ -678,18 +890,18 @@ const FormTypes = (props) => {
           <TextField
             {...rest}
             variant="outlined"
-            type="text"
+            type="number"
             label={label + " " + _unit}
-            name={name + _unit.toLowerCase()}
+            name={name + "_" + _unit.toLowerCase()}
             required={required}
-            value={values[name + _unit.toLowerCase()]}
+            value={values[name + "_" + _unit.toLowerCase()]}
             error={
-              touched[name + _unit.toLowerCase()] &&
-              Boolean(errors[name + _unit.toLowerCase()])
+              touched[name + "_" + _unit.toLowerCase()] &&
+              Boolean(errors[name + "_" + _unit.toLowerCase()])
             }
             helperText={
-              touched[name + _unit.toLowerCase()] &&
-              errors[name + _unit.toLowerCase()]
+              touched[name + "_" + _unit.toLowerCase()] &&
+              errors[name + "_" + _unit.toLowerCase()]
             }
             onChange={
               onChange
@@ -700,6 +912,149 @@ const FormTypes = (props) => {
         </InfoLabel>
       </Grid>
     ))
+  ) : type === "currencyAmount" ? (
+    fieldData.displayCurrency.map((_currency, i) =>
+      fieldData.isConverter && fieldData.displayUnits.length ? (
+        fieldData.displayUnits.map((_unit, i) => (
+          <Grid key={_unit} item xs={12} sm={6} md={6}>
+            <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+              <TextField
+                {...rest}
+                variant="outlined"
+                type="number"
+                label={label + " " + _currency + "/" + _unit}
+                name={
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
+                }
+                required={required}
+                value={
+                  values[
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
+                  ]
+                }
+                error={
+                  touched[
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
+                  ] &&
+                  Boolean(
+                    errors[
+                    name +
+                    "_" +
+                    _currency.toLowerCase() +
+                    "_" +
+                    _unit.toLowerCase()
+                    ]
+                  )
+                }
+                helperText={
+                  touched[
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
+                  ] &&
+                  errors[
+                  name +
+                  "_" +
+                  _currency.toLowerCase() +
+                  "_" +
+                  _unit.toLowerCase()
+                  ]
+                }
+                onChange={
+                  onChange
+                    ? onChange
+                    : (e) =>
+                      handleCurrencyChangeWithConverter(
+                        name,
+                        _currency,
+                        _unit,
+                        parseFloat(e.target.value)
+                      )
+                }
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {_.result(
+                        _.find(currencyList, function (obj) {
+                          return obj.currencyCode === _currency;
+                        }),
+                        "symbolNative"
+                      )}
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </InfoLabel>
+          </Grid>
+        ))
+      ) : (
+        <Grid key={_currency} item xs={12} sm={6} md={6}>
+          <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+            <TextField
+              {...rest}
+              variant="outlined"
+              type="number"
+              label={label + " " + _currency}
+              name={name + "_" + _currency.toLowerCase()}
+              required={required}
+              value={values[name + "_" + _currency.toLowerCase()]}
+              error={
+                touched[name + "_" + _currency.toLowerCase()] &&
+                Boolean(errors[name + "_" + _currency.toLowerCase()])
+              }
+              helperText={
+                touched[name + "_" + _currency.toLowerCase()] &&
+                errors[name + "_" + _currency.toLowerCase()]
+              }
+              onChange={
+                onChange
+                  ? onChange
+                  : (e) => {
+                    if (fieldData.displayCurrency.length > 1) {
+                      handleCurrencyChange(
+                        name,
+                        _currency,
+                        parseFloat(e.target.value)
+                      );
+                    } else {
+                      handleChange(
+                        name + "_" + _currency.toLowerCase(),
+                        parseFloat(e.target.value)
+                      );
+                    }
+                  }
+              }
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    {_.result(
+                      _.find(currencyList, function (obj) {
+                        return obj.currencyCode === _currency;
+                      }),
+                      "symbolNative"
+                    )}
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </InfoLabel>
+        </Grid>
+      )
+    )
   ) : type === "currency" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
       <Autocomplete
@@ -715,11 +1070,19 @@ const FormTypes = (props) => {
         }
         options={currencyData}
         getOptionLabel={(option: any) =>
-          option ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}` : ""
+          option
+            ? `${option.currencyCode} (${option.symbolNative}) - ${option.name}`
+            : ""
         }
         getOptionSelected={(option: any, val) => option.currencyCode === val}
-        onChange={onChange ? onChange : (e, val) =>
-          setFieldValue(name, val && val.currencyCode ? val.currencyCode : "")
+        onChange={
+          onChange
+            ? onChange
+            : (e, val) =>
+              setFieldValue(
+                name,
+                val && val.currencyCode ? val.currencyCode : ""
+              )
         }
         renderInput={(params) => (
           <TextField
@@ -744,7 +1107,9 @@ const FormTypes = (props) => {
                 />
               </Grid>
               <Grid item xs>
-                <Typography>{currencyCode} ({symbolNative})</Typography>
+                <Typography>
+                  {currencyCode} ({symbolNative})
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   {name}
                 </Typography>
@@ -1018,6 +1383,21 @@ const FormTypes = (props) => {
               <DeleteIcon />
             </IconButton>
           }
+          <Box flex="1">
+            <Typography
+              variant="body2"
+              className="text-truncate"
+              style={{
+                marginLeft: "4px",
+                display: touched[name] && Boolean(errors[name]) ? "" : "none",
+              }}
+              color={
+                touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
+              }
+            >
+              {touched[name] && Boolean(errors[name]) ? errors[name] : null}
+            </Typography>
+          </Box>
         </Box>
       </Box>
     </Fragment>
@@ -1044,36 +1424,38 @@ const FormTypes = (props) => {
             Upload File
           </Button>
         </label>
-        <Box marginX={1} />
-
-        <Box flex="1">
-          <Typography
-            variant="body2"
-            className="text-truncate"
-            color={
-              touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
-            }
-          >
-            {isFileUploading
-              ? `Uploading... ${fileUploadProgress}%`
-              : values[name]
-                ? values[name]
-                : touched[name] && Boolean(errors[name])
-                  ? errors[name]
-                  : "No file choosen"}
-          </Typography>
-        </Box>
-        <IconButton
-          disabled={Boolean(!values[name])}
-          title="Remove File"
-          color="secondary"
-          size="small"
-          aria-label="delete picture"
-          component="span"
-          onClick={() => setFieldValue(name, "")}
-        >
-          <DeleteIcon />
-        </IconButton>
+        {
+          doNotShowUploadedFile ? null : <>
+            <Box marginX={1} />
+            <Box flex="1">
+              <Typography
+                variant="body2"
+                className="text-truncate"
+                color={
+                  touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
+                }
+              >
+                {isFileUploading
+                  ? `Uploading... ${fileUploadProgress}%`
+                  : values[name]
+                    ? values[name]
+                    : touched[name] && Boolean(errors[name])
+                      ? errors[name]
+                      : "No file choosen"}
+              </Typography>
+            </Box>
+            <IconButton
+              disabled={Boolean(!values[name])}
+              title="Remove File"
+              color="secondary"
+              size="small"
+              aria-label="delete picture"
+              component="span"
+              onClick={() => setFieldValue(name, "")}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </>}
       </Box>
     </Fragment>
   ) : type === "url" ? (
@@ -1098,14 +1480,14 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDatePicker
           {...rest}
-          clearable="true"
+          clearable
           required={required}
           variant="inline"
           inputVariant="outlined"
           value={values[name]}
           name={name}
           label={label}
-          onChange={(date) => setFieldValue(name, date)}
+          onChange={(date) => setFieldValue(name, date ? date : "")}
           format="MM/dd/yyyy"
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
@@ -1120,6 +1502,7 @@ const FormTypes = (props) => {
       <MuiPickersUtilsProvider utils={DateUtils}>
         <KeyboardDateTimePicker
           {...rest}
+          clearable
           required={required}
           variant="inline"
           inputVariant="outlined"

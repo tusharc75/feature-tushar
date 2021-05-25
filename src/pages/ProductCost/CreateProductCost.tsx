@@ -69,9 +69,9 @@ const ProductCost = () => {
         section.forEach(_section => {
             _section.field.forEach(_field => {
                 let _field_data = _field
-                _field_data.fieldId = _field_data.fieldId.toString();
+                _field_data._id = _field_data._id.toString();
                 _field_data.sectionName = _section.sectionName
-                if (!isNaN(_field.fieldId)) {
+                if (!isNaN(_field._id)) {
                     _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
                 }
                 _field_data.order = ++order
@@ -150,12 +150,12 @@ const ProductCost = () => {
                                     </Grid>
                                     <Grid item xs={12} sm={3} container justify="flex-end">
                                         <Box>
-                                            <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
+                                            <Button disabled={isUpdating} size="small" color="primary" onClick={submitForm} variant="contained" >
                                                 Save{isUpdating && <CircularProgress size={24} />}
                                             </Button>
                                         </Box>
                                         <Box ml={1} >
-                                            <Button color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productCost.path })} >Close</Button>
+                                            <Button color="primary" size="small" variant="contained" onClick={() => history.push({ pathname: routes.productCost.path })} >Close</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
@@ -166,7 +166,8 @@ const ProductCost = () => {
                                     setSection={setSection}
                                     deleteField={deleteField}
                                     setDeleteField={setDeleteField}
-                                    isCustomField={true} />
+                                    isCustomField={true}
+                                />
                             </Box>
                         </Form>)}
                 </Formik>

@@ -18,7 +18,6 @@ import { FaEye } from 'react-icons/fa';
 const Accordion = withStyles({
     root: {
         border: "1px solid rgba(0, 0, 0, .125)",
-        boxShadow: "none",
         "&:not(:last-child)": {
             borderBottom: 0,
         },
@@ -34,15 +33,19 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "rgba(0, 0, 0, .03)",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",
+        fontWeight: "bold",
+        padding: "0px",
         "&$expanded": {
-            minHeight: 56,
+            minHeight: 46,
         },
     },
     content: {
         "&$expanded": {
             margin: "12px 0",
+
         },
     },
     expanded: {},
@@ -52,17 +55,19 @@ const AccordionDetails = withStyles((theme) => ({
     root: {
         padding: theme.spacing(1),
         display: "block",
-    },
+    }
+
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value, icon }) {
+
+function DisplayData({ key, label, value, icon }) {
     return <div style={{ flexGrow: 1 }}>
-        <List >
-            <ListItem>
+        <List>
+            <ListItem key={key}>
                 <ListItemAvatar>
                     {icon}
                 </ListItemAvatar>
-                <ListItemText primary={value} secondary={label} />
+                <ListItemText primary={value ? value : '-'} secondary={label} />
             </ListItem>
         </List>
     </div>
@@ -93,7 +98,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
 
     const [expandProject, setExpandProject] = useState(expanded);
     return <>
-        <Accordion expanded={expandProject}>
+        <Accordion expanded={expandProject} className="omsAccordian accordProject">
             <AccordionSummary
                 aria-controls="user-panel-content"
                 id="user-panel-header"
@@ -142,25 +147,24 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                                 <Grid container spacing={1}>
                                     {
                                         <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
-                                            <Card style={{ minWidth: "100%" }}>
+                                            <Card className="detailCard">
                                                 <CardContent className="detailListing">
                                                     <Grid container className="detailCardHeader">
                                                         <Grid item xs={12} sm={12}>
                                                             <Link className="link">
-                                                                <Typography >Project 1</Typography>
+                                                                <Typography className="detailName">Project 1</Typography>
                                                             </Link>
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container>
-                                                        <Grid item xs={12} sm={12}>
+                                                        <Grid item xs={12} sm={6} md={6}>
                                                             {
-                                                                <DisplayData label='Status' value="Active" icon={<BsClockHistory size={20} />} />
+                                                                <DisplayData key={1} label='Status' value="Active" icon={<BsClockHistory size={15} />} />
                                                             }
                                                         </Grid>
-                                                        <Grid item xs={12} sm={12}>
+                                                        <Grid item xs={12} sm={6} md={6}>
                                                             {
-                                                                //TODO :value={displayDate(date)}
-                                                                <DisplayData label='Due Date' value="May-20-2021" icon={< IoCalendarOutline size={20} />} />
+                                                                <DisplayData key={2} label='Due Date' value="May-20-2021" icon={< IoCalendarOutline size={15} />} />
                                                             }
                                                         </Grid>
                                                     </Grid>
@@ -174,11 +178,10 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                     }
                 </>
             </AccordionDetails>
-
-            <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
+            {/* <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
                 <FaEye /> View All &#8599;
             </Box>
-            <Box margin={1} />
+            <Box margin={1} /> */}
         </Accordion>
 
         {/* {

@@ -1,5 +1,6 @@
 //import api from './axios'
 import api from './axiosInstance'
+import { getSearchQuery } from '../services/util'
 
 export const GetUsers = async () => {
     const { data } = await api().get(`/activity/user`);
@@ -172,12 +173,14 @@ export const GetNotes = async (filter) => {
     return data;
 };
 
-export const GetEmails = async (filter) => {
-    const { data } = await api().get(`/activity/emails?filter=${filter}`);
+export const GetEmails = async (filter, params = null) => {
+    let apiUrl = `/email/my?filter=${filter}`
+    if (params) {
+        apiUrl = getSearchQuery(apiUrl, params);
+    }
+    const { data } = await api().get(apiUrl);
     return data;
 };
-
-
 
 export const GetComment = async (referenceId) => {
     const { data } = await api().get(`/comment/${referenceId}`);

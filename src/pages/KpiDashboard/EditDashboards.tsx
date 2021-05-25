@@ -1,0 +1,135 @@
+import React, { useState, useEffect, Fragment, useContext } from "react";
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Layout from "../../components/Layout";
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { useParams, useHistory } from "react-router-dom";
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import { FormBuilder } from "../../components/FormBuilder";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { TextField } from "formik-material-ui";
+import Loader from "../../components/Loader";
+import { camelCase } from "../../constants/helpers";
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import axiosInstance from "../../axios/axiosInstance";
+import CustomContainer from "../../components/CustomContainer";
+import routes from "../../components/Helpers/Routes";
+import DashboardView from '../../components/Charts/DashboardView'
+import ProductBuilder from "../../components/productBuilder";
+import axios from "axios";
+import { Dashboard } from "@material-ui/icons";
+
+const ProductBuilderSchema = Yup.object().shape({
+    name: Yup.string()
+        .min(3, "Too Short!")
+        .max(50, "Too Long")
+        .required("name is required"),
+});
+
+
+const EditDashboards = (props) => {
+    const {edit}=props
+    console.log(edit);
+    const toastConfig = useContext(CustomToastContext)
+    const history = useHistory();
+    const { id } = useParams();
+    console.log(id);
+
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [initialValues, setInitialValues] = useState(null);
+    const [deleteField, setDeleteField] = useState([]);
+
+
+    useEffect(() => {
+        fetchDashboard();
+    }, [id]);
+
+
+    const fetchDashboard = () => {
+        if (id === "0") {
+            setInitialValues({ name: "" });
+        }
+        else {
+            axiosInstance().get(`/dashboard/` + id).then(({ data: { data } }) => {
+                console.log(data);
+                setInitialValues(data);
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
+    };
+
+    
+    const handleSave = (values) => {
+        let data: any = {}
+        data.name = initialValues.name;
+        data.Charts= values;
+
+        setIsUpdating(true)
+        if (id === "0") {
+            axiosInstance().post("/dashboard", data).then(({ data: { data } }) => {
+                setIsUpdating(false)
+                history.push({ pathname: '/dashboards' });
+            }).catch((error) => {
+                setIsUpdating(false)
+                toastConfig.setToastConfig(error);
+            });
+        }
+        else {
+            data.BuilderId = id;
+            data.deleteField = deleteField;
+            axiosInstance().put("/dashboard/"+id, data).then(({ data: { data } }) => {
+                setIsUpdating(false)
+                history.push({ pathname: '/dashboards' });
+            }).catch((error) => {
+                setIsUpdating(false)
+                toastConfig.setToastConfig(error);
+            });
+        }
+    }
+
+    return (<Layout>
+
+        <Grid container direction="row">
+            <Grid item xs={12}>
+                <CustomBreadCrumbs routes={[{ title: "Dashboards", path: "/dashboards" },
+                { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
+            </Grid>
+        </Grid>
+        <CustomContainer>
+            {initialValues ?
+                <Formik initialValues={initialValues} validationSchema={ProductBuilderSchema} onSubmit={handleSave}>
+                    {({ submitForm }) => (
+                        <Form>
+                            <Box p={1} bgcolor="white">
+                                <Grid container spacing={1}>
+                                    <Grid item xs={12} sm={3}  >
+                                        {initialValues.name}
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} container justify="flex-end">
+                                        {/* <Box>
+                                            <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
+                                                Save{isUpdating && <CircularProgress size={24} />}
+                                            </Button>
+                                        </Box> */}
+                                        <Box ml={1} >
+                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: "/dashboards" })} >Close</Button>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                                <DashboardView edit={edit} handleSave={handleSave} Charts={initialValues.Charts}/>
+                            </Box>
+                        </Form>)}
+                </Formik>
+                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+        </CustomContainer>
+    </Layout>
+    );
+}
+
+export default EditDashboards;

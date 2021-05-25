@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Grid,
   IconButton,
@@ -18,7 +17,6 @@ import OpportunitiesHeader from "./OpportunitiesHeader";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import "./style.scss";
-import DataGridCustomToolbar from "../../components/Helpers/DataGridCustomToolbar";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
@@ -30,10 +28,11 @@ import {
 } from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
+import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { useHistory } from "react-router-dom";
+import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -96,7 +95,10 @@ const Opportunities = () => {
     if (permissions && permissions[opportunityResource]) {
       setOpportunityPermissions(permissions[opportunityResource]);
     }
-    // eslint-disable-next-line
+
+    return () => {
+      setOpportunityPermissions(null)
+    }
   }, [permissions]);
 
   useEffect(() => {
@@ -115,7 +117,11 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-    // eslint-disable-next-line
+
+
+    return () => {
+      setRenderCount(0);
+    }
   }, [query, selectedType, selectedEntity, accountDetails]);
 
   useEffect(() => {
@@ -133,7 +139,11 @@ const Opportunities = () => {
       return res;
     });
     setDataRows([...rows]);
-    // eslint-disable-next-line
+
+    return () => {
+      setDataRows([])
+    }
+
   }, [opportunityData]);
 
   const handleSingleDeleteOpportunity = async () => {
@@ -271,16 +281,25 @@ const Opportunities = () => {
       field: "supplierAccountName",
       headerName: "Supplier Account Name",
       width: 300,
-      renderCell: (params) => (
-        <Link
-          className="link"
-          to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName?.optionValue}`}
-        >
-          {params?.row?.supplierAccountName?.optionLabel
-            ? params.row.supplierAccountName.optionLabel
-            : ""}
-        </Link>
-      ),
+      hide: true,
+      renderCell: (params) =>
+        params?.row?.supplierAccountName.length > 0 ? (
+          <>
+            <h5 className="createBy">
+              <Link className="link"
+                to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName[0].optionValue}`}
+              >
+                {params?.row?.supplierAccountName[0].optionLabel}
+              </Link>
+              {
+                params?.row?.supplierAccountName.length > 1 &&
+                <span className="createdAtTime badge-date">
+                  {`+${params?.row?.supplierAccountName.length - 1} more..`}
+                </span>
+              }
+            </h5>
+          </>
+        ) : <NoDataCell />
     },
     {
       field: "customerAccountName",
@@ -510,15 +529,20 @@ const Opportunities = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let field = params.filterModel.items[0].columnField
-
-      if (params.filterModel.items[0].columnField == 'createdBy') {
-        field = "createdBy.user"
+      let deepFilter;
+      switch (params.filterModel.items[0].columnField) {
+        case 'createdBy':
+          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'updatedBy':
+          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+          break;
+        case 'name':
+          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+          break;
+        default:
+          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
       }
-      if (params.filterModel.items[0].columnField == 'updatedBy') {
-        field = "updatedBy.user"
-      }
-      const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
       setQuery((prevState) => ({
         ...prevState,
         deepFilter
@@ -589,7 +613,7 @@ const Opportunities = () => {
           <div className="listing-grid">
             <DataGrid
               components={{
-                Toolbar: DataGridCustomToolbar,
+                Toolbar: CustomDataGridToolbar,
                 NoRowsOverlay: CustomDataGridNoDataFound,
               }}
               rows={loading ? [] : dataRows}

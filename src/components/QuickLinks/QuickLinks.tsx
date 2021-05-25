@@ -24,7 +24,7 @@ export default function QuickLinks({ quickLinks, title = "Quick Links" }) {
             {
                 quickLinks.map((k, index) => {
                     return <React.Fragment>
-                        <Grid item xs={6} sm={4} md={3} lg={3} spacing={2}>
+                        <Grid item xs={6} sm={4} md={3} lg={3} spacing={2} key={index}>
                             <Paper className={`quickLinks ${k.class}`}  onClick={k.onClick}>
                                 {k.to ? <>
                                     <Link key={index} to={k.to}

@@ -111,7 +111,7 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
         data.forEach((row) => {
             if (row.sectionId.toString() === sectionId.toString()) {
                 row.field.forEach((ele) => {
-                    if (ele.fieldId.toString() === fieldId.toString()) {
+                    if (ele._id.toString() === fieldId.toString()) {
                         ele.fieldLabel = value
                     }
                 })
@@ -144,7 +144,7 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
         let data = [...section]
         data.forEach((row) => {
             if (row.sectionId.toString() === sectionId.toString()) {
-                row.field = (row.field.filter(i => i.fieldId.toString() !== fieldId.toString()))
+                row.field = (row.field.filter(i => i._id.toString() !== fieldId.toString()))
             }
         });
         setSection(data)
@@ -164,7 +164,7 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
     //onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}
 
     return (<Grid item xs={6}>
-        {!data.fieldId || (fieldHoverId && fieldHoverId.toString() === data.fieldId.toString()) ?
+        {!data._id || (fieldHoverId && fieldHoverId.toString() === data._id.toString()) ?
             <div ref={ref} style={{ ...dropstyle }}>
             </div> :
             <div ref={ref}>
@@ -178,7 +178,7 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
                                     margin="dense"
                                     style={{ margin: 2 }}
                                     value={data.fieldLabel}
-                                    onChange={(event) => onChangeFieldName(data.fieldId, event.target.value)}
+                                    onChange={(event) => onChangeFieldName(data._id, event.target.value)}
                                 /> : <Box pt={1.2} pl={2}>
                                     <Typography variant="body2" >{data.fieldLabel}</Typography>
                                 </Box>}
@@ -189,7 +189,7 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
                             </Box>
                         </Grid>
                         <Grid item xs={2} container justify="flex-end">
-                            <IconButton disabled={!data.editAble} aria-label="setting" onClick={handleClick} >
+                            <IconButton aria-label="setting" onClick={handleClick} >
                                 <MoreHorizIcon fontSize="small" />
                             </IconButton>
                             <Menu
@@ -200,7 +200,7 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
                                 onClose={handleClose}
                             >
                                 <MenuItem onClick={() => handleClickOpenPropertie(data)}  >Edit Properties</MenuItem>
-                                <MenuItem onClick={() => deleteField(data.fieldId)} >Delete</MenuItem>
+                                {data.editAble && <MenuItem onClick={() => deleteField(data._id)} >Delete</MenuItem>}
                             </Menu>
                             {propertie_open ? <Properties
                                 handleClose={handleClosePropertie}

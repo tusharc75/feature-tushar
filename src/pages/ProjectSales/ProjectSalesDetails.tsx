@@ -10,6 +10,8 @@ import {
 import { Skeleton } from "@material-ui/lab";
 import { ControlPoint } from "@material-ui/icons";
 import { useParams, useHistory, useLocation } from "react-router-dom";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 
 import TeamUsers from "./TeamUsers";
 import Layout from "../../components/Layout";
@@ -26,7 +28,9 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignDataDialog from "./AssignDataDialog";
-import CustomerStrategy from "./CustomerStrategy";
+import CustomerAccounts from "./CustomerAccounts";
+import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
+import { formatAmountWithCurrency } from "../../constants/helpers";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,6 +60,13 @@ const ProjectSalesDetails = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.projectSales,
   ]);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [loadingGraphData, setLoadingGraphData] = useState(false);
+  const [graphData, setGraphData] = useState({
+    edges: [],
+    nodes: [],
+    colorPalette: null,
+  });
 
   useEffect(() => {
     if (!state) return;
@@ -68,6 +79,35 @@ const ProjectSalesDetails = () => {
       });
   }, []);
 
+  useEffect(() => {
+    //  When it is nodal structure tab
+    initializeGraphData();
+
+    return () => {
+      setGraphData({ edges: [], nodes: [], colorPalette: null });
+    };
+  }, [currentTabIndex]);
+
+  const initializeGraphData = () => {
+    if (currentTabIndex === 1) {
+      setLoadingGraphData(true);
+      axiosInstance()
+        .get(`/project-sales/nodal-structure/${id}`)
+        .then(({ data }) => {
+          setLoadingGraphData(false);
+          setGraphData({
+            nodes: data.data.nodes,
+            edges: data.data.edges,
+            colorPalette: data.colorPalette,
+          });
+        })
+        .catch((error) => {
+          setLoadingGraphData(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   /**
    * Get sales strategy data for paticular ID
    */
@@ -78,15 +118,21 @@ const ProjectSalesDetails = () => {
         data: { data },
       } = await axiosInstance().get(`/project-sales/${id}`);
 
+      data.amount = formatAmountWithCurrency(data.currency, data.amount);
+      data.value = formatAmountWithCurrency(data.currency, data.value);
+
+      setProjectSalesData(data);
+      setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
+
       setHeadingLbl(name);
-      setProjectSalesData(data);
       setCustomizedRoutes([routes.projectSales, { title: data.projectName }]);
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
       setOpportunities(data.staticData?.opportunity);
       setCustomerContacts(data.staticData?.customerContact);
+      initializeGraphData();
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -112,7 +158,7 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["End Date"]: new Date(data.endDate).toDateString() || "",
+      ["End Date"]: data.endDate ? new Date(data.endDate).toDateString() : "",
       ["Value"]: data.value || "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
@@ -248,17 +294,22 @@ const ProjectSalesDetails = () => {
     }
   };
 
+  const isTeamMember = Boolean(teamUsers.find((u) => u._id === user.user._id));
+  const isManager =
+    user.user._id === projectSalesData?.projectManager?.optionValue;
+
   return (
     <>
       {openUpdateDialog && (
         <UpdateDetailsDialog
-          title="Update"
+          title={`Update ${projectSalesData?.projectName}`}
           openDialog={openUpdateDialog}
           onClose={closeUpdateDIalog}
           data={projectSalesData}
           fields={projectSalesFields}
           isUpdating={isUpdating}
           handleUpdate={handleUpdateProject}
+          isProjectSales={true}
         />
       )}
       {openDialog && (
@@ -281,7 +332,7 @@ const ProjectSalesDetails = () => {
         <div className="detail-container">
           <Grid container spacing={1}>
             <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Paper>
+              <Paper className="subContainer">
                 {!projectSalesData ? (
                   <Box padding={1}>
                     <Skeleton variant="text" width="150px" height="30px" />
@@ -306,30 +357,27 @@ const ProjectSalesDetails = () => {
                     mainPoints={mainPoints}
                     showHeading={true}
                   >
-                    {permissions?.projectSales.isUpdate &&
-                      user.user._id ===
-                        projectSalesData.projectManager?.optionValue && (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleOpenUpdateDialog}
-                        >
-                          Edit
-                        </Button>
-                      )}
+                    {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                    isManager ? (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        Edit
+                      </Button>
+                    ) : null}
 
                     <Box component="span" marginX={1} />
 
-                    {permissions?.projectSales.isDelete &&
-                      user.user._id ===
-                        projectSalesData.projectManager?.optionValue && (
-                        <DeleteButton
-                          text="Delete"
-                          onClick={() => {
-                            handleDeleteProject(id);
-                          }}
-                        />
-                      )}
+                    {permissions?.projectSales.isDelete && isManager ? (
+                      <DeleteButton
+                        text="Delete"
+                        onClick={() => {
+                          handleDeleteProject(id);
+                        }}
+                      />
+                    ) : null}
                   </DetailsPageHeader>
                 )}
                 <Box>
@@ -341,28 +389,79 @@ const ProjectSalesDetails = () => {
                     </Grid>
                   ) : (
                     <>
-                      <Box
-                        width="100%"
-                        padding={1}
-                        bgcolor="grey.200"
-                        display="flex"
-                        justifyContent="space-between"
+                      <Tabs
+                        className="oms-tab"
+                        value={currentTabIndex}
+                        onChange={(index, newValue) => {
+                          setCurrentTabIndex(newValue);
+                        }}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="icon tabs example"
                       >
-                        <Typography variant="subtitle2">
-                          Project Sales
-                        </Typography>
-                      </Box>
-                      <DetailsPage
-                        data={projectSalesData}
-                        fields={projectSalesFields}
-                      />
+                        <Tab
+                          label="Project Sales"
+                          aria-controls="a11y-tabpanel-0"
+                          id="a11y-tab-0"
+                        />
+                        <Tab
+                          label="3D Graph"
+                          aria-controls="a11y-tabpanel-1"
+                          id="a11y-tab-1"
+                        />
+                      </Tabs>
+                      {currentTabIndex === 0 && (
+                        <Box>
+                          <DetailsPage
+                            data={projectSalesData}
+                            fields={projectSalesFields}
+                          />
+                        </Box>
+                      )}
+
+                      {currentTabIndex === 1 && (
+                        <Box>
+                          <CustomNodalStructure
+                            id={id}
+                            graphData={graphData}
+                            loadingGraphData={loadingGraphData}
+                            onClick={(node) => {
+                              if (node && routes[node.route]) {
+                                history.push({
+                                  pathname: `${routes[node.route].path}/${
+                                    node.id
+                                  }`,
+                                });
+                              }
+                            }}
+                          />
+                        </Box>
+                      )}
                     </>
+
+                    // <Box>
+                    //   <Box
+                    //     width="100%"
+                    //     padding={1}
+                    //     bgcolor="grey.200"
+                    //     display="flex"
+                    //     justifyContent="space-between"
+                    //   >
+                    //     <Typography variant="subtitle2">
+                    //       Project Sales
+                    //     </Typography>
+                    //   </Box>
+                    //   <DetailsPage
+                    //     data={projectSalesData}
+                    //     fields={projectSalesFields}
+                    //   />
+                    // </Box>
                   )}
                 </Box>
               </Paper>
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper style={{ overflow: "hidden" }}>
+              <Paper className="subContainer">
                 <Box style={{ padding: "0px", maxHeight: "450px" }}>
                   <Box
                     width="100%"
@@ -373,13 +472,16 @@ const ProjectSalesDetails = () => {
                     justifyContent="space-between"
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
-                    <IconButton
-                      color="primary"
-                      size="small"
-                      onClick={() => handleOpenDialog("user")}
-                    >
-                      <ControlPoint />
-                    </IconButton>
+                    {(permissions?.projectSales.isUpdate && isTeamMember) ||
+                    isManager ? (
+                      <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={() => handleOpenDialog("user")}
+                      >
+                        <ControlPoint />
+                      </IconButton>
+                    ) : null}
                   </Box>
                   <Box padding={1}>
                     {loading ? (
@@ -401,7 +503,7 @@ const ProjectSalesDetails = () => {
                         </BoxWithBorder>
                       ))
                     ) : teamUsers.length ? (
-                      <>
+                      <Box>
                         <TeamUsers
                           managerId={
                             projectSalesData.projectManager?.optionValue
@@ -411,7 +513,7 @@ const ProjectSalesDetails = () => {
                           removeUser={handleRemoveUser}
                         />
                         <Box marginY={1} />
-                      </>
+                      </Box>
                     ) : (
                       <Box textAlign="center" padding={2}>
                         No Users
@@ -423,7 +525,10 @@ const ProjectSalesDetails = () => {
             </Grid>
           </Grid>
           <Box my={1} />
-          <CustomerStrategy
+          <CustomerAccounts
+            isTeamMember={isTeamMember}
+            isManager={isManager}
+            ownerId={projectSalesData?.projectManager?.optionValue}
             loading={loading}
             handleOpenDialog={handleOpenDialog}
             customerAccounts={customerAccounts}

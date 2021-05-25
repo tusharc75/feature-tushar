@@ -7,9 +7,9 @@ import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Link } from "react-router-dom";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
+import { roleTypes, userType } from "../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
+const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) => {
   const classes = useStyles();
 
   return (
@@ -54,26 +54,28 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions }) => {
                   />
                 </div>
 
-                <CopyToClipboard textToCopy={obj.email} className="mt-4" />
+                <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
                 {permissions.role.isUpdate && (
                   <ListItemSecondaryAction
                     title={
                       currentUser === obj._id
                         ? "Primary user can't be unassigned"
-                        : "Unassign User"
+                        : obj.userType && obj.userType === userType.brandAdmin ? "Brand Admin Can not be deleted" : "Unassign User"
                     }
                   >
-                    <IconButton
-                      size="small"
-                      disabled={currentUser === obj._id}
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => unassignRole(obj)}
-                    >
-                      <DeleteIcon
-                        color={currentUser === obj._id ? "disabled" : "error"}
-                      />
-                    </IconButton>
+                    {type == roleTypes.find((d) => d.key === "Global")?.value && (
+                      <IconButton
+                        size="small"
+                        disabled={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin)}
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => unassignRole(obj)}
+                      >
+                        <DeleteIcon
+                          color={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin) ? "disabled" : "error"}
+                        />
+                      </IconButton>
+                    )}
                   </ListItemSecondaryAction>
                 )}
               </ListItem>

@@ -250,6 +250,14 @@ const LeadDetailsPage = () => {
           leadApi={leadApi}
         />
       )}
+      {showConfirmBox ? (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this Lead`}
+          onClose={() => setShowConfirmBox(false)}
+          onOk={handleDeleteLead}
+        />
+      ) : null}
       <Layout>
 
         <Grid container direction="row">
@@ -401,10 +409,10 @@ const LeadDetailsPage = () => {
                 recordsPerLine={3}
                 opportunity={leadData?.staticData?.opportunity}
               />
-              <ProjectInAccordion recordsPerLine={3}/>
-              <QuotesInAccordion recordsPerLine={3}/>
-              <ProductBuilderInAccordion recordsPerLine={3}/>
-              <LeadInAccordion recordsPerLine={3}/>
+              <ProjectInAccordion recordsPerLine={3} />
+              <QuotesInAccordion recordsPerLine={3} />
+              <ProductBuilderInAccordion recordsPerLine={3} />
+              <LeadInAccordion recordsPerLine={3} />
             </Paper>
           </Grid>
 
@@ -429,6 +437,9 @@ const LeadDetailsPage = () => {
                       },
                     ]}
                     handleActivityRefresh={() => { }}
+                    emails={
+                      [leadData?.email ?? '']
+                    }
                   />
                 </div>
               )}
