@@ -173,7 +173,7 @@ export default function Attachment(props) {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={2} className="d-flex align-items-center gap-1">
                         <AiOutlinePaperClip className="headerLogo" />{" "}
-                        <span className="listingHeader">Attachment</span>
+                        <span className="listingHeader">Attachment ({attachments.length})</span>
                     </Grid>
                     <Grid item xs={10} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: "100%" }} >
