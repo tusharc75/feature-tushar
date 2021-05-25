@@ -22,6 +22,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { CircularProgress, IconButton } from "@material-ui/core";
 import { UnauthenticatedTemplate, useAccount, useMsal } from "@azure/msal-react";
+import { AzureLogin } from "../../Azure/Azure";
 import getAzureAcessToken from "../../Azure/getAzureAccessToken";
 import { validations } from "../../../constants/helpers";
 import { BsFillImageFill } from 'react-icons/bs'
