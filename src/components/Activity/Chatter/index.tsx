@@ -10,6 +10,7 @@ import {
 import { Skeleton } from "@material-ui/lab";
 import { Send } from "@material-ui/icons";
 import moment from "moment";
+import io from "socket.io-client";
 
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -40,6 +41,7 @@ const Chatter = (props) => {
   const [message, setMessage] = useState("");
   const [chatterId, setChatterId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   const msgBoxRef = useCallback(
     (elem: HTMLElement) => {
@@ -77,7 +79,38 @@ const Chatter = (props) => {
 
   useEffect(() => {
     getChatter();
+
+    const token = localStorage.getItem("token");
+    const s = io("https://oms-backend.vebholic.com/chatter", {
+      auth: {
+        token,
+      },
+    });
+    setSocket(s);
+
+    return () => {
+      s.disconnect();
+    };
   }, [getChatter]);
+
+  // Socket listening for data
+  useEffect(() => {
+    if (!socket && !chatterId) return;
+
+    socket.on("connect", (data) => {
+      socket.emit("join", chatterId);
+    });
+
+    socket.on("data", (data) => {
+      setMessages(data.Messages);
+    });
+
+    return () => {
+      if (socket) {
+        socket.off("connect");
+      }
+    };
+  }, [socket, chatterId]);
 
   const createChatter = () => {
     axiosInstance()
