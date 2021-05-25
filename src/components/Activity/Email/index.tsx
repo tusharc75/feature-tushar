@@ -94,21 +94,18 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     <ListRelatedTo relatedTo={_email.relatedTo} originRelatedTo={relatedTo} />
                     {/* <Chip label={_task.status} size="small" color="primary" /> */}
                   </Grid>
-                  {/* <Grid item xs={6} container justify="flex-end">
-                                        {                                   <Typography variant="caption" >Due Date : {moment(_email.dueDate).format("MMM DD YYYY")}</Typography>
- }                                </Grid> */}
                 </Grid>
               </Box>
             </Box>
           ))}
           <ViewAll type="email" relatedTo={relatedTo} />
         </Fragment>
-        ) : (
+        : (
           <Box p={1} border={1} borderColor="grey.300" textAlign="center">
-        <Typography variant="subtitle2">No Past Email</Typography>
-      </Box>
+            <Typography variant="subtitle2">No Past Email</Typography>
+          </Box>
         )}
-        <Menu
+      <Menu
         id="simple-menu"
         anchorEl={anchorEl}
         keepMounted

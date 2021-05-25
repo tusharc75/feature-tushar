@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
         border: 1
     },
     root: {
-        width: "70%"
+        width: "80%",
     },
 }));
 
@@ -84,10 +84,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const [imageAttachments, setImageAttachments] = useState([])
     const [otherAttachments, setOtherAttachment] = useState([])
     const [open, setOpen] = useState(false);
-    const [imgSrc, setImgSrc] = useState(null);
+    const [imageSource, setImageSource] = useState(null);
     const [loading, setLoading] = useState(false);
-
-
+    const [sending, setSending] = useState(false)
 
     useEffect(() => {
         fetchEmailDetail();
@@ -118,8 +117,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                         })
                         setImageAttachments(filteredAttachments)
                         setOtherAttachment([...otherAttachments])
-                        setLoading(false)
                     }
+                    setLoading(false)
                     setInitialValues(data)
                 })
                 .catch((err) => {
@@ -131,9 +130,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         }
     };
 
-    const [sending, setSending] = useState(false)
     const handleSave = async (values) => {
-        setSending(true)
         try {
             const payload = {
                 relatedTo: relatedTo,
@@ -156,26 +153,27 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                     });
             }
             else {
+                setSending(true)
                 CreateNewEmail(payload)
-                    .then(({ data }) => {
+                    .then((data) => {
                         toastConfig.setToastConfig({
                             open: true,
                             type: "success",
                             message: data.message,
                         });
                         setInitialValues(null)
+                        setSending(false)
                         handleClose()
                     })
                     .catch((err) => {
+                        setSending(false)
                         console.log(err);
-                        setInitialValues(null)
                         toastConfig.setToastConfig(err);
                     });
             }
         } catch (e) {
 
         }
-        setSending(false)
     };
 
     const onKeyPress = (event) => {
@@ -211,8 +209,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                 headers: { "Content-Type": "multipart/form-data" },
             })
             .then(({ data }) => {
-                imageAttachments.push(data.fileUrl)
-                setImageAttachments(imageAttachments)
+                setImageAttachments((prevState) => ([...prevState, data.fileUrl]));
                 setUploading(false);
             })
             .catch((err) => {
@@ -240,7 +237,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                     <Paper className={emailStyles.container}>
                                         <img src={attachment} alt="Avatar"
                                             onClick={() => {
-                                                setImgSrc(attachment)
+                                                setImageSource(attachment)
                                                 setOpen(true)
                                             }}
                                             className={emailStyles.image} />
@@ -304,7 +301,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                             <DeleteIcon />
                                         </IconButton>
                                 }
-
                             </Box>
                         </Fragment>
                     )) : null
@@ -316,8 +312,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
         {loading ?
             <div className={classes.root}>
-                {[...Array(7).keys()].map(i => (
-                    <Typography key={`skeleton${i}`} variant="h4">
+                {[...Array(10).keys()].map(i => (
+                    <Typography style={{ marginLeft: '20px' }} key={`skeleton${i}`} variant="h5">
                         <Skeleton animation="wave" />
                     </Typography>)
                 )}
@@ -527,12 +523,12 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                     open={open}
                     aria-labelledby="customized-dialog-title"
                     // heading="image preview"
-                    heading={imgSrc ? imgSrc.substring(imgSrc.lastIndexOf("/") + 1,) : "image preview"}
+                    heading={imageSource ? imageSource.substring(imageSource.lastIndexOf("/") + 1,) : "image preview"}
                     close={() => {
-                        setImgSrc(null)
+                        setImageSource(null)
                         setOpen(false)
                     }}
-                    image={imgSrc}
+                    image={imageSource}
                 /> : null
         }
 

@@ -158,9 +158,19 @@ const Email = () => {
             headerName: 'Recipient',
             width: 200,
             renderCell: (params) => {
-                if (typeof params.row.to == "string") return <span>{params.row.to}</span>
-                return <span>
-                    {params.row?.isCreatedByMe ? getToEmailList(params.row.to) : params.row?.mailbox ?? ''}
+                return <span
+                    style={{ cursor: "pointer" }}
+                    onClick={(e) => {
+                        setOpen(true)
+                        setEmailId(params.row.id)
+                    }}>
+                    {
+                        (typeof params.row.to == "string") ?
+                            <span> {params.row.to}</span > :
+                            <span>
+                                {params.row?.isCreatedByMe ? getToEmailList(params.row.to) : params.row?.mailbox ?? ''}
+                            </span>
+                    }
                 </span>
             }
         },
@@ -313,7 +323,7 @@ const Email = () => {
                             exclusive
                             onChange={handleTab}>
                             {Object.keys(tabs).map((k, index) => (
-                                <ToggleButton value={tabs[k]} key={index} className="pl-2">
+                                <ToggleButton value={tabs[k]} key={index} className="l-2">
                                     {k} {currentTab === tabs[k] ? `(${rowCount})` : ""}
                                 </ToggleButton>
                             ))}
@@ -382,10 +392,10 @@ const Email = () => {
                     page={query.page}
                     rowCount={rowCount}
                     rowsPerPageOptions={[25, 50, 75]}
-                    onRowClick={(e) => {
-                        setOpen(true)
-                        setEmailId(e.id)
-                    }}
+                    // onRowClick={(e) => {
+                    //     setOpen(true)
+                    //     setEmailId(e.id)
+                    // }}
                     disableColumnSelector={false}
                 />
             </div>
