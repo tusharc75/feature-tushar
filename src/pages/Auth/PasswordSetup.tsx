@@ -15,7 +15,7 @@ import { useHistory, Redirect } from "react-router-dom";
 
 import demoImg from "../../assets/clip-hardworking-man.png";
 import axiosInstance from "../../axios/axiosInstance";
-import {CustomToastContext} from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -65,7 +65,7 @@ const PasswordSetup = () => {
   const handleSubmit = async (values) => {
     setIsSubmitting(true);
 
-    axiosInstance(null,{ Authorization: `Bearer ${token}` })
+    axiosInstance(null, { Authorization: `Bearer ${token}` })
       .post(
         `/user/create-password`,
         {
