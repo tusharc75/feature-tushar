@@ -29,10 +29,6 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     fetchEmail();
   }, []);
 
-  useEffect(() => {
-    fetchEmail();
-  }, []);
-
   const fetchEmail = async () => {
     try {
       const emails = await GetEmail(JSON.stringify(relatedTo))
