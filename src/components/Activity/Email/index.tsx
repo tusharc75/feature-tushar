@@ -1,8 +1,7 @@
 import React, { useState, useEffect, Fragment } from "react";
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { CreateEmail } from './CreateEmail';
+import Box from "@material-ui/core/Box";
+import Grid from "@material-ui/core/Grid";
+import { CreateEmail } from "./CreateEmail";
 import { GetEmail, DeleteEmail } from "../../../axios/activity";
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
@@ -19,139 +18,161 @@ import { isEmpty } from "lodash";
 
 export const Email = ({ relatedTo, handleActivityRefresh }) => {
 
-    const [open, setOpen] = useState(false);
-    const [emails, setEmails] = useState(null);
-    const [emailId, setEmailId] = useState(null);
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const {
-        state: { user },
-    }: any = useData();
+  const [open, setOpen] = useState(false);
+  const [emails, setEmails] = useState(null);
+  const [emailId, setEmailId] = useState(null);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const {
+    state: { user },
+  }: any = useData();
 
-    useEffect(() => {
-        fetchEmail();
-    }, []);
+  useEffect(() => {
+    fetchEmail();
+  }, []);
 
-    const fetchEmail = async () => {
-        try {
-            const emails = await GetEmail(JSON.stringify(relatedTo))
-            if (emails.data && emails.data.length > 0) {
-                emails.data = emails.data.filter(obj => {
-                    let isAllowedToShow = false
-                    if (obj.cc && obj.cc.length) {
-                        isAllowedToShow = obj.cc.indexOf(user?.user?.email) >= 0
-                    }
-                    if (!isAllowedToShow && obj.to && obj.to.length) {
-                        isAllowedToShow = obj.to.indexOf(user?.user?.email) >= 0
-                    }
-                    if (!isAllowedToShow && obj?.sender) {
-                        isAllowedToShow = obj?.sender === user?.user?._id
-                    }
-                    return isAllowedToShow
-                })
-            }
-            setEmails(emails.data)
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const handleOpenMenu = (event, _id) => {
-        event.stopPropagation();
-        setAnchorEl(event.currentTarget);
-        setEmailId(_id);
-    };
-
-    const handleCloseMenu = (event) => {
-        event.stopPropagation();
-        setAnchorEl(null);
-        setEmailId(null);
-    };
-
-
-    const handleEdit = (event) => {
-        event.stopPropagation();
-        setAnchorEl(null);
-        setOpen(true)
-    };
-
-
-    const handleDelete = (event) => {
-        event.stopPropagation();
-        DeleteEmail(emailId)
-            .then(({ data }) => {
-                setAnchorEl(null);
-                fetchEmail()
-                handleActivityRefresh()
-            })
-            .catch((err) => {
-            });
-    };
-
-
-    const handleClose = () => {
-        fetchEmail()
-        setOpen(false)
-        handleActivityRefresh()
+  const fetchEmail = async () => {
+    try {
+      const emails = await GetEmail(JSON.stringify(relatedTo))
+      if (emails.data && emails.data.length > 0) {
+        emails.data = emails.data.filter(obj => {
+          let isAllowedToShow = false
+          if (obj.cc && obj.cc.length) {
+            isAllowedToShow = obj.cc.indexOf(user?.user?.email) >= 0
+          }
+          if (!isAllowedToShow && obj.to && obj.to.length) {
+            isAllowedToShow = obj.to.indexOf(user?.user?.email) >= 0
+          }
+          if (!isAllowedToShow && obj?.sender) {
+            isAllowedToShow = obj?.sender === user?.user?._id
+          }
+          return isAllowedToShow
+        })
+      }
+      setEmails(emails.data)
+    } catch (e) {
+      console.log(e);
     }
-    return (emails &&
-        <Box className="activityDetailBox">
-            {emails.length ?
-                <Fragment>
-                    {emails.map((_email, index) => (
-                        <Box key={_email._id} className="activity">
-                            <Box>
-                                <Grid container>
-                                    <Grid item xs={10} className="d-flex align-items-center gap-1">
-                                        <Typography variant="subtitle2">{_email?.subject}</Typography>
-                                    </Grid>
-                                    <Grid item xs={2} container justify="flex-end" >
-                                        <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _email._id)} >
-                                            <MoreHorizIcon />
-                                        </IconButton>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                            <Box pt={1}>
-                                <Grid container>
-                                    <Grid item xs={12} >
-                                        <ListRelatedTo relatedTo={_email.relatedTo} originRelatedTo={relatedTo} />
-                                        {/* <Chip label={_task.status} size="small" color="primary" /> */}
-                                    </Grid>
-                                    {/* <Grid item xs={6} container justify="flex-end">
+  };
+
+  const handleOpenMenu = (event, _id) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setEmailId(_id);
+  };
+
+  const handleCloseMenu = (event) => {
+    event.stopPropagation();
+    setAnchorEl(null);
+    setEmailId(null);
+  };
+
+  const handleEdit = (event) => {
+    event.stopPropagation();
+    setAnchorEl(null);
+    setOpen(true);
+  };
+
+  const handleDelete = (event) => {
+    event.stopPropagation();
+    DeleteEmail(emailId)
+      .then(({ data }) => {
+        setAnchorEl(null);
+        fetchEmail();
+        handleActivityRefresh();
+      })
+      .catch((err) => { });
+  };
+
+  const handleClose = () => {
+    fetchEmail();
+    setOpen(false);
+    handleActivityRefresh();
+  };
+  return (
+    emails && (
+      <Box className="activityDetailBox">
+        {emails.length ? (
+          <Fragment>
+            {emails.map((_email, index) => (
+              <Box key={_email._id} className="activity">
+                <Box>
+                  <Grid container>
+                    <Grid
+                      item
+                      xs={10}
+                      className="d-flex align-items-center gap-1"
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setEmailId(_email._id);
+                          setOpen(true);
+                        }}
+                      >
+                        {_email?.subject}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={2} container justify="flex-end">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        aria-label="delete"
+                        onClick={(event) => handleOpenMenu(event, _email._id)}
+                      >
+                        <MoreHorizIcon />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
+                </Box>
+                <Box pt={1}>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <ListRelatedTo
+                        relatedTo={_email.relatedTo}
+                        originRelatedTo={relatedTo}
+                      />
+                      {/* <Chip label={_task.status} size="small" color="primary" /> */}
+                    </Grid>
+                    {/* <Grid item xs={6} container justify="flex-end">
                                         {                                   <Typography variant="caption" >Due Date : {moment(_email.dueDate).format("MMM DD YYYY")}</Typography>
  }                                </Grid> */}
-                                </Grid>
-                            </Box>
-                        </Box>))}
-                    <ViewAll
-                        type="email"
-                        relatedTo={relatedTo}
-                    />
-                </Fragment>
-                : <Box p={1} border={1} borderColor="grey.300" textAlign="center">
-                    <Typography variant="subtitle2">No Past Email</Typography>
+                  </Grid>
                 </Box>
-            }
-            <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleCloseMenu}
-            >
-                <MenuItem onClick={handleEdit} >View</MenuItem>
-                <MenuItem onClick={handleDelete} >Delete</MenuItem>
-            </Menu>
-            <Dialog
-                open={open}
-                aria-labelledby="customized-dialog-title"
-                maxWidth="md"
-                onClose={handleClose}
-                fullWidth
-            >
-                <CreateEmail emailId={emailId} handleClose={handleClose} relatedTo={relatedTo} />
-            </Dialog>
-        </Box>
-
-    );
-}
+              </Box>
+            ))}
+            <ViewAll type="email" relatedTo={relatedTo} />
+          </Fragment>
+        ) : (
+          <Box p={1} border={1} borderColor="grey.300" textAlign="center">
+            <Typography variant="subtitle2">No Past Email</Typography>
+          </Box>
+        )
+        }
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleCloseMenu}
+        >
+          <MenuItem onClick={handleEdit}>View</MenuItem>
+          <MenuItem onClick={handleDelete}>Delete</MenuItem>
+        </Menu>
+        <Dialog
+          open={open}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="md"
+          onClose={handleClose}
+          fullWidth
+        >
+          <CreateEmail
+            emailId={emailId}
+            handleClose={handleClose}
+            relatedTo={relatedTo}
+          />
+        </Dialog>
+      </Box >
+    )
+  );
+};

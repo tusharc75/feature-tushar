@@ -149,36 +149,40 @@ export const profileMenuItems = {
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
   for (const key of arr) {
+    let value = key.isDefaultValue ? key.defaultValue : val
     if (key.type === "dropDown") {
       const option = key.option?.find((data: any) => data.default === true);
-      obj[key.fieldName] = val ? val : option ? option.optionValue : "";
+      obj[key.fieldName] = value ? value : option ? option.optionValue : "";
     } else if (key.type === "multiSelect") {
       const defaultOptions = key.option?.filter(
         (item: any) => item.default === true
       );
       const options = defaultOptions?.map((data: any) => data.optionValue);
-      obj[key.fieldName] = val ? val : options;
+      obj[key.fieldName] = value ? value : options;
     } else if (key.type === "date") {
-      obj[key.fieldName] = val ? val : new Date();
+      obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
-      obj[key.fieldName] = val ? val : false;
+      obj[key.fieldName] = value ? value : false;
     } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
       key.displayUnits.forEach((_unit) => {
-        obj[key.fieldName + "_" + _unit.toLowerCase()] = val;
+        obj[key.fieldName + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;
       });
     } else if (key.type === "currencyAmount") {
       key.displayCurrency.forEach((_currency) => {
         if (key.isConverter && key.displayUnits.length) {
           key.displayUnits.forEach((_unit) => {
-            obj[key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = val;
+            obj[key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
           });
         }
         else {
-          obj[key.fieldName + "_" + _currency.toLowerCase()] = val;
+          obj[key.fieldName + "_" + _currency.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
         }
       });
-    } else {
-      obj[key.fieldName] = val;
+    } else if (key.type === "decimal") {
+      obj[key.fieldName] = value && value !== "" ? parseFloat(value) : value;;
+    }
+    else {
+      obj[key.fieldName] = value;
     }
   }
   return obj;

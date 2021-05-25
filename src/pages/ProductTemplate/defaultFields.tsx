@@ -60,6 +60,8 @@ const DefaultFields = [
         formulaFields: ["marginPercentPerUnit"],
         formulainputFields: ["totalCostPerUnit_usd", "marginPerUnit_usd"],
         formulaoption: { marginPercentPerUnit: "return marginPerUnit_usd * 100 / totalCostPerUnit_usd" },
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "5",
@@ -76,6 +78,8 @@ const DefaultFields = [
         formulaFields: ["marginPerUnit_usd"],
         formulainputFields: ["totalCostPerUnit_usd", "marginPercentPerUnit"],
         formulaoption: { marginPerUnit_usd: "return totalCostPerUnit_usd * marginPercentPerUnit / 100" },
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "6",
@@ -93,6 +97,8 @@ const DefaultFields = [
         formulaFields: ["commissionPercentPerUnit"],
         formulainputFields: ["totalCostPerUnit_usd", "commissionPerUnit_usd"],
         formulaoption: { commissionPercentPerUnit: "return commissionPerUnit_usd * 100 / totalCostPerUnit_usd " },
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "7",
@@ -109,6 +115,8 @@ const DefaultFields = [
         formulaFields: ["commissionPerUnit_usd"],
         formulainputFields: ["totalCostPerUnit_usd", "commissionPercentPerUnit"],
         formulaoption: { commissionPerUnit_usd: "return totalCostPerUnit_usd * commissionPercentPerUnit / 100 " },
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "9",
@@ -129,6 +137,8 @@ const DefaultFields = [
             salesPricePerUnit_usd: "return  totalCostPerUnit_usd + marginPerUnit_usd + commissionPerUnit_usd + profitPerUnit_usd",
             profitPercentPerUnit: "return (profitPerUnit_usd * 100) /  (totalCostPerUnit_usd + marginPerUnit_usd + commissionPerUnit_usd)"
         },
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "10",
@@ -147,6 +157,8 @@ const DefaultFields = [
         formulaoption: {
             profitPerUnit_usd: "return ((totalCostPerUnit_usd + marginPerUnit_usd + commissionPerUnit_usd ) * profitPercentPerUnit) / 100",
         },
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "8",
@@ -172,6 +184,8 @@ const DefaultFields = [
             profitPerUnit_usd: "return salesPricePerUnit_usd -   (totalCostPerUnit_usd + marginPerUnit_usd + commissionPerUnit_usd)",
             profitPercentPerUnit: "return (salesPricePerUnit_usd -  (totalCostPerUnit_usd + marginPerUnit_usd + commissionPerUnit_usd)) * 100 / (totalCostPerUnit_usd + marginPerUnit_usd + commissionPerUnit_usd)"
         },
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "11",
@@ -179,7 +193,7 @@ const DefaultFields = [
         fieldLabel: 'Total Sales Price',
         required: true,
         type: 'currencyAmount',
-        sectionName: 'Sales Price Calculation',
+        sectionName: 'Total Price Calculation',
         sectionType: 'cost',
         isTooltip: false,
         order: 10,
@@ -189,7 +203,9 @@ const DefaultFields = [
         formula: "return qty * salesPricePerUnit_usd",
         inputFields: ["qty", "salesPricePerUnit_usd"],
         returnType: "decimal",
-        decimalPlaces: 2
+        decimalPlaces: 2,
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "14",
@@ -197,7 +213,7 @@ const DefaultFields = [
         fieldLabel: 'Total Margin',
         required: true,
         type: 'currencyAmount',
-        sectionName: 'Sales Price Calculation',
+        sectionName: 'Total Price Calculation',
         sectionType: 'cost',
         isTooltip: false,
         order: 11,
@@ -207,14 +223,16 @@ const DefaultFields = [
         formula: "return qty * marginPerUnit_usd",
         inputFields: ["qty", "marginPerUnit_usd"],
         returnType: "decimal",
-        decimalPlaces: 2
+        decimalPlaces: 2,
+        isDefaultValue: true,
+        defaultValue: "0"
     }, {
         _id: "13",
         fieldName: 'totalCommission',
         fieldLabel: 'Total Commission',
         required: true,
         type: 'currencyAmount',
-        sectionName: 'Sales Price Calculation',
+        sectionName: 'Total Price Calculation',
         sectionType: 'cost',
         isTooltip: false,
         order: 12,
@@ -224,7 +242,9 @@ const DefaultFields = [
         formula: "return qty * commissionPerUnit_usd",
         inputFields: ["qty", "commissionPerUnit_usd"],
         returnType: "decimal",
-        decimalPlaces: 2
+        decimalPlaces: 2,
+        isDefaultValue: true,
+        defaultValue: "0"
     },
     {
         _id: "12",
@@ -232,7 +252,7 @@ const DefaultFields = [
         fieldLabel: 'Total Profit',
         required: true,
         type: 'currencyAmount',
-        sectionName: 'Sales Price Calculation',
+        sectionName: 'Total Price Calculation',
         sectionType: 'cost',
         isTooltip: false,
         order: 13,
@@ -242,7 +262,9 @@ const DefaultFields = [
         formula: "return qty * profitPerUnit_usd",
         inputFields: ["qty", "profitPerUnit_usd"],
         returnType: "decimal",
-        decimalPlaces: 2
+        decimalPlaces: 2,
+        isDefaultValue: true,
+        defaultValue: "0"
     },
 ]
 

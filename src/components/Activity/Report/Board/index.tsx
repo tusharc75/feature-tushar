@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Box, Grid, Typography, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import { Add } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -19,13 +18,13 @@ const useStyles = makeStyles((theme) => ({
   block: {
     background: "#f0f0f0",
     borderRadius: "4px",
-    minHeight:'calc(100vh - 33.5vh)',
-    height: "100%"
+    minHeight: "calc(100vh - 33.5vh)",
+    height: "100%",
   },
-  activityMainBlock:{
+  activityMainBlock: {
     height: "calc(100vh - 32vh)",
-    overflow:"auto"
-  }
+    overflow: "auto",
+  },
 }));
 
 const Board = ({ type, filter, activityId }) => {
@@ -45,7 +44,7 @@ const Board = ({ type, filter, activityId }) => {
       .then(({ data }) => {
         setActivities(data);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   // Data for Autocomplete
@@ -216,7 +215,6 @@ const Board = ({ type, filter, activityId }) => {
             </Grid>
           ))}
         </Grid>
-
       </DndProvider>
     </>
   ) : (

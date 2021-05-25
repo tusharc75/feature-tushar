@@ -1,7 +1,7 @@
 import {useState,useEffect,useContext} from 'react'
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import './style.css'
+// import './style.css'
 import SendIcon from '@material-ui/icons/Send';
 import {Button} from '@material-ui/core'
 export default function ChatRender({id}){
