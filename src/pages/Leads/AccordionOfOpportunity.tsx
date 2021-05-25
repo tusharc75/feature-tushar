@@ -100,7 +100,9 @@ export default function AccordionOfOpportunity({
     }
 
     const [expandOpportunity, setExpandOpportunity] = useState(expanded);
-
+    useEffect(() => {
+        setExpandOpportunity(opportunity && opportunity?.length !== 0 ? true : false);
+    }, [opportunity]);
     return <>
         <Accordion expanded={expandOpportunity}>
             <AccordionSummary

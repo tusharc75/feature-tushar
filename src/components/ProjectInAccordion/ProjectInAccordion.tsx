@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, Button, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
 import CommonSkeleton from '../Helpers/CommonSkeleton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -14,6 +14,10 @@ import { IoCalendarOutline } from 'react-icons/io5';
 import { Link } from 'react-router-dom'
 import { useHistory } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import { useData } from '../../StateProvider/Provider';
+import routes from '../Helpers/Routes';
+import CreateProjectSales from "../../pages/ProjectSales/CreateProjectSales";
 
 const Accordion = withStyles({
     root: {
@@ -73,9 +77,17 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3 }) {
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales }) {
 
     const history = useHistory();
+    const {
+        state: { selectedEntity },
+    }: any = useData();
+    const [
+        showCreateProjectSalesDialog,
+        setShowCreateProjectSalesDialog,
+    ] = useState(false);
+
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -97,6 +109,9 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
     }
 
     const [expandProject, setExpandProject] = useState(expanded);
+    useEffect(() => {
+        setExpandProject(projectSales && projectSales?.length !== 0 ? true : false);
+    }, [projectSales]);
     return <>
         <Accordion expanded={expandProject} className="omsAccordian accordProject">
             <AccordionSummary
@@ -121,7 +136,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                             </Box>
                             <Box padding="5px">
                                 <Typography variant="subtitle2">
-                                    Projects (1)
+                                    Projects Sales ({projectSales?.length || 0})
                                 </Typography>
                             </Box>
                         </Box>
@@ -131,7 +146,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                             <IconButton
                                 color="primary"
                                 size="small"
-                                onClick={() => { }}
+                                onClick={() => { setShowCreateProjectSalesDialog(true) }}
                             >
                                 <ControlPointIcon />
                             </IconButton>
@@ -142,38 +157,48 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
             <AccordionDetails>
                 <>
                     {
-                        expandProject && <>
-                            {
+                        expandProject &&
+                        <>
+                            {projectSales && projectSales.length ? (
                                 <Grid container spacing={1}>
-                                    {
+                                    {projectSales.map((obj, index) => (
                                         <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
                                             <Card className="detailCard">
                                                 <CardContent className="detailListing">
                                                     <Grid container className="detailCardHeader">
                                                         <Grid item xs={12} sm={12}>
-                                                            <Link className="link">
-                                                                <Typography className="detailName">Project 1</Typography>
-                                                            </Link>
+                                                            {
+                                                                // obj.entity === selectedEntity ? 
+                                                                <Link className="link" to={`${routes.projectSalesDetail.path}/${obj._id}`}>
+                                                                    <Typography className="detailName">{obj.projectName}</Typography>
+                                                                </Link>
+                                                                // : <span className="d-flex gap-2 align-items-center">
+                                                                //     <Typography className="detailName">{obj.projectName}</Typography> <Tooltip title={`${obj.projectName} belongs to different entity`}>
+                                                                //         <InfoOutlinedIcon fontSize="small" />
+                                                                //     </Tooltip>
+                                                                // </span>
+                                                            }
                                                         </Grid>
                                                     </Grid>
                                                     <Grid container>
                                                         <Grid item xs={12} sm={6} md={6}>
                                                             {
-                                                                <DisplayData key={1} label='Status' value="Active" icon={<BsClockHistory size={15} />} />
+                                                                <DisplayData key={1} label='Status' value={obj.projectStatus ? "Active" : "Inactive"} icon={<BsClockHistory size={15} />} />
                                                             }
                                                         </Grid>
                                                         <Grid item xs={12} sm={6} md={6}>
                                                             {
-                                                                <DisplayData key={2} label='Due Date' value="May-20-2021" icon={< IoCalendarOutline size={15} />} />
+                                                                <DisplayData key={2} label='Due Date' value={displayDate(obj.endDate)} icon={< IoCalendarOutline size={15} />} />
                                                             }
                                                         </Grid>
                                                     </Grid>
                                                 </CardContent>
                                             </Card>
                                         </Grid>
-                                    }
+                                    ))}
                                 </Grid>
-                            }
+                            ) : null}
+
                         </>
                     }
                 </>
@@ -184,20 +209,13 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
             <Box margin={1} /> */}
         </Accordion>
 
-        {/* {
-            showCreateOpportunityDialog && <ManageOpportunityDialog
-                isNew={true}
-                open={showCreateOpportunityDialog}
-                onClose={() => setShowCreateOpportunityDialog(false)}
-                onSuccess={() => {
-                    setShowCreateOpportunityDialog(false);
-                    onNewOpportunityAdd();
-                }}
-                accountId={accountId}
-                resource={resource}
-                isRedirectTodetailPage={isRedirect}
+        {showCreateProjectSalesDialog && (
+            <CreateProjectSales
+                open={showCreateProjectSalesDialog}
+                close={() => setShowCreateProjectSalesDialog(false)}
+                fetchData={null}
             />
-        } */}
+        )}
     </>
 
 }

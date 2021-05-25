@@ -86,6 +86,7 @@ const ContactDetailsPage = (props) => {
   const [orgChartData, setOrgChartData] = useState([])
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
+  const [projectSales, setProjectSales] = useState([]);
 
   let { id } = useParams();
 
@@ -190,6 +191,17 @@ const ContactDetailsPage = (props) => {
             ? data.Opportunity[
                 sidebarResource[contactResource].replaceAll(" ", "_")
               ]
+            : []
+        );
+
+        setProjectSales(
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.projectSales][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
             : []
         );
       });
@@ -518,9 +530,13 @@ const ContactDetailsPage = (props) => {
                     isRedirect={false}
                   />
                 )}
-                <ProjectInAccordion recordsPerLine={3} />
+                {permissions?.projectSales?.isRead && (
+                <ProjectInAccordion 
+                recordsPerLine={3}
+                projectSales={projectSales} />
+                )}
                 <QuotesInAccordion recordsPerLine={3} />
-                <ProductBuilderInAccordion recordsPerLine={3} />
+                {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {permissions?.lead?.isRead && contactData.staticData?.lead &&(
                 <LeadInAccordion 
                 recordsPerLine={3} 
