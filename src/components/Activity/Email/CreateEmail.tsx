@@ -446,7 +446,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                     setFieldValue("file", file);
                                                                     setOtherAttachments((prevState) => ([...prevState, file]))
                                                                 }}
-                                                                usePubllicUrlforFileUpload={true}
+                                                                usePublicUrlforFileUpload={true}
                                                                 doNotShowUploadedFile={true}
                                                             />
                                                         </Box>

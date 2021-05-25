@@ -149,7 +149,7 @@ const FormTypes = (props) => {
     fieldData,
     startAdornment,
     accept,
-    usePubllicUrlforFileUpload = false,
+    usePublicUrlforFileUpload = false,
     doNotShowUploadedFile = false,
     ...rest
   } = props;
@@ -281,7 +281,7 @@ const FormTypes = (props) => {
     let formData = new FormData();
     formData.append("file", file);
     setFileUploading(true);
-    let uploadUrl = usePubllicUrlforFileUpload ? "/user/upload-public" : "/user/upload"
+    let uploadUrl = usePublicUrlforFileUpload ? "/user/upload-public" : "/user/upload"
     axiosInstance()
       .post(uploadUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -297,8 +297,7 @@ const FormTypes = (props) => {
         },
       })
       .then(({ data }) => {
-        if (usePubllicUrlforFileUpload) setFieldValue(name, data.fileUrl);
-        else setFieldValue(name, data.fileName);
+        setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
         setFileUploading(false);
       })
       .catch((err) => {
