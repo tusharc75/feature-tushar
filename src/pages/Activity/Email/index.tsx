@@ -297,7 +297,7 @@ const Email = () => {
     const handleTab = (e, currentTab) => {
         let filteredEmails = [...emailsCopy]
         if (currentTab === tabs.Sent) {
-            filteredEmails = _.cloneDeep(emailsCopy).filter(email => email.isCreatedByMe)
+            filteredEmails = emailsCopy.filter(email => email.isCreatedByMe)
         }
         setRowCount(filteredEmails.length)
         setEmails(filteredEmails)

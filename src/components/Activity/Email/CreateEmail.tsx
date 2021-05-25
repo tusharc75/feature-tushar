@@ -37,7 +37,6 @@ import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
 
-
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
         return value;
@@ -83,7 +82,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const [initialValues, setInitialValues] = useState(null);
     const [isUploading, setUploading] = useState(false);
     const [imageAttachments, setImageAttachments] = useState([])
-    const [otherAttachments, setOtherAttachment] = useState([])
+    const [otherAttachments, setOtherAttachments] = useState([])
     const [open, setOpen] = useState(false);
     const [imageSource, setImageSource] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -94,12 +93,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     }, []);
 
     const checkImageUrl = (url) => {
-
+        let extension = url.substring(url.lastIndexOf("."),).toLowerCase()
         let imageExtensions = [".tif", "tiff", ".bmp", ".jpg", "jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"]
-        let ans = imageExtensions.some(extension => {
-            return url.indexOf(extension) >= 0 || url.indexOf(extension.toUpperCase()) >= 0
-        })
-        return ans
+        return imageExtensions.indexOf(extension) >= 0
     }
     const fetchEmailDetail = async () => {
         if (emailId) {
@@ -117,7 +113,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                             return isImageUrl
                         })
                         setImageAttachments(filteredAttachments)
-                        setOtherAttachment([...otherAttachments])
+                        setOtherAttachments([...otherAttachments])
                     }
                     setLoading(false)
                     setInitialValues(data)
@@ -219,7 +215,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
             });
     };
     const handleDeleteAttachment = (url) => {
-        setOtherAttachment(otherAttachments.filter(currentUrl => currentUrl !== url))
+        setOtherAttachments(otherAttachments.filter(currentUrl => currentUrl !== url))
     }
 
     const handleDeleteImageAttachment = (url) => {
@@ -268,8 +264,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         <Box mt={2} alignItems="center">
             {
                 otherAttachments && otherAttachments.length > 0 ?
-                    otherAttachments.map(attachment => (
-                        <Fragment>
+                    otherAttachments.map((attachment, i) => (
+                        <Fragment key={`attachment${i}`}>
                             <Box alignItems="center" style={{
                                 display: 'flex', justifyContent: 'space-between'
                             }}>
@@ -448,7 +444,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 size="small"
                                                                 setFieldValue={(name, file) => {
                                                                     setFieldValue("file", file);
-                                                                    setOtherAttachment((prevState) => ([...prevState, file]))
+                                                                    setOtherAttachments((prevState) => ([...prevState, file]))
                                                                 }}
                                                                 usePubllicUrlforFileUpload={true}
                                                                 doNotShowUploadedFile={true}
@@ -532,7 +528,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                 /> : null
         }
 
-        {/* {!emailId && <UnauthenticatedTemplate>
+        {!emailId && <UnauthenticatedTemplate>
             <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
                 backdropFilter: "blur(2px)",
                 color: "#F9FAFB",
@@ -543,7 +539,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                     <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
                 </Box>
             </Box>
-        </UnauthenticatedTemplate>} */}
+        </UnauthenticatedTemplate>}
     </>
 
 }
