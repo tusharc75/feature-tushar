@@ -73,6 +73,7 @@ import Event from "./pages/Activity/Event";
 import DOAapproval from "./pages/DOA/DOAApproval";
 import Reminder from "./pages/Reminder";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import queryString from "query-string";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -108,10 +109,19 @@ function App() {
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
+
+    let redirectToAnotherScreen = null;
+    if (location && location.search) {
+      const parsedParams = queryString.parse(location.search);
+      if (parsedParams.redirect) {
+        redirectToAnotherScreen = parsedParams.redirect;
+      }
+    }
+
     return !user ? (
       <Comp />
     ) : (
-      <Redirect to={{ pathname: "/", state: { from: location } }} />
+      <Redirect to={{ pathname: redirectToAnotherScreen ? redirectToAnotherScreen : "/", state: { from: location } }} />
     );
   };
 
@@ -121,7 +131,7 @@ function App() {
         {/* <Switch location={location} key={location.key}> */}
         <Switch>
           <Route
-            exact
+            // exact
             path="/login"
             render={({ location }) => conditionalRedirect(Login, location)}
           />
