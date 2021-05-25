@@ -18,7 +18,8 @@ import ManageAttachment from "../../../components/Activity/Attachments/ManageAtt
 import CustomContainer from '../../../components/CustomContainer'
 import styles from "../../Leads/Header.module.scss";
 import { AiOutlinePaperClip } from 'react-icons/ai'
-
+import { AddOutlined } from "@material-ui/icons";
+import { Button } from '@material-ui/core'
 export default function Attachment(props) {
 
     const history = useHistory();
@@ -121,6 +122,17 @@ export default function Attachment(props) {
                                     filter={filter}
                                     chip={{ size: "small" }}
                                 />
+                                <Button
+                                    style={{ marginLeft: '10px' }}
+                                    variant="contained"
+                                    color="primary"
+                                    size="small"
+                                    className={styles.add_submit_btn}
+                                    onClick={() => setOpen(true)}
+                                    startIcon={<AddOutlined />}
+                                >
+                                    Add
+                                </Button>
                             </Box>
                         </Box>
                     </Grid>
