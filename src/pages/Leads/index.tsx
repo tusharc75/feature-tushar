@@ -341,6 +341,10 @@ const Leads = () => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
 
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`
+    }
+    
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
