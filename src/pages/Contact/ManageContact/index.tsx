@@ -191,9 +191,6 @@ export default function ManageContactDialog(props) {
           isGetAccountData={true}
           onGetAddedAccount={handleGetAddedAccount}
           isRedirectToDetailPage={false}
-          fromProject={fromProject}
-          owners={owners}
-          collaborators={collaborators}
         />
       ) : null}
     </>

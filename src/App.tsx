@@ -25,7 +25,7 @@ import Email from "./pages/Activity/Email";
 import Attachments from "./pages/Activity/Attachments";
 import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
-import ForgetPassword from './pages/Auth/ForgetPassword';
+import ForgetPassword from "./pages/Auth/ForgetPassword";
 import ProductCategory from "./pages/ProductCategory";
 import ProductTemplate from "./pages/ProductTemplate";
 import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
@@ -47,9 +47,9 @@ import CreateProductCost from "./pages/ProductCost/CreateProductCost";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
-import QuoteApproval from './pages/Quote-Approval'
-import QuoteBuilderPage from './pages/QuoteBuilder'
-import DOARequest from './pages/DOA'
+import QuoteApproval from "./pages/Quote-Approval";
+import QuoteBuilderPage from "./pages/QuoteBuilder";
+import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 
 import {
@@ -57,12 +57,12 @@ import {
   customerAccount,
   customerContact,
   supplierAccount,
-  supplierContact
+  supplierContact,
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
 import KpiDashboard from "./pages/KpiDashboard";
-import EditDashboard from './pages/KpiDashboard/EditDashboards';
+import EditDashboard from "./pages/KpiDashboard/EditDashboards";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
@@ -70,7 +70,9 @@ import UserProfilePage from "./pages/ProfilePage/index";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
-import DOAapproval from './pages/DOA/DOAApproval'
+import DOAapproval from "./pages/DOA/DOAApproval";
+import Reminder from "./pages/Reminder";
+import ResetPassword from "./pages/Auth/ResetPassword";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -84,7 +86,9 @@ function App() {
       await axiosInstance()
         .get(`/user/notification/unseen`)
         .then(({ data: { count } }) => {
-          if (count > 0) { notification.setCount(count); }
+          if (count > 0) {
+            notification.setCount(count);
+          }
         })
         .catch((error) => {
           toast.setToastConfig(error);
@@ -135,6 +139,13 @@ function App() {
               conditionalRedirect(ForgetPassword, location)
             }
           />
+          <Route
+            exact
+            path="/reset-password"
+            render={({ location }) =>
+              conditionalRedirect(ResetPassword, location)
+            }
+          />
           <PrivateRoute exact path="/">
             <Dashboard />
           </PrivateRoute>
@@ -156,7 +167,6 @@ function App() {
           <PrivateRoute exact path="/new-opp">
             <AddNewOpportunity />
           </PrivateRoute>
-
           <PrivateRoute exact path="/doa">
             <Doa />
           </PrivateRoute>
@@ -292,31 +302,27 @@ function App() {
           <PrivateRoute exact path="/activity/attachment">
             <Attachments />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/event">
-            <Event />
-          </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />
           </PrivateRoute>
           <PrivateRoute exact path="/calendar">
             <Calender />
           </PrivateRoute>
-
+          <PrivateRoute exact path="/reminder">
+            <Reminder />
+          </PrivateRoute>
           <PrivateRoute exact path={routes.product.path}>
             <Product />
           </PrivateRoute>
-
-
           <PrivateRoute exact path={routes.productCategory.path}>
             <ProductCategory />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productTemplate.path}>
             <ProductTemplate />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productTemplate.path + "/:id"} >
+          <PrivateRoute exact path={routes.productTemplate.path + "/:id"}>
             <CreateProductTemplate />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.formBuilder.path}>
             <FormBuilder />
           </PrivateRoute>
@@ -331,26 +337,22 @@ function App() {
               termsAndConditionBreadcrumb={routes.termsAndConditions}
             />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.productCost.path}>
             <ProductCost />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productCost.path + "/:id"}>
             <CreateProductCost />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.productBuilder.path}>
             <ProductBuilder />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
             <CreateProductBuilder />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
-
-          <Route exact path={"/quote-builder/:id"} >
+          <Route exact path={"/quote-builder/:id"}>
             <QuoteBuilderPage />
           </Route>
           <Route exact path={"/dashboards"}>
@@ -366,15 +368,12 @@ function App() {
           <Route exact path={"/quote-approval/:id"}>
             <QuoteApproval />
           </Route>
-
           <Route exact path={"/doa-request"}>
             <DOARequest />
           </Route>
-
           <Route exact path={"/doa-request/:id"}>
             <DOAapproval />
           </Route>
-
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-export default (history = null) => {
+export default (history = null, passedHeaders = null) => {
     const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
-    let headers: any = {};
+    let headers: any = passedHeaders ? passedHeaders : {};
 
     if (localStorage.token) {
         headers.Authorization = `Bearer ${localStorage.token}`;
