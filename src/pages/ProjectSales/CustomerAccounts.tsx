@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CustomerStrategy = (props) => {
+const CustomerAccounts = (props) => {
   const {
     loading,
     handleOpenDialog,
@@ -504,4 +504,4 @@ const CustomerStrategy = (props) => {
   );
 };
 
-export default CustomerStrategy;
+export default CustomerAccounts;
