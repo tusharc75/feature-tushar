@@ -149,6 +149,8 @@ const FormTypes = (props) => {
     fieldData,
     startAdornment,
     accept,
+    usePublicUrlforFileUpload = false,
+    doNotShowUploadedFile = false,
     ...rest
   } = props;
 
@@ -279,8 +281,9 @@ const FormTypes = (props) => {
     let formData = new FormData();
     formData.append("file", file);
     setFileUploading(true);
+    let uploadUrl = usePublicUrlforFileUpload ? "/user/upload-public" : "/user/upload"
     axiosInstance()
-      .post("/user/upload", formData, {
+      .post(uploadUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (pE) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
@@ -294,7 +297,7 @@ const FormTypes = (props) => {
         },
       })
       .then(({ data }) => {
-        setFieldValue(name, data.fileName);
+        setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
         setFileUploading(false);
       })
       .catch((err) => {
@@ -1421,36 +1424,38 @@ const FormTypes = (props) => {
             Upload File
           </Button>
         </label>
-        <Box marginX={1} />
-
-        <Box flex="1">
-          <Typography
-            variant="body2"
-            className="text-truncate"
-            color={
-              touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
-            }
-          >
-            {isFileUploading
-              ? `Uploading... ${fileUploadProgress}%`
-              : values[name]
-                ? values[name]
-                : touched[name] && Boolean(errors[name])
-                  ? errors[name]
-                  : "No file choosen"}
-          </Typography>
-        </Box>
-        <IconButton
-          disabled={Boolean(!values[name])}
-          title="Remove File"
-          color="secondary"
-          size="small"
-          aria-label="delete picture"
-          component="span"
-          onClick={() => setFieldValue(name, "")}
-        >
-          <DeleteIcon />
-        </IconButton>
+        {
+          doNotShowUploadedFile ? null : <>
+            <Box marginX={1} />
+            <Box flex="1">
+              <Typography
+                variant="body2"
+                className="text-truncate"
+                color={
+                  touched[name] && Boolean(errors[name]) ? "error" : "textPrimary"
+                }
+              >
+                {isFileUploading
+                  ? `Uploading... ${fileUploadProgress}%`
+                  : values[name]
+                    ? values[name]
+                    : touched[name] && Boolean(errors[name])
+                      ? errors[name]
+                      : "No file choosen"}
+              </Typography>
+            </Box>
+            <IconButton
+              disabled={Boolean(!values[name])}
+              title="Remove File"
+              color="secondary"
+              size="small"
+              aria-label="delete picture"
+              component="span"
+              onClick={() => setFieldValue(name, "")}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </>}
       </Box>
     </Fragment>
   ) : type === "url" ? (

@@ -72,6 +72,7 @@ import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
 import DOAapproval from "./pages/DOA/DOAApproval";
 import Reminder from "./pages/Reminder";
+import ResetPassword from "./pages/Auth/ResetPassword";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -136,6 +137,13 @@ function App() {
             path="/forget-password"
             render={({ location }) =>
               conditionalRedirect(ForgetPassword, location)
+            }
+          />
+          <Route
+            exact
+            path="/reset-password"
+            render={({ location }) =>
+              conditionalRedirect(ResetPassword, location)
             }
           />
           <PrivateRoute exact path="/">
@@ -293,9 +301,6 @@ function App() {
           </PrivateRoute>
           <PrivateRoute exact path="/activity/attachment">
             <Attachments />
-          </PrivateRoute>
-          <PrivateRoute exact path="/activity/event">
-            <Event />
           </PrivateRoute>
           <PrivateRoute exact path="/activity/:type">
             <Activity />
