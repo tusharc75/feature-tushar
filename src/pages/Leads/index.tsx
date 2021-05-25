@@ -203,7 +203,7 @@ const Leads = () => {
     { field: "phone", headerName: "Phone", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
     { field: "mobile", headerName: "Mobile", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
     { field: "email", headerName: "Email", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-    { field: "owner", headerName: "Owner Alies", show: true, filter: "agTextColumnFilter", cellRenderer: "optionLabelRenderer" },
+    { field: "owner", headerName: "Owner Alies", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
   ]);
 
   // const dummyData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => {
@@ -302,7 +302,7 @@ const Leads = () => {
 
     <GridDeleteIcon
       hasDeletePermission={leadsPermissions.isDelete}
-      ownerId={params.data.owner.optionValue}
+      ownerId={params.data.ownerId}
       userId={user?.user?._id}
       onDelete={() => showConfirmBox(params.data)}
       entity="lead"
@@ -398,7 +398,8 @@ const Leads = () => {
               ...u,
               id: u._id,
               name: name,
-              owner: u.owner,
+              owner: u.owner?.optionLabel,
+              ownerId: u.owner?.optionValue,
               isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
                 (d) => d.optionValue == user?.user?._id
               ),
@@ -406,12 +407,12 @@ const Leads = () => {
             };
             return res;
           });
-
+          console.log(rows);
           dispatch({ type: "initialize", data: rows, count: count });
 
-          if (gridApi && rows.length > 0) {
-            gridApi.hideOverlay();
-          }
+          // if (gridApi && rows.length > 0) {
+          //   gridApi.hideOverlay();
+          // }
           setCheckAllLeads(false);
 
         }).catch((error) => {
@@ -530,7 +531,7 @@ const Leads = () => {
       }
     } else {
       if (
-        selectedRecords.find((d) => d.owner.optionValue != user.user._id)
+        selectedRecords.find((d) => d.ownerId != user.user._id)
       ) {
         setShowDeleteWarningConfirmBox(true);
       } else {
