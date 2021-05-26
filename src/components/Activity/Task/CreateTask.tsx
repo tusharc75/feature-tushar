@@ -58,8 +58,6 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
 
   useEffect(() => {
     fetchTaskDetail();
-
-    return () => setId(null);
   }, [id]);
 
   const fetchTaskDetail = async () => {
