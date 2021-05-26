@@ -185,7 +185,7 @@ export default function Attachment(props) {
                                 variant="contained"
                                 color="primary"
                                 size="small"
-                                className={`${styles.add_submit_btn} ml-10`}
+                                className={styles.add_submit_btn}
                                 onClick={() => setOpen(true)}
                                 startIcon={<AddOutlined />}>
                                 Add
