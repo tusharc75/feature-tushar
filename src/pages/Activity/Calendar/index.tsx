@@ -37,16 +37,31 @@ const BigCalendar = () => {
     setAnchorEl(null);
   };
 
+  const joinDateTime = (date, time) => {
+    let d = date.split("T")[0];
+    let t = time.split("T")[1];
+
+    return date && time ? new Date(`${d}T${t}`) : "";
+  };
+
   const fetchBoard = useCallback(() => {
     GetBoard(lowerCase(type), JSON.stringify(filter))
       .then(({ data }) => {
         const newData = data.map((d) => ({
           ...d,
           title: d.name,
-          start: d.startDate ? new Date(d.startDate) : moment().toDate(),
-          end: d.dueDate
-            ? new Date(d.dueDate)
-            : moment().add(20, "days").toDate(),
+          start:
+            type === "Event"
+              ? joinDateTime(d.startDate, d.startTime)
+              : d.startDate
+              ? new Date(d.startDate)
+              : moment().toDate(),
+          end:
+            type === "Event"
+              ? joinDateTime(d.endDate, d.endTime)
+              : d.dueDate
+              ? new Date(d.dueDate)
+              : moment().add(20, "days").toDate(),
         }));
 
         setActivities(newData);

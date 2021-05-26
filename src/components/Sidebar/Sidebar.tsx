@@ -212,11 +212,11 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const activityTabs = [
     "Task",
     "Case",
-    "Event",
     "Note",
     "Email",
     "Attachment",
     "Calendar",
+    "Reminder",
   ];
 
   return (
@@ -299,8 +299,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     className="sub-list"
                     key={i}
                     to={
-                      item === "Calendar"
-                        ? "/calendar"
+                      item === "Calendar" || item === "Reminder"
+                        ? `/${_.lowerCase(item)}`
                         : `/activity/${_.lowerCase(item)}`
                     }
                   >

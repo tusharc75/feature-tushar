@@ -16,10 +16,10 @@ import { ArrowRightAlt } from "@material-ui/icons";
 import { TextField as TextFieldFormik } from "formik-material-ui";
 import { Formik, Form, Field } from "formik";
 import {
+  MuiPickersUtilsProvider,
   KeyboardDatePicker,
   KeyboardTimePicker,
-} from "formik-material-ui-pickers";
-import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+} from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import * as Yup from "yup";
 import moment from "moment";
@@ -89,7 +89,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
   useEffect(() => {
     fetchEventDetail();
-  }, []);
+  }, [eventId]);
 
   const fetchEventDetail = async () => {
     if (eventId) {
@@ -106,8 +106,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
         participant: [],
         startDate: new Date(),
         endDate: new Date(),
-        startTime: "12:00 AM",
-        endTime: "12:00 AM",
+        startTime: new Date(),
+        endTime: new Date(),
       });
     }
   };
@@ -200,9 +200,15 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     const errors = {};
 
     if (
-      new Date(values.startDate).getTime() >= new Date(values.endDate).getTime()
+      new Date(values.startTime).getTime() >= new Date(values.endTime).getTime()
     ) {
-      errors["endDate"] = "Start and End Time and Date should be different";
+      errors["endTime"] = "End time should be different";
+    }
+
+    if (
+      new Date(values.startDate).getDate() > new Date(values.endDate).getDate()
+    ) {
+      errors["endDate"] = "End date should be greater then start date";
     }
     return errors;
   }
@@ -353,62 +359,61 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                     >
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
-                          <Field
-                            component={KeyboardDatePicker}
-                            label="Start Date"
-                            name="startDate"
+                          <KeyboardDatePicker
+                            clearable
                             autoOk
+                            size="small"
+                            disablePast
                             variant="inline"
                             inputVariant="outlined"
-                            fullWidth
+                            value={values.startDate}
+                            name="startDate"
+                            label="Start Date"
+                            onChange={(date) =>
+                              setFieldValue("startDate", date)
+                            }
+                            format="DD/MM/YYYY"
+                            error={
+                              touched["startDate"] &&
+                              Boolean(errors["startDate"])
+                            }
+                            helperText={
+                              touched["startDate"] && errors["startDate"]
+                            }
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
                             margin="dense"
-                            format="yyyy/MM/DD"
                           />
                         </Grid>
 
                         <Grid item xs={5}>
-                          <Box>
-                            {/* <FormControl
-                              fullWidth
-                              margin="dense"
-                              variant="outlined"
-                            >
-                              <InputLabel id="demo-simple-select-outlined-label">
-                                Start Time
-                              </InputLabel>
-                              <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                value={values["startTime"]}
-                                onChange={(e) =>
-                                  setFieldValue("startTime", e.target.value)
-                                }
-                                label="Start Time"
-                                name="startTime"
-                                error={
-                                  touched["startTime"] &&
-                                  Boolean(errors["startTime"])
-                                }
-                                MenuProps={MenuProps}
-                              >
-                                {times.map((_time, index) => (
-                                  <MenuItem key={index} value={_time}>
-                                    {_time}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl> */}
-                            <Field
-                              component={KeyboardTimePicker}
-                              label="Start Time"
-                              name="startDate"
-                              autoOk
-                              margin="dense"
-                              variant="inline"
-                              inputVariant="outlined"
-                              fullWidth
-                            />
-                          </Box>
+                          <KeyboardTimePicker
+                            clearable
+                            autoOk
+                            size="small"
+                            variant="inline"
+                            inputVariant="outlined"
+                            label="Start Time"
+                            name="startTime"
+                            placeholder="08:00 AM"
+                            mask="__:__ _M"
+                            value={values.startTime}
+                            onChange={(date) =>
+                              setFieldValue("startTime", date)
+                            }
+                            error={
+                              touched["startTime"] &&
+                              Boolean(errors["startTime"])
+                            }
+                            helperText={
+                              touched["startTime"] && errors["startTime"]
+                            }
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                            margin="dense"
+                          />
                         </Grid>
                       </Grid>
 
@@ -420,68 +425,51 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
-                          <Field
-                            component={KeyboardDatePicker}
-                            label="End Date"
-                            name="endDate"
+                          <KeyboardDatePicker
+                            clearable
                             autoOk
+                            size="small"
+                            disablePast
                             variant="inline"
                             inputVariant="outlined"
-                            fullWidth
+                            minDate={values.startDate}
+                            value={values.endDate}
+                            name="endDate"
+                            label="End Date"
+                            onChange={(date) => setFieldValue("endDate", date)}
+                            format="DD/MM/YYYY"
+                            error={
+                              touched["endDate"] && Boolean(errors["endDate"])
+                            }
+                            helperText={touched["endDate"] && errors["endDate"]}
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
                             margin="dense"
-                            format="yyyy/MM/DD"
-                            minDate={values["startDate"]}
                           />
                         </Grid>
                         <Grid item xs={5}>
-                          <Box>
-                            {/* <FormControl
-                              fullWidth
-                              margin="dense"
-                              variant="outlined"
-                              error={
-                                touched["endTime"] && Boolean(errors["endTime"])
-                              }
-                            >
-                              <InputLabel id="demo-simple-select-outlined-label">
-                                End Time
-                              </InputLabel>
-                              <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                value={values["endTime"]}
-                                onChange={(e) =>
-                                  setFieldValue("endTime", e.target.value)
-                                }
-                                label="End Time"
-                                name="endTime"
-                                error={
-                                  touched["endTime"] &&
-                                  Boolean(errors["endTime"])
-                                }
-                                MenuProps={MenuProps}
-                              >
-                                {times.map((_time, index) => (
-                                  <MenuItem key={index} value={_time}>
-                                    {_time}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                              <FormHelperText>
-                                {touched["endTime"] && errors["endTime"]}
-                              </FormHelperText>
-                            </FormControl> */}
-                            <Field
-                              component={KeyboardTimePicker}
-                              label="End Time"
-                              name="endDate"
-                              autoOk
-                              margin="dense"
-                              variant="inline"
-                              inputVariant="outlined"
-                              fullWidth
-                            />
-                          </Box>
+                          <KeyboardTimePicker
+                            clearable
+                            autoOk
+                            size="small"
+                            variant="inline"
+                            inputVariant="outlined"
+                            label="End Time"
+                            name="endTime"
+                            placeholder="08:00 AM"
+                            mask="__:__ _M"
+                            value={values.endTime}
+                            onChange={(date) => setFieldValue("endTime", date)}
+                            error={
+                              touched["endTime"] && Boolean(errors["endTime"])
+                            }
+                            helperText={touched["endTime"] && errors["endTime"]}
+                            InputLabelProps={{
+                              shrink: true,
+                            }}
+                            margin="dense"
+                          />
                         </Grid>
                       </Grid>
                     </Box>

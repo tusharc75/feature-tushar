@@ -61,10 +61,10 @@ const Chatter = (props) => {
       setLoading(true);
       axiosInstance()
         .get(`/chatter/resource?relatedTo=${JSON.stringify(relatedTo)}`)
-        .then(({ data: { data } }) => {
-          if (data) {
-            setMessages(data.Messages);
-            setChatterId(data._id);
+        .then(({ data }) => {
+          if (data.hasOwnProperty("data")) {
+            setMessages(data.data.Messages);
+            setChatterId(data.data._id);
           } else {
             createChatter();
           }
@@ -79,7 +79,9 @@ const Chatter = (props) => {
 
   useEffect(() => {
     getChatter();
+  }, [getChatter]);
 
+  useEffect(() => {
     const token = localStorage.getItem("token");
     const s = io("https://oms-backend.vebholic.com/chatter", {
       auth: {
@@ -87,17 +89,15 @@ const Chatter = (props) => {
       },
     });
     setSocket(s);
-
-    return () => {
-      s.disconnect();
-    };
-  }, [getChatter]);
+  }, [chatterId]);
 
   // Socket listening for data
   useEffect(() => {
     if (!socket && !chatterId) return;
 
-    socket.on("connect", (data) => {
+    console.log(chatterId);
+
+    socket.on("connect", () => {
       socket.emit("join", chatterId);
     });
 
@@ -117,21 +117,20 @@ const Chatter = (props) => {
     axiosInstance()
       .post(`/chatter`, { relatedTo })
       .then(({ data: { data } }) => {
-        console.log(data);
+        setChatterId(data._id);
       })
       .catch((err) => {
         setToastConfig(err);
       });
   };
 
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault();
-    axiosInstance()
-      .put(`/chatter/${chatterId}`, { message })
-      .then(() => {})
-      .catch((err) => {
-        setToastConfig(err);
-      });
+    try {
+      await axiosInstance().put(`/chatter/${chatterId}`, { message });
+    } catch (error) {
+      setToastConfig(error);
+    }
     setMessage("");
   };
 
