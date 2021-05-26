@@ -9,7 +9,7 @@ export default function CustomRenderCell({ value, isCopyToClipboard = false }) {
     //     {value || <NoDataCell />}
     //     { inHover && isCopyToClipboard && value ? <CopyToClipboard textToCopy={value} /> : null}
     // </span>
-    return <> {<span title={value}>{value}</span> || <NoDataCell />}
+    return <> {value ? <span title={value}>{value}</span> : <NoDataCell />}
         {isCopyToClipboard && value ? <CopyToClipboard textToCopy={value} /> : null}
     </>
 }

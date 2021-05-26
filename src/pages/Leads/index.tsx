@@ -344,6 +344,38 @@ const Leads = () => {
     </AgGridColumn>
   })
 
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      case "relatedOpportunity":
+        return "staticData.opportunity.opportunityName";
+
+      default:
+        return field;
+    }
+  }
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field == updatedField) {
+      switch (field) {
+        case "owner":
+          return "owner.optionLabel";
+
+        default:
+          return field;
+      }
+    } else {
+      return updatedField;
+    }
+  }
+
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
 
@@ -355,18 +387,8 @@ const Leads = () => {
       const updatedFilters = [];
 
       Object.keys(filters).map(field => {
-        let updatedColumnName = field;
-
-        if (field === 'createdBy') {
-          updatedColumnName = "createdBy.user.concatedName"
-        } else if (field === 'updatedBy') {
-          updatedColumnName = "updatedBy.user.concatedName"
-        } else if (field === 'relatedOpportunity') {
-          updatedColumnName = "staticData.opportunity"
-        }
-
         updatedFilters.push({
-          field: updatedColumnName,
+          field: replaceFieldName(field),
           term: filters[field].filter
         })
       });
@@ -374,7 +396,7 @@ const Leads = () => {
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
     }
 
     if (search) {
