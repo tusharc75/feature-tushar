@@ -84,7 +84,10 @@ export const BoardList = ({
         <Box
           p={1}
           style={{
-            opacity: isCreateButton ? 1 : 0,
+            opacity:
+              isCreateButton || (status === "To Do" && subActivity.length === 0)
+                ? 1
+                : 0,
           }}
         >
           <Button startIcon={<Add />} onClick={() => setOpenDialog(true)}>
