@@ -473,7 +473,7 @@ export default function AccountDetailPage(props) {
   return (
     <>
       <Layout>
-        <Grid container direction="row">
+      <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">

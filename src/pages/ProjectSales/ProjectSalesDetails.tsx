@@ -73,7 +73,7 @@ const ProjectSalesDetails = () => {
 
     axiosInstance()
       .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -327,12 +327,13 @@ const ProjectSalesDetails = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={customizedRoutes} />
-
+        <Grid container className="headerbox">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Grid>
         <div className="detail-container">
           <Grid container spacing={1}>
             <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Paper className="subContainer">
+              <Paper>
                 {!projectSalesData ? (
                   <Box padding={1}>
                     <Skeleton variant="text" width="150px" height="30px" />
@@ -358,7 +359,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -382,8 +383,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                  !projectSalesFields.length ||
-                  !projectSalesData ? (
+                    !projectSalesFields.length ||
+                    !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -428,9 +429,8 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${
-                                    node.id
-                                  }`,
+                                  pathname: `${routes[node.route].path}/${node.id
+                                    }`,
                                 });
                               }
                             }}
@@ -461,7 +461,7 @@ const ProjectSalesDetails = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper className="subContainer">
+              <Paper>
                 <Box style={{ padding: "0px", maxHeight: "450px" }}>
                   <Box
                     width="100%"
@@ -473,7 +473,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -549,8 +549,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-              : ""
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

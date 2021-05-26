@@ -278,8 +278,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 .listing-grid {
-  height: calc(100vh - 10rem);
-  padding: 0 0.3rem 0.3rem;
+  height: calc(100vh - 160px);
+  padding: 0 4px 4px;
 }
 
 .form-label-style:nth-child(1) {
@@ -367,28 +367,31 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
-  margin: 0 1.5rem;
-  position: absolute;
-  top: 99px;
-  width: calc(100% - 6rem); //3rem sidebar + 1.5rem*2 margin from left and right = 6rem
-  background: white;
-  border-radius: 10px 10px 0 0;
-  box-shadow: 0 3px 5px #6f6d6d;
-  height: calc(100vh - 15.5vh);
+  height: calc(100vh - 110px);
+  position: relative;
   overflow: auto;
+  z-index: 11;
+  margin: 10px;
+  top: 36px;
+  background: white;
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 3px 5px #6f6d6d;
 }
 
 .detail-container {
-  position: absolute;
-  top: 90px;
-  padding: 10px;
-  width: calc(100% - 2.8rem) !important;
+  height: calc(100vh - 100px);
+  position: relative;
+  top: 36px;
+  padding: 0 10px 10px 10px;
+  overflow: auto;
+  z-index: 11;
+  margin-top: 5px !important;
 }
 
-.subContainer{
-  overflow-y: auto;
-  overflow-x: hidden;
-  height: calc(100vh - 116px);
+.fixedRightPanel{
+  position: fixed;
+  height: calc(100vh - 107px);
+  width: 31.5%;
 }
 
 .badge-date {

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useContext } from "react";
-import { Box, Button, Dialog } from "@material-ui/core";
+import React, { useState, useEffect, useCallback, useContext } from "react";
+import { Box, Button, Dialog, Grid } from "@material-ui/core";
 import { Add } from "@material-ui/icons";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
@@ -32,7 +32,7 @@ const Event = () => {
             { _id: referenceId, type: referenceType, name: data.name },
           ]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [referenceId]);
 
@@ -72,10 +72,11 @@ const Event = () => {
 
   return (
     <Layout>
-      <CustomBreadCrumbs
-        routes={[{ title: "Activity", path: "/activity" }, { title: "Event" }]}
-      />
-
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs
+          routes={[{ title: "Activity", path: "/activity" }, { title: "Event" }]}
+        />
+      </Grid>
       <CustomContainer>
         <div className="detailContainer">
           <Box p={1}>

@@ -3,6 +3,7 @@ import {
   Checkbox,
   Tooltip,
   IconButton,
+  Grid,
   Link as MuiLink,
 } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
@@ -408,7 +409,7 @@ const Entity: FC = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let deepFilter ;
+      let deepFilter;
       switch (params.filterModel.items[0].columnField) {
         case 'createdBy':
           deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
@@ -417,7 +418,7 @@ const Entity: FC = () => {
           deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
           break;
         case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
           break;
         default:
           deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
@@ -456,7 +457,9 @@ const Entity: FC = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={[routes.entity]} />
+        <Grid container className="headerbox">
+          <CustomBreadCrumbs routes={[routes.entity]} />
+        </Grid>
         <div className="main-container">
           <div className="header-panel">
             <EntityHeader
