@@ -212,7 +212,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const activityTabs = [
     "Task",
     "Case",
-    "Event",
     "Note",
     "Email",
     "Attachment",
