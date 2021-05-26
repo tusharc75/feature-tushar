@@ -382,6 +382,7 @@ const Leads = () => {
       dispatch({ type: "loading", loading: true });
 
       if (gridApi) {
+        gridApi.setRowData([]);
         gridApi.showLoadingOverlay();
       }
 
@@ -403,11 +404,12 @@ const Leads = () => {
             };
             return res;
           });
+          
+          dispatch({ type: "initialize", data: rows, count: count });
 
           if (gridApi && rows.length > 0) {
             gridApi.hideOverlay();
           }
-          dispatch({ type: "initialize", data: rows, count: count });
 
           setCheckAllLeads(false);
 
@@ -780,7 +782,7 @@ const Leads = () => {
                 dispatch({ type: "filter", filters: e.api.getFilterModel() });
               }}
               enableCellTextSelection={true}
-              ensureDomOrder={true}
+              ensureDomOrder={false}
               loadingOverlayComponent={'customLoadingOverlay'}
               loadingOverlayComponentParams={{
                 loadingMessage: 'Loading...',
@@ -802,10 +804,10 @@ const Leads = () => {
               onSelectionChanged={(event: any) => {
                 dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
               }}
-            // immutableData={true}
-            // getRowNodeId={(data) => {
-            //   return data._id;
-            // }}
+              immutableData={true}
+              getRowNodeId={(data) => {
+                return data._id;
+              }}
             >
               <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
                 headerCheckboxSelection={true}
