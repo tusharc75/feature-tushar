@@ -4,6 +4,7 @@ import {
   Link as MuiLink,
   Tooltip,
   IconButton,
+  Grid
 } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
@@ -98,14 +99,14 @@ const ProjectSales: FC = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((project: any) => ({
-          id: project._id,
-          isChecked: false,
-          projectName: project.projectName,
-          projectOwner: project.projectOwner?.optionLabel,
-          createdAt: moment(project.createdAt).format("MMM Do, YYYY"),
-          createdBy: project?.createdBy,
-          updatedBy: project?.updatedBy,
-        }))
+        id: project._id,
+        isChecked: false,
+        projectName: project.projectName,
+        projectOwner: project.projectOwner?.optionLabel,
+        createdAt: moment(project.createdAt).format("MMM Do, YYYY"),
+        createdBy: project?.createdBy,
+        updatedBy: project?.updatedBy,
+      }))
       : [];
     setDataRows(rows);
   };
@@ -225,7 +226,7 @@ const ProjectSales: FC = () => {
         return (
           <>
             {permissions?.projectSales.isDelete &&
-            data?.projectManager.optionValue === user.user._id ? (
+              data?.projectManager.optionValue === user.user._id ? (
               <Tooltip title="Delete">
                 <IconButton
                   aria-label="Delete"
@@ -430,7 +431,9 @@ const ProjectSales: FC = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={[routes.projectSales]} />
+        <Grid container className="headerbox">
+          <CustomBreadCrumbs routes={[routes.projectSales]} />
+        </Grid>
         <div className="main-container">
           <div className="header-panel">
             <ProjectHeader
@@ -481,9 +484,8 @@ const ProjectSales: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete this record ${
-              deleteRec.name || ""
-            }?`}
+            message={`Are you sure, you want to delete this record ${deleteRec.name || ""
+              }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

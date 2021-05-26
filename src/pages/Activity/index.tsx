@@ -64,7 +64,7 @@ const Activity = () => {
 
   return (
     <Layout>
-      <Grid container direction="row">
+      <Grid container className="headerbox">
         <Grid item xs={12}>
           <CustomBreadCrumbs
             routes={[

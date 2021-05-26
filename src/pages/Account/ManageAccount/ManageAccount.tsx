@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
+  CustomDialogTransition,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
   simplifyValues,
@@ -15,6 +16,7 @@ import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFoo
 import Dialog from "@material-ui/core/Dialog";
 import { useData } from "../../../StateProvider/Provider";
 import CustomButton from "../../../components/Helpers/CustomButton";
+import { isMobile, isTablet } from "react-device-detect";
 
 const arr = [...Array(9).keys()];
 
@@ -131,6 +133,8 @@ export default function ManageAccount(props) {
       <Dialog
         disableBackdropClick={true}
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
