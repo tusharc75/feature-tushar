@@ -90,6 +90,8 @@ const ContactDetailsPage = (props) => {
 
   let { id } = useParams();
 
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([]);
+
   // useEffect(() => {
   //     if (id) {
   //         fetchContactData()
@@ -130,7 +132,11 @@ const ContactDetailsPage = (props) => {
         handleAllowToEditList(data);
         setContactData(data);
         getContactFields();
-
+        console.log(props)
+        setTypeCreateProjectSalesDialog([
+          {  id: id, type: contactResource  },
+          {id:data?.accountName?.optionValue,type:accountResource}
+        ])
         setCanEdit(
           [...data?.collaborator ?? [], data?.owner].some(
             (obj) => obj.optionValue === user.user._id
@@ -186,11 +192,11 @@ const ContactDetailsPage = (props) => {
         setOpportunities(
           data.Opportunity &&
             data.Opportunity[
-              sidebarResource[contactResource].replaceAll(" ", "_")
+            sidebarResource[contactResource].replaceAll(" ", "_")
             ]
             ? data.Opportunity[
-                sidebarResource[contactResource].replaceAll(" ", "_")
-              ]
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
             : []
         );
 
@@ -531,16 +537,19 @@ const ContactDetailsPage = (props) => {
                   />
                 )}
                 {permissions?.projectSales?.isRead && (
-                <ProjectInAccordion 
-                recordsPerLine={3}
-                projectSales={projectSales} />
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                  />
                 )}
                 <QuotesInAccordion recordsPerLine={3} />
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-                {permissions?.lead?.isRead && contactData.staticData?.lead &&(
-                <LeadInAccordion 
-                recordsPerLine={3} 
-                lead={contactData.staticData.lead}/>
+                {permissions?.lead?.isRead && contactData.staticData?.lead && (
+                  <LeadInAccordion
+                    recordsPerLine={3}
+                    lead={contactData.staticData.lead} />
                 )}
               </div>
 

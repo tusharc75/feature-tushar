@@ -77,7 +77,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales }) {
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData }) {
 
     const history = useHistory();
     const {
@@ -87,6 +87,8 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
         showCreateProjectSalesDialog,
         setShowCreateProjectSalesDialog,
     ] = useState(false);
+
+
 
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -213,7 +215,8 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
             <CreateProjectSales
                 open={showCreateProjectSalesDialog}
                 close={() => setShowCreateProjectSalesDialog(false)}
-                fetchData={null}
+                fetchData={fetchData}
+                type={type}
             />
         )}
     </>

@@ -162,10 +162,6 @@ export default function AccordionOfOpportunity({
                                                                             </Tooltip>
                                                                         </span>
                                                                     }
-
-                                                                    <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
-                                                                        <Typography >{opportunity?.opportunityName} </Typography>
-                                                                    </Link>
                                                                 </Grid>
                                                                 {
                                                                     opportunity?.amount &&

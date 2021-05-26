@@ -406,9 +406,9 @@ const CustomerAccounts = (props) => {
                             />
                           )}
                           <QuotesInAccordion />
-                          <ProjectInAccordion
+                          {/* <ProjectInAccordion
                             recordsPerLine={3}
-                            projectSales={null} />
+                            projectSales={null} /> */}
 
                           {/* <ProductBuilderInAccordion /> */}
                         </Grid>

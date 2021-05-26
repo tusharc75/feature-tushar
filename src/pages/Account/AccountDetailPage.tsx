@@ -127,7 +127,11 @@ export default function AccountDetailPage(props) {
   });
 
   let { id } = useParams();
-
+  
+  const typeCreateProjectSalesDialog = [{
+    id: id,
+    type: accountResource
+  }];
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);
     setCurrentTabIndex(0);
@@ -631,7 +635,10 @@ export default function AccountDetailPage(props) {
                 {permissions?.projectSales?.isRead && (
                 <ProjectInAccordion 
                 recordsPerLine={3}
-                projectSales={projectSales} />
+                projectSales={projectSales} 
+                type={typeCreateProjectSalesDialog}
+                fetchData={fetchRelatedData}
+                />
                 )}
                 <QuotesInAccordion recordsPerLine={3} />
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}

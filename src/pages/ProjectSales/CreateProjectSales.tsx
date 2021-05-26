@@ -22,7 +22,7 @@ interface InitialData {
   values: object;
 }
 
-const CreateProjectSales = ({ open, close, fetchData }) => {
+const CreateProjectSales = ({ open, close, fetchData, type }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
@@ -56,16 +56,30 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
 
   const handleSubmit = (values) => {
     setSubmitting(true);
+    var tempStaticData = {};
+    if (type) {
+      type.map((d: any) => {
+        tempStaticData[d.type] = [d.id]
+      });
+    }
+    tempStaticData["user"] = [values?.projectManager]
+    values.staticData = tempStaticData
+    debugger
     axiosInstance()
       .post("/project-Sales", values)
       .then(({ data: { data } }) => {
         const newId = data._id;
         setSubmitting(false);
         fetchData();
-        history.push(`/project-sales/detail/${newId}`, {
-          managerId: data.projectManager,
-        });
-        close();
+        if (type) {
+          close();
+        }
+        else {
+          history.push(`/project-sales/detail/${newId}`, {
+            managerId: data.projectManager,
+          });
+          close();
+        }
       })
       .catch((err) => {
         setSubmitting(false);
