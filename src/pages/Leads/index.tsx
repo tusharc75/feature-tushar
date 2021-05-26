@@ -12,7 +12,8 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
-  Switch
+  Switch,
+  Divider
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -46,6 +47,7 @@ import { AiOutlineLoading } from 'react-icons/ai'
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import { isMobile, isTablet } from "react-device-detect";
+import FilterListIcon from '@material-ui/icons/FilterList';
 import "./style.scss";
 
 const LeadTypes = [
@@ -181,6 +183,7 @@ const Leads = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
+  // const [showGridFilters, setShowGridFilters] = useState(true)
   const [openColumnSelection, setOpenColumnSelection] = useState(false)
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [columns, setColumns] = useState([
@@ -672,38 +675,20 @@ const Leads = () => {
             }}
           />
         </div>
-        {isOpen && (
-          <ManageLeadDialog
-            open={isOpen}
-            onSuccess={handleClose}
-            onClose={() => {
-              setIsOpen(false);
-            }}
-            isNew={true}
-            dataToUpdate={null}
-            leadApi={leadApi}
-          />
-        )}
-        {/* <div className="listing-grid"> */}
 
-        {/* <div>
-          {
-            !loading && <div className="height-100 width-100 d-flex align-items-center justify-content-center">
-              Loading.....
-            </div>
-          }
-        </div> */}
-
-        <Box className="listing-grid-header-options border px-2 py-1 border-bottom-0">
+        <Box className="ag-grid-listing-grid-header-options border px-2 py-1 border-bottom-0">
           <Button aria-describedby="columnSelection"
             size="small"
+            className="px-2"
             startIcon={<ViewWeekIcon />}
-            color="primary" onClick={(event) => {
+            color="primary"
+            onClick={(event) => {
               setOpenColumnSelection(true)
               setOpenColumnSelectionAnchorEl(event.currentTarget);
             }}>
             Columns
           </Button>
+
           <Popover
             id="columnSelection"
             open={openColumnSelection}
@@ -748,82 +733,90 @@ const Leads = () => {
               </FormGroup>
             </FormControl>
           </Popover>
+
+          {/* <Divider orientation="vertical" />
+
+          <Button aria-describedby="columnSelection"
+            size="small"
+            className="px-2"
+            startIcon={<FilterListIcon />}
+            color="primary"
+            onClick={() => {
+              setShowGridFilters(!showGridFilters)
+            }}>
+            {`${showGridFilters ? "Hide" : "Show"} filters`}
+          </Button> */}
         </Box>
 
-        <div className="ag-theme-material listing-grid">
+        <div className="ag-theme-material ag-grid-listing-grid">
+          <AgGridReact
+            rowData={dataRows}
+            onGridReady={onGridReady}
+            suppressDragLeaveHidesColumns={true}
+            rowHeight={40}
+            frameworkComponents={frameworkComponents}
+            defaultColDef={{
+              resizable: true,
+              floatingFilter: true,
+              sortable: true,
+              width: 250,
+              suppressMenu: true,
+              // headerCheckboxSelection: true,
+              // checkboxSelection: true,
+              floatingFilterComponentParams: { suppressFilterButton: true }
+            }}
+            onSortChanged={(e) => {
+              dispatch({ type: "sort", sorting: e.api.getSortModel() })
+            }}
+            onFilterChanged={(e) => {
+              dispatch({ type: "filter", filters: e.api.getFilterModel() });
+            }}
+            enableCellTextSelection={true}
+            ensureDomOrder={false}
+            loadingOverlayComponent={'customLoadingOverlay'}
+            loadingOverlayComponentParams={{
+              loadingMessage: 'Loading...',
+            }}
+            animateRows={false}
+            suppressAnimationFrame={true}
+            suppressMaintainUnsortedOrder={true}
 
-          <div style={{ height: "100%", width: "100%" }} className="border">
+            rowBuffer={limit}
+            // suppressMaxRenderedRowRestriction={true}
 
-            <AgGridReact
-              rowData={dataRows}
-              onGridReady={onGridReady}
-              suppressDragLeaveHidesColumns={true}
-              rowHeight={40}
-              frameworkComponents={frameworkComponents}
-              defaultColDef={{
-                resizable: true,
-                floatingFilter: true,
-                sortable: true,
-                width: 250,
-                suppressMenu: true,
-                // headerCheckboxSelection: true,
-                // checkboxSelection: true,
-                floatingFilterComponentParams: { suppressFilterButton: true }
-              }}
-              onSortChanged={(e) => {
-                dispatch({ type: "sort", sorting: e.api.getSortModel() })
-              }}
-              onFilterChanged={(e) => {
-                dispatch({ type: "filter", filters: e.api.getFilterModel() });
-              }}
-              enableCellTextSelection={true}
-              ensureDomOrder={false}
-              loadingOverlayComponent={'customLoadingOverlay'}
-              loadingOverlayComponentParams={{
-                loadingMessage: 'Loading...',
-              }}
-              animateRows={false}
-              suppressAnimationFrame={true}
-              suppressMaintainUnsortedOrder={true}
+            // loadingCellRenderer={'customLoadingCellRenderer'}
+            // loadingCellRendererParams={{
+            //   loadingMessage: 'One moment please...',
+            // }}
 
-              rowBuffer={limit}
-              // suppressMaxRenderedRowRestriction={true}
-
-              // loadingCellRenderer={'customLoadingCellRenderer'}
-              // loadingCellRendererParams={{
-              //   loadingMessage: 'One moment please...',
-              // }}
-
-              suppressRowClickSelection={true}
-              rowSelection={'multiple'}
-              onSelectionChanged={(event: any) => {
-                dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
-              }}
-              immutableData={true}
-              getRowNodeId={(data) => {
-                return data._id;
-              }}
+            suppressRowClickSelection={true}
+            rowSelection={'multiple'}
+            onSelectionChanged={(event: any) => {
+              dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
+            }}
+            immutableData={true}
+            getRowNodeId={(data) => {
+              return data._id;
+            }}
+          >
+            <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
+              headerCheckboxSelection={true}
+              headerCheckboxSelectionFilteredOnly={true}
+              checkboxSelection={true}
+              resizable={false} sortable={false}
             >
-              <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
-                headerCheckboxSelection={true}
-                headerCheckboxSelectionFilteredOnly={true}
-                checkboxSelection={true}
-                resizable={false} sortable={false}
-              >
-              </AgGridColumn>
+            </AgGridColumn>
 
-              {generateColumns}
+            {generateColumns}
 
-              <AgGridColumn width={150} headerName="Actions"
-                pinned={(isMobile || isTablet) ? false : "right"}
-                lockPinned={(isMobile || isTablet) ? false : true}
-                resizable={false} sortable={false}
-                filter={false} cellRenderer="actionsRenderer">
-              </AgGridColumn>
+            <AgGridColumn width={150} headerName="Actions"
+              pinned={(isMobile || isTablet) ? false : "right"}
+              lockPinned={(isMobile || isTablet) ? false : true}
+              resizable={false} sortable={false}
+              filter={false} cellRenderer="actionsRenderer">
+            </AgGridColumn>
 
-            </AgGridReact>
-          </div>
-
+          </AgGridReact>
         </div>
 
         <TablePagination
@@ -839,6 +832,19 @@ const Leads = () => {
           }}
           rowsPerPageOptions={pageSizes}
         />
+
+        {isOpen && (
+          <ManageLeadDialog
+            open={isOpen}
+            onSuccess={handleClose}
+            onClose={() => {
+              setIsOpen(false);
+            }}
+            isNew={true}
+            dataToUpdate={null}
+            leadApi={leadApi}
+          />
+        )}
 
         {
           showDeleteWarningConfirmBox ? (

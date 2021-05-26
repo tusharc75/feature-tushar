@@ -299,8 +299,13 @@ body::-webkit-scrollbar-thumb {
   padding: 0 4px 4px;
 }
 
-.listing-grid-header-options {
-  margin: 0 0.3rem 0rem;
+.ag-grid-listing-grid {
+  height: calc(100vh - 255px);
+  padding: 0 4px 0;
+}
+
+.ag-grid-listing-grid-header-options {
+  margin: 0 4px 0;
   background: #f0f2f3 !important;
 }
 
