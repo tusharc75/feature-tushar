@@ -366,16 +366,14 @@ const Leads = () => {
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
 
-    if (field == updatedField) {
-      switch (field) {
-        case "owner":
-          return "owner.optionLabel";
+    if (field !== updatedField) return updatedField;
 
-        default:
-          return field;
-      }
-    } else {
-      return updatedField;
+    switch (field) {
+      case "owner":
+        return "owner.optionLabel";
+
+      default:
+        return field;
     }
   }
 
