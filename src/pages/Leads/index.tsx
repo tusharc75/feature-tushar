@@ -30,7 +30,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import {
   gridPageSizes,
   isObjectEmpty,
-  leadProcessFieldName,
+  processFieldName,
 } from "../../constants/helpers";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import { HiUserGroup } from "react-icons/hi";
@@ -155,24 +155,12 @@ const Leads = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
-  const [gridApi, setGridApi] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
-
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-  // const [searchVal, setSearchVal] = useState("");
-  // const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllLeads, setCheckAllLeads] = useState(false);
-  // const [dataRows, setDataRows] = useState([]);
-  // const [rowCount, setRowCount] = useState(0);
   const [renderCount, setRenderCount] = useState(0);
-  // const [loading, setLoading] = useState(false);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
@@ -187,34 +175,31 @@ const Leads = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
 
+  //  Grid Variables - Start
+  const [gridApi, setGridApi] = useState(null);
+  const [columnApi, setColumnApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
   const [openColumnSelection, setOpenColumnSelection] = useState(false)
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [columns, setColumns] = useState([
     {
-      field: "concatedName", headerName: "Name", show: true, disabled: true, filter: "agTextColumnFilter", cellRenderer: "nameRenderer",
+      field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
     },
-    { field: "relatedOpportunity", headerName: "Related Opportunity", show: true, filter: "agTextColumnFilter", cellRenderer: "relatedOpportunityRenderer" },
-    { field: "title", headerName: "Title", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    { field: "relatedOpportunity", headerName: "Related Opportunity", show: true, cellRenderer: "relatedOpportunityRenderer" },
+    { field: "title", headerName: "Title", show: true, cellRenderer: "commonRenderer" },
     {
-      field: "company", headerName: "Company", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer",
+      field: "company", headerName: "Company", show: true, cellRenderer: "commonRenderer",
     },
-    { field: "createdBy", headerName: "Created By", show: true, filter: "agTextColumnFilter", cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, filter: "agTextColumnFilter", cellRenderer: "updatedByRenderer" },
-    { field: "phone", headerName: "Phone", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-    { field: "mobile", headerName: "Mobile", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-    { field: "email", headerName: "Email", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
-    { field: "owner", headerName: "Owner Alies", show: true, filter: "agTextColumnFilter", cellRenderer: "commonRenderer" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+    { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRenderer" },
+    { field: "mobile", headerName: "Mobile", show: true, cellRenderer: "commonRenderer" },
+    { field: "email", headerName: "Email", show: true, cellRenderer: "commonRenderer" },
+    { field: "owner", headerName: "Owner Alies", show: true, cellRenderer: "commonRenderer" },
   ]);
-
-  // const dummyData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => {
-  //   let object: any = {};
-
-  //   columns.forEach((column) => {
-  //     object[column.field] = "Loading..."
-  //   })
-
-  //   return object;
-  // })
+  //  Grid Variables - End
 
   const [
     convertLeadToOpportunityConfirmationDialog,
@@ -248,13 +233,11 @@ const Leads = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting]);
 
-  const CommonRenderer = params => <CustomRenderCell value={params?.value} />;
-
-  const OptionLabelRenderer = params => <CustomRenderCell value={params.value?.optionLabel ?? ""} />;
+  const CommonRenderer = params => <CustomRenderCell value={params.value} />;
 
   const NameRenderer = params => <Link className="link"
-    to={`${leadDetailPage.path}/${params.data._id}`} >
-    {params?.value ?? ""}
+    to={`${leadDetailPage.path}/${params.data._id}`} title={params.value ?? ""}>
+    {params.value ?? ""}
   </Link>;
 
   const RelatedOpportunityRenderer = params => <>
@@ -267,27 +250,30 @@ const Leads = () => {
     }
   </>
 
-  const CreatedByRenderer = params => params.value && params.value.user ? (
+  const CreatedByRenderer = params => params.value ? (
     <h5 className="createBy">
-      {params.value.user.firstName}
-      <span
-        className="createdAtTime badge-date"
-        title={`${params.value.user.firstName} • ${moment(
-          params?.value?.date?.slice(0, 10)
+      {params.value}
+      <span className="createdAtTime badge-date"
+        title={`${params.value} • ${moment(
+          params.data.createdByDate.slice(0, 10)
         ).format("MMM Do, YYYY")}`}
       >
-        {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
+        {moment(params.data.createdByDate.slice(0, 10)).format("MMM Do, YYYY")}
       </span>
     </h5>
   ) : (
     <NoDataCell />
   );
 
-  const UpdatedByRenderer = params => params.value && params.value.user ? (
+  const UpdatedByRenderer = params => params.value ? (
     <h5 className="updateBy">
-      {params.value.user.firstName}
-      <span title={params.value.date} className="updatedAtTime badge-date">
-        {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+      {params.value}
+      <span className="updatedAtTime badge-date"
+        title={`${params.value} • ${moment(
+          params.data.updatedByDate.slice(0, 10)
+        ).format("MMM Do, YYYY")}`}
+      >
+        {moment(params.data.updatedByDate.slice(0, 10)).format("MMM Do, YYYY")}
       </span>
     </h5>
   ) : (
@@ -330,13 +316,33 @@ const Leads = () => {
     commonRenderer: CommonRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    // optionLabelRenderer: OptionLabelRenderer,
     actionsRenderer: ActionsRenderer,
     customLoadingOverlay: CustomLoadingOverlay,
     customFloatingFilter: CustomFloatingFilter,
     // customLoadingCellRenderer: CustomLoadingCellRenderer,
     // customNoRowsOverlay: CustomNoRowsOverlay
   };
+
+  //  If you want to do something once grid binding done
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+    setColumnApi(params.columnApi)
+  }
+
+  const generateColumns = columns.map((column: any, index) => {
+    return <AgGridColumn
+      key={index}
+      field={column.field}
+      headerName={column.headerName}
+      filter={column.filter ?? "agTextColumnFilter"}
+      cellRenderer={column.cellRenderer ?? null}
+    // floatingFilterComponent={column.floatingFilterComponent ?? null}
+    // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+    //   suppressFilterButton: true,
+    // }}
+    >
+    </AgGridColumn>
+  })
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
@@ -351,10 +357,12 @@ const Leads = () => {
       Object.keys(filters).map(field => {
         let updatedColumnName = field;
 
-        if (field == 'createdBy') {
-          updatedColumnName = "createdBy.user"
-        } else if (field == 'updatedBy') {
-          updatedColumnName = "updatedBy.user"
+        if (field === 'createdBy') {
+          updatedColumnName = "createdBy.user.concatedName"
+        } else if (field === 'updatedBy') {
+          updatedColumnName = "updatedBy.user.concatedName"
+        } else if (field === 'relatedOpportunity') {
+          updatedColumnName = "staticData.opportunity"
         }
 
         updatedFilters.push({
@@ -391,28 +399,33 @@ const Leads = () => {
         .then(({ data: { data, count } }) => {
 
           let rows = data.map((u) => {
+
+            const { owner, collaborator, createdBy, updatedBy, ...restProperties } = u;
+
             let res = {
-              ...u,
+              ...restProperties,
               id: u._id,
-              concatedName: u.concatedName,
+
               owner: u.owner?.optionLabel,
               ownerId: u.owner?.optionValue,
               isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
                 (d) => d.optionValue == user?.user?._id
               ),
-              relatedOpportunity: u.staticData?.convertedToOpportunity && u.staticData?.opportunity
+              relatedOpportunity: u.staticData?.convertedToOpportunity && u.staticData?.opportunity,
+
+              createdBy: u.createdBy?.user?.concatedName,
+              createdByDate: u.createdBy?.date,
+              updatedBy: u.updatedBy?.user?.concatedName,
+              updatedByDate: u.updatedBy?.date,
             };
             return res;
           });
-          
+
           dispatch({ type: "initialize", data: rows, count: count });
 
           if (gridApi && rows.length > 0) {
             gridApi.hideOverlay();
           }
-
-          setCheckAllLeads(false);
-
         }).catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -421,10 +434,6 @@ const Leads = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: "search", search: e.target.value });
-    // if (query.page !== 0) {
-    //   setQuery((prevState) => ({ ...prevState, page: 0 }));
-    // }
-    // setSearchVal(e.target.value);
   };
 
   const handleLeadTypeSel = (filteredValue) => {
@@ -444,7 +453,7 @@ const Leads = () => {
     _id,
     concatedName,
     staticData,
-    [leadProcessFieldName]: leadProcess,
+    [processFieldName]: leadProcess,
     isAllowedToUpdate,
   }) => {
     let dontHavePermissions = [];
@@ -589,42 +598,6 @@ const Leads = () => {
         setOkButtonLoading(false);
       });
   };
-
-  //  If you want to do something once grid binding done
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-    setColumnApi(params.columnApi)
-  }
-
-  const onCustomFilter = (field, operator, value) => {
-    if (value) {
-      filters[field] = {
-        operator: operator,
-        value: value
-      }
-
-      dispatch({ type: "filter", filters: filters })
-    } else {
-      const { [field]: removedField, ...restFilters } = filters;
-      dispatch({ type: "filter", filters: restFilters })
-    }
-  }
-
-  const generateColumns = columns.map((column: any, index) => {
-    return <AgGridColumn
-      key={index}
-      field={column.field}
-      headerName={column.headerName}
-      filter={column.filter ?? null}
-      filterParams={column.filterParams ?? null}
-      cellRenderer={column.cellRenderer ?? null}
-      floatingFilterComponent={column.floatingFilterComponent ?? null}
-      floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        suppressFilterButton: true,
-      }}
-    >
-    </AgGridColumn>
-  })
 
   return (
     <Layout>
@@ -773,7 +746,7 @@ const Leads = () => {
                 suppressMenu: true,
                 // headerCheckboxSelection: true,
                 // checkboxSelection: true,
-                // floatingFilterComponentParams: { suppressFilterButton: true }
+                floatingFilterComponentParams: { suppressFilterButton: true }
               }}
               onSortChanged={(e) => {
                 dispatch({ type: "sort", sorting: e.api.getSortModel() })

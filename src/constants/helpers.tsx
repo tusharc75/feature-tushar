@@ -57,8 +57,7 @@ export const userType = {
 
 export const gridPageSizes = [25, 50, 75];
 
-export const leadProcessFieldName = "leadProcess";
-export const opportunityProcessFieldName = "process";
+export const processFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
