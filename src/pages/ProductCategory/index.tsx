@@ -207,7 +207,7 @@ const ProductCategory = () => {
 
 
     return (<Layout>
-        <Grid container>
+        <Grid container className="headerbox">
             <Grid item md={12} sm={12} xs={12}>
                 <CustomBreadCrumbs routes={[{ title: routes.productCategory.title }]} />
             </Grid>

@@ -19,7 +19,6 @@ const useStyles = makeStyles((theme) => ({
   box: {
     padding: theme.spacing(0.5, 1.5),
     borderRadius: "4px",
-    margin: "8px 0px 8px 10px",
     boxShadow: "2px 2px 4px #747474",
     background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
     border: "#03232e"
@@ -62,7 +61,7 @@ const DetailsPageHeader = (props) => {
           </Grid>
           <Grid item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
         </Grid>
-        <Box display="flex">
+        <Box className="itemCenter itemMobile">
           {loading ? (
             <Grid container wrap="nowrap">
               {[...Array(4).keys()].map((i, index) => (
@@ -82,7 +81,6 @@ const DetailsPageHeader = (props) => {
               return (
                 <React.Fragment key={i}>
                   {mainPoints[key] ? (
-
                     <Box className={classes.box}>
                       <Typography
                         align="center"

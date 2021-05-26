@@ -111,22 +111,22 @@ const Activity = (props) => {
   const getIcon = (tab: string) => {
     switch (tab) {
       case "Task":
-        return <BiTask size={20} />;
+        return <BiTask className="mr-1" size={20} />;
 
       case "Event":
-        return <VscCalendar size={20} />;
+        return <VscCalendar className="mr-1" size={20} />;
 
       case "Case":
-        return <BsBriefcase size={20} />;
+        return <BsBriefcase className="mr-1" size={20} />;
 
       case "Note":
-        return <GoNote size={20} />;
+        return <GoNote className="mr-1" size={20} />;
 
       case "Email":
-        return <HiOutlineMail size={20} />;
+        return <HiOutlineMail className="mr-1" size={20} />;
 
       case "Attachment":
-        return <AiOutlinePaperClip size={22} />;
+        return <AiOutlinePaperClip className="mr-1" size={20} />;
     }
   };
 
@@ -205,7 +205,7 @@ const Activity = (props) => {
                       <Typography
                         variant="subtitle2"
                         color="primary"
-                        className="d-flex align-items-center gap-2"
+                        className="d-flex align-items-center"
                       >
                         {getIcon(data)} {data}  ({totalCount[data]})
                       </Typography>
