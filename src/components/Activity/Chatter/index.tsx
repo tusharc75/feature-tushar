@@ -97,7 +97,7 @@ const Chatter = (props) => {
   useEffect(() => {
     if (!socket && !chatterId) return;
 
-    socket.on("connect", (data) => {
+    socket.on("connect", () => {
       socket.emit("join", chatterId);
     });
 
@@ -124,14 +124,13 @@ const Chatter = (props) => {
       });
   };
 
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault();
-    axiosInstance()
-      .put(`/chatter/${chatterId}`, { message })
-      .then(() => {})
-      .catch((err) => {
-        setToastConfig(err);
-      });
+    try {
+      await axiosInstance().put(`/chatter/${chatterId}`, { message });
+    } catch (error) {
+      setToastConfig(error);
+    }
     setMessage("");
   };
 

@@ -35,6 +35,7 @@ import { SubCase } from "./SubCase";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import { useData } from "../../../StateProvider/Provider";
 
 const CaseSchema = Yup.object().shape({
   name: Yup.string().required("Please enter case name"),
@@ -45,6 +46,11 @@ const CaseSchema = Yup.object().shape({
 });
 
 export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
+  const {
+    state: {
+      user: { user },
+    },
+  } = useData();
   const [id, setId] = useState(caseId);
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
@@ -52,6 +58,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
 
   useEffect(() => {
     fetchCaseDetail();
+
+    return () => setId(null);
   }, [id]);
 
   const fetchCaseDetail = async () => {
@@ -68,7 +76,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
         description: "",
         status: status || "To Do",
         assignee: "",
-        reporter: "",
+        reporter: user._id,
         startDate: new Date(),
         dueDate: new Date(),
       });
@@ -267,7 +275,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                             inputVariant="outlined"
                             fullWidth
                             margin="dense"
-                            format="yyyy/MM/DD"
+                            format="DD/MM/YYYY"
                             minDate={
                               initialValues.parentData &&
                               initialValues.parentData.startDate
@@ -288,7 +296,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                             inputVariant="outlined"
                             fullWidth
                             margin="dense"
-                            format="yyyy/MM/DD"
+                            format="DD/MM/YYYY"
                             minDate={values.startDate}
                             maxDate={
                               initialValues.parentData &&
