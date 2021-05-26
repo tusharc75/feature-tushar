@@ -1,14 +1,20 @@
+import React, { useContext, useState } from "react";
 import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
-import { CreateNewCase } from "../../../axios/activity";
-import * as Yup from "yup";
-import TextField from "@material-ui/core/TextField";
+import {
+  Typography,
+  Button,
+  Grid,
+  Chip,
+  IconButton,
+  TextField,
+} from "@material-ui/core";
+import { DeleteOutline } from "@material-ui/icons";
 import { Formik, Form } from "formik";
-import Grid from "@material-ui/core/Grid";
-import Chip from "@material-ui/core/Chip";
-import { useHistory } from "react-router-dom";
+import * as Yup from "yup";
+
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   marginLeft: {
@@ -33,8 +39,8 @@ export const SubCase = ({
   fetchCaseDetail,
   data,
 }) => {
-  const history = useHistory();
-
+  const { setToastConfig } = useContext(CustomToastContext);
+  const [childCases, setChildCases] = useState(data.childCase || null);
   const handleSave = (values) => {
     values.parentId = data._id;
     values.description = "";
@@ -44,36 +50,52 @@ export const SubCase = ({
     values.startDate = data.startDate;
     values.dueDate = data.dueDate;
     values.relatedTo = data.relatedTo;
-    CreateNewCase(values)
+    axiosInstance()
+      .post("/case", values)
       .then(({ data }) => {
         setOpenAddSub(false);
         fetchCaseDetail();
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setToastConfig(err);
+      });
   };
 
   const handleOpenActivity = (id) => {
     setId(id);
-    // history.push({
-    //     pathname: '/project/board',
-    //     search: '?projectId=' + projectId + '&activityId=' + id
-    // })
+  };
+
+  const deleteCase = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+
+    if (!id) return;
+
+    setTimeout(() => {
+      const updTasks = childCases?.filter((t) => t._id !== id);
+      setChildCases(updTasks);
+    }, 500);
+
+    axiosInstance()
+      .delete(`/case/${id}`)
+      .then(() => {})
+      .catch((err) => {
+        setToastConfig(err);
+      });
   };
 
   const classes = useStyles();
 
   return (
     <Box mt={3} mb={3}>
-      {((data.childCase && data.childCase.length > 0) ||
-        openAddSub === true) && (
+      {((childCases && childCases.length > 0) || openAddSub === true) && (
         <Box mb={1}>
           <Typography variant="body2" className={classes.boldFont}>
             Child Case
           </Typography>
         </Box>
       )}
-      {data.childCase &&
-        data.childCase.map((element, index) => (
+      {childCases &&
+        childCases.map((element, index) => (
           <Box
             key={index}
             border={1}
@@ -93,6 +115,14 @@ export const SubCase = ({
               </Grid>
               <Grid item xs={6} container justify="flex-end">
                 <Chip size="small" label={element.status} color="primary" />
+                <Box mr={1} />
+                <IconButton
+                  size="small"
+                  color="default"
+                  onClick={(e) => deleteCase(e, element._id)}
+                >
+                  <DeleteOutline color="error" />
+                </IconButton>
               </Grid>
             </Grid>
           </Box>
