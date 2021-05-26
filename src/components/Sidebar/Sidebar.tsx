@@ -133,8 +133,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       icon: <FaHandshake size={15} className="sidebar-icon" />,
     },
     {
-      key: "Activities Management",
-      icon: <BsFillPuzzleFill size={15} className="sidebar-icon" />,
+      key: "Activities",
+      icon: <MdLocalActivity size={15} className="sidebar-icon" />,
     },
     {
       key: "Accounts",
@@ -209,15 +209,15 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     setOpen(tempdata);
   };
 
-  const activityTabs = [
-    "Task",
-    "Case",
-    "Note",
-    "Email",
-    "Attachment",
-    "Calendar",
-    "Reminder",
-  ];
+  // const activityTabs = [
+  //   "Task",
+  //   "Case",
+  //   "Note",
+  //   "Email",
+  //   "Attachment",
+  //   "Calendar",
+  //   "Reminder",
+  // ];
 
   return (
     <div className={classes.root}>
@@ -270,7 +270,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               </Tooltip>
             </Link>
 
-            <Tooltip title={!toggleDrawer ? "Activity" : ""}>
+            {/* <Tooltip title={!toggleDrawer ? "Activity" : ""}>
               <ListItem
                 button
                 className="list-item"
@@ -287,8 +287,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 <ListItemText primary="Activities" />
                 {open["Activity"] ? <ExpandLess /> : <ExpandMore />}
               </ListItem>
-            </Tooltip>
-            <Collapse
+            </Tooltip> */}
+            {/* <Collapse
               in={open["Activity"] && toggleDrawer}
               timeout="auto"
               unmountOnExit
@@ -319,7 +319,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   </Link>
                 ))}
               </List>
-            </Collapse>
+            </Collapse> */}
 
             {user &&
               listItems().map((listItem, i) => (
