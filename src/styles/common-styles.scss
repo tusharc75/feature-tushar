@@ -265,3 +265,10 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 .pull-right {
     text-align: right !important;
 }
+.itemCenter{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px;
+}

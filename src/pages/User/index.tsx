@@ -483,7 +483,7 @@ const User: FC = () => {
         />
       )}
       <Layout>
-        <Grid container direction="row">
+      <Grid container className="headerbox">
           <CustomBreadCrumbs routes={[routes.user]} />
         </Grid>
         <CustomContainer>

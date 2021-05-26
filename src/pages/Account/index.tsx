@@ -652,7 +652,7 @@ export default function Account(props) {
   return (
     <>
       <Layout>
-        <Grid container>
+        <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[{ title: accountBreadcrumb.title }]} />
           </Grid>
