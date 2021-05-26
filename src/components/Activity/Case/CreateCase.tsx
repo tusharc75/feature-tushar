@@ -58,8 +58,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
 
   useEffect(() => {
     fetchCaseDetail();
-
-    return () => setId(null);
   }, [id]);
 
   const fetchCaseDetail = async () => {
