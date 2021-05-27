@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import Box from "@material-ui/core/Box";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
@@ -8,10 +7,10 @@ import {
   Chip,
   IconButton,
   TextField,
+  Box,
+  CircularProgress,
 } from "@material-ui/core";
 import { DeleteOutline } from "@material-ui/icons";
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
 
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -25,13 +24,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ActivitySchema = Yup.object().shape({
-  name: Yup.string()
-    .min(3, "Too Short!")
-    .max(50, "Too Long")
-    .required("case name is required"),
-});
-
 export const SubCase = ({
   setId,
   openAddSub,
@@ -41,24 +33,34 @@ export const SubCase = ({
 }) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const [childCases, setChildCases] = useState(data.childCase || null);
-  const handleSave = (values) => {
-    values.parentId = data._id;
-    values.description = "";
-    values.status = data.status;
-    values.assignee = data.assignee;
-    values.reporter = data.reporter;
-    values.startDate = data.startDate;
-    values.dueDate = data.dueDate;
-    values.relatedTo = data.relatedTo;
-    axiosInstance()
-      .post("/case", values)
-      .then(({ data }) => {
-        setOpenAddSub(false);
-        fetchCaseDetail();
-      })
-      .catch((err) => {
-        setToastConfig(err);
-      });
+
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [caseName, setCaseName] = useState("");
+  const [isError, setError] = useState(false);
+
+  const handleSave = () => {
+    if (caseName && caseName.length >= 3) {
+      setSubmitting(true);
+      const values = { ...data };
+      delete values._id;
+      values.parentId = data._id;
+      values.description = "";
+      values.name = caseName;
+
+      axiosInstance()
+        .post("/case", values)
+        .then(() => {
+          setOpenAddSub(false);
+          setSubmitting(false);
+          fetchCaseDetail();
+        })
+        .catch((err) => {
+          setToastConfig(err);
+          setSubmitting(false);
+        });
+    } else {
+      setError(true);
+    }
   };
 
   const handleOpenActivity = (id) => {
@@ -129,51 +131,43 @@ export const SubCase = ({
         ))}
       {openAddSub && (
         <Box>
-          <Formik
-            initialValues={{ name: "" }}
-            validationSchema={ActivitySchema}
-            onSubmit={handleSave}
-          >
-            {({ submitForm, touched, errors, setFieldValue, values }) => (
-              <Form autoComplete="off" autoCorrect="off" noValidate>
-                <TextField
-                  variant="outlined"
-                  type="text"
-                  label="Case Name"
-                  required={true}
-                  name="name"
-                  fullWidth
-                  margin="dense"
-                  value={values["name"]}
-                  error={touched["name"] && Boolean(errors["name"])}
-                  helperText={touched["name"] && errors["name"]}
-                  onChange={(e) =>
-                    setFieldValue("name", e.target.value.trimStart())
-                  }
-                />
-                <Box mt={1}>
-                  <Button
-                    color="primary"
-                    size="small"
-                    variant="contained"
-                    onClick={submitForm}
-                  >
-                    Create
-                  </Button>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    className={classes.marginLeft}
-                    disableElevation
-                    onClick={() => setOpenAddSub(false)}
-                  >
-                    {" "}
-                    Cancel
-                  </Button>
-                </Box>
-              </Form>
-            )}
-          </Formik>
+          <TextField
+            variant="outlined"
+            type="text"
+            label="Case Name"
+            required={true}
+            name="name"
+            fullWidth
+            margin="dense"
+            onChange={(e) => setCaseName(e.target.value)}
+            error={isError && caseName.length < 3}
+            helperText={
+              isError &&
+              caseName.length < 3 &&
+              "Case name must be at least 3 letters"
+            }
+          />
+
+          <Box mt={1}>
+            <Button
+              color="primary"
+              size="small"
+              variant="contained"
+              disabled={!caseName || isSubmitting}
+              onClick={handleSave}
+            >
+              {isSubmitting ? <CircularProgress size={18} /> : "Create"}
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              className={classes.marginLeft}
+              disableElevation
+              onClick={() => setOpenAddSub(false)}
+            >
+              Cancel
+            </Button>
+          </Box>
         </Box>
       )}
     </Box>
