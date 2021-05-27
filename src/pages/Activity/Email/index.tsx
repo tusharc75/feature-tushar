@@ -336,6 +336,7 @@ const Email = () => {
                                     handleChangeFilter={handleChangeFilter}
                                     filter={filter}
                                     chip={{ size: "small" }}
+                                    dontShowMyActivity={true}
                                 />
                             </Box>
                             <Button
