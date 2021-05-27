@@ -90,6 +90,11 @@ export const sidebarResource = {
   lead: "Lead",
   opportunity: "Opportunity",
   projectSales: "Project Sales",
+  task: "Task",
+  note: "Note",
+  email: "Email",
+  attachment: "Attachment",
+  case: "Case",
 };
 
 export const lead = {
