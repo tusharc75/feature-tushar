@@ -1,10 +1,18 @@
-import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton, Grid, Chip } from "@material-ui/core";
+import React, { useState, FC, useCallback, useEffect, useContext, useReducer } from "react";
+import { Checkbox, Tooltip, IconButton, Grid, Chip, TablePagination } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
-
+import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import { isMobile, isTablet } from "react-device-detect";
+import {
+  CommonRenderer,
+  CustomLoadingOverlay
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -22,25 +30,118 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType } from './../../constants/helpers'
+import { userType, gridPageSizes, isObjectEmpty } from './../../constants/helpers'
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
+import { isNullOrUndefined } from "util";
 
 let userTimeout: ReturnType<typeof setTimeout>;
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loading: action.loading
+      }
+
+    case "initialize":
+      return {
+        ...state,
+        dataRows: action.data,
+        rowCount: action.count,
+        loading: false
+      }
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      }
+
+    case "update":
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      }
+
+    case "filter":
+      return {
+        ...state,
+        loading: true,
+        filters: action.filters,
+        page: 0
+      }
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: true
+      }
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loading: true
+      }
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page
+      }
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: true
+      }
+
+    case "complete":
+      return {
+        ...state,
+        loading: false
+      }
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: {},
+  sorting: [],
+  selectedRecords: []
+}
+
 const User: FC = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions },
   }: any = useData();
   const history = useHistory();
-  const [searchVal, setSearchVal] = useState("");
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
+  // const [searchVal, setSearchVal] = useState("");
+  // const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
-  const [dataRows, setDataRows] = useState<any[]>([]);
-  const [rowCount, setRowCount] = useState(0);
+  // const [dataRows, setDataRows] = useState<any[]>([]);
+  // const [rowCount, setRowCount] = useState(0);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllUsers, setCheckAllUsers] = useState(false);
@@ -57,277 +158,490 @@ const User: FC = () => {
     type: history.location?.state?.type,
   });
 
+  const [gridApi, setGridApi] = useState(null);
+  const [columnApi, setColumnApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  const [columns, setColumns] = useState([
+    {
+      field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
+    },
+    { field: "status", headerName: "Status", show: true, cellRenderer: "statusRenderer" },
+    { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+  ]);
+
+  const NameRenderer = params => (<>
+           <Link
+             title={params.value}
+             className="text-truncate link"
+             to={`${routes.userDetail.path}/${params.row.id}`}
+           >
+             {params.value}
+           </Link>
+           {params.row.isBrandAdmin ? <Tooltip title="Brand Admin">
+             <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
+           </Tooltip> : ""}
+         </>
+       );
+
+  const StatusRenderer = params => <div style={{ width: 150 }}>
+    {params.value ? (
+      <Tooltip title="Inactive">
+        <IconButton>
+          <FaUserAltSlash className="text-error" />
+        </IconButton>
+      </Tooltip>
+    ) : (
+      <Tooltip title="Active">
+        <IconButton>
+          <FaUserCheck className="text-success" />
+        </IconButton>
+      </Tooltip>
+    )}{" "}
+  </div>;
+
+  const CreatedByRendererCustom = params => params?.value && params?.value?.user ? (
+    <h5 className="createBy">
+      {params.value.user.firstName}
+      <span
+        className="createdAtTime badge-date"
+        title={`${params.value.user.firstName} • ${moment(
+          params.value.date.slice(0, 10)
+        ).format("MMM Do, YYYY")}`}
+      >
+        {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+      </span>
+    </h5>
+  ) : (
+    <NoDataCell />
+  );
+
+  const UpdatedByRendererCustom = params => params?.value && params?.value?.user ? (
+    <h5 className="updateBy">
+      {params.value.user.firstName}
+      <span
+        className="updatedAtTime badge-date"
+        title={`${params.value.user.firstName} • ${moment(
+          params.value.date.slice(0, 10)
+        ).format("MMM Do, YYYY")}`}
+      >
+        {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+      </span>
+    </h5>
+  ) : (
+    <NoDataCell />
+  );
+
+  const ActionsRenderer = params => <>
+    <GridDeleteIcon
+      hasDeletePermission={permissions.user.isDelete}
+      ownerId={null}
+      userId={user?.user?._id}
+      onDelete={() => showConfirmBox(params.row)
+      }
+      entity="user"
+    />
+  </>
+
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    statusRenderer: StatusRenderer,
+    emailRenderer: CommonRenderer,
+    createdByRenderer: CreatedByRendererCustom,
+    updatedByRenderer: UpdatedByRendererCustom,
+    actionsRenderer: ActionsRenderer,
+    customLoadingOverlay: CustomLoadingOverlay,
+    customFloatingFilter: CustomFloatingFilter,
+    commonRenderer: CommonRenderer
+    //  customLoadingCellRenderer: CustomLoadingCellRenderer,
+    // customNoRowsOverlay: CustomNoRowsOverlay
+  };
+
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+    setColumnApi(params.columnApi)
+  }
+
+  const generateColumns = columns.map((column: any, index) => {
+    return <AgGridColumn
+      key={index}
+      field={column.field}
+      headerName={column.headerName}
+      filter={column.filter ?? "agTextColumnFilter"}
+      cellRenderer={column.cellRenderer ?? null}
+    // floatingFilterComponent={column.floatingFilterComponent ?? null}
+    // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+    //   suppressFilterButton: true,
+    // }}
+    >
+    </AgGridColumn>
+  })
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      default:
+        return field;
+    }
+  }
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case "owner":
+        return "owner.optionLabel";
+
+      case "customerAccountName":
+        return "customerAccountName.optionLabel";
+
+      case "supplierAccountName":
+        return "supplierAccountName.optionLabel";
+
+      default:
+        return field;
+    }
+  }
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    // if (selectedEntity) {
+    //   deepFilter = `${deepFilter}&entity=${selectedEntity}`
+    // }
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).map(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+
   const fetchUsers = useCallback(() => {
     if (userTimeout) {
       clearTimeout(userTimeout);
     }
 
     userTimeout = setTimeout(() => {
-      let searchParams: any = { ...query };
-      searchParams = searchVal
-        ? { ...searchParams, search: searchVal }
-        : { ...searchParams };
+      const queryString = getQueryString();
+      dispatch({ type: "loading", loading: true });
+      if (gridApi) {
+        gridApi.setRowData([]);
+        gridApi.showLoadingOverlay();
+      }
+      // let searchParams: any = { ...query };
+      // searchParams = searchVal
+      //   ? { ...searchParams, search: searchVal }
+      //   : { ...searchParams };
       if (entityRoleRedirectDetails?.id) {
         switch (entityRoleRedirectDetails?.type) {
           case "entity":
-            searchParams["filterById"] = JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }]);
+            queryString["filterById"] = JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }]);
             break;
           case "regionalRole":
-            searchParams["filterById"] = JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }]);
+            queryString["filterById"] = JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }]);
             break;
           case "globalRole":
-            searchParams["filterById"] = JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }]);
+            queryString["filterById"] = JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }]);
             break;
         }
       }
-      let api = getSearchQuery("/user", searchParams);
-      setLoadingUsers(true);
+      // let api = getSearchQuery("/user", searchParams);
+      // setLoadingUsers(true);
       axiosInstance()
-        .get(api)
+        .get(`/user${queryString}`)
         .then(({ data: { data, count } }) => {
-          getRows(data);
-          setRowCount(count);
-          setCheckAllUsers(false);
-          setLoadingUsers(false);
+          // getRows(data);
+          // setRowCount(count);
+          // setCheckAllUsers(false);
+          // setLoadingUsers(false);
+          let rows = data.map((u) => {
+            const { createdBy, updatedBy,
+              ...restProperties } = u;
+
+            let res = {
+              ...restProperties,
+              id: u._id,
+              isChecked: false,
+              name: `${u.firstName} ${u.lastName}`,
+              email: u.email,
+              createdAt: moment(u.createdAt).format("MMM Do, YYYY"),
+              createdBy: u.createdBy,
+              updatedBy: u.updatedBy,
+              status: u.blocked ? u.blocked : false,
+              isBrandAdmin: u.userType === userType.brandAdmin
+            };
+            return res;
+          });
+
+          dispatch({ type: "initialize", data: rows, count: count });
+
+
         })
         .catch((err) => {
+          dispatch({ type: "loading", loading: false });
           toastConfig.setToastConfig(err);
-          setLoadingUsers(false);
         });
     }, 600);
     // eslint-disable-next-line
-  }, [searchVal, query, entityRoleRedirectDetails]);
+  }, [search, entityRoleRedirectDetails]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  const getRows = (data: []) => {
-    const rows = data.length
-      ? data.map((user: any) => ({
-        id: user._id,
-        isChecked: false,
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-        createdBy: user.createdBy,
-        updatedBy: user.updatedBy,
-        status: user.blocked ? user.blocked : false,
-        isBrandAdmin: user.userType === userType.brandAdmin
-      }))
-      : [];
+  // const getRows = (data: []) => {
+  //   const rows = data.length
+  //     ? data.map((user: any) => ({
+  //       id: user._id,
+  //       isChecked: false,
+  //       name: `${user.firstName} ${user.lastName}`,
+  //       email: user.email,
+  //       createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+  //       createdBy: user.createdBy,
+  //       updatedBy: user.updatedBy,
+  //       status: user.blocked ? user.blocked : false,
+  //       isBrandAdmin: user.userType === userType.brandAdmin
+  //     }))
+  //     : [];
 
-    setDataRows(rows);
-  };
+  //   setDataRows(rows);
+  // };
 
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllUsers}
-          onChange={(ev) => {
-            setCheckAllUsers(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              d.isChecked = ev.target.checked;
-              return d;
-            });
-            setDataRows([...gridData]);
-          }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev);
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      width: 400,
-      renderCell: (params: any) => (
-        <>
-          <Link
-            title={params.value}
-            className="text-truncate link"
-            to={`${routes.userDetail.path}/${params.row.id}`}
-          >
-            {params.value}
-          </Link>
-          {params.row.isBrandAdmin ? <Tooltip title="Brand Admin">
-            <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
-          </Tooltip> : ""}
-        </>
-      ),
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 150,
-      sortable: false,
-      filterable: false,
-      align: "center",
-      headerAlign: "center",
-      disableColumnMenu: true,
-      renderCell: (params: any) => (
-        <div style={{ width: 150 }}>
-          {params.value ? (
-            <Tooltip title="Inactive">
-              <IconButton>
-                <FaUserAltSlash className="text-error" />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Active">
-              <IconButton>
-                <FaUserCheck className="text-success" />
-              </IconButton>
-            </Tooltip>
-          )}{" "}
-        </div>
-      ),
-    },
+  // const columns = [
+  //   {
+  //     field: "isChecked",
+  //     headerName: "Checkbox",
+  //     renderHeader: () => (
+  //       <Checkbox
+  //         color="primary"
+  //         checked={checkAllUsers}
+  //         onChange={(ev) => {
+  //           setCheckAllUsers(ev.target.checked);
+  //           const gridData = dataRows;
+  //           gridData.map((d) => {
+  //             d.isChecked = ev.target.checked;
+  //             return d;
+  //           });
+  //           setDataRows([...gridData]);
+  //         }}
+  //       />
+  //     ),
+  //     renderCell: (params) => (
+  //       <Checkbox
+  //         color="primary"
+  //         checked={params.value}
+  //         onChange={(ev) => {
+  //           updateCheckedStatus(params, ev);
+  //         }}
+  //       />
+  //     ),
+  //     disableColumnMenu: true,
+  //     sortable: false,
+  //     filterable: false,
+  //     width: 75,
+  //   },
+  //   {
+  //     field: "name",
+  //     headerName: "Name",
+  //     width: 400,
+  //     renderCell: (params: any) => (
+  //       <>
+  //         <Link
+  //           title={params.value}
+  //           className="text-truncate link"
+  //           to={`${routes.userDetail.path}/${params.row.id}`}
+  //         >
+  //           {params.value}
+  //         </Link>
+  //         {params.row.isBrandAdmin ? <Tooltip title="Brand Admin">
+  //           <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
+  //         </Tooltip> : ""}
+  //       </>
+  //     ),
+  //   },
+  //   {
+  //     field: "status",
+  //     headerName: "Status",
+  //     width: 150,
+  //     sortable: false,
+  //     filterable: false,
+  //     align: "center",
+  //     headerAlign: "center",
+  //     disableColumnMenu: true,
+  //     renderCell: (params: any) => (
+  //       <div style={{ width: 150 }}>
+  //         {params.value ? (
+  //           <Tooltip title="Inactive">
+  //             <IconButton>
+  //               <FaUserAltSlash className="text-error" />
+  //             </IconButton>
+  //           </Tooltip>
+  //         ) : (
+  //           <Tooltip title="Active">
+  //             <IconButton>
+  //               <FaUserCheck className="text-success" />
+  //             </IconButton>
+  //           </Tooltip>
+  //         )}{" "}
+  //       </div>
+  //     ),
+  //   },
 
-    {
-      field: "email",
-      headerName: "Email",
-      width: 300,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          <CustomRenderCell isCopyToClipboard={true} value={params.value} />
-        </p>
-      ),
-    },
-    // {
-    //   field: "createdAt",
-    //   headerName: "Created At",
-    //   width: 200,
-    //   renderCell: (params: any) => (
-    //     <p title={`Created At • ${params.value}`} className="text-truncate">
-    //       {params.value}
-    //     </p>
-    //   ),
-    // },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      renderCell: (params: any) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params.value.user.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      renderCell: (params) =>
-        params?.value?.user ? (
-          <h5 className="updateBy">
-            {params?.value?.user?.firstName}
-            <span
-              title={params?.value?.date}
-              className="updatedAtTime badge-date"
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: any) =>
-        user?.user._id === params.row.id ? (
-          <p title="There is no action for currently logged in user">
-            No Actions
-          </p>
-        ) : (
-          <>
-            {permissions.user.isDelete ? (
+  //   {
+  //     field: "email",
+  //     headerName: "Email",
+  //     width: 300,
+  //     renderCell: (params: any) => (
+  //       <p title={params.value} className="text-truncate">
+  //         <CustomRenderCell isCopyToClipboard={true} value={params.value} />
+  //       </p>
+  //     ),
+  //   },
+  //   // {
+  //   //   field: "createdAt",
+  //   //   headerName: "Created At",
+  //   //   width: 200,
+  //   //   renderCell: (params: any) => (
+  //   //     <p title={`Created At • ${params.value}`} className="text-truncate">
+  //   //       {params.value}
+  //   //     </p>
+  //   //   ),
+  //   // },
+  //   {
+  //     field: "createdBy",
+  //     headerName: "Created By",
+  //     width: 250,
+  //     disableColumnMenu: true,
+  //     renderCell: (params: any) =>
+  //       params?.value && params?.value?.user ? (
+  //         <h5 className="createBy">
+  //           {params.value.user.firstName}
+  //           <span
+  //             className="createdAtTime badge-date"
+  //             title={`${params.value.user.firstName} • ${moment(
+  //               params.value.date.slice(0, 10)
+  //             ).format("MMM Do, YYYY")}`}
+  //           >
+  //             {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
+  //           </span>
+  //         </h5>
+  //       ) : (
+  //         <NoDataCell />
+  //       ),
+  //   },
+  //   {
+  //     field: "updatedBy",
+  //     headerName: "Updated By",
+  //     width: 250,
+  //     renderCell: (params) =>
+  //       params?.value?.user ? (
+  //         <h5 className="updateBy">
+  //           {params?.value?.user?.firstName}
+  //           <span
+  //             title={params?.value?.date}
+  //             className="updatedAtTime badge-date"
+  //           >
+  //             {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
+  //           </span>
+  //         </h5>
+  //       ) : (
+  //         <NoDataCell />
+  //       ),
+  //   },
+  //   {
+  //     field: "actions",
+  //     headerName: "Actions ",
+  //     disableColumnMenu: true,
+  //     sortable: false,
+  //     filterable: false,
+  //     renderCell: (params: any) =>
+  //       user?.user._id === params.row.id ? (
+  //         <p title="There is no action for currently logged in user">
+  //           No Actions
+  //         </p>
+  //       ) : (
+  //         <>
+  //           {permissions.user.isDelete ? (
 
-              params.row.isBrandAdmin ? (
-                <Tooltip
-                  className="cursor-stop"
-                  title="Brand Admin Can not be Deleted"
-                >
-                  <IconButton aria-label="Delete">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              ) :
-                (<Tooltip
-                  title="Delete"
-                >
-                  <IconButton
-                    aria-label="Delete"
-                    onClick={() => showConfirmBox(params.row)}
-                  >
-                    <DeleteIcon fontSize="small" color='error' />
-                  </IconButton>
-                </Tooltip>)
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You do not have permission to delete user"
-              >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </>
-        ),
-      width: 200,
-    },
-  ] as Array<any>;
+  //             params.row.isBrandAdmin ? (
+  //               <Tooltip
+  //                 className="cursor-stop"
+  //                 title="Brand Admin Can not be Deleted"
+  //               >
+  //                 <IconButton aria-label="Delete">
+  //                   <DeleteIcon fontSize="small" />
+  //                 </IconButton>
+  //               </Tooltip>
+  //             ) :
+  //               (<Tooltip
+  //                 title="Delete"
+  //               >
+  //                 <IconButton
+  //                   aria-label="Delete"
+  //                   onClick={() => showConfirmBox(params.row)}
+  //                 >
+  //                   <DeleteIcon fontSize="small" color='error' />
+  //                 </IconButton>
+  //               </Tooltip>)
+  //           ) : (
+  //             <Tooltip
+  //               className="cursor-stop"
+  //               title="You do not have permission to delete user"
+  //             >
+  //               <IconButton aria-label="Delete">
+  //                 <DeleteIcon fontSize="small" />
+  //               </IconButton>
+  //             </Tooltip>
+  //           )}
+  //         </>
+  //       ),
+  //     width: 200,
+  //   },
+  // ] as Array<any>;
 
-  const updateCheckedStatus = (params, ev) => {
-    const gridData = [...dataRows];
-    const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-    gridData[indexOfRecord].isChecked = ev.target.checked;
+  // const updateCheckedStatus = (params, ev) => {
+  //   const gridData = [...dataRows];
+  //   const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
+  //   gridData[indexOfRecord].isChecked = ev.target.checked;
 
-    setDataRows([...gridData]);
+  //   setDataRows([...gridData]);
 
-    const checkedRecords = gridData.filter((d) => d.isChecked === true);
+  //   const checkedRecords = gridData.filter((d) => d.isChecked === true);
 
-    if (checkedRecords.length === gridData.length) {
-      setCheckAllUsers(true);
-    } else {
-      setCheckAllUsers(false);
-    }
-    handleSelectedUsers(params.row.id, ev.target.checked);
-  };
+  //   if (checkedRecords.length === gridData.length) {
+  //     setCheckAllUsers(true);
+  //   } else {
+  //     setCheckAllUsers(false);
+  //   }
+  //   handleSelectedUsers(params.row.id, ev.target.checked);
+  // };
 
   const showConfirmBox = (row) => {
     if (row) {
@@ -378,35 +692,32 @@ const User: FC = () => {
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
+    dispatch({ type: "search", search: e.target.value });
   };
 
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
+  // const handlePage = (params) => {
+  //   if (query.page !== params.page) {
+  //     setQuery((prevState) => ({ ...prevState, page: params.page }));
+  //   }
+  // };
 
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
+  // const handlePageSize = (params) => {
+  //   if (params.pageSize !== query.limit) {
+  //     setQuery({ page: 0, limit: params.pageSize });
+  //   }
+  // };
 
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
-  };
+  // const handleSortModelChange = (params) => {
+  //   if (params?.sortModel && params.sortModel.length > 0) {
+  //     let temp = { ...params.sortModel[0] };
+  //     setQuery((prevState) => ({
+  //       ...prevState,
+  //       page: 0,
+  //       sortBy: temp.field,
+  //       orderBy: temp.sort,
+  //     }));
+  //   }
+  // };
 
   // Handle entity selection
   const handleSelectedUsers = (id, isChecked) => {
@@ -436,30 +747,30 @@ const User: FC = () => {
     setRolesDialogOpen(false);
   };
 
-  const onFilterChange = React.useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let deepFilter;
-      switch (params.filterModel.items[0].columnField) {
-        case 'createdBy':
-          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'updatedBy':
-          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
-          break;
-        default:
-          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
-      }
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter
-      }));
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
+  // const onFilterChange = React.useCallback((params) => {
+  //   if (params.filterModel.items[0].value) {
+  //     let deepFilter;
+  //     switch (params.filterModel.items[0].columnField) {
+  //       case 'createdBy':
+  //         deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+  //         break;
+  //       case 'updatedBy':
+  //         deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+  //         break;
+  //       case 'name':
+  //         deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+  //         break;
+  //       default:
+  //         deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
+  //     }
+  //     setQuery((prevState) => ({
+  //       ...prevState,
+  //       deepFilter
+  //     }));
+  //   } else {
+  //     setQuery({ page: 0, limit: 25 });
+  //   }
+  // }, []);
 
   return (
     <>
@@ -483,20 +794,20 @@ const User: FC = () => {
         />
       )}
       <Layout>
-      <Grid container className="headerbox">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={[routes.user]} />
         </Grid>
         <CustomContainer>
           <div className="header-panel">
             <Header
               onSearch={handleSearch}
-              searchVal={searchVal}
+              searchVal={search}
               userPermissions={permissions.user}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               openRolesDialog={handleOpenDialog}
               rolesActionDiabled={Boolean(!selectedUsers.length)}
-              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
+              canDelete={selectedRecords.length === 0}
             />
             {entityRoleRedirectDetails.id && (
               <Chip
@@ -510,7 +821,94 @@ const User: FC = () => {
               />
             )}
           </div>
-          <div className="listing-grid">
+          <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
+
+          <div className="ag-theme-material ag-grid-listing-grid">
+            <AgGridReact
+              rowData={dataRows}
+              onGridReady={onGridReady}
+              suppressDragLeaveHidesColumns={true}
+              suppressCellSelection={true}
+              rowHeight={40}
+              frameworkComponents={frameworkComponents}
+              defaultColDef={{
+                resizable: true,
+                floatingFilter: true,
+                sortable: true,
+                width: 250,
+                suppressMenu: true,
+                // headerCheckboxSelection: true,
+                // checkboxSelection: true,
+                floatingFilterComponentParams: { suppressFilterButton: true }
+              }}
+              onSortChanged={(e) => {
+                dispatch({ type: "sort", sorting: e.api.getSortModel() })
+              }}
+              onFilterChanged={(e) => {
+                dispatch({ type: "filter", filters: e.api.getFilterModel() });
+              }}
+              enableCellTextSelection={true}
+              ensureDomOrder={false}
+              loadingOverlayComponent={'customLoadingOverlay'}
+              loadingOverlayComponentParams={{
+                loadingMessage: 'Loading...',
+              }}
+              animateRows={false}
+              suppressAnimationFrame={true}
+              suppressMaintainUnsortedOrder={true}
+
+              rowBuffer={limit}
+              // suppressMaxRenderedRowRestriction={true}
+
+              // loadingCellRenderer={'customLoadingCellRenderer'}
+              // loadingCellRendererParams={{
+              //   loadingMessage: 'One moment please...',
+              // }}
+
+              suppressRowClickSelection={true}
+              rowSelection={'multiple'}
+              onSelectionChanged={(event: any) => {
+                dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
+              }}
+              immutableData={true}
+              getRowNodeId={(data) => {
+                return data._id;
+              }}
+            >
+              <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
+                headerCheckboxSelection={true}
+                headerCheckboxSelectionFilteredOnly={true}
+                checkboxSelection={true}
+                resizable={false} sortable={false}
+              >
+              </AgGridColumn>
+
+              {generateColumns}
+
+              <AgGridColumn width={100} headerName="Actions"
+                pinned={(isMobile || isTablet) ? false : "right"}
+                lockPinned={(isMobile || isTablet) ? false : true}
+                resizable={false} sortable={false}
+                filter={false} cellRenderer="actionsRenderer">
+              </AgGridColumn>
+
+            </AgGridReact>
+          </div>
+
+          <TablePagination
+            component="div"
+            count={rowCount}
+            page={page}
+            onChangePage={(event, newPage) => {
+              dispatch({ type: "pageChange", page: newPage })
+            }}
+            rowsPerPage={limit}
+            onChangeRowsPerPage={(event) => {
+              dispatch({ type: "pageSizeChange", limit: event.target.value })
+            }}
+            rowsPerPageOptions={pageSizes}
+          />
+          {/* <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: CustomDataGridToolbar,
@@ -534,7 +932,7 @@ const User: FC = () => {
               onFilterModelChange={onFilterChange}
               filterMode="server"
             />
-          </div>
+          </div> */}
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
