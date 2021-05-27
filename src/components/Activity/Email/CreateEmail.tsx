@@ -91,9 +91,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         fetchEmailDetail();
     }, []);
 
-    // let el = document.querySelector("button[title='Image']");
-    // if (el) { el["style"].cssText = "display: none"; }
-
     const checkImageUrl = (url) => {
         let extension = url.substring(url.lastIndexOf("."),).toLowerCase()
         let imageExtensions = [".tif", "tiff", ".bmp", ".jpg", "jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"]

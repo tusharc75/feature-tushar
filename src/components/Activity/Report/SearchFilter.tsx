@@ -45,8 +45,8 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
 
   useEffect(() => {
     if (inputValue === "") {
-      let tempAllSearch = dontShowMyActivity ? allSearch.filter(_o => _o.type !== "my") : allSearch
-      setOptions(tempAllSearch);
+      let filteredSearch = dontShowMyActivity ? allSearch.filter(_o => _o.type !== "my") : allSearch
+      setOptions(filteredSearch);
     } else {
       setLoading(true);
       SearchActivity(inputValue)
