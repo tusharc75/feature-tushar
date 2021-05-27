@@ -121,20 +121,22 @@ function StyleButton(props) {
         props.icon ? <Tooltip title={props.label || ''}>
           <IconButton className="richTextEditorIconButton">{props.icon}</IconButton>
         </Tooltip>
-          : props.label ? props.label : ""
+          : props.label ? <Tooltip title={props?.message || ''}>
+            <span> {props.label}</span>
+          </Tooltip> : ""
       }
     </span>
   );
 }
 
 const BLOCK_TYPES = [
-  { label: 'Huge', style: 'header-one' },
-  { label: 'Large', style: 'header-two' },
-  { label: 'Medium', style: 'header-three' },
-  { label: 'Small', style: 'header-four' },
+  { label: 'Huge', style: 'header-one', message: "Heading Huge" },
+  { label: 'Large', style: 'header-two', message: "Heading Large" },
+  { label: 'Medium', style: 'header-three', message: "Heading Medium" },
+  { label: 'Small', style: 'header-four', message: "Heading Small" },
   // { label: 'H5', style: 'header-five' },
   // { label: 'H6', style: 'header-six' },
-  { label: 'Code Block', style: 'code-block' },
+  { label: 'Code Block', style: 'code-block', message: "Code-block" },
   { label: 'Blockquote', icon: <MdFormatQuote className="richTextEditorIcons" />, style: 'blockquote' },
   { label: 'UL', icon: <BsListUl className="richTextEditorIcons" />, style: 'unordered-list-item' },
   { label: 'OL', icon: <BsListOl className="richTextEditorIcons" />, style: 'ordered-list-item' },
@@ -154,6 +156,7 @@ const BlockStyleControls = props => {
           key={type.label}
           active={type.style === blockType}
           label={type.label}
+          message={type.message ?? ""}
           icon={type.icon}
           onToggle={props.onToggle}
           style={type.style}
