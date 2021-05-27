@@ -77,7 +77,8 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData }) {
+
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions }) {
 
     const history = useHistory();
     const {
@@ -144,7 +145,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                         </Box>
                     </Grid>
                     <Grid item xs={4} container justify="flex-end">
-                        {
+                        {permissions?.projectSales?.isCreate && (
                             <IconButton
                                 color="primary"
                                 size="small"
@@ -152,7 +153,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                             >
                                 <ControlPointIcon />
                             </IconButton>
-                        }
+                        )}
                     </Grid>
                 </Grid>
             </AccordionSummary>

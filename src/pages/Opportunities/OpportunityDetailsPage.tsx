@@ -104,12 +104,12 @@ function OpportunityDetailsPage() {
   }, [id]);
 
   useEffect(() => {
-    if (opportunityData?.staticData?.customerContacts &&
-      opportunityData.staticData?.customerContacts.length &&
+    if (opportunityData?.staticData?.customerContact &&
+      opportunityData.staticData?.customerContactslength &&
       customerContacts && customerContacts.length === 0) fetchCustomerContactData(false)
 
-    if (opportunityData?.staticData?.supplierContacts &&
-      opportunityData.staticData?.supplierContacts.length &&
+    if (opportunityData?.staticData?.supplierContact &&
+      opportunityData.staticData?.supplierContact.length &&
       supplierContacts && supplierContacts.length === 0) fetchSupplierContactData(false)
 
   }, [opportunityData])
@@ -278,7 +278,7 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .get(`customer-contact?filterById=${filterById}`)
       .then(({ data: { data } }) => {
-        let assignedContacts = opportunityData.staticData?.customerContacts ?? []
+        let assignedContacts = opportunityData.staticData?.customerContact ?? []
         const updatedContacts = data.map(d => {
           d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
           return d
@@ -533,7 +533,7 @@ function OpportunityDetailsPage() {
                     <div className="p-3">
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContact)}
                           title="Supplier Contacts"
                           contactApi={supplierContact.contactApi}
                           isExpanded={expanded.supplierContacts}
@@ -548,7 +548,7 @@ function OpportunityDetailsPage() {
                       }
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContact)}
                           title="Customer Contacts"
                           isExpanded={expanded["customerContacts"]}
                           contactApi={customerContact.contactApi}
@@ -567,6 +567,7 @@ function OpportunityDetailsPage() {
                           projectSales={projectSales}
                           type={typeCreateProjectSalesDialog}
                           fetchData={fetchRelatedData}
+                          permissions={permissions}
                         />
                       )}
                     </div>

@@ -638,6 +638,7 @@ export default function AccountDetailPage(props) {
                 projectSales={projectSales} 
                 type={typeCreateProjectSalesDialog}
                 fetchData={fetchRelatedData}
+                permissions={permissions}
                 />
                 )}
                 <QuotesInAccordion recordsPerLine={3} />

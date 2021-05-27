@@ -134,8 +134,8 @@ const ContactDetailsPage = (props) => {
         getContactFields();
         console.log(props)
         setTypeCreateProjectSalesDialog([
-          {  id: id, type: contactResource  },
-          {id:data?.accountName?.optionValue,type:accountResource}
+          { id: id, type: contactResource },
+          { id: data?.accountName?.optionValue, type: accountResource }
         ])
         setCanEdit(
           [...data?.collaborator ?? [], data?.owner].some(
@@ -534,6 +534,8 @@ const ContactDetailsPage = (props) => {
                     recordsPerLine={3}
                     resource={accountResource}
                     isRedirect={false}
+                    contactId={id}
+                    contactResource={contactResource}
                   />
                 )}
                 {permissions?.projectSales?.isRead && (
@@ -542,6 +544,8 @@ const ContactDetailsPage = (props) => {
                     projectSales={projectSales}
                     type={typeCreateProjectSalesDialog}
                     fetchData={fetchRelatedData}
+                    permissions={permissions}
+
                   />
                 )}
                 <QuotesInAccordion recordsPerLine={3} />
