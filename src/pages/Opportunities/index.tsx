@@ -27,7 +27,9 @@ import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunity
 import {
   gridPageSizes,
   opportunity,
-  isObjectEmpty
+  isObjectEmpty,
+  customerAccount,
+  supplierAccount
 } from "../../constants/helpers";
 import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
@@ -41,6 +43,13 @@ import { AiOutlineLoading } from 'react-icons/ai'
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import { isMobile, isTablet } from "react-device-detect";
+import {
+  CommonRenderer,
+  CreatedByRenderer,
+  UpdatedByRenderer,
+  CustomLoadingOverlay
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -231,7 +240,7 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails]);
 
   const handleSingleDeleteOpportunity = async () => {
     dispatch({ type: "loading", loading: true });
@@ -257,123 +266,49 @@ const Opportunities = () => {
       });
   };
 
-  const CommonRenderer = params => <CustomRenderCell value={params.value} />;
-
   const OpportunityNameRenderer = params => <Link className="link"
-    to={`${routes.opportunityDetail.path}/${params.data._id}`} title={params.value ?? ""}>
-    {params.value ?? ""}
+    to={`${routes.opportunityDetail.path}/${params.data._id}`} title={params.value}>
+    {params.value}
   </Link>
 
-  const SupplierAccountNameRenderer = params => params.data.supplierAccountName ? (
+  const CustomerAccountNameRenderer = params => <Link
+    className="link" title={params.value}
+    to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
+  >
+    {params.value}
+  </Link>
+
+  const SupplierAccountNameRenderer = params => params.value ? (
     <>
       <h5 className="createBy">
-        <Link className="link"
-          to={`${routes.supplierAccount.path}/detail/${params.data.supplierAccountName}`}
+        <Link className="link" title={params.value}
+          to={`${routes.supplierAccount.path}/detail/${params.data.supplierAccountId}`}
         >
-          {params.row.supplierAccountName}
+          {params.value}
         </Link>
         {
-          params.row.allSupplierAccounts.length > 1 &&
+          params.data.allSupplierAccounts.length > 1 &&
           <span className="createdAtTime badge-date">
-            {`+${params.row.allSupplierAccounts.length - 1} more..`}
+            {`+${params.data.allSupplierAccounts.length - 1} more..`}
           </span>
         }
       </h5>
     </>
   ) : <NoDataCell />
 
-  const CustomerAccountNameRenderer = params => <Link
-    className="link"
-    to={`${routes.customerAccount.path}/detail/${params.data.customerAccountName}`}
-  >
-    {params.data.customerAccountName}
-  </Link>
-
-  const CreatedByRenderer = params => params.value ? (
-    <h5 className="createBy">
-      {params.value}
-      <span className="createdAtTime badge-date"
-        title={`${params.value} • ${moment(
-          params.data.createdByDate.slice(0, 10)
-        ).format("MMM Do, YYYY")}`}
-      >
-        {moment(params.data.createdByDate.slice(0, 10)).format("MMM Do, YYYY")}
-      </span>
-    </h5>
-  ) : (
-    <NoDataCell />
-  );
-
-  const UpdatedByRenderer = params => params.value ? (
-    <h5 className="updateBy">
-      {params.value}
-      <span className="updatedAtTime badge-date"
-        title={`${params.value} • ${moment(
-          params.data.updatedByDate.slice(0, 10)
-        ).format("MMM Do, YYYY")}`}
-      >
-        {moment(params.data.updatedByDate.slice(0, 10)).format("MMM Do, YYYY")}
-      </span>
-    </h5>
-  ) : (
-    <NoDataCell />
-  )
-
   const ActionsRenderer = params => <>
-    {
-      opportunityPermissions.isDelete ? (
-        params.data.canDelete ? (
-          <Tooltip title="Delete">
-            <IconButton
-              aria-label="Delete"
-              onClick={() =>
-                setSingleOpportunityDelete({
-                  show: true,
-                  id: params.fata._id,
-                  opportunityName: `${params.data.opportunityName}`,
-                })
-              }
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip
-            className="cursor-stop"
-            title="You must be the owner of this opportunity to get the delete functionality"
-          >
-            <IconButton aria-label="Delete">
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Tooltip>
-        )
-      ) : (
-        <Tooltip
-          className="cursor-stop"
-          title="You do not have permission to delete opportunity"
-        >
-          <IconButton aria-label="Delete">
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      )
-    }
+    <GridDeleteIcon
+      hasDeletePermission={opportunityPermissions.isDelete}
+      ownerId={params.data.ownerId}
+      userId={user?.user?._id}
+      onDelete={() => setSingleOpportunityDelete({
+        show: true,
+        id: params.data._id,
+        opportunityName: `${params.data.opportunityName}`,
+      })}
+      entity="opportunity"
+    />
   </>
-
-  const CustomLoadingOverlay = (params) => <div
-    className="ag-custom-loading-cell"
-    style={{ paddingLeft: '10px', lineHeight: '25px' }}
-  >
-    <AiOutlineLoading />
-    <span className="pl-2 font-size-3">{params.loadingMessage}</span>
-  </div>
-
-  const CustomLoadingCellRenderer = (params) => <div
-    className="ag-custom-loading-cell p-3"
-  >
-    <AiOutlineLoading />
-    <h4>{params.loadingMessage}</h4>
-  </div>
 
   const frameworkComponents = {
     opportunityNameRenderer: OpportunityNameRenderer,
@@ -384,6 +319,7 @@ const Opportunities = () => {
     actionsRenderer: ActionsRenderer,
     customLoadingOverlay: CustomLoadingOverlay,
     customFloatingFilter: CustomFloatingFilter,
+    commonRenderer: CommonRenderer
     // customLoadingCellRenderer: CustomLoadingCellRenderer,
     // customNoRowsOverlay: CustomNoRowsOverlay
   };
@@ -450,12 +386,10 @@ const Opportunities = () => {
     }
 
     if (accountDetails.accountId) {
-      if (accountDetails.resource === "customerAccountName") {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: accountDetails.resource, term: accountDetails.accountId }])}`
-        // searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: accountDetails.accountId }]);
-      } else if (accountDetails.resource === "supplierAccountName") {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: accountDetails.resource, term: { $in: [accountDetails.accountId] } }])}`
-        // searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: { $in: [accountDetails.accountId] } }]);
+      if (accountDetails.resource === customerAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName("customerAccountName"), term: accountDetails.accountId }])}`
+      } else if (accountDetails.resource === supplierAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName("supplierAccountName"), term: { $in: [accountDetails.accountId] } }])}`
       }
     }
 
@@ -465,7 +399,7 @@ const Opportunities = () => {
       Object.keys(filters).map(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: filters[field].filter
+          term: field === "supplierAccountName" ? { $in: [filters[field].filter] } : filters[field].filter
         })
       });
       deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
@@ -487,12 +421,18 @@ const Opportunities = () => {
       const queryString = getQueryString();
       dispatch({ type: "loading", loading: true });
 
+      if (gridApi) {
+        gridApi.setRowData([]);
+        gridApi.showLoadingOverlay();
+      }
+
       axiosInstance()
         .get(`${opportunityApi}${queryString}`)
         .then(({ data: { data, count } }) => {
 
           let rows = data.map((u) => {
-            const { owner, collaborator, createdBy, updatedBy, supplierAccountName, ...restProperties } = u;
+            const { owner, collaborator, createdBy, updatedBy, customerAccountName,
+              supplierAccountName, staticData, ...restProperties } = u;
 
             let res = {
               ...restProperties,
@@ -512,15 +452,20 @@ const Opportunities = () => {
 
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,
+
+              createdBy: u.createdBy?.user?.concatedName,
+              createdByDate: u.createdBy?.date,
+              updatedBy: u.updatedBy?.user?.concatedName,
+              updatedByDate: u.updatedBy?.date,
             };
             return res;
           });
 
           dispatch({ type: "initialize", data: rows, count: count });
 
-          if (gridApi && rows.length > 0) {
-            gridApi.hideOverlay();
-          }
+          // if (gridApi && rows.length > 0) {
+          //   gridApi.hideOverlay();
+          // }
         })
         .catch((error) => {
           dispatch({ type: "loading", loading: false });
@@ -641,7 +586,7 @@ const Opportunities = () => {
                 accountDetails.accountId && <Chip
                   className="ml-3"
                   color="primary"
-                  label={`Account: ${accountDetails.accountName}`}
+                  label={`${accountDetails.resource === customerAccount.accountResource ? "Customer" : "Supplier"} Account: ${accountDetails.accountName}`}
                   onDelete={() => {
                     setAccountDetails({ accountId: null, accountName: null, resource: null });
                   }}
@@ -656,6 +601,7 @@ const Opportunities = () => {
               rowData={dataRows}
               onGridReady={onGridReady}
               suppressDragLeaveHidesColumns={true}
+              suppressCellSelection={true}
               rowHeight={40}
               frameworkComponents={frameworkComponents}
               defaultColDef={{
@@ -712,7 +658,7 @@ const Opportunities = () => {
 
               {generateColumns}
 
-              <AgGridColumn width={150} headerName="Actions"
+              <AgGridColumn width={100} headerName="Actions"
                 pinned={(isMobile || isTablet) ? false : "right"}
                 lockPinned={(isMobile || isTablet) ? false : true}
                 resizable={false} sortable={false}

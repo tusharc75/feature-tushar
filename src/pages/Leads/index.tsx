@@ -49,6 +49,12 @@ import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import { isMobile, isTablet } from "react-device-detect";
 import FilterListIcon from '@material-ui/icons/FilterList';
 import "./style.scss";
+import {
+  CommonRenderer,
+  CreatedByRenderer,
+  UpdatedByRenderer,
+  CustomLoadingOverlay
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 
 const LeadTypes = [
   {
@@ -234,54 +240,22 @@ const Leads = () => {
     if (renderCount > 0) {
       fetchLeads();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting]);
-
-  const CommonRenderer = params => <CustomRenderCell value={params.value} />;
+  }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
   const NameRenderer = params => <Link className="link"
-    to={`${leadDetailPage.path}/${params.data._id}`} title={params.value ?? ""}>
-    {params.value ?? ""}
+    to={`${leadDetailPage.path}/${params.data._id}`} title={params.value}>
+    {params.value}
   </Link>;
 
   const RelatedOpportunityRenderer = params => <>
     {
       params.value ?
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.value?._id}`} title={params.value?.opportunityName}>
-          {params.value?.opportunityName}
+        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
+          {params.value}
         </Link>
         : <NoDataCell />
     }
   </>
-
-  const CreatedByRenderer = params => params.value ? (
-    <h5 className="createBy">
-      {params.value}
-      <span className="createdAtTime badge-date"
-        title={`${params.value} • ${moment(
-          params.data.createdByDate.slice(0, 10)
-        ).format("MMM Do, YYYY")}`}
-      >
-        {moment(params.data.createdByDate.slice(0, 10)).format("MMM Do, YYYY")}
-      </span>
-    </h5>
-  ) : (
-    <NoDataCell />
-  );
-
-  const UpdatedByRenderer = params => params.value ? (
-    <h5 className="updateBy">
-      {params.value}
-      <span className="updatedAtTime badge-date"
-        title={`${params.value} • ${moment(
-          params.data.updatedByDate.slice(0, 10)
-        ).format("MMM Do, YYYY")}`}
-      >
-        {moment(params.data.updatedByDate.slice(0, 10)).format("MMM Do, YYYY")}
-      </span>
-    </h5>
-  ) : (
-    <NoDataCell />
-  )
 
   const ActionsRenderer = params => <>
     {
@@ -297,21 +271,6 @@ const Leads = () => {
       entity="lead"
     />
   </>
-
-  const CustomLoadingOverlay = (params) => <div
-    className="ag-custom-loading-cell"
-    style={{ paddingLeft: '10px', lineHeight: '25px' }}
-  >
-    <AiOutlineLoading />
-    <span className="pl-2 font-size-3">{params.loadingMessage}</span>
-  </div>
-
-  const CustomLoadingCellRenderer = (params) => <div
-    className="ag-custom-loading-cell p-3"
-  >
-    <AiOutlineLoading />
-    <h4>{params.loadingMessage}</h4>
-  </div>
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
@@ -423,7 +382,7 @@ const Leads = () => {
 
           let rows = data.map((u) => {
 
-            const { owner, collaborator, createdBy, updatedBy, ...restProperties } = u;
+            const { owner, collaborator, createdBy, updatedBy, staticData, ...restProperties } = u;
 
             let res = {
               ...restProperties,
@@ -434,7 +393,8 @@ const Leads = () => {
               isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
                 (d) => d.optionValue == user?.user?._id
               ),
-              relatedOpportunity: u.staticData?.convertedToOpportunity && u.staticData?.opportunity,
+              relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
+              relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
 
               createdBy: u.createdBy?.user?.concatedName,
               createdByDate: u.createdBy?.date,
@@ -446,11 +406,12 @@ const Leads = () => {
 
           dispatch({ type: "initialize", data: rows, count: count });
 
-          if (gridApi && rows.length > 0) {
-            gridApi.hideOverlay();
-          }
+          // if (gridApi && rows.length > 0) {
+          //   gridApi.hideOverlay();
+          // }
         }).catch((error) => {
           toastConfig.setToastConfig(error);
+          dispatch({ type: "loading", loading: false });
         });
     }
   }
@@ -751,6 +712,7 @@ const Leads = () => {
             rowData={dataRows}
             onGridReady={onGridReady}
             suppressDragLeaveHidesColumns={true}
+            suppressCellSelection={true}
             rowHeight={40}
             frameworkComponents={frameworkComponents}
             defaultColDef={{
