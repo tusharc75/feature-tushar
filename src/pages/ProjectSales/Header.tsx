@@ -14,9 +14,10 @@ const ProjectStrategyHeader = (props) => {
     onCreate,
     permissions,
     showConfirmBox,
-    canDelete,
+    userId,
     handleFilterChange,
     selectedType,
+    selectedProjects,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -98,7 +99,10 @@ const ProjectStrategyHeader = (props) => {
                 onClose={closeActions}
               >
                 <MenuItem
-                  disabled={Boolean(canDelete)}
+                  disabled={
+                    selectedProjects?.length === 0 ||
+                    selectedProjects?.some((d) => d.projectManagerId !== userId)
+                  }
                   onClick={() => {
                     showConfirmBox(null);
                     closeActions();
