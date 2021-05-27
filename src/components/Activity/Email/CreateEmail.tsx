@@ -88,7 +88,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const [sending, setSending] = useState(false)
 
     const toolbarConfig = {
-        // Optionally specify the groups to display (displayed in the order listed).
         display: ['INLINE_STYLE_BUTTONS', 'BLOCK_ALIGNMENT_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'LINK_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
         INLINE_STYLE_BUTTONS: [
             { label: 'Bold', style: 'BOLD' },
