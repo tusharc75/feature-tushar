@@ -156,17 +156,22 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     };
 
     const handleSave = async (values) => {
+
         try {
-            const payload = {
+            let payload = {
                 relatedTo: relatedTo,
                 message: values.content.toString('html'),
-                graphToken: await getAzureAcessToken(instance),
                 to: values.to,
                 cc: values.cc,
                 subject: values.name,
-                mailbox: azureAccount.username,
                 attachment: values["file"] ? [...imageAttachments, ...otherAttachments] : [...imageAttachments]
             }
+            if (azureAccount && azureAccount?.username) {
+                payload["graphToken"] = await getAzureAcessToken(instance)
+                payload["mailbox"] = azureAccount.username
+            }
+
+            console.log('ans', await getAzureAcessToken(instance))
 
             if (emailId) {
                 UpdateEmail(emailId, values)
@@ -527,7 +532,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                 </Form>
                             </CustomDialogContent>
                             <CustomDialogFooter>
-                                <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography>
+                                {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
                                 <Button color="primary" onClick={handleClose}>Cancel</Button>
                                 {!emailId &&
                                     <Button type="button" color="primary" variant="contained" disabled={sending}
