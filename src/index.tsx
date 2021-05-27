@@ -7,6 +7,7 @@ import { Provider } from "./StateProvider/Provider";
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
 import { MsalProvider } from "@azure/msal-react";
 import AzureInstance from "./AzureInstance";
+import 'ag-grid-community/dist/styles/ag-grid.min.css';
 import "./styles/index.scss";
 import "./styles/common-styles.scss";
 import "./styles/material-component.scss";
@@ -24,6 +25,8 @@ Sentry.init({
     // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
 });
+
+
 
 ReactDOM.render(
   <React.StrictMode>
