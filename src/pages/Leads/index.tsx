@@ -174,22 +174,18 @@ const Leads = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)z
+  // const [showGridFilters, setShowGridFilters] = useState(true)
   const [columns, setColumns] = useState([
-    {
-      field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
-    },
+    { field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
     { field: "relatedOpportunity", headerName: "Related Opportunity", show: true, cellRenderer: "relatedOpportunityRenderer" },
     { field: "title", headerName: "Title", show: true, cellRenderer: "commonRenderer" },
-    {
-      field: "company", headerName: "Company", show: true, cellRenderer: "commonRenderer",
-    },
+    { field: "company", headerName: "Company", show: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRenderer" },
     { field: "mobile", headerName: "Mobile", show: true, cellRenderer: "commonRenderer" },
     { field: "email", headerName: "Email", show: true, cellRenderer: "commonRenderer" },
-    { field: "owner", headerName: "Owner Alies", show: true, cellRenderer: "commonRenderer" },
+    { field: "owner", headerName: "Owner Alies", show: true, cellRenderer: "commonRenderer" }
   ]);
   //  Grid Variables - End
 

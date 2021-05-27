@@ -71,8 +71,8 @@ export default function ManageAccount(props) {
         isNew
           ? parentAccountDropdownData.option
           : parentAccountDropdownData.option.filter(
-              (d) => d.optionValue !== accountId
-            )
+            (d) => d.optionValue !== accountId
+          )
       );
     }
 
@@ -144,7 +144,7 @@ export default function ManageAccount(props) {
           title={
             isNew
               ? "Add Account"
-              : `Editing ${entityData.initialValues.accountName}`
+              : `Editing ${entityData.initialValues.accountName ? entityData.initialValues.accountName : ""}`
           }
         />
         {entityData.fields.length > 0 ? (
@@ -210,10 +210,10 @@ export default function ManageAccount(props) {
                                         options={
                                           fromProject
                                             ? collaborators.filter(
-                                                (c) =>
-                                                  c.optionValue !==
-                                                  values["owner"]
-                                              )
+                                              (c) =>
+                                                c.optionValue !==
+                                                values["owner"]
+                                            )
                                             : collaboratorDataSource
                                         }
                                         setFieldValue={setFieldValue}
@@ -374,9 +374,9 @@ export default function ManageAccount(props) {
                             entityData.fields
                           )
                         ).toString() ===
-                          Object.values(
-                            simplifyValues(values, entityData.fields)
-                          ).toString()
+                        Object.values(
+                          simplifyValues(values, entityData.fields)
+                        ).toString()
                         // || Object.keys(errors).length > 0 ? true : false
                       }
                       onClick={(e) => {
