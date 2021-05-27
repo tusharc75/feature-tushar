@@ -93,8 +93,7 @@ export default function BrandConfiguration(props) {
             )
         }
         <Layout>
-
-            <Grid container direction="row">
+            <Grid container className="headerbox">
                 <CustomBreadCrumbs routes={[routes.brandConfiguration]} />
             </Grid>
             <Grid container spacing={1} className="detail-container" style={{ padding: '0 50px' }}>

@@ -103,7 +103,7 @@ const ProductCost = () => {
     }
 
     return (<Layout>
-        <Grid container direction="row">
+        <Grid container className="headerbox">
             <Grid item xs={12}>
                 <CustomBreadCrumbs routes={[{ title: routes.productCost.title, path: routes.productCost.path }, { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
             </Grid>

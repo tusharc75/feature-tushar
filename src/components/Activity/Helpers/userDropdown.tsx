@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import TextField from "@material-ui/core/TextField";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { GetUsers } from "../../../axios/activity";
-import Chip from "@material-ui/core/Chip";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-var _ = require("lodash");
+import { TextField, Chip } from "@material-ui/core";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import _ from "lodash";
+
+import axiosInstance from "../../../axios/axiosInstance";
 
 export const UserDropdown = ({
   name,
@@ -16,22 +16,20 @@ export const UserDropdown = ({
   setFieldValue,
   required,
 }) => {
-  const [users, setUsers] = React.useState(null);
+  const [users, setUsers] = useState(null);
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
-    await GetUsers()
-      .then(({ data }) => {
-        let userData = [];
-        for (var _user of data) {
-          userData.push({
-            userId: _user._id,
-            name: _user.firstName + " " + _user.lastName,
-          });
-        }
+    await axiosInstance()
+      .get("/activity/user")
+      .then(({ data: { data } }) => {
+        let userData = data.map((_user) => ({
+          userId: _user._id,
+          name: _user.firstName + " " + _user.lastName,
+        }));
         setUsers(userData);
       })
       .catch((err) => {});
@@ -57,7 +55,16 @@ export const UserDropdown = ({
     <Autocomplete
       multiple={multiple}
       options={users ? users : []}
-      getOptionLabel={(option) => (option ? option.name : "")}
+      getOptionLabel={(option) => {
+        if (!Array.isArray(option)) {
+          return option.name;
+        } else {
+          return "";
+        }
+      }}
+      getOptionSelected={(opt, val) => {
+        return opt.userId === val.userId;
+      }}
       filterSelectedOptions={false}
       onChange={(e, value) => setParticipants(value)}
       value={
@@ -89,7 +96,6 @@ export const UserDropdown = ({
           {...params}
           variant="outlined"
           label={label}
-          placeholder={label}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           margin="dense"

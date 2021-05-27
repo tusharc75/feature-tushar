@@ -440,13 +440,12 @@ const UserDetailsPage = () => {
         />
       )}
       <Layout>
-
-        <Grid container direction="row">
+       <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper className="subContainer">
+            <Paper>
               {!userData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -817,7 +816,7 @@ const UserDetailsPage = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper className="subContainer">
+            <Paper className="fixedRightPanel">
               <Box className="detailHeader">
                 <h2 className="listingHeader single">Approval Process</h2>
               </Box>

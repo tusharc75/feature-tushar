@@ -71,8 +71,8 @@ const Reminder = () => {
               new Date(data).getDate() < new Date().getDate()
                 ? "#dc3545"
                 : new Date(data).getDate() === new Date().getDate()
-                ? "#28a745"
-                : "#838485",
+                  ? "#28a745"
+                  : "#838485",
           }}
           fontSize="small"
         />
@@ -88,8 +88,8 @@ const Reminder = () => {
           new Date(data).getDate() < new Date().getDate()
             ? "#dc3545"
             : new Date(data).getDate() === new Date().getDate()
-            ? "#28a745"
-            : "#838485",
+              ? "#28a745"
+              : "#838485",
       }}
     />
   );
@@ -97,8 +97,9 @@ const Reminder = () => {
   return (
     <>
       <Layout>
-        <CustomBreadCrumbs routes={[{ title: "Reminder" }]} />
-
+        <Grid container className="headerbox">
+          <CustomBreadCrumbs routes={[{ title: "Reminder" }]} />
+        </Grid>
         <div className="detail-container">
           <Paper>
             <Box boxShadow={1} height="calc(100vh - 120px)" p={1}>
@@ -139,8 +140,8 @@ const Reminder = () => {
                         {loadingEvents
                           ? "Loading..."
                           : !events.length
-                          ? "No Events"
-                          : null}
+                            ? "No Events"
+                            : null}
                       </Typography>
                     </Box>
                   </Box>
@@ -184,8 +185,8 @@ const Reminder = () => {
                         {loadingTasks
                           ? "Loading..."
                           : !tasks.length
-                          ? "No Tasks"
-                          : null}
+                            ? "No Tasks"
+                            : null}
                       </Typography>
                     </Box>
                   </Box>
@@ -231,8 +232,8 @@ const Reminder = () => {
                         {loadingCases
                           ? "Loading..."
                           : !events.length
-                          ? "No Cases"
-                          : null}
+                            ? "No Cases"
+                            : null}
                       </Typography>
                     </Box>
                   </Box>

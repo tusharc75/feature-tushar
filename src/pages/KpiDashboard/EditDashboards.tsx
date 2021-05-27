@@ -92,8 +92,7 @@ const EditDashboards = (props) => {
     }
 
     return (<Layout>
-
-        <Grid container direction="row">
+        <Grid container className="headerbox">
             <Grid item xs={12}>
                 <CustomBreadCrumbs routes={[{ title: "Dashboards", path: "/dashboards" },
                 { title: id === "0" ? "New" : initialValues && initialValues.name }]} />

@@ -555,7 +555,7 @@ const Opportunities = () => {
   return (
     <>
       <Layout>
-        <Grid container>
+       <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.opportunity]} />
           </Grid>

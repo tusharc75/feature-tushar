@@ -162,10 +162,8 @@ export default function Attachment(props) {
 
 
     return <Layout>
-        <Grid container>
-            <Grid item md={12} sm={12} xs={12}>
-                <CustomBreadCrumbs routes={[{ title: "Attachment" }]} />
-            </Grid>
+        <Grid container className="headerbox">
+            <CustomBreadCrumbs routes={[{ title: "Attachment" }]} />
         </Grid>
         <CustomContainer>
             <div className="header-panel">
