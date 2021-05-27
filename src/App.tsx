@@ -312,7 +312,7 @@ function App() {
           <PrivateRoute exact path="/attachment">
             <Attachments />
           </PrivateRoute>
-          <PrivateRoute exact path="/:type">
+          <PrivateRoute  path="/:type">
             <Activity />
           </PrivateRoute>
           <PrivateRoute exact path="/calendar">
