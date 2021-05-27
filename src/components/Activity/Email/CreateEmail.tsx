@@ -171,8 +171,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                 payload["mailbox"] = azureAccount.username
             }
 
-            console.log('ans', await getAzureAcessToken(instance))
-
             if (emailId) {
                 UpdateEmail(emailId, values)
                     .then(({ data }) => {
