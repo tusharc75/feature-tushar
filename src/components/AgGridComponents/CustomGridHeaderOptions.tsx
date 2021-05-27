@@ -7,7 +7,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
     const [openColumnSelection, setOpenColumnSelection] = useState(false)
     const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-    return <Box className="ag-grid-listing-grid-header-options border px-2 py-1 border-bottom-0">
+    return <Box className="ag-grid-listing-grid-header-options border px-2 py-1">
         <Button aria-describedby="columnSelection"
             size="small"
             className="px-2"
