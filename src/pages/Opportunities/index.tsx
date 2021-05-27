@@ -1,26 +1,19 @@
-import React, { useState, useEffect, useContext, useReducer, useCallback } from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import {
   Grid,
-  IconButton,
-  Tooltip,
-  Checkbox,
   Chip,
   TablePagination
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import DeleteIcon from "@material-ui/icons/Delete";
-import { DataGrid } from "@material-ui/data-grid";
 import { useData } from "../../StateProvider/Provider";
 import Layout from "../../components/Layout";
 import axiosInstance from "../../axios/axiosInstance";
-import { getSearchQuery, displayDate } from "../../services/util";
+import { displayDate } from "../../services/util";
 import OpportunitiesHeader from "./OpportunitiesHeader";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import "./style.scss";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { GiHiveMind } from "react-icons/gi";
 import ManageOpportunityDialog from "./ManageOpportunityDialog/ManageOpportunityDialog";
@@ -31,17 +24,12 @@ import {
   customerAccount,
   supplierAccount
 } from "../../constants/helpers";
-import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { useHistory } from "react-router-dom";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
-import { AiOutlineLoading } from 'react-icons/ai'
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import { isMobile, isTablet } from "react-device-detect";
 import {
   CommonRenderer,
@@ -50,6 +38,8 @@ import {
   CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
+import "./style.scss";
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -198,8 +188,6 @@ const Opportunities = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const [openColumnSelection, setOpenColumnSelection] = useState(false)
-  const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [columns, setColumns] = useState([
     {
       field: "opportunityName", headerName: "Opportunity Name", show: true, disabled: true, cellRenderer: "opportunityNameRenderer",
@@ -595,6 +583,7 @@ const Opportunities = () => {
             </OpportunitiesHeader>
           </div>
 
+          <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
           <div className="ag-theme-material ag-grid-listing-grid">
             <AgGridReact

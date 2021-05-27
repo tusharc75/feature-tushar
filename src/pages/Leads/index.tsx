@@ -1,19 +1,9 @@
-import React, { useState, useEffect, useContext, useReducer, useCallback } from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import {
   Grid,
   Tooltip,
   IconButton,
-  Box,
-  Checkbox,
-  Button,
-  TablePagination,
-  Popover,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormLabel,
-  Switch,
-  Divider
+  TablePagination
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -25,8 +15,6 @@ import { useData } from "../../StateProvider/Provider";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { leadDetailPage } from "../../routes/Lead";
-
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import {
   gridPageSizes,
@@ -36,25 +24,22 @@ import {
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
 import { HiUserGroup } from "react-icons/hi";
 import { lead } from "../../constants/helpers";
-import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import { SiConvertio } from "react-icons/si";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
-import { AiOutlineLoading } from 'react-icons/ai'
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import ViewWeekIcon from '@material-ui/icons/ViewWeek';
 import { isMobile, isTablet } from "react-device-detect";
-import FilterListIcon from '@material-ui/icons/FilterList';
-import "./style.scss";
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
   CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
+import "./style.scss";
 
 const LeadTypes = [
   {
@@ -189,9 +174,7 @@ const Leads = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
-  const [openColumnSelection, setOpenColumnSelection] = useState(false)
-  const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null)
+  // const [showGridFilters, setShowGridFilters] = useState(true)z
   const [columns, setColumns] = useState([
     {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
@@ -635,77 +618,7 @@ const Leads = () => {
           />
         </div>
 
-        <Box className="ag-grid-listing-grid-header-options border px-2 py-1 border-bottom-0">
-          <Button aria-describedby="columnSelection"
-            size="small"
-            className="px-2"
-            startIcon={<ViewWeekIcon />}
-            color="primary"
-            onClick={(event) => {
-              setOpenColumnSelection(true)
-              setOpenColumnSelectionAnchorEl(event.currentTarget);
-            }}>
-            Columns
-          </Button>
-
-          <Popover
-            id="columnSelection"
-            open={openColumnSelection}
-            anchorEl={openColumnSelectionAnchorEl}
-            onClose={() => {
-              setOpenColumnSelectionAnchorEl(null);
-              setOpenColumnSelection(false)
-            }}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
-            }}
-          >
-            <FormControl component="fieldset" className="px-3 py-2">
-              <FormGroup>
-                {
-                  columns.map((column: any, index) => {
-                    return <Tooltip title={column.disabled ? "Main columns are always visible" : ""}>
-                      <FormControlLabel key={index} className="my-1" name={column.field}
-                        control={<Switch size="small" disabled={column.disabled} checked={column.show} onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                          const newColumns = [...columns];
-
-                          const getFieldIndex = columns.findIndex(d => d.field === column.field);
-                          newColumns[getFieldIndex].show = event.target.checked;
-                          setColumns(newColumns);
-
-                          const hiddenColumns = newColumns.filter(d => !d.show).map(m => m.field);
-                          const nonHiddenColumns = newColumns.filter(d => d.show).map(m => m.field);
-                          columnApi.setColumnsVisible(hiddenColumns, false);
-                          columnApi.setColumnsVisible(nonHiddenColumns, true);
-                        }}
-                        />}
-                        label={column.headerName}
-                      />
-                    </Tooltip>
-                  })
-                }
-              </FormGroup>
-            </FormControl>
-          </Popover>
-
-          {/* <Divider orientation="vertical" />
-
-          <Button aria-describedby="columnSelection"
-            size="small"
-            className="px-2"
-            startIcon={<FilterListIcon />}
-            color="primary"
-            onClick={() => {
-              setShowGridFilters(!showGridFilters)
-            }}>
-            {`${showGridFilters ? "Hide" : "Show"} filters`}
-          </Button> */}
-        </Box>
+        <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
         <div className="ag-theme-material ag-grid-listing-grid">
           <AgGridReact
