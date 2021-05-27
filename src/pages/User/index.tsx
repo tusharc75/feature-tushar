@@ -1,7 +1,6 @@
 import React, { useState, FC, useCallback, useEffect, useContext, useReducer } from "react";
 import { Checkbox, Tooltip, IconButton, Grid, Chip, TablePagination } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
-import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
@@ -18,24 +17,19 @@ import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import Header from "./Header";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { userType, gridPageSizes, isObjectEmpty } from './../../constants/helpers'
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
-import { isNullOrUndefined } from "util";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -136,13 +130,8 @@ const User: FC = () => {
     state: { user, permissions },
   }: any = useData();
   const history = useHistory();
-  // const [searchVal, setSearchVal] = useState("");
-  // const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
-  // const [dataRows, setDataRows] = useState<any[]>([]);
-  // const [rowCount, setRowCount] = useState(0);
-  const [loadingUsers, setLoadingUsers] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllUsers, setCheckAllUsers] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
@@ -174,18 +163,18 @@ const User: FC = () => {
   ]);
 
   const NameRenderer = params => (<>
-           <Link
-             title={params.value}
-             className="text-truncate link"
-             to={`${routes.userDetail.path}/${params.row.id}`}
-           >
-             {params.value}
-           </Link>
-           {params.row.isBrandAdmin ? <Tooltip title="Brand Admin">
-             <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
-           </Tooltip> : ""}
-         </>
-       );
+    <Link
+      title={params.value}
+      className="link"
+      to={`${routes.userDetail.path}/${params.data.id}`}
+    >
+      {params.value}
+    </Link>
+    {params?.data?.isBrandAdmin ? <Tooltip title="Brand Admin">
+      <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
+    </Tooltip> : ""}
+  </>
+  );
 
   const StatusRenderer = params => <div style={{ width: 150 }}>
     {params.value ? (
@@ -234,17 +223,57 @@ const User: FC = () => {
   ) : (
     <NoDataCell />
   );
-
-  const ActionsRenderer = params => <>
-    <GridDeleteIcon
+  {/* <GridDeleteIcon
       hasDeletePermission={permissions.user.isDelete}
       ownerId={null}
       userId={user?.user?._id}
       onDelete={() => showConfirmBox(params.row)
       }
       entity="user"
-    />
-  </>
+    /> */}
+
+  const ActionsRenderer = params =>
+    user?.user._id === params.data.id ? (
+      <p title="There is no action for currently logged in user">
+        No Actions
+      </p>
+    ) : (
+      <>
+        {permissions.user.isDelete ? (
+
+          params.data.isBrandAdmin ? (
+            <Tooltip
+              className="cursor-stop"
+              title="Brand Admin Can not be Deleted"
+            >
+              <IconButton aria-label="Delete">
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          ) :
+            (<Tooltip
+              title="Delete"
+            >
+              <IconButton
+                aria-label="Delete"
+                onClick={() => showConfirmBox(params.data)}
+              >
+                <DeleteIcon fontSize="small" color='error' />
+              </IconButton>
+            </Tooltip>)
+        ) : (
+          <Tooltip
+            className="cursor-stop"
+            title="You do not have permission to delete user"
+          >
+            <IconButton aria-label="Delete">
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </>
+    );
+
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
@@ -372,15 +401,9 @@ const User: FC = () => {
             break;
         }
       }
-      // let api = getSearchQuery("/user", searchParams);
-      // setLoadingUsers(true);
       axiosInstance()
         .get(`/user${queryString}`)
         .then(({ data: { data, count } }) => {
-          // getRows(data);
-          // setRowCount(count);
-          // setCheckAllUsers(false);
-          // setLoadingUsers(false);
           let rows = data.map((u) => {
             const { createdBy, updatedBy,
               ...restProperties } = u;
@@ -416,215 +439,9 @@ const User: FC = () => {
     fetchUsers();
   }, [fetchUsers]);
 
-  // const getRows = (data: []) => {
-  //   const rows = data.length
-  //     ? data.map((user: any) => ({
-  //       id: user._id,
-  //       isChecked: false,
-  //       name: `${user.firstName} ${user.lastName}`,
-  //       email: user.email,
-  //       createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
-  //       createdBy: user.createdBy,
-  //       updatedBy: user.updatedBy,
-  //       status: user.blocked ? user.blocked : false,
-  //       isBrandAdmin: user.userType === userType.brandAdmin
-  //     }))
-  //     : [];
 
-  //   setDataRows(rows);
-  // };
 
-  // const columns = [
-  //   {
-  //     field: "isChecked",
-  //     headerName: "Checkbox",
-  //     renderHeader: () => (
-  //       <Checkbox
-  //         color="primary"
-  //         checked={checkAllUsers}
-  //         onChange={(ev) => {
-  //           setCheckAllUsers(ev.target.checked);
-  //           const gridData = dataRows;
-  //           gridData.map((d) => {
-  //             d.isChecked = ev.target.checked;
-  //             return d;
-  //           });
-  //           setDataRows([...gridData]);
-  //         }}
-  //       />
-  //     ),
-  //     renderCell: (params) => (
-  //       <Checkbox
-  //         color="primary"
-  //         checked={params.value}
-  //         onChange={(ev) => {
-  //           updateCheckedStatus(params, ev);
-  //         }}
-  //       />
-  //     ),
-  //     disableColumnMenu: true,
-  //     sortable: false,
-  //     filterable: false,
-  //     width: 75,
-  //   },
-  //   {
-  //     field: "name",
-  //     headerName: "Name",
-  //     width: 400,
-  //     renderCell: (params: any) => (
-  //       <>
-  //         <Link
-  //           title={params.value}
-  //           className="text-truncate link"
-  //           to={`${routes.userDetail.path}/${params.row.id}`}
-  //         >
-  //           {params.value}
-  //         </Link>
-  //         {params.row.isBrandAdmin ? <Tooltip title="Brand Admin">
-  //           <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
-  //         </Tooltip> : ""}
-  //       </>
-  //     ),
-  //   },
-  //   {
-  //     field: "status",
-  //     headerName: "Status",
-  //     width: 150,
-  //     sortable: false,
-  //     filterable: false,
-  //     align: "center",
-  //     headerAlign: "center",
-  //     disableColumnMenu: true,
-  //     renderCell: (params: any) => (
-  //       <div style={{ width: 150 }}>
-  //         {params.value ? (
-  //           <Tooltip title="Inactive">
-  //             <IconButton>
-  //               <FaUserAltSlash className="text-error" />
-  //             </IconButton>
-  //           </Tooltip>
-  //         ) : (
-  //           <Tooltip title="Active">
-  //             <IconButton>
-  //               <FaUserCheck className="text-success" />
-  //             </IconButton>
-  //           </Tooltip>
-  //         )}{" "}
-  //       </div>
-  //     ),
-  //   },
 
-  //   {
-  //     field: "email",
-  //     headerName: "Email",
-  //     width: 300,
-  //     renderCell: (params: any) => (
-  //       <p title={params.value} className="text-truncate">
-  //         <CustomRenderCell isCopyToClipboard={true} value={params.value} />
-  //       </p>
-  //     ),
-  //   },
-  //   // {
-  //   //   field: "createdAt",
-  //   //   headerName: "Created At",
-  //   //   width: 200,
-  //   //   renderCell: (params: any) => (
-  //   //     <p title={`Created At • ${params.value}`} className="text-truncate">
-  //   //       {params.value}
-  //   //     </p>
-  //   //   ),
-  //   // },
-  //   {
-  //     field: "createdBy",
-  //     headerName: "Created By",
-  //     width: 250,
-  //     disableColumnMenu: true,
-  //     renderCell: (params: any) =>
-  //       params?.value && params?.value?.user ? (
-  //         <h5 className="createBy">
-  //           {params.value.user.firstName}
-  //           <span
-  //             className="createdAtTime badge-date"
-  //             title={`${params.value.user.firstName} • ${moment(
-  //               params.value.date.slice(0, 10)
-  //             ).format("MMM Do, YYYY")}`}
-  //           >
-  //             {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-  //           </span>
-  //         </h5>
-  //       ) : (
-  //         <NoDataCell />
-  //       ),
-  //   },
-  //   {
-  //     field: "updatedBy",
-  //     headerName: "Updated By",
-  //     width: 250,
-  //     renderCell: (params) =>
-  //       params?.value?.user ? (
-  //         <h5 className="updateBy">
-  //           {params?.value?.user?.firstName}
-  //           <span
-  //             title={params?.value?.date}
-  //             className="updatedAtTime badge-date"
-  //           >
-  //             {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-  //           </span>
-  //         </h5>
-  //       ) : (
-  //         <NoDataCell />
-  //       ),
-  //   },
-  //   {
-  //     field: "actions",
-  //     headerName: "Actions ",
-  //     disableColumnMenu: true,
-  //     sortable: false,
-  //     filterable: false,
-  //     renderCell: (params: any) =>
-  //       user?.user._id === params.row.id ? (
-  //         <p title="There is no action for currently logged in user">
-  //           No Actions
-  //         </p>
-  //       ) : (
-  //         <>
-  //           {permissions.user.isDelete ? (
-
-  //             params.row.isBrandAdmin ? (
-  //               <Tooltip
-  //                 className="cursor-stop"
-  //                 title="Brand Admin Can not be Deleted"
-  //               >
-  //                 <IconButton aria-label="Delete">
-  //                   <DeleteIcon fontSize="small" />
-  //                 </IconButton>
-  //               </Tooltip>
-  //             ) :
-  //               (<Tooltip
-  //                 title="Delete"
-  //               >
-  //                 <IconButton
-  //                   aria-label="Delete"
-  //                   onClick={() => showConfirmBox(params.row)}
-  //                 >
-  //                   <DeleteIcon fontSize="small" color='error' />
-  //                 </IconButton>
-  //               </Tooltip>)
-  //           ) : (
-  //             <Tooltip
-  //               className="cursor-stop"
-  //               title="You do not have permission to delete user"
-  //             >
-  //               <IconButton aria-label="Delete">
-  //                 <DeleteIcon fontSize="small" />
-  //               </IconButton>
-  //             </Tooltip>
-  //           )}
-  //         </>
-  //       ),
-  //     width: 200,
-  //   },
-  // ] as Array<any>;
 
   // const updateCheckedStatus = (params, ev) => {
   //   const gridData = [...dataRows];
@@ -650,7 +467,7 @@ const User: FC = () => {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.some((d) => d.isChecked && (d.id === user?.user._id || d.isBrandAdmin))) {
+      if (selectedRecords.some((d) => (d.id === user?.user._id || d.isBrandAdmin))) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -664,9 +481,7 @@ const User: FC = () => {
     if (deleteRec?.id) {
       recs.push(deleteRec?.id);
     } else {
-      dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj.id);
-      });
+      recs = selectedRecords.map((o) => o.id)
     }
 
     if (recs && recs.length > 0) {
@@ -695,17 +510,6 @@ const User: FC = () => {
     dispatch({ type: "search", search: e.target.value });
   };
 
-  // const handlePage = (params) => {
-  //   if (query.page !== params.page) {
-  //     setQuery((prevState) => ({ ...prevState, page: params.page }));
-  //   }
-  // };
-
-  // const handlePageSize = (params) => {
-  //   if (params.pageSize !== query.limit) {
-  //     setQuery({ page: 0, limit: params.pageSize });
-  //   }
-  // };
 
   // const handleSortModelChange = (params) => {
   //   if (params?.sortModel && params.sortModel.length > 0) {
@@ -806,7 +610,7 @@ const User: FC = () => {
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               openRolesDialog={handleOpenDialog}
-              rolesActionDiabled={Boolean(!selectedUsers.length)}
+              rolesActionDisabled={selectedRecords.length === 0}
               canDelete={selectedRecords.length === 0}
             />
             {entityRoleRedirectDetails.id && (
@@ -908,31 +712,7 @@ const User: FC = () => {
             }}
             rowsPerPageOptions={pageSizes}
           />
-          {/* <div className="listing-grid">
-            <DataGrid
-              components={{
-                Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
-              }}
-              loading={loadingUsers}
-              rows={loadingUsers ? [] : dataRows}
-              columns={columns}
-              disableSelectionOnClick
-              disableMultipleSelection
-              paginationMode="server"
-              pagination
-              rowCount={rowCount}
-              onPageChange={handlePage}
-              onPageSizeChange={handlePageSize}
-              pageSize={query.limit}
-              page={query.page}
-              onSortModelChange={handleSortModelChange}
-              rowsPerPageOptions={[25, 50, 75]}
-              density="compact"
-              onFilterModelChange={onFilterChange}
-              filterMode="server"
-            />
-          </div> */}
+
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
