@@ -308,10 +308,15 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       button
                       selected={pathnames.includes(_.lowerCase(item))}
                       className={classes.nested}
+                      // onClick={() => {
+                      //   if (toggleDrawer) {
+                      //     handleToggleDrawer();
+                      //   }
+                      // }}
+
                       onClick={() => {
-                        if (toggleDrawer) {
-                          handleToggleDrawer();
-                        }
+                        let isCurrentPath = location.pathname === (["Calendar", "Reminder"].indexOf(item) >= 0 ? `/${_.lowerCase(item)}` : `/activity/${_.lowerCase(item)}`)
+                        if (!isCurrentPath && toggleDrawer) handleToggleDrawer();
                       }}
                     >
                       <ListItemText primary={item} />
