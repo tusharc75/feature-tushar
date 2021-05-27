@@ -60,7 +60,6 @@ const EmailSchema = Yup.object().shape({
 
 });
 
-
 const useStyles = makeStyles((theme) => ({
     textEditor: {
         fontFamily: "inherit",
@@ -322,6 +321,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                             <CustomDialogContent>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
                                     <MuiPickersUtilsProvider utils={MomentUtils}>
+
                                         <Box padding={1} >
                                             {emailId ?
                                                 <Fragment>
@@ -528,18 +528,20 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                 /> : null
         }
 
-        {!emailId && <UnauthenticatedTemplate>
-            <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
-                backdropFilter: "blur(2px)",
-                color: "#F9FAFB",
-            }} zIndex={10} top={0} left={0} height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                <Box width="100%" textAlign="center">
-                    <AzureLogin></AzureLogin>
-                    <Box width="50%" marginX="auto" marginY={2} bgcolor="#F9FAFB" height="1px"></Box>
-                    <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
+        {/* {
+            (!azureAccount?.username && !emailId) ? <UnauthenticatedTemplate>
+                <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
+                    backdropFilter: "blur(2px)",
+                    color: "#F9FAFB",
+                }} zIndex={10} top={0} left={0} height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                    <Box width="100%" textAlign="center">
+                        <AzureLogin></AzureLogin>
+                        <Box width="50%" marginX="auto" marginY={2} bgcolor="#F9FAFB" height="1px"></Box>
+                        <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
+                    </Box>
                 </Box>
-            </Box>
-        </UnauthenticatedTemplate>}
+            </UnauthenticatedTemplate> : null
+        } */}
     </>
 
 }
