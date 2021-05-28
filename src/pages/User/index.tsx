@@ -498,7 +498,7 @@ const User: FC = () => {
         <AssignRolesDialog
           rolesDialogOpen={rolesDialogOpen}
           handleCloseDialog={handleCloseDialog}
-          userIds={selectedUsers}
+          userIds={selectedRecords.map((d) => d._id)}
           assignedRoles={null}
           onSuccess={() => {
             handleCloseDialog();
