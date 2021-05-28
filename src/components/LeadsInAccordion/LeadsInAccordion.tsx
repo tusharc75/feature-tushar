@@ -143,7 +143,7 @@ export default function LeadInAccordion({
                                                 <Grid container className="detailCardHeader">
                                                     <Grid item xs={12} sm={12} md={12}>
                                                         <Link className="link">
-                                                            <Typography className="detailName">{`${lead.firstName} ${lead.middleName} ${lead.lastName}`}<span className="role">{lead.title?`(${lead.title})`:""}</span> </Typography>
+                                                            <Typography className="detailName">{`${lead.firstName} ${lead.middleName} ${lead.lastName}`}<span className="role">{lead.title || ""}</span> </Typography>
                                                         </Link>
                                                     </Grid>
                                                 </Grid>
