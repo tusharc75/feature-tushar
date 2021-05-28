@@ -322,6 +322,7 @@ const Opportunities = () => {
       field={column.field}
       headerName={column.headerName}
       filter={column.filter ?? "agTextColumnFilter"}
+      sortable={column.sortable ?? true}
       cellRenderer={column.cellRenderer ?? null}
     // floatingFilterComponent={column.floatingFilterComponent ?? null}
     // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
