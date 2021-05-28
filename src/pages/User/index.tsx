@@ -8,6 +8,7 @@ import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGrid
 import { isMobile, isTablet } from "react-device-detect";
 import {
   CommonRenderer,
+  CommonRendererWithCopy,
   CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
@@ -278,7 +279,7 @@ const User: FC = () => {
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     statusRenderer: StatusRenderer,
-    emailRenderer: CommonRenderer,
+    emailRenderer: CommonRendererWithCopy,
     createdByRenderer: CreatedByRendererCustom,
     updatedByRenderer: UpdatedByRendererCustom,
     actionsRenderer: ActionsRenderer,
