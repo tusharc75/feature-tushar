@@ -248,7 +248,7 @@ export default function OpportunityInAccordian({
               history.push(`/opportunity`, {
               accountId: accountId,
               accountName: accountName,
-              resource: `${resource}Name`,
+              resource: `${resource}`,
             })
           }
            p={1} display="flex" justifyContent="center" alignItems="center">
