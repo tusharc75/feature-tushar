@@ -68,11 +68,15 @@ const Reminder = () => {
         <CalendarToday
           style={{
             color:
-              new Date(data).getDate() < new Date().getDate()
+              new Date(data).getDate() < new Date().getDate() &&
+              new Date(data).getMonth() < new Date().getMonth() &&
+              new Date(data).getFullYear() < new Date().getFullYear()
                 ? "#dc3545"
-                : new Date(data).getDate() === new Date().getDate()
-                  ? "#28a745"
-                  : "#838485",
+                : new Date(data).getDate() === new Date().getDate() &&
+                  new Date(data).getMonth() === new Date().getMonth() &&
+                  new Date(data).getFullYear() === new Date().getFullYear()
+                ? "#28a745"
+                : "#838485",
           }}
           fontSize="small"
         />
@@ -85,11 +89,15 @@ const Reminder = () => {
       style={{
         background: "#dfdfdf",
         color:
-          new Date(data).getDate() < new Date().getDate()
+          new Date(data).getDate() < new Date().getDate() &&
+          new Date(data).getMonth() < new Date().getMonth() &&
+          new Date(data).getFullYear() < new Date().getFullYear()
             ? "#dc3545"
-            : new Date(data).getDate() === new Date().getDate()
-              ? "#28a745"
-              : "#838485",
+            : new Date(data).getDate() === new Date().getDate() &&
+              new Date(data).getMonth() === new Date().getMonth() &&
+              new Date(data).getFullYear() === new Date().getFullYear()
+            ? "#28a745"
+            : "#838485",
       }}
     />
   );
@@ -140,8 +148,8 @@ const Reminder = () => {
                         {loadingEvents
                           ? "Loading..."
                           : !events.length
-                            ? "No Events"
-                            : null}
+                          ? "No Events"
+                          : null}
                       </Typography>
                     </Box>
                   </Box>
@@ -185,8 +193,8 @@ const Reminder = () => {
                         {loadingTasks
                           ? "Loading..."
                           : !tasks.length
-                            ? "No Tasks"
-                            : null}
+                          ? "No Tasks"
+                          : null}
                       </Typography>
                     </Box>
                   </Box>
@@ -232,8 +240,8 @@ const Reminder = () => {
                         {loadingCases
                           ? "Loading..."
                           : !events.length
-                            ? "No Cases"
-                            : null}
+                          ? "No Cases"
+                          : null}
                       </Typography>
                     </Box>
                   </Box>

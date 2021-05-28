@@ -1,12 +1,9 @@
 import { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
-  Tooltip,
-  IconButton,
   Grid,
   Link as MuiLink,
 } from "@material-ui/core";
-import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
@@ -48,7 +45,6 @@ const Entity: FC = () => {
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [users, setUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(false);
   const [loadingEntities, setLoadingEntities] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllEntities, setCheckAllEntities] = useState(false);
@@ -93,15 +89,12 @@ const Entity: FC = () => {
   }, [fetchEntities]);
 
   const fetchEntityUser = () => {
-    setUsersLoading(true);
     axiosInstance()
       .get(`/user?filterById=[{"field": "entities.entity", "term": "${selectedEntities[0]}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
-        setUsersLoading(false);
       })
       .catch((err) => {
-        setUsersLoading(false);
         toastConfig.setToastConfig(err);
       });
   };

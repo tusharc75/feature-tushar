@@ -7,13 +7,15 @@ import { Provider } from "./StateProvider/Provider";
 import { CustomToastProvider } from "./StateProvider/CustomToastContext/CustomToastContext";
 import { MsalProvider } from "@azure/msal-react";
 import AzureInstance from "./AzureInstance";
+import * as Sentry from "@sentry/react";
 import 'ag-grid-community/dist/styles/ag-grid.min.css';
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./styles/index.scss";
 import "./styles/common-styles.scss";
 import "./styles/material-component.scss";
 import "./styles/responsive-styles.scss"
+import "./styles/rbc-calender.scss";
 import "./styles/vis-network/vis-network.min.css"
-import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 
 Sentry.init({

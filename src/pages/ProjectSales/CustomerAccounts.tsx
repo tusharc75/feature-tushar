@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import clsx from "clsx";
 import {
   withStyles,
@@ -25,12 +25,12 @@ import CustomerContacts from "./CustomerContacts";
 import BoxWithBorder from "../../components/BoxWithBorder";
 import OpportunityAccordianProjectSales from "./OpportunityAccordingProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import ManageContactDialog from "../Contact/ManageContact";
 import { customerAccount, customerContact } from "../../constants/helpers";
 import ManageAccountDialog from "../Account/ManageAccount";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 
 const Accordion = withStyles({
   root: {
@@ -119,7 +119,6 @@ const CustomerAccounts = (props) => {
   const [showAccountCreateDialog, setShowAccountCreateDialog] = useState(false);
   const [dialogType, setDialogType] = useState(null);
   const [accId, setAccId] = useState(null);
-
   useEffect(() => {
     if (!users.length) return;
 
@@ -217,6 +216,7 @@ const CustomerAccounts = (props) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setDialogType(type);
+    renderMenu(accId)
   };
 
   const renderMenu = (id: string = "") => {
@@ -247,7 +247,7 @@ const CustomerAccounts = (props) => {
               handleOpenDialog(dialogType);
             }
             if (dialogType === "customer-contact" && accId) {
-              handleOpenDialog(dialogType, id);
+              handleOpenDialog(dialogType, accId);
             }
             handleClose();
           }}
@@ -406,8 +406,11 @@ const CustomerAccounts = (props) => {
                             />
                           )}
                           <QuotesInAccordion />
-                          <ProjectInAccordion />
-                          <ProductBuilderInAccordion />
+                          {/* <ProjectInAccordion
+                            recordsPerLine={3}
+                            projectSales={null} /> */}
+
+                          {/* <ProductBuilderInAccordion /> */}
                         </Grid>
                         {/**
                          * RIGHT SIDE
@@ -425,10 +428,10 @@ const CustomerAccounts = (props) => {
                                 justifyContent="space-between"
                               >
                                 <Typography variant="subtitle2">
-                                  Customer Contacts
+                                  Customer Contacts  ({customerContacts.filter((ca) => ca.accountName === c._id).length})
                                 </Typography>
                                 {(permissions.isUpdate && isTeamMember) ||
-                                isManager ? (
+                                  isManager ? (
                                   <IconButton
                                     aria-haspopup="true"
                                     color="primary"
@@ -465,8 +468,8 @@ const CustomerAccounts = (props) => {
                                     </BoxWithBorder>
                                   ))
                                 ) : customerContacts.filter(
-                                    (ca) => ca.accountName === c._id
-                                  ).length ? (
+                                  (ca) => ca.accountName === c._id
+                                ).length ? (
                                   <>
                                     <CustomerContacts
                                       contacts={customerContacts.filter(
