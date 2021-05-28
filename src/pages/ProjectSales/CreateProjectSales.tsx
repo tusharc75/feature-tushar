@@ -116,10 +116,10 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" color="primary" disabled>
+            <Button variant="outlined" size="small" color="primary" disabled>
               Cancel
             </Button>
-            <Button variant="contained" color="primary" disabled>
+            <Button variant="contained" size="small" color="primary" disabled>
               Submit
             </Button>
           </CustomDialogFooter>
@@ -149,6 +149,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
                 <Button
                   variant="outlined"
                   color="primary"
+                  size="small" 
                   disabled={isSubmitting || loading}
                   onClick={close}
                 >
@@ -157,6 +158,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
                 <Button
                   variant="contained"
                   color="primary"
+                  size="small" 
                   onClick={submitForm}
                   disabled={isSubmitting || loading}
                 >

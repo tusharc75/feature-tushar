@@ -163,14 +163,14 @@ export const DropField = ({ fieldHoverId, setFieldHoverId, sectionId, section, s
     // }
     //onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}
 
-    return (<Grid item xs={6}>
+    return (<Grid item xs={12} md={6} sm={6}>
         {!data._id || (fieldHoverId && fieldHoverId.toString() === data._id.toString()) ?
             <div ref={ref} style={{ ...dropstyle }}>
             </div> :
             <div ref={ref}>
                 <Box border={1} p={0.5} borderColor="grey.300" style={{ ...style, opacity }}>
                     <Grid container spacing={1}>
-                        <Grid item xs={5} >
+                        <Grid item xs={5}>
                             {data.editAble ?
                                 <TextField
                                     id="standard-basic"

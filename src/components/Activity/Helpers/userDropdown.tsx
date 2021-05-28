@@ -241,10 +241,10 @@ export const UserDropdown = ({
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="primary">
+            <Button size="small" onClick={handleClose} color="primary">
               Cancel
             </Button>
-            <Button type="submit" color="primary">
+            <Button size="small"  type="submit" color="primary">
               Add
             </Button>
           </DialogActions>

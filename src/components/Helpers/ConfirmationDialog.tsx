@@ -45,8 +45,8 @@ export default function ConfirmationDialogRaw(props) {
                 }
             </DialogContent>
             <DialogActions>
-                <Button autoFocus onClick={onClose} color="primary">Cancel</Button>
-                <Button onClick={onOk}
+                <Button size="small"  autoFocus onClick={onClose} color="primary">Cancel</Button>
+                <Button size="small"  onClick={onOk}
                     disabled={okBtnLoading} color="primary">
                     {okBtnLoading ? <CircularProgress
                         style={{ marginRight: "8px" }}

@@ -339,6 +339,7 @@ const LeadDetailsPage = () => {
                           </Button> :
                             <Button variant="contained"
                               color="primary"
+                              size="small" 
                               disabled={!steps[activeStep].canCompleteManually}
                               onClick={() => {
                                 setIsProcessing(true)

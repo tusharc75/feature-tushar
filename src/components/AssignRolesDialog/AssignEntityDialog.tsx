@@ -274,6 +274,7 @@ const AssignEntityDialog = ({
                   <div className={classes.actionsContainer}>
                     <div>
                       <Button
+                        size="small" 
                         disabled={activeStep === 0}
                         onClick={handleBack}
                         className={classes.button}
@@ -284,6 +285,7 @@ const AssignEntityDialog = ({
                         <Button
                           variant="contained"
                           color="primary"
+                          size="small" 
                           onClick={handleNext}
                           disabled={selectedData?.length === 0}
                           className={classes.button}
@@ -331,6 +333,7 @@ const AssignEntityDialog = ({
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
+          size="small" 
         >
           Cancel
         </Button>
@@ -338,6 +341,7 @@ const AssignEntityDialog = ({
           disabled={!selectedData?.length || !selectedRole?.length}
           onClick={handleAssignEntity}
           color="primary"
+          size="small" 
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

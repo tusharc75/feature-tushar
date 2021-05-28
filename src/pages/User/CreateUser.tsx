@@ -112,10 +112,10 @@ const CreateUser = ({ open, close, fetchData }) => {
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" color="primary" disabled={loading}>
+            <Button variant="outlined" size="small" color="primary" disabled={loading}>
               Cancel
             </Button>
-            <Button variant="contained" color="primary" disabled={loading}>
+            <Button variant="contained" size="small" color="primary" disabled={loading}>
               Submit
             </Button>
           </CustomDialogFooter>
@@ -145,6 +145,7 @@ const CreateUser = ({ open, close, fetchData }) => {
                 <Button
                   variant="outlined"
                   color="primary"
+                  size="small" 
                   disabled={isSubmitting || loading}
                   onClick={close}
                 >
@@ -153,6 +154,7 @@ const CreateUser = ({ open, close, fetchData }) => {
                 <Button
                   variant="contained"
                   color="primary"
+                  size="small" 
                   onClick={submitForm}
                   disabled={isSubmitting || loading}
                 >
