@@ -267,7 +267,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                 values={values}
                 setFieldValue={setFieldValue}
               />}
-            {(values["type"] === "currencyAmount" || values["type"] === "percent" || values["type"] === "converter") &&
+            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
               <FormControlLabel
                 control={
                   <Checkbox
@@ -311,7 +311,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               values={values}
               setFieldValue={setFieldValue}
             />}
-            {(values["type"] === "currencyAmount" || values["type"] === "percent" || values["type"] === "converter") &&
+            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
               <><br></br>
                 <FormControlLabel
                   control={
