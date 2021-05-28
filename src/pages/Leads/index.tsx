@@ -2,8 +2,7 @@ import React, { useState, useEffect, useContext, useReducer } from "react";
 import {
   Grid,
   Tooltip,
-  IconButton,
-  TablePagination
+  IconButton
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -29,18 +28,15 @@ import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import { SiConvertio } from "react-icons/si";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import { isMobile, isTablet } from "react-device-detect";
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
   CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
-import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight } from './../../constants/helpers';
 
 const LeadTypes = [
   {
@@ -171,7 +167,6 @@ const Leads = () => {
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -264,28 +259,6 @@ const Leads = () => {
     // customLoadingCellRenderer: CustomLoadingCellRenderer,
     // customNoRowsOverlay: CustomNoRowsOverlay
   };
-
-  //  If you want to do something once grid binding done
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-    setColumnApi(params.columnApi)
-  }
-
-  const generateColumns = columns.map((column: any, index) => {
-    return <AgGridColumn
-      key={index}
-      field={column.field}
-      headerName={column.headerName}
-      filter={column.filter ?? "agTextColumnFilter"}
-      sortable={column.sortable ?? true}
-      cellRenderer={column.cellRenderer ?? null}
-    // floatingFilterComponent={column.floatingFilterComponent ?? null}
-    // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-    //   suppressFilterButton: true,
-    // }}
-    >
-    </AgGridColumn>
-  })
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -616,95 +589,8 @@ const Leads = () => {
           />
         </div>
 
-        <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
-
-        <div className="ag-theme-material ag-grid-listing-grid">
-          <AgGridReact
-            rowData={dataRows}
-            onGridReady={onGridReady}
-            suppressDragLeaveHidesColumns={true}
-            suppressCellSelection={true}
-            headerHeight={AgGridHeaderHeight}
-            floatingFiltersHeight={AgGridFloatingFiltersHeight}
-            rowHeight={AgGridRowHeight}
-            frameworkComponents={frameworkComponents}
-            defaultColDef={{
-              resizable: true,
-              floatingFilter: true,
-              sortable: true,
-              width: 250,
-              suppressMenu: true,
-              // headerCheckboxSelection: true,
-              // checkboxSelection: true,
-              floatingFilterComponentParams: { suppressFilterButton: true }
-            }}
-            onSortChanged={() => {
-              dispatch({ type: "sort", sorting: columnApi.getColumnState().filter(d => ["asc", "desc"].some(s => s === d.sort)) });
-            }}
-            onFilterChanged={(e) => {
-              dispatch({ type: "filter", filters: e.api.getFilterModel() });
-            }}
-            enableCellTextSelection={true}
-            ensureDomOrder={false}
-            loadingOverlayComponent={'customLoadingOverlay'}
-            loadingOverlayComponentParams={{
-              loadingMessage: 'Loading...',
-            }}
-            animateRows={false}
-            suppressAnimationFrame={true}
-            suppressMaintainUnsortedOrder={true}
-
-            rowBuffer={limit}
-            // suppressMaxRenderedRowRestriction={true}
-
-            // loadingCellRenderer={'customLoadingCellRenderer'}
-            // loadingCellRendererParams={{
-            //   loadingMessage: 'One moment please...',
-            // }}
-
-            suppressRowClickSelection={true}
-            rowSelection={'multiple'}
-            onSelectionChanged={(event: any) => {
-              dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
-            }}
-            immutableData={true}
-            getRowNodeId={(data) => {
-              return data._id;
-            }}
-          >
-            <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
-              headerCheckboxSelection={true}
-              headerCheckboxSelectionFilteredOnly={true}
-              checkboxSelection={true}
-              resizable={false} sortable={false}
-            >
-            </AgGridColumn>
-
-            {generateColumns}
-
-            <AgGridColumn width={150} headerName="Actions"
-              pinned={(isMobile || isTablet) ? false : "right"}
-              lockPinned={(isMobile || isTablet) ? false : true}
-              resizable={false} sortable={false}
-              filter={false} cellRenderer="actionsRenderer">
-            </AgGridColumn>
-
-          </AgGridReact>
-        </div>
-
-        <TablePagination
-          component="div"
-          count={rowCount}
-          page={page}
-          onChangePage={(event, newPage) => {
-            dispatch({ type: "pageChange", page: newPage })
-          }}
-          rowsPerPage={limit}
-          onChangeRowsPerPage={(event) => {
-            dispatch({ type: "pageSizeChange", limit: event.target.value })
-          }}
-          rowsPerPageOptions={pageSizes}
-        />
+        <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
 
         {isOpen && (
           <ManageLeadDialog

@@ -22,6 +22,8 @@ import { AiOutlinePaperClip } from 'react-icons/ai'
 import { AddOutlined } from "@material-ui/icons";
 import { Button, Tooltip, IconButton } from '@material-ui/core'
 import { useData } from "../../../StateProvider/Provider";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 
 export default function Attachment(props) {
@@ -211,6 +213,8 @@ export default function Attachment(props) {
             {open ?
                 < Dialog
                     open={open}
+                    fullScreen={isMobile || isTablet}
+                    TransitionComponent={CustomDialogTransition}
                     aria-labelledby="customized-dialog-title"
                     maxWidth={"md"}
                     onClose={handleClose}

@@ -13,6 +13,8 @@ import ManageAttachment from "./ManageAttachment";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState(false);
@@ -165,6 +167,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               maxWidth="md"
               onClose={handleClose}
               fullWidth
+              fullScreen={isMobile || isTablet}
+              TransitionComponent={CustomDialogTransition}
             >
               <ManageAttachment
                 attachmentId={attachmentId}

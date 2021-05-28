@@ -5,6 +5,7 @@ function CustomButton(props) {
     const { loading, children, disabled, ...rest } = props
     return <Button  {...rest}
         disabled={disabled}
+        size="small"
     >
         {loading ? <CircularProgress
             style={{ marginRight: "8px" }}

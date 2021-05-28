@@ -19,7 +19,7 @@ export default function ChartsRender({chartType,kpi,title,edit,handleDrag,handle
                 }}
             >
             {edit&&
-            <Button variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
+            <Button size="small" variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
               <DeleteIcon  fontSize="small"/>
             </Button>
             }
@@ -42,7 +42,7 @@ export default function ChartsRender({chartType,kpi,title,edit,handleDrag,handle
                 }}
             >
             {edit&&
-            <Button variant="contained" color="primary"onClick={()=>{handleDelete(id)}}>
+            <Button size="small"  variant="contained" color="primary"onClick={()=>{handleDelete(id)}}>
               <DeleteIcon  fontSize="small"/>
             </Button>
             }
@@ -65,7 +65,7 @@ export default function ChartsRender({chartType,kpi,title,edit,handleDrag,handle
                 }}
             >
             {edit&&
-            <Button variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
+            <Button size="small"  variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
               <DeleteIcon  fontSize="small"/>
             </Button>
             }
@@ -88,7 +88,7 @@ export default function ChartsRender({chartType,kpi,title,edit,handleDrag,handle
                 }}
             >
               {edit&&
-            <Button variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
+            <Button size="small"  variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
               <DeleteIcon  fontSize="small"/>
             </Button>
             }
@@ -112,7 +112,7 @@ export default function ChartsRender({chartType,kpi,title,edit,handleDrag,handle
                 }}
             >
               {edit&&
-            <Button variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
+            <Button size="small"  variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
               <DeleteIcon  fontSize="small"/>
             </Button>
             }
@@ -136,7 +136,7 @@ export default function ChartsRender({chartType,kpi,title,edit,handleDrag,handle
             }}
         >
           {edit&&
-        <Button variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
+        <Button size="small"  variant="contained" color="primary" onClick={()=>{handleDelete(id)}}>
           <DeleteIcon  fontSize="small"/>
         </Button>
         }

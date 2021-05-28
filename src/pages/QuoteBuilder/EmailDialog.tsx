@@ -16,6 +16,8 @@ import AxiosInstance from '../../axios/axiosInstance'
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import routes from "../../components/Helpers/Routes";
 import { stubTrue } from "lodash";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
 
 const ProductBuilderSchema = Yup.object().shape({
@@ -109,6 +111,8 @@ const EmailDialog = (props) => {
 
     return (<Dialog
         maxWidth="sm"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
@@ -183,7 +187,7 @@ const EmailDialog = (props) => {
                         </Form>
                     </CustomDialogContent>
                     <CustomDialogFooter>
-                        <Button color="primary" onClick={handleClose}>Cancel</Button>
+                        <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                         <CustomButton
                             loading={loading}
                             variant="contained"
