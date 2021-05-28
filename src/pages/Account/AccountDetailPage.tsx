@@ -188,7 +188,6 @@ export default function AccountDetailPage(props) {
             ? data.Opportunity[
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
-<<<<<<< HEAD
             : []
         );
         setProjectSales(
@@ -199,8 +198,6 @@ export default function AccountDetailPage(props) {
             ? data[sidebarResource.projectSales][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
-=======
->>>>>>> master
             : []
         );
         initializeGraphData();
