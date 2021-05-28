@@ -399,7 +399,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
-  // height: calc(100vh - 110px);
+  height: calc(100vh - 110px);
   position: relative;
   overflow: auto;
   z-index: 11;
