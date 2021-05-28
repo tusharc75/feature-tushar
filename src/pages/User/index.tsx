@@ -1,7 +1,6 @@
 import React, { useState, FC, useCallback, useEffect, useContext, useReducer } from "react";
 import { Checkbox, Tooltip, IconButton, Grid, Chip, TablePagination } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
-import moment from "moment";
 import { Link } from "react-router-dom";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
@@ -9,7 +8,9 @@ import { isMobile, isTablet } from "react-device-detect";
 import {
   CommonRenderer,
   CommonRendererWithCopy,
-  CustomLoadingOverlay
+  CreatedByRenderer,
+  CustomLoadingOverlay,
+  UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
@@ -24,7 +25,6 @@ import { useData } from "../../StateProvider/Provider";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import { userType, gridPageSizes, isObjectEmpty } from './../../constants/helpers'
@@ -134,7 +134,6 @@ const User: FC = () => {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllUsers, setCheckAllUsers] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -193,45 +192,7 @@ const User: FC = () => {
     )}{" "}
   </div>;
 
-  const CreatedByRendererCustom = params => params?.value && params?.value?.user ? (
-    <h5 className="createBy">
-      {params.value.user.firstName}
-      <span
-        className="createdAtTime badge-date"
-        title={`${params.value.user.firstName} • ${moment(
-          params.value.date.slice(0, 10)
-        ).format("MMM Do, YYYY")}`}
-      >
-        {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-      </span>
-    </h5>
-  ) : (
-    <NoDataCell />
-  );
-
-  const UpdatedByRendererCustom = params => params?.value && params?.value?.user ? (
-    <h5 className="updateBy">
-      {params.value.user.firstName}
-      <span
-        className="updatedAtTime badge-date"
-        title={`${params.value.user.firstName} • ${moment(
-          params.value.date.slice(0, 10)
-        ).format("MMM Do, YYYY")}`}
-      >
-        {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-      </span>
-    </h5>
-  ) : (
-    <NoDataCell />
-  );
-  {/* <GridDeleteIcon
-      hasDeletePermission={permissions.user.isDelete}
-      ownerId={null}
-      userId={user?.user?._id}
-      onDelete={() => showConfirmBox(params.row)
-      }
-      entity="user"
-    /> */}
+  
 
   const ActionsRenderer = params =>
     user?.user._id === params.data.id ? (
@@ -280,8 +241,8 @@ const User: FC = () => {
     nameRenderer: NameRenderer,
     statusRenderer: StatusRenderer,
     emailRenderer: CommonRendererWithCopy,
-    createdByRenderer: CreatedByRendererCustom,
-    updatedByRenderer: UpdatedByRendererCustom,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
     customLoadingOverlay: CustomLoadingOverlay,
     customFloatingFilter: CustomFloatingFilter,
@@ -415,9 +376,10 @@ const User: FC = () => {
               isChecked: false,
               name: `${u.firstName} ${u.lastName}`,
               email: u.email,
-              createdAt: moment(u.createdAt).format("MMM Do, YYYY"),
-              createdBy: u.createdBy,
-              updatedBy: u.updatedBy,
+              createdByDate: u.createdBy?.date,
+              createdBy: u.createdBy?.user?.concatedName,
+              updatedBy: u.updatedBy?.user?.concatedName,
+              updatedByDate: u.updatedBy?.date,
               status: u.blocked ? u.blocked : false,
               isBrandAdmin: u.userType === userType.brandAdmin
             };
@@ -440,26 +402,6 @@ const User: FC = () => {
     fetchUsers();
   }, [fetchUsers]);
 
-
-
-
-
-  // const updateCheckedStatus = (params, ev) => {
-  //   const gridData = [...dataRows];
-  //   const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-  //   gridData[indexOfRecord].isChecked = ev.target.checked;
-
-  //   setDataRows([...gridData]);
-
-  //   const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-  //   if (checkedRecords.length === gridData.length) {
-  //     setCheckAllUsers(true);
-  //   } else {
-  //     setCheckAllUsers(false);
-  //   }
-  //   handleSelectedUsers(params.row.id, ev.target.checked);
-  // };
 
   const showConfirmBox = (row) => {
     if (row) {
@@ -512,29 +454,17 @@ const User: FC = () => {
   };
 
 
-  // const handleSortModelChange = (params) => {
-  //   if (params?.sortModel && params.sortModel.length > 0) {
-  //     let temp = { ...params.sortModel[0] };
-  //     setQuery((prevState) => ({
-  //       ...prevState,
-  //       page: 0,
-  //       sortBy: temp.field,
-  //       orderBy: temp.sort,
-  //     }));
+  // // Handle entity selection
+  // const handleSelectedUsers = (id, isChecked) => {
+  //   let tempSelectedUsers = [...selectedUsers],
+  //     curRecIndex = selectedUsers.indexOf(id);
+  //   if (isChecked && curRecIndex < 0) {
+  //     tempSelectedUsers = [...selectedUsers, id];
+  //   } else if (!isChecked && curRecIndex >= 0) {
+  //     tempSelectedUsers.splice(curRecIndex, 1);
   //   }
+  //   setSelectedUsers(tempSelectedUsers);
   // };
-
-  // Handle entity selection
-  const handleSelectedUsers = (id, isChecked) => {
-    let tempSelectedUsers = [...selectedUsers],
-      curRecIndex = selectedUsers.indexOf(id);
-    if (isChecked && curRecIndex < 0) {
-      tempSelectedUsers = [...selectedUsers, id];
-    } else if (!isChecked && curRecIndex >= 0) {
-      tempSelectedUsers.splice(curRecIndex, 1);
-    }
-    setSelectedUsers(tempSelectedUsers);
-  };
 
   const handleCreate = () => {
     setIsOpen(true);
@@ -667,7 +597,7 @@ const User: FC = () => {
 
               {generateColumns}
 
-              <AgGridColumn width={100} headerName="Actions"
+              <AgGridColumn width={110} headerName="Actions"
                 pinned={(isMobile || isTablet) ? false : "right"}
                 lockPinned={(isMobile || isTablet) ? false : true}
                 resizable={false} sortable={false}
