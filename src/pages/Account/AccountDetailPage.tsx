@@ -98,6 +98,7 @@ export default function AccountDetailPage(props) {
   const [accountData, setAccountData] = useState<any>({});
   const [relatedContacts, setRelatedContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
+  const [projectSales, setProjectSales] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showApproveDisapproveConfirmBox, setShowApproveDisapproveConfirmBox] =
@@ -126,7 +127,11 @@ export default function AccountDetailPage(props) {
   });
 
   let { id } = useParams();
-
+  
+  const typeCreateProjectSalesDialog = [{
+    id: id,
+    type: accountResource
+  }];
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);
     setCurrentTabIndex(0);
@@ -181,6 +186,16 @@ export default function AccountDetailPage(props) {
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             ? data.Opportunity[
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
+        setProjectSales(
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.projectSales][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             : []
@@ -618,10 +633,22 @@ export default function AccountDetailPage(props) {
                     isRedirect={false}
                   />
                 )}
-                <ProjectInAccordion recordsPerLine={3} />
+                {permissions?.projectSales?.isRead && (
+                <ProjectInAccordion 
+                recordsPerLine={3}
+                projectSales={projectSales} 
+                type={typeCreateProjectSalesDialog}
+                fetchData={fetchRelatedData}
+                permissions={permissions}
+                />
+                )}
                 <QuotesInAccordion recordsPerLine={3} />
-                <ProductBuilderInAccordion recordsPerLine={3} />
-                <LeadInAccordion recordsPerLine={3} />
+                {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+                {permissions?.lead?.isRead && accountData.staticData?.lead && (
+                  <LeadInAccordion
+                    recordsPerLine={3}
+                    lead={accountData.staticData?.lead} />
+                )}
               </div>
             </Paper>
           </Grid>
