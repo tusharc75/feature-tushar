@@ -37,19 +37,19 @@ const ProductBuilder = (props) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState([]);
 
-    const [newVersion,setNewVersion] =useState(false);
-    const [versionNumber,setVersionNumber]= useState(0);
+    const [newVersion, setNewVersion] = useState(false);
+    const [versionNumber, setVersionNumber] = useState(0);
 
     useEffect(() => {
         fetchProduct();
-    }, []);
+    }, [productBuilderId]);
 
-    useEffect(()=>{
-        fetchVersionDetail();
-    },[]);
+    // useEffect(() => {
+    //     fetchVersionDetail();
+    // }, []);
 
-    const fetchVersionDetail=()=>{
-        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + productBuilderId).then(({ data}) => {
+    const fetchVersionDetail = () => {
+        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + productBuilderId).then(({ data }) => {
             setNewVersion(data.newVersion);
             setVersionNumber(data.version);
         }).catch((error) => {
@@ -83,9 +83,8 @@ const ProductBuilder = (props) => {
 
     let SrNoColoum: any = {
         field: "srno",
-        headerName: "#",
-        renderCell: (params) => (<span>{params.rowIndex + 1}</span>),
-        width: 15,
+        headerName: "Sr No ",
+        width: 30,
         disableColumnMenu: true,
         sortable: false,
         filterable: false,
@@ -94,9 +93,10 @@ const ProductBuilder = (props) => {
     const fetchProduct = () => {
         setLoading(true)
         axiosInstance().get(`/productbuilder/getproduct/` + productBuilderId).then(({ data: { data } }) => {
-            data = data.data?.map((u) => ({
+            data = data.data?.map((u, index) => ({
                 ...u,
                 id: u._id,
+                srno: index + 1
             }));
             setColumns(null);
             let column = [{ field: 'id', headerName: 'id', hide: true }]
@@ -112,7 +112,7 @@ const ProductBuilder = (props) => {
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
-                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === "0" ? params.row[fieldName] : <NoDataCell />)
+                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
                                     col.order = ele.order
                                     col.leval = ele.leval
                                     column.push(col)
@@ -129,7 +129,7 @@ const ProductBuilder = (props) => {
                                         col.field = fieldName
                                         col.headerName = fieldLabel
                                         col.width = 180
-                                        col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === "0" ? params.row[fieldName] : <NoDataCell />)
+                                        col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
                                         col.order = ele.order
                                         col.leval = ele.leval
                                         column.push(col)
@@ -146,7 +146,7 @@ const ProductBuilder = (props) => {
                                     col.field = fieldName
                                     col.headerName = fieldLabel
                                     col.width = 180
-                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === "0" ? params.row[fieldName] : <NoDataCell />)
+                                    col.renderCell = (params) => (params.row[fieldName] || params.row[fieldName] === 0 ? params.row[fieldName] : <NoDataCell />)
                                     col.order = ele.order
                                     col.leval = ele.leval
                                     column.push(col)
@@ -162,13 +162,13 @@ const ProductBuilder = (props) => {
                             col.width = 180
                             if (ele.fieldName === "productName") {
                                 col.renderCell = (params) => (
-                                    <Link className="link" onClick={() => { setProductData(params.row) }}   >
+                                    <Link className="link" onClick={() => { console.log(params); setProductData(params.row) }}   >
                                         {params.row.productName}
                                     </Link>
                                 )
                             }
                             else {
-                                col.renderCell = (params) => (params.row[ele.fieldName] ?
+                                col.renderCell = (params) => (params.row[ele.fieldName] || params.row[ele.fieldName] === 0 ?
                                     typeof params.row[ele.fieldName] === 'object' ? params.row[ele.fieldName]["optionLabel"] : params.row[ele.fieldName]
                                     : <NoDataCell />)
                             }
@@ -320,8 +320,8 @@ const ProductBuilder = (props) => {
         </Box>
         <Box>
             <Quote productBuilderId={productBuilderId}
-            newVersion={newVersion}
-            version={versionNumber} />
+                newVersion={newVersion}
+                version={versionNumber} />
         </Box>
         {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
             isAddInBuilder={true} addProductInBuilder={addProductInBuilder}

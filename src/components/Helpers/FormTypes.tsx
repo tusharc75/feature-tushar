@@ -705,7 +705,7 @@ const FormTypes = (props) => {
             : (e) => {
               handleChange(
                 name,
-                e.target.value == "" ? 0 : parseFloat(e.target.value)
+                e.target.value == "" ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
               );
             }
         }

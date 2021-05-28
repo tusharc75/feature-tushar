@@ -18,7 +18,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ProductBuilder from "../../components/productBuilder";
-import axios from "axios";
+import ImportExportLinks from "../../components/Product/ImportExportLinks";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -33,98 +33,44 @@ const CreateProductBuilder = () => {
     const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
-    console.log(id);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
-    const [section, setSection] = useState([]);
-    const [deleteField, setDeleteField] = useState([]);
-    const [newVersion,setNewVersion]=useState(false);
-    const [versionNumber,setVersionNumber]=useState(0);
-
 
     useEffect(() => {
         fetchOneProductBuilder();
-        
     }, [id]);
 
-    useEffect(()=>{
-        fetchVersionDetail();
-    },[initialValues,section]);
-
     const fetchOneProductBuilder = () => {
-        if (id === "0") {
-            setInitialValues({ name: "" });
-        }
-        else {
-            axiosInstance().get(`/productBuilder/` + id).then(({ data: { data } }) => {
-                console.log(data);
-                setInitialValues(data);
-                setSection(data.section);
-            }).catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-        }
-    };
-
-    const fetchVersionDetail=()=>{
-        console.log("Fetching Version");
-        axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + id).then(({ data: { data } }) => {
-            setNewVersion(data.newVersion);
-            setVersionNumber(data.version);
+        axiosInstance().get(`/productbuilder/` + id).then(({ data: { data } }) => {
+            setIsUpdating(true)
+            setInitialValues(data);
+            setIsUpdating(false)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
     };
 
-    const handleSave = (values) => {
-        let data: any = {}
-        data.name = values.name;
-
-        let fields: any = []
-        let order = 0;
-        section.forEach(_section => {
-            _section.field.forEach(_field => {
-                let _field_data = _field
-                _field_data._id = _field_data._id.toString();
-                _field_data.sectionName = _section.sectionName
-                if (!isNaN(_field._id)) {
-                    _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
-                }
-                _field_data.order = ++order
-                fields.push(_field_data)
-            })
-        })
-        data.fields = fields;
-        setIsUpdating(true)
-        if (id === "0") {
-            axiosInstance().post("/productBuilder", data).then(({ data: { data } }) => {
-                setIsUpdating(false)
-                history.push({ pathname: routes.productBuilder.path });
-            }).catch((error) => {
-                setIsUpdating(false)
-                toastConfig.setToastConfig(error);
-            });
-        }
-        else {
-            data.BuilderId = id;
-            data.deleteField = deleteField;
-            axiosInstance().put("/productBuilder", data).then(({ data: { data } }) => {
-                setIsUpdating(false)
-                history.push({ pathname: routes.productBuilder.path });
-            }).catch((error) => {
-                setIsUpdating(false)
-                toastConfig.setToastConfig(error);
-            });
-        }
+    const handleSave = (values) => {    
     }
 
     return (<Layout>
-
         <Grid container direction="row">
-            <Grid item xs={12}>
+            <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title, path: routes.productBuilder.path },
                 { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
+            </Grid>
+            <Grid item md={8} sm={1} xs={2}>
+                <ImportExportLinks
+                    module="product(s)"
+                    api={"productbuilder"}
+                    refrenceId={id}
+                    onSuccessfulImport={(isImportedSuccessfully) => {
+                        if (isImportedSuccessfully) {
+                            fetchOneProductBuilder();
+                        }
+                    }}
+                />
             </Grid>
         </Grid>
         <CustomContainer>
@@ -159,7 +105,9 @@ const CreateProductBuilder = () => {
                                     </Grid>
                                 </Grid>
                             </Box>
-                            <ProductBuilder productBuilderId={id} />
+
+                            {!isUpdating &&
+                                <ProductBuilder productBuilderId={id} />}
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
