@@ -31,6 +31,7 @@ import { userType, gridPageSizes, isObjectEmpty, AgGridHeaderHeight, AgGridRowHe
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -521,7 +522,7 @@ const User: FC = () => {
               />
             )}
           </div>
-          <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
+          {/* <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
           <div className="ag-theme-material ag-grid-listing-grid">
             <AgGridReact
@@ -609,8 +610,19 @@ const User: FC = () => {
               dispatch({ type: "pageSizeChange", limit: event.target.value })
             }}
             rowsPerPageOptions={pageSizes}
+          /> */}
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={110}
           />
-
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
