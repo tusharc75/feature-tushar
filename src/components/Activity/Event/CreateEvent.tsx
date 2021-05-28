@@ -360,7 +360,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
                           <KeyboardDatePicker
-                            clearable
                             autoOk
                             size="small"
                             disablePast
@@ -389,7 +388,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
                         <Grid item xs={5}>
                           <KeyboardTimePicker
-                            clearable
                             autoOk
                             size="small"
                             variant="inline"
@@ -426,7 +424,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
                           <KeyboardDatePicker
-                            clearable
                             autoOk
                             size="small"
                             disablePast
@@ -450,7 +447,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                         </Grid>
                         <Grid item xs={5}>
                           <KeyboardTimePicker
-                            clearable
                             autoOk
                             size="small"
                             variant="inline"

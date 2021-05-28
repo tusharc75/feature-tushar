@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography, Box, Button, ButtonGroup } from "@material-ui/core";
+import { Map } from "@material-ui/icons";
 import grey from "@material-ui/core/colors/grey";
 import moment from "moment";
 
@@ -108,13 +109,15 @@ export default function Roadmap({ type, filter, activityId }) {
             style={{ position: "relative", overflow: "hidden" }}
           >
             <Box
-              height={54}
+              height={60}
               bgcolor="grey.200"
               display="flex"
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
-              <Box p={2}>
-                <Typography variant="body2" display="block">
+              <Box p={2} display="flex" alignItems="center">
+                <Map />
+                <Box mr={1} />
+                <Typography variant="body1" display="block">
                   Roadmap
                 </Typography>
               </Box>
@@ -129,6 +132,8 @@ export default function Roadmap({ type, filter, activityId }) {
                 }}
               >
                 <ActivityList
+                  fetchRoadmap={fetchRoadmap}
+                  type={type}
                   activity={activity}
                   treeList={treeList}
                   expanded={expanded}
@@ -161,6 +166,8 @@ export default function Roadmap({ type, filter, activityId }) {
             >
               <Box style={{ position: "absolute", width: totalDay * dayPixel }}>
                 <CalanderList
+                  fetchRoadmap={fetchRoadmap}
+                  type={type}
                   activity={activity}
                   expanded={expanded}
                   selected={selected}
@@ -190,9 +197,9 @@ export default function Roadmap({ type, filter, activityId }) {
                 >
                   <Box
                     style={{ margin: "auto" }}
-                    width={3}
-                    border={3}
-                    borderColor="primary.main"
+                    width={2}
+                    border={2}
+                    borderColor="secondary.main"
                     height={"100%"}
                   ></Box>
                 </Box>
