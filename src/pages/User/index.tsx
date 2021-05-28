@@ -454,19 +454,6 @@ const User: FC = () => {
     dispatch({ type: "search", search: e.target.value });
   };
 
-
-  // // Handle entity selection
-  // const handleSelectedUsers = (id, isChecked) => {
-  //   let tempSelectedUsers = [...selectedUsers],
-  //     curRecIndex = selectedUsers.indexOf(id);
-  //   if (isChecked && curRecIndex < 0) {
-  //     tempSelectedUsers = [...selectedUsers, id];
-  //   } else if (!isChecked && curRecIndex >= 0) {
-  //     tempSelectedUsers.splice(curRecIndex, 1);
-  //   }
-  //   setSelectedUsers(tempSelectedUsers);
-  // };
-
   const handleCreate = () => {
     setIsOpen(true);
   };
