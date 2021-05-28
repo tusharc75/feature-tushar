@@ -1,34 +1,23 @@
-import React, { useCallback, useContext, useEffect, useState, useReducer } from "react";
+import React, { useContext, useEffect, useState, useReducer } from "react";
 import Layout from "../../components/Layout";
 import {
   Box,
   Button,
-  Checkbox,
   Menu,
   MenuItem,
-  Tooltip,
-  IconButton,
-  Paper,
   Grid,
-  Divider,
-  Typography,
   TablePagination
 } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
 import { Link } from "react-router-dom";
-import { DataGrid } from "@material-ui/data-grid";
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import AddIcon from "@material-ui/icons/Add";
 import ManageContactDialog from "./ManageContact/index";
-import { makeStyles } from "@material-ui/core/styles";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import SearchBox from "../../components/Helpers/SearchBox";
-import DeleteIcon from "@material-ui/icons/Delete";
 import CustomContainer from "../../components/CustomContainer";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { getSearchQuery } from "../../services/util";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import styles from "../Leads/Header.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ToggleButton from "@material-ui/lab/ToggleButton";
@@ -36,21 +25,15 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { MdContacts } from "react-icons/md";
 import axiosInstance from "../../axios/axiosInstance";
 import {
-  contactTemplateFileName,
-  downloadExcel,
   sidebarResource,
-  contactImportErrorFileName,
   gridPageSizes,
   isObjectEmpty
 } from "../../constants/helpers";
-import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
 import routes from "./../../components/Helpers/Routes";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import { isMobile, isTablet } from "react-device-detect";
@@ -232,197 +215,6 @@ export default function Contact(props) {
       handleContactSelect(ContactTypes.find((d) => d.key === newFilter).value);
     }
   };
-
-  // const columns = [
-  //   {
-  //     field: "isChecked",
-  //     headerName: "Checkbox",
-  //     renderHeader: () => (
-  //       <Checkbox
-  //         color="primary"
-  //         checked={checkAllContacts}
-  //         onChange={(ev) => {
-  //           setCheckAllContacts(ev.target.checked);
-  //           const gridData = dataRows;
-  //           gridData.map((d) => {
-  //             d.isChecked = ev.target.checked;
-  //             return d;
-  //           });
-  //           setDataRows([...gridData]);
-  //         }}
-  //       />
-  //     ),
-  //     renderCell: (params) => (
-  //       <Checkbox
-  //         color="primary"
-  //         checked={params.value}
-  //         onChange={(ev) => {
-  //           const gridData = dataRows;
-  //           const indexOfRecord = gridData.findIndex(
-  //             (d) => d.id === params.row.id
-  //           );
-  //           gridData[indexOfRecord].isChecked = ev.target.checked;
-
-  //           setDataRows([...gridData]);
-
-  //           const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-  //           if (checkedRecords.length === gridData.length) {
-  //             setCheckAllContacts(true);
-  //           } else {
-  //             setCheckAllContacts(false);
-  //           }
-  //         }}
-  //       />
-  //     ),
-  //     disableColumnMenu: true,
-  //     sortable: false,
-  //     filterable: false,
-  //     width: 75,
-  //   },
-  //   {
-  //     field: "name",
-  //     headerName: "Name",
-  //     width: 250,
-  //     renderCell: (params) => (
-  //       <>
-  //         <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
-  //           {params.value || ""}
-  //         </Link>
-  //       </>
-  //     ),
-  //   },
-  //   {
-  //     field: "relatedLead",
-  //     headerName: "Related Lead",
-  //     width: 250,
-  //     renderCell: (params) => (
-  //       <>
-  //         {
-  //           params.value ?
-  //             <Link className="link" to={`${routes.leadDetail.path}/${params.value._id}`} title={[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}>
-  //               {[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}
-  //             </Link>
-  //             : <NoDataCell />
-  //         }
-  //       </>
-  //     ),
-  //     sortable: false,
-  //     filterable: false,
-  //   },
-  //   // { field: "lastName", headerName: "Last Name", width: 200 },
-  //   {
-  //     field: "phone",
-  //     headerName: "Phone",
-  //     width: 300,
-  //     renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
-  //   },
-  //   {
-  //     field: "email",
-  //     headerName: "Email",
-  //     width: 300,
-  //     renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
-  //   },
-  //   {
-  //     field: "createdBy",
-  //     headerName: "Created By",
-  //     width: 250,
-  //     disableColumnMenu: true,
-  //     renderCell: (params) =>
-  //       params?.value && params?.value?.user ? (
-  //         <h5 className="createBy">
-  //           {params.value.user.firstName}
-  //           <span
-  //             className="createdAtTime badge-date"
-  //             title={`${params.value.user.firstName} • ${moment(
-  //               params.value.date.slice(0, 10)
-  //             ).format("MMM Do, YYYY")}`}
-  //           >
-  //             {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-  //           </span>
-  //         </h5>
-  //       ) : (
-  //         <NoDataCell />
-  //       ),
-  //   },
-  //   {
-  //     field: "updatedBy",
-  //     headerName: "Updated By",
-  //     width: 250,
-  //     renderCell: (params) =>
-  //       params?.value && params?.value?.user ? (
-  //         <h5 className="updateBy">
-  //           {params.value.user.firstName}
-  //           <span
-  //             className="updatedAtTime badge-date"
-  //             title={`${params.value.user.firstName} • ${moment(
-  //               params.value.date.slice(0, 10)
-  //             ).format("MMM Do, YYYY")}`}
-  //           >
-  //             {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-  //           </span>
-  //         </h5>
-  //       ) : (
-  //         <NoDataCell />
-  //       ),
-  //   },
-  //   {
-  //     field: "accountName",
-  //     headerName: "Account",
-  //     width: 300,
-  //     renderCell: (params) => <Link className="link" to={`/${account.accountRoute}/detail/${params.row.accountId}`}>
-  //       {params.value}
-  //     </Link>
-  //   },
-  //   {
-  //     field: "actions",
-  //     headerName: "Actions ",
-  //     disableColumnMenu: true,
-  //     sortable: false,
-  //     filterable: false,
-  //     renderCell: (params) => (
-  //       <>
-  //         {contactPermissions.isDelete ? (
-  //           params.row.canDelete ? (
-  //             <Tooltip title="Delete">
-  //               <IconButton
-  //                 aria-label="Delete"
-  //                 onClick={() => {
-  //                   setSingleContactDelete({
-  //                     show: true,
-  //                     id: params.row._id,
-  //                     contactName: `${params.row.firstName} ${params.row.lastName}`,
-  //                   });
-  //                 }}
-  //               >
-  //                 <DeleteIcon fontSize="small" color="error" />
-  //               </IconButton>
-  //             </Tooltip>
-  //           ) : (
-  //             <Tooltip
-  //               className="cursor-stop"
-  //               title="You must be the owner of this contact to get the delete functionality"
-  //             >
-  //               <IconButton aria-label="Delete">
-  //                 <DeleteIcon fontSize="small" />
-  //               </IconButton>
-  //             </Tooltip>
-  //           )
-  //         ) : (
-  //           <Tooltip
-  //             className="cursor-stop"
-  //             title="You do not have permission to delete contact"
-  //           >
-  //             <IconButton aria-label="Delete">
-  //               <DeleteIcon fontSize="small" />
-  //             </IconButton>
-  //           </Tooltip>
-  //         )}
-  //       </>
-  //     ),
-  //     width: 200,
-  //   },
-  // ];
 
   useEffect(() => {
     const data = user?.role?.sideBar;
@@ -921,7 +713,6 @@ export default function Contact(props) {
             }}
             rowsPerPageOptions={pageSizes}
           />
-
 
           {/* <Box component="div" marginY={1}> */}
           {/* <div className="listing-grid">
