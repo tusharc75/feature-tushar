@@ -40,6 +40,7 @@ import {
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import "./style.scss";
+import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight} from './../../constants/helpers';
 
 let opportunityTimeout;
 const OpportunityTypes = [
@@ -588,7 +589,9 @@ const Opportunities = () => {
               onGridReady={onGridReady}
               suppressDragLeaveHidesColumns={true}
               suppressCellSelection={true}
-              rowHeight={40}
+              headerHeight={AgGridHeaderHeight}
+              floatingFiltersHeight={AgGridFloatingFiltersHeight}
+              rowHeight={AgGridRowHeight}
               frameworkComponents={frameworkComponents}
               defaultColDef={{
                 resizable: true,
