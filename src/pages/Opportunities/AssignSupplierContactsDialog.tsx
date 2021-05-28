@@ -57,8 +57,8 @@ export default function AssignSupplierContactsDialog({
         setAssigning(true);
         const dataToSave = {
             _id: opportunityId,
-            supplierContacts: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
-            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
+            supplierContact: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
+            customerContact: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
             notToBeRemoved: contacts && contacts?.notToBeRemoved ? contacts.notToBeRemoved : null
         };
 

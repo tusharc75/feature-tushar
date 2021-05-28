@@ -100,7 +100,9 @@ export default function AccordionOfOpportunity({
     }
 
     const [expandOpportunity, setExpandOpportunity] = useState(expanded);
-
+    useEffect(() => {
+        setExpandOpportunity(opportunity && opportunity?.length !== 0 ? true : false);
+    }, [opportunity]);
     return <>
         <Accordion expanded={expandOpportunity}>
             <AccordionSummary
@@ -160,10 +162,6 @@ export default function AccordionOfOpportunity({
                                                                             </Tooltip>
                                                                         </span>
                                                                     }
-
-                                                                    <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
-                                                                        <Typography >{opportunity?.opportunityName} </Typography>
-                                                                    </Link>
                                                                 </Grid>
                                                                 {
                                                                     opportunity?.amount &&

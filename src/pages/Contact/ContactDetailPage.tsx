@@ -35,6 +35,11 @@ import { ListItemText } from '@material-ui/core';
 import { AiOutlineMail } from 'react-icons/ai';
 import { BiPhone } from 'react-icons/bi';
 import { FiStar } from 'react-icons/fi';
+import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
+import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
+import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 
 function DisplayData({ label, value, icon }) {
   return <div style={{ flexGrow: 1 }}>
@@ -80,7 +85,12 @@ const ContactDetailsPage = (props) => {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([])
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
+  const [opportunities, setOpportunities] = useState([]);
+  const [projectSales, setProjectSales] = useState([]);
+
   let { id } = useParams();
+
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([]);
 
   // useEffect(() => {
   //     if (id) {
@@ -101,6 +111,7 @@ const ContactDetailsPage = (props) => {
 
     if (id) {
       fetchContactData();
+      fetchRelatedData();
     }
   }, [id]);
 
@@ -121,7 +132,11 @@ const ContactDetailsPage = (props) => {
         handleAllowToEditList(data);
         setContactData(data);
         getContactFields();
-
+        console.log(props)
+        setTypeCreateProjectSalesDialog([
+          { id: id, type: contactResource },
+          { id: data?.accountName?.optionValue, type: accountResource }
+        ])
         setCanEdit(
           [...data?.collaborator ?? [], data?.owner].some(
             (obj) => obj.optionValue === user.user._id
@@ -167,6 +182,34 @@ const ContactDetailsPage = (props) => {
       })
       .catch((err) => {
         setLoading(false);
+      });
+  };
+
+  const fetchRelatedData = () => {
+    axiosInstance()
+      .get(`/${contactApi}/related/${id}`)
+      .then(({ data: { data } }) => {
+        setOpportunities(
+          data.Opportunity &&
+            data.Opportunity[
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            ? data.Opportunity[
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
+
+        setProjectSales(
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.projectSales][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
       });
   };
 
@@ -423,60 +466,97 @@ const ContactDetailsPage = (props) => {
                   />
                 ) : null}
               </DetailsPageHeader>
+              <Box>
+                {
+                  loading ? (
+                    <Grid container spacing={2}>
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
+                        (i) => (
+                          <Grid item sm={6} md={6}>
+                            <Skeleton
+                              variant="text"
+                              width="100px"
+                              height="16px"
+                            />
+                            <Box marginY={1} />
+                            <Skeleton width="100%" height="50px" />
+                          </Grid>
+                        )
+                      )}
+                    </Grid>
+                  ) : (
 
-              {
-                loading ? (
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
-                      (i) => (
-                        <Grid item sm={6} md={6}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="16px"
-                          />
-                          <Box marginY={1} />
-                          <Skeleton width="100%" height="50px" />
-                        </Grid>
-                      )
-                    )}
-                  </Grid>
-                ) : (
+                    <>
+                      <Tabs className="oms-tab" value={currentTabIndex}
+                        onChange={(index, newValue) => {
+                          setCurrentTabIndex(newValue);
+                        }}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="icon tabs example"
+                      >
+                        <Tab
+                          label="Details"
+                          aria-controls="a11y-tabpanel-0"
+                          id="a11y-tab-0"
+                        />
+                        <Tab
+                          label="Org Chart"
+                          aria-controls="a11y-tabpanel-1"
+                          id="a11y-tab-1"
+                        />
+                      </Tabs>
+                      <Box hidden={currentTabIndex !== 0}>
+                        <DetailsPage
+                          data={contactData}
+                          fields={contactFields}
+                        />
+                      </Box>
+                      <Box hidden={currentTabIndex !== 1}>
+                        <OrgChartContainer data={orgChartData} onClick={(id) => {
+                          history.push(`/${contactApi}/detail/${id}`)
+                        }} />
+                      </Box>
+                    </>
+                  )
+                }
+              </Box>
+              <div className="p-3">
+                {permissions?.opportunity?.isRead && (
+                  <OpportunityInAccordian
+                    opportunityPermissions={permissions.opportunity}
+                    opportunities={opportunities}
+                    onNewOpportunityAdd={() => {
+                      fetchRelatedData();
+                    }}
+                    accountId={contactData?.accountName?.optionValue}
+                    accountName={contactData?.accountName?.optionLabel}
+                    recordsPerLine={3}
+                    resource={accountResource}
+                    isRedirect={false}
+                    contactId={id}
+                    contactResource={contactResource}
+                  />
+                )}
+                {permissions?.projectSales?.isRead && (
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
 
-                  <>
-                    <Tabs className="oms-tab" value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
-                      indicatorColor="primary"
-                      textColor="primary"
-                      aria-label="icon tabs example"
-                    >
-                      <Tab
-                        label="Details"
-                        aria-controls="a11y-tabpanel-0"
-                        id="a11y-tab-0"
-                      />
-                      <Tab
-                        label="Org Chart"
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
-                      />
-                    </Tabs>
-                    <Box hidden={currentTabIndex !== 0}>
-                      <DetailsPage
-                        data={contactData}
-                        fields={contactFields}
-                      />
-                    </Box>
-                    <Box hidden={currentTabIndex !== 1}>
-                      <OrgChartContainer data={orgChartData} onClick={(id) => {
-                        history.push(`/${contactApi}/detail/${id}`)
-                      }} />
-                    </Box>
-                  </>
-                )
-              }
+                  />
+                )}
+                <QuotesInAccordion recordsPerLine={3} />
+                {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+                {permissions?.lead?.isRead && contactData.staticData?.lead && (
+                  <LeadInAccordion
+                    recordsPerLine={3}
+                    lead={contactData.staticData.lead} />
+                )}
+              </div>
+
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>

@@ -46,7 +46,7 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight} from './../../constants/helpers';
+import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight } from './../../constants/helpers';
 
 const ContactTypes = [
   {
@@ -410,6 +410,9 @@ export default function Contact(props) {
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
 
+            owner: u.owner?.optionLabel,
+            ownerId: u.owner?.optionValue,
+
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
@@ -649,8 +652,8 @@ export default function Contact(props) {
                 // checkboxSelection: true,
                 floatingFilterComponentParams: { suppressFilterButton: true }
               }}
-              onSortChanged={(e) => {
-                dispatch({ type: "sort", sorting: e.api.getSortModel() })
+              onSortChanged={() => {
+                dispatch({ type: "sort", sorting: columnApi.getColumnState().filter(d => ["asc", "desc"].some(s => s === d.sort)) });
               }}
               onFilterChanged={(e) => {
                 dispatch({ type: "filter", filters: e.api.getFilterModel() });

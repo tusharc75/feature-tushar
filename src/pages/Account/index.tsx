@@ -48,7 +48,7 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight} from './../../constants/helpers';
+import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight } from './../../constants/helpers';
 
 const AccTypes = [
   {
@@ -804,8 +804,8 @@ export default function Account(props) {
                 // checkboxSelection: true,
                 floatingFilterComponentParams: { suppressFilterButton: true }
               }}
-              onSortChanged={(e) => {
-                dispatch({ type: "sort", sorting: e.api.getSortModel() })
+              onSortChanged={() => {
+                dispatch({ type: "sort", sorting: columnApi.getColumnState().filter(d => ["asc", "desc"].some(s => s === d.sort)) });
               }}
               onFilterChanged={(e) => {
                 dispatch({ type: "filter", filters: e.api.getFilterModel() });
