@@ -222,7 +222,7 @@ export default function Contact(props) {
 
     if (data) {
       const hasContactPermission = data.find(
-        (d) => d.name == contactPermission
+        (d) => d.name === contactPermission
       );
       if (hasContactPermission) {
         setContactPermissions({
@@ -361,7 +361,7 @@ export default function Contact(props) {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
@@ -608,9 +608,9 @@ export default function Contact(props) {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={selectedRecords.length == 0}
+                        disabled={selectedRecords.length === 0}
                         onClick={() => {
-                          if (selectedRecords.some((d) => d.canDelete == false)) {
+                          if (selectedRecords.some((d) => d.canDelete === false)) {
                             closeActions();
                             setShowDeleteWarningConfirmBox(true);
                           } else {

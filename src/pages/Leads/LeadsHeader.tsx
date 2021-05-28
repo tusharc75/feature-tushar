@@ -1,16 +1,11 @@
 import React, { useState } from 'react'
 import SearchBox from '../../components/Helpers/SearchBox'
-import { makeStyles } from "@material-ui/core/styles";
 import { AddOutlined } from "@material-ui/icons";
 import {
-    Box,
     Grid,
-    Select,
     MenuItem,
-    FormControl,
     Button,
-    Menu,
-    Chip
+    Menu
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import styles from "./Header.module.scss"
@@ -20,15 +15,7 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import { processFieldName } from '../../constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
-    filter_side: {
-        display: "flex",
-        justifyContent: "flex-end",
-    },
-}));
-
 function LeadsHeader(props) {
-    const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState(null);
     const [messageDialog, setMessageDialog] = useState({ open: false, message: "" });
 
@@ -43,7 +30,7 @@ function LeadsHeader(props) {
     const [filter, setFilter] = useState("All Leads");
 
     const handleFilter = (event, newFilter) => {
-        if (newFilter != null) {
+        if (newFilter !== null) {
             setFilter(newFilter);
             onTypeChange(options.find((d) => d.key === newFilter).value);
         }
@@ -136,7 +123,7 @@ function LeadsHeader(props) {
                                 closeActions();
                                 showConfirmBox(null)
                             }}
-                            disabled={selectedLeads.length == 0 || selectedLeads.some(d => d.ownerId != userId)}
+                            disabled={selectedLeads.length === 0 || selectedLeads.some(d => d.ownerId !== userId)}
                         >Delete</MenuItem>
 
                         {
@@ -146,11 +133,11 @@ function LeadsHeader(props) {
                                     if (selectedLeads.some((d) => d.staticData["convertedToOpportunity"])) {
                                         setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
                                     }
-                                    else if (selectedLeads.some((d) => (!d[processFieldName] || d[processFieldName].toLowerCase() != "qualified"))) {
+                                    else if (selectedLeads.some((d) => (!d[processFieldName] || d[processFieldName].toLowerCase() !== "qualified"))) {
                                         setMessageDialog({ open: true, message: `You have selected lead(s) which are not qualified yet to be converted into opportunity` })
                                     }
                                     else {
-                                        if (selectedLeads.some(d => d.isAllowedToUpdate == false)) {
+                                        if (selectedLeads.some(d => d.isAllowedToUpdate === false)) {
                                             setMessageDialog({ open: true, message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.` })
                                         }
                                         else {

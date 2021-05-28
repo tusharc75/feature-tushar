@@ -37,7 +37,7 @@ export default function AssignContactsDialog({
     const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
 
     const handleContactSelection = (e, id) => {
-        const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
+        const indexOfContactToChange = currentContacts.findIndex(d => d._id === id);
         currentContacts[indexOfContactToChange].isChecked = e.target.checked;
         setCurrentContacts([...currentContacts]);
     };
