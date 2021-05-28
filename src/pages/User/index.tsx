@@ -27,7 +27,7 @@ import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, gridPageSizes, isObjectEmpty } from './../../constants/helpers'
+import { userType, gridPageSizes, isObjectEmpty, AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
@@ -133,6 +133,7 @@ const User: FC = () => {
   const history = useHistory();
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
+  const [renderCount, setRenderCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -154,9 +155,9 @@ const User: FC = () => {
 
   const [columns, setColumns] = useState([
     {
-      field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
+      field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
     },
-    { field: "status", headerName: "Status", show: true, cellRenderer: "statusRenderer" },
+    { field: "status", headerName: "Status", show: true, filter: false, sortable: false, cellRenderer: "statusRenderer" },
     { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
@@ -192,7 +193,7 @@ const User: FC = () => {
     )}{" "}
   </div>;
 
-  
+
 
   const ActionsRenderer = params =>
     user?.user._id === params.data.id ? (
@@ -284,31 +285,31 @@ const User: FC = () => {
     }
   }
 
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
 
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case "owner":
-        return "owner.optionLabel";
-
-      case "customerAccountName":
-        return "customerAccountName.optionLabel";
-
-      case "supplierAccountName":
-        return "supplierAccountName.optionLabel";
-
-      default:
-        return field;
-    }
-  }
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
     // if (selectedEntity) {
     //   deepFilter = `${deepFilter}&entity=${selectedEntity}`
     // }
+
+    if (entityRoleRedirectDetails?.id) {
+      switch (entityRoleRedirectDetails?.type) {
+        case "entity":
+          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }])}`
+
+          break;
+        case "regionalRole":
+
+          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }])}`
+
+          break;
+        case "globalRole":
+          deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }])}`
+
+          break;
+      }
+    }
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -323,7 +324,7 @@ const User: FC = () => {
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`
     }
 
     if (search) {
@@ -334,73 +335,72 @@ const User: FC = () => {
   };
 
 
-  const fetchUsers = useCallback(() => {
+
+  const fetchUsers = () => {
+
+
+    const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+    // let searchParams: any = { ...query };
+    // searchParams = searchVal
+    //   ? { ...searchParams, search: searchVal }
+    //   : { ...searchParams };
+
+    axiosInstance()
+      .get(`/user${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          const { createdBy, updatedBy,
+            ...restProperties } = u;
+
+          let res = {
+            ...restProperties,
+            id: u._id,
+            concatedName: u.concatedName,
+            email: u.email,
+            createdByDate: u.createdBy?.date,
+            createdBy: u.createdBy?.user?.concatedName,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date,
+            status: u.blocked ? u.blocked : false,
+            isBrandAdmin: u.userType === userType.brandAdmin
+          };
+          return res;
+        });
+
+        dispatch({ type: "initialize", data: rows, count: count });
+
+
+      })
+      .catch((err) => {
+        dispatch({ type: "loading", loading: false });
+        toastConfig.setToastConfig(err);
+      });
+
+    // eslint-disable-next-line
+  };
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (userTimeout) {
       clearTimeout(userTimeout);
     }
 
     userTimeout = setTimeout(() => {
-      const queryString = getQueryString();
-      dispatch({ type: "loading", loading: true });
-      if (gridApi) {
-        gridApi.setRowData([]);
-        gridApi.showLoadingOverlay();
-      }
-      // let searchParams: any = { ...query };
-      // searchParams = searchVal
-      //   ? { ...searchParams, search: searchVal }
-      //   : { ...searchParams };
-      if (entityRoleRedirectDetails?.id) {
-        switch (entityRoleRedirectDetails?.type) {
-          case "entity":
-            queryString["filterById"] = JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }]);
-            break;
-          case "regionalRole":
-            queryString["filterById"] = JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }]);
-            break;
-          case "globalRole":
-            queryString["filterById"] = JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }]);
-            break;
-        }
-      }
-      axiosInstance()
-        .get(`/user${queryString}`)
-        .then(({ data: { data, count } }) => {
-          let rows = data.map((u) => {
-            const { createdBy, updatedBy,
-              ...restProperties } = u;
-
-            let res = {
-              ...restProperties,
-              id: u._id,
-              isChecked: false,
-              name: `${u.firstName} ${u.lastName}`,
-              email: u.email,
-              createdByDate: u.createdBy?.date,
-              createdBy: u.createdBy?.user?.concatedName,
-              updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date,
-              status: u.blocked ? u.blocked : false,
-              isBrandAdmin: u.userType === userType.brandAdmin
-            };
-            return res;
-          });
-
-          dispatch({ type: "initialize", data: rows, count: count });
-
-
-        })
-        .catch((err) => {
-          dispatch({ type: "loading", loading: false });
-          toastConfig.setToastConfig(err);
-        });
-    }, 600);
+      fetchUsers();
+    }, millisec);
     // eslint-disable-next-line
-  }, [search, entityRoleRedirectDetails]);
+  }, [search]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (renderCount > 0) {
+      fetchUsers();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [page, limit, filters, sorting, entityRoleRedirectDetails]);
 
 
   const showConfirmBox = (row) => {
@@ -482,7 +482,7 @@ const User: FC = () => {
     setRolesDialogOpen(false);
   };
 
-  
+
 
   return (
     <>
@@ -541,7 +541,9 @@ const User: FC = () => {
               onGridReady={onGridReady}
               suppressDragLeaveHidesColumns={true}
               suppressCellSelection={true}
-              rowHeight={40}
+              headerHeight={AgGridHeaderHeight}
+              floatingFiltersHeight={AgGridFloatingFiltersHeight}
+              rowHeight={AgGridRowHeight}
               frameworkComponents={frameworkComponents}
               defaultColDef={{
                 resizable: true,
