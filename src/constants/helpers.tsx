@@ -659,4 +659,4 @@ export const CustomDialogTransition = React.forwardRef(function Transition(
 
 export const AgGridHeaderHeight = 40;
 export const AgGridRowHeight = 30;
-export const AgGridFloatingFiltersHeight = 30;
+export const AgGridFloatingFiltersHeight = 38;
