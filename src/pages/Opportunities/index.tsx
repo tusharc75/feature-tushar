@@ -189,16 +189,14 @@ const Opportunities = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   const [columns, setColumns] = useState([
-    {
-      field: "opportunityName", headerName: "Opportunity Name", show: true, disabled: true, cellRenderer: "opportunityNameRenderer",
-    },
+    { field: "opportunityName", headerName: "Opportunity Name", show: true, disabled: true, cellRenderer: "opportunityNameRenderer" },
     { field: "supplierAccountName", headerName: "Supplier Account Name", show: true, cellRenderer: "supplierAccountNameRenderer" },
     { field: "customerAccountName", headerName: "Customer Account Name", show: true, cellRenderer: "customerAccountNameRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     { field: "stage", headerName: "Stage", show: true, cellRenderer: "commonRenderer" },
     { field: "closeDate", headerName: "Close Date", show: true, cellRenderer: "commonRenderer" },
-    { field: "owner", headerName: "Opportunity Owner", show: true, cellRenderer: "commonRenderer" },
+    { field: "owner", headerName: "Opportunity Owner", show: true, cellRenderer: "commonRenderer" }
   ]);
   //  Grid Variables - End
 
@@ -254,13 +252,12 @@ const Opportunities = () => {
       });
   };
 
-  const OpportunityNameRenderer = params => <Link className="link"
-    to={`${routes.opportunityDetail.path}/${params.data._id}`} title={params.value}>
+  const OpportunityNameRenderer = params => <Link className="link" title={params.value}
+    to={`${routes.opportunityDetail.path}/${params.data._id}`}>
     {params.value}
   </Link>
 
-  const CustomerAccountNameRenderer = params => <Link
-    className="link" title={params.value}
+  const CustomerAccountNameRenderer = params => <Link className="link" title={params.value}
     to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
   >
     {params.value}
@@ -444,7 +441,7 @@ const Opportunities = () => {
               createdBy: u.createdBy?.user?.concatedName,
               createdByDate: u.createdBy?.date,
               updatedBy: u.updatedBy?.user?.concatedName,
-              updatedByDate: u.updatedBy?.date,
+              updatedByDate: u.updatedBy?.date
             };
             return res;
           });

@@ -1,14 +1,12 @@
-import { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
-  Checkbox,
-  Link as MuiLink,
-  Tooltip,
-  IconButton,
-  Grid
-} from "@material-ui/core";
-import { Delete as DeleteIcon } from "@material-ui/icons";
-import { DataGrid } from "@material-ui/data-grid";
-import moment from "moment";
+  useState,
+  FC,
+  useReducer,
+  useCallback,
+  useEffect,
+  useContext,
+} from "react";
+import { TablePagination, Grid } from "@material-ui/core";
 import { Link } from "react-router-dom";
 
 import axiosInstance from "../../axios/axiosInstance";
@@ -16,15 +14,117 @@ import Layout from "../../components/Layout";
 import routes from "../../components/Helpers/Routes";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import ProjectHeader from "./Header";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateProjectStrategy from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+
+import { gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import { AgGridColumn, AgGridReact } from "ag-grid-react";
+import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
+import { isMobile, isTablet } from "react-device-detect";
+import {
+  CommonRenderer,
+  CreatedByRenderer,
+  UpdatedByRenderer,
+  CustomLoadingOverlay,
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
+import "./style.scss";
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loading: action.loading,
+      };
+
+    case "initialize":
+      return {
+        ...state,
+        dataRows: action.data,
+        rowCount: action.count,
+        loading: false,
+      };
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      };
+
+    case "update":
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false,
+      };
+
+    case "filter":
+      return {
+        ...state,
+        loading: true,
+        filters: action.filters,
+        page: 0,
+      };
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: true,
+      };
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loading: true,
+      };
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page,
+      };
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: true,
+      };
+
+    case "complete":
+      return {
+        ...state,
+        loading: false,
+      };
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: {},
+  sorting: [],
+  selectedRecords: [],
+};
 
 let projectSalesTimeout;
 const ProjectSales: FC = () => {
@@ -34,14 +134,9 @@ const ProjectSales: FC = () => {
   }: any = useData();
 
   const [searchVal, setSearchVal] = useState("");
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [selectedProjects, setSelectedProjects] = useState<any[]>([]);
-  const [dataRows, setDataRows] = useState<any[]>([]);
+
   const [projects, setProjects] = useState<any[]>([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [loadingProjects, setLoadingProjects] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllProjects, setCheckAllProjects] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedType, setselectedType] = useState(1);
@@ -50,33 +145,52 @@ const ProjectSales: FC = () => {
     useState(false);
   const [renderCount, setRenderCount] = useState(0);
 
-  const fetchProjects = async () => {
-    let searchParams: any = { ...query, filterAccounts: selectedType };
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
-    let api = getSearchQuery("/project-sales", searchParams);
-    setLoadingProjects(true);
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data, count } }) => {
-        setProjects(data);
-        getRows(data);
-        setRowCount(count);
-        setCheckAllProjects(false);
-        setLoadingProjects(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoadingProjects(false);
-      });
-    // eslint-disable-next-line
-  };
+  const [gridApi, setGridApi] = useState(null);
+  const [columnApi, setColumnApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const {
+    dataRows,
+    rowCount,
+    loading,
+    page,
+    limit,
+    pageSizes,
+    search,
+    filters,
+    sorting,
+    selectedRecords,
+  } = state;
 
-  const handleProtectFilter = (filterValues) => {
-    setselectedType(filterValues);
-    setCheckAllProjects(false);
-  };
+  // const [showGridFilters, setShowGridFilters] = useState(true)z
+  const [columns, setColumns] = useState([
+    {
+      field: "projectName",
+      headerName: "Name",
+      show: true,
+      disabled: true,
+      cellRenderer: "nameRenderer",
+    },
+    {
+      field: "projectManager",
+      headerName: "Project Manager",
+      show: true,
+      disabled: true,
+      cellRenderer: "projectManager",
+    },
+    {
+      field: "createdBy",
+      headerName: "Created By",
+      show: true,
+      cellRenderer: "createdByRenderer",
+    },
+    {
+      field: "updatedBy",
+      headerName: "Updated By",
+      show: true,
+      cellRenderer: "updatedByRenderer",
+    },
+  ]);
+  //  Grid Variables - End
 
   useEffect(() => {
     let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
@@ -94,193 +208,185 @@ const ProjectSales: FC = () => {
     if (renderCount > 0) {
       fetchProjects();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query, selectedType]);
+  }, [page, limit, selectedType, filters, sorting]);
 
-  const getRows = (data: []) => {
-    const rows = data.length
-      ? data.map((project: any) => ({
-        id: project._id,
-        isChecked: false,
-        projectName: project.projectName,
-        projectOwner: project.projectOwner?.optionLabel,
-        createdAt: moment(project.createdAt).format("MMM Do, YYYY"),
-        createdBy: project?.createdBy,
-        updatedBy: project?.updatedBy,
-      }))
-      : [];
-    setDataRows(rows);
-  };
+  const NameRenderer = (params) => (
+    <Link
+      className="link"
+      to={`/project-sales/detail/${params.data._id}`}
+      title={params.value}
+    >
+      {params.value}
+    </Link>
+  );
 
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllProjects}
-          onChange={(ev) => {
-            setCheckAllProjects(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              d.isChecked = ev.target.checked;
-              return d;
-            });
-            setDataRows([...gridData]);
-          }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev);
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "projectName",
-      headerName: "Name",
-      width: 250,
-      renderCell: (params: any) => (
-        <MuiLink
+  const ProjectManagerRenderer = (params) => (
+    <>
+      {params.value ? (
+        <Link
+          className="link"
+          to={`/user/detail/${params.data.projectManagerId}`}
           title={params.value}
-          className="text-truncate"
-          component={Link}
-          to={`${routes.projectSalesDetail.path}/${params.row.id}`}
         >
           {params.value}
-        </MuiLink>
-      ),
-    },
+        </Link>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
 
-    // {
-    //   field: "createdAt",
-    //   headerName: "Created At",
-    //   width: 150,
-    //   renderCell: (params: any) => (
-    //     <p title={`Created At • ${params.value}`} className="text-truncate">
-    //       {params?.value}
-    //     </p>
-    //   ),
-    // },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      renderCell: (params: any) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params?.value?.user?.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params?.value?.user?.firstName} • ${moment(
-                params?.value?.date?.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      renderCell: (params: any) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="updateBy">
-            {params.value.user.firstName}
-            <span
-              className="updatedAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-      disableColumnMenu: true,
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: any) => {
-        const data = projects?.find((p) => params.row.id === p._id);
+  const ActionsRenderer = (params) => (
+    <>
+      <GridDeleteIcon
+        hasDeletePermission={permissions?.projectSales.isDelete}
+        ownerId={params.data.projectManagerId}
+        userId={user?.user?._id}
+        onDelete={() => showConfirmBox(params.data)}
+        entity="Project"
+      />
+    </>
+  );
 
-        return (
-          <>
-            {permissions?.projectSales.isDelete &&
-              data?.projectManager.optionValue === user.user._id ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You have to be a project owner to delete"
-              >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </>
-        );
-      },
-      width: 200,
-    },
-  ];
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    projectManager: ProjectManagerRenderer,
+    commonRenderer: CommonRenderer,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    actionsRenderer: ActionsRenderer,
+    customLoadingOverlay: CustomLoadingOverlay,
+    customFloatingFilter: CustomFloatingFilter,
+    // customLoadingCellRenderer: CustomLoadingCellRenderer,
+    // customNoRowsOverlay: CustomNoRowsOverlay
+  };
 
-  const updateCheckedStatus = (params, ev) => {
-    const gridData = [...dataRows];
-    const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-    gridData[indexOfRecord].isChecked = ev.target.checked;
+  //  If you want to do something once grid binding done
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+    setColumnApi(params.columnApi);
+  };
 
-    setDataRows([...gridData]);
+  const generateColumns = columns.map((column: any, index) => {
+    return (
+      <AgGridColumn
+        key={index}
+        field={column.field}
+        headerName={column.headerName}
+        filter={column.filter ?? "agTextColumnFilter"}
+        cellRenderer={column.cellRenderer ?? null}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
+      ></AgGridColumn>
+    );
+  });
 
-    const checkedRecords = gridData.filter((d) => d.isChecked === true);
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
 
-    if (checkedRecords.length === gridData.length) {
-      setCheckAllProjects(true);
-    } else {
-      setCheckAllProjects(false);
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      default:
+        return field;
+    }
+  };
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case "projectManager":
+        return "projectManager.optionLabel";
+
+      default:
+        return field;
+    }
+  };
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&filterProjects=${selectedType}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).map((field) => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter,
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(
+        updatedFilters
+      )}&filterType=and`;
     }
 
-    handleSelectedProjects(params.row.id, ev.target.checked);
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(
+        sorting[0].colId
+      )}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+  const fetchProjects = async () => {
+    const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+
+    axiosInstance()
+      .get(`/project-sales${queryString}`)
+      .then(({ data: { data, count } }) => {
+        setProjects(data);
+        let rows = data.map((project) => ({
+          ...project,
+          projectManager: project.projectManager?.optionLabel,
+          projectManagerId: project.projectManager?.optionValue,
+          createdBy: project.createdBy?.user?.concatedName,
+          createdByDate: project.createdBy?.date,
+          updatedBy: project.updatedBy?.user?.concatedName,
+          updatedByDate: project.updatedBy?.date,
+        }));
+
+        dispatch({ type: "initialize", data: rows, count: count });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        dispatch({ type: "loading", loading: false });
+      });
+    // eslint-disable-next-line
+  };
+
+  const handleProjectFilter = (filterValues) => {
+    setselectedType(filterValues);
   };
 
   const showConfirmBox = (row) => {
     if (row === null) {
       if (permissions?.projectSales.isDelete) {
         const selectedData = projects.filter(
-          (p) => selectedProjects.filter((sp) => sp === p._id).length > 0
+          (p) => selectedRecords.filter((sp) => sp === p._id).length > 0
         );
         const myData = selectedData.filter(
-          (s) => s.projectManager.optionValue === user.user._id
+          (s) => s.projectManagerId === user.user._id
         );
 
-        if (selectedProjects.length != myData.length) {
+        if (selectedRecords.length !== myData.length) {
           setShowDeleteWarningConfirmBox(true);
         } else {
           setIsConformDialogVisible(true);
@@ -327,46 +433,7 @@ const ProjectSales: FC = () => {
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
-  };
-
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
-  };
-
-  // Handle project selection
-  const handleSelectedProjects = (id, isChecked) => {
-    let tempSelectedProjects = [...selectedProjects],
-      curRecIndex = selectedProjects.indexOf(id);
-    if (isChecked && curRecIndex < 0) {
-      tempSelectedProjects = [...selectedProjects, id];
-    } else if (!isChecked && curRecIndex >= 0) {
-      tempSelectedProjects.splice(curRecIndex, 1);
-    }
-    setSelectedProjects(tempSelectedProjects);
+    dispatch({ type: "search", search: e.target.value });
   };
 
   const handleCreate = () => {
@@ -376,50 +443,6 @@ const ProjectSales: FC = () => {
   const handleClose = () => {
     setIsOpen(false);
   };
-
-  const onFilterChange = useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let deepFilter;
-      switch (params.filterModel.items[0].columnField) {
-        case "createdBy":
-          deepFilter = JSON.stringify([
-            {
-              field: "createdBy.user.concatedName",
-              term: params.filterModel.items[0].value,
-            },
-          ]);
-          break;
-        case "updatedBy":
-          deepFilter = JSON.stringify([
-            {
-              field: "updatedBy.user.concatedName",
-              term: params.filterModel.items[0].value,
-            },
-          ]);
-          break;
-        case "name":
-          deepFilter = JSON.stringify([
-            { field: "firstName", term: params.filterModel.items[0].value },
-            { field: "middleName", term: params.filterModel.items[0].value },
-            { field: "lastName", term: params.filterModel.items[0].value },
-          ]);
-          break;
-        default:
-          deepFilter = JSON.stringify([
-            {
-              field: params.filterModel.items[0].columnField,
-              term: params.filterModel.items[0].value,
-            },
-          ]);
-      }
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter,
-      }));
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
 
   return (
     <>
@@ -437,42 +460,119 @@ const ProjectSales: FC = () => {
         <div className="main-container">
           <div className="header-panel">
             <ProjectHeader
+              userId={user?.user?._id}
               onSearch={handleSearch}
               searchVal={searchVal}
               permissions={permissions?.projectSales}
               selectedType={selectedType}
-              handleFilterChange={handleProtectFilter}
+              handleFilterChange={handleProjectFilter}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
+              selectedProject={selectedRecords}
             />
           </div>
-          <div className="listing-grid">
-            <DataGrid
-              components={{
-                Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
+
+          <CustomGridHeaderOptions
+            columns={columns}
+            setColumns={setColumns}
+            columnApi={columnApi}
+          />
+
+          <div className="ag-theme-material ag-grid-listing-grid">
+            <AgGridReact
+              rowData={dataRows}
+              onGridReady={onGridReady}
+              suppressDragLeaveHidesColumns={true}
+              suppressCellSelection={true}
+              rowHeight={40}
+              frameworkComponents={frameworkComponents}
+              defaultColDef={{
+                resizable: true,
+                floatingFilter: true,
+                sortable: true,
+                width: 250,
+                suppressMenu: true,
+                // headerCheckboxSelection: true,
+                // checkboxSelection: true,
+                floatingFilterComponentParams: { suppressFilterButton: true },
               }}
-              loading={loadingProjects}
-              rows={loadingProjects ? [] : dataRows}
-              columns={columns}
-              disableSelectionOnClick
-              disableMultipleSelection
-              paginationMode="server"
-              pagination
-              rowCount={rowCount}
-              onPageChange={handlePage}
-              onPageSizeChange={handlePageSize}
-              pageSize={query.limit}
-              page={query.page}
-              onSortModelChange={handleSortModelChange}
-              rowsPerPageOptions={[25, 50, 75]}
-              density="compact"
-              onFilterModelChange={onFilterChange}
-              filterMode="server"
-            />
+              onSortChanged={(e) => {
+                dispatch({ type: "sort", sorting: e.api.getSortModel() });
+              }}
+              onFilterChanged={(e) => {
+                dispatch({ type: "filter", filters: e.api.getFilterModel() });
+              }}
+              enableCellTextSelection={true}
+              ensureDomOrder={false}
+              loadingOverlayComponent={"customLoadingOverlay"}
+              loadingOverlayComponentParams={{
+                loadingMessage: "Loading...",
+              }}
+              animateRows={false}
+              suppressAnimationFrame={true}
+              suppressMaintainUnsortedOrder={true}
+              rowBuffer={limit}
+              // suppressMaxRenderedRowRestriction={true}
+
+              // loadingCellRenderer={'customLoadingCellRenderer'}
+              // loadingCellRendererParams={{
+              //   loadingMessage: 'One moment please...',
+              // }}
+
+              suppressRowClickSelection={true}
+              rowSelection={"multiple"}
+              onSelectionChanged={(event: any) => {
+                dispatch({
+                  type: "selection",
+                  selectedRecords: event.api.getSelectedRows(),
+                });
+              }}
+              immutableData={true}
+              getRowNodeId={(data) => {
+                return data._id;
+              }}
+            >
+              <AgGridColumn
+                width={70}
+                filter={false}
+                pinned="left"
+                lockPinned={true}
+                headerCheckboxSelection={true}
+                headerCheckboxSelectionFilteredOnly={true}
+                checkboxSelection={true}
+                resizable={false}
+                sortable={false}
+              ></AgGridColumn>
+
+              {generateColumns}
+
+              <AgGridColumn
+                width={150}
+                headerName="Actions"
+                pinned={isMobile || isTablet ? false : "right"}
+                lockPinned={isMobile || isTablet ? false : true}
+                resizable={false}
+                sortable={false}
+                filter={false}
+                cellRenderer="actionsRenderer"
+              ></AgGridColumn>
+            </AgGridReact>
           </div>
+          <TablePagination
+            component="div"
+            count={rowCount}
+            page={page}
+            onChangePage={(event, newPage) => {
+              dispatch({ type: "pageChange", page: newPage });
+            }}
+            rowsPerPage={limit}
+            onChangeRowsPerPage={(event) => {
+              dispatch({ type: "pageSizeChange", limit: event.target.value });
+            }}
+            rowsPerPageOptions={pageSizes}
+          />
         </div>
+
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -484,8 +584,9 @@ const ProjectSales: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete this record ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure, you want to delete this record ${
+              deleteRec.name || ""
+            }?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

@@ -6,6 +6,8 @@ import NoDataCell from "../Helpers/NoDataCell";
 
 export const CommonRenderer = params => <CustomRenderCell value={params.value} />;
 
+export const CommonRendererWithCopy = params => <CustomRenderCell value={params.value} isCopyToClipboard={true} />;
+
 export const CreatedByRenderer = params => params.value ? (
     <h5 className="createBy" title={`${params.value} • ${moment(
         params.data.createdByDate.slice(0, 10)

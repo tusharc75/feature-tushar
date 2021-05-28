@@ -1,23 +1,21 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useReducer } from "react";
 import Layout from "../../components/Layout";
 import { useData } from "../../StateProvider/Provider";
 import {
   Button,
-  Checkbox,
   Menu,
   MenuItem,
   Tooltip,
   IconButton,
   Grid,
   Chip,
+  TablePagination
 } from "@material-ui/core";
-import { DataGrid } from "@material-ui/data-grid";
 import { Link } from "react-router-dom";
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import SearchBox from "../../components/Helpers/SearchBox";
-import DeleteIcon from "@material-ui/icons/Delete";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import ManageAccountDialog from "./ManageAccount/index";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -30,14 +28,26 @@ import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FcApproval } from "react-icons/fc";
 import { MdAccountCircle } from "react-icons/md";
-import { getSearchQuery } from "../../services/util";
 import { sidebarResource } from "../../constants/helpers";
-import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import routes from "./../../components/Helpers/Routes";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import {
+  gridPageSizes,
+  isObjectEmpty
+} from "../../constants/helpers";
+import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import { isMobile, isTablet } from "react-device-detect";
+import {
+  CommonRenderer,
+  CreatedByRenderer,
+  UpdatedByRenderer,
+  CustomLoadingOverlay,
+  CommonRendererWithCopy
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 
 const AccTypes = [
   {
@@ -49,6 +59,98 @@ const AccTypes = [
     value: 2,
   },
 ];
+
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loading: action.loading
+      }
+
+    case "initialize":
+      return {
+        ...state,
+        dataRows: action.data,
+        rowCount: action.count,
+        loading: false
+      }
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      }
+
+    case "update":
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      }
+
+    case "filter":
+      return {
+        ...state,
+        loading: true,
+        filters: action.filters,
+        page: 0
+      }
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: true
+      }
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loading: true
+      }
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page
+      }
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: true
+      }
+
+    case "complete":
+      return {
+        ...state,
+        loading: false
+      }
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: {},
+  sorting: [],
+  selectedRecords: []
+}
 
 let accountTimeout;
 export default function Account(props) {
@@ -63,10 +165,6 @@ export default function Account(props) {
   }: any = useData();
   const [accountData, setAccountData] = useState([]);
   const [cloneId, setCloneId] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [dataRows, setDataRows] = useState([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [checkAllAccounts, setCheckAllAccounts] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -75,8 +173,6 @@ export default function Account(props) {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [searchVal, setSearchVal] = useState("");
   const [selectedType, setselectedType] = useState(1);
 
   const [singleAccountDelete, setSingleAccountDelete] = useState({
@@ -106,6 +202,26 @@ export default function Account(props) {
     approveAccount: false,
   });
 
+  //  Grid Variables - Start
+  const [gridApi, setGridApi] = useState(null);
+  const [columnApi, setColumnApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  // const [showGridFilters, setShowGridFilters] = useState(true)
+  const [columns, setColumns] = useState([
+    { field: "accountName", headerName: "Account Name", show: true, disabled: true, cellRenderer: "accountNameRenderer" },
+    { field: "relatedLead", headerName: "Related Lead", show: true, cellRenderer: "relatedLeadRenderer" },
+    { field: "typeOfAccount", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
+    { field: "industry", headerName: "Industry", show: true, cellRenderer: "commonRenderer" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+    { field: "parentAccount", headerName: "Parent Account", show: true, cellRenderer: "parentAccountRenderer" },
+    { field: "masterAccount", headerName: "Master Account", show: true, cellRenderer: "masterAccountRenderer", filter: false, sortable: false },
+    { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRendererWithCopy" },
+  ]);
+  //  Grid Variables - End
+
   useEffect(() => {
     if (permissions) {
       setAccountPermissions(permissions[accountResource]);
@@ -113,7 +229,7 @@ export default function Account(props) {
   }, [permissions]);
 
   useEffect(() => {
-    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
 
     if (accountTimeout) {
       clearTimeout(accountTimeout);
@@ -122,342 +238,271 @@ export default function Account(props) {
     accountTimeout = setTimeout(() => {
       fetchAccounts();
     }, millisec);
-  }, [searchVal]);
+  }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
       fetchAccounts();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query, selectedType]);
+  }, [page, limit, selectedType, filters, sorting]);
 
-  useEffect(() => {
-    let rows = accountData?.map((u) => ({
-      ...u,
-      isChecked: false,
-      id: u._id,
-      canDelete: u?.owner?.optionValue === user?.user._id,
-      collaborator: u.collaborator || [],
-      masterAccount:
-        u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "")?.accountName : "",
-      approved: u.staticData?.approved ? u.staticData?.approved : false,
-      relatedLead: u.staticData?.lead
-    }));
-    setDataRows([...rows]);
-  }, [accountData]);
+  const AccountNameRenderer = params => <span className="d-flex gap-2 align-items-center">
+    <Link className="link" to={`/${accountRoute}/detail/${params.data._id}`}>
+      <CustomRenderCell value={params.value} />
+    </Link>
+    {
+      params.data.approved && <FcApproval title="Approved" size={20} />
+    }
+  </span>
+
+  const RelatedLeadRenderer = params => params.value ?
+    <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
+      {params.value}
+    </Link> : <NoDataCell />
+
+  const ParentAccountRenderer = params => params.value ?
+    <Link className="link" to={`/${accountRoute}/detail/${params.data.parentAccountId}`} title={params.value}>
+      <CustomRenderCell value={params.value} />
+    </Link> : <NoDataCell />
+
+  const MasterAccountRenderer = params => params.value ?
+    <Link className="link" to={`/${accountRoute}/detail/${params.data.masterAccountId}`} title={params.value}>
+      <CustomRenderCell value={params.value} />
+    </Link> : <NoDataCell />
+
+  const ActionsRenderer = params => <>
+    {accountPermissions.isCreate ? (
+      <Tooltip title="Clone">
+        <IconButton
+          aria-label="Clone"
+          onClick={() => {
+            cloneAccount(params.data._id);
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
+    ) : (
+      <Tooltip
+        className="cursor-stop"
+        title="You do not have permission to clone/create an account"
+      >
+        <IconButton aria-label="Clone">
+          <FileCopyIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    )}
+
+    {
+      accountPermissions.isUpdate && accountPermissions.approveAccount && params.data.approved ? (
+        <Tooltip title="Disapprove">
+          <IconButton
+            aria-label="Disapprove"
+            onClick={() => {
+              setSingleApproveDisapproveAccount({
+                show: true,
+                approved: false,
+                id: params.data._id,
+                accountName: params.data.accountName,
+              });
+            }}
+          >
+            <CancelIcon fontSize="inherit" color="error" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip title="Approve">
+          <IconButton
+            aria-label="Approve"
+            onClick={() => {
+              setSingleApproveDisapproveAccount({
+                show: true,
+                approved: true,
+                id: params.data._id,
+                accountName: params.data.accountName,
+              });
+            }}
+          >
+            <FcApproval />
+          </IconButton>
+        </Tooltip>
+      )
+    }
+
+    <GridDeleteIcon
+      hasDeletePermission={accountPermissions.isDelete}
+      ownerId={params.data.ownerId}
+      userId={user?.user?._id}
+      onDelete={() => {
+        setSingleAccountDelete({
+          show: true,
+          id: params.data._id,
+          accountName: params.data.accountName,
+        });
+      }}
+      entity="account"
+    />
+  </>
+
+  const frameworkComponents = {
+    accountNameRenderer: AccountNameRenderer,
+    relatedLeadRenderer: RelatedLeadRenderer,
+    commonRenderer: CommonRenderer,
+    commonRendererWithCopy: CommonRendererWithCopy,
+    parentAccountRenderer: ParentAccountRenderer,
+    masterAccountRenderer: MasterAccountRenderer,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    actionsRenderer: ActionsRenderer,
+    customLoadingOverlay: CustomLoadingOverlay,
+    customFloatingFilter: CustomFloatingFilter,
+    // customLoadingCellRenderer: CustomLoadingCellRenderer,
+    // customNoRowsOverlay: CustomNoRowsOverlay
+  };
+
+  //  If you want to do something once grid binding done
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+    setColumnApi(params.columnApi)
+  }
+
+  const generateColumns = columns.map((column: any, index) => {
+    return <AgGridColumn
+      key={index}
+      field={column.field}
+      headerName={column.headerName}
+      filter={column.filter ?? "agTextColumnFilter"}
+      sortable={column.sortable ?? true}
+      cellRenderer={column.cellRenderer ?? null}
+    // floatingFilterComponent={column.floatingFilterComponent ?? null}
+    // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+    //   suppressFilterButton: true,
+    // }}
+    >
+    </AgGridColumn>
+  })
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      case "relatedLead":
+        return "staticData.relatedLead.concatedName";
+
+      default:
+        return field;
+    }
+  }
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case "owner":
+        return "owner.optionLabel";
+
+      case "parentAccount":
+        return "parentAccount.optionLabel";
+
+      default:
+        return field;
+    }
+  }
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${selectedType}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).map(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+  const fetchAccounts = async () => {
+    const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+
+    axiosInstance()
+      .get(`${accountApi}${queryString}`)
+      .then(({ data: { data, count } }) => {
+
+        let rows = data.map((u) => {
+          const { owner, collaborator, createdBy, updatedBy, staticData, parentAccount, parentHierarchy, ...restProperties } = u;
+
+          let res = {
+            ...restProperties,
+            id: u._id,
+
+            owner: u.owner?.optionLabel,
+            ownerId: u.owner?.optionValue,
+            canDelete: u.owner?.optionValue === user?.user._id,
+
+            isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
+              (d) => d.optionValue == user?.user?._id
+            ),
+            relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+            relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+
+            approved: u.staticData?.approved,
+
+            parentAccount: parentAccount?.optionLabel,
+            parentAccountId: parentAccount?.optionValue,
+
+            masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "")?.accountName : "",
+            masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find(d => d.parentAccount === "")?._id : "",
+
+            createdBy: u.createdBy?.user?.concatedName,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date,
+          };
+          return res;
+        });
+
+        dispatch({ type: "initialize", data: rows, count: count });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        dispatch({ type: "loading", loading: false });
+      });
+  }
 
   const cloneAccount = async (accountId) => {
     setCloneId(accountId);
     setIsAccDialogVisible(true);
   };
 
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllAccounts}
-          onChange={(ev) => {
-            setCheckAllAccounts(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              // if (d.canDelete) {
-              d.isChecked = ev.target.checked;
-              // }
-              return d;
-            });
-            setDataRows([...gridData]);
-          }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          // disabled={!params.canDelete}
-          checked={params.value}
-          onChange={(ev) => {
-            const gridData = dataRows;
-            const indexOfRecord = gridData.findIndex(
-              (d) => d.id === params.row.id
-            );
-            gridData[indexOfRecord].isChecked = ev.target.checked;
-
-            setDataRows([...gridData]);
-
-            const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-            if (checkedRecords.length === gridData.length) {
-              setCheckAllAccounts(true);
-            } else {
-              setCheckAllAccounts(false);
-            }
-          }}
-        />
-        //  : <Tooltip className="cursor-stop" title="You must be the owner or collaborator of this account to get the selection functionality">
-        //     <IconButton>
-        //         <BlockIcon fontSize="small" color="error" />
-        //     </IconButton>
-        // </Tooltip >
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "accountName",
-      headerName: "Account Name",
-      width: 250,
-      renderCell: (params) => (
-        <span className="d-flex gap-2 align-items-center">
-          <Link
-            className={`${accountClass.account_name_link}`}
-            to={`/${accountRoute}/detail/${params.row._id}`}
-          >
-            <CustomRenderCell value={params?.value} />
-          </Link>
-          {
-            params.row.approved && <FcApproval className="mt-1" title="Approved" />
-          }
-        </span>
-      ),
-    },
-    {
-      field: "relatedLead",
-      headerName: "Related Lead",
-      width: 250,
-      renderCell: (params) => (
-        <>
-          {
-            params.value ?
-              <Link className="link" to={`${routes.leadDetail.path}/${params.value._id}`} title={[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}>
-                {[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}
-              </Link>
-              : <NoDataCell />
-          }
-        </>
-      ),
-      sortable: false,
-      filterable: false,
-    },
-    {
-      field: "typeOfAccount",
-      headerName: "Type",
-      width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
-    },
-    {
-      field: "industry",
-      headerName: "Industry",
-      width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
-    },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      renderCell: (params) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params.value.user.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params?.value?.date?.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-      // renderCell: (params) => <CustomRenderCell value={params?.value?.createdBy?.optionLabel} />
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      renderCell: (params) =>
-        params?.value?.user ? (
-          <h5 className="updateBy">
-            {params.value.user.firstName}
-            <span title={params.value.date} className="updatedAtTime badge-date">
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-
-      // renderCell: (params) => <CustomRenderCell value={params?.value?.updatedBy?.optionLabel} />
-    },
-    {
-      field: "parentAccount",
-      headerName: "Parent Account",
-      width: 250,
-      renderCell: (params) => (
-        <CustomRenderCell value={params?.value?.optionLabel} />
-      ),
-    },
-    {
-      field: "masterAccount",
-      headerName: "Master Account",
-      width: 250,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <CustomRenderCell value={params?.value} />
-      ),
-    },
-    {
-      field: "phone",
-      headerName: "Phone",
-      hide: true,
-      width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      renderCell: (params) => (
-        <>
-          {accountPermissions.isCreate ? (
-            <Tooltip title="Clone">
-              <IconButton
-                aria-label="Clone"
-                onClick={() => {
-                  cloneAccount(params.row._id);
-                }}
-              >
-                <FileCopyIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip
-              className="cursor-stop"
-              title="You do not have permission to clone/create an account"
-            >
-              <IconButton aria-label="Clone">
-                <FileCopyIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-
-          {accountPermissions.isUpdate && accountPermissions.approveAccount ? (
-            params.row.approved ? (
-              <Tooltip title="Disapprove">
-                <IconButton
-                  aria-label="Disapprove"
-                  onClick={() => {
-                    setSingleApproveDisapproveAccount({
-                      show: true,
-                      approved: false,
-                      id: params.row._id,
-                      accountName: params.row.accountName,
-                    });
-                  }}
-                >
-                  <CancelIcon fontSize="inherit" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip title="Approve">
-                <IconButton
-                  aria-label="Approve"
-                  onClick={() => {
-                    setSingleApproveDisapproveAccount({
-                      show: true,
-                      approved: true,
-                      id: params.row._id,
-                      accountName: params.row.accountName,
-                    });
-                  }}
-                >
-                  <FcApproval />
-                </IconButton>
-              </Tooltip>
-            )
-          ) : (
-            ""
-          )}
-
-          {accountPermissions.isDelete ? (
-            params.row.canDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => {
-                    setSingleAccountDelete({
-                      show: true,
-                      id: params.row._id,
-                      accountName: params.row.accountName,
-                    });
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You must be the owner of this account to get the delete functionality"
-              >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" color="disabled" />
-                </IconButton>
-              </Tooltip>
-            )
-          ) : (
-            <Tooltip
-              className="cursor-stop"
-              title="You do not have permission to delete account"
-            >
-              <IconButton aria-label="Delete">
-                <DeleteIcon fontSize="small" color="disabled" />
-              </IconButton>
-            </Tooltip>
-          )}
-        </>
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 200,
-    },
-  ];
-
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
+    dispatch({ type: "search", search: e.target.value });
   };
-
-  const fetchAccounts = async () => {
-    setLoading(true);
-    let searchParams: any = { ...query, filterAccounts: selectedType };
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
-    let api = getSearchQuery(`/${accountApi}`, searchParams);
-    setLoading(true);
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data, count } }) => {
-        setAccountData(data);
-        // getRows(data);
-        setRowCount(count);
-        setLoading(false);
-        setCheckAllAccounts(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-      });
-  }
 
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
@@ -472,40 +517,14 @@ export default function Account(props) {
     setIsAccDialogVisible(true);
   };
 
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
-  };
-
   const handleDeleteAccounts = async () => {
-    let selectedAccounts = dataRows
-      .filter((obj) => obj.isChecked)
-      .map((cr) => cr._id);
-    if (selectedAccounts && selectedAccounts.length > 0) {
+    let selectedAccounts = selectedRecords.map((cr) => cr._id);
+
+    if (selectedAccounts.length > 0) {
       axiosInstance()
         .put(`/${accountApi}/remove`, {
           ids: [...selectedAccounts],
-        })
-        .then(({ data }) => {
+        }).then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -538,7 +557,6 @@ export default function Account(props) {
       .finally(() => {
         setShowDeleteConfirmBox(false);
       });
-
     setSingleAccountDelete({ id: null, show: false, accountName: "" });
   };
 
@@ -571,7 +589,6 @@ export default function Account(props) {
           accountName: "",
         });
       });
-    setCheckAllAccounts(false);
   };
 
   const handleDialogClose = (params) => {
@@ -584,9 +601,8 @@ export default function Account(props) {
     }
   };
 
-  const handleAccountSel = (filterValues) => {
+  const handleAccountSelect = (filterValues) => {
     setselectedType(filterValues);
-    setCheckAllAccounts(false);
   };
 
   const approveDisapproveAccounts = () => {
@@ -620,34 +636,7 @@ export default function Account(props) {
           selectedRecords: 0,
         });
       });
-    setCheckAllAccounts(false);
   };
-
-  const onFilterChange = useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let deepFilter ;
-      switch (params.filterModel.items[0].columnField) {
-        case 'createdBy':
-          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'updatedBy':
-          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
-          break;
-        default:
-          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
-      }
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter
-      }));
-
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
 
   return (
     <>
@@ -674,7 +663,7 @@ export default function Account(props) {
               total={rowCount}
               heading={sidebarResource[accountResource]}
               selectedType={selectedType}
-              onTypeChange={handleAccountSel}
+              onTypeChange={handleAccountSelect}
               options={AccTypes}
               secondHeading="Account"
               icon={<MdAccountCircle className="headerLogo" />}
@@ -686,7 +675,7 @@ export default function Account(props) {
                   onSearch={handleSearch}
                   searchbox="account_header_search_bar"
                   width="300px"
-                  value={searchVal}
+                  value={search}
                 />
                 <div
                   className={`${accountClass.account_header_add_btn_action_btn_group}`}
@@ -707,9 +696,7 @@ export default function Account(props) {
                   {(accountPermissions.isDelete ||
                     accountPermissions.approveAccount) && (
                       <Button
-                        disabled={
-                          dataRows.filter((d) => d.isChecked).length === 0
-                        }
+                        disabled={selectedRecords.length === 0}
                         variant="outlined"
                         color="default"
                         size="small"
@@ -735,70 +722,48 @@ export default function Account(props) {
                     {accountPermissions.isUpdate &&
                       accountPermissions.approveAccount && (
                         <MenuItem
-                          disabled={
-                            dataRows.filter((d) => d.isChecked && !d.approved)
-                              .length === 0
-                          }
+                          disabled={selectedRecords.filter((d) => !d.approved).length === 0}
                           onClick={() => {
                             closeActions();
                             setMultipleApproveDisapproveAccount({
                               show: true,
                               approved: true,
-                              selectedRecords: dataRows.filter(
-                                (d) => d.isChecked && !d.approved
-                              ).length,
+                              selectedRecords: selectedRecords.filter((d) => !d.approved).length,
                             });
                           }}
                         >
                           Approve Accounts &nbsp;{" "}
                           <Chip
                             size="small"
-                            label={
-                              dataRows.filter((d) => d.isChecked && !d.approved)
-                                .length
-                            }
+                            label={selectedRecords.filter((d) => !d.approved).length}
                           />
                         </MenuItem>
                       )}
                     {accountPermissions.isUpdate &&
                       accountPermissions.approveAccount && (
                         <MenuItem
-                          disabled={
-                            dataRows.filter((d) => d.isChecked && d.approved)
-                              .length === 0
-                          }
+                          disabled={selectedRecords.filter((d) => d.approved).length === 0}
                           onClick={() => {
                             closeActions();
                             setMultipleApproveDisapproveAccount({
                               show: true,
                               approved: false,
-                              selectedRecords: dataRows.filter(
-                                (d) => d.isChecked && d.approved
-                              ).length,
+                              selectedRecords: selectedRecords.filter((d) => d.approved).length,
                             });
                           }}
                         >
                           Disapprove Accounts &nbsp;{" "}
                           <Chip
                             size="small"
-                            label={
-                              dataRows.filter((d) => d.isChecked && d.approved)
-                                .length
-                            }
+                            label={selectedRecords.filter((d) => d.approved).length}
                           />
                         </MenuItem>
                       )}
                     {accountPermissions.isDelete && (
                       <MenuItem
-                        disabled={
-                          dataRows.filter((d) => d.isChecked).length === 0
-                        }
+                        disabled={selectedRecords.length === 0}
                         onClick={() => {
-                          if (
-                            dataRows.find(
-                              (d) => d.isChecked && d.canDelete === false
-                            )
-                          ) {
+                          if (selectedRecords.some((d) => d.canDelete === false)) {
                             closeActions();
                             setShowDeleteWarningConfirmBox(true);
                           } else {
@@ -816,7 +781,95 @@ export default function Account(props) {
             </CustomHeader>
           </div>
 
-          <div className="listing-grid">
+          <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
+
+          <div className="ag-theme-material ag-grid-listing-grid">
+            <AgGridReact
+              rowData={dataRows}
+              onGridReady={onGridReady}
+              suppressDragLeaveHidesColumns={true}
+              suppressCellSelection={true}
+              rowHeight={40}
+              frameworkComponents={frameworkComponents}
+              defaultColDef={{
+                resizable: true,
+                floatingFilter: true,
+                sortable: true,
+                width: 250,
+                suppressMenu: true,
+                // headerCheckboxSelection: true,
+                // checkboxSelection: true,
+                floatingFilterComponentParams: { suppressFilterButton: true }
+              }}
+              onSortChanged={(e) => {
+                dispatch({ type: "sort", sorting: e.api.getSortModel() })
+              }}
+              onFilterChanged={(e) => {
+                dispatch({ type: "filter", filters: e.api.getFilterModel() });
+              }}
+              enableCellTextSelection={true}
+              ensureDomOrder={false}
+              loadingOverlayComponent={'customLoadingOverlay'}
+              loadingOverlayComponentParams={{
+                loadingMessage: 'Loading...',
+              }}
+              animateRows={false}
+              suppressAnimationFrame={true}
+              suppressMaintainUnsortedOrder={true}
+
+              rowBuffer={limit}
+              // suppressMaxRenderedRowRestriction={true}
+
+              // loadingCellRenderer={'customLoadingCellRenderer'}
+              // loadingCellRendererParams={{
+              //   loadingMessage: 'One moment please...',
+              // }}
+
+              suppressRowClickSelection={true}
+              rowSelection={'multiple'}
+              onSelectionChanged={(event: any) => {
+                dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
+              }}
+              immutableData={true}
+              getRowNodeId={(data) => {
+                return data._id;
+              }}
+            >
+              <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
+                headerCheckboxSelection={true}
+                headerCheckboxSelectionFilteredOnly={true}
+                checkboxSelection={true}
+                resizable={false} sortable={false}
+              >
+              </AgGridColumn>
+
+              {generateColumns}
+
+              <AgGridColumn width={200} headerName="Actions"
+                pinned={(isMobile || isTablet) ? false : "right"}
+                lockPinned={(isMobile || isTablet) ? false : true}
+                resizable={false} sortable={false}
+                filter={false} cellRenderer="actionsRenderer">
+              </AgGridColumn>
+
+            </AgGridReact>
+          </div>
+
+          <TablePagination
+            component="div"
+            count={rowCount}
+            page={page}
+            onChangePage={(event, newPage) => {
+              dispatch({ type: "pageChange", page: newPage })
+            }}
+            rowsPerPage={limit}
+            onChangeRowsPerPage={(event) => {
+              dispatch({ type: "pageSizeChange", limit: event.target.value })
+            }}
+            rowsPerPageOptions={pageSizes}
+          />
+
+          {/* <div className="listing-grid">
             <DataGrid
               components={{
                 Toolbar: CustomDataGridToolbar,
@@ -843,7 +896,9 @@ export default function Account(props) {
               onFilterModelChange={onFilterChange}
               filterMode="server"
             />
-          </div>
+          </div> */}
+
+
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
               open={showDeleteWarningConfirmBox}
