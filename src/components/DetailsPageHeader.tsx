@@ -6,6 +6,7 @@ import { Skeleton } from "@material-ui/lab";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CopyToClipboard from '../components/Helpers/CopyToClipboard'
 import { FcApproval } from 'react-icons/fc';
+import { isMobile, isTablet } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,7 +63,7 @@ const DetailsPageHeader = (props) => {
           </Grid>
           <Grid item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
         </Grid>
-        <Box className="itemCenter itemMobile">
+        <Box className="detailHeaderDashboard">
           {loading ? (
             <Grid container wrap="nowrap">
               {[...Array(4).keys()].map((i, index) => (
