@@ -72,6 +72,8 @@ import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
 import DOAapproval from "./pages/DOA/DOAApproval";
 import Reminder from "./pages/Reminder";
+import ResetPassword from "./pages/Auth/ResetPassword";
+import queryString from "query-string";
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -107,10 +109,19 @@ function App() {
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
+
+    let redirectToAnotherScreen = null;
+    if (location && location.search) {
+      const parsedParams = queryString.parse(location.search);
+      if (parsedParams.redirect) {
+        redirectToAnotherScreen = parsedParams.redirect;
+      }
+    }
+
     return !user ? (
       <Comp />
     ) : (
-      <Redirect to={{ pathname: "/", state: { from: location } }} />
+      <Redirect to={{ pathname: redirectToAnotherScreen ? redirectToAnotherScreen : "/", state: { from: location } }} />
     );
   };
 
@@ -120,7 +131,7 @@ function App() {
         {/* <Switch location={location} key={location.key}> */}
         <Switch>
           <Route
-            exact
+            // exact
             path="/login"
             render={({ location }) => conditionalRedirect(Login, location)}
           />
@@ -136,6 +147,13 @@ function App() {
             path="/forget-password"
             render={({ location }) =>
               conditionalRedirect(ForgetPassword, location)
+            }
+          />
+          <Route
+            exact
+            path="/reset-password"
+            render={({ location }) =>
+              conditionalRedirect(ResetPassword, location)
             }
           />
           <PrivateRoute exact path="/">
@@ -285,21 +303,16 @@ function App() {
           <PrivateRoute exact path="/activity">
             <Activitydemo />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/email">
+          <PrivateRoute exact path="/email">
             <Email />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/note">
+          <PrivateRoute exact path="/note">
             <Note />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/attachment">
+          <PrivateRoute exact path="/attachment">
             <Attachments />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/event">
-            <Event />
-          </PrivateRoute>
-          <PrivateRoute exact path="/activity/:type">
-            <Activity />
-          </PrivateRoute>
+  
           <PrivateRoute exact path="/calendar">
             <Calender />
           </PrivateRoute>
@@ -369,6 +382,10 @@ function App() {
           <Route exact path={"/doa-request/:id"}>
             <DOAapproval />
           </Route>
+
+          <PrivateRoute path="/:type">
+            <Activity />
+          </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>

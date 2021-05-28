@@ -91,6 +91,21 @@
 
 // Used below mixin to generate some fixed sized size
 
+.border {
+    border: 1px solid var(--common-border-color) !important;
+}
+
+.border-0 {
+    border: 0 !important;
+}
+
+$directions: top, bottom, left, right;
+@each $direction in $directions {
+    #{".border-" + $direction + "-0"} {
+        #{"border-" + $direction}: 0 !important;
+    }
+}
+
 $offset: 1;
 $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 @mixin fixed-list-loop($className, $styleName, $unit) {
@@ -249,4 +264,11 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 
 .pull-right {
     text-align: right !important;
+}
+.itemCenter{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px;
 }

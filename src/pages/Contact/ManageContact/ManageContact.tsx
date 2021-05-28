@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { Box, Button, Grid, IconButton, Tooltip } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
+  CustomDialogTransition,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
   simplifyValues,
@@ -18,6 +19,7 @@ import { useData } from "../../../StateProvider/Provider";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
 import { makeStyles } from "@material-ui/core/styles";
+import { isMobile, isTablet } from "react-device-detect";
 
 const arr = [...Array(9).keys()];
 
@@ -177,6 +179,8 @@ export default function ManageContact(props) {
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
       >
         <CustomDialogHeader
           onClose={onClose}

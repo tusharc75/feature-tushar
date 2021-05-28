@@ -13,7 +13,7 @@ import routes from "../../components/Helpers/Routes";
 import { useData } from "../../StateProvider/Provider";
 import { SVG } from "../../assets";
 import Activity from "../../components/Activity";
-import { getObjKeysWithValues, lead, leadProcessFieldName } from "../../constants/helpers";
+import { getObjKeysWithValues, lead, processFieldName } from "../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
@@ -80,9 +80,9 @@ const LeadDetailsPage = () => {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = leadFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == leadProcessFieldName.toLocaleLowerCase());
+      const processSteps = leadFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == processFieldName.toLocaleLowerCase());
       if (processSteps && processSteps.isRead && leadData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == leadData[leadProcessFieldName]) + 1;
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == leadData[processFieldName]) + 1;
         setActiveStep(currentStepToShow);
       }
     }
@@ -122,7 +122,7 @@ const LeadDetailsPage = () => {
           );
 
           setHasPermissionToConvertToOpportunity(dontHavePermissions.length == 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate &&
-            data[leadProcessFieldName] && data[leadProcessFieldName].toLowerCase() === "qualified");
+            data[processFieldName] && data[processFieldName].toLowerCase() === "qualified");
           setIsLeadAlreadyConvertedToOpportunity(data.staticData && data.staticData["convertedToOpportunity"] ? data.staticData["convertedToOpportunity"] : false);
 
           if (data?.salutation?.optionLabel) {
@@ -161,7 +161,7 @@ const LeadDetailsPage = () => {
       .then(({ data: { data } }) => {
         setLeadFields(data);
 
-        const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == leadProcessFieldName.toLowerCase());
+        const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == processFieldName.toLowerCase());
         if (processSteps && processSteps.isRead) {
           setSteps(processSteps.fieldData.option.map(m => {
             return {
@@ -260,7 +260,7 @@ const LeadDetailsPage = () => {
       ) : null}
       <Layout>
 
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
@@ -352,7 +352,7 @@ const LeadDetailsPage = () => {
                                 setIsProcessing(true)
                                 const updatedData = {
                                   ...getObjKeysWithValues(leadData, leadFields.map((f) => { return f.fieldData })),
-                                  [leadProcessFieldName]: steps[activeStep].text,
+                                  [processFieldName]: steps[activeStep].text,
                                   _id: leadData._id
                                 };
 

@@ -16,8 +16,13 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import Dialog from '@material-ui/core/Dialog';
 import ManageAttachment from "../../../components/Activity/Attachments/ManageAttachment";
 import CustomContainer from '../../../components/CustomContainer'
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import styles from "../../Leads/Header.module.scss";
 import { AiOutlinePaperClip } from 'react-icons/ai'
+import { AddOutlined } from "@material-ui/icons";
+import { Button, Tooltip, IconButton } from '@material-ui/core'
+import { useData } from "../../../StateProvider/Provider";
+import { Delete as DeleteIcon } from "@material-ui/icons";
 
 export default function Attachment(props) {
 
@@ -30,7 +35,13 @@ export default function Attachment(props) {
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false)
     const [attachmentData, setAttachmentData] = useState(null)
+    const [deleteRecord, setDeleteRecord] = useState(null)
+    const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const toastConfig = useContext(CustomToastContext);
+    const {
+        state: { user },
+    }: any = useData();
 
     useEffect(() => {
         if (referenceType) {
@@ -76,13 +87,45 @@ export default function Attachment(props) {
         setAttachmentData(null)
         fetchAttachments()
     }
+    const showConfirmBox = (row) => {
+        if (row) {
+            setIsConfirmDialogVisible(true);
+            if (row && row.id) {
+                setDeleteRecord(row);
+            }
+        }
+    };
+
+    const handleDeleteEmails = async () => {
+        setDeleteLoading(true);
+        if (deleteRecord?.id)
+            axiosInstance()
+                .delete(`/attachment/${deleteRecord?.id}`)
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: "success",
+                        message: data.message,
+                    });
+                    setIsConfirmDialogVisible(false);
+                    setDeleteLoading(false);
+                    if (deleteRecord) setDeleteRecord(null);
+                    fetchAttachments();
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                    setIsConfirmDialogVisible(false);
+                    setDeleteLoading(false);
+                });
+    };
 
     const columns = [
         {
             field: 'name', headerName: 'Name',
             width: 300,
             renderCell: (params) =>
-                <a onClick={() => handleActivityOpen(params.row)}>{params.row.name}</a>
+                <a className="link cursor-pointer"
+                    onClick={() => handleActivityOpen(params.row)}>{params.row.name}</a>
         },
         {
             field: 'createdBy',
@@ -98,30 +141,53 @@ export default function Attachment(props) {
             renderCell: (params) =>
                 <span>{moment(params.row.updatedAt).format("DD/MM/YYYY hh:mm A")}</span>
         },
+        {
+            field: "actions",
+            headerName: "Actions ",
+            disableColumnMenu: true,
+            sortable: false,
+            filterable: false,
+            renderCell: (params: any) => (
+                <Tooltip title="Delete">
+                    <IconButton
+                        aria-label="Delete"
+                        onClick={() => showConfirmBox(params.row)}>
+                        <DeleteIcon fontSize="small" color="error" />
+                    </IconButton>
+                </Tooltip>
+            ),
+            width: 100,
+        },
     ];
 
 
     return <Layout>
-        <Grid container>
-            <Grid item md={12} sm={12} xs={12}>
-                <CustomBreadCrumbs routes={[{ title: "Attachment" }]} />
-            </Grid>
+        <Grid container className="headerbox">
+            <CustomBreadCrumbs routes={[{ title: "Attachment" }]} />
         </Grid>
         <CustomContainer>
             <div className="header-panel">
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={2} className="d-flex align-items-center gap-1">
                         <AiOutlinePaperClip className="headerLogo" />{" "}
-                        <span className="listingHeader">Attachment</span>
+                        <span className="listingHeader">Attachment ({attachments.length})</span>
                     </Grid>
                     <Grid item xs={10} className={styles.filter_side}>
-                        <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
-                            <Box style={{ width: '90%' }}>
-                                <SearchFilter handleChangeFilter={handleChangeFilter}
-                                    filter={filter}
-                                    chip={{ size: "small" }}
-                                />
-                            </Box>
+                        <Box component="div" className={styles.filter_side_header} style={{ width: "100%" }} >
+                            <SearchFilter handleChangeFilter={handleChangeFilter}
+                                filter={filter}
+                                chip={{ size: "small" }}
+                            />
+                            <Button
+
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                className={styles.add_submit_btn}
+                                onClick={() => setOpen(true)}
+                                startIcon={<AddOutlined />}>
+                                Add
+                                </Button>
                         </Box>
                     </Grid>
                 </Grid>
@@ -152,12 +218,25 @@ export default function Attachment(props) {
                 >
                     <ManageAttachment
                         attachmentId={attachmentData?.id}
+                        relatedTo={[{ type: "my", name: user?.user?._id }]}
                         handleClose={handleClose}
                         attachmentData={attachmentData}
                     />
                 </Dialog>
                 : null
             }
+            {isConfirmDialogVisible ? (
+                <ConfirmationDialog
+                    open={isConfirmDialogVisible}
+                    message={`Are you sure, you want to delete ${deleteRecord?.id ? "this attachment ?" : ""}`}
+                    onClose={() => {
+                        if (deleteRecord) setDeleteRecord(null);
+                        setIsConfirmDialogVisible(false);
+                    }}
+                    okBtnLoading={deleteLoading}
+                    onOk={handleDeleteEmails}
+                />
+            ) : null}
         </CustomContainer>
 
     </Layout>

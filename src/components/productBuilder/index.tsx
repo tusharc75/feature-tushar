@@ -44,9 +44,9 @@ const ProductBuilder = (props) => {
         fetchProduct();
     }, [productBuilderId]);
 
-    // useEffect(() => {
-    //     fetchVersionDetail();
-    // }, []);
+    useEffect(() => {
+        fetchVersionDetail();
+    }, []);
 
     const fetchVersionDetail = () => {
         axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + productBuilderId).then(({ data }) => {

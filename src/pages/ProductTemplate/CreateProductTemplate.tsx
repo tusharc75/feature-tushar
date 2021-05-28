@@ -152,8 +152,7 @@ const ProductTemplate = () => {
     }
 
     return (<Layout>
-
-        <Grid container direction="row">
+        <Grid container className="headerbox">
             <Grid item xs={12}>
                 <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
             </Grid>

@@ -25,15 +25,14 @@ const useStyles = makeStyles((theme) => ({
   activityHeader: {
     background: "#dfdfdf",
     margin: "6px 6px",
-    borderRadius: "6px"
+    borderRadius: "6px",
   },
   tabBox: {
     display: "flex",
     justifyContent: "center",
     padding: "2px",
-    margin: "5PX"
-  }
-
+    margin: "5PX",
+  },
 }));
 
 const Activity = () => {
@@ -54,7 +53,7 @@ const Activity = () => {
             { _id: referenceId, type: referenceType, name: data.name },
           ]);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     }
   }, [type, referenceId]);
 
@@ -65,11 +64,10 @@ const Activity = () => {
 
   return (
     <Layout>
-      <Grid container direction="row">
+      <Grid container className="headerbox">
         <Grid item xs={12}>
           <CustomBreadCrumbs
             routes={[
-              { title: "Activity", path: "/activity" },
               { title: capitalize(type) },
             ]}
           />
@@ -79,21 +77,37 @@ const Activity = () => {
             <Grid container>
               <Grid item xs={12} md={5} sm={5}>
                 <Paper className={classes.tabBox}>
-                  <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
+                  <CustomTabs
+                    value={viewType}
+                    setValue={setViewType}
+                    tabs={tabs}
+                  />
                 </Paper>
               </Grid>
               <Grid item xs={12} md={7} sm={7}>
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} />
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                />
               </Grid>
             </Grid>
           </Box>
           <Box className={classes.activityContainer}>
-            {viewType === 0 && <Board type={type} filter={filter} activityId={activityId} />}
-            {viewType === 1 && <Roadmap type={type} filter={filter} activityId={activityId} />}
+            {viewType === 0 && (
+              <Board type={type} filter={filter} activityId={activityId} />
+            )}
+            {viewType === 1 && (
+              <Roadmap type={type} filter={filter} activityId={activityId} />
+            )}
           </Box>
         </CustomContainer>
-        {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
-       </Grid>
+        {activityType !== undefined && (
+          <ActivityModelHandler
+            activityType={activityType}
+            activityId={activityId}
+          />
+        )}
+      </Grid>
     </Layout>
   );
 };

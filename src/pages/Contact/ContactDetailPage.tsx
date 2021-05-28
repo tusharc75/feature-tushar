@@ -386,12 +386,12 @@ const ContactDetailsPage = (props) => {
           />
         )}
 
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2} >
-            <Paper className="subContainer">
+            <Paper>
               <DetailsPageHeader
                 heading={headingLbl}
                 logo={
@@ -480,7 +480,7 @@ const ContactDetailsPage = (props) => {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper className="subContainer">
+            <Paper>
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity

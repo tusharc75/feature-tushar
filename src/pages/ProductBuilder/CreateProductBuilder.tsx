@@ -55,7 +55,7 @@ const CreateProductBuilder = () => {
     }
 
     return (<Layout>
-        <Grid container direction="row">
+        <Grid container className="headerbox">  
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title, path: routes.productBuilder.path },
                 { title: id === "0" ? "New" : initialValues && initialValues.name }]} />

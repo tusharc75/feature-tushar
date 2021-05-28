@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import React, { forwardRef } from "react";
 import {
   AddBox,
   ArrowDownward,
@@ -20,6 +20,8 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 import currencies from "./currency_with_country.json";
+import { TransitionProps } from "@material-ui/core/transitions";
+import { Slide } from "@material-ui/core";
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -57,8 +59,7 @@ export const userType = {
 
 export const gridPageSizes = [25, 50, 75];
 
-export const leadProcessFieldName = "leadProcess";
-export const opportunityProcessFieldName = "process";
+export const processFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
@@ -88,6 +89,11 @@ export const sidebarResource = {
   lead: "Lead",
   opportunity: "Opportunity",
   projectSales: "Project Sales",
+  task: "Task",
+  note: "Note",
+  email: "Email",
+  attachment: "Attachment",
+  case: "Case",
 };
 
 export const lead = {
@@ -642,3 +648,11 @@ export const graphOptions = {
     shadow: true,
   },
 };
+
+
+export const CustomDialogTransition = React.forwardRef(function Transition(
+  props: TransitionProps & { children?: React.ReactElement<any, any> },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});

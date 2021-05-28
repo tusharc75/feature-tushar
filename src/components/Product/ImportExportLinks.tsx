@@ -162,7 +162,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
   );
 
   return (
-    <div className={`${classes.root} headerbox`}>
+    <div className={`${classes.root} `}>
       <div className={classes.linksContainer}>
         <label
           htmlFor="importFromExcel"
@@ -228,7 +228,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
         </MenuItem>
         <MenuItem
           onClick={() => {
-            downloadTemplate();
+            setIsSelection(true);
             handleClose();
           }}
         >

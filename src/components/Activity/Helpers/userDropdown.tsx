@@ -1,10 +1,30 @@
-import React, { useState, useEffect } from "react";
-import TextField from "@material-ui/core/TextField";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { GetUsers } from "../../../axios/activity";
-import Chip from "@material-ui/core/Chip";
+import { useState, useEffect, Fragment, FormEvent } from "react";
 import PropTypes from "prop-types";
-var _ = require("lodash");
+import {
+  TextField,
+  Chip,
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@material-ui/core";
+import Autocomplete, {
+  createFilterOptions,
+} from "@material-ui/lab/Autocomplete";
+import _ from "lodash";
+
+import axiosInstance from "../../../axios/axiosInstance";
+
+interface UserOptionType {
+  inputValue?: string;
+  userId?: string;
+  name?: string;
+}
+
+const filter = createFilterOptions<UserOptionType>();
 
 export const UserDropdown = ({
   name,
@@ -16,87 +36,191 @@ export const UserDropdown = ({
   setFieldValue,
   required,
 }) => {
-  const [users, setUsers] = React.useState(null);
+  const [users, setUsers] = useState(null);
+  const [open, toggleOpen] = useState(false);
+  const [dialogValue, setDialogValue] = useState({
+    userId: "",
+    name: "",
+  });
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  const handleClose = () => {
+    setDialogValue({
+      userId: "",
+      name: "",
+    });
+    toggleOpen(false);
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setUsers([
+      ...users,
+      {
+        userId: dialogValue.userId,
+        name: dialogValue.name,
+      },
+    ]);
+    setFieldValue(name, [...value, { userId: dialogValue.userId }]);
+    handleClose();
+  };
+
   const fetchUsers = async () => {
-    await GetUsers()
-      .then(({ data }) => {
-        let userData = [];
-        for (var _user of data) {
-          userData.push({
-            userId: _user._id,
-            name: _user.firstName + " " + _user.lastName,
-          });
-        }
+    await axiosInstance()
+      .get("/activity/user")
+      .then(({ data: { data } }) => {
+        let userData = data.map((_user) => ({
+          userId: _user._id,
+          name: _user.firstName + " " + _user.lastName,
+        }));
         setUsers(userData);
       })
       .catch((err) => {});
   };
 
   const setParticipants = (value) => {
-    let content: any = "";
     if (value) {
-      if (multiple == true) {
-        let userIdList = [];
-        for (var val of value) {
-          userIdList.push({ userId: val.userId });
-        }
-        content = userIdList;
+      if (multiple === true) {
+        value.forEach((val: any) => {
+          if (typeof val === "string") {
+            setTimeout(() => {
+              toggleOpen(true);
+              setDialogValue({
+                userId: val,
+                name: "",
+              });
+            });
+          } else if (val && val.inputValue) {
+            toggleOpen(true);
+            setDialogValue({
+              userId: val.inputValue,
+              name: "",
+            });
+          }
+        });
       } else {
-        content = value.userId;
+        setFieldValue(name, value.userId);
       }
     }
-    setFieldValue(name, content);
   };
 
   return (
-    <Autocomplete
-      multiple={multiple}
-      options={users ? users : []}
-      getOptionLabel={(option) => (option ? option.name : "")}
-      filterSelectedOptions={false}
-      onChange={(e, value) => setParticipants(value)}
-      value={
-        users && multiple === true
-          ? users.filter((data) =>
-              _.flatMap(value, (nameObj) =>
-                _.map(nameObj, (userId) => {
-                  return userId;
-                })
-              ).includes(data.userId)
-            )
-          : users
-          ? users.filter((data) => data.userId === value).length > 0
-            ? users.filter((data) => data.userId === value)[0]
+    <Fragment>
+      <Autocomplete
+        multiple={multiple}
+        options={users ? users : []}
+        getOptionLabel={(option) => {
+          if (typeof option === "string") {
+            return option;
+          }
+
+          if (!Array.isArray(option)) {
+            return option.name;
+          }
+
+          return "";
+        }}
+        freeSolo
+        filterOptions={(option, params) => {
+          const filtered = filter(option, params) as UserOptionType[];
+
+          if (params.inputValue !== "") {
+            filtered.push({
+              inputValue: params.inputValue,
+              name: `Add "${params.inputValue}"`,
+            });
+          }
+          return filtered;
+        }}
+        getOptionSelected={(opt, val) => {
+          return opt.userId === val.userId;
+        }}
+        filterSelectedOptions={false}
+        onChange={(e, value) => setParticipants(value)}
+        value={
+          users && multiple === true
+            ? users.filter((data) =>
+                _.flatMap(value, (nameObj) =>
+                  _.map(nameObj, (userId) => {
+                    return userId;
+                  })
+                ).includes(data.userId)
+              )
+            : users
+            ? users.filter((data) => data.userId === value).length > 0
+              ? users.filter((data) => data.userId === value)[0]
+              : []
             : []
-          : []
-      }
-      renderTags={(value, getTagProps) =>
-        value.map((option, index) => (
-          <Chip
+        }
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip
+              variant="outlined"
+              label={option && option.name}
+              {...getTagProps({ index })}
+            />
+          ))
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
             variant="outlined"
-            label={option && option.name}
-            {...getTagProps({ index })}
+            label={label}
+            error={touched[name] && Boolean(errors[name])}
+            helperText={touched[name] && errors[name]}
+            margin="dense"
+            required={required}
           />
-        ))
-      }
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          variant="outlined"
-          label={label}
-          placeholder={label}
-          error={touched[name] && Boolean(errors[name])}
-          helperText={touched[name] && errors[name]}
-          margin="dense"
-          required={required}
-        />
-      )}
-    />
+        )}
+      />
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="form-dialog-title"
+      >
+        <form onSubmit={handleSubmit}>
+          <DialogTitle style={{ color: "white" }}>
+            Add a new participant
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Please fill participant's email and name
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              value={dialogValue.userId}
+              onChange={(event) =>
+                setDialogValue({ ...dialogValue, userId: event.target.value })
+              }
+              label="Participant Email"
+              type="text"
+            />
+            <Box component="span" mx={1} />
+            <TextField
+              margin="dense"
+              value={dialogValue.name}
+              onChange={(event) =>
+                setDialogValue({ ...dialogValue, name: event.target.value })
+              }
+              label="Participant Name"
+              type="text"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button type="submit" color="primary">
+              Add
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+    </Fragment>
   );
 };
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useCallback } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import Layout from "../../components/Layout";
 import { useData } from '../../StateProvider/Provider';
 import {
@@ -8,7 +8,8 @@ import {
     Menu,
     MenuItem,
     Tooltip,
-    IconButton
+    IconButton,
+    Grid
 } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import { Link } from 'react-router-dom'
@@ -259,23 +260,23 @@ export default function TermsAndCondition(props) {
     }
     const onFilterChange = useCallback((params) => {
         if (params.filterModel.items[0].value) {
-            let deepFilter ;
+            let deepFilter;
             switch (params.filterModel.items[0].columnField) {
-              case 'createdBy':
-                deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
-                break;
-              case 'updatedBy':
-                deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
-                break;
-              case 'name':
-                deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
-                break;
-              default:
-                deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
+                case 'createdBy':
+                    deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
+                    break;
+                case 'updatedBy':
+                    deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
+                    break;
+                case 'name':
+                    deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+                    break;
+                default:
+                    deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
             }
             setQuery((prevState) => ({
-              ...prevState,
-              deepFilter
+                ...prevState,
+                deepFilter
             }));
         } else {
             setQuery({ page: 0, limit: 25 });
@@ -284,8 +285,9 @@ export default function TermsAndCondition(props) {
     return (
         <>
             <Layout>
-                <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
-
+                <Grid container className="headerbox">
+                    <CustomBreadCrumbs routes={[termsAndConditionBreadcrumb]} />
+                </Grid>
                 <Box component="div">
                     <CustomContainer>
                         <div className={`${styles["terms_header_inner_container"]}`} >
