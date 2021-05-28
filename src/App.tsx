@@ -76,16 +76,12 @@ import UserProfilePage from "./pages/ProfilePage/index";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
-<<<<<<< HEAD
 import DOAapproval from './pages/DOA/DOAApproval'
 import QuoteBuilderCombined from './pages/QuoteBuilderCombined'
-=======
-import DOAapproval from "./pages/DOA/DOAApproval";
 import Reminder from "./pages/Reminder";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import queryString from "query-string";
 import { USER_LOADING, SET_USER, SET_SELECTED_ENTITY } from "./StateProvider/actionTypes";
->>>>>>> master
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -401,16 +397,10 @@ function App() {
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
-<<<<<<< HEAD
 
           <PrivateRoute exact path={"/quote-builder/:id"} >
             <QuoteDetail />
           </PrivateRoute>
-=======
-          <Route exact path={"/quote-builder/:id"}>
-            <QuoteBuilderPage />
-          </Route>
->>>>>>> master
           <Route exact path={"/dashboards"}>
             <KpiDashboard />
           </Route>
