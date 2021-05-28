@@ -53,7 +53,7 @@ const Activity = () => {
             { _id: referenceId, type: referenceType, name: data.name },
           ]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [type, referenceId]);
 
@@ -72,42 +72,46 @@ const Activity = () => {
             ]}
           />
         </Grid>
-        <CustomContainer>
-          <Box className={classes.activityHeader}>
-            <Grid container>
-              <Grid item xs={12} md={5} sm={5}>
-                <Paper className={classes.tabBox}>
-                  <CustomTabs
-                    value={viewType}
-                    setValue={setViewType}
-                    tabs={tabs}
-                  />
-                </Paper>
-              </Grid>
-              <Grid item xs={12} md={7} sm={7}>
-                <SearchFilter
-                  handleChangeFilter={handleChangeFilter}
-                  filter={filter}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-          <Box className={classes.activityContainer}>
-            {viewType === 0 && (
-              <Board type={type} filter={filter} activityId={activityId} />
-            )}
-            {viewType === 1 && (
-              <Roadmap type={type} filter={filter} activityId={activityId} />
-            )}
-          </Box>
-        </CustomContainer>
-        {activityType !== undefined && (
-          <ActivityModelHandler
-            activityType={activityType}
-            activityId={activityId}
-          />
-        )}
       </Grid>
+      <CustomContainer>
+        <Box className={classes.activityHeader}>
+          <Grid container>
+            <Grid item xs={12} md={5} sm={6}>
+              <Paper className={classes.tabBox}>
+                <CustomTabs
+                  value={viewType}
+                  setValue={setViewType}
+                  tabs={tabs}
+                />
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={7} sm={6}>
+              <SearchFilter
+                handleChangeFilter={handleChangeFilter}
+                filter={filter}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+        <Grid item xs={12} md={12} sm={12}>
+
+        </Grid>
+        <Box className={classes.activityContainer}>
+          {viewType === 0 && (
+            <Board type={type} filter={filter} activityId={activityId} />
+          )}
+          {viewType === 1 && (
+            <Roadmap type={type} filter={filter} activityId={activityId} />
+          )}
+        </Box>
+      </CustomContainer>
+      {activityType !== undefined && (
+        <ActivityModelHandler
+          activityType={activityType}
+          activityId={activityId}
+        />
+      )}
+
     </Layout>
   );
 };

@@ -362,7 +362,7 @@ export default function OpportunityAccordianProjectSales({
             history.push(`/opportunity`, {
               accountId: accountId,
               accountName: accountName,
-              resource: `${resource}Name`,
+              resource: `${resource}`,
             })
           }
           p={1}

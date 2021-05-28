@@ -46,6 +46,7 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight } from './../../constants/helpers';
 
 const ContactTypes = [
   {
@@ -409,6 +410,9 @@ export default function Contact(props) {
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
 
+            owner: u.owner?.optionLabel,
+            ownerId: u.owner?.optionValue,
+
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
@@ -634,7 +638,9 @@ export default function Contact(props) {
               onGridReady={onGridReady}
               suppressDragLeaveHidesColumns={true}
               suppressCellSelection={true}
-              rowHeight={40}
+              headerHeight={AgGridHeaderHeight}
+              floatingFiltersHeight={AgGridFloatingFiltersHeight}
+              rowHeight={AgGridRowHeight}
               frameworkComponents={frameworkComponents}
               defaultColDef={{
                 resizable: true,
@@ -690,7 +696,7 @@ export default function Contact(props) {
 
               {generateColumns}
 
-              <AgGridColumn width={200} headerName="Actions"
+              <AgGridColumn width={100} headerName="Actions"
                 pinned={(isMobile || isTablet) ? false : "right"}
                 lockPinned={(isMobile || isTablet) ? false : true}
                 resizable={false} sortable={false}
