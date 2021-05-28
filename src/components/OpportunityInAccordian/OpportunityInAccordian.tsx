@@ -272,6 +272,7 @@ export default function OpportunityInAccordian({
           resource={resource}
           isRedirectTodetailPage={isRedirect}
           contactId={contactId}
+          disableOwnerAndAccount ={true}
           contactResource={contactResource}
         />
       )}

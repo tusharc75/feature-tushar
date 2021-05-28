@@ -49,6 +49,7 @@ export default function ManageOpportunityDialog({
   userId = null,
   contactId = null,
   contactResource = null,
+  disableOwnerAndAccount = false,
 }) {
   const { opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
@@ -58,7 +59,7 @@ export default function ManageOpportunityDialog({
     state: { user, selectedEntity, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate.owner.optionValue
+    (!isNew && user.user._id !== dataToUpdate.owner.optionValue) || disableOwnerAndAccount
   );
 
   const [entityData, setEntityData] = useState({
@@ -194,9 +195,8 @@ export default function ManageOpportunityDialog({
   }
 
   const handleCreateOpportunity = (values) => {
-    // values.closeDate = "03/03/2021"
     if (accountId) values["supplierAccountName"] = [accountId]
-    if (contactId && contactResource ) values.staticData = {[contactResource]:[contactId],[resource]:[accountId]}
+    if (contactId && contactResource) values.staticData = { [contactResource]: [contactId], [resource]: [accountId] }
     setLoading(true);
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
@@ -326,6 +326,7 @@ export default function ManageOpportunityDialog({
                                             md={permissions.customerAccount.isCreate ? 10 : 11}
                                           >
                                             <FormTypes
+                                              disabled={disableOwnerAndAccount}
                                               values={values}
                                               errors={errors}
                                               touched={touched}
