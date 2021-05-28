@@ -89,9 +89,13 @@ const Reminder = () => {
       style={{
         background: "#dfdfdf",
         color:
-          new Date(data).getDate() < new Date().getDate()
+          new Date(data).getDate() < new Date().getDate() &&
+          new Date(data).getMonth() < new Date().getMonth() &&
+          new Date(data).getFullYear() < new Date().getFullYear()
             ? "#dc3545"
-            : new Date(data).getDate() === new Date().getDate()
+            : new Date(data).getDate() === new Date().getDate() &&
+              new Date(data).getMonth() === new Date().getMonth() &&
+              new Date(data).getFullYear() === new Date().getFullYear()
             ? "#28a745"
             : "#838485",
       }}

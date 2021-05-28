@@ -85,7 +85,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
 
   const handleActivityOpen = (event) => {
     history.push({
-      pathname: "/activity/" + type,
+      pathname: "/" + type,
       search: "?activityType=" + type + "&activityId=" + data._id,
     });
   };

@@ -14,7 +14,7 @@ import {
 import Autocomplete, {
   createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
-import _ from "lodash";
+import _, { values } from "lodash";
 
 import axiosInstance from "../../../axios/axiosInstance";
 
@@ -81,9 +81,13 @@ export const UserDropdown = ({
       .catch((err) => {});
   };
 
-  const setParticipants = (value) => {
+  const setParticipants = (value, reason) => {
     if (value) {
       if (multiple === true) {
+        if (reason === "clear" || reason === "clear-option") {
+          setFieldValue(name, []);
+        }
+
         value.forEach((val: any) => {
           if (typeof val === "string") {
             setTimeout(() => {
@@ -99,6 +103,15 @@ export const UserDropdown = ({
               userId: val.inputValue,
               name: "",
             });
+          } else {
+            const values = [];
+            value.forEach((val) => {
+              if (typeof val !== "string") {
+                values.push({ userId: val.userId });
+              }
+            });
+
+            setFieldValue(name, values);
           }
         });
       } else {
@@ -124,6 +137,7 @@ export const UserDropdown = ({
           return "";
         }}
         freeSolo
+        limitTags={5}
         filterOptions={(option, params) => {
           const filtered = filter(option, params) as UserOptionType[];
 
@@ -139,7 +153,7 @@ export const UserDropdown = ({
           return opt.userId === val.userId;
         }}
         filterSelectedOptions={false}
-        onChange={(e, value) => setParticipants(value)}
+        onChange={(e, value, reason) => setParticipants(value, reason)}
         value={
           users && multiple === true
             ? users.filter((data) =>
@@ -190,6 +204,7 @@ export const UserDropdown = ({
               Please fill participant's email and name
             </DialogContentText>
             <TextField
+              required
               autoFocus
               margin="dense"
               value={dialogValue.userId}
@@ -201,6 +216,7 @@ export const UserDropdown = ({
             />
             <Box component="span" mx={1} />
             <TextField
+              required
               margin="dense"
               value={dialogValue.name}
               onChange={(event) =>
