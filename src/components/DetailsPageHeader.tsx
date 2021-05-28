@@ -5,6 +5,7 @@ import { Grid, Typography, Box, Avatar, Paper, Tooltip } from "@material-ui/core
 import { Skeleton } from "@material-ui/lab";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CopyToClipboard from '../components/Helpers/CopyToClipboard'
+import { FcApproval } from 'react-icons/fc';
 import { isMobile, isTablet } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
@@ -51,8 +52,8 @@ const DetailsPageHeader = (props) => {
                   component="h2"
                   color="primary"
                 >
-                  <span className="d-flex align-items-center gap-2"><span className="listingHeader">{heading}</span> {
-                    isApproved && <Tooltip title="Approved"><CheckCircleIcon color="primary" /></Tooltip>
+                  <span className="d-flex align-items-center"><span className="listingHeader">{heading}</span> {
+                    isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
                   }</span>
 
 

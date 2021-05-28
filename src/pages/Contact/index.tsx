@@ -693,7 +693,7 @@ export default function Contact(props) {
 
               {generateColumns}
 
-              <AgGridColumn width={200} headerName="Actions"
+              <AgGridColumn width={100} headerName="Actions"
                 pinned={(isMobile || isTablet) ? false : "right"}
                 lockPinned={(isMobile || isTablet) ? false : true}
                 resizable={false} sortable={false}
