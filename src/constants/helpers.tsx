@@ -106,6 +106,11 @@ export const opportunity = {
   opportunityApi: "/opportunity",
 };
 
+export const entity = {
+  entityResource: "entity", //  Key of sidebar object
+  entityApi: "/entity",
+};
+
 export const supplierAccount = {
   accountApi: "supplier-account",
   accountRoute: "supplier-account",
