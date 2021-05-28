@@ -119,7 +119,7 @@ export default function ManageLeadDialog({
               .filter((d) => d.isCreate)
               .map((_f) => {
 
-                if (isNew && userId && _f.fieldData.fieldName == "owner") {
+                if (isNew && userId && _f.fieldData.fieldName === "owner") {
                   _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
                 }
                 newFields.push(_f.fieldData)
@@ -226,7 +226,7 @@ export default function ManageLeadDialog({
         onClose={onClose}
       />
 
-      {entityData.fields.length == 0 && (
+      {entityData.fields.length === 0 && (
         <CustomDialogContent>
           <CommonSkeleton lenArray={arr} />
         </CustomDialogContent>
@@ -264,7 +264,7 @@ export default function ManageLeadDialog({
                                 sm={6}
                                 md={6}
                               >
-                                {field.fieldName == "owner" ? (
+                                {field.fieldName === "owner" ? (
                                   <FormTypes
                                     values={values}
                                     errors={errors}
@@ -285,7 +285,7 @@ export default function ManageLeadDialog({
                                       );
                                     }}
                                   />
-                                ) : field.fieldName == "collaborator" ? (
+                                ) : field.fieldName === "collaborator" ? (
                                   <FormTypes
                                     values={values}
                                     errors={errors}

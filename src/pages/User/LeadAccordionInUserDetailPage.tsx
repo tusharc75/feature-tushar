@@ -10,11 +10,9 @@ import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import { useHistory } from 'react-router-dom';
 import { BiCustomize } from 'react-icons/bi';
 import { HiOutlineUser } from 'react-icons/hi';
 import { BiPhone } from 'react-icons/bi';
-import { AiOutlineMail } from 'react-icons/ai';
 import { BsBuilding } from 'react-icons/bs';
 import { useData } from '../../StateProvider/Provider';
 import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
@@ -76,12 +74,10 @@ function DisplayData({ label, value, icon }) {
     </div>
 }
 
-
 export default function LeadAccordionInUserDetailPage({
     leads,
     expanded = true, recordsPerLine = 3, userId, onSuccess
 }) {
-    const history = useHistory();
     const {
         state: { permissions, selectedEntity },
     }: any = useData();

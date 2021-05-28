@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Box, Button, Grid, IconButton, Tooltip } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import {
@@ -14,7 +14,6 @@ import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import Dialog from "@material-ui/core/Dialog";
-import _ from "lodash";
 import { useData } from "../../../StateProvider/Provider";
 import AddIcon from "@material-ui/icons/AddCircle";
 import InfoIcon from "@material-ui/icons/Info";
@@ -225,7 +224,7 @@ export default function ManageContact(props) {
                                     sm={6}
                                     md={6}
                                   >
-                                    {field.fieldName == "owner" ? (
+                                    {field.fieldName === "owner" ? (
                                       <FormTypes
                                         values={values}
                                         errors={errors}
@@ -249,7 +248,7 @@ export default function ManageContact(props) {
                                           )
                                         }
                                       />
-                                    ) : field.fieldName == "collaborator" ? (
+                                    ) : field.fieldName === "collaborator" ? (
                                       <FormTypes
                                         multiple
                                         values={values}
@@ -279,7 +278,7 @@ export default function ManageContact(props) {
                                           )
                                         }
                                       />
-                                    ) : field.fieldName == "accountName" &&
+                                    ) : field.fieldName === "accountName" &&
                                       accountSource !== undefined ? (
                                       <Grid container spacing={1}>
                                         <Grid
@@ -356,7 +355,7 @@ export default function ManageContact(props) {
                                           </Grid>
                                         ) : null}
                                       </Grid>
-                                    ) : field.fieldName == "reportsTo" ? (
+                                    ) : field.fieldName === "reportsTo" ? (
                                       <FormTypes
                                         values={values}
                                         errors={errors}
