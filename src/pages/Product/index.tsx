@@ -1,11 +1,9 @@
 import { useState, useEffect, Fragment, useContext, useCallback } from "react";
-import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
-import { useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { DataGrid, GridOverlay } from "@material-ui/data-grid";
+import { DataGrid } from "@material-ui/data-grid";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
@@ -30,7 +28,6 @@ import ImportExportLinks from "../../components/Product/ImportExportLinks";
 
 const Product = () => {
     const toastConfig = useContext(CustomToastContext)
-    const history = useHistory();
     const [loading, setLoading] = useState(true);
     const [product, setProduct] = useState([]);
     const [open, setOpen] = useState(false);
