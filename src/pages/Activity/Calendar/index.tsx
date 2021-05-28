@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Box, Button, Dialog, Grid, Menu, MenuItem } from "@material-ui/core";
 import { Add, ExpandMore } from "@material-ui/icons";
-import { lowerCase } from "lodash";
+import { lowerCase, startCase } from "lodash";
+import { useHistory } from "react-router-dom";
 import moment from "moment";
+import queryString from "query-string";
 
 import MyCalendar from "./MyCalendar";
 import { GetBoard } from "../../../axios/activity";
@@ -15,6 +17,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { CreateTask } from "../../../components/Activity/Task/CreateTask";
 import { CreateCase } from "../../../components/Activity/Case/CreateCase";
 import { CreateEvent } from "../../../components/Activity/Event/CreateEvent";
+import axiosInstance from "../../../axios/axiosInstance";
 
 const BigCalendar = () => {
   const {
@@ -22,12 +25,19 @@ const BigCalendar = () => {
       user: { user },
     },
   } = useData();
-  const [type, setType] = useState("Task");
+  const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { referenceType, referenceId, type: actType } = parsed;
+  const [type, setType] = useState(
+    actType ? startCase(actType.toLocaleString()) : "Task"
+  );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [createType, setCreateType] = useState(null);
   const [filter, setFilter] = useState([]);
   const [activityData, setActivityData] = useState(null);
   const [activities, setActivities] = useState([]);
+
+  console.log(parsed);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -44,6 +54,17 @@ const BigCalendar = () => {
     return date && time ? new Date(`${d}T${t}`) : "";
   };
 
+  useEffect(() => {
+    axiosInstance()
+      .get(
+        `/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`
+      )
+      .then(({ data: { data } }) => {
+        setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
+      })
+      .catch((err) => {});
+  }, []);
+
   const fetchBoard = useCallback(() => {
     GetBoard(lowerCase(type), JSON.stringify(filter))
       .then(({ data }) => {
@@ -54,19 +75,19 @@ const BigCalendar = () => {
             type === "Event"
               ? joinDateTime(d.startDate, d.startTime)
               : d.startDate
-                ? new Date(d.startDate)
-                : moment().toDate(),
+              ? new Date(d.startDate)
+              : moment().toDate(),
           end:
             type === "Event"
               ? joinDateTime(d.endDate, d.endTime)
               : d.dueDate
-                ? new Date(d.dueDate)
-                : moment().add(20, "days").toDate(),
+              ? new Date(d.dueDate)
+              : moment().add(20, "days").toDate(),
         }));
 
         setActivities(newData);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   }, [type, filter]);
 
   useEffect(() => {
@@ -77,6 +98,9 @@ const BigCalendar = () => {
 
   const handleChangeFilter = (value) => {
     setFilter(value);
+    history.replace({
+      search: "",
+    });
   };
 
   const closeDialog = () => {

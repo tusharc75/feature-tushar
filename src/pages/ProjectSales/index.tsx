@@ -137,10 +137,6 @@ const ProjectSales: FC = () => {
   const {
     state: { user, permissions },
   }: any = useData();
-
-  const [searchVal, setSearchVal] = useState("");
-
-  const [projects, setProjects] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -198,7 +194,7 @@ const ProjectSales: FC = () => {
   //  Grid Variables - End
 
   useEffect(() => {
-    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
 
     if (projectSalesTimeout) {
       clearTimeout(projectSalesTimeout);
@@ -207,7 +203,7 @@ const ProjectSales: FC = () => {
     projectSalesTimeout = setTimeout(() => {
       fetchProjects();
     }, millisec);
-  }, [searchVal]);
+  }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
@@ -357,7 +353,6 @@ const ProjectSales: FC = () => {
     axiosInstance()
       .get(`/project-sales${queryString}`)
       .then(({ data: { data, count } }) => {
-        setProjects(data);
         let rows = data.map((project) => ({
           ...project,
           projectManager: project.projectManager?.optionLabel,
@@ -464,7 +459,7 @@ const ProjectSales: FC = () => {
             <ProjectHeader
               userId={user?.user?._id}
               onSearch={handleSearch}
-              searchVal={searchVal}
+              searchVal={search}
               permissions={permissions?.projectSales}
               selectedType={selectedType}
               handleFilterChange={handleProjectFilter}
