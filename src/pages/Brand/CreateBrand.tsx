@@ -259,6 +259,7 @@ const CreateBrand = () => {
                   <Button
                     disabled={activeStep === 0}
                     onClick={handleBack}
+                    size="small" 
                     className={classes.backButton}
                   >
                     Back
@@ -266,6 +267,7 @@ const CreateBrand = () => {
                   <Button
                     variant="contained"
                     color="primary"
+                    size="small" 
                     onClick={handleNext}
                   >
                     {activeStep === steps.length - 1 ? "Finish" : "Next"}

@@ -17,7 +17,7 @@ const UserRoles = ({ brand }) => {
   return (
     <div>
       <Box marginBottom={2} display="flex" justifyContent="flex-end">
-        <Button variant="outlined">
+        <Button size="small" variant="outlined">
           <Add /> Create User Roles
         </Button>
         <Box marginX={2} />

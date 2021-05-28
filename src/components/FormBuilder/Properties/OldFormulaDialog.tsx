@@ -20,6 +20,8 @@ import { camelCase } from "../../../constants/helpers";
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 const OperatorList = [
   { name: "Add", value: "+" },
@@ -153,7 +155,9 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
   const classes = useStyles();
   return (
     <div>
-      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={open}>
+      <Dialog 
+      fullScreen={isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}onClose={handleClose} aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={open}>
         <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`} onClose={handleClose}></CustomDialogHeader>
         <CustomDialogContent >
           <Box padding={1}>
@@ -297,7 +301,7 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
                 onChange={handleChange}
               />
               {formulaError && <Typography variant="caption" display="block">{formulaError} </Typography>}
-              <Button onClick={handleCheckSyntax} color="primary">Check Syntax</Button>
+              <Button size="small"  onClick={handleCheckSyntax} color="primary">Check Syntax</Button>
             </Box>
           </Box>
         </CustomDialogContent>

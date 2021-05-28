@@ -87,10 +87,10 @@ const QuoteApproval=()=>{
                         rows={rows}
                         getRowId ={(row) => row.id}/>
                 </div>
-                <Button variant="contained" color="primary" onClick={()=>QuoteStatusChange(true)}>
+                <Button size="small" variant="contained" color="primary" onClick={()=>QuoteStatusChange(true)}>
                 <ThumbUpIcon/>Accept
                 </Button>
-                <Button variant="contained" color="secondary" onClick={()=>QuoteStatusChange(false)} >
+                <Button size="small" variant="contained" color="secondary" onClick={()=>QuoteStatusChange(false)} >
                 <ThumbDownIcon/>Reject
                 </Button>
                 <div>

@@ -23,8 +23,8 @@ import { Converter } from "../AddField/converter";
 import { Option } from "../AddField/option";
 import { Currency } from "../AddField/currency";
 import { MultipleFormula } from "../AddField/multipleformula";
-
-
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string()
@@ -163,7 +163,10 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     }
   }
 
-  return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
+  return (<Dialog 
+    fullScreen={isMobile || isTablet}
+    TransitionComponent={CustomDialogTransition}
+    aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
     <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} >
       {({ submitForm, touched, errors, setFieldValue, values }) => (
         <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
@@ -408,8 +411,8 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button onClick={handleClose} color="primary">Cancel</Button>
-            <Button type="submit" color="primary" variant="contained">Save</Button>
+            <Button size="small" onClick={handleClose} color="primary">Cancel</Button>
+            <Button size="small" type="submit" color="primary" variant="contained">Save</Button>
           </CustomDialogFooter>
         </Form>)}
     </Formik>

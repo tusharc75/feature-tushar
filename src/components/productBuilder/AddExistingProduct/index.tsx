@@ -22,7 +22,8 @@ import CustomDataGridNoDataFound from "../../Helpers/DataGridHelpers/CustomDataG
 import CustomDataGridToolbar from "../../Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { getSearchQuery } from '../../../services/util';
 import SearchBox from '../../Helpers/SearchBox'
-
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
@@ -196,9 +197,10 @@ const AddExistingProduct = (props) => {
     }
 
     return (<Dialog
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
-        fullScreen
     >
         <CustomDialogHeader title={"Add Existing Product"} onClose={handleClose} ></CustomDialogHeader>
         <div className="listing-grid p-3">
@@ -214,7 +216,7 @@ const AddExistingProduct = (props) => {
                             value={searchVal}
                         />
                         <Box ml={1} >
-                            <Button color="primary" onClick={handleAdd} variant="contained" disabled={selectedProduct.length > 0 ? false : true}  >
+                            <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedProduct.length > 0 ? false : true}  >
                                 {selectedProduct.length ? "(" + selectedProduct.length + ")  " : ""}
                                 Add</Button>
                         </Box>

@@ -363,6 +363,7 @@ const ProjectSalesDetails = () => {
                       <Button
                         variant="contained"
                         color="primary"
+                        size="small" 
                         onClick={handleOpenUpdateDialog}
                       >
                         Edit

@@ -21,6 +21,8 @@ import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 const arr = [...Array(9).keys()];
 
@@ -208,6 +210,8 @@ export default function ManageLeadDialog({
   return (
     <Dialog
       maxWidth="md"
+      fullScreen={isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={onClose}
       open={open}
@@ -332,6 +336,7 @@ export default function ManageLeadDialog({
                   type="button"
                   variant="outlined"
                   color="primary"
+                  size="small" 
                   onClick={onClose}
                 >
                   Cancel

@@ -140,6 +140,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                             return (
                               <Button
                                 key={index}
+                                size="small"
                                 className="cursor-pointer"
                                 onClick={() => setId(_p._id)}
                                 color="primary"
@@ -151,7 +152,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                       </Breadcrumbs>
                     </Box>
                     <Grid container spacing={3}>
-                      <Grid item xs={7}>
+                      <Grid item xs={12} md={7} sm={6}>
                         <TextField
                           variant="outlined"
                           type="text"
@@ -217,7 +218,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                           </Fragment>
                         )}
                       </Grid>
-                      <Grid item xs={5}>
+                      <Grid item xs={12} md={5} sm={6}>
                         <Box pt={1}>
                           <FormControl variant="outlined" fullWidth>
                             <InputLabel id="demo-simple-select-outlined-label">
@@ -338,6 +339,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
               <Button
                 disabled={isSubmitting}
                 color="primary"
+                size="small"
                 onClick={handleClose}
               >
                 Cancel
@@ -345,6 +347,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
               <Button
                 disabled={isSubmitting}
                 type="button"
+                size="small"
                 color="primary"
                 variant="contained"
                 onClick={submitForm}

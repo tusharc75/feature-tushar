@@ -554,6 +554,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
               <Button
                 disabled={isSubmitting}
                 color="primary"
+                size="small"
                 onClick={handleClose}
               >
                 Cancel
@@ -563,6 +564,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                 type="button"
                 color="primary"
                 variant="contained"
+                size="small"
                 onClick={submitForm}
               >
                 {isSubmitting ? <CircularProgress size={22} /> : "Save"}
@@ -571,6 +573,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                 <Button
                   disabled={isSubmitting}
                   variant="outlined"
+                  size="small"
                   style={{ color: "red", borderColor: "red" }}
                   onClick={() =>
                     DeleteEvent(eventId)
