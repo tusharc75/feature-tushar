@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Dialog,
   Button,
@@ -16,14 +16,16 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 interface InitialData {
   fields: any[];
   values: object;
 }
 
-const CreateProjectSales = ({ open, close, fetchData, type }) => {
+const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
   const theme = useTheme();
+  const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -64,11 +66,10 @@ const CreateProjectSales = ({ open, close, fetchData, type }) => {
     }
     tempStaticData["user"] = [values?.projectManager]
     values.staticData = tempStaticData
-    debugger
     axiosInstance()
       .post("/project-Sales", values)
-      .then(({ data: { data } }) => {
-        const newId = data._id;
+      .then(({ data }) => {
+        const newId = data.data?._id;
         setSubmitting(false);
         fetchData();
         if (type) {
@@ -76,12 +77,18 @@ const CreateProjectSales = ({ open, close, fetchData, type }) => {
         }
         else {
           history.push(`/project-sales/detail/${newId}`, {
-            managerId: data.projectManager,
+            managerId: data.data?.projectManager,
           });
           close();
         }
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setSubmitting(false);
       });
   };

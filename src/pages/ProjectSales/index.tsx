@@ -451,7 +451,6 @@ const ProjectSales: FC = () => {
           open={isOpen}
           close={handleClose}
           fetchData={fetchProjects}
-          type={null}
         />
       )}
       <Layout>
