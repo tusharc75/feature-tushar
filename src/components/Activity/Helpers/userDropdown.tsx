@@ -77,16 +77,20 @@ export const UserDropdown = ({
           name: _user.firstName + " " + _user.lastName,
         }));
 
-        let filteredOptions = value.filter(
-          (val) => userData.filter((u) => val.userId === u.userId).length <= 0
-        );
+        if (Array.isArray(value) && value.length) {
+          let filteredOptions = value.filter(
+            (val) => userData.filter((u) => val.userId === u.userId).length <= 0
+          );
 
-        filteredOptions = filteredOptions.map((user) => ({
-          userId: user.userId,
-          name: user.userId,
-        }));
+          filteredOptions = filteredOptions.map((user) => ({
+            userId: user.userId,
+            name: user.userId,
+          }));
 
-        setUsers([...userData, ...filteredOptions]);
+          setUsers([...userData, ...filteredOptions]);
+        } else {
+          setUsers(userData);
+        }
       })
       .catch((err) => {});
   };
