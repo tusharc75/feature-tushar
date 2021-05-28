@@ -103,6 +103,8 @@ export default function OpportunityInAccordian({
   opportunityPermissions,
   resource,
   isRedirect,
+  contactId = null,
+  contactResource = null,
 }) {
   const history = useHistory();
   const {
@@ -248,7 +250,7 @@ export default function OpportunityInAccordian({
               history.push(`/opportunity`, {
               accountId: accountId,
               accountName: accountName,
-              resource: `${resource}Name`,
+              resource: `${resource}`,
             })
           }
            p={1} display="flex" justifyContent="center" alignItems="center">
@@ -269,6 +271,9 @@ export default function OpportunityInAccordian({
           accountId={accountId}
           resource={resource}
           isRedirectTodetailPage={isRedirect}
+          contactId={contactId}
+          disableOwnerAndAccount ={true}
+          contactResource={contactResource}
         />
       )}
     </>

@@ -69,17 +69,6 @@ const ProjectSalesDetails = () => {
   });
 
   useEffect(() => {
-    if (!state) return;
-
-    axiosInstance()
-      .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
-      .then(() => { })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, []);
-
-  useEffect(() => {
     //  When it is nodal structure tab
     initializeGraphData();
 

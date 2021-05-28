@@ -1,28 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction } from '@material-ui/core'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { Grid, Box, IconButton, Typography, Card, CardContent, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { withStyles, makeStyles } from "@material-ui/core/styles";
-import { displayDate } from '../../services/util';
+import { withStyles } from "@material-ui/core/styles";
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
-import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline, IoBriefcase } from 'react-icons/io5';
-import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import currencies from './../../constants/currency_with_country.json';
 import { customerContact, supplierContact, customerAccount, supplierAccount } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import ManageContactDialog from "./../Contact/ManageContact/index";
 import { AiOutlineMail } from 'react-icons/ai';
-import { HiOutlineUser } from 'react-icons/hi';
-import { AiOutlinePhone } from 'react-icons/ai';
 import { FiStar } from 'react-icons/fi';
 import { BiPhone } from 'react-icons/bi';
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard"
@@ -70,37 +61,10 @@ const AccordionDetails = withStyles((theme) => ({
     }
 }))(MuiAccordionDetails);
 
-// function DisplayData({ label, value, icon }) {
-//     return <div style={{ flexGrow: 1 }}>
-//         <span className="d-flex gap-2 align-items-center">
-//             {icon}{value}
-//         </span>
-//     </div>
-// }
-function DisplayData({ label, value, icon, showCopyToText = false }) {
-    return <div style={{ flexGrow: 1 }}>
-        <List >
-            <ListItem>
-                <ListItemAvatar>
-                    {icon}
-                </ListItemAvatar>
-                <ListItemText
-                    primary={value}
-                    secondary={label} />
-                {
-                    showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
-                }
-            </ListItem>
-        </List>
-    </div>
-}
-
-
 export default function ContactAccordionInDetailPage({
     contacts, type,
     expanded = true, recordsPerLine = 2, userId, onSuccess
 }) {
-    const history = useHistory();
     const {
         state: { permissions },
     }: any = useData();
@@ -148,7 +112,7 @@ export default function ContactAccordionInDetailPage({
                             <Box>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => setExpandContact(!expandContact)} >
+                                    onClick={() => setExpandContact(!expandContact)} >
                                     {
                                         expandContact === true ? (
                                             <ExpandLessIcon />
@@ -269,6 +233,5 @@ export default function ContactAccordionInDetailPage({
                 isRedirectToDetailPage={false}
             />
         }
-
     </>
 }

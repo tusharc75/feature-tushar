@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Dialog,
   Button,
@@ -16,14 +16,16 @@ import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter
 import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
 interface InitialData {
   fields: any[];
   values: object;
 }
 
-const CreateProjectSales = ({ open, close, fetchData }) => {
+const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
   const theme = useTheme();
+  const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,18 +58,37 @@ const CreateProjectSales = ({ open, close, fetchData }) => {
 
   const handleSubmit = (values) => {
     setSubmitting(true);
+    var tempStaticData = {};
+    if (type) {
+      type.map((d: any) => {
+        tempStaticData[d.type] = [d.id]
+      });
+    }
+    tempStaticData["user"] = [values?.projectManager]
+    values.staticData = tempStaticData
     axiosInstance()
       .post("/project-Sales", values)
-      .then(({ data: { data } }) => {
-        const newId = data._id;
+      .then(({ data }) => {
+        const newId = data.data?._id;
         setSubmitting(false);
         fetchData();
-        history.push(`/project-sales/detail/${newId}`, {
-          managerId: data.projectManager,
+        if (type) {
+          close();
+        }
+        else {
+          history.push(`/project-sales/detail/${newId}`, {
+            managerId: data.data?.projectManager,
+          });
+          close();
+        }
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
         });
-        close();
       })
-      .catch((err) => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         setSubmitting(false);
       });
   };

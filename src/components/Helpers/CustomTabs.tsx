@@ -1,10 +1,10 @@
-import React from "react";
 import { withStyles, Theme, createStyles } from "@material-ui/core/styles";
 import { Typography, Tabs, Tab } from "@material-ui/core";
+import { DeveloperBoard, Map } from "@material-ui/icons";
 
 const AntTabs = withStyles((theme) => ({
   root: {
-    minHeight:"38px"
+    minHeight: "38px",
     // borderBottom: "1px solid #e8e8e8",
   },
   indicator: {
@@ -34,7 +34,14 @@ const AntTab = withStyles((theme: Theme) =>
     },
     selected: {},
   })
-)((props: StyledTabProps) => <Tab disableRipple {...props} />);
+)((props: StyledTabProps) => (
+  <Tab
+    className="AntTab"
+    icon={props.label === "Board" ? <DeveloperBoard /> : <Map />}
+    disableRipple
+    {...props}
+  />
+));
 
 interface StyledTabProps {
   label: string;

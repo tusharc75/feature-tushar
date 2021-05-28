@@ -49,12 +49,18 @@
       material-accent-color: var(--primary-light),
       input-focus-border-color: red,
       range-selection-background-color: red,
+      odd-row-background-color: #f5f3f3,
     )
   );
 }
 
 .ag-theme-material .ag-ltr .ag-has-focus .ag-cell-focus:not(.ag-cell-range-selected) {
   border: 1px solid lightgray !important;
+}
+
+.ag-theme-material input[class^='ag-'][type='text']{
+  padding-bottom: 2px;
+  height: 20px;
 }
 
 * {
@@ -624,4 +630,9 @@ body::-webkit-scrollbar-thumb {
   border-radius: 3px;
   display: flex;
   align-items: center;
+  border-bottom: 1px solid #d5d5d5;
 }
+.bgLight {
+  background: #f0f0f0;
+}
+

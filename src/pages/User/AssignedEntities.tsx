@@ -1,26 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import { Grid, Paper, IconButton } from '@material-ui/core';
+import { Grid, IconButton } from '@material-ui/core';
 import { ControlPoint } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
 import BoxWithBorder from '../../components/BoxWithBorder';
-import ProductBuilderInAccordion from '../../components/ProductBuilderInAccordion/ProductBuilderInAccordion';
-import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
-import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
-import CustomerContacts from '../ProjectSales/CustomerContacts';
-import OpportunityAccordianProjectSales from '../ProjectSales/OpportunityAccordingProjectSales';
 import RoleEngine from '../../components/Shared/RoleEngine';
 import UserRoles from './UserRoles';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 
 export default function AssignedEntities({
@@ -47,7 +38,7 @@ export default function AssignedEntities({
   const handleUnassignRole = (value) => {
     let entityArray = []
     if (entities) {
-      entities.map(d => {
+      entities.forEach(d => {
         entityArray.push({
           entity: d.entity?._id,
           role: currentEntity?.entity._id === d.entity?._id ? d.role?.filter(d => d._id !== value._id).map(r => r._id) : d.role?.map(r => r._id)
@@ -80,7 +71,7 @@ export default function AssignedEntities({
   const DeleteEntity = () => {
     let entityArray = []
     if (entities) {
-      entities.map(d => {
+      entities.forEach(d => {
         if (currentEntity.entity?._id !== d.entity?._id) {
           entityArray.push({
             entity: d.entity?._id,
