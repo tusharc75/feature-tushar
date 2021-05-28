@@ -60,7 +60,6 @@ const EmailSchema = Yup.object().shape({
 
 });
 
-
 const useStyles = makeStyles((theme) => ({
     textEditor: {
         fontFamily: "inherit",
@@ -87,6 +86,35 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const [imageSource, setImageSource] = useState(null);
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false)
+
+    const toolbarConfig = {
+        display: ['INLINE_STYLE_BUTTONS', 'BLOCK_ALIGNMENT_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'LINK_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
+        INLINE_STYLE_BUTTONS: [
+            { label: 'Bold', style: 'BOLD' },
+            { label: 'Italic', style: 'ITALIC' },
+            { label: 'Underline', style: 'UNDERLINE' },
+            { label: 'Strikethrough', style: 'STRIKETHROUGH' },
+            { label: 'Monospace', style: 'CODE' },
+        ],
+        BLOCK_ALIGNMENT_BUTTONS: [
+            { label: 'Align Left', style: 'ALIGN_LEFT' },
+            { label: 'Align Center', style: 'ALIGN_CENTER' },
+            { label: 'Align Right', style: 'ALIGN_RIGHT' },
+            { label: 'Align Justify', style: 'ALIGN_JUSTIFY' },
+        ],
+        BLOCK_TYPE_DROPDOWN: [
+            { label: 'Normal', style: 'unstyled' },
+            { label: 'Heading Large', style: 'header-one' },
+            { label: 'Heading Medium', style: 'header-two' },
+            { label: 'Heading Small', style: 'header-three' },
+            { label: 'Code Block', style: 'code-block' },
+        ],
+        BLOCK_TYPE_BUTTONS: [
+            { label: 'UL', style: 'unordered-list-item' },
+            { label: 'OL', style: 'ordered-list-item' },
+            { label: 'Blockquote', style: 'blockquote' },
+        ]
+    };
 
     useEffect(() => {
         fetchEmailDetail();
@@ -128,16 +156,19 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     };
 
     const handleSave = async (values) => {
+
         try {
-            const payload = {
+            let payload = {
                 relatedTo: relatedTo,
                 message: values.content.toString('html'),
-                graphToken: await getAzureAcessToken(instance),
                 to: values.to,
                 cc: values.cc,
                 subject: values.name,
-                mailbox: azureAccount.username,
                 attachment: values["file"] ? [...imageAttachments, ...otherAttachments] : [...imageAttachments]
+            }
+            if (azureAccount && azureAccount?.username) {
+                payload["graphToken"] = await getAzureAcessToken(instance)
+                payload["mailbox"] = azureAccount.username
             }
 
             if (emailId) {
@@ -322,6 +353,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                             <CustomDialogContent>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
                                     <MuiPickersUtilsProvider utils={MomentUtils}>
+
                                         <Box padding={1} >
                                             {emailId ?
                                                 <Fragment>
@@ -487,6 +519,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                         </label>
                                                                     </button>
                                                                 ]}
+                                                                toolbarConfig={toolbarConfig}
                                                             />
                                                             {renderImageAttachments}
                                                         </Box>
@@ -497,11 +530,12 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                 </Form>
                             </CustomDialogContent>
                             <CustomDialogFooter>
-                                <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography>
+                                {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
                                 <Button color="primary" onClick={handleClose}>Cancel</Button>
                                 {!emailId &&
                                     <Button type="button" color="primary" variant="contained" disabled={sending}
                                         onClick={(e) => {
+
                                             e.preventDefault()
                                             submitForm()
                                         }}>
@@ -528,18 +562,20 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                 /> : null
         }
 
-        {!emailId && <UnauthenticatedTemplate>
-            <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
-                backdropFilter: "blur(2px)",
-                color: "#F9FAFB",
-            }} zIndex={10} top={0} left={0} height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                <Box width="100%" textAlign="center">
-                    <AzureLogin></AzureLogin>
-                    <Box width="50%" marginX="auto" marginY={2} bgcolor="#F9FAFB" height="1px"></Box>
-                    <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
+        {/* {
+            (!azureAccount?.username && !emailId) ? <UnauthenticatedTemplate>
+                <Box position="absolute" bgcolor="rgba(0,0,0,0.6)" style={{
+                    backdropFilter: "blur(2px)",
+                    color: "#F9FAFB",
+                }} zIndex={10} top={0} left={0} height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                    <Box width="100%" textAlign="center">
+                        <AzureLogin></AzureLogin>
+                        <Box width="50%" marginX="auto" marginY={2} bgcolor="#F9FAFB" height="1px"></Box>
+                        <Typography >To able to send Mail you need to Log  Into azure Account</Typography>
+                    </Box>
                 </Box>
-            </Box>
-        </UnauthenticatedTemplate>}
+            </UnauthenticatedTemplate> : null
+        } */}
     </>
 
 }

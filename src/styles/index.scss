@@ -30,6 +30,8 @@
   --grey: #838485;
   --lightgrey: lightgrey;
 
+  --common-border-color: #dee2e6;
+
   --box-shadow: "rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px";
 
   --colorOpportunity: #d46101;
@@ -37,6 +39,27 @@
   --colorContact: #003f57;
   --colorAccount: red;
   --colorProject: yellow;
+}
+
+@import "~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss";
+.ag-theme-material {
+  @include ag-theme-material(
+    (
+      material-primary-color: var(--primary),
+      material-accent-color: var(--primary-light),
+      input-focus-border-color: red,
+      range-selection-background-color: red,
+      odd-row-background-color: #f5f3f3,
+    )
+  );
+}
+
+.ag-theme-material .ag-ltr .ag-has-focus .ag-cell-focus:not(.ag-cell-range-selected) {
+  border: 1px solid lightgray !important;
+}
+
+.ag-theme-material input[class^='ag-'][type='text']{
+  padding-bottom: 0;
 }
 
 * {
@@ -279,6 +302,16 @@ body::-webkit-scrollbar-thumb {
 .listing-grid {
   height: calc(100vh - 160px);
   padding: 0 4px 4px;
+}
+
+.ag-grid-listing-grid {
+  height: calc(100vh - 255px);
+  padding: 0 4px 0;
+}
+
+.ag-grid-listing-grid-header-options {
+  margin: 0 4px 0;
+  background: #f0f2f3 !important;
 }
 
 .form-label-style:nth-child(1) {

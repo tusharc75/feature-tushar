@@ -18,7 +18,7 @@ import styles from "./Header.module.scss"
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { leadProcessFieldName } from '../../constants/helpers';
+import { processFieldName } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
     filter_side: {
@@ -59,13 +59,12 @@ function LeadsHeader(props) {
         onCreate,
         leadPermissions,
         showConfirmBox,
-        allowToDelete,
         icon,
         heading,
         allowToConvertLeadToOpportunity,
         showLeadToOpportunityConfirmationDialog,
         selectedLeads
-    } = props
+    } = props;
 
     return <Grid className={styles.filter_side_container} container>
         <Grid item xs={6} className="d-flex align-items-center gap-1">
@@ -137,17 +136,17 @@ function LeadsHeader(props) {
                                 closeActions();
                                 showConfirmBox(null)
                             }}
-                            disabled={allowToDelete}
+                            disabled={selectedLeads.length == 0 || selectedLeads.some(d => d.ownerId != userId)}
                         >Delete</MenuItem>
 
                         {
                             allowToConvertLeadToOpportunity && <MenuItem
                                 onClick={() => {
                                     closeActions();
-                                    if (selectedLeads.some((d) => d.isChecked && d.staticData["convertedToOpportunity"])) {
+                                    if (selectedLeads.some((d) => d.staticData["convertedToOpportunity"])) {
                                         setMessageDialog({ open: true, message: `You are trying to convert already converted lead, Please unselect those records and try again.` })
                                     }
-                                    else if (selectedLeads.some((d) => d.isChecked && (!d[leadProcessFieldName] || d[leadProcessFieldName].toLowerCase() != "qualified"))) {
+                                    else if (selectedLeads.some((d) => (!d[processFieldName] || d[processFieldName].toLowerCase() != "qualified"))) {
                                         setMessageDialog({ open: true, message: `You have selected lead(s) which are not qualified yet to be converted into opportunity` })
                                     }
                                     else {

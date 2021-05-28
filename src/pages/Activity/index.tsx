@@ -68,7 +68,6 @@ const Activity = () => {
         <Grid item xs={12}>
           <CustomBreadCrumbs
             routes={[
-              { title: "Calendar", path: "/calendar" },
               { title: capitalize(type) },
             ]}
           />
@@ -77,7 +76,16 @@ const Activity = () => {
       <CustomContainer>
         <Box className={classes.activityHeader}>
           <Grid container>
-            <Grid item xs={12} md={12} sm={12}>
+            <Grid item xs={12} md={5} sm={6}>
+              <Paper className={classes.tabBox}>
+                <CustomTabs
+                  value={viewType}
+                  setValue={setViewType}
+                  tabs={tabs}
+                />
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={7} sm={6}>
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}
@@ -86,13 +94,7 @@ const Activity = () => {
           </Grid>
         </Box>
         <Grid item xs={12} md={12} sm={12}>
-          <Paper className={classes.tabBox}>
-            <CustomTabs
-              value={viewType}
-              setValue={setViewType}
-              tabs={tabs}
-            />
-          </Paper>
+
         </Grid>
         <Box className={classes.activityContainer}>
           {viewType === 0 && (

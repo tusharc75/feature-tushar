@@ -59,8 +59,7 @@ export const userType = {
 
 export const gridPageSizes = [25, 50, 75];
 
-export const leadProcessFieldName = "leadProcess";
-export const opportunityProcessFieldName = "process";
+export const processFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
@@ -90,6 +89,11 @@ export const sidebarResource = {
   lead: "Lead",
   opportunity: "Opportunity",
   projectSales: "Project Sales",
+  task: "Task",
+  note: "Note",
+  email: "Email",
+  attachment: "Attachment",
+  case: "Case",
 };
 
 export const lead = {
@@ -652,3 +656,7 @@ export const CustomDialogTransition = React.forwardRef(function Transition(
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
+
+export const AgGridHeaderHeight = 40;
+export const AgGridRowHeight = 30;
+export const AgGridFloatingFiltersHeight = 30;

@@ -18,7 +18,7 @@ export const capitalize = (string) => {
     : string;
 };
 
-export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
+export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActivity = false }) => {
   const {
     state: {
       user: { user },
@@ -45,7 +45,8 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip }) => {
 
   useEffect(() => {
     if (inputValue === "") {
-      setOptions(allSearch);
+      let filteredSearch = dontShowMyActivity ? allSearch.filter(_o => _o.type !== "my") : allSearch
+      setOptions(filteredSearch);
     } else {
       setLoading(true);
       SearchActivity(inputValue)
