@@ -95,15 +95,12 @@ const Chatter = (props) => {
   useEffect(() => {
     if (!socket && !chatterId) return;
 
-    console.log(chatterId);
-
     socket.on("connect", () => {
       socket.emit("join", chatterId);
     });
 
     socket.on("data", (data) => {
       setMessages(data.Messages);
-      console.log(data);
     });
 
     return () => {
