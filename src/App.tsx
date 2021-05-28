@@ -342,9 +342,7 @@ function App() {
           <PrivateRoute exact path="/attachment">
             <Attachments />
           </PrivateRoute>
-          <PrivateRoute path="/:type">
-            <Activity />
-          </PrivateRoute>
+  
           <PrivateRoute exact path="/calendar">
             <Calender />
           </PrivateRoute>
@@ -414,6 +412,10 @@ function App() {
           <Route exact path={"/doa-request/:id"}>
             <DOAapproval />
           </Route>
+
+          <PrivateRoute path="/:type">
+            <Activity />
+          </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>

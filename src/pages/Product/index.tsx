@@ -26,6 +26,7 @@ import { Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
 import { getSearchQuery } from '../../services/util';
 import routes from "../../components/Helpers/Routes";
+import ImportExportLinks from "../../components/Product/ImportExportLinks";
 
 const Product = () => {
     const toastConfig = useContext(CustomToastContext)
@@ -248,8 +249,20 @@ const Product = () => {
 
     return (<Layout>
         <Grid container className="headerbox">
-            <Grid item xs={12}>
+            <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.product.title }]} />
+            </Grid>
+            <Grid item md={8} sm={1} xs={2}>
+                <ImportExportLinks
+                    module="product(s)"
+                    api={"product"}
+                    refrenceId={null}
+                    onSuccessfulImport={(isImportedSuccessfully) => {
+                        if (isImportedSuccessfully) {
+                            fetchProduct();
+                        }
+                    }}
+                />
             </Grid>
         </Grid>
         <div className="main-container">
