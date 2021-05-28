@@ -277,6 +277,7 @@ const Leads = () => {
       field={column.field}
       headerName={column.headerName}
       filter={column.filter ?? "agTextColumnFilter"}
+      sortable={column.sortable ?? true}
       cellRenderer={column.cellRenderer ?? null}
     // floatingFilterComponent={column.floatingFilterComponent ?? null}
     // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
@@ -326,7 +327,7 @@ const Leads = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
@@ -371,7 +372,7 @@ const Leads = () => {
               owner: u.owner?.optionLabel,
               ownerId: u.owner?.optionValue,
               isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
-                (d) => d.optionValue == user?.user?._id
+                (d) => d.optionValue === user?.user?._id
               ),
               relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
               relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
@@ -432,7 +433,7 @@ const Leads = () => {
       dontHavePermissions.push("Opportunity");
     }
 
-    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() == "qualified";
+    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() === "qualified";
 
     return dontHavePermissions.length > 0 ? (
       <>
@@ -497,7 +498,7 @@ const Leads = () => {
       }
     } else {
       if (
-        selectedRecords.find((d) => d.ownerId != user.user._id)
+        selectedRecords.find((d) => d.ownerId !== user.user._id)
       ) {
         setShowDeleteWarningConfirmBox(true);
       } else {

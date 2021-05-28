@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, Avatar, Divider } from "@material-ui/core";
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
@@ -10,11 +10,9 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { useData } from "../../StateProvider/Provider";
 import { contactPage } from "../../routes/Contacts";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import routes from "../../components/Helpers/Routes";
 import axiosInstance from "./../../axios/axiosInstance";
 import Activity from "../../components/Activity";
 import {
-  // DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -28,7 +26,6 @@ import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks"
 import { FcFlowChart } from "react-icons/fc";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import { BiFace } from 'react-icons/bi'
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
@@ -38,32 +35,18 @@ import { FiStar } from 'react-icons/fi';
 import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
-import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
 import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
-
-function DisplayData({ label, value, icon }) {
-  return <div style={{ flexGrow: 1 }}>
-    <List>
-      <ListItem>
-        <ListItemAvatar>
-          {icon}
-        </ListItemAvatar>
-        <ListItemText primary={value} secondary={label} />
-      </ListItem>
-    </List>
-  </div>
-}
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    contact: { contactApi, contactResource, contactPermission, contactRoute },
+    contact: { contactApi, contactResource },
     account: { accountResource },
     contactBreadcrumb,
   } = props;
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity },
+    state: { user, permissions }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [contactData, setContactData] = useState<any>({});
@@ -71,7 +54,6 @@ const ContactDetailsPage = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
-  const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [contactPermissions, setContactPermissions] = useState({
@@ -364,7 +346,6 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleUpdateContact = (values) => {
-    setUpdating(true);
     if (values.employees) {
       values.employees = parseInt(values.employees);
     }
@@ -382,12 +363,10 @@ const ContactDetailsPage = (props) => {
           type: "success",
           message: data.message,
         });
-        setUpdating(false);
         setOpenUpdateDialog(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setUpdating(false);
       });
   };
   return (
