@@ -1,11 +1,25 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Editor, RichUtils } from 'draft-js';
 import "./RichEditorStyle.scss";
-
+import {
+  BsTypeBold,
+  BsTypeItalic,
+  BsTypeUnderline,
+  BsListUl,
+  BsListOl
+} from "react-icons/bs"
+import { MdFormatQuote } from "react-icons/md"
+import { VscSymbolNamespace } from "react-icons/vsc"
+import { IconButton, Tooltip } from "@material-ui/core"
 
 export function RichTextEditor(props) {
   const { editorState, style, placeholder } = props;
   const editorRef = useRef(null);
+
+  useEffect(() => {
+    editorRef.current.focus();
+  }, [])
+
   const onChange = editorState => {
     props.onChange('editorState', editorState);
   };
@@ -45,14 +59,16 @@ export function RichTextEditor(props) {
   }
   return (
     <div className="RichEditor-root" style={style ? { ...style } : null}>
-      <BlockStyleControls
-        editorState={editorState}
-        onToggle={toggleBlockType}
-      />
-      <InlineStyleControls
-        editorState={editorState}
-        onToggle={toggleInlineStyle}
-      />
+      <div className="container">
+        <BlockStyleControls
+          editorState={editorState}
+          onToggle={toggleBlockType}
+        />
+        <InlineStyleControls
+          editorState={editorState}
+          onToggle={toggleInlineStyle}
+        />
+      </div>
       <div className={className} onClick={focus}>
         <Editor
           blockStyleFn={getBlockStyle}
@@ -101,22 +117,31 @@ function StyleButton(props) {
   };
   return (
     <span className={className} onMouseDown={onToggle}>
-      {props.label}
+      {
+        props.icon ? <Tooltip title={props.label || ''}>
+          <IconButton className="richTextEditorIconButton">{props.icon}</IconButton>
+        </Tooltip>
+          : props.label ? <Tooltip title={props?.message || ''}>
+            <span> {props.label}</span>
+          </Tooltip> : ""
+      }
     </span>
   );
 }
+
 const BLOCK_TYPES = [
-  { label: 'H1', style: 'header-one' },
-  { label: 'H2', style: 'header-two' },
-  { label: 'H3', style: 'header-three' },
-  { label: 'H4', style: 'header-four' },
-  { label: 'H5', style: 'header-five' },
-  { label: 'H6', style: 'header-six' },
-  { label: 'Blockquote', style: 'blockquote' },
-  { label: 'UL', style: 'unordered-list-item' },
-  { label: 'OL', style: 'ordered-list-item' },
-  { label: 'Code Block', style: 'code-block' },
+  { label: 'Huge', style: 'header-one', message: "Heading Huge" },
+  { label: 'Large', style: 'header-two', message: "Heading Large" },
+  { label: 'Medium', style: 'header-three', message: "Heading Medium" },
+  { label: 'Small', style: 'header-four', message: "Heading Small" },
+  // { label: 'H5', style: 'header-five' },
+  // { label: 'H6', style: 'header-six' },
+  { label: 'Code Block', style: 'code-block', message: "Code-block" },
+  { label: 'Blockquote', icon: <MdFormatQuote className="richTextEditorIcons" />, style: 'blockquote' },
+  { label: 'UL', icon: <BsListUl className="richTextEditorIcons" />, style: 'unordered-list-item' },
+  { label: 'OL', icon: <BsListOl className="richTextEditorIcons" />, style: 'ordered-list-item' },
 ];
+
 const BlockStyleControls = props => {
   const { editorState } = props;
   const selection = editorState.getSelection();
@@ -131,6 +156,8 @@ const BlockStyleControls = props => {
           key={type.label}
           active={type.style === blockType}
           label={type.label}
+          message={type.message ?? ""}
+          icon={type.icon}
           onToggle={props.onToggle}
           style={type.style}
         />
@@ -139,10 +166,10 @@ const BlockStyleControls = props => {
   );
 };
 const INLINE_STYLES = [
-  { label: 'Bold', style: 'BOLD' },
-  { label: 'Italic', style: 'ITALIC' },
-  { label: 'Underline', style: 'UNDERLINE' },
-  { label: 'Monospace', style: 'CODE' },
+  { label: 'Bold', icon: <BsTypeBold className="richTextEditorIcons" />, style: 'BOLD' },
+  { label: 'Italic', icon: <BsTypeItalic className="richTextEditorIcons" />, style: 'ITALIC' },
+  { label: 'Underline', icon: <BsTypeUnderline className="richTextEditorIcons" />, style: 'UNDERLINE' },
+  { label: 'Monospace', icon: <VscSymbolNamespace className="richTextEditorIcons" />, style: 'CODE' },
 ];
 const InlineStyleControls = props => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
@@ -155,6 +182,7 @@ const InlineStyleControls = props => {
           label={type.label}
           onToggle={props.onToggle}
           style={type.style}
+          icon={type.icon}
         />
       )}
     </div>

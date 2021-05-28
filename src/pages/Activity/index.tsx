@@ -68,7 +68,6 @@ const Activity = () => {
         <Grid item xs={12}>
           <CustomBreadCrumbs
             routes={[
-              { title: "Calendar", path: "/calendar" },
               { title: capitalize(type) },
             ]}
           />

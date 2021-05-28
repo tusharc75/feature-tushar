@@ -188,6 +188,7 @@ export default function AccountDetailPage(props) {
             ? data.Opportunity[
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
+<<<<<<< HEAD
             : []
         );
         setProjectSales(
@@ -198,6 +199,8 @@ export default function AccountDetailPage(props) {
             ? data[sidebarResource.projectSales][
             sidebarResource[accountResource].replaceAll(" ", "_")
             ]
+=======
+>>>>>>> master
             : []
         );
         initializeGraphData();
@@ -350,6 +353,7 @@ export default function AccountDetailPage(props) {
           state: {
             accountId: accountData._id,
             accountName: accountData.accountName,
+            resource: accountResource
           },
         });
       },
@@ -473,7 +477,7 @@ export default function AccountDetailPage(props) {
   return (
     <>
       <Layout>
-      <Grid container className="headerbox">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
