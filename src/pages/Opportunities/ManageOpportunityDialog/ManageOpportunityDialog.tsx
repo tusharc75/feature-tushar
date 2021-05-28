@@ -35,6 +35,8 @@ import currencies from "../../../constants/currency_with_country.json";
 import AddIcon from '@material-ui/icons/AddCircle'
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 const arr = [...Array(9).keys()];
 export default function ManageOpportunityDialog({
@@ -47,6 +49,9 @@ export default function ManageOpportunityDialog({
   resource, // either called from customer account or supplier account
   isRedirectTodetailPage,
   userId = null,
+  contactId = null,
+  contactResource = null,
+  disableOwnerAndAccount = false,
 }) {
   const { opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
@@ -56,7 +61,7 @@ export default function ManageOpportunityDialog({
     state: { user, selectedEntity, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== dataToUpdate.owner.optionValue
+    (!isNew && user.user._id !== dataToUpdate.owner.optionValue) || disableOwnerAndAccount
   );
 
   const [entityData, setEntityData] = useState({
@@ -72,7 +77,7 @@ export default function ManageOpportunityDialog({
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
   const [accountData, setAccountData] = useState([]);
-  const [newAddedAccountId, setNewAddedAccountId] = useState(null)
+  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -192,8 +197,8 @@ export default function ManageOpportunityDialog({
   }
 
   const handleCreateOpportunity = (values) => {
-    // values.closeDate = "03/03/2021"
     if (accountId) values["supplierAccountName"] = [accountId]
+    if (contactId && contactResource) values.staticData = { [contactResource]: [contactId], [resource]: [accountId] }
     setLoading(true);
     axiosInstance()
       .post(`${opportunityApi}?entity=${selectedEntity}`, values)
@@ -260,6 +265,8 @@ export default function ManageOpportunityDialog({
     <>
       <Dialog
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
@@ -323,6 +330,7 @@ export default function ManageOpportunityDialog({
                                             md={permissions.customerAccount.isCreate ? 10 : 11}
                                           >
                                             <FormTypes
+                                              disabled={disableOwnerAndAccount}
                                               values={values}
                                               errors={errors}
                                               touched={touched}
@@ -569,6 +577,7 @@ export default function ManageOpportunityDialog({
                     type="button"
                     variant="outlined"
                     color="primary"
+                    size="small"
                     onClick={onClose}
                   >
                     Cancel

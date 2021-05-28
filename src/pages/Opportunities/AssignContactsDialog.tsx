@@ -37,7 +37,7 @@ export default function AssignContactsDialog({
     const [currentContacts, setCurrentContacts] = useState(contacts.customerContacts)
 
     const handleContactSelection = (e, id) => {
-        const indexOfContactToChange = currentContacts.findIndex(d => d._id == id);
+        const indexOfContactToChange = currentContacts.findIndex(d => d._id === id);
         currentContacts[indexOfContactToChange].isChecked = e.target.checked;
         setCurrentContacts([...currentContacts]);
     };
@@ -54,8 +54,8 @@ export default function AssignContactsDialog({
 
         const dataToSave = {
             _id: opportunityId,
-            supplierContacts: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
-            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
+            supplierContact: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
+            customerContact: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
             notToBeRemoved: contacts && contacts?.notToBeRemoved ? contacts.notToBeRemoved : null
         };
 
@@ -121,12 +121,14 @@ export default function AssignContactsDialog({
                     disabled={isAssigning}
                     onClick={handleCloseDialog}
                     color="primary"
+                    size="small" 
                 >
                     Cancel
                 </Button>
                 <Button
                     onClick={handleAssignContacts}
                     color="primary"
+                    size="small" 
                 >
                     {isAssigning ? <CircularProgress size={22} /> : "Save"}
                 </Button>

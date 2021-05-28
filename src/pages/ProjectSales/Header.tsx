@@ -5,6 +5,7 @@ import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import styles from "../Leads/Header.module.scss";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 
 const ProjectStrategyHeader = (props) => {
   const {
@@ -14,8 +15,16 @@ const ProjectStrategyHeader = (props) => {
     permissions,
     showConfirmBox,
     canDelete,
+    handleFilterChange,
+    selectedType,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter !== null) {
+      handleFilterChange(newFilter);
+    }
+  };
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -30,6 +39,16 @@ const ProjectStrategyHeader = (props) => {
       <Grid item xs={6} className="d-flex align-items-center gap-1">
         <BiNetworkChart className="headerLogo" />
         <span className="listingHeader">Project Sales</span>
+        <ToggleButtonGroup
+          size="small"
+          className="ml-8"
+          value={selectedType}
+          exclusive
+          onChange={handleFilter}
+        >
+          <ToggleButton value={1}>All Projects</ToggleButton>
+          <ToggleButton value={2}>My Projects</ToggleButton>
+        </ToggleButtonGroup>
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
         <Box component="div" className={styles.filter_side_header}>
@@ -79,7 +98,7 @@ const ProjectStrategyHeader = (props) => {
                 onClose={closeActions}
               >
                 <MenuItem
-                  disabled={Boolean(canDelete)}
+                  disabled={canDelete}
                   onClick={() => {
                     showConfirmBox(null);
                     closeActions();

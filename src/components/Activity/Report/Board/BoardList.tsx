@@ -84,10 +84,10 @@ export const BoardList = ({
         <Box
           p={1}
           style={{
-            opacity: isCreateButton ? 1 : 0,
+            opacity: isCreateButton || status === "To Do" ? 1 : 0,
           }}
         >
-          <Button startIcon={<Add />} onClick={() => setOpenDialog(true)}>
+          <Button size="small" startIcon={<Add />} onClick={() => setOpenDialog(true)}>
             Create {type}
           </Button>
         </Box>

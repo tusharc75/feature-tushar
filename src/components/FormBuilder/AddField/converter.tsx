@@ -123,32 +123,54 @@ export const Converter = ({ fields, values, setFieldValue, }) => {
                     </table>
                 </Box>}
             {(values["units"] && values["units"].length > 0) && <Box mt={1}>
-                <FormControl variant="outlined" fullWidth margin="dense">
-                    <InputLabel htmlFor="filled-age-native-simple">Display Units</InputLabel>
-                    <Select
-                        inputProps={{
-                            name: 'inputFields',
-                            id: "demo-simple-select-outlined"
-                        }}
-                        margin="dense"
-                        label="Display Units"
-                        multiple
-                        name="displayUnits"
-                        value={values["displayUnits"] ? values["displayUnits"] : []}
-                        onChange={(e) => setFieldValue("displayUnits", e.target.value)}
-                        renderValue={(selected: any) => selected.join(', ')}
-                        MenuProps={MenuProps}
-                    >
-                        {values["units"] && values["units"].map((_unit) => (
-                            <MenuItem key={_unit} value={_unit}>
-                                <Checkbox color="primary" checked={values["displayUnits"] && values["displayUnits"].indexOf(_unit) > -1} />
-                                <ListItemText primary={_unit} />
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </Box>
-            }
+                <Grid spacing={3} container>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <FormControl variant="outlined" fullWidth margin="dense">
+                            <InputLabel htmlFor="filled-age-native-simple">Display Units</InputLabel>
+                            <Select
+                                inputProps={{
+                                    name: 'inputFields',
+                                    id: "demo-simple-select-outlined"
+                                }}
+                                margin="dense"
+                                label="Display Units"
+                                multiple
+                                name="displayUnits"
+                                value={values["displayUnits"] ? values["displayUnits"] : []}
+                                onChange={(e) => setFieldValue("displayUnits", e.target.value)}
+                                renderValue={(selected: any) => selected.join(', ')}
+                                MenuProps={MenuProps}
+                            >
+                                {values["units"] && values["units"].map((_unit) => (
+                                    <MenuItem key={_unit} value={_unit}>
+                                        <Checkbox color="primary" checked={values["displayUnits"] && values["displayUnits"].indexOf(_unit) > -1} />
+                                        <ListItemText primary={_unit} />
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+
+                    {values["isFormula"] &&
+                        <Grid item xs={12} sm={6} md={6}>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                                <InputLabel id="demo-simple-select-outlined-label">Formula applied on converter</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-outlined-label"
+                                    id="demo-simple-select-outlined"
+                                    value={values["formulaOnConverter"]}
+                                    onChange={(e) => setFieldValue("formulaOnConverter", e.target.value)}
+                                    label="Formula applied on converter"
+                                    name="formulaOnConverter"
+                                >
+                                    {values["displayUnits"] && values["displayUnits"].map((_unit) => (
+                                        <MenuItem value={_unit}>{_unit}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>}
+                </Grid>
+            </Box>}
         </Box>
     );
 }

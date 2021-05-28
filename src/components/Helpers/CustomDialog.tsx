@@ -57,7 +57,7 @@ const CustomDialog = (props) => {
             </DialogContent>
 
             <DialogActions>
-              <Button onClick={handleClose} color="primary">
+              <Button size="small" onClick={handleClose} color="primary">
                 Close
               </Button>
               <Button

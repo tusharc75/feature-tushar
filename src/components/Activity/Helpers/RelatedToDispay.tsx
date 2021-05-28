@@ -29,7 +29,7 @@ export const RelatedToDispay = ({ relatedTo }) => {
             <Typography variant="body2" className={classes.boldFont}>Related to</Typography>
         </Box>
         {relatedTo && relatedTo.map((_element, index) => (
-            <Box mr={1} component="div" display="inline">
+            <Box mr={1} key={`relatedTo${index}`} component="div" display="inline">
                 <Chip key={index} label={capitalize(UnCamelCase(_element.type)) + " - " + _element.name} size="medium" color={classes[_element.type]} />
             </Box>
         ))}

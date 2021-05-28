@@ -13,8 +13,10 @@ import Dialog from "@material-ui/core/Dialog";
 import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
-export const Case = ({ relatedTo, handleActivityRefresh }) => {
+export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
   const [cases, setCases] = useState(null);
   const [caseId, setCaseId] = useState(null);
@@ -30,6 +32,7 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
     await GetCase(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setCases(data);
+        onSetCount("Case", data.length)
         setLoading(false);
       })
       .catch((err) => {
@@ -63,7 +66,7 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
         fetchCash();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleClose = () => {
@@ -87,7 +90,16 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
                     xs={10}
                     className="d-flex align-items-center gap-1"
                   >
-                    <Typography variant="subtitle2">{_case.name}</Typography>
+                    <Typography
+                      variant="subtitle2"
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setCaseId(_case._id);
+                        setOpen(true);
+                      }}
+                    >
+                      {_case.name}
+                    </Typography>
                     <span className="activity-date">
                       Due Date : {moment(_case.dueDate).format("MMM DD YYYY")}
                     </span>
@@ -140,6 +152,8 @@ export const Case = ({ relatedTo, handleActivityRefresh }) => {
         maxWidth="md"
         onClose={handleClose}
         fullWidth
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
       >
         <CreateCase
           caseId={caseId}

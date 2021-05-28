@@ -1,114 +1,175 @@
-import React, { useState, useEffect, Fragment } from 'react';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
-import { CreateNewCase } from "../../../axios/activity";
-import * as Yup from "yup";
-import TextField from '@material-ui/core/TextField';
-import { Formik, Form, Field } from "formik";
-import Grid from '@material-ui/core/Grid';
-import Chip from '@material-ui/core/Chip';
-import { useHistory } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import {
+  Typography,
+  Button,
+  Grid,
+  Chip,
+  IconButton,
+  TextField,
+  Box,
+  CircularProgress,
+} from "@material-ui/core";
+import { DeleteOutline } from "@material-ui/icons";
 
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
-    marginLeft: {
-        marginLeft: 10
-    },
-    boldFont: {
-        fontWeight: 500
-    },
-
+  marginLeft: {
+    marginLeft: 10,
+  },
+  boldFont: {
+    fontWeight: 500,
+  },
 }));
 
-const ActivitySchema = Yup.object().shape({
-    name: Yup.string()
-        .min(3, "Too Short!")
-        .max(50, "Too Long")
-        .required("case name is required"),
-});
+export const SubCase = ({
+  setId,
+  openAddSub,
+  setOpenAddSub,
+  fetchCaseDetail,
+  data,
+}) => {
+  const { setToastConfig } = useContext(CustomToastContext);
+  const [childCases, setChildCases] = useState(data.childCase || null);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [caseName, setCaseName] = useState("");
+  const [isError, setError] = useState(false);
 
-export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, data }) => {
+  const handleSave = () => {
+    if (caseName && caseName.length >= 3) {
+      setSubmitting(true);
+      const values = { ...data };
+      delete values._id;
+      values.parentId = data._id;
+      values.description = "";
+      values.name = caseName;
 
-    const history = useHistory();
-
-    const handleSave = (values) => {
-        values.parentId = data._id
-        values.description = ""
-        values.status = data.status
-        values.assignee = data.assignee
-        values.reporter = data.reporter
-        values.startDate = data.startDate
-        values.dueDate = data.dueDate
-        values.relatedTo = data.relatedTo
-        CreateNewCase(values)
-            .then(({ data }) => {
-                setOpenAddSub(false)
-                fetchCaseDetail()
-            })
-            .catch((err) => {
-            });
-    };
-
-    const handleOpenActivity = (id) => {
-
-        setId(id)
-        // history.push({
-        //     pathname: '/project/board',
-        //     search: '?projectId=' + projectId + '&activityId=' + id
-        // })
+      axiosInstance()
+        .post("/case", values)
+        .then(() => {
+          setOpenAddSub(false);
+          setSubmitting(false);
+          fetchCaseDetail();
+        })
+        .catch((err) => {
+          setToastConfig(err);
+          setSubmitting(false);
+        });
+    } else {
+      setError(true);
     }
+  };
 
-    const classes = useStyles();
+  const handleOpenActivity = (id) => {
+    setId(id);
+  };
 
-    return <Box mt={3} mb={3}>
-        {(data.childCase && data.childCase.length > 0 || openAddSub === true) &&
-            <Box mb={1}>
-                <Typography variant="body2" className={classes.boldFont}>Child Case</Typography>
-            </Box>}
-        {data.childCase && data.childCase.map((element, index) => (
-            <Box key={index} border={1} onClick={() => handleOpenActivity(element._id)} borderColor="grey.300" p={1.5} mb={1} boxShadow={1}>
-                <Grid container spacing={1}>
-                    <Grid item xs={6}>
-                        <Typography variant="body2">{element.name}</Typography>
-                    </Grid>
-                    <Grid item xs={6} container justify="flex-end">
-                        <Chip size="small" label={element.status} color="primary" />
-                    </Grid>
-                </Grid>
-            </Box>
+  const deleteCase = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+
+    if (!id) return;
+
+    setTimeout(() => {
+      const updTasks = childCases?.filter((t) => t._id !== id);
+      setChildCases(updTasks);
+    }, 500);
+
+    axiosInstance()
+      .delete(`/case/${id}`)
+      .then(() => {})
+      .catch((err) => {
+        setToastConfig(err);
+      });
+  };
+
+  const classes = useStyles();
+
+  return (
+    <Box mt={3} mb={3}>
+      {((childCases && childCases.length > 0) || openAddSub === true) && (
+        <Box mb={1}>
+          <Typography variant="body2" className={classes.boldFont}>
+            Child Case
+          </Typography>
+        </Box>
+      )}
+      {childCases &&
+        childCases.map((element, index) => (
+          <Box
+            key={index}
+            border={1}
+            onClick={() => handleOpenActivity(element._id)}
+            borderColor="grey.300"
+            p={1.5}
+            mb={1}
+            boxShadow={1}
+            borderRadius={4}
+            style={{ cursor: "pointer" }}
+          >
+            <Grid container spacing={1}>
+              <Grid item xs={6}>
+                <Typography variant="body1" color="primary">
+                  {element.name}
+                </Typography>
+              </Grid>
+              <Grid item xs={6} container justify="flex-end">
+                <Chip size="small" label={element.status} color="primary" />
+                <Box mr={1} />
+                <IconButton
+                  size="small"
+                  color="default"
+                  onClick={(e) => deleteCase(e, element._id)}
+                >
+                  <DeleteOutline color="error" />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </Box>
         ))}
-        {openAddSub && <Box>
-            <Formik initialValues={{ name: "" }} validationSchema={ActivitySchema} onSubmit={handleSave}>
-                {({ submitForm, touched, errors, setFieldValue, values }) => (
-                   <Form autoComplete="off" autoCorrect="off" noValidate >
-                        <TextField
-                            variant="outlined"
-                            type="text"
-                            label="Case Name"
-                            required={true}
-                            name="name"
-                            fullWidth
-                            margin="dense"
-                            value={values["name"]}
-                            error={touched["name"] && Boolean(errors["name"])}
-                            helperText={touched["name"] && errors["name"]}
-                            onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
-                        />
-                        <Box mt={1}>
-                            <Button color="primary" size="small" variant="contained" onClick={submitForm}>Create</Button>
-                            <Button
-                                variant="contained"
-                                size="small"
-                                className={classes.marginLeft}
-                                disableElevation
-                                onClick={() => setOpenAddSub(false)}
-                            > Cancel</Button>
-                        </Box>
-                    </Form>)}
-            </Formik>
-        </Box>}
+      {openAddSub && (
+        <Box>
+          <TextField
+            variant="outlined"
+            type="text"
+            label="Case Name"
+            required={true}
+            name="name"
+            fullWidth
+            margin="dense"
+            onChange={(e) => setCaseName(e.target.value)}
+            error={isError && caseName.length < 3}
+            helperText={
+              isError &&
+              caseName.length < 3 &&
+              "Case name must be at least 3 letters"
+            }
+          />
+
+          <Box mt={1}>
+            <Button
+              color="primary"
+              size="small"
+              variant="contained"
+              disabled={!caseName || isSubmitting}
+              onClick={handleSave}
+            >
+              {isSubmitting ? <CircularProgress size={18} /> : "Create"}
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              className={classes.marginLeft}
+              disableElevation
+              onClick={() => setOpenAddSub(false)}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      )}
     </Box>
-}
+  );
+};

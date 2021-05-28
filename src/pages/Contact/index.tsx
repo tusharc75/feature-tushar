@@ -1,33 +1,22 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useReducer } from "react";
 import Layout from "../../components/Layout";
 import {
   Box,
   Button,
-  Checkbox,
   Menu,
   MenuItem,
-  Tooltip,
-  IconButton,
-  Paper,
-  Grid,
-  Divider,
-  Typography,
+  Grid
 } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
 import { Link } from "react-router-dom";
-import { DataGrid } from "@material-ui/data-grid";
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import AddIcon from "@material-ui/icons/Add";
 import ManageContactDialog from "./ManageContact/index";
-import { makeStyles } from "@material-ui/core/styles";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import SearchBox from "../../components/Helpers/SearchBox";
-import DeleteIcon from "@material-ui/icons/Delete";
 import CustomContainer from "../../components/CustomContainer";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { getSearchQuery } from "../../services/util";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import styles from "../Leads/Header.module.scss";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ToggleButton from "@material-ui/lab/ToggleButton";
@@ -35,19 +24,25 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { MdContacts } from "react-icons/md";
 import axiosInstance from "../../axios/axiosInstance";
 import {
-  contactTemplateFileName,
-  downloadExcel,
   sidebarResource,
-  contactImportErrorFileName,
+  gridPageSizes,
+  isObjectEmpty
 } from "../../constants/helpers";
-import moment from "moment";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import { useHistory } from "react-router-dom";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
 import routes from "./../../components/Helpers/Routes";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import {
+  CommonRenderer,
+  CreatedByRenderer,
+  UpdatedByRenderer,
+  CustomLoadingOverlay,
+  CommonRendererWithCopy
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 const ContactTypes = [
   {
@@ -60,9 +55,101 @@ const ContactTypes = [
   },
 ];
 
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loading: action.loading
+      }
+
+    case "initialize":
+      return {
+        ...state,
+        dataRows: action.data,
+        rowCount: action.count,
+        loading: false
+      }
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      }
+
+    case "update":
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      }
+
+    case "filter":
+      return {
+        ...state,
+        loading: true,
+        filters: action.filters,
+        page: 0
+      }
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: true
+      }
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loading: true
+      }
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page
+      }
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: true
+      }
+
+    case "complete":
+      return {
+        ...state,
+        loading: false
+      }
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: {},
+  sorting: [],
+  selectedRecords: []
+}
+
 let contactTimeout;
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
   const {
     state: { user },
@@ -72,16 +159,9 @@ export default function Contact(props) {
     contactBreadcrumb,
     account,
   } = props;
-  const [selectedType, setselectedType] = useState(1);
-  const [contactData, setContactData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [dataRows, setDataRows] = useState([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [checkAllContacts, setCheckAllContacts] = useState(false);
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
+  const [selectedType, setSelectedType] = useState(1);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [searchVal, setSearchVal] = useState("");
   const [renderCount, setRenderCount] = useState(0);
 
   const [
@@ -95,13 +175,6 @@ export default function Contact(props) {
     contactName: "",
   });
 
-  const [createContactEntityDetails] = useState({
-    fields: [],
-    initialValues: {},
-  });
-
-  const history = useHistory();
-
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
@@ -114,235 +187,37 @@ export default function Contact(props) {
   });
 
   const [filter, setFilter] = useState("All Contacts");
+
+  //  Grid Variables - Start
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  // const [showGridFilters, setShowGridFilters] = useState(true)
+  const columns = [
+    { field: "fullName", headerName: "Name", show: true, disabled: true, cellRenderer: "fullNameRenderer" },
+    { field: "relatedLead", headerName: "Related Lead", show: true, cellRenderer: "relatedLeadRenderer" },
+    { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRendererWithCopy" },
+    { field: "email", headerName: "Email", show: true, cellRenderer: "commonRendererWithCopy" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+    { field: "accountName", headerName: "Account Name", show: true, cellRenderer: "accountNameRenderer" }
+  ];
+  //  Grid Variables - End
+
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
       setFilter(newFilter);
-      handleContactSel(ContactTypes.find((d) => d.key === newFilter).value);
+      handleContactSelect(ContactTypes.find((d) => d.key === newFilter).value);
     }
   };
-
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllContacts}
-          onChange={(ev) => {
-            setCheckAllContacts(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              d.isChecked = ev.target.checked;
-              return d;
-            });
-            setDataRows([...gridData]);
-          }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            const gridData = dataRows;
-            const indexOfRecord = gridData.findIndex(
-              (d) => d.id === params.row.id
-            );
-            gridData[indexOfRecord].isChecked = ev.target.checked;
-
-            setDataRows([...gridData]);
-
-            const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-            if (checkedRecords.length === gridData.length) {
-              setCheckAllContacts(true);
-            } else {
-              setCheckAllContacts(false);
-            }
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      width: 250,
-      renderCell: (params) => (
-        <>
-          <Link className="link" to={`/${contactRoute}/detail/${params.row._id}`}>
-            {params.value || ""}
-          </Link>
-        </>
-      ),
-    },
-    {
-      field: "relatedLead",
-      headerName: "Related Lead",
-      width: 250,
-      renderCell: (params) => (
-        <>
-          {
-            params.value ?
-              <Link className="link" to={`${routes.leadDetail.path}/${params.value._id}`} title={[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}>
-                {[params.value?.firstName, params.value?.lastName].filter(f => f).join(" ")}
-              </Link>
-              : <NoDataCell />
-          }
-        </>
-      ),
-      sortable: false,
-      filterable: false,
-    },
-    // { field: "lastName", headerName: "Last Name", width: 200 },
-    {
-      field: "phone",
-      headerName: "Phone",
-      width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      width: 300,
-      renderCell: (params) => <CustomRenderCell value={params?.value} isCopyToClipboard={true} />,
-    },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      renderCell: (params) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params.value.user.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      renderCell: (params) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="updateBy">
-            {params.value.user.firstName}
-            <span
-              className="updatedAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "accountName",
-      headerName: "Account",
-      width: 300,
-      renderCell: (params) => <Link className="link" to={`/${account.accountRoute}/detail/${params.row.accountId}`}>
-        {params.value}
-      </Link>
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <>
-          {contactPermissions.isDelete ? (
-            params.row.canDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => {
-                    setSingleContactDelete({
-                      show: true,
-                      id: params.row._id,
-                      contactName: `${params.row.firstName} ${params.row.lastName}`,
-                    });
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You must be the owner of this contact to get the delete functionality"
-              >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )
-          ) : (
-            <Tooltip
-              className="cursor-stop"
-              title="You do not have permission to delete contact"
-            >
-              <IconButton aria-label="Delete">
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-        </>
-      ),
-      width: 200,
-    },
-  ];
-
-  const onFilterChange = React.useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let deepFilter ;
-      switch (params.filterModel.items[0].columnField) {
-        case 'createdBy':
-          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'updatedBy':
-          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
-          break;
-        default:
-          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
-      }
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter
-      }));
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
 
   useEffect(() => {
     const data = user?.role?.sideBar;
 
     if (data) {
       const hasContactPermission = data.find(
-        (d) => d.name == contactPermission
+        (d) => d.name === contactPermission
       );
       if (hasContactPermission) {
         setContactPermissions({
@@ -354,37 +229,181 @@ export default function Contact(props) {
     }
   }, [user]);
 
-  const getContacts = useCallback(() => {
-    setLoading(true);
-    let searchParams: any = { ...query, filterContacts: selectedType };
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+
+    if (contactTimeout) {
+      clearTimeout(contactTimeout);
+    }
+
+    contactTimeout = setTimeout(() => {
+      getContacts();
+    }, millisec);
+  }, [search]);
+
+  useEffect(() => {
+    if (renderCount > 0) {
+      getContacts();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [page, limit, selectedType, filters, sorting, accountDetails]);
+
+  const FullNameRenderer = params => <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
+    {params.value}
+  </Link>
+
+  const RelatedLeadRenderer = params => params.value ?
+    <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
+      {params.value}
+    </Link> : <NoDataCell />
+
+  const AccountNameRenderer = params => <Link className="link" to={`/${account.accountRoute}/detail/${params.data.accountId}`}>
+    {params.value}
+  </Link>
+
+  const ActionsRenderer = params => <>
+    <GridDeleteIcon
+      hasDeletePermission={contactPermissions.isDelete}
+      ownerId={params.data.ownerId}
+      userId={user?.user?._id}
+      onDelete={() => {
+        setSingleContactDelete({
+          show: true,
+          id: params.data._id,
+          contactName: params.data.fullName,
+        })
+      }}
+      entity="contact"
+    />
+  </>
+
+  const frameworkComponents = {
+    fullNameRenderer: FullNameRenderer,
+    relatedLeadRenderer: RelatedLeadRenderer,
+    commonRenderer: CommonRenderer,
+    commonRendererWithCopy: CommonRendererWithCopy,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    accountNameRenderer: AccountNameRenderer,
+    actionsRenderer: ActionsRenderer,
+    customLoadingOverlay: CustomLoadingOverlay,
+    customFloatingFilter: CustomFloatingFilter,
+    // customLoadingCellRenderer: CustomLoadingCellRenderer,
+    // customNoRowsOverlay: CustomNoRowsOverlay
+  };
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      case "relatedLead":
+        return "staticData.relatedLead.concatedName";
+
+      default:
+        return field;
+    }
+  }
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case "owner":
+        return "owner.optionLabel";
+
+      case "accountName":
+        return "accountName.optionLabel";
+
+      default:
+        return field;
+    }
+  }
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${selectedType}`;
 
     if (accountDetails.accountId) {
-      searchParams["filterById"] = JSON.stringify([{ field: "accountName", term: accountDetails.accountId }]);
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName("accountName"), term: accountDetails.accountId }])}`
     }
-    let api = getSearchQuery(`/${contactApi}`, searchParams);
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+  const getContacts = () => {
+
+    const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
 
     axiosInstance()
-      .get(api)
+      .get(`${contactApi}${queryString}`)
       .then(({ data: { data, count } }) => {
-        setContactData(data);
-        // getRows(data);
-        setRowCount(count);
-        setCheckAllContacts(false);
-        setLoading(false);
+
+        let rows = data.map((u) => {
+          const { owner, collaborator, createdBy, updatedBy, accountName, staticData, ...restProperties } = u;
+
+          return {
+            ...restProperties,
+            id: u._id,
+
+            canDelete: u.owner?.optionValue === user?.user._id,
+
+            accountId: u.accountName?.optionValue,
+            accountName: u.accountName?.optionLabel,
+
+            relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+            relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+
+            owner: u.owner?.optionLabel,
+            ownerId: u.owner?.optionValue,
+
+            createdBy: u.createdBy?.user?.concatedName,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date
+          }
+        });
+
+        dispatch({ type: "initialize", data: rows, count: count });
+
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setLoading(false);
+        dispatch({ type: "loading", loading: false });
       });
-  }, [searchVal, query, selectedType, accountDetails]);
-
-
+  };
 
   const handleSingleDeleteContacts = async () => {
-    setLoading(true);
+    dispatch({ type: "loading", loading: true });
     axiosInstance()
       .put(`/${contactApi}/remove`, { ids: [singleContactDelete.id] })
       .then(({ data }) => {
@@ -396,45 +415,11 @@ export default function Contact(props) {
         getContacts();
       })
       .catch((error) => {
-        setLoading(false);
         toastConfig.setToastConfig(error);
+        dispatch({ type: "loading", loading: false });
       });
     setSingleContactDelete({ id: null, show: false, contactName: "" });
   };
-
-  useEffect(() => {
-    let rows = contactData?.map((u) => ({
-      ...u,
-      isChecked: false,
-      id: u._id,
-      canDelete: u?.owner?.optionValue === user?.user._id,
-      collaborator: u.collaborator || [],
-      accountId: u.accountName?.optionValue,
-      accountName: u.accountName?.optionLabel,
-      name: [u.firstName, u.middleName, u.lastName].filter((f) => f).join(" "),
-      relatedLead: u.staticData?.lead
-    }));
-    setDataRows([...rows]);
-  }, [contactData]);
-
-
-  useEffect(() => {
-    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
-
-    if (contactTimeout) {
-      clearTimeout(contactTimeout);
-    }
-
-    contactTimeout = setTimeout(() => {
-      getContacts();
-    }, millisec);
-  }, [searchVal]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      getContacts();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [query, selectedType, accountDetails]);
 
   // ****** ACTIONS BUTTON STUFF *********
   const openActions = (event) => {
@@ -449,21 +434,13 @@ export default function Contact(props) {
     setShowCreateContactDialog(true);
   };
 
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
   const handleDeleteContact = () => {
-    const selectedContacts = dataRows
-      .filter((d) => d.isChecked)
-      .map((m) => {
-        return m.id;
-      });
+    const selectedContacts = selectedRecords.map((m) => {
+      return m.id;
+    });
 
-    if (selectedContacts && selectedContacts.length > 0) {
-      setLoading(true);
+    if (selectedContacts.length > 0) {
+      dispatch({ type: "loading", loading: true });
       axiosInstance()
         .put(`/${contactApi}/remove`, {
           ids: [...selectedContacts],
@@ -480,44 +457,23 @@ export default function Contact(props) {
           toastConfig.setToastConfig(error);
         })
         .finally(() => {
-          setLoading(false);
+          dispatch({ type: "loading", loading: false });
           setShowDeleteConfirmBox(false);
         });
     }
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
+    dispatch({ type: "search", search: e.target.value });
   };
 
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
-  };
-
-  const handleContactSel = (filterValues) => {
-    setselectedType(filterValues);
+  const handleContactSelect = (filterValues) => {
+    setSelectedType(filterValues);
   };
 
   return (
     <Layout>
-      <Grid container>
+      <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[contactBreadcrumb]} />
         </Grid>
@@ -580,7 +536,7 @@ export default function Contact(props) {
                 <SearchBox
                   onSearch={handleSearch}
                   searchbox={styles.search_box_input}
-                  value={searchVal}
+                  value={search}
                   size="small"
                 />
                 {contactPermissions.isCreate && (
@@ -602,9 +558,7 @@ export default function Contact(props) {
                   <>
                     <Button
                       // disabled={Boolean(!selectedBrand)}
-                      disabled={
-                        dataRows.filter((d) => d.isChecked).length === 0
-                      }
+                      disabled={selectedRecords.length === 0}
                       variant="outlined"
                       color="default"
                       size="small"
@@ -627,15 +581,9 @@ export default function Contact(props) {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={
-                          dataRows.filter((d) => d.isChecked).length == 0
-                        }
+                        disabled={selectedRecords.length === 0}
                         onClick={() => {
-                          if (
-                            dataRows.find(
-                              (d) => d.isChecked && d.canDelete == false
-                            )
-                          ) {
+                          if (selectedRecords.some((d) => d.canDelete === false)) {
                             closeActions();
                             setShowDeleteWarningConfirmBox(true);
                           } else {
@@ -654,33 +602,9 @@ export default function Contact(props) {
           </Grid>
         </div>
         <Box component="div">
-          {/* <Box component="div" marginY={1}> */}
-          <div className="listing-grid">
-            <DataGrid
-              components={{
-                Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
-              }}
-              rows={loading ? [] : dataRows}
-              columns={columns}
-              loading={loading}
-              disableSelectionOnClick
-              disableMultipleSelection
-              paginationMode="server"
-              pagination
-              onPageChange={handlePage}
-              onPageSizeChange={handlePageSize}
-              pageSize={query.limit}
-              page={query.page}
-              rowCount={rowCount}
-              rowsPerPageOptions={[25, 50, 75]}
-              onSortModelChange={handleSortModelChange}
-              density="compact"
-              filterMode="server"
-              onFilterModelChange={onFilterChange}
-            />
-          </div>
-          {/* </Box> */}
+
+          <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog

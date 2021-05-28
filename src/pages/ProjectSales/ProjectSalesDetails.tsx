@@ -28,7 +28,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import UpdateDetailsDialog from "../../components/Shared/UpdateDetailsDialog";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import AssignDataDialog from "./AssignDataDialog";
-import CustomerStrategy from "./CustomerStrategy";
+import CustomerAccounts from "./CustomerAccounts";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
 import { formatAmountWithCurrency } from "../../constants/helpers";
 
@@ -69,17 +69,6 @@ const ProjectSalesDetails = () => {
   });
 
   useEffect(() => {
-    if (!state) return;
-
-    axiosInstance()
-      .put(`/project-sales/add-user`, { user: [state.managerId], _id: id })
-      .then(() => { })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, []);
-
-  useEffect(() => {
     //  When it is nodal structure tab
     initializeGraphData();
 
@@ -104,9 +93,9 @@ const ProjectSalesDetails = () => {
         .catch((error) => {
           setLoadingGraphData(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
-  }
+  };
 
   /**
    * Get sales strategy data for paticular ID
@@ -327,12 +316,13 @@ const ProjectSalesDetails = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={customizedRoutes} />
-
+        <Grid container className="headerbox">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Grid>
         <div className="detail-container">
           <Grid container spacing={1}>
             <Grid item xs={12} sm={12} md={8} lg={8}>
-              <Paper className="subContainer">
+              <Paper>
                 {!projectSalesData ? (
                   <Box padding={1}>
                     <Skeleton variant="text" width="150px" height="30px" />
@@ -362,6 +352,7 @@ const ProjectSalesDetails = () => {
                       <Button
                         variant="contained"
                         color="primary"
+                        size="small" 
                         onClick={handleOpenUpdateDialog}
                       >
                         Edit
@@ -460,7 +451,7 @@ const ProjectSalesDetails = () => {
               </Paper>
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper  className="subContainer">
+              <Paper>
                 <Box style={{ padding: "0px", maxHeight: "450px" }}>
                   <Box
                     width="100%"
@@ -524,7 +515,7 @@ const ProjectSalesDetails = () => {
             </Grid>
           </Grid>
           <Box my={1} />
-          <CustomerStrategy
+          <CustomerAccounts
             isTeamMember={isTeamMember}
             isManager={isManager}
             ownerId={projectSalesData?.projectManager?.optionValue}

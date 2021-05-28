@@ -178,6 +178,7 @@ const AssignDataDialog = (props) => {
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
+          size="small" 
         >
           Cancel
         </Button>
@@ -185,6 +186,7 @@ const AssignDataDialog = (props) => {
           disabled={!selectedData.length || isAssigning}
           onClick={handleSave}
           color="primary"
+          size="small"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

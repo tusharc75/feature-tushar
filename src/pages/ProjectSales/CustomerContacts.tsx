@@ -30,12 +30,13 @@ function DisplayData({ label, value, icon }) {
 
 function RelatedContacts({ contacts, accountId, accountName, contactRoute }) {
   const history = useHistory();
+  const showRecordsBeforeViewAll = 2;
 
   return (
     <>
       {contacts && contacts.length ? (
         <>
-          {contacts.map((obj, index) => (
+          {contacts.slice(0, showRecordsBeforeViewAll).map((obj, index) => (
             <Fragment key={index}>
               <Card>
                 <CardContent className="detailListing">
@@ -79,21 +80,24 @@ function RelatedContacts({ contacts, accountId, accountName, contactRoute }) {
             </Fragment>
           ))}
           <Box margin={1} />
-          <Box
-            className="btn-view gap-1"
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            onClick={() =>
-              history.push(`/${contactRoute}`, {
-                accountId: accountId,
-                accountName: accountName,
-              })
-            }
-          >
-            <FaEye /> View All
-          </Box>
+          {contacts.length > showRecordsBeforeViewAll ?
+            <Box
+              className="btn-view gap-1"
+              p={1}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              onClick={() =>
+                history.push(`/${contactRoute}`, {
+                  accountId: accountId,
+                  accountName: accountName,
+                })
+              }
+            >
+              <FaEye /> View All
+          </Box> 
+          : null
+          }
         </>
       ) : null}
     </>

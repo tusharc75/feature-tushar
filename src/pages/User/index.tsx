@@ -275,14 +275,27 @@ const User: FC = () => {
         ) : (
           <>
             {permissions.user.isDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
+
+              params.row.isBrandAdmin ? (
+                <Tooltip
+                  className="cursor-stop"
+                  title="Brand Admin Can not be Deleted"
                 >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
+                  <IconButton aria-label="Delete">
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              ) :
+                (<Tooltip
+                  title="Delete"
+                >
+                  <IconButton
+                    aria-label="Delete"
+                    onClick={() => showConfirmBox(params.row)}
+                  >
+                    <DeleteIcon fontSize="small" color='error' />
+                  </IconButton>
+                </Tooltip>)
             ) : (
               <Tooltip
                 className="cursor-stop"
@@ -323,7 +336,7 @@ const User: FC = () => {
         setDeleteRec(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.id === user?.user._id)) {
+      if (dataRows.some((d) => d.isChecked && (d.id === user?.user._id || d.isBrandAdmin))) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -425,7 +438,7 @@ const User: FC = () => {
 
   const onFilterChange = React.useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let deepFilter ;
+      let deepFilter;
       switch (params.filterModel.items[0].columnField) {
         case 'createdBy':
           deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
@@ -470,7 +483,7 @@ const User: FC = () => {
         />
       )}
       <Layout>
-        <Grid container direction="row">
+      <Grid container className="headerbox">
           <CustomBreadCrumbs routes={[routes.user]} />
         </Grid>
         <CustomContainer>

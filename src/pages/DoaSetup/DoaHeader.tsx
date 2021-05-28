@@ -63,6 +63,7 @@ function DoaHeader(props) {
                             disabled={canDelete}
                             variant="outlined"
                             color="default"
+                            size="small" 
                             onClick={openActions}
                             className={styles.action_submit_btn}
                             aria-controls="action-menu"

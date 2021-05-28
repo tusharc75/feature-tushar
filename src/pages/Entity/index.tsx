@@ -1,11 +1,9 @@
 import { useState, FC, useCallback, useEffect, useContext } from "react";
 import {
   Checkbox,
-  Tooltip,
-  IconButton,
+  Grid,
   Link as MuiLink,
 } from "@material-ui/core";
-import { Delete as DeleteIcon } from "@material-ui/icons";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import { Link } from "react-router-dom";
@@ -47,7 +45,6 @@ const Entity: FC = () => {
   const [dataRows, setDataRows] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [users, setUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(false);
   const [loadingEntities, setLoadingEntities] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [checkAllEntities, setCheckAllEntities] = useState(false);
@@ -92,15 +89,12 @@ const Entity: FC = () => {
   }, [fetchEntities]);
 
   const fetchEntityUser = () => {
-    setUsersLoading(true);
     axiosInstance()
       .get(`/user?filterById=[{"field": "entities.entity", "term": "${selectedEntities[0]}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
-        setUsersLoading(false);
       })
       .catch((err) => {
-        setUsersLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -408,7 +402,7 @@ const Entity: FC = () => {
 
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
-      let deepFilter ;
+      let deepFilter;
       switch (params.filterModel.items[0].columnField) {
         case 'createdBy':
           deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
@@ -417,7 +411,7 @@ const Entity: FC = () => {
           deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
           break;
         case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value },{ field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
+          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
           break;
         default:
           deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
@@ -456,7 +450,9 @@ const Entity: FC = () => {
         />
       )}
       <Layout>
-        <CustomBreadCrumbs routes={[routes.entity]} />
+        <Grid container className="headerbox">
+          <CustomBreadCrumbs routes={[routes.entity]} />
+        </Grid>
         <div className="main-container">
           <div className="header-panel">
             <EntityHeader

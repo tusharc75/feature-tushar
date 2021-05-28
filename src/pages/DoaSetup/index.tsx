@@ -445,8 +445,9 @@ export default function Doa() {
 
   return (
     <Layout>
-      <CustomBreadCrumbs routes={[routes.doa]} />
-
+       <Grid container className="headerbox">
+           <CustomBreadCrumbs routes={[routes.doa]} />
+      </Grid>
       {/* Tables Begins Here */}
       <Container>
         <div className="header-panel">
@@ -520,6 +521,7 @@ export default function Doa() {
                   <>
                     <Button
                       color="inherit"
+                      size="small" 
                       className={classes.actionBtn}
                       onClick={() => setOpen(true)}
                     >
@@ -535,6 +537,7 @@ export default function Doa() {
                   <React.Fragment>
                     <div className={classes.no_doa}>No DOA created </div>
                     <Button
+                      size="small" 
                       color="inherit"
                       className={classes.actionBtn}
                       onClick={() => setOpen(true)}

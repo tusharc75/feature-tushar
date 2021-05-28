@@ -13,8 +13,10 @@ import Dialog from "@material-ui/core/Dialog";
 import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
-export const Event = ({ relatedTo, handleActivityRefresh }) => {
+export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
   const [events, setEvents] = useState(null);
   const [eventId, setEventId] = useState(null);
@@ -30,6 +32,7 @@ export const Event = ({ relatedTo, handleActivityRefresh }) => {
     await GetEvent(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setEvents(data);
+        onSetCount("Event", data.length)
         setLoading(false);
       })
       .catch((err) => {
@@ -63,7 +66,7 @@ export const Event = ({ relatedTo, handleActivityRefresh }) => {
         fetchEvent();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleClose = () => {
@@ -87,7 +90,16 @@ export const Event = ({ relatedTo, handleActivityRefresh }) => {
                     xs={10}
                     className="d-flex align-items-center gap-1"
                   >
-                    <Typography variant="subtitle2">{_event.name}</Typography>
+                    <Typography
+                      variant="subtitle2"
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setEventId(_event._id);
+                        setOpen(true);
+                      }}
+                    >
+                      {_event.name}
+                    </Typography>
                     <span className="activity-date">
                       End Date : {moment(_event.endDate).format("MMM DD YYYY")}
                     </span>
@@ -140,6 +152,8 @@ export const Event = ({ relatedTo, handleActivityRefresh }) => {
         maxWidth="md"
         onClose={handleClose}
         fullWidth
+        fullScreen={isMobile || isTablet }
+        TransitionComponent={CustomDialogTransition}
       >
         <CreateEvent
           eventId={eventId}

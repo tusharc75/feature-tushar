@@ -18,6 +18,8 @@ import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
 import TextField from '@material-ui/core/TextField';
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
@@ -49,8 +51,8 @@ const CreateProduct = (props) => {
         setFields(_fields.filter((_f) => _f.leval === "builder-custom"))
 
         let values = { ...productData }
-        values.productCategory = values.productCategory._id
-        values.productTemplate = values.productTemplate && values.productTemplate._id && values.productTemplate._id
+        values.productCategory = values.productCategory.optionValue
+        values.productTemplate = values.productTemplate && values.productTemplate.optionValue && values.productTemplate.optionValue
         delete values.fields
 
         setInitialData({
@@ -136,6 +138,8 @@ const CreateProduct = (props) => {
 
     return (<Dialog
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
@@ -222,7 +226,7 @@ const CreateProduct = (props) => {
                             </Box>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"
