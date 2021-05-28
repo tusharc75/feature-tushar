@@ -521,6 +521,7 @@ export default function Doa() {
                   <>
                     <Button
                       color="inherit"
+                      size="small" 
                       className={classes.actionBtn}
                       onClick={() => setOpen(true)}
                     >
@@ -536,6 +537,7 @@ export default function Doa() {
                   <React.Fragment>
                     <div className={classes.no_doa}>No DOA created </div>
                     <Button
+                      size="small" 
                       color="inherit"
                       className={classes.actionBtn}
                       onClick={() => setOpen(true)}

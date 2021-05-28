@@ -13,7 +13,8 @@ import TextField from '@material-ui/core/TextField';
 import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
-
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -42,6 +43,8 @@ const CreateNewDialog = (props) => {
 
     return (<Dialog
         maxWidth="sm"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
@@ -80,12 +83,13 @@ const CreateNewDialog = (props) => {
                         </Form>
                     </CustomDialogContent>
                     <CustomDialogFooter>
-                        <Button color="primary" onClick={handleClose}>Cancel</Button>
+                        <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                         <CustomButton
                             loading={loading}
                             variant="contained"
                             color="primary"
                             type="submit"
+                            size="small" 
                             onClick={submitForm}
                         > Save</CustomButton>
                     </CustomDialogFooter>

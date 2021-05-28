@@ -30,6 +30,8 @@ import _ from 'lodash'
 import styles from "../../Leads/Header.module.scss";
 import emailStyles from './email.module.scss'
 import './email.scss'
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 const tabs = {
     Inbox: 1,
@@ -423,6 +425,8 @@ const Email = () => {
                 open ?
                     <Dialog
                         open={open}
+                        fullScreen={isMobile || isTablet}
+                        TransitionComponent={CustomDialogTransition}
                         aria-labelledby="customized-dialog-title"
                         maxWidth="md"
                         onClose={handleClose}

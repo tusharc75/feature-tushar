@@ -123,6 +123,7 @@ const AssignRolesDialog = ({
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
+          size="small" 
         >
           Cancel
         </Button>
@@ -130,6 +131,7 @@ const AssignRolesDialog = ({
           disabled={!selectedRoles.length || isAssigning}
           onClick={handleAssignRoles}
           color="primary"
+          size="small" 
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

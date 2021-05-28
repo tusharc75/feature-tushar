@@ -140,6 +140,7 @@ const ForgetPassword = () => {
                                             <Button
                                                 variant='contained'
                                                 color='primary'
+                                                size="small" 
                                                 disabled={isSubmitting}
                                                 onClick={submitForm}>
                                                 Submit

@@ -309,6 +309,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                 <CustomDialogFooter>
 
                                     <Button
+                                        size="small" 
                                         onClick={onClose}
                                         variant="contained"
                                     >
@@ -318,6 +319,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, open, 
                                         variant="contained"
                                         color="primary"
                                         type="submit"
+                                        size="small" 
                                         disabled={currency === ""
                                             || values.users.filter(item => item.name === "" || item.name === undefined || item.id == "" || item.id === undefined).length > 0
                                             || JSON.stringify(values.users.map((item) => {

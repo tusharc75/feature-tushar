@@ -43,7 +43,7 @@ export default function MessageDialog({ onClose, open, message }) {
                 }
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="primary">Close</Button>
+                <Button size="small" onClick={onClose} color="primary">Close</Button>
             </DialogActions>
         </Dialog>
     );
