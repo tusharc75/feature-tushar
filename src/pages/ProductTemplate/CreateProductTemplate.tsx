@@ -22,14 +22,16 @@ import TextField from '@material-ui/core/TextField';
 import queryString from "query-string";
 import _ from 'lodash';
 import { useLocation } from 'react-router-dom';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
         .min(3, "Too Short!")
         .max(50, "Too Long")
         .required("Template name is required"),
-    productCategory: Yup.string()
-        .required("Product category is required"),
+    // productCategory: Yup.string()
+    //     .required("Product category is required"),
     unit: Yup.string()
         .required("Unit is required"),
 });
@@ -55,10 +57,9 @@ const ProductTemplate = () => {
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", unit: "" });
+            setInitialValues({ name: "", productCategory: "", unit: "", isStandard: false });
             const _data = []
             const _section = _.uniq(_.map(DefaultFields, 'sectionName'));
-
             _section.forEach((element: any, index: number) => {
                 _data.push({
                     sectionId: index,
@@ -103,9 +104,14 @@ const ProductTemplate = () => {
     const handleSave = (values) => {
         let data: any = {}
         data.name = values.name;
-        data.productCategory = values.productCategory;
         data.unit = values.unit;
-
+        data.isStandard = values.isStandard;
+        if (data.isStandard) {
+            data.productCategory = null;
+        }
+        else {
+            data.productCategory = values.productCategory;
+        }
         let fields: any = []
         let order = 0;
         section.forEach(_section => {
@@ -173,32 +179,7 @@ const ProductTemplate = () => {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <Autocomplete
-                                            options={productCategory}
-                                            getOptionLabel={(option: any) => (option ? option.name : "")}
-                                            getOptionSelected={(option: any, val) => option._id === val}
-                                            value={productCategory.filter((data) => data._id === values["productCategory"]).length
-                                                ? productCategory.filter((data) => data._id === values["productCategory"])[0]
-                                                : ""
-                                            }
-                                            onChange={(e, val) => setFieldValue("productCategory", val && val._id ? val._id : "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="productCategory"
-                                                    label="Product Category"
-                                                    variant="outlined"
-                                                    error={touched["productCategory"] && Boolean(errors["productCategory"])}
-                                                    helperText={touched["productCategory"] && errors["productCategory"]}
-                                                    required={true}
-                                                    fullWidth
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={2}>
                                         <Autocomplete
                                             options={productUnit}
                                             getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
@@ -222,6 +203,48 @@ const ProductTemplate = () => {
                                                 />
                                             )}
                                         />
+                                    </Grid>
+                                    <Grid item xs={12} sm={1}>
+                                        <Box mt={0.5}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        name="isStandard"
+                                                        checked={values["isStandard"]}
+                                                        onChange={(e) => {
+                                                            setFieldValue("isStandard", e.target.checked)
+                                                        }}
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Standard"
+                                            />
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        {!values["isStandard"] && <Autocomplete
+                                            options={productCategory}
+                                            getOptionLabel={(option: any) => (option ? option.name : "")}
+                                            getOptionSelected={(option: any, val) => option._id === val}
+                                            value={productCategory.filter((data) => data._id === values["productCategory"]).length
+                                                ? productCategory.filter((data) => data._id === values["productCategory"])[0]
+                                                : ""
+                                            }
+                                            onChange={(e, val) => setFieldValue("productCategory", val && val._id ? val._id : "")}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="productCategory"
+                                                    label="Product Category"
+                                                    variant="outlined"
+                                                    error={touched["productCategory"] && Boolean(errors["productCategory"])}
+                                                    helperText={touched["productCategory"] && errors["productCategory"]}
+                                                    required={true}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
                                     </Grid>
                                     <Grid item xs={12} sm={3} container justify="flex-end">
                                         <Box>
