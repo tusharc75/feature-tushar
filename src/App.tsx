@@ -47,15 +47,10 @@ import CreateProductCost from "./pages/ProductCost/CreateProductCost";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
-<<<<<<< HEAD
 import QuoteApproval from './pages/Quote-Approval'
 import QuoteDetail from './pages/QuoteBuilderCombined/QuoteDetail'
-import DOARequest from './pages/DOA'
-=======
-import QuoteApproval from "./pages/Quote-Approval";
 import QuoteBuilderPage from "./pages/QuoteBuilder";
 import DOARequest from "./pages/DOA";
->>>>>>> master
 import CurrencyConverter from "./pages/CurrencyConverter";
 
 import {
