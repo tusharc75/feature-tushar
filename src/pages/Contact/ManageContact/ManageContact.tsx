@@ -51,10 +51,10 @@ export default function ManageContact(props) {
   const {
     state: { user, permissions },
   }: any = useData();
-  const [disableOwnerSelection] = useState(
-    !isNew && user.user._id !== entityData.initialValues.owner
-  );
 
+  const disableOwnerSelection = !isNew && user.user._id !== entityData.initialValues.owner;
+
+  console.log(disableOwnerSelection);
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
   const [
@@ -261,10 +261,10 @@ export default function ManageContact(props) {
                                         options={
                                           fromProject
                                             ? collaborators.filter(
-                                                (c) =>
-                                                  c.optionValue !==
-                                                  values["owner"]
-                                              )
+                                              (c) =>
+                                                c.optionValue !==
+                                                values["owner"]
+                                            )
                                             : collaboratorDataSource
                                         }
                                         setFieldValue={setFieldValue}
@@ -307,9 +307,9 @@ export default function ManageContact(props) {
                                             values={
                                               accountId
                                                 ? initializeAccountDropdown(
-                                                    values,
-                                                    accountSource
-                                                  )
+                                                  values,
+                                                  accountSource
+                                                )
                                                 : values
                                             }
                                             disabled={fromProject}
@@ -329,21 +329,21 @@ export default function ManageContact(props) {
                                         </Grid>
                                         {permissions[accountResource]
                                           .isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              title="Create Account"
-                                              className={`${classes.createAccountTooltip} mt-1`}
-                                            >
-                                              <IconButton
-                                                onClick={onCreateAccount}
-                                                size="small"
-                                                disabled={fromProject}
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Create Account"
+                                                className={`${classes.createAccountTooltip} mt-1`}
                                               >
-                                                <AddIcon color="primary" />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
+                                                <IconButton
+                                                  onClick={onCreateAccount}
+                                                  size="small"
+                                                  disabled={fromProject}
+                                                >
+                                                  <AddIcon color="primary" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )}
                                         {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip
@@ -417,9 +417,9 @@ export default function ManageContact(props) {
                             entityData.fields
                           )
                         ).toString() ===
-                          Object.values(
-                            simplifyValues(values, entityData.fields)
-                          ).toString()
+                        Object.values(
+                          simplifyValues(values, entityData.fields)
+                        ).toString()
                       }
                       onClick={(e) => {
                         e.preventDefault();

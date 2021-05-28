@@ -360,7 +360,6 @@ const LeadDetailsPage = () => {
                                 axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
                                   setActiveStep(activeStep + 1)
                                   setIsProcessing(false)
-                                  debugger;
                                   if (steps[activeStep].text.toLowerCase() === "qualified") {
                                     fetchLeadData();
                                   }
@@ -410,10 +409,10 @@ const LeadDetailsPage = () => {
                 recordsPerLine={3}
                 opportunity={leadData?.staticData?.opportunity}
               />
-              <ProjectInAccordion recordsPerLine={3} />
+              {/* <ProjectInAccordion recordsPerLine={3} projectSales={null}/> */}
               <QuotesInAccordion recordsPerLine={3} />
-              <ProductBuilderInAccordion recordsPerLine={3} />
-              <LeadInAccordion recordsPerLine={3} />
+              {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+              {/* <LeadInAccordion recordsPerLine={3} /> */}
             </Paper>
           </Grid>
 

@@ -24,7 +24,7 @@ const ActivityModelHandler = (props) => {
       setActivityData(null);
     } else {
       history.push({
-        pathname: "/activity/" + activityType,
+        pathname: "/" + activityType,
       });
     }
   };
