@@ -652,8 +652,8 @@ export default function Contact(props) {
                 // checkboxSelection: true,
                 floatingFilterComponentParams: { suppressFilterButton: true }
               }}
-              onSortChanged={(e) => {
-                dispatch({ type: "sort", sorting: e.api.getSortModel() })
+              onSortChanged={() => {
+                dispatch({ type: "sort", sorting: columnApi.getColumnState().filter(d => ["asc", "desc"].some(s => s === d.sort)) });
               }}
               onFilterChanged={(e) => {
                 dispatch({ type: "filter", filters: e.api.getFilterModel() });
