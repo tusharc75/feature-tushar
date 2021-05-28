@@ -359,7 +359,6 @@ const LeadDetailsPage = () => {
                                 axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
                                   setActiveStep(activeStep + 1)
                                   setIsProcessing(false)
-                                  debugger;
                                   if (steps[activeStep].text.toLowerCase() === "qualified") {
                                     fetchLeadData();
                                   }
