@@ -34,7 +34,11 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import "./style.scss";
-import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight} from './../../constants/helpers';
+import {
+  AgGridHeaderHeight,
+  AgGridRowHeight,
+  AgGridFloatingFiltersHeight,
+} from "./../../constants/helpers";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -380,14 +384,11 @@ const ProjectSales: FC = () => {
   const showConfirmBox = (row) => {
     if (row === null) {
       if (permissions?.projectSales.isDelete) {
-        const selectedData = projects.filter(
-          (p) => selectedRecords.filter((sp) => sp === p._id).length > 0
-        );
-        const myData = selectedData.filter(
+        const myData = selectedRecords.filter(
           (s) => s.projectManagerId === user.user._id
         );
 
-        if (selectedRecords.length !== myData.length) {
+        if (selectedRecords?.length !== myData.length) {
           setShowDeleteWarningConfirmBox(true);
         } else {
           setIsConformDialogVisible(true);
@@ -395,7 +396,7 @@ const ProjectSales: FC = () => {
       }
     }
 
-    if (row && row.id) {
+    if (row && row._id) {
       setIsConformDialogVisible(true);
       setDeleteRec(row);
     }
@@ -404,11 +405,11 @@ const ProjectSales: FC = () => {
   const handleDeleteProjects = async () => {
     setDeleteLoading(true);
     let recs = [];
-    if (deleteRec?.id) {
-      recs.push(deleteRec?.id);
+    if (deleteRec?._id) {
+      recs.push(deleteRec?._id);
     } else {
-      dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj.id);
+      selectedRecords.forEach((obj) => {
+        recs.push(obj._id);
       });
     }
     if (recs && recs.length > 0) {
@@ -469,7 +470,7 @@ const ProjectSales: FC = () => {
               handleFilterChange={handleProjectFilter}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              selectedProject={selectedRecords}
+              canDelete={selectedRecords?.length === 0}
             />
           </div>
 
