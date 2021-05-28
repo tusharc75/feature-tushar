@@ -23,9 +23,9 @@ const ProductBuilderSchema = Yup.object().shape({
         .required("please enter email subject"),
     body: Yup.string()
         .required("please enter email body"),
-    account:Yup.string()
+    account:Yup.object()
     .required("please select Account"),
-    contact:Yup.string()
+    contact:Yup.object()
     .required("please select Contact")
 });
 
@@ -33,7 +33,7 @@ const ProductBuilderSchema = Yup.object().shape({
 const EmailDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose,success,id} = props;
+    const { handleClose,success,id,version} = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ subject: "",body:"",cc:"",bcc:"",account:"",contact:"" });
     const [accounts,setAccounts]=useState([]);
@@ -49,6 +49,7 @@ const EmailDialog = (props) => {
     const handleSubmit = (values) => {
         const body={
             email:email,
+            version:version,
             emailBody:values.body,
             emailSubject:values.subject,
             cc:values.cc,
@@ -162,7 +163,7 @@ const EmailDialog = (props) => {
                                 options={contacts}
                                 getOptionLabel={(option) => option.firstName}
                                 style={{ width: 300 }}
-                                onChange={(e,value)=>{fetchemailAddress(e,value); setFieldValue("account",value);}}
+                                onChange={(e,value)=>{fetchemailAddress(e,value); setFieldValue("contact",value);}}
                                 renderInput={(params) => 
                                 <TextField {...params} 
                                 label="Contact" 

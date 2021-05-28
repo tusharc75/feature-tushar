@@ -48,7 +48,7 @@ import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 import QuoteApproval from './pages/Quote-Approval'
-import QuoteBuilderPage from './pages/QuoteBuilder'
+import QuoteDetail from './pages/QuoteBuilderCombined/QuoteDetail'
 import DOARequest from './pages/DOA'
 import CurrencyConverter from "./pages/CurrencyConverter";
 
@@ -71,6 +71,7 @@ import { CustomNotificationCountContext } from "./StateProvider/CustomNotificati
 import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
 import DOAapproval from './pages/DOA/DOAApproval'
+import QuoteBuilderCombined from './pages/QuoteBuilderCombined'
 
 function App() {
   const toast = useContext(CustomToastContext);
@@ -350,9 +351,9 @@ function App() {
             <CurrencyConverter />
           </PrivateRoute>
 
-          <Route exact path={"/quote-builder/:id"} >
-            <QuoteBuilderPage />
-          </Route>
+          <PrivateRoute exact path={"/quote-builder/:id"} >
+            <QuoteDetail />
+          </PrivateRoute>
           <Route exact path={"/dashboards"}>
             <KpiDashboard />
           </Route>
@@ -374,6 +375,9 @@ function App() {
           <Route exact path={"/doa-request/:id"}>
             <DOAapproval />
           </Route>
+          <PrivateRoute exact path={'/quote-builder'}>
+            <QuoteBuilderCombined/>
+          </PrivateRoute>
 
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>

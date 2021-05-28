@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams,useLocation } from "react-router-dom";
 import React, { useEffect, useState } from 'react'
 import { GoThumbsdown, GoThumbsup } from 'react-icons/go';
 import Layout from "../../components/Layout";
@@ -38,9 +38,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const QuoteApproval = () => {
+    let location= useLocation().search;
+    console.log(location);
     const classes = useStyles();
     const { id } = useParams();
-    const [comments, setComments] = useState("");
     const [replied, setReplied] = useState(false);
     const [validQuote, setValidQuote] = useState(true);
     const [columns, setColumns] = useState([]);
@@ -58,7 +59,7 @@ const QuoteApproval = () => {
     const fetchQuote = () => {
         //const baseURL = process?.env?.REACT_APP_API_URL || "https://oms-backend.vebholic.com";
 
-        axios.get(baseURL + "/quote-builder/getQuotefromId/" + id)
+        axios.get(baseURL + "/quote-builder/getQuotefromId/" + id+location)
             .then(({ data }) => {
                 console.log(data);
                 if (data.Quote_Status === "Sent to Customer") {
@@ -81,15 +82,14 @@ const QuoteApproval = () => {
     }
 
     const QuoteStatusChange = (accepted) => {
-        var body = { status: "", comments: comments }
+        var body = { status: ""}
         if (accepted) {
             body.status = "Accepted by Customer";
         }
         else {
             body.status = "Rejected by Customer";
         }
-        console.log(comments);
-        axios.post(baseURL + "/quote-builder/updateStatusfromCustomer/" + id, body)
+        axios.post(baseURL + "/quote-builder/updateStatusfromCustomer/" + id+location, body)
             .then(({ data }) => {
                 setReplied(true);
             })
@@ -123,7 +123,7 @@ const QuoteApproval = () => {
                                    <h1>Total : {sellingPrice} {currency}</h1> 
                                 </Grid>
                                 <Grid item xs={12} md={8} sm={8} className="centerItem">
-                                    <textarea name="story" rows={5} placeholder="Add your comment here..." style={{ width: "100%" }} onChange={(event) => { setComments(event.target.value) }} value={comments} />
+                                    
                                     <Button variant="contained" startIcon={<GoThumbsup />} color="primary" onClick={() => QuoteStatusChange(true)}>
                                         Accept
                                     </Button>
