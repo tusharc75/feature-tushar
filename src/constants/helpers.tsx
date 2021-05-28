@@ -656,3 +656,7 @@ export const CustomDialogTransition = React.forwardRef(function Transition(
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
+
+export const AgGridHeaderHeight = 40;
+export const AgGridRowHeight = 30;
+export const AgGridFloatingFiltersHeight = 38;

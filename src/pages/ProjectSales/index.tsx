@@ -34,6 +34,7 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import "./style.scss";
+import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight} from './../../constants/helpers';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -484,7 +485,9 @@ const ProjectSales: FC = () => {
               onGridReady={onGridReady}
               suppressDragLeaveHidesColumns={true}
               suppressCellSelection={true}
-              rowHeight={40}
+              headerHeight={AgGridHeaderHeight}
+              floatingFiltersHeight={AgGridFloatingFiltersHeight}
+              rowHeight={AgGridRowHeight}
               frameworkComponents={frameworkComponents}
               defaultColDef={{
                 resizable: true,
