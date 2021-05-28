@@ -14,7 +14,7 @@ import {
 import Autocomplete, {
   createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
-import _, { values } from "lodash";
+import _ from "lodash";
 
 import axiosInstance from "../../../axios/axiosInstance";
 
@@ -76,7 +76,17 @@ export const UserDropdown = ({
           userId: _user._id,
           name: _user.firstName + " " + _user.lastName,
         }));
-        setUsers(userData);
+
+        let filteredOptions = value.filter(
+          (val) => userData.filter((u) => val.userId === u.userId).length <= 0
+        );
+
+        filteredOptions = filteredOptions.map((user) => ({
+          userId: user.userId,
+          name: user.userId,
+        }));
+
+        setUsers([...userData, ...filteredOptions]);
       })
       .catch((err) => {});
   };
@@ -212,7 +222,7 @@ export const UserDropdown = ({
                 setDialogValue({ ...dialogValue, userId: event.target.value })
               }
               label="Participant Email"
-              type="text"
+              type="email"
             />
             <Box component="span" mx={1} />
             <TextField
