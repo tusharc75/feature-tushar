@@ -172,7 +172,7 @@ export default function Contact(props) {
   const [singleContactDelete, setSingleContactDelete] = useState({
     id: null,
     show: false,
-    contactName: "",
+    contactedName: "",
   });
 
   const [accountDetails, setAccountDetails] = useState({
@@ -195,7 +195,7 @@ export default function Contact(props) {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
-    { field: "fullName", headerName: "Name", show: true, disabled: true, cellRenderer: "fullNameRenderer" },
+    { field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "concatedNameRenderer" },
     { field: "relatedLead", headerName: "Related Lead", show: true, cellRenderer: "relatedLeadRenderer" },
     { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRendererWithCopy" },
     { field: "email", headerName: "Email", show: true, cellRenderer: "commonRendererWithCopy" },
@@ -247,7 +247,7 @@ export default function Contact(props) {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails]);
 
-  const FullNameRenderer = params => <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
+  const ConcatedNameRenderer = params => <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
     {params.value}
   </Link>
 
@@ -269,7 +269,7 @@ export default function Contact(props) {
         setSingleContactDelete({
           show: true,
           id: params.data._id,
-          contactName: params.data.fullName,
+          contactedName: params.data.concatedName,
         })
       }}
       entity="contact"
@@ -277,7 +277,7 @@ export default function Contact(props) {
   </>
 
   const frameworkComponents = {
-    fullNameRenderer: FullNameRenderer,
+    concatedNameRenderer: ConcatedNameRenderer,
     relatedLeadRenderer: RelatedLeadRenderer,
     commonRenderer: CommonRenderer,
     commonRendererWithCopy: CommonRendererWithCopy,
@@ -418,7 +418,7 @@ export default function Contact(props) {
         toastConfig.setToastConfig(error);
         dispatch({ type: "loading", loading: false });
       });
-    setSingleContactDelete({ id: null, show: false, contactName: "" });
+    setSingleContactDelete({ id: null, show: false, contactedName: "" });
   };
 
   // ****** ACTIONS BUTTON STUFF *********
@@ -639,12 +639,12 @@ export default function Contact(props) {
           {singleContactDelete.show ? (
             <ConfirmationDialog
               open={singleContactDelete.show}
-              message={`Are you sure, you want to delete contact: ${singleContactDelete.contactName} ?`}
+              message={`Are you sure, you want to delete contact: ${singleContactDelete.contactedName} ?`}
               onClose={() =>
                 setSingleContactDelete({
                   id: null,
                   show: false,
-                  contactName: "",
+                  contactedName: "",
                 })
               }
               onOk={handleSingleDeleteContacts}
