@@ -4,14 +4,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import {
   CssBaseline,
   Drawer,
-  IconButton,
   List,
   ListItem,
   ListItemText,
   Toolbar,
   Collapse,
   ListItemIcon,
-  Grid,
   Tooltip,
 } from "@material-ui/core";
 import { Link, withRouter } from "react-router-dom";
@@ -19,24 +17,18 @@ import Header from "../Header/Header";
 import { useData } from "../../StateProvider/Provider";
 import "./Sidebar.scss";
 import {
-  ChevronLeft,
   ChevronRight,
   ExpandMore,
   ExpandLess,
 } from "@material-ui/icons";
 import _ from "lodash";
 import { FaUserTie, FaDatabase, FaHandshake } from "react-icons/fa";
-import { BsCalendarFill, BsFillPuzzleFill } from "react-icons/bs";
+import { BsCalendarFill } from "react-icons/bs";
 import { MdDashboard, MdLocalActivity } from "react-icons/md";
-import SidebarImage from "../../assets/header-bg.png";
-import Avatar from "@material-ui/core/Avatar";
 import { RiFolderSettingsFill } from "react-icons/ri";
 import { RiAccountPinCircleFill } from "react-icons/ri";
 import { SiCivicrm } from "react-icons/si";
-import {
-  IoIosArrowDroprightCircle,
-  IoIosArrowDropleftCircle,
-} from "react-icons/io";
+
 import { AccountCircle } from "@material-ui/icons";
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({

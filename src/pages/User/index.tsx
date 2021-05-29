@@ -1,10 +1,9 @@
-import React, { useState, FC, useCallback, useEffect, useContext, useReducer } from "react";
-import { Checkbox, Tooltip, IconButton, Grid, Chip, TablePagination } from "@material-ui/core";
+import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import { Tooltip, IconButton, Grid, Chip } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import { AgGridColumn } from 'ag-grid-react';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import { isMobile, isTablet } from "react-device-detect";
 import {
   CommonRenderer,
   CommonRendererWithCopy,
@@ -12,8 +11,6 @@ import {
   CustomLoadingOverlay,
   UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -27,7 +24,7 @@ import { FaUserCheck, FaUserAltSlash } from "react-icons/fa";
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, gridPageSizes, isObjectEmpty, AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight } from './../../constants/helpers'
+import { userType, gridPageSizes, isObjectEmpty } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
@@ -150,11 +147,10 @@ const User: FC = () => {
   });
 
   const [gridApi, setGridApi] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const [columns, setColumns] = useState([
+  const columns = [
     {
       field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer",
     },
@@ -162,7 +158,7 @@ const User: FC = () => {
     { field: "email", headerName: "Email", show: true, cellRenderer: "emailRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-  ]);
+  ];
 
   const NameRenderer = params => (<>
     <Link
@@ -193,8 +189,6 @@ const User: FC = () => {
       </Tooltip>
     )}{" "}
   </div>;
-
-
 
   const ActionsRenderer = params =>
     user?.user._id === params.data.id ? (
@@ -238,7 +232,6 @@ const User: FC = () => {
       </>
     );
 
-
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     statusRenderer: StatusRenderer,
@@ -253,27 +246,6 @@ const User: FC = () => {
     // customNoRowsOverlay: CustomNoRowsOverlay
   };
 
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-    setColumnApi(params.columnApi)
-  }
-
-  const generateColumns = columns.map((column: any, index) => {
-    return <AgGridColumn
-      key={index}
-      field={column.field}
-      headerName={column.headerName}
-      filter={column.filter ?? "agTextColumnFilter"}
-      sortable={column.sortable ?? true}
-      cellRenderer={column.cellRenderer ?? null}
-    // floatingFilterComponent={column.floatingFilterComponent ?? null}
-    // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-    //   suppressFilterButton: true,
-    // }}
-    >
-    </AgGridColumn>
-  })
-
   const replaceFieldName = (field) => {
     switch (field) {
       case "createdBy":
@@ -287,28 +259,21 @@ const User: FC = () => {
     }
   }
 
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
-    // if (selectedEntity) {
-    //   deepFilter = `${deepFilter}&entity=${selectedEntity}`
-    // }
 
     if (entityRoleRedirectDetails?.id) {
       switch (entityRoleRedirectDetails?.type) {
         case "entity":
           deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.entity", term: entityRoleRedirectDetails?.id }])}`
-
           break;
+
         case "regionalRole":
-
           deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "entities.role", term: entityRoleRedirectDetails?.id }])}`
-
           break;
+
         case "globalRole":
           deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: "role", term: entityRoleRedirectDetails?.id }])}`
-
           break;
       }
     }
@@ -332,58 +297,7 @@ const User: FC = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
     return deepFilter;
-  };
-
-
-
-  const fetchUsers = () => {
-
-
-    const queryString = getQueryString();
-    dispatch({ type: "loading", loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-      gridApi.showLoadingOverlay();
-    }
-    // let searchParams: any = { ...query };
-    // searchParams = searchVal
-    //   ? { ...searchParams, search: searchVal }
-    //   : { ...searchParams };
-
-    axiosInstance()
-      .get(`/user${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          const { createdBy, updatedBy,
-            ...restProperties } = u;
-
-          let res = {
-            ...restProperties,
-            id: u._id,
-            concatedName: u.concatedName,
-            email: u.email,
-            createdByDate: u.createdBy?.date,
-            createdBy: u.createdBy?.user?.concatedName,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date,
-            status: u.blocked ? u.blocked : false,
-            isBrandAdmin: u.userType === userType.brandAdmin
-          };
-          return res;
-        });
-
-        dispatch({ type: "initialize", data: rows, count: count });
-
-
-      })
-      .catch((err) => {
-        dispatch({ type: "loading", loading: false });
-        toastConfig.setToastConfig(err);
-      });
-
-    // eslint-disable-next-line
   };
 
   useEffect(() => {
@@ -404,6 +318,43 @@ const User: FC = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, entityRoleRedirectDetails]);
 
+  const fetchUsers = () => {
+    const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+
+    axiosInstance()
+      .get(`/user${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          const { createdBy, updatedBy, ...restProperties } = u;
+
+          let res = {
+            ...restProperties,
+            id: u._id,
+            concatedName: u.concatedName,
+            email: u.email,
+            createdByDate: u.createdBy?.date,
+            createdBy: u.createdBy?.user?.concatedName,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date,
+            status: u.blocked ? u.blocked : false,
+            isBrandAdmin: u.userType === userType.brandAdmin
+          };
+          return res;
+        });
+        dispatch({ type: "initialize", data: rows, count: count });
+      })
+      .catch((error) => {
+        dispatch({ type: "loading", loading: false });
+        toastConfig.setToastConfig(error);
+      });
+    // eslint-disable-next-line
+  };
 
   const showConfirmBox = (row) => {
     if (row) {
@@ -471,8 +422,6 @@ const User: FC = () => {
     setRolesDialogOpen(false);
   };
 
-
-
   return (
     <>
       {
@@ -522,7 +471,7 @@ const User: FC = () => {
               />
             )}
           </div>
-          
+
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
@@ -535,6 +484,7 @@ const User: FC = () => {
             page={page}
             actionWidth={110}
           />
+
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog

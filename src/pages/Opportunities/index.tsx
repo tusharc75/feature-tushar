@@ -339,7 +339,7 @@ const Opportunities = () => {
   }
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterOpportunities=${selectedType}`;
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`
@@ -359,7 +359,7 @@ const Opportunities = () => {
       Object.keys(filters).map(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: field === "supplierAccountName" ? { $in: [filters[field].filter] } : filters[field].filter
+          term: filters[field].filter
         })
       });
       deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
