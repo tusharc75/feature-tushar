@@ -31,6 +31,7 @@ import { userType, gridPageSizes, isObjectEmpty, AgGridHeaderHeight, AgGridRowHe
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { startCase } from "lodash";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 let userTimeout: ReturnType<typeof setTimeout>;
 
@@ -454,19 +455,6 @@ const User: FC = () => {
     dispatch({ type: "search", search: e.target.value });
   };
 
-
-  // // Handle entity selection
-  // const handleSelectedUsers = (id, isChecked) => {
-  //   let tempSelectedUsers = [...selectedUsers],
-  //     curRecIndex = selectedUsers.indexOf(id);
-  //   if (isChecked && curRecIndex < 0) {
-  //     tempSelectedUsers = [...selectedUsers, id];
-  //   } else if (!isChecked && curRecIndex >= 0) {
-  //     tempSelectedUsers.splice(curRecIndex, 1);
-  //   }
-  //   setSelectedUsers(tempSelectedUsers);
-  // };
-
   const handleCreate = () => {
     setIsOpen(true);
   };
@@ -534,96 +522,19 @@ const User: FC = () => {
               />
             )}
           </div>
-          <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
-
-          <div className="ag-theme-material ag-grid-listing-grid">
-            <AgGridReact
-              rowData={dataRows}
-              onGridReady={onGridReady}
-              suppressDragLeaveHidesColumns={true}
-              suppressCellSelection={true}
-              headerHeight={AgGridHeaderHeight}
-              floatingFiltersHeight={AgGridFloatingFiltersHeight}
-              rowHeight={AgGridRowHeight}
-              frameworkComponents={frameworkComponents}
-              defaultColDef={{
-                resizable: true,
-                floatingFilter: true,
-                sortable: true,
-                width: 250,
-                suppressMenu: true,
-                // headerCheckboxSelection: true,
-                // checkboxSelection: true,
-                floatingFilterComponentParams: { suppressFilterButton: true }
-              }}
-              onSortChanged={() => {
-                dispatch({ type: "sort", sorting: columnApi.getColumnState().filter(d => ["asc", "desc"].some(s => s === d.sort)) });
-              }}
-              onFilterChanged={(e) => {
-                dispatch({ type: "filter", filters: e.api.getFilterModel() });
-              }}
-              enableCellTextSelection={true}
-              ensureDomOrder={false}
-              loadingOverlayComponent={'customLoadingOverlay'}
-              loadingOverlayComponentParams={{
-                loadingMessage: 'Loading...',
-              }}
-              animateRows={false}
-              suppressAnimationFrame={true}
-              suppressMaintainUnsortedOrder={true}
-
-              rowBuffer={limit}
-              // suppressMaxRenderedRowRestriction={true}
-
-              // loadingCellRenderer={'customLoadingCellRenderer'}
-              // loadingCellRendererParams={{
-              //   loadingMessage: 'One moment please...',
-              // }}
-
-              suppressRowClickSelection={true}
-              rowSelection={'multiple'}
-              onSelectionChanged={(event: any) => {
-                dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
-              }}
-              immutableData={true}
-              getRowNodeId={(data) => {
-                return data._id;
-              }}
-            >
-              <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
-                headerCheckboxSelection={true}
-                headerCheckboxSelectionFilteredOnly={true}
-                checkboxSelection={true}
-                resizable={false} sortable={false}
-              >
-              </AgGridColumn>
-
-              {generateColumns}
-
-              <AgGridColumn width={110} headerName="Actions"
-                pinned={(isMobile || isTablet) ? false : "right"}
-                lockPinned={(isMobile || isTablet) ? false : true}
-                resizable={false} sortable={false}
-                filter={false} cellRenderer="actionsRenderer">
-              </AgGridColumn>
-
-            </AgGridReact>
-          </div>
-
-          <TablePagination
-            component="div"
-            count={rowCount}
+          
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
             page={page}
-            onChangePage={(event, newPage) => {
-              dispatch({ type: "pageChange", page: newPage })
-            }}
-            rowsPerPage={limit}
-            onChangeRowsPerPage={(event) => {
-              dispatch({ type: "pageSizeChange", limit: event.target.value })
-            }}
-            rowsPerPageOptions={pageSizes}
+            actionWidth={110}
           />
-
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
