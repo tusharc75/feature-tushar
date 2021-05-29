@@ -36,7 +36,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
         //   suppressFilterButton: true,
         // }}
         >
-        </AgGridColumn >
+        </AgGridColumn>
     })
 
     return (
@@ -48,6 +48,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     rowData={dataRows}
                     onGridReady={onGridReady}
                     suppressDragLeaveHidesColumns={true}
+                    accentedSort={true}
                     suppressCellSelection={true}
                     headerHeight={AgGridHeaderHeight}
                     floatingFiltersHeight={AgGridFloatingFiltersHeight}
