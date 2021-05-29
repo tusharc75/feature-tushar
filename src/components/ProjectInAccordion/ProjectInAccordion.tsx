@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
-import CommonSkeleton from '../Helpers/CommonSkeleton'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import { BsClockHistory } from 'react-icons/bs';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { Link } from 'react-router-dom'
 import { useHistory } from 'react-router-dom';
-import { FaEye } from 'react-icons/fa';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { useData } from '../../StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import CreateProjectSales from "../../pages/ProjectSales/CreateProjectSales";
@@ -79,17 +76,11 @@ function DisplayData({ key, label, value, icon }) {
 
 
 export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions }) {
-
-    const history = useHistory();
-    const {
-        state: { selectedEntity },
-    }: any = useData();
+    ;
     const [
         showCreateProjectSalesDialog,
         setShowCreateProjectSalesDialog,
     ] = useState(false);
-
-
 
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
@@ -115,6 +106,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
     useEffect(() => {
         setExpandProject(projectSales && projectSales?.length !== 0 ? true : false);
     }, [projectSales]);
+
     return <>
         <Accordion expanded={expandProject} className="omsAccordian accordProject">
             <AccordionSummary
@@ -127,7 +119,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                             <Box>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => setExpandProject(!expandProject)} >
+                                    onClick={() => setExpandProject(!expandProject)} >
                                     {
                                         expandProject === true ? (
                                             <ExpandLessIcon />
@@ -165,7 +157,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                             {projectSales && projectSales.length ? (
                                 <Grid container spacing={1}>
                                     {projectSales.map((obj, index) => (
-                                        <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
+                                        <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
                                             <Card className="detailCard">
                                                 <CardContent className="detailListing">
                                                     <Grid container className="detailCardHeader">
@@ -221,5 +213,4 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
             />
         )}
     </>
-
 }
