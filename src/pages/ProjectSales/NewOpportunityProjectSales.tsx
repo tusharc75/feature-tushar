@@ -11,6 +11,7 @@ import {
   initializeDropdownById,
   opportunity,
   simplifyValues,
+  setFieldsInAscendingOrder
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -21,7 +22,7 @@ import CustomDialogContent from "../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
 const arr = [...Array(9).keys()];
 
@@ -52,28 +53,8 @@ export default function NewOpportunityProjectSales({
   const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
-    sortArray();
+    setFormsData(setFieldsInAscendingOrder(opportunityData.fields));
   }, [opportunityData.fields]);
-
-  const sortArray = () => {
-    const sections = [];
-    opportunityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = opportunityData.fields.filter(
-        (field) => field.sectionName === name
-      );
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
 
   useEffect(() => {
     getOpportunityFields();
@@ -168,7 +149,7 @@ export default function NewOpportunityProjectSales({
           initialValues={opportunityData.initialValues}
           validationSchema={yupSchema(opportunityData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,
@@ -383,7 +364,7 @@ export default function NewOpportunityProjectSales({
                   type="button"
                   variant="outlined"
                   color="primary"
-                  size="small" 
+                  size="small"
                   onClick={onClose}
                 >
                   Cancel
