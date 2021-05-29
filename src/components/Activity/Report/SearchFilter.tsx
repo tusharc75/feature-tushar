@@ -5,12 +5,14 @@ import {
   Grid,
   TextField,
   Typography,
+  Chip,
 } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import Chip from "@material-ui/core/Chip";
+import { startCase } from "lodash";
+
 import { SearchActivity } from "../../../axios/activity";
-import { UnCamelCase } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
+import { resActivityColors } from "../Helpers/utils";
 
 export const capitalize = (string) => {
   return string && typeof string === "string"
@@ -18,7 +20,12 @@ export const capitalize = (string) => {
     : string;
 };
 
-export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActivity = false }) => {
+export const SearchFilter = ({
+  handleChangeFilter,
+  filter,
+  chip,
+  dontShowMyActivity = false,
+}) => {
   const {
     state: {
       user: { user },
@@ -45,7 +52,9 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
 
   useEffect(() => {
     if (inputValue === "") {
-      let filteredSearch = dontShowMyActivity ? allSearch.filter(_o => _o.type !== "my") : allSearch
+      let filteredSearch = dontShowMyActivity
+        ? allSearch.filter((_o) => _o.type !== "my")
+        : allSearch;
       setOptions(filteredSearch);
     } else {
       setLoading(true);
@@ -81,13 +90,16 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
       renderTags={(value, getTagProps) =>
         value.map((option, index) => (
           <Chip
-            variant={chip?.variant || "outlined"}
             size={chip?.size || "medium"}
             color={chip?.color || "primary"}
+            style={{
+              backgroundColor: resActivityColors[option.type],
+              color: "white",
+            }}
             label={
               option && option.type === "my"
                 ? "My activities"
-                : capitalize(UnCamelCase(option.type)) + " - " + option.name
+                : startCase(option.type) + " - " + option.name
             }
             {...getTagProps({ index })}
           />
@@ -118,15 +130,17 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
           <Grid container alignItems="center" spacing={3}>
             <Grid item>
               <Chip
-                variant={chip?.variant || "outlined"}
                 size={chip?.size || "medium"}
-                color={chip?.color || "primary"}
+                style={{
+                  backgroundColor: resActivityColors[option.type],
+                  color: "white",
+                }}
                 label={
                   option.isAll
                     ? option.type === "my"
                       ? "My activities"
-                      : option.name + " " + capitalize(UnCamelCase(option.type))
-                    : capitalize(UnCamelCase(option.type))
+                      : option.name + " " + startCase(option.type)
+                    : startCase(option.type)
                 }
               />
             </Grid>

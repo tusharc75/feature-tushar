@@ -177,10 +177,10 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                         </Grid>
                     </CustomDialogContent>
                     <CustomDialogFooter>
-                        <Button variant="outlined" color="primary" disabled={loading}>
+                        <Button size="small" variant="outlined" color="primary" disabled={loading}>
                             Cancel
                         </Button>
-                        <Button variant="contained" color="primary" disabled={loading}>
+                        <Button size="small" variant="contained" color="primary" disabled={loading}>
                             Submit
                         </Button>
                     </CustomDialogFooter>
@@ -250,6 +250,7 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                                 <Button
                                     variant="outlined"
                                     color="primary"
+                                    size="small"
                                     disabled={isSubmitting || loading}
                                     onClick={close}
                                 >
@@ -258,6 +259,7 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                                 <Button
                                     variant="contained"
                                     color="primary"
+                                    size="small"
                                     onClick={submitForm}
                                     disabled={isSubmitting || loading}
                                 >

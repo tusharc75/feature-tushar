@@ -359,6 +359,7 @@ export default function ManageAccount(props) {
                       onClick={onClose}
                       variant="outlined"
                       color="primary"
+                      size="small" 
                     >
                       Cancel
                     </Button>

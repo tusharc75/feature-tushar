@@ -237,6 +237,7 @@ function OpportunityDetailsPage() {
           if (!useAccountList) setShowAddSupplierContactsDialog(showDialog);
         }).catch(error => {
           setLoadingSupplierAccounts(false)
+          toastConfig.setToastConfig(error);
         })
     }
     else {

@@ -399,6 +399,7 @@ export default function ManageContact(props) {
                       onClick={onClose}
                       variant="outlined"
                       color="primary"
+                      size="small" 
                     >
                       Cancel
                     </Button>
@@ -406,6 +407,7 @@ export default function ManageContact(props) {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small" 
                       disabled={
                         loading ||
                         Object.values(

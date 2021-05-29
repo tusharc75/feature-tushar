@@ -15,6 +15,8 @@ import { ListRelatedTo } from '../Helpers/ListRelatedTo'
 import { ViewAll } from '../Helpers/ViewAll'
 import { useData } from "../../../StateProvider/Provider"
 import { isEmpty } from "lodash";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -135,6 +137,8 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
       </Menu>
       <Dialog
         open={open}
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
         onClose={handleClose}

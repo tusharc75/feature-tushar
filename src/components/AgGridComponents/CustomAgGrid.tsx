@@ -15,6 +15,10 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
     const onGridReady = (params) => {
         setGridApi(params.api);
         setColumnApi(params.columnApi)
+
+        // if (autoSizeColumns) {
+        //     params.columnApi.autoSizeColumns(columns.map(m => m.field), false);
+        // }
     }
 
     const generateColumns = columns.map((column: any, index) => {
@@ -25,6 +29,8 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
             filter={column.filter ?? "agTextColumnFilter"}
             sortable={column.sortable ?? true}
             cellRenderer={column.cellRenderer ?? null}
+            minWidth={column.width ?? 250}
+            flex={1}
         // floatingFilterComponent={column.floatingFilterComponent ?? null}
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
@@ -42,6 +48,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     rowData={dataRows}
                     onGridReady={onGridReady}
                     suppressDragLeaveHidesColumns={true}
+                    accentedSort={true}
                     suppressCellSelection={true}
                     headerHeight={AgGridHeaderHeight}
                     floatingFiltersHeight={AgGridFloatingFiltersHeight}
@@ -51,7 +58,6 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                         resizable: true,
                         floatingFilter: true,
                         sortable: true,
-                        width: 250,
                         suppressMenu: true,
                         // headerCheckboxSelection: true,
                         // checkboxSelection: true,

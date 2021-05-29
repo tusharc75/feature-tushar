@@ -336,6 +336,7 @@ const RoleDetailsPage = () => {
                       disabled={currentData === updatedData || isUpdating || checkError()}
                       variant="contained"
                       color="primary"
+                      size="small" 
                       onClick={handleUpdateRole}
                     >
                       {isUpdating ? <CircularProgress size={22} /> : "Update"}

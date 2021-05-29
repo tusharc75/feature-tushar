@@ -13,6 +13,8 @@ import Dialog from "@material-ui/core/Dialog";
 import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -145,6 +147,8 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
       </Menu>
       <Dialog
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
