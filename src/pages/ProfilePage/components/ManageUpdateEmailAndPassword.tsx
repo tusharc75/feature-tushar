@@ -16,6 +16,8 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import { IconButton } from "@material-ui/core";
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 const updatePassWordSchema = Yup.object().shape({
     oldPassword: Yup.string()
@@ -111,6 +113,8 @@ export default function ManageUpdateEmailAndPassword({
     return (
         <Dialog
             maxWidth="sm"
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             onClose={onClose}
             open={open}
@@ -229,6 +233,7 @@ export default function ManageUpdateEmailAndPassword({
                                 type="button"
                                 variant="outlined"
                                 color="primary"
+                                size="small"
                                 onClick={onClose}>Cancel</Button>
 
                             <CustomButton

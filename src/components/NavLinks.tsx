@@ -147,6 +147,7 @@ const OpportunityNavLinks = ({ OpportunityDashboard, ButtonProps }) => {
               ButtonProps.map((btn, i) => (
                 <Button
                   key={i}
+                  size="small"
                   className={classes.button}
                   disableElevation
                   style={{

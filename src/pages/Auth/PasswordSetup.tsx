@@ -146,6 +146,7 @@ const PasswordSetup = () => {
                     <Button
                       variant="contained"
                       color="primary"
+                      size="small" 
                       disabled={isSubmitting}
                       onClick={submitForm}
                     >

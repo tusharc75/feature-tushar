@@ -531,9 +531,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                             </CustomDialogContent>
                             <CustomDialogFooter>
                                 {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
-                                <Button color="primary" onClick={handleClose}>Cancel</Button>
+                                <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
                                 {!emailId &&
-                                    <Button type="button" color="primary" variant="contained" disabled={sending}
+                                    <Button type="button" size="small" color="primary" variant="contained" disabled={sending}
                                         onClick={(e) => {
 
                                             e.preventDefault()

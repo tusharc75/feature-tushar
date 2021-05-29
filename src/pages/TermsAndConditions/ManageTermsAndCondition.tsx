@@ -17,6 +17,9 @@ import axiosInstance from "../../axios/axiosInstance";
 import FormTypes from '../../components/Helpers/FormTypes'
 import CustomButton from "../../components/Helpers/CustomButton";
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
+
 import {
     EditorState,
     convertToRaw,
@@ -105,6 +108,8 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
     return <Dialog
         disableBackdropClick={true}
         open={open}
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         maxWidth="lg"
         onClose={handleClose}
@@ -169,7 +174,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 variant="contained"
                                 color="primary"

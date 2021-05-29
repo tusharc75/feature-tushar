@@ -35,6 +35,8 @@ import currencies from "../../../constants/currency_with_country.json";
 import AddIcon from '@material-ui/icons/AddCircle'
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 const arr = [...Array(9).keys()];
 export default function ManageOpportunityDialog({
@@ -75,7 +77,7 @@ export default function ManageOpportunityDialog({
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
   const [accountData, setAccountData] = useState([]);
-  const [newAddedAccountId, setNewAddedAccountId] = useState(null)
+  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -263,6 +265,8 @@ export default function ManageOpportunityDialog({
     <>
       <Dialog
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
@@ -573,6 +577,7 @@ export default function ManageOpportunityDialog({
                     type="button"
                     variant="outlined"
                     color="primary"
+                    size="small"
                     onClick={onClose}
                   >
                     Cancel

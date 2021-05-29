@@ -15,6 +15,8 @@ import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import FormTypes from "../Helpers/FormTypes";
 import { downloadExcel } from "../../constants/helpers";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
 
 const ProductBuilderSchema = Yup.object().shape({
@@ -66,6 +68,8 @@ const SelectionDialog = (props) => {
 
     return (<Dialog
         maxWidth="xs"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
@@ -126,7 +130,7 @@ const SelectionDialog = (props) => {
                         </Form>
                     </CustomDialogContent>
                     <CustomDialogFooter>
-                        <Button color="primary" onClick={handleClose}>Cancel</Button>
+                        <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                         <CustomButton
                             loading={loading}
                             variant="contained"

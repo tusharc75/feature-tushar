@@ -67,7 +67,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: "",
@@ -138,11 +138,11 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                           initialValues.parent.map((_p, index) => {
                             return (
                               <Button
+                                size="small"
                                 key={index}
                                 className="cursor-pointer"
                                 onClick={() => setId(_p._id)}
                                 color="primary"
-                                size="large"
                               >
                                 {_p.name}
                               </Button>
@@ -151,7 +151,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                       </Breadcrumbs>
                     </Box>
                     <Grid container spacing={3}>
-                      <Grid item xs={7}>
+                      <Grid item xs={12} md={7} sm={6}>
                         <TextField
                           variant="outlined"
                           type="text"
@@ -216,7 +216,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                           </Fragment>
                         )}
                       </Grid>
-                      <Grid item xs={5}>
+                      <Grid item xs={12} md={5} sm={6}>
                         <Box pt={1}>
                           <FormControl variant="outlined" fullWidth>
                             <InputLabel id="demo-simple-select-outlined-label">
@@ -337,6 +337,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
               <Button
                 disabled={isSubmitting}
                 color="primary"
+                size="small"
                 onClick={handleClose}
               >
                 Cancel
@@ -345,6 +346,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                 disabled={isSubmitting}
                 type="button"
                 color="primary"
+                size="small"
                 variant="contained"
                 onClick={submitForm}
               >

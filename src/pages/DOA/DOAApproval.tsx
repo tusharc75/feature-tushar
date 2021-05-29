@@ -149,14 +149,14 @@ const DOAApproval=()=>{
                         getRowId ={(row) => row.id}/>
                 </div>
                 {QStatus?(
-                <><Button variant="contained" color="primary" onClick={()=>QuoteStatusChange(true)}>
+                <><Button size="small"  variant="contained" color="primary" onClick={()=>QuoteStatusChange(true)}>
                 <ThumbUpIcon/>{buttontext}
                 </Button>
-                <Button variant="contained" color="secondary" onClick={()=>QuoteStatusChange(false)} >
+                <Button size="small" variant="contained" color="secondary" onClick={()=>QuoteStatusChange(false)} >
                 <ThumbDownIcon/>Reject
                 </Button>
                 </>):(null)}
-                <Button variant="contained" color="primary" onClick={()=>ViewQuote()}>
+                <Button size="small" variant="contained" color="primary" onClick={()=>ViewQuote()}>
                 <VisibilityIcon/>View
                 </Button>
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
@@ -8,22 +7,13 @@ import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles } from "@material-ui/core/styles";
-import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
-import { useHistory } from 'react-router-dom';
-import { IoCalendarOutline, IoCall } from 'react-icons/io5';
-import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import currencies from './../../constants/currency_with_country.json';
 import { useData } from '../../StateProvider/Provider';
 import { customerAccount, supplierAccount } from '../../constants/helpers';
 import ManageAccountDialog from "./../Account/ManageAccount/index";
-import { BiPhone } from 'react-icons/bi';
 import { FaIndustry } from 'react-icons/fa';
-import { AiOutlineMail } from 'react-icons/ai';
-import { HiOutlineUser } from 'react-icons/hi';
 import { AiOutlinePhone } from 'react-icons/ai';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard'
 
@@ -48,9 +38,9 @@ const AccordionSummary = withStyles({
     root: {
         backgroundColor: "white",
         borderBottom: "1px solid #f1ece8",
-        background: "#ffffff",       
+        background: "#ffffff",
         fontWeight: "bold",
-        padding:"0px",
+        padding: "0px",
         "&$expanded": {
             minHeight: 46,
         },
@@ -79,7 +69,7 @@ function DisplayData({ label, value, icon, showCopyToText = false }) {
                     {icon}
                 </ListItemAvatar>
                 <ListItemText
-                    primary={ value ? value : '-'}
+                    primary={value ? value : '-'}
                     secondary={label} />
                 {
                     showCopyToText ? <CopyToClipboard textToCopy={value} /> : null
@@ -94,7 +84,6 @@ export default function AccountAccordionDetail({
     accounts, type,
     expanded = true, recordsPerLine = 2, userId, onSuccess
 }) {
-    const history = useHistory();
     const {
         state: { permissions },
     }: any = useData();
@@ -143,7 +132,7 @@ export default function AccountAccordionDetail({
                             <Box>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => setExpandAccount(!expandAccount)} >
+                                    onClick={() => setExpandAccount(!expandAccount)} >
                                     {
                                         expandAccount === true ? (
                                             <ExpandLessIcon />
@@ -204,7 +193,7 @@ export default function AccountAccordionDetail({
                                                                     </Grid>
                                                                     <Grid item xs={12} sm={7} md={7}>
                                                                         {
-                                                                           <DisplayData showCopyToText={true} icon={<AiOutlinePhone size={15} />} label='Phone' value={obj?.phone ?? ''} />
+                                                                            <DisplayData showCopyToText={true} icon={<AiOutlinePhone size={15} />} label='Phone' value={obj?.phone ?? ''} />
                                                                         }
                                                                     </Grid>
 
@@ -227,7 +216,7 @@ export default function AccountAccordionDetail({
                     // history.push(`/${type === "customer" ? customerAccount.accountResource : supplierAccount.accountResource}`)
                     setMaxRecordsToShow(accounts.length)
                 }} p={1} display="flex" justifyContent="center" alignItems="center">
-                     <FaArrowAltCircleDown size={25}/>
+                    <FaArrowAltCircleDown size={25} />
                 </Box>
             }
         </Accordion>
@@ -247,6 +236,5 @@ export default function AccountAccordionDetail({
                 isRedirectToDetailPage={false}
             />
         }
-
     </>
 }

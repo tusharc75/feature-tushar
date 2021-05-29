@@ -117,7 +117,7 @@ export const Formula = ({ fields, values, setFieldValue }) => {
                 onChange={(e) => setFieldValue("formula", e.target.value)}
             />
             {formulaError && <Typography variant="caption" display="block">{formulaError} </Typography>}
-            <Button onClick={handleCheckSyntax} color="primary">Check Syntax</Button>
+            <Button size="small"  onClick={handleCheckSyntax} color="primary">Check Syntax</Button>
         </Box>
     </Box>
     );

@@ -90,8 +90,6 @@ const UserDetailsPage = () => {
   const [orgChartData, setOrgChartData] = useState([])
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([])
-  const showRecordsBeforeViewAll = 2;
-  const [showEntities, setShowEntities] = useState(showRecordsBeforeViewAll);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
 
   useEffect(() => {
@@ -440,7 +438,7 @@ const UserDetailsPage = () => {
         />
       )}
       <Layout>
-       <Grid container className="headerbox">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">

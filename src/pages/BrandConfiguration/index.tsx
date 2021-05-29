@@ -119,6 +119,7 @@ export default function BrandConfiguration(props) {
                                         <Button
                                             variant="contained"
                                             color="primary"
+                                            size="small" 
                                             onClick={handleOpenUpdateDialog}>Edit</Button>
                                     </div>
                                     <Divider />
