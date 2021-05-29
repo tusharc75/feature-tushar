@@ -46,30 +46,6 @@ const EventSchema = Yup.object().shape({
   name: Yup.string().required("Please enter event name"),
 });
 
-const TimeList = () => {
-  var quarterHours = ["00", "15", "30", "45"];
-  var times = [];
-  for (var i = 0; i < 12; i++) {
-    for (var j = 0; j < 4; j++) {
-      times.push((i === 0 ? 12 : i) + ":" + quarterHours[j] + " AM");
-    }
-  }
-  for (var i = 0; i < 12; i++) {
-    for (var j = 0; j < 4; j++) {
-      times.push((i === 0 ? 12 : i) + ":" + quarterHours[j] + " PM");
-    }
-  }
-  return times;
-};
-
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: 300,
-    },
-  },
-};
-
 export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
   const {
     state: {
@@ -79,7 +55,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
   const isMobile = useMediaQuery("(max-width:599px)");
   const [initialValues, setInitialValues] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const { instance, accounts, inProgress } = useMsal();
+  const { instance, accounts } = useMsal();
   const azureAccount = useAccount(accounts[0] || {});
   const [isSubmitting, setSubmitting] = useState(false);
   const [resource, setResource] = useState("");
@@ -212,8 +188,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     }
     return errors;
   }
-
-  let times = TimeList();
 
   const resourceOptions = [
     "Customer Account",
