@@ -11,7 +11,8 @@ import {
   yupSchema,
   getObjKeysWithValues,
   simplifyValues,
-  initializeDropdownById
+  initializeDropdownById,
+  setFieldsInAscendingOrder
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -22,7 +23,7 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const arr = [...Array(9).keys()];
 
@@ -66,28 +67,10 @@ export default function ManageLeadDialog({
       setOwnerData(ownerCollabOptions[0].option);
       setCollaboratorData(ownerCollabOptions[0].option);
     }
-    sortArray();
+
+    setFormsData(setFieldsInAscendingOrder(entityData.fields));
+
   }, [entityData.fields]);
-
-  const sortArray = () => {
-    const sections = [];
-    entityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = entityData.fields.filter(
-        (field) => field.sectionName === name
-      );
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(
@@ -336,7 +319,7 @@ export default function ManageLeadDialog({
                   type="button"
                   variant="outlined"
                   color="primary"
-                  size="small" 
+                  size="small"
                   onClick={onClose}
                 >
                   Cancel

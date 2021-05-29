@@ -20,6 +20,7 @@ import {
   opportunity,
   simplifyValues,
   customerAccount,
+  setFieldsInAscendingOrder
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -36,7 +37,8 @@ import AddIcon from '@material-ui/icons/AddCircle'
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
+import { orderBy } from 'lodash'
 
 const arr = [...Array(9).keys()];
 export default function ManageOpportunityDialog({
@@ -94,7 +96,7 @@ export default function ManageOpportunityDialog({
       setAccountData(customerAccountOptions.option);
     }
 
-    sortArray();
+    setFormsData(setFieldsInAscendingOrder(entityData.fields));
 
     return () => {
       setOwnerCollaboratorData([])
@@ -104,27 +106,6 @@ export default function ManageOpportunityDialog({
     }
 
   }, [entityData.fields]);
-
-
-  const sortArray = () => {
-    const sections = [];
-    entityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = entityData.fields.filter(
-        (field) => field.sectionName === name
-      );
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(

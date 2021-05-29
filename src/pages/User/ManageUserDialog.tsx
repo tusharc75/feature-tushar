@@ -15,7 +15,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { getObjKeys, yupSchema, getObjKeysWithValues } from "../../constants/helpers";
+import { getObjKeys, yupSchema, getObjKeysWithValues, setFieldsInAscendingOrder } from "../../constants/helpers";
 import { useLocation, useHistory } from "react-router-dom";
 import FormTypes from "../../components/Helpers/FormTypes";
 
@@ -81,28 +81,9 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                     setReportsToDataSource(currentContactRemovedDataSource);
                 }
             }
-            sortArray();
+            setFormsData(setFieldsInAscendingOrder(initialData.fields));
         }
     }, [initialData.fields]);
-
-
-    const sortArray = () => {
-        const sections = [];
-        initialData.fields.forEach((field) => {
-            if (!sections.includes(field.sectionName)) {
-                sections.push(field.sectionName);
-            }
-        });
-
-        const customData = sections.map((name) => {
-            let fields = initialData.fields.filter((field) => field.sectionName === name);
-
-            const sectionFields = fields.map((formData) => formData);
-            return { name, sectionFields };
-        });
-
-        setFormsData(customData);
-    };
 
     const handleSubmit = (values) => {
         setSubmitting(true);

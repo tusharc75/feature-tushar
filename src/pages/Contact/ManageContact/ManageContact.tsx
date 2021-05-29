@@ -7,6 +7,7 @@ import {
   getOwnerDropdownDataSource,
   simplifyValues,
   yupSchema,
+  setFieldsInAscendingOrder
 } from "../../../constants/helpers";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
@@ -95,30 +96,9 @@ export default function ManageContact(props) {
           setReportsToDataSource(currentContactRemovedDataSource);
         }
       }
-
-      sortArray();
+      setFormsData(setFieldsInAscendingOrder(entityData.fields));
     }
   }, [entityData.fields]);
-
-  const sortArray = () => {
-    const sections = [];
-    entityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = entityData.fields.filter(
-        (field) => field.sectionName === name
-      );
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerDataSource(
@@ -399,7 +379,7 @@ export default function ManageContact(props) {
                       onClick={onClose}
                       variant="outlined"
                       color="primary"
-                      size="small" 
+                      size="small"
                     >
                       Cancel
                     </Button>
@@ -407,7 +387,7 @@ export default function ManageContact(props) {
                     <Button
                       variant="contained"
                       color="primary"
-                      size="small" 
+                      size="small"
                       disabled={
                         loading ||
                         Object.values(
