@@ -37,8 +37,6 @@ const BigCalendar = () => {
   const [activityData, setActivityData] = useState(null);
   const [activities, setActivities] = useState([]);
 
-  console.log(parsed);
-
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -55,14 +53,18 @@ const BigCalendar = () => {
   };
 
   useEffect(() => {
-    axiosInstance()
-      .get(
-        `/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`
-      )
-      .then(({ data: { data } }) => {
-        setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
-      })
-      .catch((err) => {});
+    if (referenceType && referenceId) {
+      axiosInstance()
+        .get(
+          `/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`
+        )
+        .then(({ data: { data } }) => {
+          setFilter([
+            { _id: referenceId, type: referenceType, name: data.name },
+          ]);
+        })
+        .catch((err) => {});
+    }
   }, []);
 
   const fetchBoard = useCallback(() => {
@@ -167,7 +169,7 @@ const BigCalendar = () => {
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}
-                chip={{ variant: "default", size: "small", color: "default" }}
+                chip={{ size: "small" }}
               />
             </Grid>
           </Grid>

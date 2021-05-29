@@ -1,12 +1,7 @@
-import Chip from "@material-ui/core/Chip";
-import Box from "@material-ui/core/Box";
-import { UnCamelCase } from "../../../constants/helpers";
+import { Chip, Box } from "@material-ui/core";
+import { startCase } from "lodash";
 
-export const capitalize = (string) => {
-  return string && typeof string === "string"
-    ? string.charAt(0).toUpperCase() + string.slice(1)
-    : string;
-};
+import { resActivityColors } from "./utils";
 
 export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
   let filter = originRelatedTo.filter(
@@ -22,12 +17,12 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
               <Box mr={1} mb={1} key={index}>
                 <Chip
                   className="custom-chip"
-                  label={
-                    capitalize(UnCamelCase(_element.type)) +
-                    " - " +
-                    _element.name
-                  }
+                  label={startCase(_element.type) + " - " + _element.name}
                   size="small"
+                  style={{
+                    backgroundColor: resActivityColors[_element.type],
+                    color: "white",
+                  }}
                 />
               </Box>
             )
@@ -39,10 +34,12 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
         relatedTo.map((_element, index) => (
           <Box mr={1} mb={1} key={index}>
             <Chip
-              label={
-                capitalize(UnCamelCase(_element.type)) + " - " + _element.name
-              }
+              label={startCase(_element.type) + " - " + _element.name}
               size="small"
+              style={{
+                backgroundColor: resActivityColors[_element.type],
+                color: "white",
+              }}
             />
           </Box>
         ))}
