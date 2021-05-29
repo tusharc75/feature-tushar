@@ -2,8 +2,10 @@ import React, { useState, FC, useCallback, useEffect, useContext, useReducer } f
 import {
   Checkbox,
   Grid,
+  IconButton,
   Link as MuiLink,
   TablePagination,
+  Tooltip,
 } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
@@ -36,11 +38,12 @@ import {
   CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import { isMobile, isTablet } from "react-device-detect";
+import { SiConvertio } from "react-icons/si";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -160,7 +163,9 @@ const Entity: FC = () => {
   ] = useState(false);
 
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
+  const [usersDialogLoding, setUsersDialogLoding] = useState(false);
   const [users, setUsers] = useState([]);
+  const [singleSelectEntity, setSingleSelectEntity] = useState(null);
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [columnApi, setColumnApi] = useState(null);
@@ -204,18 +209,24 @@ const Entity: FC = () => {
 
   useEffect(() => {
     if (selectedRecords.length === 1) {
-      fetchEntityUser();
+      fetchEntityUser(selectedRecords[0].id);
     }
   }, [selectedRecords]);
 
-  const fetchEntityUser = () => {
-    axiosInstance()
-      .get(`/user?filterById=[{"field": "entities.entity", "term": "${selectedRecords[0].id}"}]`)
+  const fetchEntityUser = async (entityId) => {
+    setUsersDialogLoding(true)
+    await axiosInstance()
+      .get(`/user?filterById=[{"field": "entities.entity", "term": "${entityId}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
+        setSingleSelectEntity(entityId)
+        setUsersDialogLoding(false)
+
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setUsersDialogLoding(false)
+
       });
   };
   const NameRenderer = params => <Link className="link"
@@ -223,37 +234,43 @@ const Entity: FC = () => {
     {params.value}
   </Link>;
 
+  const ActionsRenderer = params => <>
+
+    {entityPermissions.isUpdate ?
+
+      <Tooltip title="Assign users">
+        <IconButton
+          aria-label="Assign users"
+          onClick={() => {
+            // alert(params.data._id)
+            fetchEntityUser(params.data._id)
+            setUsersDialogOpen(true)
+          }}
+        >
+          <SiConvertio size={18} className="text-primary" />
+        </IconButton>
+      </Tooltip>
+      :
+      <Tooltip className="cursor-stop" title={`You don't have permission to update this entity`}>
+        <IconButton aria-label="Assign users">
+          <SiConvertio size={18} className="text-primary" />
+        </IconButton>
+      </Tooltip>
+    }
+  </>
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     customLoadingOverlay: CustomLoadingOverlay,
+    actionsRenderer: ActionsRenderer,
     customFloatingFilter: CustomFloatingFilter,
     // customLoadingCellRenderer: CustomLoadingCellRenderer,
     // customNoRowsOverlay: CustomNoRowsOverlay
   };
 
-  //  If you want to do something once grid binding done
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-    setColumnApi(params.columnApi)
-  }
-
-  const generateColumns = columns.map((column: any, index) => {
-    return <AgGridColumn
-      key={index}
-      field={column.field}
-      headerName={column.headerName}
-      filter={column.filter ?? "agTextColumnFilter"}
-      cellRenderer={column.cellRenderer ?? null}
-    // floatingFilterComponent={column.floatingFilterComponent ?? null}
-    // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-    //   suppressFilterButton: true,
-    // }}
-    >
-    </AgGridColumn>
-  })
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -363,7 +380,6 @@ const Entity: FC = () => {
 
   const handleClose = () => {
     setIsOpen(false);
-    fetchEntity();
   };
   const handleOpenDialog = () => {
     setUsersDialogOpen(true);
@@ -442,7 +458,7 @@ const Entity: FC = () => {
           <EntityHeader
             onSearch={handleSearch}
             searchVal={search}
-            entityPermissions={permissions?.entity}
+            entityPermissions={entityPermissions}
             onCreate={handleCreate}
             showConfirmBox={showConfirmBox}
             openUserDialog={handleOpenDialog}
@@ -451,87 +467,8 @@ const Entity: FC = () => {
           />
         </div>
 
-        <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
-
-        <div className="ag-theme-material ag-grid-listing-grid">
-          <AgGridReact
-            rowData={dataRows}
-            onGridReady={onGridReady}
-            suppressDragLeaveHidesColumns={true}
-            suppressCellSelection={true}
-            rowHeight={40}
-            frameworkComponents={frameworkComponents}
-            defaultColDef={{
-              resizable: true,
-              floatingFilter: true,
-              sortable: true,
-              width: 250,
-              suppressMenu: true,
-              // headerCheckboxSelection: true,
-              // checkboxSelection: true,
-              floatingFilterComponentParams: { suppressFilterButton: true }
-            }}
-            onSortChanged={(e) => {
-              dispatch({ type: "sort", sorting: e.api.getSortModel() })
-            }}
-            onFilterChanged={(e) => {
-              dispatch({ type: "filter", filters: e.api.getFilterModel() });
-            }}
-            enableCellTextSelection={true}
-            ensureDomOrder={false}
-            loadingOverlayComponent={'customLoadingOverlay'}
-            loadingOverlayComponentParams={{
-              loadingMessage: 'Loading...',
-            }}
-            animateRows={false}
-            suppressAnimationFrame={true}
-            suppressMaintainUnsortedOrder={true}
-
-            rowBuffer={limit}
-            // suppressMaxRenderedRowRestriction={true}
-
-            // loadingCellRenderer={'customLoadingCellRenderer'}
-            // loadingCellRendererParams={{
-            //   loadingMessage: 'One moment please...',
-            // }}
-
-            suppressRowClickSelection={true}
-            rowSelection={'multiple'}
-            onSelectionChanged={(event: any) => {
-              dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
-            }}
-            immutableData={true}
-            getRowNodeId={(data) => {
-              return data._id;
-            }}
-          >
-            <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
-              headerCheckboxSelection={true}
-              headerCheckboxSelectionFilteredOnly={true}
-              checkboxSelection={true}
-              resizable={false} sortable={false}
-            >
-            </AgGridColumn>
-
-            {generateColumns}
-
-
-          </AgGridReact>
-        </div>
-
-        <TablePagination
-          component="div"
-          count={rowCount}
-          page={page}
-          onChangePage={(event, newPage) => {
-            dispatch({ type: "pageChange", page: newPage })
-          }}
-          rowsPerPage={limit}
-          onChangeRowsPerPage={(event) => {
-            dispatch({ type: "pageSizeChange", limit: event.target.value })
-          }}
-          rowsPerPageOptions={pageSizes}
-        />
+        <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
 
         {isOpen && (
           <CreateEntity
@@ -540,16 +477,16 @@ const Entity: FC = () => {
             fetchData={fetchEntity}
           />
         )}
-        {usersDialogOpen && (
+        {usersDialogOpen && !usersDialogLoding && (
           <AssignUsersDialog
             entitiesDialogOpen={usersDialogOpen}
             handleCloseDialog={handleCloseDialog}
             type="user"
-            ids={[selectedRecords[0].id]}
+            ids={[singleSelectEntity]}
             assignedEntity={users}
             regionalRole={false}
             onSuccess={() => {
-              fetchEntity();
+              // fetchEntity();
               handleCloseDialog();
             }}
           />
