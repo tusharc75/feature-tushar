@@ -1,14 +1,10 @@
-import React, { useState, FC, useCallback, useEffect, useContext, useReducer } from "react";
+import React, { useState, FC, useEffect, useContext, useReducer } from "react";
 import {
-  Checkbox,
   Grid,
   IconButton,
   Link as MuiLink,
-  TablePagination,
   Tooltip,
 } from "@material-ui/core";
-import { DataGrid } from "@material-ui/data-grid";
-import moment from "moment";
 import { Link, useHistory } from "react-router-dom";
 import { entity, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
@@ -18,19 +14,10 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import EntityHeader from "./Header";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import {
-  SET_USER,
-  USER_LOADING,
-  SET_SELECTED_ENTITY,
-} from "../../StateProvider/actionTypes";
 import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import {
   CommonRenderer,
   CreatedByRenderer,
@@ -41,9 +28,7 @@ import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGrid
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
-import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
-import { isMobile, isTablet } from "react-device-detect";
-import { SiConvertio } from "react-icons/si";
+import { FaUser } from "react-icons/fa";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -247,13 +232,13 @@ const Entity: FC = () => {
             setUsersDialogOpen(true)
           }}
         >
-          <SiConvertio size={18} className="text-primary" />
+          <FaUser size={18} className="text-primary" />
         </IconButton>
       </Tooltip>
       :
       <Tooltip className="cursor-stop" title={`You don't have permission to update this entity`}>
         <IconButton aria-label="Assign users">
-          <SiConvertio size={18} className="text-primary" />
+          <FaUser size={18} className="text-primary" />
         </IconButton>
       </Tooltip>
     }
