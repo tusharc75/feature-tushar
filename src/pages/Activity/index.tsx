@@ -80,6 +80,8 @@ const Activity = () => {
                   <SearchFilter
                     handleChangeFilter={handleChangeFilter}
                     filter={filter}
+                    // dontShowMyActivity={type === "case" ? true:false}
+                    ActivityName={type === "case" ? "Case":""}
                   />
                 </Grid>
               </Grid>
