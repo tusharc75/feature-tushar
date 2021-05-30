@@ -11,7 +11,8 @@ import {
   yupSchema,
   getObjKeysWithValues,
   simplifyValues,
-  initializeDropdownById
+  initializeDropdownById,
+  setFieldsInAscendingOrder
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -21,6 +22,8 @@ import CustomButton from "../../../components/Helpers/CustomButton";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const arr = [...Array(9).keys()];
 
@@ -64,28 +67,10 @@ export default function ManageLeadDialog({
       setOwnerData(ownerCollabOptions[0].option);
       setCollaboratorData(ownerCollabOptions[0].option);
     }
-    sortArray();
+
+    setFormsData(setFieldsInAscendingOrder(entityData.fields));
+
   }, [entityData.fields]);
-
-  const sortArray = () => {
-    const sections = [];
-    entityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
-
-    const customData = sections.map((name) => {
-      let fields = entityData.fields.filter(
-        (field) => field.sectionName === name
-      );
-
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
-
-    setFormsData(customData);
-  };
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(
@@ -117,7 +102,7 @@ export default function ManageLeadDialog({
               .filter((d) => d.isCreate)
               .map((_f) => {
 
-                if (isNew && userId && _f.fieldData.fieldName == "owner") {
+                if (isNew && userId && _f.fieldData.fieldName === "owner") {
                   _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
                 }
                 newFields.push(_f.fieldData)
@@ -208,6 +193,8 @@ export default function ManageLeadDialog({
   return (
     <Dialog
       maxWidth="md"
+      fullScreen={isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       onClose={onClose}
       open={open}
@@ -222,7 +209,7 @@ export default function ManageLeadDialog({
         onClose={onClose}
       />
 
-      {entityData.fields.length == 0 && (
+      {entityData.fields.length === 0 && (
         <CustomDialogContent>
           <CommonSkeleton lenArray={arr} />
         </CustomDialogContent>
@@ -260,7 +247,7 @@ export default function ManageLeadDialog({
                                 sm={6}
                                 md={6}
                               >
-                                {field.fieldName == "owner" ? (
+                                {field.fieldName === "owner" ? (
                                   <FormTypes
                                     values={values}
                                     errors={errors}
@@ -281,7 +268,7 @@ export default function ManageLeadDialog({
                                       );
                                     }}
                                   />
-                                ) : field.fieldName == "collaborator" ? (
+                                ) : field.fieldName === "collaborator" ? (
                                   <FormTypes
                                     values={values}
                                     errors={errors}
@@ -332,6 +319,7 @@ export default function ManageLeadDialog({
                   type="button"
                   variant="outlined"
                   color="primary"
+                  size="small"
                   onClick={onClose}
                 >
                   Cancel

@@ -23,8 +23,8 @@ import currencyList from "../../constants/currency_with_country.json";
 
 const useStyles = makeStyles((theme) => ({
   tdWidth: {
-    maxWidth: 100,
-    minWidth: 100
+    maxWidth: 120,
+    minWidth: 120
   },
 }));
 
@@ -36,8 +36,6 @@ const CurrencyConverter = () => {
   const [currency, setCurrency] = useState([]);
   const [isApiUpdate, setIsApiUpdate] = useState(false);
   const [option, setOption] = useState([]);
-
-
 
   useEffect(() => {
     fetchConverter();
@@ -55,6 +53,27 @@ const CurrencyConverter = () => {
 
 
   const handleUpdate = () => {
+
+    if (option.length === 0) {
+      toastConfig.setToastConfig({ open: true, type: "error", message: "Please select currency" });
+      return false
+    }
+
+    console.log(option)
+    let is_valid = true;
+    option.forEach((_option) => {
+      for (var _currency in _option) {
+        if (!_option[_currency] || _option[_currency] === "") {
+          is_valid = false
+          return;
+        }
+      }
+    });
+    if (!is_valid) {
+      toastConfig.setToastConfig({ open: true, type: "error", message: "Please enter currency values" });
+      return false
+    }
+
     let data: any = {}
     data.type = "currency"
     data.currency = currency
@@ -98,7 +117,7 @@ const CurrencyConverter = () => {
 
   return (
     <Layout>
-      <Grid container>
+     <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
           <CustomBreadCrumbs routes={[routes.currencyConverter]} />
         </Grid>
@@ -124,7 +143,6 @@ const CurrencyConverter = () => {
                   options={currencyList.map((_c) => { return _c.currencyCode })}
                   getOptionLabel={(option) => option}
                   value={currency}
-                  freeSolo
                   renderTags={(value: string[], getTagProps) =>
                     value.map((option: string, index: number) => (
                       <Chip variant="outlined" label={option} {...getTagProps({ index })} />
@@ -179,12 +197,13 @@ const CurrencyConverter = () => {
                           <td className={classes.tdWidth} key={index}>
                             <TextField
                               id="standard-basic"
+                              type="number"
                               variant="outlined"
                               margin="dense"
                               fullWidth
                               style={{ margin: 0 }}
                               value={option && option[i] && option[i][_unit]}
-                              onChange={(event) => onChangeValue(i, _unit, event.target.value)}
+                              onChange={(event) => onChangeValue(i, _unit, parseFloat(event.target.value))}
                             />
                           </td>
                         ))}

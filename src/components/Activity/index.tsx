@@ -16,7 +16,6 @@ import { GoNote } from "react-icons/go";
 import { HiOutlineMail } from "react-icons/hi";
 import { FiPlusSquare } from "react-icons/fi";
 import { AiOutlinePaperClip } from "react-icons/ai";
-
 import { Task } from "./Task";
 import { CreateTask } from "./Task/CreateTask";
 import { Event } from "./Event";
@@ -27,13 +26,16 @@ import { Note } from "./Note";
 import { CreateNote } from "./Note/CreateNote";
 import { Email } from "./Email";
 import { CreateEmail } from "./Email/CreateEmail";
-import Attachments from "./Attachments/index";
+import { Chip } from '@material-ui/core'
+import Attachments from './Attachments/index'
 import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAttachment from "./Attachments/ManageAttachment";
 import Chatter from "./Chatter";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   activityBox: {
     padding: "1px 1px 9px 1px",
     background: "#f6f6f6",
@@ -58,13 +60,29 @@ const Activity = (props) => {
 
   const [type, setType] = useState(null);
   const [open, setOpen] = useState(false);
-  const [emailUsersOptions, setEmailUsersOptions] = useState([]);
+  const [emailUsersOptions, setEmailUsersOptions] = useState([])
+  const [countFetched, setCountFetched] = useState(false)
+  const [totalCount, setTotalCount] = useState({
+    Task: 0,
+    Event: 0,
+    Case: 0,
+    Note: 0,
+    Email: 0,
+    Attachment: 0
+  })
 
   const tabs = ["Task", "Event", "Case", "Note", "Email", "Attachment"];
 
   useEffect(() => {
-    fetchUsersEmails();
-  }, []);
+    fetchUsersEmails()
+  }, [])
+
+  useEffect(() => {
+    if (Boolean(relatedTo[0]?.referenceId) && !countFetched) {
+      fetchTotalCounts()
+    }
+  }, [relatedTo[0]?.referenceId])
+
   useEffect(() => {
     let data = [];
     if (emails && emails.length) {
@@ -78,25 +96,38 @@ const Activity = (props) => {
     }
   }, [emails]);
 
+  const fetchTotalCounts = () => {
+
+    axiosInstance()
+      .get(`/activity/resource/count?relatedTo=${JSON.stringify(relatedTo)}`)
+      .then(({ data: { data } }) => {
+        setTotalCount(data)
+        setCountFetched(true)
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      })
+  }
+
   const getIcon = (tab: string) => {
     switch (tab) {
       case "Task":
-        return <BiTask size={20} />;
+        return <BiTask className="mr-1" size={20} />;
 
       case "Event":
-        return <VscCalendar size={20} />;
+        return <VscCalendar className="mr-1" size={20} />;
 
       case "Case":
-        return <BsBriefcase size={20} />;
+        return <BsBriefcase className="mr-1" size={20} />;
 
       case "Note":
-        return <GoNote size={20} />;
+        return <GoNote className="mr-1" size={20} />;
 
       case "Email":
-        return <HiOutlineMail size={20} />;
+        return <HiOutlineMail className="mr-1" size={20} />;
 
       case "Attachment":
-        return <AiOutlinePaperClip size={22} />;
+        return <AiOutlinePaperClip className="mr-1" size={20} />;
     }
   };
 
@@ -139,7 +170,13 @@ const Activity = (props) => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  };
+  }
+  const handleSetCount = (name, count) => {
+    if (name) {
+      setTotalCount((prevState) => ({ ...prevState, [name]: count }))
+    }
+  }
+
 
   return (
     <Box>
@@ -169,9 +206,9 @@ const Activity = (props) => {
                       <Typography
                         variant="subtitle2"
                         color="primary"
-                        className="d-flex align-items-center gap-2"
+                        className="d-flex align-items-center"
                       >
-                        {getIcon(data)} {data}
+                        {getIcon(data)} {data}  ({totalCount[data]})
                       </Typography>
                     </Box>
                   </Box>
@@ -193,38 +230,45 @@ const Activity = (props) => {
                 <Task
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {type === "Event" && data === "Event" ? (
                 <Event
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {type === "Case" && data === "Case" ? (
                 <Case
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {type === "Note" && data === "Note" ? (
                 <Note
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
               {type === "Email" && data === "Email" ? (
                 <Email
                   relatedTo={relatedTo}
                   handleActivityRefresh={handleActivityRefresh}
+                  onSetCount={handleSetCount}
                 />
               ) : null}
-              {type === "Attachment" && data === "Attachment" ? (
-                <Attachments
-                  relatedTo={relatedTo}
-                  handleActivityRefresh={handleActivityRefresh}
-                />
-              ) : null}
+              {
+                type === "Attachment" && data === "Attachment" ? (
+                  <Attachments
+                    relatedTo={relatedTo}
+                    handleActivityRefresh={handleActivityRefresh}
+                    onSetCount={handleSetCount}
+                  />) : null
+              }
             </Box>
           </Fragment>
         ))}
@@ -233,6 +277,8 @@ const Activity = (props) => {
         ) : null}
       </Box>
       <Dialog
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth={"md"}

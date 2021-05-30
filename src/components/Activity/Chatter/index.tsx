@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -7,12 +7,14 @@ import {
   makeStyles,
   Typography,
 } from "@material-ui/core";
-import { Send } from "@material-ui/icons";
+import { Skeleton } from "@material-ui/lab";
+import { ChatBubble, Send } from "@material-ui/icons";
 import moment from "moment";
+import io from "socket.io-client";
 
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
-import { Skeleton } from "@material-ui/lab";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 
 const useStyles = makeStyles((theme) => ({
   messageBubble: {
@@ -34,10 +36,12 @@ const Chatter = (props) => {
   } = useData();
   const classes = useStyles();
 
+  const { setToastConfig } = useContext(CustomToastContext);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [chatterId, setChatterId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   const msgBoxRef = useCallback(
     (elem: HTMLElement) => {
@@ -57,17 +61,17 @@ const Chatter = (props) => {
       setLoading(true);
       axiosInstance()
         .get(`/chatter/resource?relatedTo=${JSON.stringify(relatedTo)}`)
-        .then(({ data: { data } }) => {
-          if (data && data.length) {
-            setMessages(data && data[0].Messages);
-            setChatterId(data && data[0]._id);
+        .then(({ data }) => {
+          if (data.hasOwnProperty("data")) {
+            setMessages(data.data.Messages);
+            setChatterId(data.data._id);
           } else {
             createChatter();
           }
           setLoading(false);
         })
         .catch((err) => {
-          console.log(err);
+          setToastConfig(err);
           setLoading(false);
         });
     }
@@ -77,150 +81,196 @@ const Chatter = (props) => {
     getChatter();
   }, [getChatter]);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const s = io("https://oms-backend.vebholic.com/chatter", {
+      auth: {
+        token,
+      },
+    });
+    setSocket(s);
+  }, [chatterId]);
+
+  // Socket listening for data
+  useEffect(() => {
+    if (!socket && !chatterId) return;
+
+    socket.on("connect", () => {
+      socket.emit("join", chatterId);
+    });
+
+    socket.on("data", (data) => {
+      setMessages(data.Messages);
+    });
+
+    return () => {
+      if (socket) {
+        socket.off("connect");
+      }
+    };
+  }, [socket, chatterId]);
+
   const createChatter = () => {
     axiosInstance()
       .post(`/chatter`, { relatedTo })
       .then(({ data: { data } }) => {
-        console.log(data);
+        setChatterId(data._id);
       })
       .catch((err) => {
-        console.log(err);
+        setToastConfig(err);
       });
   };
 
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault();
-    axiosInstance()
-      .put(`/chatter/${chatterId}`, { message })
-      .then(({ data: { data } }) => {
-        setMessages(data.Messages);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    try {
+      await axiosInstance().put(`/chatter/${chatterId}`, { message });
+    } catch (error) {
+      setToastConfig(error);
+    }
     setMessage("");
   };
 
   return (
-    <Box p={1}>
-      <Box
-        borderRadius={4}
-        height={350}
-        border="1px solid #dfdfdf"
-        width="100%"
-        display="flex"
-        flexDirection="column"
-        justifyContent="flex-end"
-      >
-        <div
-          style={{
-            width: "100%",
-            overflow: "auto",
-            padding: "0 10px",
-          }}
+    <>
+      <Box p={1}>
+        <Box
+          mb={1}
+          bgcolor="#dfdfdf"
+          p={1}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
         >
-          {loading ? (
-            <Box
-              height="100%"
-              display="flex"
-              flexDirection="column"
-              justifyContent="flex-end"
-            >
-              {[100, 180, 120, 160].map((i) => (
-                <Box
-                  height={60}
-                  key={i}
-                  display="flex"
-                  alignSelf={i < 150 ? "flex-start" : "flex-end"}
-                >
-                  <Skeleton
-                    height="100%"
-                    width={i}
-                    style={{ borderRadius: 16 }}
-                  />
-                </Box>
-              ))}
-            </Box>
-          ) : messages.length ? (
-            messages.map((msg, idx) => (
+          <ChatBubble fontSize="large" color="disabled" />
+          <Box ml={1} />
+          <Typography variant="h6"> Chatter</Typography>
+        </Box>
+        <Box
+          borderRadius={4}
+          height={350}
+          border="1px solid #dfdfdf"
+          width="100%"
+          display="flex"
+          flexDirection="column"
+          justifyContent="flex-end"
+        >
+          <div
+            style={{
+              width: "100%",
+              overflow: "auto",
+              padding: "0 10px",
+            }}
+          >
+            {loading ? (
               <Box
-                key={idx}
-                mt={1}
+                height="100%"
                 display="flex"
                 flexDirection="column"
-                alignItems={msg.userid === user._id ? "flex-end" : "flex-start"}
+                justifyContent="flex-end"
               >
-                <div ref={msgBoxRef}>
-                  <Box display="flex">
-                    <Avatar
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        order: user._id === msg.userid ? 1 : 0,
-                        marginRight: user._id === msg.userid ? 0 : "8px",
-                      }}
-                    >
-                      {msg.userName.split(" ")[0].charAt(0)}
-                    </Avatar>
+                {[100, 180, 120, 160].map((i) => (
+                  <Box
+                    height={60}
+                    key={i}
+                    display="flex"
+                    alignSelf={i < 150 ? "flex-start" : "flex-end"}
+                  >
+                    <Skeleton
+                      height="100%"
+                      width={i}
+                      style={{ borderRadius: 16 }}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            ) : messages.length ? (
+              messages.map((msg, idx) => (
+                <Box
+                  key={idx}
+                  mt={1}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems={
+                    msg.userid === user._id ? "flex-end" : "flex-start"
+                  }
+                >
+                  <div ref={msgBoxRef}>
+                    <Box display="flex">
+                      <Avatar
+                        title={msg.userName}
+                        style={{
+                          width: "28px",
+                          height: "28px",
+                          order: user._id === msg.userid ? 1 : 0,
+                          marginRight: user._id === msg.userid ? 0 : "8px",
+                        }}
+                      >
+                        {msg.userName.split(" ")[0].charAt(0)}
+                      </Avatar>
 
-                    <Box
-                      mr={user._id === msg.userid ? "8px" : 0}
-                      className={classes.messageBubble}
-                      style={{
-                        background: msg.userid === user._id ? "grey" : "white",
-                        color: msg.userid === user._id ? "white" : "black",
-                      }}
-                    >
-                      <Typography variant="body1">{msg.message}</Typography>
-                      <Box textAlign="right">
-                        <Typography variant="caption">
-                          {moment(msg.date).fromNow()}
-                        </Typography>
+                      <Box
+                        mr={user._id === msg.userid ? "8px" : 0}
+                        className={classes.messageBubble}
+                        style={{
+                          background:
+                            msg.userid === user._id ? "grey" : "white",
+                          color: msg.userid === user._id ? "white" : "black",
+                        }}
+                      >
+                        <Typography variant="body1">{msg.message}</Typography>
+                        <Box textAlign="right">
+                          <Typography variant="caption">
+                            {moment(msg.date).fromNow()}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                </div>
+                  </div>
+                </Box>
+              ))
+            ) : (
+              <Box textAlign="center">
+                <Typography>No Messages</Typography>
               </Box>
-            ))
-          ) : (
-            <Box textAlign="center">No Messages</Box>
-          )}
-        </div>
+            )}
+          </div>
 
-        <Box component="form" onSubmit={sendMessage}>
-          <Box
-            style={{ padding: "8px 10px" }}
-            mt="10px"
-            display="flex"
-            alignItems="center"
-          >
+          <Box component="form" onSubmit={sendMessage}>
             <Box
-              border="1px solid #aaa"
-              borderRadius={20}
-              width="100%"
-              height={34}
+              style={{ padding: "8px 10px" }}
+              mt="10px"
+              display="flex"
+              alignItems="center"
             >
-              <InputBase
-                style={{ padding: "0 10px" }}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                fullWidth
-                placeholder="Write message..."
-              />
+              <Box
+                border="1px solid #aaa"
+                borderRadius={20}
+                width="100%"
+                height={34}
+              >
+                <InputBase
+                  style={{ padding: "0 10px" }}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  fullWidth
+                  placeholder="Write message..."
+                />
+              </Box>
+              <Box mx={1} />
+              <IconButton
+                size="small"
+                type="submit"
+                disabled={!message}
+                color="secondary"
+              >
+                <Send />
+              </IconButton>
             </Box>
-            <Box mx={1} />
-            <IconButton
-              size="small"
-              type="submit"
-              disabled={!message}
-              color="secondary"
-            >
-              <Send />
-            </IconButton>
           </Box>
         </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

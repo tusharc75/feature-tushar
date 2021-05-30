@@ -158,7 +158,7 @@ export default function ImportExportLinks({ module, api, onSuccessfulImport }) {
   );
 
   return (
-    <div className={`${classes.root} headerbox`}>
+    <div className={`${classes.root}`}>
       <div className={classes.linksContainer}>
         <label
           htmlFor="importFromExcel"

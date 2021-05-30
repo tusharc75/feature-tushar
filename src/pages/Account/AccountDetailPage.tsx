@@ -98,6 +98,7 @@ export default function AccountDetailPage(props) {
   const [accountData, setAccountData] = useState<any>({});
   const [relatedContacts, setRelatedContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
+  const [projectSales, setProjectSales] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showApproveDisapproveConfirmBox, setShowApproveDisapproveConfirmBox] =
@@ -126,7 +127,11 @@ export default function AccountDetailPage(props) {
   });
 
   let { id } = useParams();
-
+  
+  const typeCreateProjectSalesDialog = [{
+    id: id,
+    type: accountResource
+  }];
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);
     setCurrentTabIndex(0);
@@ -178,11 +183,21 @@ export default function AccountDetailPage(props) {
         setOpportunities(
           data.Opportunity &&
             data.Opportunity[
-              sidebarResource[accountResource].replaceAll(" ", "_")
+            sidebarResource[accountResource].replaceAll(" ", "_")
             ]
             ? data.Opportunity[
-                sidebarResource[accountResource].replaceAll(" ", "_")
-              ]
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
+        setProjectSales(
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.projectSales][
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
             : []
         );
         initializeGraphData();
@@ -220,9 +235,9 @@ export default function AccountDetailPage(props) {
               current: true,
               parentAccount: data.parentAccount
                 ? {
-                    _id: data.parentAccount.optionValue,
-                    accountName: data.parentAccount.optionLabel,
-                  }
+                  _id: data.parentAccount.optionValue,
+                  accountName: data.parentAccount.optionLabel,
+                }
                 : null,
               // parentAccountName: data.parentAccount?.optionLabel,
               // parentAccount: data.parentAccount?.optionValue
@@ -335,6 +350,7 @@ export default function AccountDetailPage(props) {
           state: {
             accountId: accountData._id,
             accountName: accountData.accountName,
+            resource: accountResource
           },
         });
       },
@@ -458,7 +474,7 @@ export default function AccountDetailPage(props) {
   return (
     <>
       <Layout>
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
@@ -512,11 +528,11 @@ export default function AccountDetailPage(props) {
                     )}
 
                   {permissions &&
-                  permissions[accountResource] &&
-                  permissions[accountResource].isDelete &&
-                  accountData?.owner?.optionValue &&
-                  user?.user?._id &&
-                  accountData.owner.optionValue === user.user._id ? (
+                    permissions[accountResource] &&
+                    permissions[accountResource].isDelete &&
+                    accountData?.owner?.optionValue &&
+                    user?.user?._id &&
+                    accountData.owner.optionValue === user.user._id ? (
                     <DeleteButton
                       text="Delete"
                       onClick={() => setShowConfirmBox(true)}
@@ -591,9 +607,8 @@ export default function AccountDetailPage(props) {
                           onClick={(node) => {
                             if (node && routes[node.route]) {
                               history.push({
-                                pathname: `${routes[node.route].path}/${
-                                  node.id
-                                }`,
+                                pathname: `${routes[node.route].path}/${node.id
+                                  }`,
                               });
                             }
                           }}
@@ -618,10 +633,22 @@ export default function AccountDetailPage(props) {
                     isRedirect={false}
                   />
                 )}
-                <ProjectInAccordion recordsPerLine={3} />
+                {permissions?.projectSales?.isRead && (
+                <ProjectInAccordion 
+                recordsPerLine={3}
+                projectSales={projectSales} 
+                type={typeCreateProjectSalesDialog}
+                fetchData={fetchRelatedData}
+                permissions={permissions}
+                />
+                )}
                 <QuotesInAccordion recordsPerLine={3} />
-                <ProductBuilderInAccordion recordsPerLine={3} />
-                <LeadInAccordion recordsPerLine={3} />
+                {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+                {permissions?.lead?.isRead && accountData.staticData?.lead && (
+                  <LeadInAccordion
+                    recordsPerLine={3}
+                    lead={accountData.staticData?.lead} />
+                )}
               </div>
             </Paper>
           </Grid>
@@ -639,17 +666,17 @@ export default function AccountDetailPage(props) {
                             access: true,
                           },
                         ]}
-                        handleActivityRefresh={() => {}}
+                        handleActivityRefresh={() => { }}
                         emails={
                           relatedContacts && relatedContacts.length > 0
                             ? _.cloneDeep(relatedContacts).reduce(
-                                (emails, contact) => {
-                                  if (contact?.email)
-                                    emails.push(contact.email);
-                                  return emails;
-                                },
-                                []
-                              )
+                              (emails, contact) => {
+                                if (contact?.email)
+                                  emails.push(contact.email);
+                                return emails;
+                              },
+                              []
+                            )
                             : []
                         }
                       />
@@ -780,9 +807,8 @@ export default function AccountDetailPage(props) {
           {showConfirmBox ? (
             <ConfirmationDialog
               open={showConfirmBox}
-              message={`Are you sure you want to delete this Account ${
-                accountData.accountName || ""
-              }`}
+              message={`Are you sure you want to delete this Account ${accountData.accountName || ""
+                }`}
               onClose={() => setShowConfirmBox(false)}
               onOk={handleDeleteAcc}
             />
@@ -790,9 +816,8 @@ export default function AccountDetailPage(props) {
           {showApproveDisapproveConfirmBox ? (
             <ConfirmationDialog
               open={showApproveDisapproveConfirmBox}
-              message={`Are you sure you want to ${
-                accountData.staticData?.approved ? "disapprove" : "approve"
-              } this Account ?`}
+              message={`Are you sure you want to ${accountData.staticData?.approved ? "disapprove" : "approve"
+                } this Account ?`}
               onClose={() => setShowApproveDisapproveConfirmBox(false)}
               onOk={handleApproveDisapprove}
             />

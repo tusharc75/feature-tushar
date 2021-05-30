@@ -5,12 +5,19 @@ import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import Layout from "../../components/Layout";
 import { DataGrid } from "@material-ui/data-grid";
 import ChatRender from '../../components/Chatter'
-import {
-    Button
-} from "@material-ui/core";
 import axiosInstance from '../../axios/axiosInstance'
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import {
+    Button,
+    Radio,
+    Grid,
+    Paper,
+    Typography
+} from "@material-ui/core";
+import { GiAbstract055 } from 'react-icons/gi';
+import { AiOutlineEye } from 'react-icons/ai';
+import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 
 
 
@@ -26,6 +33,7 @@ const DOAApproval=()=>{
     const [sellingPrice,setSellingPrice]=useState(0);
     const [loading,setLoading]=useState(true);
     const [chatid,setChatid]=useState("")
+    const [QData,setQData]=useState({});
     const [needDOA,setneedDOA]=useState(false)
     const [PDFName,setPDFName]=useState("");
     const [buttontext,setButton]=useState("Accept");
@@ -38,9 +46,7 @@ const DOAApproval=()=>{
         fetchDOA()
     },[]);
 
-    useEffect(()=>{
-        fetchQuote()
-    },[]);
+    
 
     const fetchDOA=()=>{
         axiosInstance()
@@ -49,7 +55,8 @@ const DOAApproval=()=>{
                 console.log("DOA limit is:");
                 console.log(data);
                 DOAsetup=data.data.doasetup;
-                DOALimit=data.data.limit;           
+                DOALimit=data.data.limit;     
+                fetchQuote();      
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -75,6 +82,7 @@ const DOAApproval=()=>{
                     setPDFName(data.PDF)
                     setChatid(data.chatter);
                     console.log(data.chatter);
+                    setQData(data);
                     if(data.Quote_Status!=="Sent for DOA"){
                         setQStatus(false);
                     }
@@ -141,34 +149,98 @@ const DOAApproval=()=>{
 
     return(
         <Layout>
-        <div>
-                <div style={{ height: 400,width:"100%"}}>
-                    <DataGrid
-                        columns={columns}
-                        rows={rows}
-                        getRowId ={(row) => row.id}/>
-                </div>
-                {QStatus?(
-                <><Button variant="contained" color="primary" onClick={()=>QuoteStatusChange(true)}>
-                <ThumbUpIcon/>{buttontext}
-                </Button>
-                <Button variant="contained" color="secondary" onClick={()=>QuoteStatusChange(false)} >
-                <ThumbDownIcon/>Reject
-                </Button>
-                </>):(null)}
-                <Button variant="contained" color="primary" onClick={()=>ViewQuote()}>
-                <VisibilityIcon/>View
-                </Button>
-
-                <div>
-                    Comments:
-                </div>
-                <div>
-                {!loading && <ChatRender id={chatid}/>}
-            </div>
-            </div>
+        <Grid container direction="row">
+        <CustomBreadCrumbs routes={[{ title: "DOA Requests", path: "/doa-request" },
+                { title: id }]} />
+        </Grid>
+                 <Grid container spacing={1} className="detail-container">
+                <Grid item xs={12} sm={12} md={8} lg={8}>
+                     <Paper className="subContainer">
+                        <Grid container className="detailHeader">
+                             <Grid item xs={12} md={5} sm={6} className="d-flex align-items-center gap-1">
+                                 <GiAbstract055 color="primary" /><span className="listingHeader">DOA Request</span>
+                             </Grid>
+                             <Grid item xs={12} md={7} sm={6} className="d-flex align-items-center gap-1" container justify="flex-end">
+                                 <Button onClick={() => ViewQuote()} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">View</Button>
+                                 {QStatus?(<><Button onClick={() => QuoteStatusChange(true)} variant="outlined" size="small" startIcon={<ThumbUpIcon/>} color="primary">{buttontext}</Button>
+                                 <Button onClick={() => QuoteStatusChange(false)}  startIcon={<ThumbDownIcon/>}  variant="contained" size="small" color="primary">Reject</Button></>):null}
+                             </Grid>
+                         </Grid><Grid container>
+                             <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+                                 <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel">
+                                 <div className="quoteBox">
+                                        <span>Total Profit</span>
+                                        <span>{QData["TotalProfitamount"]} {QData["TotalProfitcurr"]}</span>
+                                    </div>
+                                    <div className="quoteBox">
+                                        <span>Total Cost Price</span>
+                                        <span>{QData["TotalCostamount"]} {QData["TotalCostcurr"]}</span>
+                                    </div>
+                                    <div className="quoteBox">
+                                        <span>Total Selling Price</span>
+                                        <span>{QData["TotalSellingPriceamount"]} {QData["TotalSellingPricecurr"]}</span>
+                                    </div>
+                                    <div className="quoteBox">
+                                        <span>Total Margin</span>
+                                        <span> {QData["TotalMarginamount"]} {QData["TotalMargincurr"]}</span>
+                                    </div>
+                                     <div>
+                                     </div>
+                                </Grid>
+                                <DataGrid
+                                autoHeight
+                                    columns={columns}
+                                    rows={rows}
+                                getRowId ={(row) => row.id}/>
+                                </Grid>
+                            
+                        </Grid>
+                    </Paper>
+                    </Grid>
+                 <Grid item xs={12} sm={12} md={4} lg={4}>
+                     <ChatRender id={QData["chatter"]} isLoaded={true}/>
+                 </Grid>
+             </Grid>
         </Layout>
     );
+ 
+
+// }
+
+ // return(
+    //     <Layout>
+    //     <Grid container direction="row">
+    //     <CustomBreadCrumbs routes={[{ title: "DOA Requests", path: "/doa-request" },
+    //             { title: id }]} />
+    //     </Grid>
+    //     <div>
+    //             <div style={{ height: 400,width:"100%"}}>
+    //                 <DataGrid
+    //                     columns={columns}
+    //                     rows={rows}
+    //                     getRowId ={(row) => row.id}/>
+    //             </div>
+    //             {QStatus?(
+    //             <><Button variant="contained" color="primary" onClick={()=>QuoteStatusChange(true)}>
+    //             <ThumbUpIcon/>{buttontext}
+    //             </Button>
+    //             <Button variant="contained" color="secondary" onClick={()=>QuoteStatusChange(false)} >
+    //             <ThumbDownIcon/>Reject
+    //             </Button>
+    //             </>):(null)}
+    //             <Button variant="contained" color="primary" onClick={()=>ViewQuote()}>
+    //             <VisibilityIcon/>View
+    //             </Button>
+
+    //             <div>
+    //                 Comments:
+    //             </div>
+    //             <div>
+    //             {!loading && <ChatRender id={chatid}/>}
+    //         </div>
+    //         </div>
+    //     </Layout>
+    // );
 
 }
 

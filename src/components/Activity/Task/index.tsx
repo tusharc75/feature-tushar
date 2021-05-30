@@ -13,8 +13,10 @@ import Dialog from "@material-ui/core/Dialog";
 import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
-export const Task = ({ relatedTo, handleActivityRefresh }) => {
+export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
   const [task, setTask] = useState(null);
   const [taskId, setTaskId] = useState(null);
@@ -30,6 +32,7 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
     await GetTask(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setTask(data);
+        onSetCount("Task", data.length)
         setLoading(false);
       })
       .catch((err) => {
@@ -63,7 +66,7 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
         fetchTask();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleClose = () => {
@@ -144,6 +147,8 @@ export const Task = ({ relatedTo, handleActivityRefresh }) => {
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
       </Menu>
       <Dialog
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"

@@ -13,8 +13,10 @@ import Dialog from "@material-ui/core/Dialog";
 import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
-export const Note = ({ relatedTo, handleActivityRefresh }) => {
+export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState(null);
   const [noteId, setNoteId] = useState(null);
@@ -30,6 +32,7 @@ export const Note = ({ relatedTo, handleActivityRefresh }) => {
     await GetNote(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setNotes(data);
+        onSetCount("Note", data.length)
         setLoading(false);
       })
       .catch((err) => {
@@ -63,7 +66,7 @@ export const Note = ({ relatedTo, handleActivityRefresh }) => {
         fetchNote();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleClose = () => {
@@ -149,6 +152,8 @@ export const Note = ({ relatedTo, handleActivityRefresh }) => {
         maxWidth="md"
         onClose={handleClose}
         fullWidth
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
       >
         <CreateNote
           noteId={noteId}

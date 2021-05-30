@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
       }
     } else if (
       pathname === "/" ||
-      ["activity", "terms-conditions", "product-category", "product-template", "product-cost", "form-builder", "product-builder","currency-converter",
+      ["case", "task", "attachment", "note", "event", "terms-conditions", "product-category", "product-template", "product-cost", "form-builder", "product-builder", "currency-converter",
         "profile", "brand-configuration", "project-sales"].indexOf(pathnames[0]) >= 0) {
       setAccess(true);
       setChecking(false);
@@ -57,7 +57,11 @@ const ProtectedRoute = ({ children, ...rest }) => {
             <Unauthorized />
           )
         ) : (
-          <Redirect to={{ pathname: "/login", state: { from: location } }} />
+          <Redirect to={{
+            pathname: "/login",
+            search: `${location && location.pathname ? `?redirect=${location.pathname}` : null}`,
+            state: { from: location }
+          }} />
         )
       }
     />

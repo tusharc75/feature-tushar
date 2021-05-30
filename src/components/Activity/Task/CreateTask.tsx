@@ -35,6 +35,7 @@ import { SubTask } from "./SubTask";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
+import { useData } from "../../../StateProvider/Provider";
 
 const TaskSchema = Yup.object().shape({
   name: Yup.string().required("Please enter task name"),
@@ -45,6 +46,11 @@ const TaskSchema = Yup.object().shape({
 });
 
 export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
+  const {
+    state: {
+      user: { user },
+    },
+  } = useData();
   const [id, setId] = useState(taskId);
   const [initialValues, setInitialValues] = useState(null);
   const [openAddSub, setOpenAddSub] = useState(false);
@@ -61,14 +67,14 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: "",
         description: "",
         status: status || "To Do",
         assignee: "",
-        reporter: "",
+        reporter: user._id,
         startDate: new Date(),
         dueDate: new Date(),
       });
@@ -132,11 +138,11 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                           initialValues.parent.map((_p, index) => {
                             return (
                               <Button
+                                size="small"
                                 key={index}
                                 className="cursor-pointer"
                                 onClick={() => setId(_p._id)}
                                 color="primary"
-                                size="large"
                               >
                                 {_p.name}
                               </Button>
@@ -145,7 +151,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                       </Breadcrumbs>
                     </Box>
                     <Grid container spacing={3}>
-                      <Grid item xs={7}>
+                      <Grid item xs={12} md={7} sm={6}>
                         <TextField
                           variant="outlined"
                           type="text"
@@ -210,7 +216,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                           </Fragment>
                         )}
                       </Grid>
-                      <Grid item xs={5}>
+                      <Grid item xs={12} md={5} sm={6}>
                         <Box pt={1}>
                           <FormControl variant="outlined" fullWidth>
                             <InputLabel id="demo-simple-select-outlined-label">
@@ -250,7 +256,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                             label="Reporter"
                             errors={errors}
                             touched={touched}
-                            required={false}
+                            required={true}
                             setFieldValue={setFieldValue}
                             multiple={false}
                             value={values["reporter"]}
@@ -266,7 +272,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                             inputVariant="outlined"
                             fullWidth
                             margin="dense"
-                            format="yyyy/MM/DD"
+                            format="DD/MM/YYYY"
                             minDate={
                               initialValues.parentData &&
                               initialValues.parentData.startDate
@@ -292,7 +298,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                               initialValues.parentData &&
                               initialValues.parentData.dueDate
                             }
-                            format="yyyy/MM/DD"
+                            format="DD/MM/YYYY"
                           />
                         </Box>
                         {id && (
@@ -331,6 +337,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
               <Button
                 disabled={isSubmitting}
                 color="primary"
+                size="small"
                 onClick={handleClose}
               >
                 Cancel
@@ -339,6 +346,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                 disabled={isSubmitting}
                 type="button"
                 color="primary"
+                size="small"
                 variant="contained"
                 onClick={submitForm}
               >

@@ -60,19 +60,6 @@ const DOARequest = () => {
             )
         },
         {
-            field: "amount",
-            headerName: "Quote Amount",
-            width: 200,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => (
-                <>
-                {params.row.amount}
-                </>
-            ) 
-        },
-        {
             field: "Quoted By",
             headerName: "QuotedBy",
             width: 200,
@@ -120,7 +107,7 @@ const DOARequest = () => {
 
 
     return (<Layout>
-        <Grid container>
+        <Grid container className="headerbox">
             <Grid item md={12} sm={12} xs={12}>
                 <CustomBreadCrumbs routes={[{ title: 'DOA Requests' }]} />
             </Grid>

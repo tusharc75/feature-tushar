@@ -19,15 +19,16 @@ import _ from "lodash";
 import {
   customerAccount, supplierAccount, yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
-  getObjKeysWithValues, opportunityProcessFieldName, formatAmountWithCurrency
+  getObjKeysWithValues, processFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
-import { opportunity } from '../../constants/helpers'
+import { opportunity, sidebarResource } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -86,6 +87,8 @@ function OpportunityDetailsPage() {
   });
 
   const { opportunityResource, opportunityApi } = opportunity
+  const [projectSales, setProjectSales] = useState([]);
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: opportunity.opportunityResource }]);
 
   useEffect(() => {
     if (permissions) {
@@ -96,25 +99,26 @@ function OpportunityDetailsPage() {
   useEffect(() => {
     if (id) {
       fetchOpportunityData();
+      fetchRelatedData();
     }
   }, [id]);
 
   useEffect(() => {
-    if (opportunityData?.staticData?.customerContacts &&
-      opportunityData.staticData?.customerContacts.length &&
+    if (opportunityData?.staticData?.customerContact &&
+      opportunityData.staticData?.customerContactslength &&
       customerContacts && customerContacts.length === 0) fetchCustomerContactData(false)
 
-    if (opportunityData?.staticData?.supplierContacts &&
-      opportunityData.staticData?.supplierContacts.length &&
+    if (opportunityData?.staticData?.supplierContact &&
+      opportunityData.staticData?.supplierContact.length &&
       supplierContacts && supplierContacts.length === 0) fetchSupplierContactData(false)
 
   }, [opportunityData])
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === opportunityProcessFieldName.toLowerCase());
+      const processSteps = opportunityFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
       if (processSteps && processSteps.isRead && opportunityData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === opportunityData[opportunityProcessFieldName]) + 1;
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === opportunityData[processFieldName]) + 1;
         setActiveStep(currentStepToShow);
       }
     }
@@ -131,6 +135,12 @@ function OpportunityDetailsPage() {
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 
+          if (data?.customerAccountName?.optionValue) {
+            setTypeCreateProjectSalesDialog((prevState) => [...prevState, { id: data?.customerAccountName?.optionValue, type: "customerAccount" }])
+          }
+          if (data?.supplierAccountName?.optionValue) {
+            setTypeCreateProjectSalesDialog((prevState) => [...prevState, { id: data?.supplierAccountName?.optionValue, type: "supplierAccount" }])
+          }
           setAllowedToEdit([...data.collaborator ?? [], data.owner].some(
             (d) => d?.optionValue === user?.user?._id
           ))
@@ -182,6 +192,26 @@ function OpportunityDetailsPage() {
     }
   }
 
+  const fetchRelatedData = () => {
+    axiosInstance()
+      .get(`${opportunityApi}/related/${id}`)
+      .then(({ data: { data } }) => {
+        setProjectSales(
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.projectSales][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const fetchSupplierContactData = (showDialog, useAccountList = false, accountList = []) => {
     let ids = []
 
@@ -207,6 +237,7 @@ function OpportunityDetailsPage() {
           if (!useAccountList) setShowAddSupplierContactsDialog(showDialog);
         }).catch(error => {
           setLoadingSupplierAccounts(false)
+          toastConfig.setToastConfig(error);
         })
     }
     else {
@@ -248,7 +279,7 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .get(`customer-contact?filterById=${filterById}`)
       .then(({ data: { data } }) => {
-        let assignedContacts = opportunityData.staticData?.customerContacts ?? []
+        let assignedContacts = opportunityData.staticData?.customerContact ?? []
         const updatedContacts = data.map(d => {
           d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
           return d
@@ -282,7 +313,7 @@ function OpportunityDetailsPage() {
               setSupplierAccountOptions(fieldData.option.map(option => ({ ...option, isSelected: false })))
             }
           }
-          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === opportunityProcessFieldName.toLowerCase());
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
           if (processSteps && processSteps.isRead) {
             setSteps(processSteps.fieldData.option.map(m => {
               return {
@@ -377,12 +408,12 @@ function OpportunityDetailsPage() {
   return (
     <>
       <Layout>
-        <Grid container direction="row">
+      <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper className="subContainer">
+            <Paper>
               {!opportunityData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -503,34 +534,43 @@ function OpportunityDetailsPage() {
                     <div className="p-3">
                       {
                         opportunityData && <OpportunityContacts
-                            contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
-                            title="Supplier Contacts"
-                            contactApi={supplierContact.contactApi}
-                            isExpanded={expanded.supplierContacts}
-                            onAddContact={() => {
-                              fetchSupplierContactData(true);
-                            }}
-                            onSetExpanded={() => {
-                              setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
-                            }}
-                            recordsPerLine={recordsPerLine}
-                          />
+                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContact)}
+                          title="Supplier Contacts"
+                          contactApi={supplierContact.contactApi}
+                          isExpanded={expanded.supplierContacts}
+                          onAddContact={() => {
+                            fetchSupplierContactData(true);
+                          }}
+                          onSetExpanded={() => {
+                            setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
+                          }}
+                          recordsPerLine={recordsPerLine}
+                        />
                       }
                       {
                         opportunityData && <OpportunityContacts
-                            contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
-                            title="Customer Contacts"
-                            isExpanded={expanded["customerContacts"]}
-                            contactApi={customerContact.contactApi}
-                            onAddContact={() => {
-                              fetchCustomerContactData(true);
-                            }}
-                            onSetExpanded={() => {
-                              setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
-                            }}
-                            recordsPerLine={recordsPerLine}
-                          />
+                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContact)}
+                          title="Customer Contacts"
+                          isExpanded={expanded["customerContacts"]}
+                          contactApi={customerContact.contactApi}
+                          onAddContact={() => {
+                            fetchCustomerContactData(true);
+                          }}
+                          onSetExpanded={() => {
+                            setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
+                          }}
+                          recordsPerLine={recordsPerLine}
+                        />
                       }
+                      {permissions?.projectSales?.isRead && (
+                        <ProjectInAccordion
+                          recordsPerLine={3}
+                          projectSales={projectSales}
+                          type={typeCreateProjectSalesDialog}
+                          fetchData={fetchRelatedData}
+                          permissions={permissions}
+                        />
+                      )}
                     </div>
                   </TabPanel>
                   <TabPanel value={currentTabIndex} index={1}>
@@ -541,7 +581,7 @@ function OpportunityDetailsPage() {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper className="subContainer">
+            <Paper>
               {!opportunityData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />

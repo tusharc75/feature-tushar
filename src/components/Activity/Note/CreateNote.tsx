@@ -127,8 +127,8 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                     </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                    <Button color="primary" onClick={handleClose}>Cancel</Button>
-                    <Button type="button" color="primary" variant="contained" onClick={submitForm}>Save </Button>
+                    <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
+                    <Button size="small" type="button" color="primary" variant="contained" onClick={submitForm}>Save </Button>
                 </CustomDialogFooter>
             </>
         )}

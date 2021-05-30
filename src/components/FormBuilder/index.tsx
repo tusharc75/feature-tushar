@@ -64,7 +64,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
     return (<Box p={2} bgcolor="white">
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
             <Grid container spacing={1}>
-                <Grid item xs={3}>
+                <Grid item xs={12} md={3} sm={4}>
                     <Box border={1} p={2} borderColor="grey.300" className={classes.screenHeightAuto}>
                         <Grid container spacing={1} >
                             {Object.keys(FieldList).map((type, index) => {
@@ -83,7 +83,7 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
                         </Box>}
                     </Box>
                 </Grid>
-                <Grid item xs={9} >
+                <Grid item xs={12} md={9} sm={8} >
                     <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto}>
                         <DropMaster
                             addSection={addSection}

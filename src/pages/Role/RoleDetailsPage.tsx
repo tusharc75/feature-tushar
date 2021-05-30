@@ -42,7 +42,7 @@ const RoleDetailsPage = () => {
   const history = useHistory();
   const { id } = useParams();
   const {
-    state: { user, permissions, selectedEntity },
+    state: { user, permissions },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -68,7 +68,6 @@ const RoleDetailsPage = () => {
 
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
-  const [showEntities, setShowEntities] = useState(showRecordsBeforeViewAll);
 
   useEffect(() => {
     if (id) {
@@ -221,10 +220,6 @@ const RoleDetailsPage = () => {
     setShowAssignUserDialog(false);
   };
 
-  const entityDialogOpen = () => {
-    setShowAssignEntityDialog(true);
-  };
-
   const entityDialogClose = () => {
     setShowAssignEntityDialog(false);
   };
@@ -248,11 +243,6 @@ const RoleDetailsPage = () => {
         localStorage.setItem("token", "");
         dispatch({ type: USER_LOADING, payload: false });
       });
-  };
-
-  const handleUnassignEntity = (entityRec) => {
-    setEntityDeleteRec(entityRec);
-    setShowConfirmBox(true);
   };
 
   const unassignEntity = () => {
@@ -316,12 +306,12 @@ const RoleDetailsPage = () => {
       )}
 
       <Layout>
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper className="subContainer">
+            <Paper>
               {!roleData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -346,6 +336,7 @@ const RoleDetailsPage = () => {
                       disabled={currentData === updatedData || isUpdating || checkError()}
                       variant="contained"
                       color="primary"
+                      size="small" 
                       onClick={handleUpdateRole}
                     >
                       {isUpdating ? <CircularProgress size={22} /> : "Update"}
@@ -510,7 +501,7 @@ const RoleDetailsPage = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper className="subContainer">
+            <Paper>
               <Box
                 padding={1}
                 bgcolor="grey.200"

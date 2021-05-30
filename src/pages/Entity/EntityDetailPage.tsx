@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Grid, Box, Button, Typography, IconButton, Container, Paper } from "@material-ui/core";
+import { Grid, Box, Button, Typography, IconButton, Paper } from "@material-ui/core";
 import { ControlPoint } from "@material-ui/icons";
 import { Skeleton } from "@material-ui/lab";
 import { useParams, useHistory } from "react-router-dom";
@@ -31,7 +31,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions, selectedEntity },
+    state: { permissions },
     dispatch,
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
@@ -42,18 +42,15 @@ const EntityDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [entityFields, setEntityFIelds] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
-  const [deleteRoleRec, setDeleteRoleRec] = useState(null);
   const [userDeleteRec, setUserDeleteRec] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
-  const [openRolesDialog, setOpenRolesDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     routes.entity,
   ]);
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
-  const [showRegionalRoles, setShowRegionalRoles] = useState(showRecordsBeforeViewAll);
 
   useEffect(() => {
     if (id) {
@@ -217,14 +214,6 @@ const EntityDetailsPage = () => {
     setOpenUpdateDialog(false);
   };
 
-  const handleOpenRolesDialog = () => {
-    setOpenRolesDialog(true);
-  };
-
-  const closeRolesDIalog = () => {
-    setOpenRolesDialog(false);
-  };
-
   const userDialogOpen = () => {
     setShowAssignUserDialog(true);
   };
@@ -262,12 +251,12 @@ const EntityDetailsPage = () => {
       )}
       <Layout>
 
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
-            <Paper className="subContainer">
+            <Paper>
               {!entityData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -436,7 +425,6 @@ const EntityDetailsPage = () => {
               : `Are you sure you want to delete this entity ?`
           }
           onClose={() => {
-            setDeleteRoleRec(null);
             setShowConfirmBox(false);
           }}
           onOk={

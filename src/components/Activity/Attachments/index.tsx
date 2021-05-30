@@ -13,8 +13,10 @@ import ManageAttachment from "./ManageAttachment";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
-export default function Attachments({ relatedTo, handleActivityRefresh }) {
+export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [attachments, setAttachments] = useState(null);
@@ -29,12 +31,12 @@ export default function Attachments({ relatedTo, handleActivityRefresh }) {
 
   const fetchAttachment = async () => {
     setLoading(true);
-    let api = `/attachment?relatedTo=${JSON.stringify(relatedTo)}`;
-    axiosInstance()
-      .get(api)
+    let api = `/attachment?relatedTo=${JSON.stringify(relatedTo)}`
+    axiosInstance().get(api)
       .then(({ data: { data } }) => {
         setLoading(false);
-        setAttachments(data);
+        onSetCount("Attachment", data.length)
+        setAttachments(data)
       })
       .catch((error) => {
         setLoading(false);
@@ -165,6 +167,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh }) {
               maxWidth="md"
               onClose={handleClose}
               fullWidth
+              fullScreen={isMobile || isTablet}
+              TransitionComponent={CustomDialogTransition}
             >
               <ManageAttachment
                 attachmentId={attachmentId}

@@ -6,7 +6,6 @@ import {
   sidebarResource,
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
-import _ from "lodash";
 import { useHistory } from "react-router-dom";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -31,11 +30,8 @@ export default function ManageContactDialog(props) {
     owners,
     fromProject,
   } = props;
-  const { accountApi, accountResource, accountPermission, accountRoute } =
-    account;
-  const {
-    state: { user, selectedEntity },
-  }: any = useData();
+  const { accountApi, accountResource } = account;
+  const { state: { user } }: any = useData();
   const [entityData, setEntityData] = useState({
     fields: [],
     initialValues: {},
@@ -191,9 +187,6 @@ export default function ManageContactDialog(props) {
           isGetAccountData={true}
           onGetAddedAccount={handleGetAddedAccount}
           isRedirectToDetailPage={false}
-          fromProject={fromProject}
-          owners={owners}
-          collaborators={collaborators}
         />
       ) : null}
     </>

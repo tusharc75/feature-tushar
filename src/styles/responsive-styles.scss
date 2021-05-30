@@ -1,6 +1,5 @@
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
-   
     .MuiMenuItem-root {
         font-size: 0.8rem;
         min-height: 34px;
@@ -19,7 +18,10 @@
         height: auto !important;
     }
     .headerbox {
-        padding: 7px 26px 55px 12px;
+        position: static;
+        height: auto;
+        width: 100% !important;
+
         ol {
             li {
                 a {
@@ -31,13 +33,41 @@
             }
         }
     }
-    .detail-container{
+    .detail-container {
+        top: 0;
+        padding: 0;
+        margin-top: 0 !important;
+    }
+
+    .detailHeaderDashboard {
+        display: flex;
+        align-items: normal;
+        justify-content: center;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .listing-grid {
+        height: calc(100vh - 233px);
+    }
+
+    .rbc-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .greyBox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    .chat-box {
         position: absolute;
-        top: 92px;
-        // width: 100% !important;
-        padding: 0px 0px 0 9px;
-        overflow: auto;
-        height: auto;
+        right: 10px;
+        bottom: 14px;
     }
 }
 
@@ -47,16 +77,17 @@
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 600px) and (max-width: 768px) {
     .headerbox {
-        padding: 10px 15px 55px 26px;
+        position: static;
+        height: auto;
+        width: 100% !important;
     }
 }
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (max-width: 959px) {
     .main-container {
-        margin: 0 0.5rem;
-        width: calc(100% - 1rem);
-        top: 6rem;
+        top: 0;
+        margin: 0;
     }
 }
 

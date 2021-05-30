@@ -25,7 +25,7 @@ import Email from "./pages/Activity/Email";
 import Attachments from "./pages/Activity/Attachments";
 import Calender from "./pages/Activity/Calendar";
 import PasswordSetup from "./pages/Auth/PasswordSetup";
-import ForgetPassword from './pages/Auth/ForgetPassword';
+import ForgetPassword from "./pages/Auth/ForgetPassword";
 import ProductCategory from "./pages/ProductCategory";
 import ProductTemplate from "./pages/ProductTemplate";
 import CreateProductTemplate from "./pages/ProductTemplate/CreateProductTemplate";
@@ -48,8 +48,9 @@ import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 import QuoteApproval from './pages/Quote-Approval'
-import QuoteBuilderPage from './pages/QuoteBuilder'
-import DOARequest from './pages/DOA'
+import QuoteDetail from './pages/QuoteBuilderCombined/QuoteDetail'
+import QuoteBuilderPage from "./pages/QuoteBuilder";
+import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
 
 import {
@@ -57,12 +58,12 @@ import {
   customerAccount,
   customerContact,
   supplierAccount,
-  supplierContact
+  supplierContact,
 } from "./constants/helpers";
 import routes from "./components/Helpers/Routes";
 import Dashboard from "./pages/Dashboard";
 import KpiDashboard from "./pages/KpiDashboard";
-import EditDashboard from './pages/KpiDashboard/EditDashboards';
+import EditDashboard from "./pages/KpiDashboard/EditDashboards";
 
 import FormBuilder from "./pages/FormBuilder";
 import CreateFormBuilder from "./pages/FormBuilder/CreateFormBuilder";
@@ -71,20 +72,56 @@ import { CustomNotificationCountContext } from "./StateProvider/CustomNotificati
 import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
 import DOAapproval from './pages/DOA/DOAApproval'
+import QuoteBuilderCombined from './pages/QuoteBuilderCombined'
+import Reminder from "./pages/Reminder";
+import ResetPassword from "./pages/Auth/ResetPassword";
+import queryString from "query-string";
+import { USER_LOADING, SET_USER, SET_SELECTED_ENTITY } from "./StateProvider/actionTypes";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const {
     state: { user },
+    dispatch
   }: any = useData();
 
   const getNotification = async () => {
     if (localStorage.getItem("token")) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
-        .then(({ data: { count } }) => {
-          if (count > 0) { notification.setCount(count); }
+        .then(({ data: { frontendReloadRequired, count } }) => {
+          if (count > 0) {
+            notification.setCount(count);
+          }
+
+          if (frontendReloadRequired) {
+            // dispatch({ type: USER_LOADING, payload: true });
+            axiosInstance()
+              .get("/user/me")
+              .then(({ data: response }) => {
+                const { data } = response;
+                dispatch({ type: SET_USER, payload: data });
+                let prevSelectedEntity = localStorage.getItem("selectedEntity")
+                if (prevSelectedEntity && prevSelectedEntity !== 'null') {
+                  dispatch({
+                    type: SET_SELECTED_ENTITY,
+                    payload: prevSelectedEntity,
+                  });
+                }
+                else if (data?.role?.selectedEntity?._id) {
+                  dispatch({
+                    type: SET_SELECTED_ENTITY,
+                    payload: data.role.selectedEntity._id,
+                  });
+                }
+                // dispatch({ type: USER_LOADING, payload: false });
+              })
+              .catch((err) => {
+                localStorage.setItem("token", "");
+                // dispatch({ type: USER_LOADING, payload: false });
+              });
+          }
         })
         .catch((error) => {
           toast.setToastConfig(error);
@@ -104,10 +141,19 @@ function App() {
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
+
+    let redirectToAnotherScreen = null;
+    if (location && location.search) {
+      const parsedParams = queryString.parse(location.search);
+      if (parsedParams.redirect) {
+        redirectToAnotherScreen = parsedParams.redirect;
+      }
+    }
+
     return !user ? (
       <Comp />
     ) : (
-      <Redirect to={{ pathname: "/", state: { from: location } }} />
+      <Redirect to={{ pathname: redirectToAnotherScreen ? redirectToAnotherScreen : "/", state: { from: location } }} />
     );
   };
 
@@ -117,7 +163,7 @@ function App() {
         {/* <Switch location={location} key={location.key}> */}
         <Switch>
           <Route
-            exact
+            // exact
             path="/login"
             render={({ location }) => conditionalRedirect(Login, location)}
           />
@@ -133,6 +179,13 @@ function App() {
             path="/forget-password"
             render={({ location }) =>
               conditionalRedirect(ForgetPassword, location)
+            }
+          />
+          <Route
+            exact
+            path="/reset-password"
+            render={({ location }) =>
+              conditionalRedirect(ResetPassword, location)
             }
           />
           <PrivateRoute exact path="/">
@@ -156,7 +209,6 @@ function App() {
           <PrivateRoute exact path="/new-opp">
             <AddNewOpportunity />
           </PrivateRoute>
-
           <PrivateRoute exact path="/doa">
             <Doa />
           </PrivateRoute>
@@ -283,40 +335,34 @@ function App() {
           <PrivateRoute exact path="/activity">
             <Activitydemo />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/email">
+          <PrivateRoute exact path="/email">
             <Email />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/note">
+          <PrivateRoute exact path="/note">
             <Note />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/attachment">
+          <PrivateRoute exact path="/attachment">
             <Attachments />
           </PrivateRoute>
-          <PrivateRoute exact path="/activity/event">
-            <Event />
-          </PrivateRoute>
-          <PrivateRoute exact path="/activity/:type">
-            <Activity />
-          </PrivateRoute>
+          
           <PrivateRoute exact path="/calendar">
             <Calender />
           </PrivateRoute>
-
+          <PrivateRoute exact path="/reminder">
+            <Reminder />
+          </PrivateRoute>
           <PrivateRoute exact path={routes.product.path}>
             <Product />
           </PrivateRoute>
-
-
           <PrivateRoute exact path={routes.productCategory.path}>
             <ProductCategory />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productTemplate.path}>
             <ProductTemplate />
           </PrivateRoute>
-          <PrivateRoute exact path={routes.productTemplate.path + "/:id"} >
+          <PrivateRoute exact path={routes.productTemplate.path + "/:id"}>
             <CreateProductTemplate />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.formBuilder.path}>
             <FormBuilder />
           </PrivateRoute>
@@ -331,28 +377,25 @@ function App() {
               termsAndConditionBreadcrumb={routes.termsAndConditions}
             />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.productCost.path}>
             <ProductCost />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productCost.path + "/:id"}>
             <CreateProductCost />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.productBuilder.path}>
             <ProductBuilder />
           </PrivateRoute>
           <PrivateRoute exact path={routes.productBuilder.path + "/:id"}>
             <CreateProductBuilder />
           </PrivateRoute>
-
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
 
-          <Route exact path={"/quote-builder/:id"} >
-            <QuoteBuilderPage />
-          </Route>
+          <PrivateRoute exact path={"/quote-builder/:id"} >
+            <QuoteDetail />
+          </PrivateRoute>
           <Route exact path={"/dashboards"}>
             <KpiDashboard />
           </Route>
@@ -366,15 +409,19 @@ function App() {
           <Route exact path={"/quote-approval/:id"}>
             <QuoteApproval />
           </Route>
-
           <Route exact path={"/doa-request"}>
             <DOARequest />
           </Route>
-
           <Route exact path={"/doa-request/:id"}>
             <DOAapproval />
           </Route>
+          <PrivateRoute exact path={'/quote-builder'}>
+            <QuoteBuilderCombined/>
+          </PrivateRoute>
 
+          <PrivateRoute path="/:type">
+            <Activity />
+          </PrivateRoute>
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>

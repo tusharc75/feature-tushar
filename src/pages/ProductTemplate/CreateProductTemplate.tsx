@@ -19,16 +19,19 @@ import CustomContainer from "../../components/CustomContainer";
 import DefaultFields from './defaultFields';
 import { Autocomplete } from "@material-ui/lab";
 import TextField from '@material-ui/core/TextField';
-
+import queryString from "query-string";
 import _ from 'lodash';
+import { useLocation } from 'react-router-dom';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 const ProductTemplateSchema = Yup.object().shape({
     name: Yup.string()
         .min(3, "Too Short!")
         .max(50, "Too Long")
         .required("Template name is required"),
-    productCategory: Yup.string()
-        .required("Product category is required"),
+    // productCategory: Yup.string()
+    //     .required("Product category is required"),
     unit: Yup.string()
         .required("Unit is required"),
 });
@@ -36,10 +39,11 @@ const ProductTemplateSchema = Yup.object().shape({
 
 const ProductTemplate = () => {
 
-    const toastConfig = useContext(CustomToastContext)
     const history = useHistory();
     const { id } = useParams();
+    const toastConfig = useContext(CustomToastContext)
 
+    const [isClone, setisClone] = useState(history.location.state?.isClone ? true : false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [initialValues, setInitialValues] = useState(null);
     const [section, setSection] = useState([]);
@@ -49,17 +53,18 @@ const ProductTemplate = () => {
 
     useEffect(() => {
         fetchOneProductTemplate();
-    }, [id]);
+    }, [id, isClone]);
 
     const fetchOneProductTemplate = () => {
         if (id === "0") {
-            setInitialValues({ name: "", productCategory: "", unit: "" });
+            setInitialValues({ name: "", productCategory: "", unit: "", isStandard: false });
             const _data = []
             const _section = _.uniq(_.map(DefaultFields, 'sectionName'));
             _section.forEach((element: any, index: number) => {
                 _data.push({
                     sectionId: index,
                     sectionName: element,
+                    sectionType: "cost",
                     field: DefaultFields.filter((el: any) => el.sectionName === element),
                 });
             });
@@ -67,6 +72,9 @@ const ProductTemplate = () => {
         }
         else {
             axiosInstance().get(`/product-template/` + id).then(({ data: { data } }) => {
+                if (isClone) {
+                    data.name = ""
+                }
                 setInitialValues(data);
                 setSection(data.section);
             }).catch((error) => {
@@ -96,33 +104,32 @@ const ProductTemplate = () => {
     const handleSave = (values) => {
         let data: any = {}
         data.name = values.name;
-        data.productCategory = values.productCategory;
         data.unit = values.unit;
-
+        data.isStandard = values.isStandard;
+        if (data.isStandard) {
+            data.productCategory = null;
+        }
+        else {
+            data.productCategory = values.productCategory;
+        }
         let fields: any = []
         let order = 0;
         section.forEach(_section => {
-            let is_sectionType = false
-            if (_section.field.filter((data) => data.sectionType === "cost").length) {
-                is_sectionType = true
-            }
             _section.field.forEach(_field => {
                 let _field_data = _field
                 _field_data._id = _field_data._id.toString();
-                _field_data.sectionName = _section.sectionName
-                if (is_sectionType) {
-                    _field_data.sectionType = "cost"
-                }
                 if (!isNaN(_field._id)) {
                     _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
                 }
+                _field_data.sectionName = _section.sectionName
+                _field_data.sectionType = _section.sectionType
                 _field_data.order = ++order
                 fields.push(_field_data)
             })
         })
         data.fields = fields;
         setIsUpdating(true)
-        if (id === "0") {
+        if (id === "0" || isClone) {
             axiosInstance().post("/product-template", data).then(({ data: { data } }) => {
                 setIsUpdating(false)
                 history.push({ pathname: routes.productTemplate.path });
@@ -145,10 +152,9 @@ const ProductTemplate = () => {
     }
 
     return (<Layout>
-
-        <Grid container direction="row">
+        <Grid container className="headerbox">
             <Grid item xs={12}>
-                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.productTemplate.title, path: routes.productTemplate.path }, { title: id === "0" || isClone ? "New" : initialValues && initialValues.name }]} />
             </Grid>
         </Grid>
         <CustomContainer>
@@ -173,32 +179,7 @@ const ProductTemplate = () => {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
-                                        <Autocomplete
-                                            options={productCategory}
-                                            getOptionLabel={(option: any) => (option ? option.name : "")}
-                                            getOptionSelected={(option: any, val) => option._id === val}
-                                            value={productCategory.filter((data) => data._id === values["productCategory"]).length
-                                                ? productCategory.filter((data) => data._id === values["productCategory"])[0]
-                                                : ""
-                                            }
-                                            onChange={(e, val) => setFieldValue("productCategory", val && val._id ? val._id : "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="productCategory"
-                                                    label="Product Category"
-                                                    variant="outlined"
-                                                    error={touched["productCategory"] && Boolean(errors["productCategory"])}
-                                                    helperText={touched["productCategory"] && errors["productCategory"]}
-                                                    required={true}
-                                                    fullWidth
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={2}>
                                         <Autocomplete
                                             options={productUnit}
                                             getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
@@ -222,6 +203,48 @@ const ProductTemplate = () => {
                                                 />
                                             )}
                                         />
+                                    </Grid>
+                                    <Grid item xs={12} sm={1}>
+                                        <Box mt={0.5}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        name="isStandard"
+                                                        checked={values["isStandard"]}
+                                                        onChange={(e) => {
+                                                            setFieldValue("isStandard", e.target.checked)
+                                                        }}
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Standard"
+                                            />
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12} sm={3}>
+                                        {!values["isStandard"] && <Autocomplete
+                                            options={productCategory}
+                                            getOptionLabel={(option: any) => (option ? option.name : "")}
+                                            getOptionSelected={(option: any, val) => option._id === val}
+                                            value={productCategory.filter((data) => data._id === values["productCategory"]).length
+                                                ? productCategory.filter((data) => data._id === values["productCategory"])[0]
+                                                : ""
+                                            }
+                                            onChange={(e, val) => setFieldValue("productCategory", val && val._id ? val._id : "")}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="productCategory"
+                                                    label="Product Category"
+                                                    variant="outlined"
+                                                    error={touched["productCategory"] && Boolean(errors["productCategory"])}
+                                                    helperText={touched["productCategory"] && errors["productCategory"]}
+                                                    required={true}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
                                     </Grid>
                                     <Grid item xs={12} sm={3} container justify="flex-end">
                                         <Box>

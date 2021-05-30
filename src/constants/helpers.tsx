@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import React, { forwardRef } from "react";
 import {
   AddBox,
   ArrowDownward,
@@ -20,6 +20,9 @@ import {
 import * as yup from "yup";
 import moment from "moment";
 import currencies from "./currency_with_country.json";
+import { TransitionProps } from "@material-ui/core/transitions";
+import { Slide } from "@material-ui/core";
+import { orderBy } from 'lodash';
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -55,10 +58,13 @@ export const userType = {
   brandAdmin: 2,
 };
 
+export const AgGridHeaderHeight = 40;
+export const AgGridRowHeight = 30;
+export const AgGridFloatingFiltersHeight = 38;
+
 export const gridPageSizes = [25, 50, 75];
 
-export const leadProcessFieldName = "leadProcess";
-export const opportunityProcessFieldName = "process";
+export const processFieldName = "process";
 
 export const stepsToIgnoreManualCompleteForOpportunity = ["doa"];
 
@@ -88,6 +94,11 @@ export const sidebarResource = {
   lead: "Lead",
   opportunity: "Opportunity",
   projectSales: "Project Sales",
+  task: "Task",
+  note: "Note",
+  email: "Email",
+  attachment: "Attachment",
+  case: "Case",
 };
 
 export const lead = {
@@ -99,6 +110,11 @@ export const opportunity = {
   opportunityResource: "opportunity", //  Key of sidebar object
   opportunityApi: "/opportunity",
 };
+
+export const quoteBuilder={
+  qbResource:"quoteBuilder",
+  qbApi:"/quote-builder"
+}
 
 export const supplierAccount = {
   accountApi: "supplier-account",
@@ -149,36 +165,40 @@ export const profileMenuItems = {
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
   for (const key of arr) {
+    let value = key.isDefaultValue ? key.defaultValue : val
     if (key.type === "dropDown") {
       const option = key.option?.find((data: any) => data.default === true);
-      obj[key.fieldName] = val ? val : option ? option.optionValue : "";
+      obj[key.fieldName] = value ? value : option ? option.optionValue : "";
     } else if (key.type === "multiSelect") {
       const defaultOptions = key.option?.filter(
         (item: any) => item.default === true
       );
       const options = defaultOptions?.map((data: any) => data.optionValue);
-      obj[key.fieldName] = val ? val : options;
+      obj[key.fieldName] = value ? value : options;
     } else if (key.type === "date") {
-      obj[key.fieldName] = val ? val : new Date();
+      obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
-      obj[key.fieldName] = val ? val : false;
+      obj[key.fieldName] = value ? value : false;
     } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
       key.displayUnits.forEach((_unit) => {
-        obj[key.fieldName + "_" + _unit.toLowerCase()] = val;
+        obj[key.fieldName + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;
       });
     } else if (key.type === "currencyAmount") {
       key.displayCurrency.forEach((_currency) => {
         if (key.isConverter && key.displayUnits.length) {
           key.displayUnits.forEach((_unit) => {
-            obj[key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = val;
+            obj[key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
           });
         }
         else {
-          obj[key.fieldName + "_" + _currency.toLowerCase()] = val;
+          obj[key.fieldName + "_" + _currency.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
         }
       });
-    } else {
-      obj[key.fieldName] = val;
+    } else if (key.type === "decimal") {
+      obj[key.fieldName] = value && value !== "" ? parseFloat(value) : value;;
+    }
+    else {
+      obj[key.fieldName] = value;
     }
   }
   return obj;
@@ -638,3 +658,35 @@ export const graphOptions = {
     shadow: true,
   },
 };
+
+
+export const CustomDialogTransition = React.forwardRef(function Transition(
+  props: TransitionProps & { children?: React.ReactElement<any, any> },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+//  Don't use this for details screen as the model being passed is different
+export const setFieldsInAscendingOrder = (fieldsToOrder) => {
+
+  const sections = [];
+  const fieldsInAscendingOrder = orderBy(fieldsToOrder, ["order", "asc"]);
+
+  fieldsInAscendingOrder.forEach((field) => {
+    if (!sections.includes(field.sectionName)) {
+      sections.push(field.sectionName);
+    }
+  });
+
+  const customData = sections.map((name) => {
+    let fields = fieldsInAscendingOrder.filter(
+      (field) => field.sectionName === name
+    );
+
+    const sectionFields = fields.map((formData) => formData);
+    return { name, sectionFields };
+  });
+
+  return customData;
+}

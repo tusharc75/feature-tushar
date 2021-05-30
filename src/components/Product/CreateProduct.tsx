@@ -17,6 +17,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
 
 const CreateProduct = (props) => {
@@ -32,6 +34,7 @@ const CreateProduct = (props) => {
     const [fields, setFields] = useState([]);
     const [sectionName, setSectionName] = useState("");
     const ref = useRef(null);
+    const [productTemplate, setProductTemplate] = useState([]);
 
 
     useEffect(() => {
@@ -53,6 +56,7 @@ const CreateProduct = (props) => {
                         values: data.productData
                     });
                     EvaluteproductFields(newField)
+                    handleChangeCategory(data.productData.productCategory, false)
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -114,6 +118,20 @@ const CreateProduct = (props) => {
         setProductFields(customData)
     }
 
+    const handleChangeCategory = (value, isChange) => {
+        if (value && value !== "") {
+            axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
+                setProductTemplate(data.data)
+                if (isChange) {
+                    setInitialData({
+                        fields: initialData.fields,
+                        values: { ...ref.current.values, productTemplate: "" },
+                    });
+                }
+            });
+        }
+    }
+
     const handleChangeTemplate = (value) => {
         if (value && value !== "") {
             axiosInstance().get(`/product-template/fields/` + value).then(({ data: { data } }) => {
@@ -158,6 +176,8 @@ const CreateProduct = (props) => {
 
     return (<Dialog
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
@@ -191,7 +211,7 @@ const CreateProduct = (props) => {
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
                                                     {section.sectionFields && section.sectionFields.map((field) => (
-                                                        field.fieldName === "productTemplate" ?
+                                                        field.fieldName === "productCategory" ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                 <FormTypes
                                                                     fields={initialData.fields}
@@ -211,31 +231,35 @@ const CreateProduct = (props) => {
                                                                     disableClearable
                                                                     onChange={(e, val) => {
                                                                         setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                                        handleChangeTemplate(val && val.optionValue ? val.optionValue : "")
+                                                                        handleChangeCategory(val && val.optionValue ? val.optionValue : "", true)
                                                                     }}
                                                                     size="small"
                                                                 />  </Grid> :
-                                                            field.type === "converter" || field.type === "currencyAmount" ?
-                                                                <FormTypes
-                                                                    fields={initialData.fields}
-                                                                    values={values}
-                                                                    errors={errors}
-                                                                    touched={touched}
-                                                                    label={field.fieldLabel}
-                                                                    name={field.fieldName}
-                                                                    type={field.type}
-                                                                    options={field.option}
-                                                                    setFieldValue={setFieldValue}
-                                                                    required={field.required}
-                                                                    fullWidth
-                                                                    isTooltip={field.isTooltip}
-                                                                    tooltipMessage={field.tooltipMessage}
-                                                                    decimalPlaces={field.decimalPlaces}
-                                                                    isvlookupReverse={field.isvlookupReverse}
-                                                                    fieldData={field}
-                                                                    size="small"
-                                                                /> :
+                                                            field.fieldName === "productTemplate" ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <FormTypes
+                                                                        fields={initialData.fields}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={productTemplate}
+                                                                        setFieldValue={setFieldValue}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isTooltip={field.isTooltip}
+                                                                        tooltipMessage={field.tooltipMessage}
+                                                                        decimalPlaces={field.decimalPlaces}
+                                                                        disableClearable
+                                                                        onChange={(e, val) => {
+                                                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                            handleChangeTemplate(val && val.optionValue ? val.optionValue : "")
+                                                                        }}
+                                                                        size="small"
+                                                                    />  </Grid> :
+                                                                field.type === "converter" || field.type === "currencyAmount" ?
                                                                     <FormTypes
                                                                         fields={initialData.fields}
                                                                         values={values}
@@ -254,9 +278,29 @@ const CreateProduct = (props) => {
                                                                         isvlookupReverse={field.isvlookupReverse}
                                                                         fieldData={field}
                                                                         size="small"
-                                                                        disabled={field.fieldName === "unit" ? true : false}
-                                                                    />
-                                                                </Grid>
+                                                                    /> :
+                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                        <FormTypes
+                                                                            fields={initialData.fields}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={field.option}
+                                                                            setFieldValue={setFieldValue}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field.isTooltip}
+                                                                            tooltipMessage={field.tooltipMessage}
+                                                                            decimalPlaces={field.decimalPlaces}
+                                                                            isvlookupReverse={field.isvlookupReverse}
+                                                                            fieldData={field}
+                                                                            size="small"
+                                                                            disabled={field.fieldName === "unit" ? true : false}
+                                                                        />
+                                                                    </Grid>
                                                     ))}
                                                 </Grid>
                                             </Box>
@@ -266,7 +310,7 @@ const CreateProduct = (props) => {
                             </Box>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button color="primary" onClick={handleClose}>Cancel</Button>
+                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
                             <CustomButton
                                 loading={loading}
                                 variant="contained"

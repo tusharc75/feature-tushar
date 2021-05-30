@@ -5,6 +5,8 @@ import { Grid, Typography, Box, Avatar, Paper, Tooltip } from "@material-ui/core
 import { Skeleton } from "@material-ui/lab";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CopyToClipboard from '../components/Helpers/CopyToClipboard'
+import { FcApproval } from 'react-icons/fc';
+import { isMobile, isTablet } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
   box: {
     padding: theme.spacing(0.5, 1.5),
     borderRadius: "4px",
-    margin: "8px 0px 8px 10px",
     boxShadow: "2px 2px 4px #747474",
     background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
     border: "#03232e"
@@ -51,18 +52,16 @@ const DetailsPageHeader = (props) => {
                   component="h2"
                   color="primary"
                 >
-                  <span className="d-flex align-items-center gap-2"><span className="listingHeader">{heading}</span> {
-                    isApproved && <Tooltip title="Approved"><CheckCircleIcon color="primary" /></Tooltip>
+                  <span className="d-flex align-items-center"><span className="listingHeader">{heading}</span> {
+                    isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
                   }</span>
-
-
                 </Typography>
               </>
             ) : null}
           </Grid>
           <Grid item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
         </Grid>
-        <Box display="flex">
+        <Box className="detailHeaderDashboard">
           {loading ? (
             <Grid container wrap="nowrap">
               {[...Array(4).keys()].map((i, index) => (
@@ -82,7 +81,6 @@ const DetailsPageHeader = (props) => {
               return (
                 <React.Fragment key={i}>
                   {mainPoints[key] ? (
-
                     <Box className={classes.box}>
                       <Typography
                         align="center"

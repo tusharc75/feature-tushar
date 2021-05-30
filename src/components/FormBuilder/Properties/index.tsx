@@ -23,8 +23,8 @@ import { Converter } from "../AddField/converter";
 import { Option } from "../AddField/option";
 import { Currency } from "../AddField/currency";
 import { MultipleFormula } from "../AddField/multipleformula";
-
-
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "../../../constants/helpers";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string()
@@ -131,6 +131,9 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               ele.units = values.units
               ele.displayUnits = values.displayUnits
               ele.option = values.option
+              if (fieldData.type === "formula" || values.isFormula === true) {
+                ele.formulaOnConverter = values.formulaOnConverter
+              }
             }
             if (fieldData.type === "currencyAmount") {
               delete ele.currency
@@ -141,6 +144,11 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               ele.formulainputFields = values.formulainputFields
               ele.formulaoption = values.formulaoption
             }
+            ele.isDefaultValue = values.isDefaultValue ? values.isDefaultValue : false
+            ele.defaultValue = ""
+            if (ele.isDefaultValue) {
+              ele.defaultValue = values.defaultValue
+            }
           }
         })
       }
@@ -149,10 +157,19 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     handleClose()
   }
 
-  return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
-    <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
+  const onKeyPress = (event) => {
+    if (event.which === 13) {
+      event.preventDefault();
+    }
+  }
+
+  return (<Dialog 
+    fullScreen={isMobile || isTablet}
+    TransitionComponent={CustomDialogTransition}
+    aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
+    <Formik initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} >
       {({ submitForm, touched, errors, setFieldValue, values }) => (
-        <Form autoComplete="off" autoCorrect="off" noValidate >
+        <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
           <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`} onClose={handleClose}></CustomDialogHeader>
           <CustomDialogContent>
             <TextField
@@ -253,7 +270,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                 values={values}
                 setFieldValue={setFieldValue}
               />}
-            {(values["type"] === "currencyAmount" || values["type"] === "percent" || values["type"] === "converter") &&
+            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
               <FormControlLabel
                 control={
                   <Checkbox
@@ -297,7 +314,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               values={values}
               setFieldValue={setFieldValue}
             />}
-            {(values["type"] === "currencyAmount" || values["type"] === "percent" || values["type"] === "converter") &&
+            {(values["type"] === "currencyAmount" || values["type"] === "decimal" || values["type"] === "percent" || values["type"] === "converter") &&
               <><br></br>
                 <FormControlLabel
                   control={
@@ -348,6 +365,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                 }
                 label="Show Tooltip"
               />
+
               {values["isTooltip"] &&
                 <TextField
                   variant="outlined"
@@ -363,11 +381,38 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                   onChange={(e) => setFieldValue("tooltipMessage", e.target.value.trimStart())}
                 />
               }
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="isDefaultValue"
+                    checked={values["isDefaultValue"]}
+                    onChange={(e) => setFieldValue("isDefaultValue", e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Default Value"
+              />
+              {values["isDefaultValue"] &&
+                <TextField
+                  variant="outlined"
+                  type="text"
+                  label="Default Value"
+                  required={true}
+                  name="defaultValue"
+                  fullWidth
+                  margin="dense"
+                  value={values["defaultValue"]}
+                  error={touched["defaultValue"] && Boolean(errors["defaultValue"])}
+                  helperText={touched["defaultValue"] && errors["defaultValue"]}
+                  onChange={(e) => setFieldValue("defaultValue", e.target.value.trimStart())}
+                />
+              }
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button onClick={handleClose} color="primary">Cancel</Button>
-            <Button type="submit" color="primary" variant="contained">Save</Button>
+            <Button size="small" onClick={handleClose} color="primary">Cancel</Button>
+            <Button size="small" type="submit" color="primary" variant="contained">Save</Button>
           </CustomDialogFooter>
         </Form>)}
     </Formik>

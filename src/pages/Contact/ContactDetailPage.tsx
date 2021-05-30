@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, Avatar, Divider } from "@material-ui/core";
+import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, } from "@material-ui/core";
 import { useHistory, useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Skeleton } from "@material-ui/lab";
@@ -10,11 +10,9 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import { useData } from "../../StateProvider/Provider";
 import { contactPage } from "../../routes/Contacts";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import routes from "../../components/Helpers/Routes";
 import axiosInstance from "./../../axios/axiosInstance";
 import Activity from "../../components/Activity";
 import {
-  // DisplayData,
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
@@ -28,37 +26,27 @@ import QuickLinks, { IQuickLinks } from "../../components/QuickLinks/QuickLinks"
 import { FcFlowChart } from "react-icons/fc";
 import FullScreenDialog from "../../components/Helpers/FullScreenDialog";
 import BoxWithBorder from "../../components/BoxWithBorder";
-import { BiFace } from 'react-icons/bi'
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 import { AiOutlineMail } from 'react-icons/ai';
 import { BiPhone } from 'react-icons/bi';
 import { FiStar } from 'react-icons/fi';
-
-function DisplayData({ label, value, icon }) {
-  return <div style={{ flexGrow: 1 }}>
-    <List>
-      <ListItem>
-        <ListItemAvatar>
-          {icon}
-        </ListItemAvatar>
-        <ListItemText primary={value} secondary={label} />
-      </ListItem>
-    </List>
-  </div>
-}
+import OpportunityInAccordian from "../../components/OpportunityInAccordian/OpportunityInAccordian";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
+import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    contact: { contactApi, contactResource, contactPermission, contactRoute },
+    contact: { contactApi, contactResource },
     account: { accountResource },
     contactBreadcrumb,
   } = props;
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity },
+    state: { user, permissions }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState("");
   const [contactData, setContactData] = useState<any>({});
@@ -66,7 +54,6 @@ const ContactDetailsPage = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [mainPoints, setMainPoints] = useState({});
-  const [isUpdating, setUpdating] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [contactPermissions, setContactPermissions] = useState({
@@ -80,7 +67,12 @@ const ContactDetailsPage = (props) => {
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
   const [orgChartData, setOrgChartData] = useState([])
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
+  const [opportunities, setOpportunities] = useState([]);
+  const [projectSales, setProjectSales] = useState([]);
+
   let { id } = useParams();
+
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([]);
 
   // useEffect(() => {
   //     if (id) {
@@ -101,6 +93,7 @@ const ContactDetailsPage = (props) => {
 
     if (id) {
       fetchContactData();
+      fetchRelatedData();
     }
   }, [id]);
 
@@ -121,7 +114,11 @@ const ContactDetailsPage = (props) => {
         handleAllowToEditList(data);
         setContactData(data);
         getContactFields();
-
+        console.log(props)
+        setTypeCreateProjectSalesDialog([
+          { id: id, type: contactResource },
+          { id: data?.accountName?.optionValue, type: accountResource }
+        ])
         setCanEdit(
           [...data?.collaborator ?? [], data?.owner].some(
             (obj) => obj.optionValue === user.user._id
@@ -167,6 +164,34 @@ const ContactDetailsPage = (props) => {
       })
       .catch((err) => {
         setLoading(false);
+      });
+  };
+
+  const fetchRelatedData = () => {
+    axiosInstance()
+      .get(`/${contactApi}/related/${id}`)
+      .then(({ data: { data } }) => {
+        setOpportunities(
+          data.Opportunity &&
+            data.Opportunity[
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            ? data.Opportunity[
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
+
+        setProjectSales(
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.projectSales][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
       });
   };
 
@@ -321,7 +346,6 @@ const ContactDetailsPage = (props) => {
   };
 
   const handleUpdateContact = (values) => {
-    setUpdating(true);
     if (values.employees) {
       values.employees = parseInt(values.employees);
     }
@@ -339,12 +363,10 @@ const ContactDetailsPage = (props) => {
           type: "success",
           message: data.message,
         });
-        setUpdating(false);
         setOpenUpdateDialog(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setUpdating(false);
       });
   };
   return (
@@ -386,12 +408,12 @@ const ContactDetailsPage = (props) => {
           />
         )}
 
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2} >
-            <Paper className="subContainer">
+            <Paper>
               <DetailsPageHeader
                 heading={headingLbl}
                 logo={
@@ -423,64 +445,101 @@ const ContactDetailsPage = (props) => {
                   />
                 ) : null}
               </DetailsPageHeader>
+              <Box>
+                {
+                  loading ? (
+                    <Grid container spacing={2}>
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
+                        (i) => (
+                          <Grid item sm={6} md={6}>
+                            <Skeleton
+                              variant="text"
+                              width="100px"
+                              height="16px"
+                            />
+                            <Box marginY={1} />
+                            <Skeleton width="100%" height="50px" />
+                          </Grid>
+                        )
+                      )}
+                    </Grid>
+                  ) : (
 
-              {
-                loading ? (
-                  <Grid container spacing={2}>
-                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
-                      (i) => (
-                        <Grid item sm={6} md={6}>
-                          <Skeleton
-                            variant="text"
-                            width="100px"
-                            height="16px"
-                          />
-                          <Box marginY={1} />
-                          <Skeleton width="100%" height="50px" />
-                        </Grid>
-                      )
-                    )}
-                  </Grid>
-                ) : (
+                    <>
+                      <Tabs className="oms-tab" value={currentTabIndex}
+                        onChange={(index, newValue) => {
+                          setCurrentTabIndex(newValue);
+                        }}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="icon tabs example"
+                      >
+                        <Tab
+                          label="Details"
+                          aria-controls="a11y-tabpanel-0"
+                          id="a11y-tab-0"
+                        />
+                        <Tab
+                          label="Org Chart"
+                          aria-controls="a11y-tabpanel-1"
+                          id="a11y-tab-1"
+                        />
+                      </Tabs>
+                      <Box hidden={currentTabIndex !== 0}>
+                        <DetailsPage
+                          data={contactData}
+                          fields={contactFields}
+                        />
+                      </Box>
+                      <Box hidden={currentTabIndex !== 1}>
+                        <OrgChartContainer data={orgChartData} onClick={(id) => {
+                          history.push(`/${contactApi}/detail/${id}`)
+                        }} />
+                      </Box>
+                    </>
+                  )
+                }
+              </Box>
+              <div className="p-3">
+                {permissions?.opportunity?.isRead && (
+                  <OpportunityInAccordian
+                    opportunityPermissions={permissions.opportunity}
+                    opportunities={opportunities}
+                    onNewOpportunityAdd={() => {
+                      fetchRelatedData();
+                    }}
+                    accountId={contactData?.accountName?.optionValue}
+                    accountName={contactData?.accountName?.optionLabel}
+                    recordsPerLine={3}
+                    resource={accountResource}
+                    isRedirect={false}
+                    contactId={id}
+                    contactResource={contactResource}
+                  />
+                )}
+                {permissions?.projectSales?.isRead && (
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
 
-                  <>
-                    <Tabs className="oms-tab" value={currentTabIndex}
-                      onChange={(index, newValue) => {
-                        setCurrentTabIndex(newValue);
-                      }}
-                      indicatorColor="primary"
-                      textColor="primary"
-                      aria-label="icon tabs example"
-                    >
-                      <Tab
-                        label="Details"
-                        aria-controls="a11y-tabpanel-0"
-                        id="a11y-tab-0"
-                      />
-                      <Tab
-                        label="Org Chart"
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
-                      />
-                    </Tabs>
-                    <Box hidden={currentTabIndex !== 0}>
-                      <DetailsPage
-                        data={contactData}
-                        fields={contactFields}
-                      />
-                    </Box>
-                    <Box hidden={currentTabIndex !== 1}>
-                      <OrgChartContainer data={orgChartData} onClick={(id) => {
-                        history.push(`/${contactApi}/detail/${id}`)
-                      }} />
-                    </Box>
-                  </>
-                )
-              }
+                  />
+                )}
+                <QuotesInAccordion recordsPerLine={3} />
+                {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+                {permissions?.lead?.isRead && contactData.staticData?.lead && (
+                  <LeadInAccordion
+                    recordsPerLine={3}
+                    lead={contactData.staticData.lead} />
+                )}
+              </div>
+
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper className="subContainer">
+            <Paper>
               {!isObjectEmpty(contactData) && (
                 <div>
                   <Activity
