@@ -60,19 +60,6 @@ const DOARequest = () => {
             )
         },
         {
-            field: "amount",
-            headerName: "Quote Amount",
-            width: 200,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => (
-                <>
-                {params.row.amount}
-                </>
-            ) 
-        },
-        {
             field: "Quoted By",
             headerName: "QuotedBy",
             width: 200,
