@@ -117,6 +117,7 @@ export default function Calander({
                             maxWidth: dayPixel,
                             textAlign: "center",
                             float: "left",
+                            borderLeft: "1px solid #dfdfdf",
                           }}
                         >
                           <Typography
@@ -124,6 +125,7 @@ export default function Calander({
                             color={"textSecondary"}
                             display="block"
                           >
+                            {console.log(moment(date).format("YYYY-MM"))}
                             {
                               moment(
                                 moment(date).format("YYYY-MM") +
@@ -181,11 +183,12 @@ export default function Calander({
                 minWidth={dayPixel * parseInt(date.days)}
                 border={1}
                 borderColor="grey.300"
+                textAlign="center"
               >
-                <Typography variant="caption" display="block">
+                <Typography variant="body2" display="block">
                   {(
                     moment(date.q_s_date).format("MMM") +
-                    "-" +
+                    " - " +
                     moment(date.q_e_date).format("MMM") +
                     " " +
                     moment(date.q_s_date).format("YYYY")

@@ -15,11 +15,16 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
     const onGridReady = (params) => {
         setGridApi(params.api);
         setColumnApi(params.columnApi)
-
-        // if (autoSizeColumns) {
-        //     params.columnApi.autoSizeColumns(columns.map(m => m.field), false);
-        // }
     }
+
+    var customFilterParams = {
+        filterOptions: ['contains'],
+        textCustomComparator: () => {
+            return true;
+        },
+        // trimInput: true,
+        // debounceMs: 1000,
+    };
 
     const generateColumns = columns.map((column: any, index) => {
         return <AgGridColumn
@@ -31,12 +36,13 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
             cellRenderer={column.cellRenderer ?? null}
             minWidth={column.width ?? 250}
             flex={1}
+            filterParams={customFilterParams}
         // floatingFilterComponent={column.floatingFilterComponent ?? null}
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
         // }}
         >
-        </AgGridColumn >
+        </AgGridColumn>
     })
 
     return (
@@ -48,6 +54,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     rowData={dataRows}
                     onGridReady={onGridReady}
                     suppressDragLeaveHidesColumns={true}
+                    accentedSort={true}
                     suppressCellSelection={true}
                     headerHeight={AgGridHeaderHeight}
                     floatingFiltersHeight={AgGridFloatingFiltersHeight}

@@ -1419,7 +1419,7 @@ const FormTypes = (props) => {
             disabled={isFileUploading}
             variant="contained"
             color="primary"
-            size="small" 
+            size="small"
             component="span"
           >
             Upload File

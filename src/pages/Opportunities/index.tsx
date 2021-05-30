@@ -268,9 +268,9 @@ const Opportunities = () => {
           {params.value}
         </Link>
         {
-          params.data.allSupplierAccounts.length > 1 &&
+          params.data.restSupplierAccounts.length > 0 &&
           <span className="createdAtTime badge-date">
-            {`+${params.data.allSupplierAccounts.length - 1} more..`}
+            {`+${params.data.restSupplierAccounts.length} more..`}
           </span>
         }
       </h5>
@@ -339,7 +339,7 @@ const Opportunities = () => {
   }
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterOpportunities=${selectedType}`;
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`
@@ -359,7 +359,7 @@ const Opportunities = () => {
       Object.keys(filters).map(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: field === "supplierAccountName" ? { $in: [filters[field].filter] } : filters[field].filter
+          term: filters[field].filter
         })
       });
       deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
@@ -394,6 +394,8 @@ const Opportunities = () => {
             const { owner, collaborator, createdBy, updatedBy, customerAccountName,
               supplierAccountName, staticData, ...restProperties } = u;
 
+            const [firstSupplierAccount, ...restSupplierAccounts] = supplierAccountName;
+
             let res = {
               ...restProperties,
               id: u._id,
@@ -405,10 +407,10 @@ const Opportunities = () => {
               stage: u.stage,
               closeDate: u?.closeDate ? displayDate(u.closeDate) : "",
 
-              supplierAccountName: u.supplierAccountName.length > 0 ? u.supplierAccountName[0].optionLabel : "",
-              supplierAccountId: u.supplierAccountName.length > 0 ? u.supplierAccountName[0].optionValue : "",
+              supplierAccountName: firstSupplierAccount?.optionLabel ?? "",
+              supplierAccountId: firstSupplierAccount?.optionValue ?? "",
 
-              allSupplierAccounts: supplierAccountName,
+              restSupplierAccounts: restSupplierAccounts,
 
               customerAccountName: u.customerAccountName?.optionLabel,
               customerAccountId: u.customerAccountName?.optionValue,

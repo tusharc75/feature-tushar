@@ -8,7 +8,6 @@ import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { withStyles } from "@material-ui/core/styles";
 import { Link } from 'react-router-dom'
-import { FaEye } from 'react-icons/fa';
 import { BsClockHistory } from 'react-icons/bs';
 import { IoCalendarOutline } from 'react-icons/io5';
 
@@ -143,7 +142,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2 
                                 <Grid container spacing={1}>
                                     {
                                         <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}>
-                                             <Card className="detailCard">
+                                            <Card className="detailCard">
                                                 <CardContent className="detailListing">
                                                     <Grid container className="detailCardHeader">
                                                         <Grid item xs={12} sm={12}>

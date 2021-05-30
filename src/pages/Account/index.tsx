@@ -207,7 +207,7 @@ export default function Account(props) {
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
     { field: "accountName", headerName: "Account Name", show: true, disabled: true, cellRenderer: "accountNameRenderer" },
-    { field: "relatedLead", headerName: "Related Lead", show: true, cellRenderer: "relatedLeadRenderer" },
+    { field: "lead", headerName: "Related Lead", show: true, cellRenderer: "leadRenderer" },
     { field: "typeOfAccount", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
     { field: "industry", headerName: "Industry", show: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
@@ -251,8 +251,8 @@ export default function Account(props) {
     }
   </span>
 
-  const RelatedLeadRenderer = params => params.value ?
-    <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
+  const LeadRenderer = params => params.value ?
+    <Link className="link" to={`${routes.leadDetail.path}/${params.data.leadId}`} title={params.value}>
       {params.value}
     </Link> : <NoDataCell />
 
@@ -342,7 +342,7 @@ export default function Account(props) {
 
   const frameworkComponents = {
     accountNameRenderer: AccountNameRenderer,
-    relatedLeadRenderer: RelatedLeadRenderer,
+    leadRenderer: LeadRenderer,
     commonRenderer: CommonRenderer,
     commonRendererWithCopy: CommonRendererWithCopy,
     parentAccountRenderer: ParentAccountRenderer,
@@ -364,8 +364,8 @@ export default function Account(props) {
       case "updatedBy":
         return "updatedBy.user.concatedName";
 
-      case "relatedLead":
-        return "staticData.relatedLead.concatedName";
+      case "lead":
+        return "staticData.lead.concatedName";
 
       default:
         return field;
@@ -442,8 +442,8 @@ export default function Account(props) {
             isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
               (d) => d.optionValue == user?.user?._id
             ),
-            relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-            relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
+            lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
+            leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
 
             approved: u.staticData?.approved,
 

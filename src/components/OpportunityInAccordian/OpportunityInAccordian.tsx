@@ -6,22 +6,19 @@ import {
   Typography,
   Card,
   CardContent,
-  Button,
-  Avatar,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   Tooltip
 } from "@material-ui/core";
-import CommonSkeleton from "../Helpers/CommonSkeleton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from "../../services/util";
 import routes from "./../../components/Helpers/Routes";
 import { Link } from "react-router-dom";
@@ -29,9 +26,7 @@ import ManageOpportunityDialog from "../../pages/Opportunities/ManageOpportunity
 import { useHistory } from "react-router-dom";
 import { IoCalendarOutline } from "react-icons/io5";
 import { BiCustomize } from "react-icons/bi";
-import { FaEye } from "react-icons/fa";
 import currencies from "./../../constants/currency_with_country.json";
-import { LinkOff } from "@material-ui/icons";
 import { useData } from "../../StateProvider/Provider";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { HiExternalLink } from 'react-icons/hi';
@@ -82,14 +77,14 @@ const AccordionDetails = withStyles((theme) => ({
 
 function DisplayData({ key, label, value, icon }) {
   return <div style={{ flexGrow: 1 }}>
-      <List>
-          <ListItem key={key}>
-              <ListItemAvatar>
-                  {icon}
-              </ListItemAvatar>
-              <ListItemText primary={value ? value : '-'} secondary={label} />
-          </ListItem>
-      </List>
+    <List>
+      <ListItem key={key}>
+        <ListItemAvatar>
+          {icon}
+        </ListItemAvatar>
+        <ListItemText primary={value ? value : '-'} secondary={label} />
+      </ListItem>
+    </List>
   </div>
 }
 
@@ -160,7 +155,7 @@ export default function OpportunityInAccordian({
               >
                 <IconButton
                   size="small"
-                  onClick={(event) => setExpandOpportunity(!expandOpportunity)}
+                  onClick={() => setExpandOpportunity(!expandOpportunity)}
                 >
                   {expandOpportunity === true ? (
                     <ExpandLessIcon />
@@ -246,17 +241,17 @@ export default function OpportunityInAccordian({
             )}
           </>
         </AccordionDetails>
-           <Box margin={1} className="btn-view gap-1"  onClick={() =>
-              history.push(`/opportunity`, {
-              accountId: accountId,
-              accountName: accountName,
-              resource: `${resource}`,
-            })
-          }
-           p={1} display="flex" justifyContent="center" alignItems="center">
-               <HiExternalLink size={25} />
-           </Box>
-        
+        <Box margin={1} className="btn-view gap-1" onClick={() =>
+          history.push(`/opportunity`, {
+            accountId: accountId,
+            accountName: accountName,
+            resource: `${resource}`,
+          })
+        }
+          p={1} display="flex" justifyContent="center" alignItems="center">
+          <HiExternalLink size={25} />
+        </Box>
+
       </Accordion>
 
       {showCreateOpportunityDialog && (
@@ -272,7 +267,7 @@ export default function OpportunityInAccordian({
           resource={resource}
           isRedirectTodetailPage={isRedirect}
           contactId={contactId}
-          disableOwnerAndAccount ={true}
+          disableOwnerAndAccount={true}
           contactResource={contactResource}
         />
       )}
