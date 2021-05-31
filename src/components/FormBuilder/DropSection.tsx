@@ -43,7 +43,7 @@ export const DropSection = ({ fieldHoverId, setFieldHoverId, setSectionHoverInde
                 }
                 let insert_object: any = {
                     _id: (parseInt((Math.random() * 100000).toString())), fieldLabel: FieldList[type.toUpperCase()].label + " " + (count + 1), type: type, option: option,
-                    required: true, isTooltip: false, tooltipMessage: "", editAble: true, order: 0
+                    required: false, isTooltip: false, tooltipMessage: "", editAble: true, order: 0
                 }
                 if (type === FieldList.FORMULA.type) {
                     insert_object.formula = "return "

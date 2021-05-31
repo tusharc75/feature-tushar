@@ -18,8 +18,10 @@ import { Link } from 'react-router-dom'
 import Quote from "./Quote";
 import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem } from "@material-ui/core";
-var _ = require('lodash');
+import { AddField } from '../FormBuilder/AddField';
+import ConfirmationDialog from '../Helpers/ConfirmationDialog'
 
+var _ = require('lodash');
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
@@ -36,6 +38,10 @@ const ProductBuilder = (props) => {
     const [productData, setProductData] = useState(null);
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState([]);
+    const [isAddField, setIsAddField] = useState(false);
+    const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
+    const [deleteRecord, setDeleteRecord] = useState(null)
 
     const [newVersion, setNewVersion] = useState(false);
     const [versionNumber, setVersionNumber] = useState(0);
@@ -44,9 +50,9 @@ const ProductBuilder = (props) => {
         fetchProduct();
     }, [productBuilderId]);
 
-    useEffect(() => {
-        fetchVersionDetail();
-    }, []);
+    // useEffect(() => {
+    //     fetchVersionDetail();
+    // }, []);
 
     const fetchVersionDetail = () => {
         axiosInstance().get(`/quote-builder/checkQuoteforBuilder/` + productBuilderId).then(({ data }) => {
@@ -69,7 +75,7 @@ const ProductBuilder = (props) => {
                     </IconButton>
                 </Tooltip >
                 <Tooltip title="Delete" >
-                    <IconButton aria-label="Delete" onClick={() => { removeProductInBuilder([params.row._id]) }}  >
+                    <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}   >
                         <DeleteIcon fontSize="small" color="error" />
                     </IconButton>
                 </Tooltip >
@@ -225,7 +231,14 @@ const ProductBuilder = (props) => {
         });
     }
 
-    const removeProductInBuilder = (ids) => {
+    const handleDelete = () => {
+        let ids = []
+        if (deleteRecord) {
+            ids.push(deleteRecord._id)
+        }
+        else {
+            ids = selectedProduct;
+        }
         setLoading(true)
         let data: any = {}
         data.productBuilderId = productBuilderId
@@ -233,15 +246,13 @@ const ProductBuilder = (props) => {
         axiosInstance().post(`/productbuilder/deleteproduct`, data).then(({ data: { data } }) => {
             setLoading(false)
             fetchProduct()
+            setShowDeleteConfirmBox(false)
+            setDeleteRecord(null)
+            setSelectedProduct([])
+            setAnchorEl(null)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
-    }
-
-    const handelDeleteProducts = () => {
-        removeProductInBuilder(selectedProduct)
-        closeActions()
-        setSelectedProduct([])
     }
 
     const openActions = (event) => {
@@ -251,6 +262,61 @@ const ProductBuilder = (props) => {
     const closeActions = () => {
         setAnchorEl(null);
     };
+
+    const handleOpenAddField = () => {
+        const rows: any = product.filter((data) => selectedProduct.includes(data._id))
+        let section: any = []
+        let fields: any = []
+        // rows.forEach((_field: any) => {
+        //     section = _.uniq(_.map(_field[0].fields, 'sectionName'));
+        // })
+        section = _.uniq(_.map(rows[0].fields, 'sectionName'));
+        rows[0].fields.forEach(_field => {
+            let fid = { ..._field }
+            if (fid.type !== "currencyAmount" && (fid.type === "converter" || fid.isConverter === true)) {
+                fid.displayUnits && fid.displayUnits.forEach(_unit => {
+                    fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + "_" + _unit.toLowerCase() })
+                })
+            }
+            else if (fid.type === "currencyAmount") {
+                fid.displayCurrency && fid.displayCurrency.forEach(_currency => {
+                    if (fid.isConverter) {
+                        fid.displayUnits && fid.displayUnits.forEach(_unit => {
+                            fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _unit, fieldName: fid.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
+                        })
+                    }
+                    else {
+                        fields.push({ ...fid, fieldLabel: fid.fieldLabel + " " + _currency, fieldName: fid.fieldName + "_" + _currency.toLowerCase() })
+                    }
+                })
+            }
+            else {
+                fields.push(fid)
+            }
+        })
+        setaddFieldData({ section: section, fields: fields })
+        setIsAddField(true)
+        setAnchorEl(null);
+    }
+
+    const handleCloseAddField = () => {
+        setIsAddField(false)
+    }
+
+    const handleAddField = (field) => {
+        let data: any = {}
+        data.productBuilderId = productBuilderId
+        data._ids = selectedProduct
+        data.field = field
+        data.field.leval = "builder-custom"
+        axiosInstance().post(`/productbuilder/addField`, data).then(({ data: { data } }) => {
+            setLoading(false)
+            fetchProduct()
+            setIsAddField(false)
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+    }
 
     // const onEditCellChangeCommitted = (row) => {
     //     console.log(row)
@@ -295,7 +361,8 @@ const ProductBuilder = (props) => {
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                     >
-                        <MenuItem onClick={handelDeleteProducts}>Delete</MenuItem>
+                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                        <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
                     </Menu>
                 </Grid>
             </Grid>
@@ -328,6 +395,16 @@ const ProductBuilder = (props) => {
         />}
         {isAddExistingProduct && <AddExistingProduct addProductInBuilder={addProductInBuilder} handleClose={() => setIsAddExistingProduct(false)} />}
         {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} />}
+        {isAddField && <AddField refrence="builder" section={addFieldData.section}
+            fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={addFieldData.fields} />}
+        {showDeleteConfirmBox &&
+            <ConfirmationDialog
+                open={showDeleteConfirmBox}
+                message={`Are you sure, you want to delete product ?`}
+                onClose={() => setShowDeleteConfirmBox(false)}
+                onOk={handleDelete}
+            />
+        }
     </Box>
     );
 }

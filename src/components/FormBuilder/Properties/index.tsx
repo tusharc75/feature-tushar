@@ -1,4 +1,4 @@
-import React, { useState, Fragment, useRef } from 'react';
+import React, { useState, Fragment, useRef, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
@@ -24,8 +24,6 @@ import { Option } from "../AddField/option";
 import { Currency } from "../AddField/currency";
 import { MultipleFormula } from "../AddField/multipleformula";
 
-
-
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string()
     .required("please enter field label"),
@@ -49,6 +47,15 @@ const LookupResource = [
 export const Properties = ({ handleClose, fieldData, sectionId, section, setSection }) => {
 
   const [initialValues, setInitialValues] = useState(fieldData);
+
+  useEffect(() => {
+    console.log(fieldData)
+    if (fieldData.type === "dropDown" && !fieldData.lookup) {
+      if (fieldData.option && fieldData.option.filter((data) => data.default === true).length) {
+        setInitialValues({ ...initialValues, defaultDropdownOption: fieldData.option.filter((data) => data.default === true)[0].optionValue })
+      }
+    }
+  }, []);
 
   const fields = [];
   section.forEach(_section => {
@@ -81,7 +88,6 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     })
   })
 
-
   const handleSave = (values) => {
     let data = [...section]
     data.forEach((row) => {
@@ -100,8 +106,12 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
               values.option.forEach((ele, index) => {
                 ele.order = index + 1
                 ele.default = false
-                if (index === 0) {
-                  ele.default = true
+                if (fieldData.type === "dropDown" && !values["lookup"]) {
+                  if (values["defaultDropdownOption"] && values["defaultDropdownOption"] !== "") {
+                    if (values["defaultDropdownOption"] === ele.optionLabel) {
+                      ele.default = true
+                    }
+                  }
                 }
               })
               ele.option = values.option
@@ -255,7 +265,8 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                       </Select>
                     </FormControl>
                   </Box>}
-              </Fragment>}
+              </Fragment>
+            }
             {values["type"] === "currencyAmount" &&
               <Currency
                 values={values}

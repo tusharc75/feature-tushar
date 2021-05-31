@@ -31,7 +31,6 @@ const SelectionDialog = (props) => {
     const { handleClose, api } = props;
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ productCategory: "", productTemplate: "" });
-    const history = useHistory();
     const [productCategory, setProductCategory] = useState([]);
     const [productTemplate, setProductTemplate] = useState([]);
 
@@ -101,6 +100,7 @@ const SelectionDialog = (props) => {
                                     onChange={(e, val) => {
                                         setFieldValue("productCategory", val && val.optionValue ? val.optionValue : "")
                                         handleChangeCategory(val && val.optionValue ? val.optionValue : "")
+                                        setFieldValue("productTemplate", "")
                                     }}
                                     size="small"
                                 />

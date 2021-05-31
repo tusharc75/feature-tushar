@@ -19,15 +19,14 @@ import FieldList from '../FieldList';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { camelCase } from "./../../../constants/helpers";
-import ListItemText from '@material-ui/core/ListItemText';
 import { Vlokup } from "./vlokup";
 import { Formula } from "./formula";
 import { Converter } from "./converter";
 import { Currency } from "./currency";
-import Divider from '@material-ui/core/Divider';
 
 const FieldSchema = Yup.object().shape({
   type: Yup.string()
@@ -45,11 +44,12 @@ const MenuProps = {
   },
 };
 
-export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => {
+export const AddField = (props) => {
 
+  const { fieldData, handleClose, handleAddField, fields, refrence, section } = props;
 
   const [initialValues, setInitialValues] = useState(fieldData ? fieldData : {
-    type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
+    sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
     tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "" }], formula: "return ", isvlookupReverse: false,
     units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false,
   });
@@ -60,9 +60,18 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
 
     let data: any = {}
     data._id = values._id
+    if (refrence === "builder") {
+      data.sectionName = values.sectionName
+    }
     data.type = values.type
     data.fieldLabel = values.fieldLabel
     data.fieldName = camelCase(values.fieldLabel.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, ''))
+
+    if (fields.filter((t) => t.fieldName === data.fieldName).length) {
+      alert("Field name alredy exist")
+      return
+    }
+
     data.required = values.required
     data.isTooltip = values.isTooltip
     data.tooltipMessage = values.tooltipMessage
@@ -118,13 +127,40 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
     }
   }
 
+  function validate(values) {
+    const errors = {};
+    if (refrence === "builder") {
+      if (!values.sectionName || values.sectionName === "") {
+        errors["sectionName"] = "Please select section name";
+      }
+    }
+    return errors;
+  }
 
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
-    <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave}>
+    <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
       {({ submitForm, touched, errors, setFieldValue, values }) => (
         <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
           <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"} onClose={handleClose}></CustomDialogHeader>
           <CustomDialogContent>
+            {refrence === "builder" &&
+              <FormControl fullWidth margin="dense" variant="outlined" error={touched["sectionName"] && Boolean(errors["sectionName"])}>
+                <InputLabel id="demo-simple-select-outlined-label">Section Name</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  value={values["sectionName"]}
+                  onChange={(e) => setFieldValue("sectionName", e.target.value)}
+                  label="Section Name"
+                  name="sectionName"
+                >
+                  {section && section.map((_section) => (
+                    <MenuItem value={_section}>{_section}</MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{errors["sectionName"]}</FormHelperText>
+              </FormControl>
+            }
             <FormControl fullWidth margin="dense" variant="outlined">
               <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
               <Select
@@ -143,7 +179,7 @@ export const AddField = ({ fieldData, handleClose, handleAddField, fields }) => 
                 <MenuItem value={"formula"}>Formula</MenuItem>
                 <MenuItem value={"vlookupDropdown"}>Vlookup Dropdown</MenuItem>
                 <MenuItem value={"converter"}>Converter</MenuItem>
-                {/* <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem> */}
+                {refrence === "builder" && <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem>}
               </Select>
             </FormControl>
             <TextField
