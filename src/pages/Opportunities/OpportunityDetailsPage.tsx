@@ -198,7 +198,7 @@ function OpportunityDetailsPage() {
           let assignedContacts = opportunityData.staticData?.supplierContacts ?? []
           const updatedContacts = [];
           data.forEach(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item === d?._id) : false;
             updatedContacts.push(d);
           })
 
@@ -250,7 +250,7 @@ function OpportunityDetailsPage() {
       .then(({ data: { data } }) => {
         let assignedContacts = opportunityData.staticData?.customerContacts ?? []
         const updatedContacts = data.map(d => {
-          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item === d?._id) : false;
           return d
         })
         setCustomerContacts(updatedContacts)
@@ -377,7 +377,7 @@ function OpportunityDetailsPage() {
   return (
     <>
       <Layout>
-      <Grid container className="headerbox">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
@@ -503,33 +503,33 @@ function OpportunityDetailsPage() {
                     <div className="p-3">
                       {
                         opportunityData && <OpportunityContacts
-                            contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
-                            title="Supplier Contacts"
-                            contactApi={supplierContact.contactApi}
-                            isExpanded={expanded.supplierContacts}
-                            onAddContact={() => {
-                              fetchSupplierContactData(true);
-                            }}
-                            onSetExpanded={() => {
-                              setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
-                            }}
-                            recordsPerLine={recordsPerLine}
-                          />
+                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
+                          title="Supplier Contacts"
+                          contactApi={supplierContact.contactApi}
+                          isExpanded={expanded.supplierContacts}
+                          onAddContact={() => {
+                            fetchSupplierContactData(true);
+                          }}
+                          onSetExpanded={() => {
+                            setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
+                          }}
+                          recordsPerLine={recordsPerLine}
+                        />
                       }
                       {
                         opportunityData && <OpportunityContacts
-                            contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
-                            title="Customer Contacts"
-                            isExpanded={expanded["customerContacts"]}
-                            contactApi={customerContact.contactApi}
-                            onAddContact={() => {
-                              fetchCustomerContactData(true);
-                            }}
-                            onSetExpanded={() => {
-                              setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
-                            }}
-                            recordsPerLine={recordsPerLine}
-                          />
+                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
+                          title="Customer Contacts"
+                          isExpanded={expanded["customerContacts"]}
+                          contactApi={customerContact.contactApi}
+                          onAddContact={() => {
+                            fetchCustomerContactData(true);
+                          }}
+                          onSetExpanded={() => {
+                            setExpanded({ ...expanded, customerContacts: !expanded.customerContacts })
+                          }}
+                          recordsPerLine={recordsPerLine}
+                        />
                       }
                     </div>
                   </TabPanel>
@@ -615,7 +615,10 @@ function OpportunityDetailsPage() {
             open={showAddSupplierContactsDialog}
             title="Assign Supplier Contacts"
             onSuccess={() => { fetchOpportunityData(); setShowAddSupplierContactsDialog(false) }}
-            handleCloseDialog={() => { setShowAddSupplierContactsDialog(false) }}
+            handleCloseDialog={() => {
+              if (selectedSupplierAccounts.length == 0) setSupplierContacts([])
+              setShowAddSupplierContactsDialog(false)
+            }}
             contacts={{
               supplierContacts: supplierContacts, customerContacts: customerContacts,
               notToBeRemoved: opportunityData?.staticData?.notToBeRemoved

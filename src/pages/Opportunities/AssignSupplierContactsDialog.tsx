@@ -41,6 +41,8 @@ export default function AssignSupplierContactsDialog({
     const [isAssigning, setAssigning] = useState(false);
     const [selectedSupplierAccounts, setSelectedSupplierAccounts] = useState([]);
 
+    console.log('currentContacts', currentContacts)
+
     useEffect(() => {
         setSelectedSupplierAccounts(selectedSupplierAccountsList)
     }, [])

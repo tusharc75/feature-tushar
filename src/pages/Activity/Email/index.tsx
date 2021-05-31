@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../../components/Layout";
@@ -6,14 +6,11 @@ import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
 import { useHistory } from "react-router-dom";
 import queryString from 'query-string';
 import { GetReferenceName, GetEmails } from "../../../axios/activity";
-import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
-import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import { useData } from "../../../StateProvider/Provider";
-import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import CustomContainer from "../../../components/CustomContainer";
-import { Button, MenuItem, Menu, Checkbox, Typography, Tooltip, IconButton } from '@material-ui/core'
+import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TablePagination } from '@material-ui/core'
 import { ExpandMore } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -26,7 +23,17 @@ import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail'
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import _ from 'lodash'
+import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
+import { isMobile, isTablet } from "react-device-detect";
+import {
+    CustomLoadingOverlay
+} from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomGridHeaderOptions from "../../../components/AgGridComponents/CustomGridHeaderOptions";
+import {
+    gridPageSizes,
+    isObjectEmpty,
+} from "../../../constants/helpers";
 import styles from "../../Leads/Header.module.scss";
 import emailStyles from './email.module.scss'
 import './email.scss'
@@ -34,6 +41,97 @@ import './email.scss'
 const tabs = {
     Inbox: 1,
     Sent: 2
+}
+
+function reducer(state, action) {
+    switch (action.type) {
+        case "loading":
+            return {
+                ...state,
+                loading: action.loading
+            }
+
+        case "initialize":
+            return {
+                ...state,
+                dataRows: action.data,
+                rowCount: action.count,
+                loading: false
+            }
+
+        case "selection":
+            return {
+                ...state,
+                selectedRecords: action.selectedRecords,
+            }
+
+        case "update":
+            return {
+                ...state,
+                dataRows: action.data,
+                loading: false
+            }
+
+        case "filter":
+            return {
+                ...state,
+                loading: true,
+                filters: action.filters,
+                page: 0
+            }
+
+        case "sort":
+            return {
+                ...state,
+                sorting: action.sorting,
+                loading: true
+            }
+
+        case "search":
+            return {
+                ...state,
+                search: action.search,
+                loading: true
+            }
+
+        case "pageChange":
+            return {
+                ...state,
+                page: action.page
+            }
+
+        case "pageSizeChange":
+            return {
+                ...state,
+                limit: action.limit,
+                page: 0,
+                loading: true
+            }
+
+        case "complete":
+            return {
+                ...state,
+                loading: false
+            }
+
+        default:
+            break;
+    }
+
+    return state;
+}
+
+const intialState = {
+    dataRows: [],
+    rowCount: 0,
+    loading: false,
+    page: 0,
+    limit: 25,
+    pageSizes: gridPageSizes,
+    search: "",
+    filters: {},
+    sorting: [],
+    selectedRecords: []
 }
 const Email = () => {
 
@@ -47,19 +145,30 @@ const Email = () => {
 
     const [filter, setFilter] = useState([]);
     const [emailsCopy, setEmailsCopy] = useState([]);
-    const [emails, setEmails] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
     const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false);
-    const [checkAllEmails, setCheckAllEmails] = useState(false);
     const [query, setQuery] = useState({ page: 0, limit: 25 });
-    const [rowCount, setRowCount] = useState(0);
     const [open, setOpen] = useState(false);
     const [emailId, setEmailId] = useState(null);
     const [currentTab, setCurrentTab] = useState(1)
+
+    const [gridApi, setGridApi] = useState(null);
+    const [columnApi, setColumnApi] = useState(null);
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+    const [columns, setColumns] = useState([
+        { field: "to", headerName: "Recipient", show: true, disabled: true, cellRenderer: "recipentRenderer" },
+        {
+            field: "subject", headerName: "Subject - Message", show: true,
+            width: 700,
+            cellRenderer: "subjectMessageRenderer"
+        },
+        { field: "createdAt", headerName: "Created At", show: true, cellRenderer: "createdByDate" },
+    ]);
 
     useEffect(() => {
         if (referenceType) {
@@ -72,40 +181,43 @@ const Email = () => {
         }
     }, [referenceId]);
 
-
     useEffect(() => {
         fetchEmails()
-    }, [filter, query]);
+    }, [page, limit, filters, sorting]);
 
 
     const fetchEmails = async () => {
-        setLoading(true)
 
-        await GetEmails(JSON.stringify(filter), { ...query })
+        const queryString = getQueryString();
+        dispatch({ type: "loading", loading: true });
+
+        if (gridApi) {
+            gridApi.setRowData([]);
+            gridApi.showLoadingOverlay();
+        }
+
+        await GetEmails(JSON.stringify(filter), queryString)
             .then(({ data, count }) => {
                 data = data.map(obj => {
                     return {
                         ...obj,
                         id: obj._id,
+                        createdByDate: obj?.createdBy?.date ?? '',
                         isCreatedByMe: obj?.createdBy?.user === user?.user?._id ? true : false,
-                        isChecked: false,
                     }
                 })
-                setEmails(data)
+                dispatch({ type: "initialize", data: data, count: count });
                 setEmailsCopy(data)
-                setRowCount(count)
-                setLoading(false)
             })
             .catch((error) => {
-                setLoading(false)
+                dispatch({ type: "loading", loading: false });
                 toastConfig.setToastConfig(error);
             });
     };
 
+
     const handleChangeFilter = (value) => {
-        if (query.page !== 0) {
-            setQuery((prevState) => ({ ...prevState, page: 0 }));
-        }
+        dispatch({ type: "pageChange", page: 0 });
         setFilter(value)
     }
 
@@ -120,113 +232,108 @@ const Email = () => {
         }
     }
 
-    const columns = [
-        {
-            field: "isChecked",
-            headerName: "Checkbox",
-            renderHeader: () => (
-                <Checkbox
-                    color="primary"
-                    checked={checkAllEmails}
-                    onChange={(ev) => {
-                        setCheckAllEmails(ev.target.checked);
-                        const gridData = emails;
-                        gridData.map((d) => {
-                            d.isChecked = ev.target.checked;
-                            return d;
-                        });
-                        setEmails([...gridData]);
-                    }}
-                />
-            ),
-            renderCell: (params) => (
-                <Checkbox
-                    color="primary"
-                    checked={params.value}
-                    onChange={(ev) => {
-                        updateCheckedStatus(params, ev);
-                    }}
-                />
-            ),
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            width: 75,
-        },
-        {
-            field: 'to',
-            headerName: 'Recipient',
-            width: 200,
-            renderCell: (params) => {
-                return <span
-                    style={{ cursor: "pointer" }}
-                    onClick={(e) => {
-                        setOpen(true)
-                        setEmailId(params.row.id)
-                    }}>
-                    {
-                        (typeof params.row.to == "string") ?
-                            <span> {params.row.to}</span > :
-                            <span>
-                                {params.row?.isCreatedByMe ? getToEmailList(params.row.to) : params.row?.mailbox ?? ''}
-                            </span>
-                    }
-                </span>
+    const ActionsRenderer = params => <>
+        <Tooltip title="Delete">
+            <IconButton
+                aria-label="Delete"
+                onClick={() => showConfirmBox(params.data)}>
+                <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+        </Tooltip>
+    </>
+
+    const RecipentRenderer = params => (
+        <span
+            className="link cursor-pointer"
+            onClick={(e) => {
+                setOpen(true)
+                setEmailId(params.data.id)
+            }}>
+            {
+                (typeof params.data.to == "string") ?
+                    <span> {params.data.to}</span > :
+                    <span>
+                        {params.data?.isCreatedByMe ? getToEmailList(params.data.to) : params.data?.mailbox ?? ''}
+                    </span>
             }
-        },
-        {
-            field: 'cc',
-            headerName: 'Subject - Message',
-            width: 700,
-            renderCell: (params) => {
-                return <div className={emailStyles.emailMessageConatiner} >
-                    <Typography > {params.row?.subject ?? "(no subject) "} - </Typography>
-                    <Typography noWrap display="inline"
-                        className={emailStyles.emailMessage}> {params.row.message ? reactHtmlparser(params.row.message, { transform }) : null}
-                    </Typography>
-                </div >
-            }
-        },
-        {
-            field: 'createdAt', headerName: 'Created At', width: 130,
-            renderCell: (params) => (
-                <span className={emailStyles.emailCreatedAt}>
-                    { moment(params.row.createdBy.date).format("ddd MM/DD")}
-                </span >)
-        },
-        {
-            field: "actions",
-            headerName: "Actions ",
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params: any) => (
-                <Tooltip title="Delete">
-                    <IconButton
-                        aria-label="Delete"
-                        onClick={() => showConfirmBox(params.row)}>
-                        <DeleteIcon fontSize="small" color="error" />
-                    </IconButton>
-                </Tooltip>
-            ),
-            width: 100,
-        },
-    ];
+        </span>
+    )
 
-    const updateCheckedStatus = (params, ev) => {
-        const gridData = [...emails];
-        const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-        gridData[indexOfRecord].isChecked = ev.target.checked;
+    const SubjectMessageRenderer = params => (<div className={emailStyles.emailMessageConatiner} >
+        <Typography > {params.data?.subject ?? "(no subject) "} - </Typography>
+        <Typography noWrap={false} display="inline"
+            className={emailStyles.emailMessage}> {params.data.message ? reactHtmlparser(params.data.message, { transform }) : null}
+        </Typography>
+    </div >)
 
-        setEmails([...gridData]);
+    const CreatedByDateRenderer = params => (
+        <span className={emailStyles.emailCreatedAt}>
+            { moment(params.data.createdByDate).format("ddd MM/DD")}
+        </span >)
 
-        const checkedRecords = gridData.filter((d) => d.isChecked === true);
+    const frameworkComponents = {
+        recipentRenderer: RecipentRenderer,
+        subjectMessageRenderer: SubjectMessageRenderer,
+        createdByDate: CreatedByDateRenderer,
+        actionsRenderer: ActionsRenderer,
+        customLoadingOverlay: CustomLoadingOverlay,
+        customFloatingFilter: CustomFloatingFilter,
+        // customLoadingCellRenderer: CustomLoadingCellRenderer,
+        // customNoRowsOverlay: CustomNoRowsOverlay
+    };
 
-        if (checkedRecords.length === gridData.length) {
-            setCheckAllEmails(true);
-        } else {
-            setCheckAllEmails(false);
+    const onGridReady = (params) => {
+        setGridApi(params.api);
+        setColumnApi(params.columnApi)
+    }
+
+    const generateColumns = columns.map((column: any, index) => {
+        return <AgGridColumn
+            key={index}
+            width={column.width}
+            field={column.field}
+            headerName={column.headerName}
+            filter={column.filter ?? "agTextColumnFilter"}
+            cellRenderer={column.cellRenderer ?? null}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
+        >
+        </AgGridColumn>
+    })
+
+    const getQueryString = () => {
+        console.log('get filetr')
+        let deepFilter = `&page=${page}&limit=${limit}`;
+
+        if (!isObjectEmpty(filters)) {
+            const updatedFilters = [];
+
+            Object.keys(filters).map(field => {
+                console.log('field', field, '----', filters[field])
+                if (filters[field].filter === "me") {
+                    filters[field].filter = user?.user?.email
+                }
+                updatedFilters.push({
+                    field: field,
+                    term: filters[field].filter
+                })
+            });
+            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
         }
+
+        if (sorting.length > 0) {
+            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+        }
+
+        if (search) {
+            console.log("🚀 ~ file: index.tsx ~ line 327 ~ getQueryString ~ search", search)
+
+            deepFilter = `${deepFilter}&search=${search}`;
+        }
+
+        return deepFilter;
     };
 
     const openActions = (event) => {
@@ -250,16 +357,11 @@ const Email = () => {
 
     const handleDeleteEmails = async () => {
         setDeleteLoading(true);
-        let selectedRecords = [];
-        if (deleteRecord?.id) {
-            selectedRecords.push(deleteRecord?.id);
-        } else {
-            selectedRecords = emails.filter(currentObject => currentObject.isChecked).map(o => o.id)
-        }
 
-        if (selectedRecords && selectedRecords.length > 0) {
+        if (deleteRecord?.id || selectedRecords.length > 0) {
             axiosInstance()
-                .put('/email', { emails: [...selectedRecords] })
+                .put('/email',
+                    { emails: deleteRecord?.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
@@ -279,28 +381,17 @@ const Email = () => {
         }
     };
 
-    const handlePage = (params) => {
-        if (query.page !== params.page) {
-            setQuery((prevState) => ({ ...prevState, page: params.page }));
-        }
-    };
-
-    const handlePageSize = (params) => {
-        if (params.pageSize !== query.limit) {
-            setQuery({ page: 0, limit: params.pageSize });
-        }
-    };
     const handleClose = () => {
         setEmailId(null)
         setOpen(false)
     }
+
     const handleTab = (e, currentTab) => {
         let filteredEmails = [...emailsCopy]
         if (currentTab === tabs.Sent) {
             filteredEmails = emailsCopy.filter(email => email.isCreatedByMe)
         }
-        setRowCount(filteredEmails.length)
-        setEmails(filteredEmails)
+        dispatch({ type: "initialize", data: filteredEmails, count: filteredEmails.length });
         setCurrentTab(currentTab)
     }
 
@@ -374,32 +465,94 @@ const Email = () => {
                 </Grid>
 
             </div>
+            <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
-            <div className='listing-grid emailList'>
-                <DataGrid
-                    components={{
-                        Toolbar: CustomDataGridToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
+            <div className="ag-theme-material ag-grid-listing-grid">
+                <AgGridReact
+                    rowData={dataRows}
+                    onGridReady={onGridReady}
+                    suppressDragLeaveHidesColumns={true}
+                    suppressCellSelection={true}
+                    rowHeight={40}
+                    frameworkComponents={frameworkComponents}
+                    defaultColDef={{
+                        resizable: true,
+                        floatingFilter: true,
+                        sortable: true,
+                        width: 250,
+                        suppressMenu: true,
+                        // headerCheckboxSelection: true,
+                        // checkboxSelection: true,
+                        floatingFilterComponentParams: { suppressFilterButton: true }
                     }}
-                    loading={loading}
-                    rows={loading ? [] : emails}
-                    columns={columns}
-                    density="compact"
-                    paginationMode="server"
-                    pagination
-                    onPageChange={handlePage}
-                    onPageSizeChange={handlePageSize}
-                    pageSize={query.limit}
-                    page={query.page}
-                    rowCount={rowCount}
-                    rowsPerPageOptions={[25, 50, 75]}
-                    // onRowClick={(e) => {
-                    //     setOpen(true)
-                    //     setEmailId(e.id)
+                    onSortChanged={(e) => {
+                        dispatch({ type: "sort", sorting: e.api.getSortModel() })
+                    }}
+                    onFilterChanged={(e) => {
+                        dispatch({ type: "filter", filters: e.api.getFilterModel() });
+                    }}
+                    enableCellTextSelection={true}
+                    ensureDomOrder={false}
+                    loadingOverlayComponent={'customLoadingOverlay'}
+                    loadingOverlayComponentParams={{
+                        loadingMessage: 'Loading...',
+                    }}
+                    animateRows={false}
+                    suppressAnimationFrame={true}
+                    suppressMaintainUnsortedOrder={true}
+
+                    rowBuffer={limit}
+                    // suppressMaxRenderedRowRestriction={true}
+
+                    // loadingCellRenderer={'customLoadingCellRenderer'}
+                    // loadingCellRendererParams={{
+                    //   loadingMessage: 'One moment please...',
                     // }}
-                    disableColumnSelector={false}
-                />
+
+                    suppressRowClickSelection={true}
+                    rowSelection={'multiple'}
+                    onSelectionChanged={(event: any) => {
+                        dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
+                    }}
+                    immutableData={true}
+                    getRowNodeId={(data) => {
+                        return data._id;
+                    }}
+                >
+                    <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
+                        headerCheckboxSelection={true}
+                        headerCheckboxSelectionFilteredOnly={true}
+                        checkboxSelection={true}
+                        resizable={false} sortable={false}
+                    >
+                    </AgGridColumn>
+
+                    {generateColumns}
+
+                    <AgGridColumn width={150} headerName="Actions"
+                        pinned={(isMobile || isTablet) ? false : "right"}
+                        lockPinned={(isMobile || isTablet) ? false : true}
+                        resizable={false} sortable={false}
+                        filter={false} cellRenderer="actionsRenderer">
+                    </AgGridColumn>
+
+                </AgGridReact>
             </div>
+
+            <TablePagination
+                component="div"
+                count={rowCount}
+                page={page}
+                onChangePage={(event, newPage) => {
+                    dispatch({ type: "pageChange", page: newPage })
+                }}
+                rowsPerPage={limit}
+                onChangeRowsPerPage={(event) => {
+                    dispatch({ type: "pageSizeChange", limit: event.target.value })
+                }}
+                rowsPerPageOptions={pageSizes}
+            />
+
             {showDeleteWarningConfirmBox ? (
                 <MessageDialog
                     open={showDeleteWarningConfirmBox}
