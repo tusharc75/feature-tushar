@@ -154,7 +154,7 @@ const Email = () => {
     const [open, setOpen] = useState(false);
     const [emailId, setEmailId] = useState(null);
     const [currentTab, setCurrentTab] = useState(1)
-    const [initialCount, setInitialCount] = useState(0)
+    const [totalCount, setTotalCount] = useState(0)
 
     const [gridApi, setGridApi] = useState(null);
     const [columnApi, setColumnApi] = useState(null);
@@ -212,7 +212,7 @@ const Email = () => {
                     if (currentTab === tabs.Sent && isCreatedByMe) filteredData.push(currentObject)
                     return currentObject
                 })
-                setInitialCount(count)
+                setTotalCount(count)
                 dispatch({ type: "initialize", data: filteredData, count: filteredData.length });
                 setEmailsCopy(data)
             })
@@ -224,7 +224,7 @@ const Email = () => {
 
 
     const handleChangeFilter = (value) => {
-        dispatch({ type: "pageChange", page: 0 });
+        if (page !== 0) dispatch({ type: "pageChange", page: 0 });
         setFilter(value)
     }
 
@@ -392,7 +392,7 @@ const Email = () => {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={3} className="d-flex align-items-center gap-1">
                         <HiOutlineMail className="headerLogo" />{" "}
-                        <span className="listingHeader">Email({initialCount})</span>
+                        <span className="listingHeader">Email({totalCount})</span>
                         <ToggleButtonGroup
                             size="small"
                             className="ml-8"
