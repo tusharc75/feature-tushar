@@ -168,7 +168,11 @@ const Email = () => {
             width: 700,
             cellRenderer: "subjectMessageRenderer"
         },
-        { field: "createdAt", headerName: "Created At", show: true, cellRenderer: "createdByDate" },
+        {
+            field: "createdAt", headerName: "Created At", show: true,
+            filter: false, sortable: false,
+            cellRenderer: "createdByDate"
+        },
     ]);
 
     useEffect(() => {
@@ -401,7 +405,7 @@ const Email = () => {
                             onChange={handleTab}>
                             {Object.keys(tabs).map((k, index) => (
                                 <ToggleButton value={tabs[k]} key={index} className="l-2">
-                                    {k}{currentTab === tabs[k] ? `(${rowCount})` : ""}
+                                    {k} {currentTab === tabs[k] ? `(${rowCount})` : ""}
                                 </ToggleButton>
                             ))}
                         </ToggleButtonGroup>
