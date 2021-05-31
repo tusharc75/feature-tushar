@@ -111,9 +111,13 @@ export const opportunity = {
   opportunityApi: "/opportunity",
 };
 
-export const quoteBuilder = {
-  qbResource: "quoteBuilder",
-  qbApi: "/quote-builder"
+export const entity = {
+  entityResource: "entity", //  Key of sidebar object
+  entityApi: "/entity",
+};
+export const quoteBuilder={
+  qbResource:"quoteBuilder",
+  qbApi:"/quote-builder"
 }
 
 export const supplierAccount = {
