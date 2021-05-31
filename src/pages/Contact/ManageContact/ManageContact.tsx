@@ -30,7 +30,7 @@ const useStyles = makeStyles(() => ({
 }));
 export default function ManageContact(props) {
   const {
-    entityData,
+    contactData: entityData,
     handleSubmit,
     onClose,
     open,
