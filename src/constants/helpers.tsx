@@ -111,6 +111,11 @@ export const opportunity = {
   opportunityApi: "/opportunity",
 };
 
+export const quoteBuilder={
+  qbResource:"quoteBuilder",
+  qbApi:"/quote-builder"
+}
+
 export const supplierAccount = {
   accountApi: "supplier-account",
   accountRoute: "supplier-account",

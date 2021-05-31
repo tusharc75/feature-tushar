@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
       paddingRight: 0,
-    }
+    },
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -287,7 +287,11 @@ const Header = ({ toggleDrawer }) => {
 
   const logoutUser = async () => {
     try {
-      if (!isEmpty(account)) await instance.logoutPopup();
+      if (!isEmpty(account)){
+        await instance.logoutPopup({
+          account: account
+        });
+      }
     } catch (e) {
       toastConfig.setToastConfig({ open: true, type: "error", message: "Need to logout from Azure" })
     } finally {

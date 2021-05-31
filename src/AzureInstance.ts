@@ -6,7 +6,10 @@ const configuration: Configuration = {
   auth: {
     clientId: azureConfig.clientId,
     redirectUri:azureConfig.redirectUri,
-    authority:azureConfig.authority
+    authority:azureConfig.authority,
+  },
+  cache:{
+    cacheLocation:azureConfig.cache
   }
 };
 const AzureInstance = new PublicClientApplication(configuration);
