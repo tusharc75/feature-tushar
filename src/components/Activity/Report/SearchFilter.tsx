@@ -25,7 +25,7 @@ export const SearchFilter = ({
   filter,
   chip,
   dontShowMyActivity = false,
-  ActivityName = "",
+  ActivityName = null,
 }) => {
   const {
     state: {
@@ -99,7 +99,7 @@ export const SearchFilter = ({
             }}
             label={
               option && option.type === "my"
-                ? ActivityName.length > 0 ? `My ${ActivityName}` : "My activities"
+                ? ActivityName ? "My" + " " + startCase(ActivityName) : "My activities"
                 : startCase(option.type) + " - " + option.name
             }
             {...getTagProps({ index })}
@@ -139,7 +139,7 @@ export const SearchFilter = ({
                 label={
                   option.isAll
                     ? option.type === "my"
-                      ? ActivityName.length > 0 ? `My ${ActivityName}` : "My activities"
+                      ? ActivityName ? "My" + " " + startCase(ActivityName) : "My activities"
                       : option.name + " " + startCase(option.type)
                     : startCase(option.type)
                 }

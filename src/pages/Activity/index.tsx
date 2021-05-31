@@ -80,7 +80,7 @@ const Activity = () => {
                   <SearchFilter
                     handleChangeFilter={handleChangeFilter}
                     filter={filter}
-                    ActivityName={type === "case" ? "Case" : ""}
+                    ActivityName={type}
                   />
                 </Grid>
               </Grid>
