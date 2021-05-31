@@ -182,7 +182,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     }
 
     if (
-      new Date(values.startDate).getDate() > new Date(values.endDate).getDate()
+      new Date(values.startDate).getTime() > new Date(values.endDate).getTime()
     ) {
       errors["endDate"] = "End date should be greater then start date";
     }
@@ -342,9 +342,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                             value={values.startDate}
                             name="startDate"
                             label="Start Date"
-                            onChange={(date) =>
-                              setFieldValue("startDate", date)
-                            }
+                            onChange={(date) => {
+                              setFieldValue("startDate", date);
+                              setFieldValue("startTime", date);
+                            }}
                             format="DD/MM/YYYY"
                             error={
                               touched["startDate"] &&
@@ -407,7 +408,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                             value={values.endDate}
                             name="endDate"
                             label="End Date"
-                            onChange={(date) => setFieldValue("endDate", date)}
+                            onChange={(date) => {
+                              setFieldValue("endDate", date);
+                              setFieldValue("endTime", date);
+                            }}
                             format="DD/MM/YYYY"
                             error={
                               touched["endDate"] && Boolean(errors["endDate"])
@@ -496,6 +500,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                       <FormControlLabel
                         control={
                           <Checkbox
+                            value={true}
                             name="meeting"
                             color="primary"
                             onChange={(e) =>
