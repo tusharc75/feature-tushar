@@ -134,13 +134,13 @@ const OrgChart = ({
                    </div>
            </div>
         </div> `  : `
-        <div class="card cursor-pointer">
+        <div class="card">
             <div class="p-0" data-id='${p.id}' />
             <div class="p-0" data-parent-id='${p.parentId}' />
            <div class="firstinfo">
                    ${p.logo ? `<img class="profile-img" src="${p.logo}" width="50px" />` : `<div data-initials="${p.name.charAt(0).toUpperCase()}"></div>`}
                    <div class="profileinfo">
-                      <h5 class="card-header">${p.name}</h5>
+                      <h5 class="card-header cursor-pointer">${p.name}</h5>
                        ${p.email ? `<h5 class="card-detail"><span class="iconEmail" />${p.email}</h5>` : ""} 
                        ${p.phone ? `<h5  class="card-detail">${p.phone}</h5>` : ""}
                    </div>
