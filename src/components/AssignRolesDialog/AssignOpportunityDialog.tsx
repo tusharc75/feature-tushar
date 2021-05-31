@@ -10,82 +10,58 @@ import {
   ListItemText,
   Typography,
 } from "@material-ui/core";
-import { startCase, camelCase, kebabCase, lowerCase } from "lodash";
-
-import Loader from "../../components/Loader";
+import CustomDialogContent from "../CustomDialog/CustomDialogContent";
+import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
+import Loader from "../Loader";
+import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 
-const AssignOpportunityDialog = (props) => {
-  const {
-    dialogOpen,
-    onSuccess,
-    handleCloseDialog,
-    type,
-    projectID,
-    existingData,
-    accountId = "",
-  } = props;
+const AssignOpportunityDialog = ({
+  usersDialogOpen,
+  onSuccess,
+  handleCloseDialog,
+  roleIds,
+  assignedUsers
+}) => {
   const toastConfig = useContext(CustomToastContext);
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedData, setSelectedData] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
 
   useEffect(() => {
-    const url =
-      type === "customer-contact"
-        ? `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"}]`
-        : type === "opportunity"
-        ? `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`
-        : `/${type}?limit=100`;
-    setLoading(true);
+    setLoadingUsers(true);
+    console.log(JSON.stringify(assignedUsers))
     axiosInstance()
-      .get(url)
+      .get(`/user`)
       .then(({ data: { data } }) => {
-        const filteredData = data.filter(
-          (_d) => !existingData().some((item) => item === _d?._id)
-        );
-
-        setData(filteredData);
-        setLoading(false);
+        setUsers(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })))
+        setLoadingUsers(false);
       })
       .catch((error) => {
-        setLoading(false);
+        setLoadingUsers(false);
         toastConfig.setToastConfig(error);
       });
     // eslint-disable-next-line
   }, []);
 
-  const handleUserSelection = (e, id) => {
-    let tempSelectedData = [...selectedData];
-    let curIndex = tempSelectedData.indexOf(id);
-    if (e.target.checked) {
-      if (curIndex < 0) tempSelectedData = [...tempSelectedData, id];
-    } else if (curIndex >= 0) {
-      tempSelectedData.splice(curIndex, 1);
-    }
-    setSelectedData(tempSelectedData);
-  };
 
-  const handleSave = () => {
-    if (selectedData.length) {
+  const handleAssignRoles = async () => {
+    if (selectedUsers.length) {
       setAssigning(true);
 
       const dataObj = {
-        [camelCase(type)]: [...selectedData, ...existingData()],
-        _id: projectID,
+        users: selectedUsers,
+        roles: roleIds,
       };
 
-      axiosInstance()
-        .put(`/project-sales/add-${kebabCase(type)}`, dataObj)
+      await axiosInstance()
+        .put(`/user/assign-role`, dataObj)
         .then(() => {
           setAssigning(false);
           toastConfig.setToastConfig({
-            message: `${startCase(type)} added successfully`,
+            message: "Roles assigned successfully",
             type: "success",
             open: true,
           });
@@ -99,78 +75,45 @@ const AssignOpportunityDialog = (props) => {
     }
   };
 
-  const getHeading = (type: string, data: any) => {
-    switch (type) {
-      case "user":
-        return `${data.firstName}  ${data.lastName}`;
-      case "lead":
-        return `${data.salutation} ${data.firstName} ${data.middleName}  ${data.lastName}`;
-      case "opportunity":
-        return `${data.opportunityName}`;
-      case "customer-account":
-        return `${data.accountName}`;
-      case "customer-contact":
-        return `${data.salutation} ${data.firstName} ${data.middleName}  ${data.lastName}`;
-      default:
-        break;
-    }
-  };
-
-  const getSubHeading = (type: string, data: any) => {
-    switch (type) {
-      case "user":
-        return data.email;
-      case "lead":
-        return "";
-      case "opportunity":
-        return "";
-      case "customer-account":
-        return "";
-      case "customer-contact":
-        return "";
-      default:
-        return "";
-    }
-  };
-
   return (
     <Dialog
       fullWidth
       maxWidth="xs"
-      open={dialogOpen}
+      open={usersDialogOpen}
       onClose={handleCloseDialog}
-      aria-labelledby="assign-dialog"
+      aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Assign ${startCase(type)}`} />
+      <CustomDialogHeader title="Assign Users" />
       <CustomDialogContent>
-        {loading ? (
-          <Loader text={`Loading ${startCase(type)}`} />
-        ) : data.length ? (
+        {loadingUsers ? (
+          <Loader text="Loading Users" />
+        ) : users.length ? (
           <List style={{ padding: 0 }}>
-            {data.map((_d) => (
-              <ListItem divider key={_d._id}>
+            {users.map((user) => (
+              <ListItem divider key={user._id}>
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
-                    onChange={(e) => handleUserSelection(e, _d._id)}
-                    checked={selectedData.indexOf(_d._id) >= 0}
+                    onChange={(e) => {
+                      user.isChecked = e.target.checked
+                      setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
+                    }
+                    }
+                    checked={user.isChecked}
                     inputProps={{
-                      "aria-labelledby": `checkbox-list-label-${_d._id}`,
+                      "aria-labelledby": `checkbox-list-label-${user._id}`,
                     }}
                   />
                 </ListItemIcon>
                 <ListItemText
-                  primary={getHeading(type, _d)}
-                  secondary={getSubHeading(type, _d)}
+                  primary={`${user.firstName} ${user.lastName}`}
+                  secondary={user.email}
                 />
               </ListItem>
             ))}
           </List>
         ) : (
-          <Typography>
-            There are no {lowerCase(type)} or you have already added all{" "}
-            {lowerCase(type)}
-          </Typography>
+          <Typography>All Users has been assigned</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
@@ -183,10 +126,10 @@ const AssignOpportunityDialog = (props) => {
           Cancel
         </Button>
         <Button
-          disabled={!selectedData.length || isAssigning}
-          onClick={handleSave}
+          disabled={!selectedUsers.length || isAssigning}
+          onClick={handleAssignRoles}
           color="primary"
-          size="small"
+          size="small" 
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>
