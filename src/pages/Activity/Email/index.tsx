@@ -38,6 +38,7 @@ import emailStyles from './email.module.scss'
 import './email.scss'
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
+import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
 
 const tabs = {
     Inbox: 1,
@@ -203,14 +204,15 @@ const Email = () => {
                 let filteredData = []
                 data = data.map(obj => {
                     let isCreatedByMe = obj?.createdBy?.user === user?.user?._id ? true : false
-                    if (currentTab === tabs.Inbox && !isCreatedByMe) filteredData.push(obj)
-                    if (currentTab === tabs.Sent && isCreatedByMe) filteredData.push(obj)
-                    return {
+                    let currentObject = {
                         ...obj,
                         id: obj._id,
                         createdByDate: obj?.createdBy?.date ?? '',
                         isCreatedByMe
                     }
+                    if (currentTab === tabs.Inbox && !isCreatedByMe) filteredData.push(currentObject)
+                    if (currentTab === tabs.Sent && isCreatedByMe) filteredData.push(currentObject)
+                    return currentObject
                 })
                 setInitialCount(count)
                 dispatch({ type: "initialize", data: filteredData, count: filteredData.length });
@@ -311,7 +313,6 @@ const Email = () => {
     })
 
     const getQueryString = () => {
-        console.log('get filetr')
         let deepFilter = `&page=${page}&limit=${limit}`;
 
         if (!isObjectEmpty(filters)) {
@@ -474,93 +475,17 @@ const Email = () => {
                 </Grid>
 
             </div>
-            <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
-
-            <div className="ag-theme-material ag-grid-listing-grid">
-                <AgGridReact
-                    rowData={dataRows}
-                    onGridReady={onGridReady}
-                    suppressDragLeaveHidesColumns={true}
-                    suppressCellSelection={true}
-                    rowHeight={40}
-                    frameworkComponents={frameworkComponents}
-                    defaultColDef={{
-                        resizable: true,
-                        floatingFilter: true,
-                        sortable: true,
-                        width: 250,
-                        suppressMenu: true,
-                        // headerCheckboxSelection: true,
-                        // checkboxSelection: true,
-                        floatingFilterComponentParams: { suppressFilterButton: true }
-                    }}
-                    onSortChanged={(e) => {
-                        dispatch({ type: "sort", sorting: e.api.getSortModel() })
-                    }}
-                    onFilterChanged={(e) => {
-                        dispatch({ type: "filter", filters: e.api.getFilterModel() });
-                    }}
-                    enableCellTextSelection={true}
-                    ensureDomOrder={false}
-                    loadingOverlayComponent={'customLoadingOverlay'}
-                    loadingOverlayComponentParams={{
-                        loadingMessage: 'Loading...',
-                    }}
-                    animateRows={false}
-                    suppressAnimationFrame={true}
-                    suppressMaintainUnsortedOrder={true}
-
-                    rowBuffer={limit}
-                    // suppressMaxRenderedRowRestriction={true}
-
-                    // loadingCellRenderer={'customLoadingCellRenderer'}
-                    // loadingCellRendererParams={{
-                    //   loadingMessage: 'One moment please...',
-                    // }}
-
-                    suppressRowClickSelection={true}
-                    rowSelection={'multiple'}
-                    onSelectionChanged={(event: any) => {
-                        dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
-                    }}
-                    immutableData={true}
-                    getRowNodeId={(data) => {
-                        return data._id;
-                    }}
-                >
-                    <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
-                        headerCheckboxSelection={true}
-                        headerCheckboxSelectionFilteredOnly={true}
-                        checkboxSelection={true}
-                        resizable={false} sortable={false}
-                    >
-                    </AgGridColumn>
-
-                    {generateColumns}
-
-                    <AgGridColumn width={150} headerName="Actions"
-                        pinned={(isMobile || isTablet) ? false : "right"}
-                        lockPinned={(isMobile || isTablet) ? false : true}
-                        resizable={false} sortable={false}
-                        filter={false} cellRenderer="actionsRenderer">
-                    </AgGridColumn>
-
-                </AgGridReact>
-            </div>
-
-            <TablePagination
-                component="div"
-                count={rowCount}
+            <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
                 page={page}
-                onChangePage={(event, newPage) => {
-                    dispatch({ type: "pageChange", page: newPage })
-                }}
-                rowsPerPage={limit}
-                onChangeRowsPerPage={(event) => {
-                    dispatch({ type: "pageSizeChange", limit: event.target.value })
-                }}
-                rowsPerPageOptions={pageSizes}
-            />
+                actionWidth={150} />
 
             {showDeleteWarningConfirmBox ? (
                 <MessageDialog
