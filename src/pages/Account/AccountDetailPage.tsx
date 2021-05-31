@@ -36,6 +36,7 @@ import {
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
+  customerAccount,
 } from "../../constants/helpers";
 import ManageAccount from "./ManageAccount/ManageAccount";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -127,7 +128,7 @@ export default function AccountDetailPage(props) {
   });
 
   let { id } = useParams();
-  
+
   const typeCreateProjectSalesDialog = [{
     id: id,
     type: accountResource
@@ -633,14 +634,14 @@ export default function AccountDetailPage(props) {
                     isRedirect={false}
                   />
                 )}
-                {permissions?.projectSales?.isRead && (
-                <ProjectInAccordion 
-                recordsPerLine={3}
-                projectSales={projectSales} 
-                type={typeCreateProjectSalesDialog}
-                fetchData={fetchRelatedData}
-                permissions={permissions}
-                />
+                {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource &&  (
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
+                  />
                 )}
                 <QuotesInAccordion recordsPerLine={3} />
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}

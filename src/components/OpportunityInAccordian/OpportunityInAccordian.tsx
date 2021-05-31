@@ -30,6 +30,7 @@ import currencies from "./../../constants/currency_with_country.json";
 import { useData } from "../../StateProvider/Provider";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { HiExternalLink } from 'react-icons/hi';
+import { customerAccount } from "../../constants/helpers";
 
 const Accordion = withStyles({
   root: {
@@ -267,7 +268,7 @@ export default function OpportunityInAccordian({
           resource={resource}
           isRedirectTodetailPage={isRedirect}
           contactId={contactId}
-          disableOwnerAndAccount={true}
+          disableOwnerAndAccount={ resource === customerAccount.accountResource}
           contactResource={contactResource}
         />
       )}

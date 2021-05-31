@@ -21,7 +21,7 @@ import {
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
   getObjKeysWithValues, processFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
-import { opportunity, sidebarResource } from '../../constants/helpers'
+import { opportunity, sidebarResource, lead } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
@@ -88,6 +88,7 @@ function OpportunityDetailsPage() {
 
   const { opportunityResource, opportunityApi } = opportunity
   const [projectSales, setProjectSales] = useState([]);
+  const [parentLead, setParentLead] = useState([]);
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: opportunity.opportunityResource }]);
 
   useEffect(() => {
@@ -189,6 +190,8 @@ function OpportunityDetailsPage() {
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
+
+
     }
   }
 
@@ -206,6 +209,19 @@ function OpportunityDetailsPage() {
             ]
             : []
         );
+
+        if (data[sidebarResource.lead] &&
+          data[sidebarResource.lead][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            
+          ]){
+            setMainPoints(prevState => ({
+              ...prevState,
+              "Parent Lead": data[sidebarResource.lead][ sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")][0].lastName
+          }));
+          }
+
+
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -295,7 +311,6 @@ function OpportunityDetailsPage() {
     mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount) : "";
     mainPoint["Opportunity Owner"] = data?.owner?.optionLabel || "";
-
     setMainPoints(mainPoint);
   };
 

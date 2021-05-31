@@ -16,6 +16,7 @@ import {
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
+  customerAccount
 } from "./../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -517,7 +518,7 @@ const ContactDetailsPage = (props) => {
                     contactResource={contactResource}
                   />
                 )}
-                {permissions?.projectSales?.isRead && (
+                {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
                   <ProjectInAccordion
                     recordsPerLine={3}
                     projectSales={projectSales}
