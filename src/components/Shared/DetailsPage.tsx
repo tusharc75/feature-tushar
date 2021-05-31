@@ -236,16 +236,15 @@ const Details = (props: DetailProps) => {
                 data[fieldData.fieldName].map((_val: any) => (
                   <React.Fragment key={_val.optionValue}>
                     <Link
-                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${
-                        _val.optionValue
-                      }`}
-                      // onMouseEnter={(e) =>
-                      //   getPopoverData(
-                      //     e,
-                      //     fieldData.lookupResource,
-                      //     _val.optionValue
-                      //   )
-                      // }
+                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue
+                        }`}
+                    // onMouseEnter={(e) =>
+                    //   getPopoverData(
+                    //     e,
+                    //     fieldData.lookupResource,
+                    //     _val.optionValue
+                    //   )
+                    // }
                     >
                       <span className={classes.dataValue}>
                         {_val.optionLabel}
@@ -258,16 +257,15 @@ const Details = (props: DetailProps) => {
               )
             ) : data[fieldData.fieldName] ? (
               <Link
-                to={`/${kebabCase(fieldData.lookupResource)}/detail/${
-                  val[fieldData.fieldName]
-                }`}
-                // onMouseEnter={(e) =>
-                //   getPopoverData(
-                //     e,
-                //     fieldData.lookupResource,
-                //     val[fieldData.fieldName]
-                //   )
-                // }
+                to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]
+                  }`}
+              // onMouseEnter={(e) =>
+              //   getPopoverData(
+              //     e,
+              //     fieldData.lookupResource,
+              //     val[fieldData.fieldName]
+              //   )
+              // }
               >
                 <span className={classes.dataValue}>
                   {data[fieldData.fieldName].optionLabel}
@@ -316,46 +314,46 @@ const Details = (props: DetailProps) => {
         ? popoverData?.avatar
         : lookupResource === "contact-account" ||
           lookupResource === "supplier-account"
-        ? popoverData?.accountLogo
-        : lookupResource === "contact-contact"
-        ? popoverData?.contactLogo
-        : "";
+          ? popoverData?.accountLogo
+          : lookupResource === "contact-contact"
+            ? popoverData?.contactLogo
+            : "";
     const name =
       lookupResource === "user"
         ? `${popoverData?.firstName} ${popoverData?.lastName}`
         : lookupResource === "customer-account" ||
           lookupResource === "supplier-account"
-        ? popoverData?.accountName
-        : lookupResource === "customer-contact" ||
-          lookupResource === "supplier-contact"
-        ? `${popoverData?.firstName} ${popoverData?.middleName} ${popoverData?.lastName}`
-        : lookupResource === "role"
-        ? popoverData?.name
-        : "";
+          ? popoverData?.accountName
+          : lookupResource === "customer-contact" ||
+            lookupResource === "supplier-contact"
+            ? `${popoverData?.firstName} ${popoverData?.middleName} ${popoverData?.lastName}`
+            : lookupResource === "role"
+              ? popoverData?.name
+              : "";
 
     const subInfo =
       lookupResource === "user"
         ? popoverData?.email
         : lookupResource === "customer-account" ||
           lookupResource === "supplier-account"
-        ? popoverData?.description
-        : lookupResource === "customer-contact" ||
-          lookupResource === "supplier-contact"
-        ? popoverData?.email
-        : lookupResource === "role"
-        ? popoverData?.description
-        : "";
+          ? popoverData?.description
+          : lookupResource === "customer-contact" ||
+            lookupResource === "supplier-contact"
+            ? popoverData?.email
+            : lookupResource === "role"
+              ? popoverData?.description
+              : "";
 
     const subInfo1 =
       lookupResource === "user"
         ? popoverData?.mobileNo
         : lookupResource === "customer-account" ||
           lookupResource === "supplier-account"
-        ? popoverData?.owner?.optionLabel
-        : lookupResource === "customer-contact" ||
-          lookupResource === "supplier-contact"
-        ? popoverData?.phone
-        : "";
+          ? popoverData?.owner?.optionLabel
+          : lookupResource === "customer-contact" ||
+            lookupResource === "supplier-contact"
+            ? popoverData?.phone
+            : "";
 
     const isRole = lookupResource === "role";
     return (
@@ -442,6 +440,13 @@ const Details = (props: DetailProps) => {
                           md={dynamicSize(5, field.fieldData.type)}
                         >
                           <Box height="100%" display="flex" alignItems="center">
+                            <h4
+                              title={field.fieldData.fieldLabel}
+                              className={classes.detailLabel}
+                            >
+                              {field.fieldData.fieldLabel}
+                            </h4>
+                            <Box marginX="2px" />
                             {field.fieldData.isTooltip && (
                               <Tooltip title={field.fieldData.tooltipMessage}>
                                 <InfoOutlined
@@ -450,13 +455,6 @@ const Details = (props: DetailProps) => {
                                 />
                               </Tooltip>
                             )}
-                            <Box marginX="2px" />
-                            <h4
-                              title={field.fieldData.fieldLabel}
-                              className={classes.detailLabel}
-                            >
-                              {field.fieldData.fieldLabel}
-                            </h4>
                           </Box>
                         </Grid>
                         <Grid
@@ -474,65 +472,64 @@ const Details = (props: DetailProps) => {
                           ) : (
                             <Box display="flex" alignItems="center">
                               {field.fieldData.type === "fileUpload" &&
-                              initialVals[field.fieldData.fieldName] ? (
+                                initialVals[field.fieldData.fieldName] ? (
                                 <InsertDriveFile />
                               ) : null}{" "}
                               {renderData(initialVals, field.fieldData)}
                               {field.fieldData.type === "fileUpload"
                                 ? initialVals[field.fieldData.fieldName] &&
-                                  (isDownloading ? (
-                                    <Box display="flex" alignItems="center">
-                                      {downloadProgress === 100
-                                        ? "Downloaded"
-                                        : "Downloading"}
+                                (isDownloading ? (
+                                  <Box display="flex" alignItems="center">
+                                    {downloadProgress === 100
+                                      ? "Downloaded"
+                                      : "Downloading"}
 
+                                    <Box
+                                      marginLeft={1}
+                                      position="relative"
+                                      display="inline-flex"
+                                    >
+                                      <CircularProgress
+                                        size={30}
+                                        variant="determinate"
+                                        value={downloadProgress}
+                                      />
                                       <Box
-                                        marginLeft={1}
-                                        position="relative"
-                                        display="inline-flex"
+                                        top={0}
+                                        left={0}
+                                        bottom={0}
+                                        right={0}
+                                        position="absolute"
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
                                       >
-                                        <CircularProgress
-                                          size={30}
-                                          variant="determinate"
-                                          value={downloadProgress}
-                                        />
-                                        <Box
-                                          top={0}
-                                          left={0}
-                                          bottom={0}
-                                          right={0}
-                                          position="absolute"
-                                          display="flex"
-                                          alignItems="center"
-                                          justifyContent="center"
-                                        >
-                                          <Typography
-                                            variant="caption"
-                                            component="div"
-                                            color="textSecondary"
-                                          >{`${downloadProgress}%`}</Typography>
-                                        </Box>
+                                        <Typography
+                                          variant="caption"
+                                          component="div"
+                                          color="textSecondary"
+                                        >{`${downloadProgress}%`}</Typography>
                                       </Box>
                                     </Box>
-                                  ) : (
-                                    <IconButton
-                                      title={`Download ${
-                                        initialVals[field.fieldData.fieldName]
+                                  </Box>
+                                ) : (
+                                  <IconButton
+                                    title={`Download ${initialVals[field.fieldData.fieldName]
                                       }`}
-                                      disabled={isDownloading}
-                                      size="small"
-                                      onClick={() =>
-                                        downloadFile(
-                                          normalizeValues(
-                                            initialVals,
-                                            field.fieldData
-                                          )
+                                    disabled={isDownloading}
+                                    size="small"
+                                    onClick={() =>
+                                      downloadFile(
+                                        normalizeValues(
+                                          initialVals,
+                                          field.fieldData
                                         )
-                                      }
-                                    >
-                                      <GetApp />
-                                    </IconButton>
-                                  ))
+                                      )
+                                    }
+                                  >
+                                    <GetApp />
+                                  </IconButton>
+                                ))
                                 : null}{" "}
                             </Box>
                           )}
