@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Box, Button, Dialog, Grid, Menu, MenuItem } from "@material-ui/core";
 import { Add, ExpandMore } from "@material-ui/icons";
-import { lowerCase } from "lodash";
+import { lowerCase, startCase } from "lodash";
+import { useHistory } from "react-router-dom";
 import moment from "moment";
+import queryString from "query-string";
 
 import MyCalendar from "./MyCalendar";
 import { GetBoard } from "../../../axios/activity";
@@ -15,6 +17,7 @@ import { useData } from "../../../StateProvider/Provider";
 import { CreateTask } from "../../../components/Activity/Task/CreateTask";
 import { CreateCase } from "../../../components/Activity/Case/CreateCase";
 import { CreateEvent } from "../../../components/Activity/Event/CreateEvent";
+import axiosInstance from "../../../axios/axiosInstance";
 
 const BigCalendar = () => {
   const {
@@ -22,7 +25,12 @@ const BigCalendar = () => {
       user: { user },
     },
   } = useData();
-  const [type, setType] = useState("Task");
+  const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { referenceType, referenceId, type: actType } = parsed;
+  const [type, setType] = useState(
+    actType ? startCase(actType.toLocaleString()) : "Task"
+  );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [createType, setCreateType] = useState(null);
   const [filter, setFilter] = useState([]);
@@ -43,6 +51,21 @@ const BigCalendar = () => {
 
     return date && time ? new Date(`${d}T${t}`) : "";
   };
+
+  useEffect(() => {
+    if (referenceType && referenceId) {
+      axiosInstance()
+        .get(
+          `/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`
+        )
+        .then(({ data: { data } }) => {
+          setFilter([
+            { _id: referenceId, type: referenceType, name: data.name },
+          ]);
+        })
+        .catch((err) => {});
+    }
+  }, []);
 
   const fetchBoard = useCallback(() => {
     GetBoard(lowerCase(type), JSON.stringify(filter))
@@ -77,6 +100,9 @@ const BigCalendar = () => {
 
   const handleChangeFilter = (value) => {
     setFilter(value);
+    history.replace({
+      search: "",
+    });
   };
 
   const closeDialog = () => {
@@ -92,64 +118,67 @@ const BigCalendar = () => {
         </Grid>
       </Grid>
       <CustomContainer>
-        <Grid container className="greyBox">
-          <Grid item xs={12} sm={3}>
-            <Button
-              aria-controls="simple-menu"
-              aria-haspopup="true"
-              onClick={handleClick}
-              size="small"
-              variant="outlined"
-              endIcon={<ExpandMore />}
-            >
-              {`${type}s`}
-            </Button>
-            <Box mr={1} component="span" />
-            <Button
-              aria-controls="simple-menu"
-              aria-haspopup="true"
-              size="small"
-              variant="outlined"
-              onClick={() => setCreateType(lowerCase(type))}
-              startIcon={<Add />}
-            >
-              {`Create ${type}`}
-            </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              {activityOptions.map((item, i) => (
-                <MenuItem
-                  key={i}
-                  selected={item === type}
-                  onClick={() => {
-                    setType(item);
-                    handleClose();
-                  }}
-                >
-                  {item}s
-                </MenuItem>
-              ))}
-            </Menu>
+        <div className="bgLight">
+          <Grid container className="greyBox">
+            <Grid item xs={12} sm={3}>
+              <Button
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                onClick={handleClick}
+                size="small"
+                color="primary"
+                variant="contained"
+                endIcon={<ExpandMore />}
+              >
+                {`${type}s`}
+              </Button>
+              <Box mr={1} component="span" />
+              <Button
+                aria-controls="simple-menu"
+                aria-haspopup="true"
+                size="small"
+                color="primary"
+                variant="contained"
+                onClick={() => setCreateType(lowerCase(type))}
+                startIcon={<Add />}
+              >
+                {`Create ${type}`}
+              </Button>
+              <Menu
+                id="simple-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                {activityOptions.map((item, i) => (
+                  <MenuItem
+                    key={i}
+                    selected={item === type}
+                    onClick={() => {
+                      setType(item);
+                      handleClose();
+                    }}
+                  >
+                    {item}s
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Grid>
+            <Grid item xs={12} sm={9}>
+              <SearchFilter
+                handleChangeFilter={handleChangeFilter}
+                filter={filter}
+                chip={{ size: "small" }}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={9}>
-            <SearchFilter
-              handleChangeFilter={handleChangeFilter}
-              filter={filter}
-              chip={{ variant: "default", size: "small", color: "default" }}
-            />
-          </Grid>
-        </Grid>
-        <MyCalendar
-          activities={activities}
-          setActivityData={setActivityData}
-          type={lowerCase(type)}
-        />
-
+          <MyCalendar
+            activities={activities}
+            setActivityData={setActivityData}
+            type={lowerCase(type)}
+          />
+        </div>
         {activityData && (
           <ActivityModelHandler
             fetchBoard={fetchBoard}

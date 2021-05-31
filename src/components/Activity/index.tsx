@@ -32,7 +32,8 @@ import axiosInstance from "./../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageAttachment from "./Attachments/ManageAttachment";
 import Chatter from "./Chatter";
-
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   activityBox: {
@@ -276,6 +277,8 @@ const Activity = (props) => {
         ) : null}
       </Box>
       <Dialog
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth={"md"}

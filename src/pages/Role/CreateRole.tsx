@@ -119,10 +119,10 @@ const CreateRole = ({
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" color="primary" disabled={loading}>
+            <Button variant="outlined" size="small" color="primary" disabled={loading}>
               Cancel
             </Button>
-            <Button variant="contained" color="primary" disabled={loading}>
+            <Button variant="contained" size="small" color="primary" disabled={loading}>
               Submit
             </Button>
           </CustomDialogFooter>
@@ -184,6 +184,7 @@ const CreateRole = ({
             <Button
               variant="outlined"
               color="primary"
+              size="small" 
               disabled={isSubmitting}
               onClick={close}
             >
@@ -192,6 +193,7 @@ const CreateRole = ({
             <Button
               variant="contained"
               color="primary"
+              size="small" 
               onClick={handleSubmit}
               disabled={
                 isSubmitting ||

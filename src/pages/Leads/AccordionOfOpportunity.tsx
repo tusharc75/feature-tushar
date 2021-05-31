@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, Avatar, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import { displayDate } from '../../services/util';
 import routes from '../../components/Helpers/Routes'
 import { Link } from 'react-router-dom'
-import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
-import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
-import { FaEye } from 'react-icons/fa';
 import currencies from '../../constants/currency_with_country.json';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { useData } from '../../StateProvider/Provider';
@@ -75,10 +70,9 @@ function DisplayData({ label, value, icon }) {
 export default function AccordionOfOpportunity({
     opportunity, expanded = true, recordsPerLine = 2,
 }) {
-    const history = useHistory();
     const {
         state: { selectedEntity },
-      }: any = useData();
+    }: any = useData();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -100,7 +94,9 @@ export default function AccordionOfOpportunity({
     }
 
     const [expandOpportunity, setExpandOpportunity] = useState(expanded);
-
+    useEffect(() => {
+        setExpandOpportunity(opportunity && opportunity?.length !== 0 ? true : false);
+    }, [opportunity]);
     return <>
         <Accordion expanded={expandOpportunity}>
             <AccordionSummary
@@ -113,7 +109,7 @@ export default function AccordionOfOpportunity({
                             <Box>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => setExpandOpportunity(!expandOpportunity)} >
+                                    onClick={() => setExpandOpportunity(!expandOpportunity)} >
                                     {
                                         expandOpportunity === true ? (
                                             <ExpandLessIcon />
@@ -160,16 +156,12 @@ export default function AccordionOfOpportunity({
                                                                             </Tooltip>
                                                                         </span>
                                                                     }
-
-                                                                    <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
-                                                                        <Typography >{opportunity?.opportunityName} </Typography>
-                                                                    </Link>
                                                                 </Grid>
                                                                 {
                                                                     opportunity?.amount &&
                                                                     <Grid item xs={12} sm={4}>
                                                                         <Typography className="amount">
-                                                                            {currencies.find(d => d.currencyCode == opportunity["currency"])?.symbolNative}
+                                                                            {currencies.find(d => d.currencyCode === opportunity["currency"])?.symbolNative}
                                                                         &nbsp;{opportunity?.amount ?? ''}</Typography>
                                                                     </Grid>
                                                                 }
@@ -204,7 +196,5 @@ export default function AccordionOfOpportunity({
 
             <Box margin={1} />
         </Accordion>
-
-
     </>
 }

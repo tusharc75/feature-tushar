@@ -46,30 +46,6 @@ const EventSchema = Yup.object().shape({
   name: Yup.string().required("Please enter event name"),
 });
 
-const TimeList = () => {
-  var quarterHours = ["00", "15", "30", "45"];
-  var times = [];
-  for (var i = 0; i < 12; i++) {
-    for (var j = 0; j < 4; j++) {
-      times.push((i === 0 ? 12 : i) + ":" + quarterHours[j] + " AM");
-    }
-  }
-  for (var i = 0; i < 12; i++) {
-    for (var j = 0; j < 4; j++) {
-      times.push((i === 0 ? 12 : i) + ":" + quarterHours[j] + " PM");
-    }
-  }
-  return times;
-};
-
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: 300,
-    },
-  },
-};
-
 export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
   const {
     state: {
@@ -79,7 +55,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
   const isMobile = useMediaQuery("(max-width:599px)");
   const [initialValues, setInitialValues] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const { instance, accounts, inProgress } = useMsal();
+  const { instance, accounts } = useMsal();
   const azureAccount = useAccount(accounts[0] || {});
   const [isSubmitting, setSubmitting] = useState(false);
   const [resource, setResource] = useState("");
@@ -212,8 +188,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
     }
     return errors;
   }
-
-  let times = TimeList();
 
   const resourceOptions = [
     "Customer Account",
@@ -360,7 +334,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
                           <KeyboardDatePicker
-                            clearable
                             autoOk
                             size="small"
                             disablePast
@@ -389,7 +362,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
 
                         <Grid item xs={5}>
                           <KeyboardTimePicker
-                            clearable
                             autoOk
                             size="small"
                             variant="inline"
@@ -426,7 +398,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                       <Grid container spacing={2}>
                         <Grid item xs={7}>
                           <KeyboardDatePicker
-                            clearable
                             autoOk
                             size="small"
                             disablePast
@@ -450,7 +421,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                         </Grid>
                         <Grid item xs={5}>
                           <KeyboardTimePicker
-                            clearable
                             autoOk
                             size="small"
                             variant="inline"
@@ -554,6 +524,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
               <Button
                 disabled={isSubmitting}
                 color="primary"
+                size="small"
                 onClick={handleClose}
               >
                 Cancel
@@ -563,6 +534,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                 type="button"
                 color="primary"
                 variant="contained"
+                size="small"
                 onClick={submitForm}
               >
                 {isSubmitting ? <CircularProgress size={22} /> : "Save"}
@@ -571,6 +543,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                 <Button
                   disabled={isSubmitting}
                   variant="outlined"
+                  size="small"
                   style={{ color: "red", borderColor: "red" }}
                   onClick={() =>
                     DeleteEvent(eventId)

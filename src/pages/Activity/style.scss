@@ -1,0 +1,10 @@
+.AntTab {
+  span.MuiTab-wrapper {
+    flex-direction: row;
+
+    .MuiSvgIcon-root {
+      margin-bottom: 0 !important;
+      margin-right: 10px !important;
+    }
+  }
+}

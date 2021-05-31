@@ -17,10 +17,7 @@ import { getObjKeysWithValues, lead, processFieldName } from "../../constants/he
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import ManageLeadDialog from "./ManageLeadDialog/ManageLeadDialog";
-import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
-import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
-import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 import AccordionOfOpportunity from "./AccordionOfOpportunity";
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 
@@ -49,10 +46,6 @@ const LeadDetailsPage = () => {
 
   const [hasPermissionToConvertToOpportunity, setHasPermissionToConvertToOpportunity] = useState(false);
   const [isLeadAlreadyConvertedToOpportunity, setIsLeadAlreadyConvertedToOpportunity] = useState(false);
-  const [okButtonLoading, setOkButtonLoading] = useState(false);
-  const [isExpandedAccordion, setIsExpandedAccordion] = useState(true);
-  const [expandOpportunity, setExpandOpportunity] = useState(isExpandedAccordion);
-  const [convertedOpportunityName, setConvertedOpportunityName] = useState("");
 
   const [
     convertLeadToOpportunityConfirmationDialog,
@@ -80,9 +73,9 @@ const LeadDetailsPage = () => {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = leadFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == processFieldName.toLocaleLowerCase());
+      const processSteps = leadFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLocaleLowerCase());
       if (processSteps && processSteps.isRead && leadData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel == leadData[processFieldName]) + 1;
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === leadData[processFieldName]) + 1;
         setActiveStep(currentStepToShow);
       }
     }
@@ -118,10 +111,10 @@ const LeadDetailsPage = () => {
           }
 
           const isAllowedToUpdate = [...data.collaborator ?? [], data.owner].some(
-            (d) => d?.optionValue == userId
+            (d) => d?.optionValue === userId
           );
 
-          setHasPermissionToConvertToOpportunity(dontHavePermissions.length == 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate &&
+          setHasPermissionToConvertToOpportunity(dontHavePermissions.length === 0 && user?.user?.permissions?.convertLeadToOpportunity && isAllowedToUpdate &&
             data[processFieldName] && data[processFieldName].toLowerCase() === "qualified");
           setIsLeadAlreadyConvertedToOpportunity(data.staticData && data.staticData["convertedToOpportunity"] ? data.staticData["convertedToOpportunity"] : false);
 
@@ -132,11 +125,11 @@ const LeadDetailsPage = () => {
 
           setAllowedToEdit(
             [...data.collaborator ?? [], data.owner].some(
-              (d) => d?.optionValue == userId
+              (d) => d?.optionValue === userId
             )
           );
           setAllowedToDelete(
-            [data.owner].some((d) => d?.optionValue == userId)
+            [data.owner].some((d) => d?.optionValue === userId)
           );
           setLeadData(data);
           getLeadFields();
@@ -161,7 +154,7 @@ const LeadDetailsPage = () => {
       .then(({ data: { data } }) => {
         setLeadFields(data);
 
-        const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() == processFieldName.toLowerCase());
+        const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
         if (processSteps && processSteps.isRead) {
           setSteps(processSteps.fieldData.option.map(m => {
             return {
@@ -232,7 +225,6 @@ const LeadDetailsPage = () => {
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setOkButtonLoading(false);
       });
   };
 
@@ -347,6 +339,7 @@ const LeadDetailsPage = () => {
                           </Button> :
                             <Button variant="contained"
                               color="primary"
+                              size="small" 
                               disabled={!steps[activeStep].canCompleteManually}
                               onClick={() => {
                                 setIsProcessing(true)
@@ -359,7 +352,6 @@ const LeadDetailsPage = () => {
                                 axiosInstance().put(`/lead?entity=${selectedEntity}`, updatedData).then(() => {
                                   setActiveStep(activeStep + 1)
                                   setIsProcessing(false)
-                                  debugger;
                                   if (steps[activeStep].text.toLowerCase() === "qualified") {
                                     fetchLeadData();
                                   }
@@ -409,10 +401,10 @@ const LeadDetailsPage = () => {
                 recordsPerLine={3}
                 opportunity={leadData?.staticData?.opportunity}
               />
-              <ProjectInAccordion recordsPerLine={3} />
+              {/* <ProjectInAccordion recordsPerLine={3} projectSales={null}/> */}
               <QuotesInAccordion recordsPerLine={3} />
-              <ProductBuilderInAccordion recordsPerLine={3} />
-              <LeadInAccordion recordsPerLine={3} />
+              {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
+              {/* <LeadInAccordion recordsPerLine={3} /> */}
             </Paper>
           </Grid>
 

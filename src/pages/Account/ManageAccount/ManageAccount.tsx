@@ -5,6 +5,7 @@ import {
   CustomDialogTransition,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
+  setFieldsInAscendingOrder,
   simplifyValues,
   yupSchema,
 } from "../../../constants/helpers";
@@ -76,7 +77,7 @@ export default function ManageAccount(props) {
       );
     }
 
-    sortArray();
+    setFormsData(setFieldsInAscendingOrder(entityData.fields));
 
     return () => {
       setOwnerCollaboratorCommonDataSource([]);
@@ -85,25 +86,25 @@ export default function ManageAccount(props) {
     };
   }, [entityData.fields]);
 
-  const sortArray = () => {
-    const sections = [];
-    entityData.fields.forEach((field) => {
-      if (!sections.includes(field.sectionName)) {
-        sections.push(field.sectionName);
-      }
-    });
+  // const sortArray = () => {
+  //   const sections = [];
+  //   entityData.fields.forEach((field) => {
+  //     if (!sections.includes(field.sectionName)) {
+  //       sections.push(field.sectionName);
+  //     }
+  //   });
 
-    const customData = sections.map((name) => {
-      let fields = entityData.fields.filter(
-        (field) => field.sectionName === name
-      );
+  //   const customData = sections.map((name) => {
+  //     let fields = entityData.fields.filter(
+  //       (field) => field.sectionName === name
+  //     );
 
-      const sectionFields = fields.map((formData) => formData);
-      return { name, sectionFields };
-    });
+  //     const sectionFields = fields.map((formData) => formData);
+  //     return { name, sectionFields };
+  //   });
 
-    setFormsData(customData);
-  };
+  //   setFormsData(customData);
+  // };
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerDataSource(
@@ -359,6 +360,7 @@ export default function ManageAccount(props) {
                       onClick={onClose}
                       variant="outlined"
                       color="primary"
+                      size="small" 
                     >
                       Cancel
                     </Button>

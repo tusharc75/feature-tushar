@@ -163,6 +163,7 @@ const UpdateDetailsDialog = (props) => {
               <Button
                 variant="outlined"
                 color="primary"
+                size="small"
                 disabled={isUpdating}
                 onClick={onClose}
               >
@@ -171,10 +172,11 @@ const UpdateDetailsDialog = (props) => {
               <Button
                 variant="contained"
                 color="primary"
+                size="small"
                 onClick={submitForm}
                 disabled={
                   Object.values(simplifyValues(initialVals)).toString() ===
-                    Object.values(simplifyValues(values)).toString() ||
+                  Object.values(simplifyValues(values)).toString() ||
                   isUpdating
                 }
               >

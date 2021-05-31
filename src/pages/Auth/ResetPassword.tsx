@@ -155,6 +155,7 @@ const ResetPassword = () => {
                     <Button
                       variant='contained'
                       color='primary'
+                      size="small" 
                       disabled={isSubmitting}
                       onClick={submitForm}>
                       Submit

@@ -5,6 +5,8 @@ import { CreateNote } from "./Note/CreateNote";
 import { CreateEmail } from "./Email/CreateEmail";
 import Dialog from "@material-ui/core/Dialog";
 import { useHistory } from "react-router-dom";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition} from "./../../constants/helpers";
 
 const ActivityModelHandler = (props) => {
   const {
@@ -22,7 +24,7 @@ const ActivityModelHandler = (props) => {
       setActivityData(null);
     } else {
       history.push({
-        pathname: "/activity/" + activityType,
+        pathname: "/" + activityType,
       });
     }
   };
@@ -30,6 +32,8 @@ const ActivityModelHandler = (props) => {
   return (
     <Dialog
       open={true}
+      fullScreen={isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       maxWidth={"md"}
       onClose={handleClose}

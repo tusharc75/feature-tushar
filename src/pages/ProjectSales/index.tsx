@@ -1,13 +1,7 @@
-import {
-  useState,
-  FC,
-  useReducer,
-  useCallback,
-  useEffect,
-  useContext,
-} from "react";
-import { TablePagination, Grid } from "@material-ui/core";
+import { useState, FC, useReducer, useEffect, useContext } from "react";
+import { Grid } from "@material-ui/core";
 import { Link } from "react-router-dom";
+import { AgGridColumn } from "ag-grid-react";
 
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
@@ -19,20 +13,17 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
 import CreateProjectStrategy from "./CreateProjectSales";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-
 import { gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import { AgGridColumn, AgGridReact } from "ag-grid-react";
 import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
-import { isMobile, isTablet } from "react-device-detect";
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
   CustomLoadingOverlay,
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
 
 function reducer(state, action) {
@@ -132,10 +123,6 @@ const ProjectSales: FC = () => {
   const {
     state: { user, permissions },
   }: any = useData();
-
-  const [searchVal, setSearchVal] = useState("");
-
-  const [projects, setProjects] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -161,7 +148,6 @@ const ProjectSales: FC = () => {
     selectedRecords,
   } = state;
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)z
   const [columns, setColumns] = useState([
     {
       field: "projectName",
@@ -193,7 +179,7 @@ const ProjectSales: FC = () => {
   //  Grid Variables - End
 
   useEffect(() => {
-    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
 
     if (projectSalesTimeout) {
       clearTimeout(projectSalesTimeout);
@@ -202,7 +188,7 @@ const ProjectSales: FC = () => {
     projectSalesTimeout = setTimeout(() => {
       fetchProjects();
     }, millisec);
-  }, [searchVal]);
+  }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
@@ -352,7 +338,6 @@ const ProjectSales: FC = () => {
     axiosInstance()
       .get(`/project-sales${queryString}`)
       .then(({ data: { data, count } }) => {
-        setProjects(data);
         let rows = data.map((project) => ({
           ...project,
           projectManager: project.projectManager?.optionLabel,
@@ -379,14 +364,11 @@ const ProjectSales: FC = () => {
   const showConfirmBox = (row) => {
     if (row === null) {
       if (permissions?.projectSales.isDelete) {
-        const selectedData = projects.filter(
-          (p) => selectedRecords.filter((sp) => sp === p._id).length > 0
-        );
-        const myData = selectedData.filter(
+        const myData = selectedRecords.filter(
           (s) => s.projectManagerId === user.user._id
         );
 
-        if (selectedRecords.length !== myData.length) {
+        if (selectedRecords?.length !== myData.length) {
           setShowDeleteWarningConfirmBox(true);
         } else {
           setIsConformDialogVisible(true);
@@ -394,7 +376,7 @@ const ProjectSales: FC = () => {
       }
     }
 
-    if (row && row.id) {
+    if (row && row._id) {
       setIsConformDialogVisible(true);
       setDeleteRec(row);
     }
@@ -403,11 +385,11 @@ const ProjectSales: FC = () => {
   const handleDeleteProjects = async () => {
     setDeleteLoading(true);
     let recs = [];
-    if (deleteRec?.id) {
-      recs.push(deleteRec?.id);
+    if (deleteRec?._id) {
+      recs.push(deleteRec?._id);
     } else {
-      dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj.id);
+      selectedRecords.forEach((obj) => {
+        recs.push(obj._id);
       });
     }
     if (recs && recs.length > 0) {
@@ -462,114 +444,27 @@ const ProjectSales: FC = () => {
             <ProjectHeader
               userId={user?.user?._id}
               onSearch={handleSearch}
-              searchVal={searchVal}
+              searchVal={search}
               permissions={permissions?.projectSales}
               selectedType={selectedType}
               handleFilterChange={handleProjectFilter}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
-              selectedProject={selectedRecords}
+              canDelete={selectedRecords?.length === 0}
             />
           </div>
 
-          <CustomGridHeaderOptions
+          <CustomAgGrid
             columns={columns}
-            setColumns={setColumns}
-            columnApi={columnApi}
-          />
-
-          <div className="ag-theme-material ag-grid-listing-grid">
-            <AgGridReact
-              rowData={dataRows}
-              onGridReady={onGridReady}
-              suppressDragLeaveHidesColumns={true}
-              suppressCellSelection={true}
-              rowHeight={40}
-              frameworkComponents={frameworkComponents}
-              defaultColDef={{
-                resizable: true,
-                floatingFilter: true,
-                sortable: true,
-                width: 250,
-                suppressMenu: true,
-                // headerCheckboxSelection: true,
-                // checkboxSelection: true,
-                floatingFilterComponentParams: { suppressFilterButton: true },
-              }}
-              onSortChanged={(e) => {
-                dispatch({ type: "sort", sorting: e.api.getSortModel() });
-              }}
-              onFilterChanged={(e) => {
-                dispatch({ type: "filter", filters: e.api.getFilterModel() });
-              }}
-              enableCellTextSelection={true}
-              ensureDomOrder={false}
-              loadingOverlayComponent={"customLoadingOverlay"}
-              loadingOverlayComponentParams={{
-                loadingMessage: "Loading...",
-              }}
-              animateRows={false}
-              suppressAnimationFrame={true}
-              suppressMaintainUnsortedOrder={true}
-              rowBuffer={limit}
-              // suppressMaxRenderedRowRestriction={true}
-
-              // loadingCellRenderer={'customLoadingCellRenderer'}
-              // loadingCellRendererParams={{
-              //   loadingMessage: 'One moment please...',
-              // }}
-
-              suppressRowClickSelection={true}
-              rowSelection={"multiple"}
-              onSelectionChanged={(event: any) => {
-                dispatch({
-                  type: "selection",
-                  selectedRecords: event.api.getSelectedRows(),
-                });
-              }}
-              immutableData={true}
-              getRowNodeId={(data) => {
-                return data._id;
-              }}
-            >
-              <AgGridColumn
-                width={70}
-                filter={false}
-                pinned="left"
-                lockPinned={true}
-                headerCheckboxSelection={true}
-                headerCheckboxSelectionFilteredOnly={true}
-                checkboxSelection={true}
-                resizable={false}
-                sortable={false}
-              ></AgGridColumn>
-
-              {generateColumns}
-
-              <AgGridColumn
-                width={150}
-                headerName="Actions"
-                pinned={isMobile || isTablet ? false : "right"}
-                lockPinned={isMobile || isTablet ? false : true}
-                resizable={false}
-                sortable={false}
-                filter={false}
-                cellRenderer="actionsRenderer"
-              ></AgGridColumn>
-            </AgGridReact>
-          </div>
-          <TablePagination
-            component="div"
-            count={rowCount}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
             page={page}
-            onChangePage={(event, newPage) => {
-              dispatch({ type: "pageChange", page: newPage });
-            }}
-            rowsPerPage={limit}
-            onChangeRowsPerPage={(event) => {
-              dispatch({ type: "pageSizeChange", limit: event.target.value });
-            }}
-            rowsPerPageOptions={pageSizes}
+            actionWidth={150}
           />
         </div>
 

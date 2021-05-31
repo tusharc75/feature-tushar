@@ -87,7 +87,12 @@ export const BoardList = ({
             opacity: isCreateButton || status === "To Do" ? 1 : 0,
           }}
         >
-          <Button startIcon={<Add />} onClick={() => setOpenDialog(true)}>
+          <Button
+            fullWidth
+            style={{ justifyContent: "flex-start" }}
+            startIcon={<Add />}
+            onClick={() => setOpenDialog(true)}
+          >
             Create {type}
           </Button>
         </Box>

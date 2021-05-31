@@ -221,7 +221,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                     </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                    <Button color="primary" onClick={handleClose}>Cancel</Button>
+                    <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
                     <CustomButton
                         type="button" color="primary"
                         disabled={loading}

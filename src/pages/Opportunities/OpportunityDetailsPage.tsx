@@ -21,13 +21,14 @@ import {
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
   getObjKeysWithValues, processFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
-import { opportunity } from '../../constants/helpers'
+import { opportunity, sidebarResource } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import OpportunityContacts from "./OpportunityContacts";
 import AssignContactsDialog from "./AssignContactsDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
+import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -86,6 +87,8 @@ function OpportunityDetailsPage() {
   });
 
   const { opportunityResource, opportunityApi } = opportunity
+  const [projectSales, setProjectSales] = useState([]);
+  const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: opportunity.opportunityResource }]);
 
   useEffect(() => {
     if (permissions) {
@@ -96,16 +99,17 @@ function OpportunityDetailsPage() {
   useEffect(() => {
     if (id) {
       fetchOpportunityData();
+      fetchRelatedData();
     }
   }, [id]);
 
   useEffect(() => {
-    if (opportunityData?.staticData?.customerContacts &&
-      opportunityData.staticData?.customerContacts.length &&
+    if (opportunityData?.staticData?.customerContact &&
+      opportunityData.staticData?.customerContactslength &&
       customerContacts && customerContacts.length === 0) fetchCustomerContactData(false)
 
-    if (opportunityData?.staticData?.supplierContacts &&
-      opportunityData.staticData?.supplierContacts.length &&
+    if (opportunityData?.staticData?.supplierContact &&
+      opportunityData.staticData?.supplierContact.length &&
       supplierContacts && supplierContacts.length === 0) fetchSupplierContactData(false)
 
   }, [opportunityData])
@@ -131,6 +135,12 @@ function OpportunityDetailsPage() {
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 
+          if (data?.customerAccountName?.optionValue) {
+            setTypeCreateProjectSalesDialog((prevState) => [...prevState, { id: data?.customerAccountName?.optionValue, type: "customerAccount" }])
+          }
+          if (data?.supplierAccountName?.optionValue) {
+            setTypeCreateProjectSalesDialog((prevState) => [...prevState, { id: data?.supplierAccountName?.optionValue, type: "supplierAccount" }])
+          }
           setAllowedToEdit([...data.collaborator ?? [], data.owner].some(
             (d) => d?.optionValue === user?.user?._id
           ))
@@ -182,6 +192,26 @@ function OpportunityDetailsPage() {
     }
   }
 
+  const fetchRelatedData = () => {
+    axiosInstance()
+      .get(`${opportunityApi}/related/${id}`)
+      .then(({ data: { data } }) => {
+        setProjectSales(
+          data[sidebarResource.projectSales] &&
+            data[sidebarResource.projectSales][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.projectSales][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            : []
+        );
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const fetchSupplierContactData = (showDialog, useAccountList = false, accountList = []) => {
     let ids = []
 
@@ -207,6 +237,7 @@ function OpportunityDetailsPage() {
           if (!useAccountList) setShowAddSupplierContactsDialog(showDialog);
         }).catch(error => {
           setLoadingSupplierAccounts(false)
+          toastConfig.setToastConfig(error);
         })
     }
     else {
@@ -248,7 +279,7 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .get(`customer-contact?filterById=${filterById}`)
       .then(({ data: { data } }) => {
-        let assignedContacts = opportunityData.staticData?.customerContacts ?? []
+        let assignedContacts = opportunityData.staticData?.customerContact ?? []
         const updatedContacts = data.map(d => {
           d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item === d?._id) : false;
           return d
@@ -531,6 +562,15 @@ function OpportunityDetailsPage() {
                           recordsPerLine={recordsPerLine}
                         />
                       }
+                      {permissions?.projectSales?.isRead && (
+                        <ProjectInAccordion
+                          recordsPerLine={3}
+                          projectSales={projectSales}
+                          type={typeCreateProjectSalesDialog}
+                          fetchData={fetchRelatedData}
+                          permissions={permissions}
+                        />
+                      )}
                     </div>
                   </TabPanel>
                   <TabPanel value={currentTabIndex} index={1}>

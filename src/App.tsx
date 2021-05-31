@@ -47,7 +47,8 @@ import CreateProductCost from "./pages/ProductCost/CreateProductCost";
 import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
-import QuoteApproval from "./pages/Quote-Approval";
+import QuoteApproval from './pages/Quote-Approval'
+import QuoteDetail from './pages/QuoteBuilderCombined/QuoteDetail'
 import QuoteBuilderPage from "./pages/QuoteBuilder";
 import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
@@ -70,7 +71,8 @@ import UserProfilePage from "./pages/ProfilePage/index";
 import { CustomNotificationCountContext } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
-import DOAapproval from "./pages/DOA/DOAApproval";
+import DOAapproval from './pages/DOA/DOAApproval'
+import QuoteBuilderCombined from './pages/QuoteBuilderCombined'
 import Reminder from "./pages/Reminder";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import queryString from "query-string";
@@ -342,7 +344,7 @@ function App() {
           <PrivateRoute exact path="/attachment">
             <Attachments />
           </PrivateRoute>
-  
+          
           <PrivateRoute exact path="/calendar">
             <Calender />
           </PrivateRoute>
@@ -390,9 +392,10 @@ function App() {
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
-          <Route exact path={"/quote-builder/:id"}>
-            <QuoteBuilderPage />
-          </Route>
+
+          <PrivateRoute exact path={"/quote-builder/:id"} >
+            <QuoteDetail />
+          </PrivateRoute>
           <Route exact path={"/dashboards"}>
             <KpiDashboard />
           </Route>
@@ -412,6 +415,9 @@ function App() {
           <Route exact path={"/doa-request/:id"}>
             <DOAapproval />
           </Route>
+          <PrivateRoute exact path={'/quote-builder'}>
+            <QuoteBuilderCombined/>
+          </PrivateRoute>
 
           <PrivateRoute path="/:type">
             <Activity />

@@ -59,8 +59,8 @@ export default function AssignSupplierContactsDialog({
         setAssigning(true);
         const dataToSave = {
             _id: opportunityId,
-            supplierContacts: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
-            customerContacts: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
+            supplierContact: contactType === "supplier" ? getFilteredIds(currentContacts) : isDataAvailable("supplierContacts") ? getFilteredIds(contacts.supplierContacts) : [],
+            customerContact: contactType === "customer" ? getFilteredIds(currentContacts) : isDataAvailable("customerContacts") ? getFilteredIds(contacts.customerContacts) : [],
             notToBeRemoved: contacts && contacts?.notToBeRemoved ? contacts.notToBeRemoved : null
         };
 
@@ -155,12 +155,14 @@ export default function AssignSupplierContactsDialog({
                     disabled={isAssigning}
                     onClick={handleCloseDialog}
                     color="primary"
+                    size="small" 
                 >
                     Cancel
                 </Button>
                 <Button
                     onClick={handleAssignContacts}
                     color="primary"
+                    size="small" 
                 >
                     {isAssigning ? <CircularProgress size={22} /> : "Save"}
                 </Button>

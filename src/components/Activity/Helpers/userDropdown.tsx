@@ -76,14 +76,32 @@ export const UserDropdown = ({
           userId: _user._id,
           name: _user.firstName + " " + _user.lastName,
         }));
-        setUsers(userData);
+
+        if (Array.isArray(value) && value.length) {
+          let filteredOptions = value.filter(
+            (val) => userData.filter((u) => val.userId === u.userId).length <= 0
+          );
+
+          filteredOptions = filteredOptions.map((user) => ({
+            userId: user.userId,
+            name: user.userId,
+          }));
+
+          setUsers([...userData, ...filteredOptions]);
+        } else {
+          setUsers(userData);
+        }
       })
       .catch((err) => {});
   };
 
-  const setParticipants = (value) => {
+  const setParticipants = (value, reason) => {
     if (value) {
       if (multiple === true) {
+        if (reason === "clear" || reason === "clear-option") {
+          setFieldValue(name, []);
+        }
+
         value.forEach((val: any) => {
           if (typeof val === "string") {
             setTimeout(() => {
@@ -99,6 +117,15 @@ export const UserDropdown = ({
               userId: val.inputValue,
               name: "",
             });
+          } else {
+            const values = [];
+            value.forEach((val) => {
+              if (typeof val !== "string") {
+                values.push({ userId: val.userId });
+              }
+            });
+
+            setFieldValue(name, values);
           }
         });
       } else {
@@ -124,6 +151,7 @@ export const UserDropdown = ({
           return "";
         }}
         freeSolo
+        limitTags={5}
         filterOptions={(option, params) => {
           const filtered = filter(option, params) as UserOptionType[];
 
@@ -139,7 +167,7 @@ export const UserDropdown = ({
           return opt.userId === val.userId;
         }}
         filterSelectedOptions={false}
-        onChange={(e, value) => setParticipants(value)}
+        onChange={(e, value, reason) => setParticipants(value, reason)}
         value={
           users && multiple === true
             ? users.filter((data) =>
@@ -190,6 +218,7 @@ export const UserDropdown = ({
               Please fill participant's email and name
             </DialogContentText>
             <TextField
+              required
               autoFocus
               margin="dense"
               value={dialogValue.userId}
@@ -197,10 +226,11 @@ export const UserDropdown = ({
                 setDialogValue({ ...dialogValue, userId: event.target.value })
               }
               label="Participant Email"
-              type="text"
+              type="email"
             />
             <Box component="span" mx={1} />
             <TextField
+              required
               margin="dense"
               value={dialogValue.name}
               onChange={(event) =>
@@ -211,10 +241,10 @@ export const UserDropdown = ({
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="primary">
+            <Button size="small" onClick={handleClose} color="primary">
               Cancel
             </Button>
-            <Button type="submit" color="primary">
+            <Button size="small"  type="submit" color="primary">
               Add
             </Button>
           </DialogActions>
