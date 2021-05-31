@@ -111,9 +111,9 @@ export const opportunity = {
   opportunityApi: "/opportunity",
 };
 
-export const quoteBuilder={
-  qbResource:"quoteBuilder",
-  qbApi:"/quote-builder"
+export const quoteBuilder = {
+  qbResource: "quoteBuilder",
+  qbApi: "/quote-builder"
 }
 
 export const supplierAccount = {
@@ -689,4 +689,8 @@ export const setFieldsInAscendingOrder = (fieldsToOrder) => {
   });
 
   return customData;
+}
+
+export const generateUniqueId = () => {
+  return `id-${new Date().getTime()}`;
 }
