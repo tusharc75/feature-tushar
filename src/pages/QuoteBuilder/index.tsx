@@ -15,7 +15,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndCondition';
 import ChatRender from '../../components/Chatter';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import EmailDialog from './EmailDialog'
+import EmailDialog from '../../components/productBuilder/EmailDialog'
 import {
   Grid as GridDropTable,
   DragDropProvider,
@@ -659,7 +659,8 @@ const CreatePriceBuilder=(props)=>{
                                     Status: {QData["Quote_Status"]}
                                     </div>
                                     <div>
-                                        {loaded && <ChatRender id={QData["chatter"]}/>}
+                                        {/*Please check isLoaded props - Gagandeep*/}
+                                        {loaded && <ChatRender id={QData["chatter"]} isLoaded={false}/>}
                                     </div>
                                 </Grid>
                             </Grid> 

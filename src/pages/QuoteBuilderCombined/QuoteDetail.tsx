@@ -20,7 +20,7 @@ import _ from "lodash";
 import {
   customerAccount, supplierAccount, yyyyMMDD,
   stepsToIgnoreManualCompleteForOpportunity, supplierContact, customerContact,
-  getObjKeysWithValues, opportunityProcessFieldName, formatAmountWithCurrency
+  getObjKeysWithValues, processFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
 import { quoteBuilder } from '../../constants/helpers'
 import CustomSteps from "../../components/CustomSteps/CustomSteps";
@@ -116,9 +116,9 @@ function QuoteDetail() {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = quoteFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === opportunityProcessFieldName.toLowerCase());
+      const processSteps = quoteFields.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
       if (processSteps && processSteps.isRead && quoteData) {
-        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === quoteData[opportunityProcessFieldName]) + 1;
+        const currentStepToShow = processSteps.fieldData.option.findIndex(d => d.optionLabel === quoteData[processFieldName]) + 1;
         setActiveStep(currentStepToShow);
       }
     }
@@ -298,7 +298,7 @@ function QuoteDetail() {
               setSupplierAccountOptions(fieldData.option.map(option => ({ ...option, isSelected: false })))
             }
           }
-          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === opportunityProcessFieldName.toLowerCase());
+          const processSteps = data.find(d => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
           if (processSteps && processSteps.isRead) {
             setSteps(processSteps.fieldData.option.map(m => {
               return {
