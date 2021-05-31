@@ -347,6 +347,8 @@ const Leads = () => {
               isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
                 (d) => d.optionValue === user?.user?._id
               ),
+
+              convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
               relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
               relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
 
@@ -390,7 +392,7 @@ const Leads = () => {
   const generateLeadToOpportunityButton = ({
     _id,
     concatedName,
-    staticData,
+    convertedToOpportunity,
     [processFieldName]: leadProcess,
     isAllowedToUpdate,
   }) => {
@@ -420,7 +422,7 @@ const Leads = () => {
           </IconButton>
         </Tooltip>
       </>
-    ) : staticData && staticData["convertedToOpportunity"] ? (
+    ) : convertedToOpportunity ? (
       <>
         <Tooltip className="cursor-stop" title="This lead is already converted to opportunity">
           <IconButton aria-label="Convert to opportunity">
