@@ -14,7 +14,7 @@ import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -32,8 +32,8 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     await GetEvent(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setEvents(data);
-        onSetCount("Event", data.length)
-        setLoading(false);
+        onSetCount("Event", data.length);
+        setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
       .catch((err) => {
         setLoading(false);
@@ -66,7 +66,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchEvent();
         handleActivityRefresh();
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const handleClose = () => {
@@ -152,7 +152,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         maxWidth="md"
         onClose={handleClose}
         fullWidth
-        fullScreen={isMobile || isTablet }
+        fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
       >
         <CreateEvent
