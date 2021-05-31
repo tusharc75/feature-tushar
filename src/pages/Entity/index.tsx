@@ -281,7 +281,7 @@ const Entity: FC = () => {
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`
     }
 
     if (search) {
