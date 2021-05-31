@@ -25,7 +25,6 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
-import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomLoadingOverlay
 } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
@@ -38,7 +37,7 @@ import styles from "../../Leads/Header.module.scss";
 import emailStyles from './email.module.scss'
 import './email.scss'
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const tabs = {
     Inbox: 1,
@@ -156,6 +155,7 @@ const Email = () => {
     const [open, setOpen] = useState(false);
     const [emailId, setEmailId] = useState(null);
     const [currentTab, setCurrentTab] = useState(1)
+    const [initialCount, setInitialCount] = useState(0)
 
     const [gridApi, setGridApi] = useState(null);
     const [columnApi, setColumnApi] = useState(null);
@@ -200,15 +200,20 @@ const Email = () => {
 
         await GetEmails(JSON.stringify(filter), queryString)
             .then(({ data, count }) => {
+                let filteredData = []
                 data = data.map(obj => {
+                    let isCreatedByMe = obj?.createdBy?.user === user?.user?._id ? true : false
+                    if (currentTab === tabs.Inbox && !isCreatedByMe) filteredData.push(obj)
+                    if (currentTab === tabs.Sent && isCreatedByMe) filteredData.push(obj)
                     return {
                         ...obj,
                         id: obj._id,
                         createdByDate: obj?.createdBy?.date ?? '',
-                        isCreatedByMe: obj?.createdBy?.user === user?.user?._id ? true : false,
+                        isCreatedByMe
                     }
                 })
-                dispatch({ type: "initialize", data: data, count: count });
+                setInitialCount(count)
+                dispatch({ type: "initialize", data: filteredData, count: filteredData.length });
                 setEmailsCopy(data)
             })
             .catch((error) => {
@@ -330,7 +335,6 @@ const Email = () => {
         }
 
         if (search) {
-            console.log("🚀 ~ file: index.tsx ~ line 327 ~ getQueryString ~ search", search)
 
             deepFilter = `${deepFilter}&search=${search}`;
         }
@@ -393,6 +397,9 @@ const Email = () => {
         if (currentTab === tabs.Sent) {
             filteredEmails = emailsCopy.filter(email => email.isCreatedByMe)
         }
+        else if (currentTab === tabs.Inbox) {
+            filteredEmails = emailsCopy.filter(email => !email.isCreatedByMe)
+        }
         dispatch({ type: "initialize", data: filteredEmails, count: filteredEmails.length });
         setCurrentTab(currentTab)
     }
@@ -408,7 +415,7 @@ const Email = () => {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={3} className="d-flex align-items-center gap-1">
                         <HiOutlineMail className="headerLogo" />{" "}
-                        <span className="listingHeader">Email({rowCount}) </span>
+                        <span className="listingHeader">Email({initialCount})</span>
                         <ToggleButtonGroup
                             size="small"
                             className="ml-8"
@@ -417,7 +424,7 @@ const Email = () => {
                             onChange={handleTab}>
                             {Object.keys(tabs).map((k, index) => (
                                 <ToggleButton value={tabs[k]} key={index} className="l-2">
-                                    {k} {currentTab === tabs[k] ? `(${rowCount})` : ""}
+                                    {k}{currentTab === tabs[k] ? `(${rowCount})` : ""}
                                 </ToggleButton>
                             ))}
                         </ToggleButtonGroup>
