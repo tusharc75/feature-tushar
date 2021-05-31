@@ -48,7 +48,7 @@ const Activity = () => {
             { _id: referenceId, type: referenceType, name: data.name },
           ]);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     }
   }, [type, referenceId]);
 
@@ -80,6 +80,7 @@ const Activity = () => {
                   <SearchFilter
                     handleChangeFilter={handleChangeFilter}
                     filter={filter}
+                    activityName={type}
                   />
                 </Grid>
               </Grid>

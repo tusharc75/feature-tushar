@@ -299,8 +299,8 @@ export default function Contact(props) {
       case "updatedBy":
         return "updatedBy.user.concatedName";
 
-      case "relatedLead":
-        return "staticData.relatedLead.concatedName";
+      case "lead":
+        return "staticData.lead.concatedName";
 
       default:
         return field;

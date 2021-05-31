@@ -22,6 +22,7 @@ import moment from "moment";
 import currencies from "./currency_with_country.json";
 import { TransitionProps } from "@material-ui/core/transitions";
 import { Slide } from "@material-ui/core";
+import { orderBy } from 'lodash';
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -56,6 +57,10 @@ export const roleTypes = [
 export const userType = {
   brandAdmin: 2,
 };
+
+export const AgGridHeaderHeight = 40;
+export const AgGridRowHeight = 30;
+export const AgGridFloatingFiltersHeight = 38;
 
 export const gridPageSizes = [25, 50, 75];
 
@@ -110,6 +115,10 @@ export const entity = {
   entityResource: "entity", //  Key of sidebar object
   entityApi: "/entity",
 };
+export const quoteBuilder={
+  qbResource:"quoteBuilder",
+  qbApi:"/quote-builder"
+}
 
 export const supplierAccount = {
   accountApi: "supplier-account",
@@ -662,6 +671,26 @@ export const CustomDialogTransition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const AgGridHeaderHeight = 40;
-export const AgGridRowHeight = 30;
-export const AgGridFloatingFiltersHeight = 38;
+//  Don't use this for details screen as the model being passed is different
+export const setFieldsInAscendingOrder = (fieldsToOrder) => {
+
+  const sections = [];
+  const fieldsInAscendingOrder = orderBy(fieldsToOrder, ["order", "asc"]);
+
+  fieldsInAscendingOrder.forEach((field) => {
+    if (!sections.includes(field.sectionName)) {
+      sections.push(field.sectionName);
+    }
+  });
+
+  const customData = sections.map((name) => {
+    let fields = fieldsInAscendingOrder.filter(
+      (field) => field.sectionName === name
+    );
+
+    const sectionFields = fields.map((formData) => formData);
+    return { name, sectionFields };
+  });
+
+  return customData;
+}

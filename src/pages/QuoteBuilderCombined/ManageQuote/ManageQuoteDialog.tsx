@@ -17,10 +17,9 @@ import {
   yupSchema,
   getObjKeysWithValues,
   initializeDropdownById,
-  opportunity,
+  quoteBuilder,
   simplifyValues,
   customerAccount,
-  setFieldsInAscendingOrder
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -36,12 +35,9 @@ import currencies from "../../../constants/currency_with_country.json";
 import AddIcon from '@material-ui/icons/AddCircle'
 import InfoIcon from "@material-ui/icons/Info";
 import ManageAccountDialog from "../../Account/ManageAccount";
-import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "../../../constants/helpers";
-import { orderBy } from 'lodash'
 
 const arr = [...Array(9).keys()];
-export default function ManageOpportunityDialog({
+export default function ManageQuoteDialog({
   open,
   onSuccess,
   onClose,
@@ -51,11 +47,8 @@ export default function ManageOpportunityDialog({
   resource, // either called from customer account or supplier account
   isRedirectTodetailPage,
   userId = null,
-  contactId = null,
-  contactResource = null,
-  disableOwnerAndAccount = false,
 }) {
-  const { opportunityApi } = opportunity;
+  const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -63,7 +56,7 @@ export default function ManageOpportunityDialog({
     state: { user, selectedEntity, permissions },
   }: any = useData();
   const [disableOwnerSelection] = useState(
-    (!isNew && user.user._id !== dataToUpdate.owner.optionValue) || disableOwnerAndAccount
+    !isNew && user.user._id !== dataToUpdate.owner.optionValue
   );
 
   const [entityData, setEntityData] = useState({
@@ -79,7 +72,7 @@ export default function ManageOpportunityDialog({
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
   const [accountData, setAccountData] = useState([]);
-  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
+  const [newAddedAccountId, setNewAddedAccountId] = useState(null)
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -96,7 +89,7 @@ export default function ManageOpportunityDialog({
       setAccountData(customerAccountOptions.option);
     }
 
-    setFormsData(setFieldsInAscendingOrder(entityData.fields));
+    sortArray();
 
     return () => {
       setOwnerCollaboratorData([])
@@ -106,6 +99,27 @@ export default function ManageOpportunityDialog({
     }
 
   }, [entityData.fields]);
+
+
+  const sortArray = () => {
+    const sections = [];
+    entityData.fields.forEach((field) => {
+      if (!sections.includes(field.sectionName)) {
+        sections.push(field.sectionName);
+      }
+    });
+
+    const customData = sections.map((name) => {
+      let fields = entityData.fields.filter(
+        (field) => field.sectionName === name
+      );
+
+      const sectionFields = fields.map((formData) => formData);
+      return { name, sectionFields };
+    });
+
+    setFormsData(customData);
+  };
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(
@@ -120,7 +134,7 @@ export default function ManageOpportunityDialog({
   };
 
   useEffect(() => {
-    getOpportunityFields();
+    getQuoteFields();
 
     return () => {
       setCurrencySymbol(null)
@@ -131,9 +145,9 @@ export default function ManageOpportunityDialog({
     }
   }, []);
 
-  const getOpportunityFields = () => {
+  const getQuoteFields = () => {
     axiosInstance()
-      .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
+      .get(`/field?resource=Quote Builder&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         const newFields = [];
 
@@ -174,15 +188,15 @@ export default function ManageOpportunityDialog({
   };
 
   const onSubmit = (values) => {
-    isNew ? handleCreateOpportunity(values) : handleUpdateOpportunity(values);
+    isNew ? handleCreateQuote(values) : handleUpdateQuote(values);
   }
 
-  const handleCreateOpportunity = (values) => {
+  const handleCreateQuote = (values) => {
+    // values.closeDate = "03/03/2021"
     if (accountId) values["supplierAccountName"] = [accountId]
-    if (contactId && contactResource) values.staticData = { [contactResource]: [contactId], [resource]: [accountId] }
     setLoading(true);
     axiosInstance()
-      .post(`${opportunityApi}?entity=${selectedEntity}`, values)
+      .post(`${qbApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
         const newId = data.data._id;
         toastConfig.setToastConfig({
@@ -191,7 +205,7 @@ export default function ManageOpportunityDialog({
           message: data.message,
         });
         if (isRedirectTodetailPage)
-          history.push(`${opportunityApi}/detail/${newId}`);
+          history.push(`${qbApi}/${newId}`);
         setLoading(false);
         onSuccess(newId);
       })
@@ -201,12 +215,12 @@ export default function ManageOpportunityDialog({
       });
   };
 
-  const handleUpdateOpportunity = (values) => {
+  const handleUpdateQuote = (values) => {
     values = { ...values, _id: dataToUpdate._id };
     setLoading(true);
 
     axiosInstance()
-      .put(`${opportunityApi}?entity=${selectedEntity}`, values)
+      .put(`${qbApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -246,8 +260,6 @@ export default function ManageOpportunityDialog({
     <>
       <Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={onClose}
         open={open}
@@ -256,8 +268,8 @@ export default function ManageOpportunityDialog({
         <CustomDialogHeader
           title={
             isNew
-              ? "Create Opportunity"
-              : `Editing ${dataToUpdate.opportunityName}`
+              ? "Create Ouote Builder"
+              : `Editing ${dataToUpdate.quoteName}`
           }
           onClose={onClose}
         />
@@ -311,7 +323,6 @@ export default function ManageOpportunityDialog({
                                             md={permissions.customerAccount.isCreate ? 10 : 11}
                                           >
                                             <FormTypes
-                                              disabled={disableOwnerAndAccount}
                                               values={values}
                                               errors={errors}
                                               touched={touched}
@@ -558,7 +569,6 @@ export default function ManageOpportunityDialog({
                     type="button"
                     variant="outlined"
                     color="primary"
-                    size="small"
                     onClick={onClose}
                   >
                     Cancel
@@ -591,7 +601,7 @@ export default function ManageOpportunityDialog({
   );
 }
 
-ManageOpportunityDialog.propTypes = {
+ManageQuoteDialog.propTypes = {
   open: PropTypes.bool,
   onSuccess: PropTypes.func,
   onClose: PropTypes.any,
