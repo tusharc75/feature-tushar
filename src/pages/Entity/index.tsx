@@ -221,7 +221,6 @@ const Entity: FC = () => {
         <IconButton
           aria-label="Assign users"
           onClick={() => {
-            // alert(params.data._id)
             fetchEntityUser(params.data._id)
             setUsersDialogOpen(true)
           }}
