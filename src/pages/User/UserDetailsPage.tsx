@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Grid,
   Box,
@@ -35,7 +35,7 @@ import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDia
 import RoleEngine from "../../components/Shared/RoleEngine";
 import NewStepper from "../../components/Helpers/NewStepper";
 import DoaDialog from "../DoaSetup/ManageDoa/ManageDoaDialog";
-import { userType } from "../../constants/helpers";
+import { isObjectEmpty, userType } from "../../constants/helpers";
 import OpportunityAccordionInUserDetail from "./OpportunityAccordionInUserDetail";
 import LeadAccordionInUserDetailPage from "./LeadAccordionInUserDetailPage";
 import AccountAccordionDetail from "./AccountAccordionInDetail";
@@ -119,10 +119,8 @@ const UserDetailsPage = () => {
 
   const fetchUserData = async () => {
     setLoading(true);
-    try {
-      const {
-        data: { data },
-      } = await axiosInstance().get(`/user/${id}`);
+
+    await axiosInstance().get(`/user/${id}`).then(({ data: { data } }) => {
       handleMainPoints(data);
       const name = [data.firstName, data.lastName].filter((d) => d).join(" ");
 
@@ -169,32 +167,38 @@ const UserDetailsPage = () => {
 
       setUserPermissions(data.permissions);
       setLoading(false);
-    } catch (error) {
+    }).catch((error) => {
       toastConfig.setToastConfig(error);
-    }
-  };
+    });
+  }
 
   const fetchDoa = async () => {
-    setDoa([]);
     axiosInstance()
       .get(`/doa/${id}`)
-      .then(({ data: { data, count } }) => {
-        setDoa(
-          data?.doa.map((item) => {
-            return {
+      .then(({ data: { data } }) => {
+        let doaData = [];
+
+        data.doa.forEach((item) => {
+          //  When the user set in doa was deleted, we are getting {} in array like this [{}]
+          //  So added this check
+          if (!isObjectEmpty(item)) {
+            doaData.push({
               id: item.user?._id,
-              name: `${item.user.firstName} ${item.user.lastName}`,
-              firstName: item.user.firstName,
-              lastName: item.user.lastName,
+              name: [item.user?.firstName, item.user?.lastName].filter(f => f).join(" "),
+              firstName: item.user?.firstName,
+              lastName: item.user?.lastName,
               amount: item.amount,
-            };
-          })
-        );
-        setDoaCurrency(data?.doaCurrency)
+            });
+          }
+        });
+
+        setDoa(doaData);
+        setDoaCurrency(data.doaCurrency)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setLoading(false);
+        setDoa([]);
       });
   };
 
