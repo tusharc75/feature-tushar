@@ -1,16 +1,14 @@
-import React, { useContext, useEffect, useState, useCallback, useReducer } from 'react';
+import React, { useContext, useEffect, useState, useReducer } from 'react';
 import Layout from "../../components/Layout";
 import { useData } from '../../StateProvider/Provider';
 import {
     Box,
     Button,
-    Checkbox,
     Menu,
     MenuItem,
     Tooltip,
     IconButton,
     Grid,
-    TablePagination
 } from "@material-ui/core";
 import { Link } from 'react-router-dom'
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
@@ -28,13 +26,11 @@ import { termsAndCondition, gridPageSizes, isObjectEmpty } from '../../constants
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import _ from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import { AgGridColumn } from 'ag-grid-react';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 function reducer(state, action) {
@@ -260,27 +256,6 @@ export default function TermsAndCondition(props) {
         // customLoadingCellRenderer: CustomLoadingCellRenderer,
         // customNoRowsOverlay: CustomNoRowsOverlay
     };
-
-    //  If you want to do something once grid binding done
-    const onGridReady = (params) => {
-        setGridApi(params.api);
-        setColumnApi(params.columnApi)
-    }
-
-    const generateColumns = columns.map((column: any, index) => {
-        return <AgGridColumn
-            key={index}
-            field={column.field}
-            headerName={column.headerName}
-            filter={column.filter ?? "agTextColumnFilter"}
-            cellRenderer={column.cellRenderer ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
-        >
-        </AgGridColumn>
-    })
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;

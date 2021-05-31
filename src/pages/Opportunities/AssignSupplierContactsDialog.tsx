@@ -41,8 +41,6 @@ export default function AssignSupplierContactsDialog({
     const [isAssigning, setAssigning] = useState(false);
     const [selectedSupplierAccounts, setSelectedSupplierAccounts] = useState([]);
 
-    console.log('currentContacts', currentContacts)
-
     useEffect(() => {
         setSelectedSupplierAccounts(selectedSupplierAccountsList)
     }, [])
@@ -155,14 +153,14 @@ export default function AssignSupplierContactsDialog({
                     disabled={isAssigning}
                     onClick={handleCloseDialog}
                     color="primary"
-                    size="small" 
+                    size="small"
                 >
                     Cancel
                 </Button>
                 <Button
                     onClick={handleAssignContacts}
                     color="primary"
-                    size="small" 
+                    size="small"
                 >
                     {isAssigning ? <CircularProgress size={22} /> : "Save"}
                 </Button>

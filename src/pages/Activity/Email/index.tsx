@@ -10,7 +10,7 @@ import moment from "moment";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import { useData } from "../../../StateProvider/Provider";
 import CustomContainer from "../../../components/CustomContainer";
-import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TablePagination } from '@material-ui/core'
+import { Button, MenuItem, Menu, Typography, Tooltip, IconButton } from '@material-ui/core'
 import { ExpandMore } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
@@ -23,12 +23,11 @@ import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail'
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import { AgGridColumn } from 'ag-grid-react';
 import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
 import {
     CustomLoadingOverlay
 } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomGridHeaderOptions from "../../../components/AgGridComponents/CustomGridHeaderOptions";
 import {
     gridPageSizes,
     isObjectEmpty,
@@ -152,7 +151,6 @@ const Email = () => {
     const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
     const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false);
-    const [query, setQuery] = useState({ page: 0, limit: 25 });
     const [open, setOpen] = useState(false);
     const [emailId, setEmailId] = useState(null);
     const [currentTab, setCurrentTab] = useState(1)
@@ -291,27 +289,6 @@ const Email = () => {
         // customNoRowsOverlay: CustomNoRowsOverlay
     };
 
-    const onGridReady = (params) => {
-        setGridApi(params.api);
-        setColumnApi(params.columnApi)
-    }
-
-    const generateColumns = columns.map((column: any, index) => {
-        return <AgGridColumn
-            key={index}
-            width={column.width}
-            field={column.field}
-            headerName={column.headerName}
-            filter={column.filter ?? "agTextColumnFilter"}
-            cellRenderer={column.cellRenderer ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
-        >
-        </AgGridColumn>
-    })
-
     const getQueryString = () => {
         let deepFilter = `&page=${page}&limit=${limit}`;
 
@@ -319,7 +296,6 @@ const Email = () => {
             const updatedFilters = [];
 
             Object.keys(filters).map(field => {
-                console.log('field', field, '----', filters[field])
                 if (filters[field].filter === "me") {
                     filters[field].filter = user?.user?.email
                 }
