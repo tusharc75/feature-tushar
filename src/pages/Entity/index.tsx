@@ -133,19 +133,13 @@ const Entity: FC = () => {
   }: any = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
-  const [okButtonLoading, setOkButtonLoading] = useState(false);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
   const [entityPermissions, setEntityPermissions] = useState({
     isCreate: false,
     isUpdate: false,
     isRead: false,
     isDelete: false,
   });
-  const [
-    showDeleteWarningConfirmBox,
-    setShowDeleteWarningConfirmBox,
-  ] = useState(false);
+
 
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
   const [usersDialogLoding, setUsersDialogLoding] = useState(false);
@@ -265,27 +259,12 @@ const Entity: FC = () => {
       case "updatedBy":
         return "updatedBy.user.concatedName";
 
-      case "relatedOpportunity":
-        return "staticData.opportunity.opportunityName";
-
       default:
         return field;
     }
   }
 
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
 
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case "owner":
-        return "owner.optionLabel";
-
-      default:
-        return field;
-    }
-  }
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -303,7 +282,7 @@ const Entity: FC = () => {
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
     }
 
     if (search) {
@@ -333,8 +312,6 @@ const Entity: FC = () => {
           let res = {
             ...restProperties,
             id: u._id,
-
-            isChecked: false,
             createdBy: u.createdBy?.user?.concatedName,
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
@@ -374,49 +351,7 @@ const Entity: FC = () => {
     setUsersDialogOpen(false);
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row) {
-        setDeleteRecord({ id: row._id, name: row.concatedName });
-      }
-    } else {
-      if (
-        selectedRecords.find((d) => d.ownerId != user.user._id)
-      ) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
-  const handleDeleteEntity = async () => {
-    if (deleteRecord.id || selectedRecords.length > 0) {
-      setOkButtonLoading(true);
-
-      axiosInstance()
-        .put(`${entityApi}/remove`,
-          { ids: deleteRecord.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
-          });
-          setIsConformDialogVisible(false);
-          setOkButtonLoading(false);
-          if (deleteRecord.id) { setDeleteRecord({ id: null, name: null }); }
-          fetchEntity();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setOkButtonLoading(false);
-        });
-    }
-  };
-
+  
   return (
     <Layout>
       <Grid container className="headerbox">
@@ -445,10 +380,8 @@ const Entity: FC = () => {
             searchVal={search}
             entityPermissions={entityPermissions}
             onCreate={handleCreate}
-            showConfirmBox={showConfirmBox}
             openUserDialog={handleOpenDialog}
             userActionDiabled={selectedRecords.length !== 1} //single select entity can assign user
-            canDelete={dataRows.filter((d) => d.isChecked).length === 0}
           />
         </div>
 
@@ -476,32 +409,6 @@ const Entity: FC = () => {
             }}
           />
         )}
-        {
-          showDeleteWarningConfirmBox ? (
-            <MessageDialog
-              open={showDeleteWarningConfirmBox}
-              message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-              onClose={() => setShowDeleteWarningConfirmBox(false)}
-            />
-          ) : null
-        }
-        {
-          isConfirmDialogVisible ? (
-            <ConfirmationDialog
-              open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete entity ${deleteRecord.name || ""
-                }?`}
-              onClose={() => {
-                if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
-                setIsConformDialogVisible(false);
-              }}
-              okBtnLoading={okButtonLoading}
-              onOk={handleDeleteEntity}
-            />
-          ) : null
-        }
-
-
       </CustomContainer >
     </Layout >
   );
