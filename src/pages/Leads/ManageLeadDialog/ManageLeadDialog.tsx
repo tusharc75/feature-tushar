@@ -12,7 +12,7 @@ import {
   getObjKeysWithValues,
   simplifyValues,
   initializeDropdownById,
-  setFieldsInAscendingOrder
+  setFieldsInAscendingOrder,
 } from "../../../constants/helpers";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -35,7 +35,7 @@ export default function ManageLeadDialog({
   dataToUpdate,
   leadApi,
   userId = null,
-  isRedirectToDetailPage = true
+  isRedirectToDetailPage = true,
 }) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -47,7 +47,7 @@ export default function ManageLeadDialog({
     !isNew && user.user._id !== dataToUpdate.owner.optionValue
   );
 
-  const [entityData, setEntityData] = useState({
+  const [leadData, setLeadData] = useState({
     fields: [],
     initialValues: {},
   });
@@ -59,7 +59,7 @@ export default function ManageLeadDialog({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const ownerCollabOptions = entityData.fields.filter(
+    const ownerCollabOptions = leadData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );
     if (ownerCollabOptions.length > 0) {
@@ -68,9 +68,8 @@ export default function ManageLeadDialog({
       setCollaboratorData(ownerCollabOptions[0].option);
     }
 
-    setFormsData(setFieldsInAscendingOrder(entityData.fields));
-
-  }, [entityData.fields]);
+    setFormsData(setFieldsInAscendingOrder(leadData.fields));
+  }, [leadData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerData(
@@ -85,7 +84,7 @@ export default function ManageLeadDialog({
   };
 
   useEffect(() => {
-    if (entityData.fields.length === 0) {
+    if (leadData.fields.length === 0) {
       getLeadFields();
     }
   }, []);
@@ -101,14 +100,17 @@ export default function ManageLeadDialog({
             data
               .filter((d) => d.isCreate)
               .map((_f) => {
-
                 if (isNew && userId && _f.fieldData.fieldName === "owner") {
-                  _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
+                  _f = initializeDropdownById(
+                    _f,
+                    _f.fieldData.fieldName,
+                    userId
+                  );
                 }
-                newFields.push(_f.fieldData)
+                newFields.push(_f.fieldData);
               });
 
-            setEntityData({
+            setLeadData({
               fields: newFields,
               initialValues: getObjKeys("", newFields),
             });
@@ -116,7 +118,7 @@ export default function ManageLeadDialog({
             data
               .filter((d) => d.isUpdate)
               .map((_f) => newFields.push(_f.fieldData));
-            setEntityData({
+            setLeadData({
               fields: newFields,
               initialValues: getObjKeysWithValues(dataToUpdate, newFields),
             });
@@ -133,7 +135,7 @@ export default function ManageLeadDialog({
     setErrors
   ) => {
     if (Object.keys(errors).length) {
-      entityData.fields.forEach((input) => {
+      leadData.fields.forEach((input) => {
         if (input.required || values[input.fieldName]) {
           setTouched(input.fieldName, true);
         }
@@ -193,6 +195,7 @@ export default function ManageLeadDialog({
   return (
     <Dialog
       maxWidth="md"
+      fullWidth
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
@@ -204,22 +207,24 @@ export default function ManageLeadDialog({
         title={
           isNew
             ? "Create Lead"
-            : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName].filter(f => f).join(" ")}`
+            : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName]
+                .filter((f) => f)
+                .join(" ")}`
         }
         onClose={onClose}
       />
 
-      {entityData.fields.length === 0 && (
+      {leadData.fields.length === 0 && (
         <CustomDialogContent>
           <CommonSkeleton lenArray={arr} />
         </CustomDialogContent>
       )}
-      {entityData.fields.length > 0 && (
+      {leadData.fields.length > 0 && (
         <Formik
-          initialValues={entityData.initialValues}
-          validationSchema={yupSchema(entityData.fields)}
+          initialValues={leadData.initialValues}
+          validationSchema={yupSchema(leadData.fields)}
           validateOnMount
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({
             values,
@@ -235,81 +240,85 @@ export default function ManageLeadDialog({
                 <Form>
                   {formsData &&
                     formsData.map((form, i) => {
-                      return form.name && <div key={i}>
-                        <h2 className="form-label-style">{form.name}</h2>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field) => (
-                              <Grid
-                                key={field.fieldName}
-                                item
-                                xs={12}
-                                sm={6}
-                                md={6}
-                              >
-                                {field.fieldName === "owner" ? (
-                                  <FormTypes
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={ownerData}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                    disabled={disableOwnerSelection}
-                                    onOpen={() => {
-                                      onOwnerDropdownOpen(
-                                        values["collaborator"]
-                                      );
-                                    }}
-                                  />
-                                ) : field.fieldName === "collaborator" ? (
-                                  <FormTypes
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={collaboratorData}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                    onOpen={() => {
-                                      onCollabOwnerMultiselectOpen(
-                                        values["owner"]
-                                      );
-                                    }}
-                                  />
-                                ) : (
-                                  <FormTypes
-                                    // {...rest}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={setFieldValue}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={true}
-                                    size="small"
-                                  />
-                                )}
+                      return (
+                        form.name && (
+                          <div key={i}>
+                            <h2 className="form-label-style">{form.name}</h2>
+                            <Box marginY={2}>
+                              <Grid spacing={3} container>
+                                {form.sectionFields.map((field) => (
+                                  <Grid
+                                    key={field.fieldName}
+                                    item
+                                    xs={12}
+                                    sm={6}
+                                    md={6}
+                                  >
+                                    {field.fieldName === "owner" ? (
+                                      <FormTypes
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={ownerData}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                        disabled={disableOwnerSelection}
+                                        onOpen={() => {
+                                          onOwnerDropdownOpen(
+                                            values["collaborator"]
+                                          );
+                                        }}
+                                      />
+                                    ) : field.fieldName === "collaborator" ? (
+                                      <FormTypes
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={collaboratorData}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                        onOpen={() => {
+                                          onCollabOwnerMultiselectOpen(
+                                            values["owner"]
+                                          );
+                                        }}
+                                      />
+                                    ) : (
+                                      <FormTypes
+                                        // {...rest}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={setFieldValue}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={true}
+                                        size="small"
+                                      />
+                                    )}
+                                  </Grid>
+                                ))}
                               </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
+                            </Box>
+                          </div>
+                        )
+                      );
                     })}
                 </Form>
               </CustomDialogContent>
@@ -331,8 +340,12 @@ export default function ManageLeadDialog({
                   color="primary"
                   disabled={
                     // loading || Object.keys(errors).length > 0 ? true : false
-                    Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
-                    Object.values(simplifyValues(values, entityData.fields)).toString()
+                    Object.values(
+                      simplifyValues(leadData.initialValues, leadData.fields)
+                    ).toString() ===
+                    Object.values(
+                      simplifyValues(values, leadData.fields)
+                    ).toString()
                   }
                   onClick={(e) => {
                     e.preventDefault();
