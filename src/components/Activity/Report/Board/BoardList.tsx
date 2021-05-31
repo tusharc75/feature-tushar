@@ -4,11 +4,13 @@ import { Add } from "@material-ui/icons";
 import { useDrop } from "react-dnd";
 import update from "immutability-helper";
 import { camelCase } from "lodash";
+import { isMobile, isTablet } from "react-device-detect";
 
 import { BoardBox } from "./BoardBox";
 import { CreateTask } from "../../Task/CreateTask";
 import { CreateCase } from "../../Case/CreateCase";
 import { useData } from "../../../../StateProvider/Provider";
+import { CustomDialogTransition } from "../../../../constants/helpers";
 
 export const BoardList = ({
   status,
@@ -102,6 +104,8 @@ export const BoardList = ({
         onClose={handleCloseDialog}
         fullWidth
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
       >
         {type === "task" ? (
           <CreateTask

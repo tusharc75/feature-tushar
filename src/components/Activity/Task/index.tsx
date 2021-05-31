@@ -14,7 +14,7 @@ import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -32,8 +32,9 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     await GetTask(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setTask(data);
-        onSetCount("Task", data.length)
-        setLoading(false);
+        onSetCount("Task", data.length);
+
+        setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
       .catch((err) => {
         setLoading(false);
@@ -66,7 +67,7 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchTask();
         handleActivityRefresh();
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const handleClose = () => {
