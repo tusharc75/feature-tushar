@@ -694,3 +694,7 @@ export const setFieldsInAscendingOrder = (fieldsToOrder) => {
 
   return customData;
 }
+
+export const generateUniqueId = () => {
+  return `id-${new Date().getTime()}`;
+}

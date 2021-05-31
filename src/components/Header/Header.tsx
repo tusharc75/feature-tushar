@@ -287,7 +287,7 @@ const Header = ({ toggleDrawer }) => {
 
   const logoutUser = async () => {
     try {
-      if (!isEmpty(account)){
+      if (!isEmpty(account)) {
         await instance.logoutPopup({
           account: account
         });
@@ -355,6 +355,7 @@ const Header = ({ toggleDrawer }) => {
         data.map((d, index) => {
           return <div style={{ borderBottom: d.read ? "1px solid lightgrey" : "1px solid white" }}
             className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
+            key={index}
             onClick={() => {
               if (d.read == false) {
                 axiosInstance().put("/user/notification/read", {
@@ -365,10 +366,13 @@ const Header = ({ toggleDrawer }) => {
                   toastConfig.setToastConfig(error);
                 })
               }
+
               if (d?.entity) {
                 handleSelectedEnity(d.entity)
               }
-              history.push(`${d.resourcePath}/${d.resourceId}`)
+
+              history.push(d.resourceId ? `${d.resourcePath}/${d.resourceId}` : d.resourcePath)
+
             }}>
             {
               <>
