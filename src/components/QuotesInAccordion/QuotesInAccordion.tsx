@@ -77,7 +77,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes = null , fetchData = null, quoteBuilderPermission }) {
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission }) {
     const history = useHistory();
     const {
         state: { selectedEntity },
