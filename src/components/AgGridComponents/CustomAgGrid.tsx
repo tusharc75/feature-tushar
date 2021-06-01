@@ -37,12 +37,13 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
             minWidth={column.width ?? 250}
             flex={1}
             filterParams={customFilterParams}
+            comparator={() => { return 0; }}
         // floatingFilterComponent={column.floatingFilterComponent ?? null}
         // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
         //   suppressFilterButton: true,
         // }}
         >
-        </AgGridColumn>
+        </AgGridColumn >
     })
 
     return (
@@ -60,6 +61,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     floatingFiltersHeight={AgGridFloatingFiltersHeight}
                     rowHeight={AgGridRowHeight}
                     frameworkComponents={frameworkComponents}
+                    enableCellChangeFlash={false}
                     defaultColDef={{
                         resizable: true,
                         floatingFilter: true,
@@ -116,7 +118,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     {generateColumns}
 
                     {
-                        allowAction && <AgGridColumn width={actionWidth} headerName="Actions"
+                        allowAction && <AgGridColumn width={actionWidth} field="actions" headerName="Actions"
                             pinned={(isMobile || isTablet) ? false : "right"}
                             lockPinned={(isMobile || isTablet) ? false : true}
                             resizable={false} sortable={false}
