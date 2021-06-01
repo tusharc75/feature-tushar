@@ -386,7 +386,7 @@ const ContactDetailsPage = (props) => {
             isNew={false}
             open={openUpdateDialog}
             onClose={closeUpdateDialog}
-            entityData={{
+            contactData={{
               fields: contactFields.map((f) => {
                 return f.fieldData;
               }),

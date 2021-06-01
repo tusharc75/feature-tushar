@@ -336,6 +336,15 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         </Box >
     )
 
+    const onUploadFile = file => {
+        if (checkImageUrl(file)) {
+            imageAttachments.push(file)
+        }
+        else {
+            setOtherAttachments((prevState) => ([...prevState, file]))
+        }
+    }
+
     return <>
         <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
         {loading ?
@@ -476,7 +485,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 size="small"
                                                                 setFieldValue={(name, file) => {
                                                                     setFieldValue("file", file);
-                                                                    setOtherAttachments((prevState) => ([...prevState, file]))
+                                                                    onUploadFile(file)
                                                                 }}
                                                                 usePublicUrlforFileUpload={true}
                                                                 doNotShowUploadedFile={true}

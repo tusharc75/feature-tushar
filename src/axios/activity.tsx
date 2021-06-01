@@ -175,9 +175,7 @@ export const GetNotes = async (filter) => {
 
 export const GetEmails = async (filter, params = null) => {
     let apiUrl = `/email/my?filter=${filter}`
-    if (params) {
-        apiUrl = getSearchQuery(apiUrl, params);
-    }
+    if (params) apiUrl = `${apiUrl}${params}`
     const { data } = await api().get(apiUrl);
     return data;
 };

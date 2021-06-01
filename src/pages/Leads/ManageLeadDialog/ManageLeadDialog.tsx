@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from "react";
-import { Box, Button, CircularProgress, Grid } from "@material-ui/core";
+import { useEffect, useState, useContext } from "react";
+import { Box, Button, Grid } from "@material-ui/core";
 import { Formik, Form } from "formik";
 import { useHistory } from "react-router-dom";
 import Dialog from "@material-ui/core/Dialog";
@@ -57,6 +57,7 @@ export default function ManageLeadDialog({
   const [ownerData, setOwnerData] = useState([]);
   const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
     const ownerCollabOptions = leadData.fields.filter(
@@ -91,6 +92,7 @@ export default function ManageLeadDialog({
 
   const getLeadFields = () => {
     if (selectedEntity) {
+      setLoadingData(true);
       axiosInstance()
         .get(`/field?resource=Lead&entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
@@ -114,6 +116,7 @@ export default function ManageLeadDialog({
               fields: newFields,
               initialValues: getObjKeys("", newFields),
             });
+            setTimeout(() => setLoadingData(false), 500);
           } else {
             data
               .filter((d) => d.isUpdate)
@@ -122,6 +125,7 @@ export default function ManageLeadDialog({
               fields: newFields,
               initialValues: getObjKeysWithValues(dataToUpdate, newFields),
             });
+            setTimeout(() => setLoadingData(false), 500);
           }
         });
     }
@@ -214,12 +218,12 @@ export default function ManageLeadDialog({
         onClose={onClose}
       />
 
-      {leadData.fields.length === 0 && (
+      {loadingData && (
         <CustomDialogContent>
           <CommonSkeleton lenArray={arr} />
         </CustomDialogContent>
       )}
-      {leadData.fields.length > 0 && (
+      {!loadingData && leadData.fields.length > 0 && (
         <Formik
           initialValues={leadData.initialValues}
           validationSchema={yupSchema(leadData.fields)}
@@ -343,9 +347,9 @@ export default function ManageLeadDialog({
                     Object.values(
                       simplifyValues(leadData.initialValues, leadData.fields)
                     ).toString() ===
-                    Object.values(
-                      simplifyValues(values, leadData.fields)
-                    ).toString()
+                      Object.values(
+                        simplifyValues(values, leadData.fields)
+                      ).toString() || loading
                   }
                   onClick={(e) => {
                     e.preventDefault();
