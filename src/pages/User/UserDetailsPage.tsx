@@ -247,7 +247,7 @@ const UserDetailsPage = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       name: `${data.firstName} ${data.lastName}`,
-      phone: data.phone || "",
+      phone: data.mobileNo || "",
       email: data.email || "",
     };
     setMainPoints(tempMp);
