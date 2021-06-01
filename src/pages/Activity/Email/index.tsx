@@ -23,7 +23,6 @@ import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail'
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import { AgGridColumn } from 'ag-grid-react';
 import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
 import {
     CustomLoadingOverlay
@@ -145,7 +144,8 @@ const Email = () => {
     const { referenceType, referenceId } = parsed;
 
     const [filter, setFilter] = useState([]);
-    const [emailsCopy, setEmailsCopy] = useState([]);
+    const [inboxEmails, setInboxEmails] = useState([]);
+    const [sentEmails, setSentEmails] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [deleteRecord, setDeleteRecord] = useState(null)
     const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false)
@@ -157,16 +157,19 @@ const Email = () => {
     const [totalCount, setTotalCount] = useState(0)
 
     const [gridApi, setGridApi] = useState(null);
-    const [columnApi, setColumnApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
     const [columns, setColumns] = useState([
         { field: "to", headerName: "Recipient", show: true, disabled: true, cellRenderer: "recipentRenderer" },
         {
-            field: "subject", headerName: "Subject - Message", show: true,
-            width: 700,
-            cellRenderer: "subjectMessageRenderer"
+            field: "subject", headerName: "Subject", show: true,
+            cellRenderer: "SubjectRenderer"
+        },
+        {
+            field: "", headerName: "Message", show: true,
+            filter: false, sortable: false,
+            cellRenderer: "MessageRenderer"
         },
         {
             field: "createdAt", headerName: "Created At", show: true,
@@ -203,29 +206,34 @@ const Email = () => {
 
         await GetEmails(JSON.stringify(filter), queryString)
             .then(({ data, count }) => {
-                let filteredData = []
-                data = data.map(obj => {
+                let inboxEmailsData = [], sentEmails = []
+                data = data.forEach(obj => {
+                    const { createdBy, ...rest } = obj
                     let isCreatedByMe = obj?.createdBy?.user === user?.user?._id ? true : false
                     let currentObject = {
-                        ...obj,
+                        ...rest,
                         id: obj._id,
                         createdByDate: obj?.createdBy?.date ?? '',
+                        createdByUser: obj?.createdBy?.user,
                         isCreatedByMe
                     }
-                    if (currentTab === tabs.Inbox && !isCreatedByMe) filteredData.push(currentObject)
-                    if (currentTab === tabs.Sent && isCreatedByMe) filteredData.push(currentObject)
-                    return currentObject
+                    if (isCreatedByMe) sentEmails.push(currentObject)
+                    else inboxEmailsData.push(currentObject)
                 })
+                dispatch({
+                    type: "initialize",
+                    data: currentTab === tabs.Inbox ? inboxEmailsData : sentEmails,
+                    count: currentTab === tabs.Inbox ? inboxEmailsData.length : sentEmails.length
+                });
+                setSentEmails(sentEmails)
                 setTotalCount(count)
-                dispatch({ type: "initialize", data: filteredData, count: filteredData.length });
-                setEmailsCopy(data)
+                setInboxEmails(inboxEmailsData)
             })
             .catch((error) => {
                 dispatch({ type: "loading", loading: false });
                 toastConfig.setToastConfig(error);
             });
     };
-
 
     const handleChangeFilter = (value) => {
         if (page !== 0) dispatch({ type: "pageChange", page: 0 });
@@ -270,10 +278,14 @@ const Email = () => {
         </span>
     )
 
-    const SubjectMessageRenderer = params => (<div className={emailStyles.emailMessageConatiner} >
-        <Typography > {params.data?.subject ?? "(no subject) "} - </Typography>
-        <Typography noWrap={false} display="inline"
-            className={emailStyles.emailMessage}> {params.data.message ? reactHtmlparser(params.data.message, { transform }) : null}
+    const SubjectRenderer = params => (<div className={emailStyles.emailMessageConatiner} >
+        <Typography > {params.data?.subject ?? "(no subject) "} </Typography>
+    </div >)
+
+    const MessageRenderer = params => (<div className={emailStyles.emailMessageConatiner} >
+        <Typography display="inline"
+            className={emailStyles.emailMessage}>
+            {params.data.message ? reactHtmlparser(params.data.message, { transform }) : null}
         </Typography>
     </div >)
 
@@ -284,7 +296,8 @@ const Email = () => {
 
     const frameworkComponents = {
         recipentRenderer: RecipentRenderer,
-        subjectMessageRenderer: SubjectMessageRenderer,
+        SubjectRenderer: SubjectRenderer,
+        MessageRenderer: MessageRenderer,
         createdByDate: CreatedByDateRenderer,
         actionsRenderer: ActionsRenderer,
         customLoadingOverlay: CustomLoadingOverlay,
@@ -300,7 +313,7 @@ const Email = () => {
             const updatedFilters = [];
 
             Object.keys(filters).map(field => {
-                if (filters[field].filter === "me") {
+                if (filters[field].filter.toLowerCase() === "me") {
                     filters[field].filter = user?.user?.email
                 }
                 updatedFilters.push({
@@ -374,14 +387,11 @@ const Email = () => {
     }
 
     const handleTab = (e, currentTab) => {
-        let filteredEmails = [...emailsCopy]
-        if (currentTab === tabs.Sent) {
-            filteredEmails = emailsCopy.filter(email => email.isCreatedByMe)
-        }
-        else if (currentTab === tabs.Inbox) {
-            filteredEmails = emailsCopy.filter(email => !email.isCreatedByMe)
-        }
-        dispatch({ type: "initialize", data: filteredEmails, count: filteredEmails.length });
+        dispatch({
+            type: "initialize",
+            data: currentTab === tabs.Sent ? sentEmails : inboxEmails,
+            count: currentTab === tabs.Sent ? sentEmails.length : inboxEmails.length
+        });
         setCurrentTab(currentTab)
     }
 

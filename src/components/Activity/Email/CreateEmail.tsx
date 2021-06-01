@@ -36,6 +36,11 @@ import ImagePreview from "./ImagePreview"
 import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
+import { FiFileText } from 'react-icons/fi'
+import { FaFileAlt, FaRegFilePdf } from 'react-icons/fa'
+import { GrDocumentCsv } from 'react-icons/gr'
+import { RiFileExcel2Fill } from 'react-icons/ri'
+import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file/index"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -73,6 +78,32 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+const fileIcons = [
+    {
+        extensions: [".txt", ".rtf"],
+        source: textFileIcon
+    },
+    {
+        extensions: [".doc", ".docx", ".docs"],
+        source: docIcon
+    },
+    {
+        extensions: [".pdf"],
+        source: pdfFileIcon
+    },
+    {
+        extensions: [".xlsx", ".xml", ".xls", ".xlsm", ".xlt", ".xltm", ".xltx", ".xlw"],
+        source: excelSheetIcon
+    },
+    {
+        extensions: [".csv"],
+        source: csvIcon
+    },
+    {
+        extensions: [".pot", ".potm", ".potx", ".ppa", ".ppam", ".pptx", ".pptm", ".ppt", ".ppsx"],
+        source: pptIcon
+    }
+]
 export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) => {
 
     const toastConfig = useContext(CustomToastContext);
@@ -252,8 +283,52 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const handleDeleteImageAttachment = (url) => {
         setImageAttachments(imageAttachments.filter(currentUrl => currentUrl !== url))
     }
+    const getFileIconSrc = file => {
+        let extension = file.substring(file.lastIndexOf("."),).toLowerCase()
+        let data = fileIcons.find(o => (o.extensions.indexOf(extension) >= 0))
+        if (data && data?.source) return data.source
+    }
 
     const classes = useStyles();
+
+    const renderFileThumbnails = (
+        <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+            {
+                otherAttachments && otherAttachments.length > 0 ?
+                    <>
+                        {otherAttachments.map((attachment, i) => {
+                            return <>
+                                <Grid item sm={4} xs={6} md={3} xl={3}>
+                                    <Paper className={emailStyles.fileContainer}>
+                                        <img src={getFileIconSrc(attachment)}
+                                            className={emailStyles.file}
+                                            alt="attchment" />
+                                        <Typography noWrap variant="body2" >
+                                            {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attchment"}
+                                        </Typography>
+                                        < div className={emailStyles.fileOverlay}>
+                                            <Typography variant="subtitle2" >
+                                                {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attchment"}
+                                            </Typography>
+                                            <IconButton className={emailStyles.text}>
+                                                {
+                                                    emailId && <a href={`${attachment}`}
+                                                        download={true}>
+                                                        <GoArrowDown color="white" size={21} />
+                                                    </a>
+                                                }
+                                            </IconButton>
+                                        </div>
+                                    </Paper>
+                                </Grid>
+                            </>
+                        })
+                        }
+                    </>
+                    : null
+            }
+        </Grid >
+    )
     const renderImageAttachments = (
         <Grid container spacing={1} className={emailStyles.createEmailContainer}>
             {
@@ -289,6 +364,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                     : null
             }
         </Grid >
+
     )
 
     const renderOtherAttachements = (
@@ -338,7 +414,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
 
     const onUploadFile = file => {
         if (checkImageUrl(file)) {
-            imageAttachments.push(file)
+            setImageAttachments((prevState) => ([...prevState, file]));
         }
         else {
             setOtherAttachments((prevState) => ([...prevState, file]))
@@ -362,7 +438,6 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                             <CustomDialogContent>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
                                     <MuiPickersUtilsProvider utils={MomentUtils}>
-
                                         <Box padding={1} >
                                             {emailId ?
                                                 <Fragment>
@@ -377,7 +452,8 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                     <Box mt={2}>
                                                         <div dangerouslySetInnerHTML={{ __html: initialValues.content || initialValues.message }} />
                                                     </Box>
-                                                    {renderOtherAttachements}
+                                                    {/* {renderOtherAttachements} */}
+                                                    {renderFileThumbnails}
                                                     {renderImageAttachments}
                                                     <Box mt={2}>
                                                         <RelatedToDispay relatedTo={initialValues.relatedTo} />

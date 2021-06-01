@@ -6,7 +6,7 @@ import { CreateEmail } from "./Email/CreateEmail";
 import Dialog from "@material-ui/core/Dialog";
 import { useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
 const ActivityModelHandler = (props) => {
   const {
@@ -15,6 +15,7 @@ const ActivityModelHandler = (props) => {
     fromCalender,
     setActivityData,
     fetchBoard,
+    onClose = null
   } = props;
   const history = useHistory();
 
@@ -22,6 +23,8 @@ const ActivityModelHandler = (props) => {
     if (fromCalender) {
       fetchBoard();
       setActivityData(null);
+    } else if (onClose) {
+      onClose()
     } else {
       history.push({
         pathname: "/" + activityType,
