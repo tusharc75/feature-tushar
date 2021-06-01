@@ -36,10 +36,6 @@ import ImagePreview from "./ImagePreview"
 import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
-import { FiFileText } from 'react-icons/fi'
-import { FaFileAlt, FaRegFilePdf } from 'react-icons/fa'
-import { GrDocumentCsv } from 'react-icons/gr'
-import { RiFileExcel2Fill } from 'react-icons/ri'
 import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file/index"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
@@ -304,11 +300,11 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                             className={emailStyles.file}
                                             alt="attchment" />
                                         <Typography noWrap variant="body2" >
-                                            {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attchment"}
+                                            {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attachment"}
                                         </Typography>
                                         < div className={emailStyles.fileOverlay}>
                                             <Typography variant="subtitle2" >
-                                                {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attchment"}
+                                                {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attachment"}
                                             </Typography>
                                             <IconButton className={emailStyles.text}>
                                                 {
