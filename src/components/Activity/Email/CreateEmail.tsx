@@ -36,7 +36,7 @@ import ImagePreview from "./ImagePreview"
 import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
-import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file/index"
+import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
