@@ -406,7 +406,7 @@ const Email = () => {
                 <Grid container className={styles.filter_side_container}>
                     <Grid item xs={3} className="d-flex align-items-center gap-1">
                         <HiOutlineMail className="headerLogo" />{" "}
-                        <span className="listingHeader">Email({totalCount})</span>
+                        <span className="listingHeader">Email</span>
                         <ToggleButtonGroup
                             size="small"
                             className="ml-8"

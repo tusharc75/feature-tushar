@@ -268,7 +268,7 @@ export default function ManageQuoteDialog({
         <CustomDialogHeader
           title={
             isNew
-              ? "Create Ouote Builder"
+              ? "Create Quote Builder"
               : `Editing ${dataToUpdate.quoteName}`
           }
           onClose={onClose}

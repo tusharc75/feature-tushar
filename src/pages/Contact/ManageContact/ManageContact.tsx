@@ -30,7 +30,7 @@ const useStyles = makeStyles(() => ({
 }));
 export default function ManageContact(props) {
   const {
-    entityData,
+    contactData,
     handleSubmit,
     onClose,
     open,
@@ -53,7 +53,7 @@ export default function ManageContact(props) {
   }: any = useData();
 
   const disableOwnerSelection =
-    !isNew && user.user._id !== entityData.initialValues.owner;
+    !isNew && user.user._id !== contactData.initialValues.owner;
 
   console.log(disableOwnerSelection);
   //  Owner, Collaborator Code - Start
@@ -67,8 +67,8 @@ export default function ManageContact(props) {
   const [reportsToDataSource, setReportsToDataSource] = useState([]);
 
   useEffect(() => {
-    if (entityData.fields.length > 0) {
-      const ownerCollaboratorDropdownData = entityData.fields.filter(
+    if (contactData.fields.length > 0) {
+      const ownerCollaboratorDropdownData = contactData.fields.filter(
         (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
       );
       if (ownerCollaboratorDropdownData.length > 0) {
@@ -83,7 +83,7 @@ export default function ManageContact(props) {
         );
       }
 
-      const reportsToDropdownData = entityData.fields.find(
+      const reportsToDropdownData = contactData.fields.find(
         (d) => d.fieldName === "reportsTo"
       );
       if (reportsToDropdownData) {
@@ -97,9 +97,9 @@ export default function ManageContact(props) {
           setReportsToDataSource(currentContactRemovedDataSource);
         }
       }
-      setFormsData(setFieldsInAscendingOrder(entityData.fields));
+      setFormsData(setFieldsInAscendingOrder(contactData.fields));
     }
-  }, [entityData.fields]);
+  }, [contactData.fields]);
 
   const onOwnerDropdownOpen = (selectedCollaborator) => {
     setOwnerDataSource(
@@ -127,7 +127,7 @@ export default function ManageContact(props) {
   // const onSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm, errors) => {
 
   //     if (Object.keys(errors).length) {
-  //         entityData.fields.forEach((input) => {
+  //         contactData.fields.forEach((input) => {
   //             if (input.required || values[input.fieldName]) {
   //                 setTouched(input.fieldName, true);
   //             }
@@ -168,16 +168,16 @@ export default function ManageContact(props) {
           title={
             isNew
               ? "Add Contact"
-              : `Editing ${entityData.initialValues.firstName}`
+              : `Editing ${contactData.initialValues.firstName}`
           }
         />
 
-        {entityData.fields.length > 0 ? (
+        {contactData.fields.length > 0 ? (
           <>
             <Formik
-              initialValues={entityData.initialValues}
-              validationSchema={yupSchema(entityData.fields)}
-              // validate={(values) => formValidation(values, entityData.fields)}
+              initialValues={contactData.initialValues}
+              validationSchema={yupSchema(contactData.fields)}
+              // validate={(values) => formValidation(values, contactData.fields)}
               validateOnMount
               onSubmit={onSubmit}
             >
@@ -394,12 +394,12 @@ export default function ManageContact(props) {
                         loading ||
                         Object.values(
                           simplifyValues(
-                            entityData.initialValues,
-                            entityData.fields
+                            contactData.initialValues,
+                            contactData.fields
                           )
                         ).toString() ===
                           Object.values(
-                            simplifyValues(values, entityData.fields)
+                            simplifyValues(values, contactData.fields)
                           ).toString()
                       }
                       onClick={(e) => {
