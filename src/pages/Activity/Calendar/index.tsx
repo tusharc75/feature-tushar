@@ -181,7 +181,6 @@ const BigCalendar = () => {
           <ActivityModelHandler
             fetchBoard={fetchBoard}
             setActivityData={setActivityData}
-            fromCalender={true}
             activityType={activityData.type}
             activityId={activityData.id}
           />
