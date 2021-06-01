@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Board = ({ type, filter, activityId }) => {
+const Board = ({ type, filter }) => {
   const [activities, setActivities] = useState(null);
   const classes = useStyles();
   const [resource, setResource] = useState("");
@@ -37,7 +37,7 @@ const Board = ({ type, filter, activityId }) => {
 
   useEffect(() => {
     fetchBoard();
-  }, [type, filter, activityId]);
+  }, [type, filter]);
 
   const fetchBoard = async () => {
     await GetBoard(type, JSON.stringify(filter))

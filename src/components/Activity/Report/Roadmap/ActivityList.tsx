@@ -128,7 +128,6 @@ export default function ActivityList(props) {
         <ActivityModelHandler
           fetchBoard={fetchRoadmap}
           setActivityData={setActivityData}
-          fromCalender={true}
           activityType={activityData.type}
           activityId={activityData.id}
         />
