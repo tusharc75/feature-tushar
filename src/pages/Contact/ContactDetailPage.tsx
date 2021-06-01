@@ -69,6 +69,7 @@ const ContactDetailsPage = (props) => {
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
+  const [quotes, setQuotes] = useState([]);
 
   let { id } = useParams();
 
@@ -192,6 +193,17 @@ const ContactDetailsPage = (props) => {
             ]
             : []
         );
+
+        setQuotes(
+          data[sidebarResource.quoteBuilder] &&
+            data[sidebarResource.quoteBuilder][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.quoteBuilder][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            : []
+        )
       });
   };
 
@@ -371,6 +383,7 @@ const ContactDetailsPage = (props) => {
   };
   return (
     <>
+    {console.log("inside contact",quotes)}
       <Layout>
         {openUpdateDialog && (
           // <UpdateDetailsDialog
@@ -527,7 +540,14 @@ const ContactDetailsPage = (props) => {
 
                   />
                 )}
-                <QuotesInAccordion recordsPerLine={3} />
+                {permissions?.quoteBuilder?.isRead && (
+                  <QuotesInAccordion 
+                recordsPerLine={3} 
+                quotes = {quotes}
+                fetchData={fetchRelatedData}
+                quoteBuilderPermission = {permissions.quoteBuilder}
+                
+                />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {permissions?.lead?.isRead && contactData.staticData?.lead && (
                   <LeadInAccordion
