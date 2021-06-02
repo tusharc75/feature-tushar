@@ -258,7 +258,7 @@ function OpportunityDetailsPage() {
           let assignedContacts = opportunityData.staticData?.supplierContact ?? []
           const updatedContacts = [];
           data.forEach(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item === d?._id) : false;
+            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item._id === d?._id) : false;
             updatedContacts.push(d);
           })
 
@@ -311,7 +311,7 @@ function OpportunityDetailsPage() {
       .then(({ data: { data } }) => {
         let assignedContacts = opportunityData.staticData?.customerContact ?? []
         const updatedContacts = data.map(d => {
-          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item === d?._id) : false;
+          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item._id === d?._id) : false;
           return d
         })
         setCustomerContacts(updatedContacts)
