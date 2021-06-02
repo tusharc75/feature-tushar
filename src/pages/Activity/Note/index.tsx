@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../../components/Layout";
@@ -13,6 +13,7 @@ import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../../components/CustomContainer";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import styles from "../../Leads/Header.module.scss";
 import { GoNote } from "react-icons/go";
 import { Button, Dialog } from "@material-ui/core";
@@ -24,6 +25,9 @@ import { useData } from "../../../StateProvider/Provider";
 
 const Note = () => {
 
+    const toastConfig = useContext(CustomToastContext);
+
+
     const {
         state: { user },
     }: any = useData();
@@ -32,7 +36,7 @@ const Note = () => {
     const parsed = queryString.parse(history.location.search);
     const { referenceType, referenceId, activityType, activityId } = parsed;
     const [showCreateDialog, setShowCreateDialog] = useState(false);
-
+    const [isNew, setIsNew] = useState(false);
     const [filter, setFilter] = useState([]);
     const [notes, setNotes] = useState([]);
     const [noteData, setNoteData] = useState(null);
@@ -46,6 +50,7 @@ const Note = () => {
                     setFilter([{ "_id": referenceId, "type": referenceType, "name": data.name }])
                 })
                 .catch((err) => {
+                    toastConfig.setToastConfig(err);
                 });
         }
     }, [referenceId]);
@@ -56,8 +61,9 @@ const Note = () => {
     }, [filter]);
 
     const handleClose = () => {
-        setShowCreateDialog(false)
-        fetchNotes()
+        setShowCreateDialog(false);
+        setIsNew(false);
+        fetchNotes();
     }
 
 
@@ -69,6 +75,8 @@ const Note = () => {
                 setLoading(false)
             })
             .catch((err) => {
+                toastConfig.setToastConfig(err);
+
             });
     };
 
@@ -94,7 +102,8 @@ const Note = () => {
             field: 'name', headerName: 'Title',
             width: 300,
             renderCell: (params) =>
-                <a onClick={() => handleActivityOpen(params.row)}>{params.row.name}</a>
+                <a className="link cursor-pointer"
+                onClick={() => handleActivityOpen(params.row)}>{params.row.name}</a>
         },
         {
             field: 'createdBy',
@@ -140,7 +149,9 @@ const Note = () => {
                                 color="primary"
                                 size="small"
                                 className={styles.add_submit_btn}
-                                onClick={() => setShowCreateDialog(true)}
+                                onClick={() => {
+                                    setIsNew(true)
+                                    setShowCreateDialog(true)}}
                                 startIcon={<AddOutlined />}>
                                 Add
                                 </Button>
@@ -182,7 +193,7 @@ const Note = () => {
                 fullWidth
             >
                 <CreateNote
-                    noteId={noteData?.id}
+                    noteId={isNew ? null : noteData?.id}
                     relatedTo={[{ type: "my", name: user?.user?._id }]}
                     handleClose={handleClose}
                 // noteData={noteData}
