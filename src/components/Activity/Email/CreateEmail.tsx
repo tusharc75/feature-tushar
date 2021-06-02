@@ -299,7 +299,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                     <>
                         {otherAttachments.map((attachment, i) => {
                             return <>
-                                <Grid item key={attachment} sm={3} xs={3} md={3} xl={3}>
+                                <Grid item key={i} sm={3} xs={3} md={3} xl={3}>
                                     <Paper className={emailStyles.fileContainer}>
                                         <img src={getFileIconSrc(attachment)}
                                             className={emailStyles.file}
