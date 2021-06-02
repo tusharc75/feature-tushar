@@ -207,18 +207,18 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                                             <Typography variant="subtitle2" >
                                                 {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attachment"}
                                             </Typography>
-                                            <span>
+                                            <span style={{display:'flex'}}>
                                             <IconButton >
                                                 {
                                                     <a href={`${attachment}`}
                                                     download={true}>
-                                                    <GoArrowDown color="black" size={21} />
+                                                    <GoArrowDown color="green" size={21} />
                                                 </a>
                                                 }
                                             </IconButton>
                                             <IconButton >
                                                 {
-                                                       <DeleteIcon color="error"
+                                                       <DeleteIcon className={emailStyles.deleteIcon} color='error'
                                                         onClick={() => handleDeleteAttachment(attachment)}
                                                     />
                                                 }
@@ -288,7 +288,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                                             }}
                                             onDelete={handleDeleteFileImageAttachment}
                                             emailId={noteId}
-                                            isRenderedFromNote={noteId ? false : true }
                                         />
                                         <Box mt={2}>
                                             <RichTextEditor
@@ -333,7 +332,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                                                 }}
                                                 onDelete={handleDeleteImageAttachment}
                                                 emailId={noteId}
-                                                isRenderedFromNote={noteId ? false : true }
                                             />
                                         </Box>
 
