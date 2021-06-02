@@ -15,15 +15,27 @@ import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpe
 import CustomContainer from "../../../components/CustomContainer";
 import styles from "../../Leads/Header.module.scss";
 import { GoNote } from "react-icons/go";
+import { Button, Dialog } from "@material-ui/core";
+import { AddOutlined } from "@material-ui/icons";
+import { CreateNote } from "../../../components/Activity/Note/CreateNote";
+import { CustomDialogTransition } from "../../../constants/helpers";
+import { isMobile, isTablet } from "react-device-detect";
+import { useData } from "../../../StateProvider/Provider";
 
 const Note = () => {
+
+    const {
+        state: { user },
+    }: any = useData();
 
     const history = useHistory();
     const parsed = queryString.parse(history.location.search);
     const { referenceType, referenceId, activityType, activityId } = parsed;
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
 
     const [filter, setFilter] = useState([]);
     const [notes, setNotes] = useState([]);
+    const [noteData, setNoteData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -42,6 +54,11 @@ const Note = () => {
         fetchNotes()
     }, [filter]);
 
+    const handleClose = () => {
+        setShowCreateDialog(false)
+        fetchNotes()
+    }
+
 
     const fetchNotes = async () => {
         setLoading(true)
@@ -59,11 +76,14 @@ const Note = () => {
     }
 
 
-    const handleActivityOpen = (id) => {
-        history.push({
-            pathname: '/activity/note',
-            search: '?activityType=note&activityId=' + id
-        })
+    const handleActivityOpen = (data) => {
+        // history.push({
+        //     pathname: '/activity/note',
+        //     search: '?activityType=note&activityId=' + id
+        // })
+        setShowCreateDialog(true);
+        setNoteData(data);
+
     }
 
 
@@ -73,7 +93,7 @@ const Note = () => {
             field: 'name', headerName: 'Title',
             width: 300,
             renderCell: (params) =>
-                <a onClick={() => handleActivityOpen(params.row.id)}>{params.row.name}</a>
+                <a onClick={() => handleActivityOpen(params.row)}>{params.row.name}</a>
         },
         {
             field: 'createdBy',
@@ -108,13 +128,21 @@ const Note = () => {
                     </Grid>
                     <Grid item xs={10} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
-                            <Box style={{ width: '90%' }}>
-                                <SearchFilter
-                                    handleChangeFilter={handleChangeFilter}
-                                    filter={filter}
-                                    chip={{ size: "small" }}
-                                />
-                            </Box>
+                            <SearchFilter
+                                handleChangeFilter={handleChangeFilter}
+                                filter={filter}
+                                chip={{ size: "small" }}
+                            />
+                            <Button
+
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                className={styles.add_submit_btn}
+                                onClick={() => setShowCreateDialog(true)}
+                                startIcon={<AddOutlined />}>
+                                Add
+                                </Button>
                         </Box>
                     </Grid>
                 </Grid>
@@ -137,6 +165,27 @@ const Note = () => {
             </div>
             {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
         </CustomContainer>
+        {
+            showCreateDialog &&
+            <Dialog
+                open={showCreateDialog}
+                fullScreen={isMobile || isTablet}
+                TransitionComponent={CustomDialogTransition}
+                aria-labelledby="customized-dialog-title"
+                maxWidth={"md"}
+                onClose={handleClose}
+                fullWidth
+            >
+                <CreateNote
+                    noteId={noteData?.id}
+                    relatedTo={[{ type: "my", name: user?.user?._id }]}
+                    handleClose={handleClose}
+                // noteData={noteData}
+                />
+
+
+            </Dialog>
+        }
     </Layout>
 
     );
