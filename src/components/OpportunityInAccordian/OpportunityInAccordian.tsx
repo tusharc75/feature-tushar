@@ -55,8 +55,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: "#f5f5f5",
-    borderBottom: "1px solid rgba(0, 0, 0, .125)",
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
     "&$expanded": {
       minHeight: 46,
     },
@@ -64,6 +67,7 @@ const AccordionSummary = withStyles({
   content: {
     "&$expanded": {
       margin: "12px 0",
+
     },
   },
   expanded: {},
@@ -165,23 +169,24 @@ export default function OpportunityInAccordian({
         >
           <Grid container>
             <Grid item xs={8} alignItems="center">
-              <Box
-                component="div"
-                display="flex"
-                alignItems="center"
-                flexGrow={1}
-              >
-                <IconButton
-                  size="small"
-                  onClick={() => setExpandOpportunity(!expandOpportunity)}
-                >
-                  {expandOpportunity === true ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </IconButton>
-                <strong>Opportunity ({opportunities.length})</strong>
+              <Box display="flex">
+                <Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => setExpandOpportunity(!expandOpportunity)}
+                  >
+                    {expandOpportunity === true ? (
+                      <ExpandLessIcon />
+                    ) : (
+                      <ExpandMoreIcon />
+                    )}
+                  </IconButton>
+                </Box>
+                <Box padding="5px">
+                  <Typography variant="subtitle2">
+                    Opportunity ({opportunities?.length || 0})
+                  </Typography>
+                </Box>
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
