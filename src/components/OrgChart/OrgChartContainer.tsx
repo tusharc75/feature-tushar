@@ -1,4 +1,5 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, Fragment } from 'react';
+import { generateUniqueId } from '../../constants/helpers';
 import OrgChart from './OrgChart';
 // import chartService from '../services/ChartService';
 // import shortid from 'shortid';
@@ -11,7 +12,7 @@ import './OrgChartContainer.scss';
 
 export default function OrgChartContainer({ data, onClick }) {
 
-    const chartId = `chart-${new Date().getMilliseconds()}`;
+    const chartId = `chart-${generateUniqueId()}`;
     const google = window.google;
     google.charts.load('current', { packages: ["orgchart"] });
 
@@ -125,7 +126,7 @@ export default function OrgChartContainer({ data, onClick }) {
 
     return (
         <Fragment>
-             <div className="custom-orgchart w-100 d-flex justify-content-center">
+            <div className="custom-orgchart w-100 d-flex justify-content-center">
                 <OrgChart
                     positions={positions}
                     getOrgChart={getOrgChart}
@@ -134,9 +135,9 @@ export default function OrgChartContainer({ data, onClick }) {
                     onClickNode={onClickNode}
                     google={google}
                 />
-             </div>
-                {/* <ToastContainer position="bottom-right" /> */}
-                   {/* <div className="ui menu">
+            </div>
+            {/* <ToastContainer position="bottom-right" /> */}
+            {/* <div className="ui menu">
                 <div className="item">
                     <div onClick={openAddModal} className="ui primary button">Add node</div>
                 </div>
@@ -146,7 +147,7 @@ export default function OrgChartContainer({ data, onClick }) {
                     </div>
                 </div>
             </div> */}
-                {/* {positions.length === 0 ? (<div className="no-chart-text"><p>+ Add node to start creating an organizational chart</p></div>) : null}
+            {/* {positions.length === 0 ? (<div className="no-chart-text"><p>+ Add node to start creating an organizational chart</p></div>) : null}
             {
                 showModal ? (
                     <Modal>
@@ -179,7 +180,7 @@ export default function OrgChartContainer({ data, onClick }) {
                     </Modal>
                 ) : null
             } */}
-           
+
         </Fragment>
     );
 };

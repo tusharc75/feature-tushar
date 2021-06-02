@@ -1,6 +1,5 @@
 import React from 'react'
-import { Button, Card, CardActions, CardContent, makeStyles, Snackbar, Typography } from '@material-ui/core';
-import MuiAlert from '@material-ui/lab/Alert';
+import { Card, CardContent, makeStyles, Snackbar, Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     root: {

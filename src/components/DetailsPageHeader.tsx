@@ -55,8 +55,6 @@ const DetailsPageHeader = (props) => {
                   <span className="d-flex align-items-center"><span className="listingHeader">{heading}</span> {
                     isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
                   }</span>
-
-
                 </Typography>
               </>
             ) : null}
