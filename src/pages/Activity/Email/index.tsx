@@ -167,7 +167,7 @@ const Email = () => {
             cellRenderer: "SubjectRenderer"
         },
         {
-            field: "", headerName: "Message", show: true,
+            field: "message", headerName: "Message", show: true,
             filter: false, sortable: false,
             cellRenderer: "MessageRenderer"
         },
