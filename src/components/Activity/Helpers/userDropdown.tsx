@@ -17,6 +17,7 @@ import Autocomplete, {
 import _ from "lodash";
 
 import axiosInstance from "../../../axios/axiosInstance";
+import { useData } from "../../../StateProvider/Provider";
 
 interface UserOptionType {
   inputValue?: string;
@@ -36,6 +37,11 @@ export const UserDropdown = ({
   setFieldValue,
   required,
 }) => {
+  const {
+    state: {
+      user: { user },
+    },
+  } = useData();
   const [users, setUsers] = useState(null);
   const [open, toggleOpen] = useState(false);
   const [dialogValue, setDialogValue] = useState({
@@ -189,9 +195,6 @@ export const UserDropdown = ({
               variant="outlined"
               label={option && option.name}
               {...getTagProps({ index })}
-              disabled={
-                value.findIndex((o) => o.userId === option.userId) !== -1
-              }
             />
           ))
         }
@@ -207,6 +210,7 @@ export const UserDropdown = ({
           />
         )}
       />
+
       <Dialog
         open={open}
         onClose={handleClose}

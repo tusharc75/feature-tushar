@@ -1,7 +1,7 @@
-import React, { useEffect, Fragment } from "react";
+import React, { useEffect, memo } from "react";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
-const moment = require("moment");
+import moment from "moment";
 
 const DaysBetweenDates = function (calendarType, startDate, endDate) {
   var dateList = [];
@@ -65,12 +65,7 @@ const DaysBetweenDates = function (calendarType, startDate, endDate) {
   return dateList;
 };
 
-export default function Calander({
-  calendarType,
-  dayPixel,
-  startDate,
-  endDate,
-}) {
+function Calendar({ calendarType, dayPixel, startDate, endDate }) {
   const [totalDay, setTotalDay] = React.useState(0);
   const [dates, setDates] = React.useState(null);
   const [calType, setCalType] = React.useState(calendarType);
@@ -125,7 +120,6 @@ export default function Calander({
                             color={"textSecondary"}
                             display="block"
                           >
-                            {console.log(moment(date).format("YYYY-MM"))}
                             {
                               moment(
                                 moment(date).format("YYYY-MM") +
@@ -201,3 +195,5 @@ export default function Calander({
     )
   );
 }
+
+export default memo(Calendar);
