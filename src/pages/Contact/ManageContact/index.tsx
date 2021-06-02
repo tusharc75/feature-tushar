@@ -31,8 +31,10 @@ export default function ManageContactDialog(props) {
     fromProject,
   } = props;
   const { accountApi, accountResource } = account;
-  const { state: { user } }: any = useData();
-  const [entityData, setEntityData] = useState({
+  const {
+    state: { user },
+  }: any = useData();
+  const [contactData, setContactData] = useState({
     fields: [],
     initialValues: {},
   });
@@ -44,13 +46,13 @@ export default function ManageContactDialog(props) {
   const history = useHistory();
 
   useEffect(() => {
-    const { entityData } = props;
-    if (entityData && entityData?.fields && entityData?.initialValues) {
-      setEntityData({
-        fields: entityData.fields,
-        initialValues: entityData.initialValues,
+    const { contactData } = props;
+    if (contactData && contactData?.fields && contactData?.initialValues) {
+      setContactData({
+        fields: contactData.fields,
+        initialValues: contactData.initialValues,
       });
-      entityData.fields.some((currentField) => {
+      contactData.fields.some((currentField) => {
         if (currentField.fieldName === "accountName") {
           setAccountSource(currentField.option);
           return true;
@@ -89,11 +91,11 @@ export default function ManageContactDialog(props) {
             }
             newFields.push(_f.fieldData);
           });
-        setEntityData({
+        setContactData({
           fields: newFields,
           initialValues: getObjKeys("", newFields),
         });
-        setLoading(false);
+        setTimeout(() => setLoading(false), 500);
       })
       .catch((err) => setLoading(false));
   };
@@ -122,9 +124,9 @@ export default function ManageContactDialog(props) {
       });
   };
   // const handleSubmit = async (setTouched, values, setValues, setErrors, saveAndNew = false, resetForm) => {
-  //     const errors = formValidation(values, _.cloneDeep(entityData.fields));
+  //     const errors = formValidation(values, _.cloneDeep(contactData.fields));
   //     if (Object.keys(errors).length) {
-  //         entityData.fields.forEach((input) => {
+  //         contactData.fields.forEach((input) => {
   //             if (input.required) {
   //                 setTouched(input.fieldName, true);
   //             }
@@ -165,7 +167,7 @@ export default function ManageContactDialog(props) {
         open={open}
         isNew={contactId ? false : true}
         onClose={onClose}
-        entityData={entityData}
+        contactData={contactData}
         handleSubmit={handleSubmit ? handleSubmit : handleCreateContact}
         accountSource={accountSource}
         onCreateAccount={() => setShowAccountDialog(true)}

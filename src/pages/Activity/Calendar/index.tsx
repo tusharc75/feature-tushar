@@ -3,8 +3,8 @@ import { Box, Button, Dialog, Grid, Menu, MenuItem } from "@material-ui/core";
 import { Add, ExpandMore } from "@material-ui/icons";
 import { lowerCase, startCase } from "lodash";
 import { useHistory } from "react-router-dom";
-import moment from "moment";
 import queryString from "query-string";
+import { isMobile, isTablet } from "react-device-detect";
 
 import MyCalendar from "./MyCalendar";
 import { GetBoard } from "../../../axios/activity";
@@ -18,6 +18,7 @@ import { CreateTask } from "../../../components/Activity/Task/CreateTask";
 import { CreateCase } from "../../../components/Activity/Case/CreateCase";
 import { CreateEvent } from "../../../components/Activity/Event/CreateEvent";
 import axiosInstance from "../../../axios/axiosInstance";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const BigCalendar = () => {
   const {
@@ -45,13 +46,6 @@ const BigCalendar = () => {
     setAnchorEl(null);
   };
 
-  const joinDateTime = (date, time) => {
-    let d = date.split("T")[0];
-    let t = time.split("T")[1];
-
-    return date && time ? new Date(`${d}T${t}`) : "";
-  };
-
   useEffect(() => {
     if (referenceType && referenceId) {
       axiosInstance()
@@ -67,6 +61,13 @@ const BigCalendar = () => {
     }
   }, []);
 
+  const joinTime = (date: any, time: any) => {
+    const d = new Date(date).toISOString().split("T")[0];
+    const t = new Date(time).toISOString().split("T")[1];
+
+    return new Date(`${d}T${t}`);
+  };
+
   const fetchBoard = useCallback(() => {
     GetBoard(lowerCase(type), JSON.stringify(filter))
       .then(({ data }) => {
@@ -75,16 +76,13 @@ const BigCalendar = () => {
           title: d.name,
           start:
             type === "Event"
-              ? joinDateTime(d.startDate, d.startTime)
-              : d.startDate
-              ? new Date(d.startDate)
-              : moment().toDate(),
+              ? joinTime(d.startDate, d.startTime)
+              : new Date(d.startDate),
+
           end:
             type === "Event"
-              ? joinDateTime(d.endDate, d.endTime)
-              : d.dueDate
-              ? new Date(d.dueDate)
-              : moment().add(20, "days").toDate(),
+              ? joinTime(d.endDate, d.endTime)
+              : new Date(d.dueDate),
         }));
 
         setActivities(newData);
@@ -183,14 +181,20 @@ const BigCalendar = () => {
           <ActivityModelHandler
             fetchBoard={fetchBoard}
             setActivityData={setActivityData}
-            fromCalender={true}
             activityType={activityData.type}
             activityId={activityData.id}
           />
         )}
 
         {createType && (
-          <Dialog open={true} fullWidth maxWidth="md" onClose={closeDialog}>
+          <Dialog
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            open={true}
+            fullWidth
+            maxWidth="md"
+            onClose={closeDialog}
+          >
             {createType === "task" && (
               <CreateTask
                 taskId={null}

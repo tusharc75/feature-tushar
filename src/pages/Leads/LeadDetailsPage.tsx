@@ -402,7 +402,7 @@ const LeadDetailsPage = () => {
                 opportunity={leadData?.staticData?.opportunity}
               />
               {/* <ProjectInAccordion recordsPerLine={3} projectSales={null}/> */}
-              <QuotesInAccordion recordsPerLine={3} />
+              {/* <QuotesInAccordion recordsPerLine={3} /> */}
               {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
               {/* <LeadInAccordion recordsPerLine={3} /> */}
             </Paper>

@@ -70,6 +70,7 @@ const ContactDetailsPage = (props) => {
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
+  const [quotes, setQuotes] = useState([]);
 
   let { id } = useParams();
 
@@ -115,7 +116,6 @@ const ContactDetailsPage = (props) => {
         handleAllowToEditList(data);
         setContactData(data);
         getContactFields();
-        console.log(props)
         setTypeCreateProjectSalesDialog([
           { id: id, type: contactResource },
           { id: data?.accountName?.optionValue, type: accountResource }
@@ -193,6 +193,17 @@ const ContactDetailsPage = (props) => {
             ]
             : []
         );
+
+        setQuotes(
+          data[sidebarResource.quoteBuilder] &&
+            data[sidebarResource.quoteBuilder][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.quoteBuilder][
+            sidebarResource[contactResource].replaceAll(" ", "_")
+            ]
+            : []
+        )
       });
   };
 
@@ -387,7 +398,7 @@ const ContactDetailsPage = (props) => {
             isNew={false}
             open={openUpdateDialog}
             onClose={closeUpdateDialog}
-            entityData={{
+            contactData={{
               fields: contactFields.map((f) => {
                 return f.fieldData;
               }),
@@ -528,7 +539,14 @@ const ContactDetailsPage = (props) => {
                     isAddProjectSale={true}
                   />
                 )}
-                <QuotesInAccordion recordsPerLine={3} />
+                {permissions?.quoteBuilder?.isRead && (
+                  <QuotesInAccordion 
+                recordsPerLine={3} 
+                quotes = {quotes}
+                fetchData={fetchRelatedData}
+                quoteBuilderPermission = {permissions.quoteBuilder}
+                
+                />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
                   <LeadInAccordion

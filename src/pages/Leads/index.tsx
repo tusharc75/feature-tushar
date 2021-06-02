@@ -33,7 +33,8 @@ import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
-  CustomLoadingOverlay
+  CustomLoadingOverlay,
+  CommonRendererWithCopy
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
@@ -178,9 +179,9 @@ const Leads = () => {
     { field: "company", headerName: "Company", show: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-    { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRenderer" },
-    { field: "mobile", headerName: "Mobile", show: true, cellRenderer: "commonRenderer" },
-    { field: "email", headerName: "Email", show: true, cellRenderer: "commonRenderer" },
+    { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRendererWithCopy" },
+    { field: "mobile", headerName: "Mobile", show: true, cellRenderer: "commonRendererWithCopy" },
+    { field: "email", headerName: "Email", show: true, cellRenderer: "commonRendererWithCopy" },
     { field: "owner", headerName: "Owner Alies", show: true, cellRenderer: "commonRenderer" }
   ]);
   //  Grid Variables - End
@@ -251,6 +252,7 @@ const Leads = () => {
     nameRenderer: NameRenderer,
     relatedOpportunityRenderer: RelatedOpportunityRenderer,
     commonRenderer: CommonRenderer,
+    commonRendererWithCopy: CommonRendererWithCopy,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
@@ -347,6 +349,8 @@ const Leads = () => {
               isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
                 (d) => d.optionValue === user?.user?._id
               ),
+
+              convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
               relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
               relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
 
@@ -390,7 +394,7 @@ const Leads = () => {
   const generateLeadToOpportunityButton = ({
     _id,
     concatedName,
-    staticData,
+    convertedToOpportunity,
     [processFieldName]: leadProcess,
     isAllowedToUpdate,
   }) => {
@@ -420,7 +424,7 @@ const Leads = () => {
           </IconButton>
         </Tooltip>
       </>
-    ) : staticData && staticData["convertedToOpportunity"] ? (
+    ) : convertedToOpportunity ? (
       <>
         <Tooltip className="cursor-stop" title="This lead is already converted to opportunity">
           <IconButton aria-label="Convert to opportunity">

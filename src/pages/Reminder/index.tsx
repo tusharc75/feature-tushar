@@ -239,7 +239,7 @@ const Reminder = () => {
                       <Typography>
                         {loadingCases
                           ? "Loading..."
-                          : !events.length
+                          : !cases.length
                           ? "No Cases"
                           : null}
                       </Typography>

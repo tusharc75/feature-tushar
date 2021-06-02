@@ -5,8 +5,7 @@ import CustomTabs from "../../components/Helpers/CustomTabs";
 import Board from "../../components/Activity/Report/Board";
 import Roadmap from "../../components/Activity/Report/Roadmap";
 import { SearchFilter } from "../../components/Activity/Report/SearchFilter";
-import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
-import { useParams, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { GetReferenceName } from "../../axios/activity";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -14,7 +13,6 @@ import CustomContainer from "../../components/CustomContainer";
 
 import "./style.scss";
 
-import _default from "yup/lib/locale";
 const capitalize = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
@@ -30,13 +28,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Activity = () => {
+const Activity = ({ type }) => {
   const classes = useStyles();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { referenceType, referenceId, activityType, activityId } = parsed;
+  const { referenceType, referenceId } = parsed;
 
-  const { type } = useParams();
   const [viewType, setViewType] = useState(0);
   const [filter, setFilter] = useState([]);
 
@@ -48,13 +45,16 @@ const Activity = () => {
             { _id: referenceId, type: referenceType, name: data.name },
           ]);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     }
   }, [type, referenceId]);
 
   const tabs = ["Board", "Roadmap"];
   const handleChangeFilter = (value) => {
     setFilter(value);
+    history.replace({
+      search: "",
+    });
   };
 
   return (
@@ -87,20 +87,10 @@ const Activity = () => {
             </Paper>
           </Box>
           <Box className={classes.activityContainer}>
-            {viewType === 0 && (
-              <Board type={type} filter={filter} activityId={activityId} />
-            )}
-            {viewType === 1 && (
-              <Roadmap type={type} filter={filter} activityId={activityId} />
-            )}
+            {viewType === 0 && <Board type={type} filter={filter} />}
+            {viewType === 1 && <Roadmap type={type} filter={filter} />}
           </Box>
         </CustomContainer>
-        {activityType !== undefined && (
-          <ActivityModelHandler
-            activityType={activityType}
-            activityId={activityId}
-          />
-        )}
       </Grid>
     </Layout>
   );

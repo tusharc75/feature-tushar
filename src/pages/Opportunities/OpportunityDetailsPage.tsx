@@ -29,6 +29,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -54,6 +55,7 @@ function OpportunityDetailsPage() {
 
   const [supplierContacts, setSupplierContacts] = useState([])
   const [customerContacts, setCustomerContacts] = useState([])
+  const [quotes, setQuotes] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false)
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false)
 
@@ -222,6 +224,17 @@ function OpportunityDetailsPage() {
           }));
           }
 
+        setQuotes(
+          data[sidebarResource.quoteBuilder] &&
+            data[sidebarResource.quoteBuilder][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.quoteBuilder][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            : []
+
+        );
 
       })
       .catch((error) => {
@@ -245,7 +258,7 @@ function OpportunityDetailsPage() {
           let assignedContacts = opportunityData.staticData?.supplierContact ?? []
           const updatedContacts = [];
           data.forEach(d => {
-            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+            d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item === d?._id) : false;
             updatedContacts.push(d);
           })
 
@@ -298,7 +311,7 @@ function OpportunityDetailsPage() {
       .then(({ data: { data } }) => {
         let assignedContacts = opportunityData.staticData?.customerContact ?? []
         const updatedContacts = data.map(d => {
-          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
+          d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item === d?._id) : false;
           return d
         })
         setCustomerContacts(updatedContacts)
@@ -423,8 +436,9 @@ function OpportunityDetailsPage() {
 
   return (
     <>
+    {console.log(permissions)}
       <Layout>
-      <Grid container className="headerbox">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
@@ -550,7 +564,7 @@ function OpportunityDetailsPage() {
                     <div className="p-3">
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContact)}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
                           title="Supplier Contacts"
                           contactApi={supplierContact.contactApi}
                           isExpanded={expanded.supplierContacts}
@@ -565,7 +579,7 @@ function OpportunityDetailsPage() {
                       }
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContact)}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
                           title="Customer Contacts"
                           isExpanded={expanded["customerContacts"]}
                           contactApi={customerContact.contactApi}
@@ -588,6 +602,16 @@ function OpportunityDetailsPage() {
                           isAddProjectSale={true}
                         />
                       )}
+                      {
+                        permissions?.quoteBuilder?.isRead && (
+                          <QuotesInAccordion  
+                            recordsPerLine={3}
+                            quotes = {quotes}
+                            fetchData={fetchRelatedData}
+                            quoteBuilderPermission = {permissions.quoteBuilder}
+                          />
+                        )
+                      }
                     </div>
                   </TabPanel>
                   <TabPanel value={currentTabIndex} index={1}>
@@ -672,7 +696,10 @@ function OpportunityDetailsPage() {
             open={showAddSupplierContactsDialog}
             title="Assign Supplier Contacts"
             onSuccess={() => { fetchOpportunityData(); setShowAddSupplierContactsDialog(false) }}
-            handleCloseDialog={() => { setShowAddSupplierContactsDialog(false) }}
+            handleCloseDialog={() => {
+              if (selectedSupplierAccounts.length == 0) setSupplierContacts([])
+              setShowAddSupplierContactsDialog(false)
+            }}
             contacts={{
               supplierContacts: supplierContacts, customerContacts: customerContacts,
               notToBeRemoved: opportunityData?.staticData?.notToBeRemoved

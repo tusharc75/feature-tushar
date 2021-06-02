@@ -189,6 +189,9 @@ export const UserDropdown = ({
               variant="outlined"
               label={option && option.name}
               {...getTagProps({ index })}
+              disabled={
+                value.findIndex((o) => o.userId === option.userId) !== -1
+              }
             />
           ))
         }
@@ -244,7 +247,7 @@ export const UserDropdown = ({
             <Button size="small" onClick={handleClose} color="primary">
               Cancel
             </Button>
-            <Button size="small"  type="submit" color="primary">
+            <Button size="small" type="submit" color="primary">
               Add
             </Button>
           </DialogActions>
