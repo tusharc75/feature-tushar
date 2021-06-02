@@ -191,17 +191,17 @@ export default function LeadAccordionInUserDetailPage({
                                                             <Grid container>
                                                                 <Grid item xs={12} sm={12} md={12}>
                                                                     {
-                                                                        obj.firstName ? <DisplayData label='Name' icon={<HiOutlineUser size={20} />} value={[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} /> : ''
+                                                                        obj.firstName ? <DisplayData label='Name' icon={<HiOutlineUser size={15} />} value={[obj?.firstName, obj?.lastName].filter(f => f).join(" ")} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12} md={12}>
                                                                     {
-                                                                        obj.status ? <DisplayData label='Status' icon={<BiCustomize size={20} />} value={obj?.status ?? ''} /> : ''
+                                                                        obj.status ? <DisplayData label='Status' icon={<BiCustomize size={15} />} value={obj?.status ?? ''} /> : ''
                                                                     }
                                                                 </Grid>
                                                                 <Grid item xs={12} sm={12} md={12}>
                                                                     {
-                                                                        obj.company ? <DisplayData label='Company' icon={<BsBuilding size={20} />} value={obj.company ?? ''} /> : ''
+                                                                        obj.company ? <DisplayData label='Company' icon={<BsBuilding size={15} />} value={obj.company ?? ''} /> : ''
 
                                                                     }
                                                                 </Grid>

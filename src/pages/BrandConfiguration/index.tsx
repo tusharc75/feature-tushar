@@ -96,7 +96,7 @@ export default function BrandConfiguration(props) {
             <Grid container className="headerbox">
                 <CustomBreadCrumbs routes={[routes.brandConfiguration]} />
             </Grid>
-            <Grid container spacing={1} className="detail-container" style={{ padding: '0 50px' }}>
+            <Grid container spacing={1} className="detail-container">
                 <Grid item xs={12} sm={12} lg={12} >
                     <Paper>
                         {

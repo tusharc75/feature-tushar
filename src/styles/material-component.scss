@@ -253,6 +253,11 @@ Button.MuiButtonBase-root {
     padding-bottom: 0 !important;
     background: #e6e6e6;
 
+    &.userCard {
+      min-height: 112px;
+      display: flex;
+      align-items: center;
+    }
     .MuiListItemAvatar-root {
       min-width: 20px !important;
       color: #515557;
@@ -329,5 +334,4 @@ Button.MuiButtonBase-root {
   & .MuiChip-deleteIcon {
     width: 16px;
   }
-  
 }

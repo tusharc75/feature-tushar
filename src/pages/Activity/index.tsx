@@ -25,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
   },
   activityHeader: {
     background: "#dfdfdf",
-    margin: "6px 6px",
     borderRadius: "6px",
   },
 }));
@@ -58,50 +57,51 @@ const Activity = () => {
   };
 
   return (
+
     <Layout>
       <Grid container className="headerbox">
-        <Grid item xs={12}>
+        <Grid item md={12} sm={12} xs={12}>
           <CustomBreadCrumbs routes={[{ title: capitalize(type) }]} />
         </Grid>
-        <CustomContainer styles={{ width: "100%" }}>
-          <Box className={classes.activityHeader}>
-            <Paper elevation={4} style={{ marginBottom: 20 }}>
-              <Grid container>
-                <Grid item xs={12} md={5} sm={7}>
-                  <Box display="flex" justifyContent="center">
-                    <CustomTabs
-                      value={viewType}
-                      setValue={setViewType}
-                      tabs={tabs}
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={7} sm={5}>
-                  <SearchFilter
-                    handleChangeFilter={handleChangeFilter}
-                    filter={filter}
-                    activityName={type}
-                  />
-                </Grid>
-              </Grid>
-            </Paper>
-          </Box>
-          <Box className={classes.activityContainer}>
-            {viewType === 0 && (
-              <Board type={type} filter={filter} activityId={activityId} />
-            )}
-            {viewType === 1 && (
-              <Roadmap type={type} filter={filter} activityId={activityId} />
-            )}
-          </Box>
-        </CustomContainer>
-        {activityType !== undefined && (
-          <ActivityModelHandler
-            activityType={activityType}
-            activityId={activityId}
-          />
-        )}
       </Grid>
+      <CustomContainer>
+        <Box className={classes.activityHeader}>
+          <Paper elevation={4} style={{ marginBottom: 20 }}>
+            <Grid container>
+              <Grid item xs={12} md={5} sm={7}>
+                <Box display="flex" justifyContent="center">
+                  <CustomTabs
+                    value={viewType}
+                    setValue={setViewType}
+                    tabs={tabs}
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={7} sm={5}>
+                <SearchFilter
+                  handleChangeFilter={handleChangeFilter}
+                  filter={filter}
+                  activityName={type}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+        </Box>
+        <Box className={classes.activityContainer}>
+          {viewType === 0 && (
+            <Board type={type} filter={filter} activityId={activityId} />
+          )}
+          {viewType === 1 && (
+            <Roadmap type={type} filter={filter} activityId={activityId} />
+          )}
+        </Box>
+      </CustomContainer>
+      {activityType !== undefined && (
+        <ActivityModelHandler
+          activityType={activityType}
+          activityId={activityId}
+        />
+      )}
     </Layout>
   );
 };

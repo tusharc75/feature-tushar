@@ -17,6 +17,7 @@ import {
   useMediaQuery,
   ButtonBase,
   Popover,
+  Grid,
 } from "@material-ui/core";
 import {
   Search,
@@ -40,6 +41,7 @@ import routes from "../Helpers/Routes"
 import moment from 'moment'
 import { useAccount, useMsal } from "@azure/msal-react";
 import { isEmpty } from "lodash";
+import { FiCheckCircle } from 'react-icons/fi';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -143,6 +145,13 @@ const useStyles = makeStyles((theme) => ({
   notificationHeightWithData: {
     minWidth: 300,
     maxHeight: `calc(100vh - 200px)`
+  },
+  markAll: {
+    borderTop: "1px solid lightgrey",
+    background: "#047d1c",
+    textAlign: "center",
+    color: "white",
+    padding: "5px"
   }
 }));
 
@@ -385,25 +394,25 @@ const Header = ({ toggleDrawer }) => {
         })
       }
 
-      <div className="px-2 py-1" style={{ borderTop: "1px solid lightgrey" }}>
-        <Typography onClick={() => {
-          axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
-            let updatedNotificationList = [];
-            notificationList.map(notification => {
-              notification.read = true;
-              updatedNotificationList.push(notification);
+      <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
+          <Typography onClick={() => {
+            axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
+              let updatedNotificationList = [];
+              notificationList.map(notification => {
+                notification.read = true;
+                updatedNotificationList.push(notification);
+              })
+
+              setNotificationList(updatedNotificationList);
+              toastConfig.setToastConfig({ open: true, message: data.message, type: "success" })
+
+              setFullScreenNotificationAnchorEl(null);
+              setMobileScreenNotificationAnchorEl(null);
+            }).catch((error) => {
+              toastConfig.setToastConfig(error)
             })
 
-            setNotificationList(updatedNotificationList);
-            toastConfig.setToastConfig({ open: true, message: data.message, type: "success" })
-
-            setFullScreenNotificationAnchorEl(null);
-            setMobileScreenNotificationAnchorEl(null);
-          }).catch((error) => {
-            toastConfig.setToastConfig(error)
-          })
-
-        }} className="cursor-pointer">Mark all as read</Typography>
+          }} className="cursor-pointer"><FiCheckCircle />Mark all as read</Typography>
       </div>
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>

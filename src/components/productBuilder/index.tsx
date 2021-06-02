@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useContext,useCallback} from "react";
+import React, { useState, useEffect, Fragment, useContext, useCallback } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -61,35 +61,32 @@ const useStyles = makeStyles((theme) => ({
         position: "absolute"
     },
     formControl: {
-        margin: theme.spacing(1),
         minWidth: 120,
-        maxWidth: 300,
-      },
-      chips: {
+        width: "100%",
+    },
+    chips: {
         display: 'flex',
         flexWrap: 'wrap',
-      },
-      chip: {
+    },
+    chip: {
         margin: 2,
-      },
-      noLabel: {
-        marginTop: theme.spacing(3),
-      },
+    },
+
 }));
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
     },
-  },
 };
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
 const ProductBuilder = (props) => {
-    const { productBuilderId,TNC,Editable,status,columnView,PDF,QBId,currentv,Refresh} = props;
+    const { productBuilderId, TNC, Editable, status, columnView, PDF, QBId, currentv, Refresh } = props;
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext)
     const [isAddNewProduct, setIsAddNewProduct] = useState(false);
@@ -98,13 +95,13 @@ const ProductBuilder = (props) => {
     const [product, setProduct] = useState([]);
     const [columns, setColumns] = useState(null);
     const [productData, setProductData] = useState(null);
-    const [totalProfit,setTotalProfit]=useState("");
-    const [totalcost,setTotalCost]=useState("");
-    const [totalsale,setTotalSale]=useState("");
-    const [totalmargin,setTotalMargin]=useState("");
+    const [totalProfit, setTotalProfit] = useState("");
+    const [totalcost, setTotalCost] = useState("");
+    const [totalsale, setTotalSale] = useState("");
+    const [totalmargin, setTotalMargin] = useState("");
     const [dynamicTableData, setDynamicTableData] = useState([])
     const [ColumnName, setColName] = useState([]);
-    const [visibleColumns,setVisibleColumnName]=useState([]);
+    const [visibleColumns, setVisibleColumnName] = useState([]);
     const [query, setQuery] = useState({ page: 0, limit: 5 });
     const [searchVal, setSearchVal] = useState("");
     const [data, setData] = useState([]);
@@ -115,22 +112,22 @@ const ProductBuilder = (props) => {
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [editRecord, setEditRecord] = useState<any>({})
-    const [DOAreq,setDOAreq]=useState(false);
-    const [Customerreq,setCustomerreq]=useState(true);
+    const [DOAreq, setDOAreq] = useState(false);
+    const [Customerreq, setCustomerreq] = useState(true);
     const [sendEmail, setSendEmail] = useState(false)
-    const[buttonMessage,setButtonMessage]=useState("Send to Customer");
+    const [buttonMessage, setButtonMessage] = useState("Send to Customer");
     const theme = useTheme();
-    
-    let logo=null;
-    var companyName="";
-    var companyAddress="";
+
+    let logo = null;
+    var companyName = "";
+    var companyAddress = "";
     let DOAlimit = 0;
     var DOAsetup = false;
     let termsTimeout;
 
-    
 
-    
+
+
     useEffect(() => {
         fetchTermsAndConditions()
     }, [query, searchVal])
@@ -145,8 +142,8 @@ const ProductBuilder = (props) => {
             id: u._id,
         }));
         setDataRows([...rows]);
-        for(var i=0;i<rows.length;i++){
-            if(rows[i].isChecked){
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].isChecked) {
                 setRadioIndex(i);
                 break;
             }
@@ -156,9 +153,9 @@ const ProductBuilder = (props) => {
     useEffect(() => {
         fetchProduct();
     }, [productBuilderId]);
-    
 
-    
+
+
     const fetchTermsAndConditions = () => {
         if (termsTimeout) {
             clearTimeout(termsTimeout);
@@ -195,28 +192,28 @@ const ProductBuilder = (props) => {
                     // disabled={!params.canDelete}
                     checked={params.value}
                     onClick={(ev) => {
-                            const gridData = dataRows;
-                            const indexOfRecord = gridData.findIndex(
-                                (d) => d.id === params.row.id
-                            );
-                            var prevvalue = gridData[indexOfRecord].isChecked;
-                            for (var i = 0; i < gridData.length; i++) {
-                                gridData[i].isChecked = false;
-                            }
-                            if (prevvalue) {
-                                gridData[indexOfRecord].isChecked = false;
-                                setRadioIndex(-1);
-                            }
-                            else {
-                                gridData[indexOfRecord].isChecked = true;
-                                setRadioIndex(indexOfRecord);
-                            }
+                        const gridData = dataRows;
+                        const indexOfRecord = gridData.findIndex(
+                            (d) => d.id === params.row.id
+                        );
+                        var prevvalue = gridData[indexOfRecord].isChecked;
+                        for (var i = 0; i < gridData.length; i++) {
+                            gridData[i].isChecked = false;
+                        }
+                        if (prevvalue) {
+                            gridData[indexOfRecord].isChecked = false;
+                            setRadioIndex(-1);
+                        }
+                        else {
+                            gridData[indexOfRecord].isChecked = true;
+                            setRadioIndex(indexOfRecord);
+                        }
 
-                            setDataRows([...gridData]);
-                            setTNC(gridData[indexOfRecord]._id);
-                            handleVersionUpdate(PDF,visibleColumns,status,gridData[indexOfRecord]._id);
-                            console.log(gridData[indexOfRecord]._id);
-                            const checkedRecords = gridData.filter((d) => d.isChecked === true);
+                        setDataRows([...gridData]);
+                        setTNC(gridData[indexOfRecord]._id);
+                        handleVersionUpdate(PDF, visibleColumns, status, gridData[indexOfRecord]._id);
+                        console.log(gridData[indexOfRecord]._id);
+                        const checkedRecords = gridData.filter((d) => d.isChecked === true);
                     }}
                 />
             ),
@@ -291,45 +288,45 @@ const ProductBuilder = (props) => {
         filterable: false,
     }
 
-    const createImagePDF=(view, send)=>{ 
+    const createImagePDF = (view, send) => {
         axiosInstance()
-        .get('/user/brandInfo')
-        .then(({ data }) => {
-            companyName=data.data.name;
-            companyAddress=data.data.address
-            if(data.data.logo){
-                fetchImage(data.data.logo,function(dataUri) {
-                    logo = dataUri;
-                    GeneratePdf(view,send)
-                });
-            }
-            else{
-                GeneratePdf(view,send)
-            }
-            
-        })
-        .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setLoading(false);
-        });
-        
+            .get('/user/brandInfo')
+            .then(({ data }) => {
+                companyName = data.data.name;
+                companyAddress = data.data.address
+                if (data.data.logo) {
+                    fetchImage(data.data.logo, function (dataUri) {
+                        logo = dataUri;
+                        GeneratePdf(view, send)
+                    });
+                }
+                else {
+                    GeneratePdf(view, send)
+                }
+
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setLoading(false);
+            });
+
     }
 
-    const fetchImage=(Url,cb)=> {
+    const fetchImage = (Url, cb) => {
         var image = new Image();
         image.setAttribute('crossOrigin', 'anonymous'); //getting images from external domain
 
         image.onload = function () {
             var canvas = document.createElement('canvas');
             canvas.width = image.naturalWidth;
-            canvas.height = image.naturalHeight; 
+            canvas.height = image.naturalHeight;
             console.log(image.naturalWidth);
             //next three lines for white background in case png has a transparent background
             var ctx = canvas.getContext('2d');
             ctx.fillStyle = '#fff';  /// set white fill style
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            canvas.getContext('2d').drawImage(image,0,0);
+            canvas.getContext('2d').drawImage(image, 0, 0);
 
             cb(canvas.toDataURL('image/jpeg'));
         };
@@ -340,20 +337,20 @@ const ProductBuilder = (props) => {
     const GeneratePdf = (view, send) => {
         const PdfDoc = new jsPDF('p', 'pt', 'a4');
 
-        const pagewidth= PdfDoc.internal.pageSize.width;
-        if(logo!==null){
-        PdfDoc.addImage(logo, 'JPEG', pagewidth-80, 0, 70, 50);
+        const pagewidth = PdfDoc.internal.pageSize.width;
+        if (logo !== null) {
+            PdfDoc.addImage(logo, 'JPEG', pagewidth - 80, 0, 70, 50);
         }
         PdfDoc.setFontSize(26);
-        PdfDoc.text(companyName,20,30);
+        PdfDoc.text(companyName, 20, 30);
         PdfDoc.setFontSize(14);
-        PdfDoc.text(companyAddress,20,45);
+        PdfDoc.text(companyAddress, 20, 45);
         var PDFData = [];
         var PdfCol = [];
         dynamicTableData.forEach(dataEntry => {
             var PdfRow = [];
             ColumnName.forEach(ColName => {
-                if (visibleColumns.indexOf(ColName) !== -1 ) {
+                if (visibleColumns.indexOf(ColName) !== -1) {
                     if (PdfCol.indexOf(ColName) == -1) {
                         PdfCol.push(ColName);
                     }
@@ -446,13 +443,13 @@ const ProductBuilder = (props) => {
                     .then(({ data }) => {
                         console.log("PDF Response is:");
                         console.log(data);
-                        if(DOAreq){
-                            handleVersionUpdate(data.fileName,visibleColumns,"Sent for DOA",TandC);
+                        if (DOAreq) {
+                            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
                         }
-                        else{
-                            handleVersionUpdate(data.fileName,visibleColumns,status,TandC);
+                        else {
+                            handleVersionUpdate(data.fileName, visibleColumns, status, TandC);
                         }
-                        
+
                     })
                     .catch((err) => {
                         toastConfig.setToastConfig(err);
@@ -564,11 +561,11 @@ const ProductBuilder = (props) => {
                             col.width = 180
                             if (ele.fieldName === "productName") {
                                 col.renderCell = (params) => (
-                                    Editable?       
-                                    (<Link className="link" onClick={() => { setProductData(params.row) }}   >
-                                        {params.row.productName}
-                                    </Link>):(<>{params.row.productName}</>)
-                                    
+                                    Editable ?
+                                        (<Link className="link" onClick={() => { setProductData(params.row) }}   >
+                                            {params.row.productName}
+                                        </Link>) : (<>{params.row.productName}</>)
+
                                 )
                             }
                             else {
@@ -587,7 +584,7 @@ const ProductBuilder = (props) => {
             column = _.sortBy(column, function (item) {
                 return levalOrderBy.indexOf(item.leval)
             });
-            if(Editable){
+            if (Editable) {
                 column.push(ActionsColoum)
             }
             setColumns(column);
@@ -641,73 +638,72 @@ const ProductBuilder = (props) => {
         });
     }
 
-    const productBuilderdatatoQuoteBuilderdata=(BuilderData)=>{
+    const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
         console.log(BuilderData);
-        const inventory: { fieldName: string; fieldValue: any; }[][]=[];
-        const ignoredKeys=['fields','_id','productId','templateFields','id'];
-        var totalCost=0;
-        var totalSellingPrice=0
-        var totalMargin=0
-        var totalProfit=0
-        var CostCurrency=""
-        var SPCurrency=""
-        var MarginCurrency=""
-        var ProfitCurrency=""
-        BuilderData.map((quoteRows: { [x: string]: any; })=>{
+        const inventory: { fieldName: string; fieldValue: any; }[][] = [];
+        const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id'];
+        var totalCost = 0;
+        var totalSellingPrice = 0
+        var totalMargin = 0
+        var totalProfit = 0
+        var CostCurrency = ""
+        var SPCurrency = ""
+        var MarginCurrency = ""
+        var ProfitCurrency = ""
+        BuilderData.map((quoteRows: { [x: string]: any; }) => {
             console.log(quoteRows);
-            const quoteRowKeys= Object.keys(quoteRows);
-            var inventorydata: { fieldName: string; fieldValue: any; }[]=[];
-            quoteRowKeys.map((key)=>{
+            const quoteRowKeys = Object.keys(quoteRows);
+            var inventorydata: { fieldName: string; fieldValue: any; }[] = [];
+            quoteRowKeys.map((key) => {
                 console.log(key);
-                if(ignoredKeys.indexOf(key)===-1){
-                    var indexkey=key;
-                    var currency=""
-                    if (key.includes("_")){
-                        var splitKey=key.split("_")
-                        key=splitKey[0]
-                        currency=splitKey[1]
+                if (ignoredKeys.indexOf(key) === -1) {
+                    var indexkey = key;
+                    var currency = ""
+                    if (key.includes("_")) {
+                        var splitKey = key.split("_")
+                        key = splitKey[0]
+                        currency = splitKey[1]
                     }
-                    var fields= quoteRows["fields"]
-                    var field= fields.filter((d: { fieldName: string; }) => d.fieldName===key);
-                    if(typeof(quoteRows[key])==="object"){
+                    var fields = quoteRows["fields"]
+                    var field = fields.filter((d: { fieldName: string; }) => d.fieldName === key);
+                    if (typeof (quoteRows[key]) === "object") {
                         inventorydata.push({
-                            fieldName:field[0].fieldLabel,
-                            fieldValue:quoteRows[key][key]
+                            fieldName: field[0].fieldLabel,
+                            fieldValue: quoteRows[key][key]
                         });
                     }
-                    else{
+                    else {
                         inventorydata.push({
-                            fieldName:field[0].fieldLabel,
-                            fieldValue:quoteRows[indexkey]
+                            fieldName: field[0].fieldLabel,
+                            fieldValue: quoteRows[indexkey]
                         });
                     }
-                    if(key==='totalCost'){
-                        totalCost=totalCost+quoteRows[indexkey]
-                        CostCurrency=currency.toUpperCase()
+                    if (key === 'totalCost') {
+                        totalCost = totalCost + quoteRows[indexkey]
+                        CostCurrency = currency.toUpperCase()
                     }
-                    else if(key==='totalSalesPrice'){
-                        totalSellingPrice=totalSellingPrice+quoteRows[indexkey]
-                        SPCurrency=currency.toUpperCase()
+                    else if (key === 'totalSalesPrice') {
+                        totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
+                        SPCurrency = currency.toUpperCase()
                     }
-                    else if(key==="totalProfit")
-                    {
-                        totalProfit=totalProfit+quoteRows[indexkey]
-                        ProfitCurrency=currency.toUpperCase()
+                    else if (key === "totalProfit") {
+                        totalProfit = totalProfit + quoteRows[indexkey]
+                        ProfitCurrency = currency.toUpperCase()
                     }
-                    else if(key==="totalMargin"){
-                        totalMargin=totalMargin+quoteRows[indexkey]
-                        MarginCurrency=currency.toUpperCase()
+                    else if (key === "totalMargin") {
+                        totalMargin = totalMargin + quoteRows[indexkey]
+                        MarginCurrency = currency.toUpperCase()
                     }
                 }
             })
             inventory.push(inventorydata);
         });
         console.log(inventory);
-    
-        setTotalProfit(totalProfit.toString()+" "+ProfitCurrency);
-        setTotalMargin(totalMargin.toString()+" "+MarginCurrency);
-        setTotalSale(totalSellingPrice.toString()+" "+SPCurrency);
-        setTotalCost(totalCost.toString()+" "+CostCurrency);
+
+        setTotalProfit(totalProfit.toString() + " " + ProfitCurrency);
+        setTotalMargin(totalMargin.toString() + " " + MarginCurrency);
+        setTotalSale(totalSellingPrice.toString() + " " + SPCurrency);
+        setTotalCost(totalCost.toString() + " " + CostCurrency);
         console.log("Check:");
         console.log(DOAsetup);
         console.log(DOAlimit);
@@ -717,21 +713,21 @@ const ProductBuilder = (props) => {
         setDOAreq(false);
         setCustomerreq(true);
 
-        if(DOAsetup && totalSellingPrice>DOAlimit && status==="Building Quote"){
+        if (DOAsetup && totalSellingPrice > DOAlimit && status === "Building Quote") {
             setDOAreq(true);
             setCustomerreq(false);
             setButtonMessage("Send for DOA");
         }
-        else if(status.includes("Rejected by DOA")){
+        else if (status.includes("Rejected by DOA")) {
             setDOAreq(true);
             setCustomerreq(false);
             setButtonMessage("Send for DOA");
         }
-        else if(status==="Sent for DOA"){
+        else if (status === "Sent for DOA") {
             setDOAreq(false);
             setCustomerreq(false);
         }
-        else if(status==="Sent to Customer" || status==="Accepted by Customer" || status==="Rejected by Customer"){
+        else if (status === "Sent to Customer" || status === "Accepted by Customer" || status === "Rejected by Customer") {
             setDOAreq(false);
             setCustomerreq(false);
         }
@@ -758,13 +754,13 @@ const ProductBuilder = (props) => {
             KeyValuePairs = [...KeyValuePairs, KeyValue];
         }
         setColName(ColName);
-        if(columnView){
+        if (columnView) {
             setVisibleColumnName(columnView)
         }
-        else{
+        else {
             setVisibleColumnName(ColName);
         }
-        
+
 
         for (var j = 0; j < KeyValuePairs.length; j++) {
             const DataSet = KeyValuePairs[j];
@@ -789,12 +785,12 @@ const ProductBuilder = (props) => {
                 GeneratePdf(false, true);
             }
             axiosInstance().post(`/doa-request/create/${QBId}?version=${currentv}`)
-            .then(({ data }) => {
-               Refresh(currentv)
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
+                .then(({ data }) => {
+                    Refresh(currentv)
+                })
+                .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                });
         };
         if (Customerreq) {
             if (!PDF) {
@@ -805,19 +801,19 @@ const ProductBuilder = (props) => {
     }
     const handleChangeVisible = (event) => {
         setVisibleColumnName(event.target.value);
-        handleVersionUpdate(PDF,event.target.value,status,TandC);
+        handleVersionUpdate(PDF, event.target.value, status, TandC);
     };
 
     function getStyles(name, personName, theme) {
         return {
-          fontWeight:
-            personName.indexOf(name) === -1
-              ? theme.typography.fontWeightRegular
-              : theme.typography.fontWeightMedium,
+            fontWeight:
+                personName.indexOf(name) === -1
+                    ? theme.typography.fontWeightRegular
+                    : theme.typography.fontWeightMedium,
         };
-      }
+    }
 
-    const cloneVersion=()=>{
+    const cloneVersion = () => {
         axiosInstance().post(`/quote-builder/createVersion/${QBId}?version=${currentv}`, data).then(({ data: { data } }) => {
             Refresh(0);
         }).catch((error) => {
@@ -825,89 +821,92 @@ const ProductBuilder = (props) => {
         });
     }
 
-    const handleVersionUpdate=(PDFfile,Columns,Status,TC)=>{
-        var body={PDF:PDFfile,acceptedColumns:Columns,status:Status,TNC:TC}
+    const handleVersionUpdate = (PDFfile, Columns, Status, TC) => {
+        var body = { PDF: PDFfile, acceptedColumns: Columns, status: Status, TNC: TC }
         axiosInstance()
-        .post(`quote-builder/updateVersion/${QBId}?version=${currentv}`,body)
-        .then(({ data }) => {
-            
-        })
-        .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setLoading(false);
-        });
+            .post(`quote-builder/updateVersion/${QBId}?version=${currentv}`, body)
+            .then(({ data }) => {
+
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setLoading(false);
+            });
     }
 
     const onSuccess = () => {
         setSendEmail(false)
         console.log("Success");
-        handleVersionUpdate("",visibleColumns, "Sent to Customer", TandC);
+        handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
         Refresh(currentv);
     }
 
     return (<Box p={1}>
         <Box>
-            <Grid>
-                    {Editable?
-                    (<><Button variant="outlined" size="small" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true); }}>New</Button>
-                    <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true); }}>Add Existing</Button></>):(null)}
+            <Grid container>
+                <Grid item xs={12} sm={12} md={12} justify={"flex-end"} className="d-flex align-items-center gap-1">
+                    {Editable ?
+                        (<>
+                            <Button variant="outlined" size="small" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true); }}>New</Button>
+                            <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true); }}>Add Existing</Button></>) : (null)}
                     <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { cloneVersion() }}>Clone Version</Button>
                     <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">View</Button>
                     <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
-                    <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />}  variant="contained" size="small" color="primary">{buttonMessage}</Button>    
-                    
-                    {Editable?(<FormControl className={classes.formControl}>
+                    <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button>
+                </Grid>
+                <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel mt-2">
+                    <div className="quoteBox">
+                        <span>Total Profit</span>
+                        <span>{totalProfit}</span>
+                    </div>
+                    <div className="quoteBox">
+                        <span>Total Cost Price</span>
+                        <span>{totalcost}</span>
+                    </div>
+                    <div className="quoteBox">
+                        <span>Total Selling Price</span>
+                        <span>{totalsale}</span>
+                    </div>
+                    <div className="quoteBox">
+                        <span>Total Margin</span>
+                        <span>{totalmargin}</span>
+                    </div>
+                    <div className="quoteBox">
+                        <span>Status</span>
+                        <span>{status}</span>
+                    </div>
+                    <div>
+                    </div>
+                </Grid>
+                <Grid item className="d-flex align-items-center gap-1 mb-2" xs={12} sm={12} md={12} >
+                    {Editable ? (<FormControl className={classes.formControl}>
                         <InputLabel id="demo-mutiple-chip-label">Visible Columns in Quote</InputLabel>
-                    <Select
-                        labelId="demo-mutiple-chip-label"
-                        id="demo-mutiple-chip"
-                        multiple
-                        value={visibleColumns}
-                        onChange={handleChangeVisible}
-                        input={<Input id="select-multiple-chip" />}
-                        renderValue={(selected:any) => (
-                        <div className={classes.chips}>
-                            {selected.map((value) => (
-                                <Chip key={value} label={value} className={classes.chip} />
-                        ))}
-                        </div>
-                )}
-                MenuProps={MenuProps}
-            >
-          {ColumnName.map((name) => (
-                <MenuItem key={name} value={name} style={getStyles(name, visibleColumns, theme)}>
-                <Checkbox checked={visibleColumns.indexOf(name) > -1} />{name}
-                </MenuItem>
-                ))}
-            </Select>
-        </FormControl>):null}
+                        <Select
+                            labelId="demo-mutiple-chip-label"
+                            id="demo-mutiple-chip"
+                            multiple
+                            value={visibleColumns}
+                            onChange={handleChangeVisible}
+                            input={<Input id="select-multiple-chip" />}
+                            renderValue={(selected: any) => (
+                                <div className={classes.chips}>
+                                    {selected.map((value) => (
+                                        <Chip key={value} label={value} className={classes.chip} />
+                                    ))}
+                                </div>
+                            )}
+                            MenuProps={MenuProps}
+                        >
+                            {ColumnName.map((name) => (
+                                <MenuItem key={name} value={name} style={getStyles(name, visibleColumns, theme)}>
+                                    <Checkbox checked={visibleColumns.indexOf(name) > -1} />{name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>) : null}
+                </Grid>
             </Grid>
-            <Grid>
-                                <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel">
-                                    <div className="quoteBox">
-                                        <span>Total Profit</span>
-                                        <span>{totalProfit}</span>
-                                    </div>
-                                    <div className="quoteBox">
-                                        <span>Total Cost Price</span>
-                                        <span>{totalcost}</span>
-                                    </div>
-                                    <div className="quoteBox">
-                                        <span>Total Selling Price</span>
-                                        <span>{totalsale}</span>
-                                    </div>
-                                    <div className="quoteBox">
-                                        <span>Total Margin</span>
-                                        <span>{totalmargin}</span>
-                                    </div>
-                                    <div className="quoteBox">
-                                        <span>Status</span>
-                                        <span>{status}</span>
-                                    </div>
-                                    <div>
-                                    </div>
-            </Grid>
-            </Grid>
+
             <Box height={500}>
                 {columns &&
                     <DataGrid
@@ -924,66 +923,66 @@ const ProductBuilder = (props) => {
                         density="compact"
                     />}
             </Box>
-            {Editable?
-            (<Box>
-                <Grid container>
-                                <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-                                    <Grid container>
-                                        <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center p-2 gap-1" container justify="flex-start">
-                                            <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add Terms & Conditions</Button>
-                                        </Grid>
-                                        <Grid item xs={12} className="listing-grid">
-                                            <DataGrid
-                                                components={{
-                                                    Toolbar: DataGridCustomToolbar,
-                                                    NoRowsOverlay: CustomDataGridNoDataFound,
-                                                }}
-                                                scrollbarSize={20}
-                                                rows={dataRows}
-                                                columns={columnsTNC}
-                                                loading={loading}
-                                                disableSelectionOnClick
-                                                disableMultipleSelection
-                                                paginationMode="server"
-                                                pagination
-                                                onPageChange={handlePage}
-                                                onPageSizeChange={handlePageSize}
-                                                pageSize={query.limit}
-                                                page={query.page}
-                                                rowCount={rowCount}
-                                                rowsPerPageOptions={[25, 50, 75]}
-                                                onSortModelChange={handleSortModelChange}
-                                                onFilterModelChange={onFilterChange}
-                                            />
-                                        </Grid>
-                                    </Grid>
+            {Editable ?
+                (<Box>
+                    <Grid container>
+                        <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+                            <Grid container>
+                                <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center p-2 gap-1" container justify="flex-start">
+                                    <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add Terms & Conditions</Button>
+                                </Grid>
+                                <Grid item xs={12} className="listing-grid">
+                                    <DataGrid
+                                        components={{
+                                            Toolbar: DataGridCustomToolbar,
+                                            NoRowsOverlay: CustomDataGridNoDataFound,
+                                        }}
+                                        scrollbarSize={20}
+                                        rows={dataRows}
+                                        columns={columnsTNC}
+                                        loading={loading}
+                                        disableSelectionOnClick
+                                        disableMultipleSelection
+                                        paginationMode="server"
+                                        pagination
+                                        onPageChange={handlePage}
+                                        onPageSizeChange={handlePageSize}
+                                        pageSize={query.limit}
+                                        page={query.page}
+                                        rowCount={rowCount}
+                                        rowsPerPageOptions={[25, 50, 75]}
+                                        onSortModelChange={handleSortModelChange}
+                                        onFilterModelChange={onFilterChange}
+                                    />
                                 </Grid>
                             </Grid>
-            </Box>):
-            (null)}
+                        </Grid>
+                    </Grid>
+                </Box>) :
+                (null)}
         </Box>
         {
-                showCreateDialog ? (
-                    <ManageTermsAndCondition
-                        termsAndCondition={termsAndCondition}
-                        open={showCreateDialog}
-                        handleClose={handleCloseCreateDialog}
-                        fetchData={fetchTermsAndConditions}
-                        editRecord={editRecord}
-                    />
-                ) : null
-            }
+            showCreateDialog ? (
+                <ManageTermsAndCondition
+                    termsAndCondition={termsAndCondition}
+                    open={showCreateDialog}
+                    handleClose={handleCloseCreateDialog}
+                    fetchData={fetchTermsAndConditions}
+                    editRecord={editRecord}
+                />
+            ) : null
+        }
         {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
             isAddInBuilder={true} addProductInBuilder={addProductInBuilder}
         />}
         {isAddExistingProduct && <AddExistingProduct addProductInBuilder={addProductInBuilder} handleClose={() => setIsAddExistingProduct(false)} />}
         {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} />}
         {sendEmail && <EmailDialog
-                    handleClose={() => setSendEmail(false)}
-                    success={onSuccess}
-                    id={QBId}
-                    version={currentv} />
-                }
+            handleClose={() => setSendEmail(false)}
+            success={onSuccess}
+            id={QBId}
+            version={currentv} />
+        }
     </Box>
     );
 }

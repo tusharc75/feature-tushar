@@ -27,6 +27,7 @@ import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import { BsCheckAll } from "react-icons/bs";
 import ProductBuilder from "../../components/productBuilder";
+import CustomContainer from "../../components/CustomContainer";
 
 const recordsPerLine = 3;
 function QuoteDetail() {
@@ -49,9 +50,9 @@ function QuoteDetail() {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0)
-  const [versions,setVersions]=useState([])
-  const [productBuilderID,setProductBuilderID]=useState("");
-  
+  const [versions, setVersions] = useState([])
+  const [productBuilderID, setProductBuilderID] = useState("");
+
 
   const [supplierContacts, setSupplierContacts] = useState([])
   const [customerContacts, setCustomerContacts] = useState([])
@@ -59,7 +60,7 @@ function QuoteDetail() {
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false)
 
   const [isProcessing, setIsProcessing] = useState(false)
-  const [currentVersion,setCurrentVersion]=useState(0);
+  const [currentVersion, setCurrentVersion] = useState(0);
 
   const [messageDialog, setMessageDialog] = useState({ open: false, message: null })
   const [expanded, setExpanded] = useState({
@@ -70,8 +71,8 @@ function QuoteDetail() {
   const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
   const [contactsEmailsData, setContactsEmailsData] = useState([])
   const [notToBeRemovedContacts, setNotToBeRemovedContacts] = useState([])
-  const [PBstatus,setPBStatus]=useState("")
-  const [loadPB,setLoadPB]=useState(false);
+  const [PBstatus, setPBStatus] = useState("")
+  const [loadPB, setLoadPB] = useState(false);
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -128,23 +129,23 @@ function QuoteDetail() {
 
   const fetchquoteData = (version) => {
     if (selectedEntity) {
-        setLoadPB(false);
+      setLoadPB(false);
       setLoading(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           handleMainPoints(data);
           setHeadingLbl(data.quoteName);
-          var keys=Object.keys(data.versions);
+          var keys = Object.keys(data.versions);
           setVersions(keys);
-          if(version===0){
-            setCurrentVersion(parseInt(keys[keys.length-1]));
+          if (version === 0) {
+            setCurrentVersion(parseInt(keys[keys.length - 1]));
           }
-          else{
+          else {
             setCurrentVersion(version);
           }
-          setProductBuilderID(data.versions[keys[keys.length-1]]["productBuilderId"]);
-          setPBStatus(data.versions[keys[keys.length-1]]["status"]);
+          setProductBuilderID(data.versions[keys[keys.length - 1]]["productBuilderId"]);
+          setPBStatus(data.versions[keys[keys.length - 1]]["status"]);
           setAllowedToEdit([...data.collaborator ?? [], data.owner].some(
             (d) => d?.optionValue === user?.user?._id
           ))
@@ -186,10 +187,10 @@ function QuoteDetail() {
 
           getquoteFields();
           setCustomizedRoutes([
-            {title:"Quote Builder", path:"/quote-builder"},
+            { title: "Quote Builder", path: "/quote-builder" },
             { title: `${data.quoteName}` },
           ]);
-          
+
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -345,7 +346,7 @@ function QuoteDetail() {
   };
 
 
-  const handleChangeVersion=(event)=>{
+  const handleChangeVersion = (event) => {
     setLoadPB(false)
     setCurrentVersion(event.target.value);
     setProductBuilderID(quoteData["versions"][event.target.value]["productBuilderId"]);
@@ -373,15 +374,15 @@ function QuoteDetail() {
   // ];
 
 
-  const handleClone=()=>{
+  const handleClone = () => {
     axiosInstance()
-    .post(`${qbApi}/clone/${quoteData._id}`)
-    .then(({ data }) => {
+      .post(`${qbApi}/clone/${quoteData._id}`)
+      .then(({ data }) => {
         history.push(`${qbApi}/${data.data._id}`);
-    })
-    .catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleUpdateOpportunity = (supplierAccounts) => {
@@ -414,12 +415,12 @@ function QuoteDetail() {
   return (
     <>
       <Layout>
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper className="subContainer">
+            <Paper>
               {!quoteData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -446,7 +447,7 @@ function QuoteDetail() {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                    {quotePermissions.isCreate ?(
+                  {quotePermissions.isCreate ? (
                     <Button
                       variant="contained"
                       color="primary"
@@ -455,7 +456,7 @@ function QuoteDetail() {
                     >
                       Clone
                     </Button>
-                    ):null}
+                  ) : null}
                   {allowedToEdit ? (
                     <Button
                       variant="contained"
@@ -476,7 +477,7 @@ function QuoteDetail() {
                       onClick={() => setShowConfirmBox(true)}
                     />
                   ) : null}
-                  
+
                 </DetailsPageHeader>
               )}
 
@@ -496,7 +497,7 @@ function QuoteDetail() {
                             disabled={true}
                             onClick={() => { }}>
                             Processing...
-                    </Button> :
+                          </Button> :
                             <Button variant="contained"
                               color="primary"
                               size="small"
@@ -525,7 +526,7 @@ function QuoteDetail() {
                 </div>
               }
 
-                    
+
               {loading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>
@@ -545,42 +546,39 @@ function QuoteDetail() {
               ) : (
                 <>
                   <TabPanel value={currentTabIndex} index={0}>
-                    <Box padding="16px">
-                      <DetailsPage
-                        data={quoteData}
-                        fields={quoteFields}
-                      />
-                    </Box>
-                    <div className="p-3">
-                      
-                    </div>
+                    <DetailsPage
+                      data={quoteData}
+                      fields={quoteFields}
+                    />
                   </TabPanel>
                   <TabPanel value={currentTabIndex} index={1}>
                     <Activity />
                   </TabPanel>
                 </>
               )}
-              <Grid>
-              <select className="customSelect" value={currentVersion} 
-                                        onChange={handleChangeVersion}>
-                                        {versions.map((team) => <option key={team} value={team}>{"Version : " + team}</option>)}
-            </select>
-            {loadPB?(<ProductBuilder
-                productBuilderId={productBuilderID}
-                TNC={quoteData["versions"][currentVersion]["TNC"]}
-                columnView={quoteData["versions"][currentVersion]["visibleColumns"]}
-                status={PBstatus}
-                QBId={id}
-                currentv={currentVersion}
-                Editable={PBstatus==="Building Quote"?true:false}
-                Refresh={fetchquoteData}
-                
-            />):null}
-            </Grid>
+              <Box padding={2}>
+                <h2 className="form-label-style mb-0 d-flex align-items-center justify-content-space-between">Product Information
+                    <select className="customSelect" value={currentVersion}
+                    onChange={handleChangeVersion}>
+                    {versions.map((team) => <option key={team} value={team}>{"Version : " + team}</option>)}
+                  </select>
+                </h2>
+                {loadPB ? (<ProductBuilder
+                  productBuilderId={productBuilderID}
+                  TNC={quoteData["versions"][currentVersion]["TNC"]}
+                  columnView={quoteData["versions"][currentVersion]["visibleColumns"]}
+                  status={PBstatus}
+                  QBId={id}
+                  currentv={currentVersion}
+                  Editable={PBstatus === "Building Quote" ? true : false}
+                  Refresh={fetchquoteData}
+
+                />) : null}
+              </Box>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper className="subContainer">
+            <Paper>
               {!quoteData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />
@@ -648,7 +646,7 @@ function QuoteDetail() {
           />
         )}
 
-        
+
 
 
         {

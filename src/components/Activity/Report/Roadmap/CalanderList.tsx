@@ -51,7 +51,7 @@ export default function CalanderList(props) {
       }
 
       let label = (
-        <Box width={"100%"} height={50}>
+        <Box width={"100%"} height={30} className="d-flex align-items-center">
           <Tooltip
             title={
               data.status +
@@ -65,10 +65,9 @@ export default function CalanderList(props) {
             <Box
               onClick={() => setActivityData({ id: data._id, type })}
               minWidth={calendarType !== "week" ? "100px" : ""}
-              height={30}
+              height={20}
               borderRadius="borderRadius"
               display="flex"
-              mt={1}
               style={{
                 position: "absolute",
                 left:
@@ -80,7 +79,7 @@ export default function CalanderList(props) {
                     totalDay +
                   "%",
               }}
-              bgcolor="info.main"
+              bgcolor="secondary.main"
               color="white"
             ></Box>
           </Tooltip>

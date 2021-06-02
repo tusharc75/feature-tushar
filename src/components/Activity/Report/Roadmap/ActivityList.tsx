@@ -68,11 +68,8 @@ export default function ActivityList(props) {
       }
 
       let label = (
-        <Box width={"100%"} height={50}>
+        <Box width={"100%"} height={30} className="d-flex align-items-center">
           <Box
-            display="flex"
-            mt={2}
-            mb={1}
             width={"100%"}
             style={{ position: "absolute" }}
           >
