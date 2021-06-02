@@ -33,10 +33,10 @@ import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ImagePreview from "./ImagePreview"
-import { AiOutlinePaperClip } from 'react-icons/ai'
 import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
 import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
+import ImageAttachments from './ImageAttachments'
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -100,6 +100,7 @@ const fileIcons = [
         source: pptIcon
     }
 ]
+
 export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) => {
 
     const toastConfig = useContext(CustomToastContext);
@@ -107,6 +108,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const azureAccount = useAccount(accounts[0] || {});
     const [initialValues, setInitialValues] = useState(null);
     const [isUploading, setUploading] = useState(false);
+    const [fileImageAttachments, setFileImageAttachments] = useState([])
     const [imageAttachments, setImageAttachments] = useState([])
     const [otherAttachments, setOtherAttachments] = useState([])
     const [open, setOpen] = useState(false);
@@ -191,7 +193,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                 to: values.to,
                 cc: values.cc,
                 subject: values.name,
-                attachment: values["file"] ? [...imageAttachments, ...otherAttachments] : [...imageAttachments]
+                attachment: values["file"] ? [...imageAttachments, ...otherAttachments, ...fileImageAttachments] : [...imageAttachments]
             }
             if (azureAccount && azureAccount?.username) {
                 payload["graphToken"] = await getAzureAcessToken(instance)
@@ -279,6 +281,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
     const handleDeleteImageAttachment = (url) => {
         setImageAttachments(imageAttachments.filter(currentUrl => currentUrl !== url))
     }
+    const handleDeleteFileImageAttachment = url => {
+        setFileImageAttachments(fileImageAttachments.filter(currentUrl => currentUrl !== url))
+    }
     const getFileIconSrc = file => {
         let extension = file.substring(file.lastIndexOf("."),).toLowerCase()
         let data = fileIcons.find(o => (o.extensions.indexOf(extension) >= 0))
@@ -308,45 +313,11 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                             </Typography>
                                             <IconButton className={emailStyles.text}>
                                                 {
-                                                    emailId && <a href={`${attachment}`}
+                                                    emailId ? <a href={`${attachment}`}
                                                         download={true}>
                                                         <GoArrowDown color="white" size={21} />
-                                                    </a>
-                                                }
-                                            </IconButton>
-                                        </div>
-                                    </Paper>
-                                </Grid>
-                            </>
-                        })
-                        }
-                    </>
-                    : null
-            }
-        </Grid >
-    )
-    const renderImageAttachments = (
-        <Grid container spacing={1} className={emailStyles.createEmailContainer}>
-            {
-                imageAttachments.length ?
-                    <>
-                        {imageAttachments.map((attachment, i) => {
-                            return <>
-                                <Grid item sm={8} xs={12} md={6} xl={6}>
-                                    <Paper className={emailStyles.container}>
-                                        <img src={attachment} alt="Avatar"
-                                            onClick={() => {
-                                                setImageSource(attachment)
-                                                setOpen(true)
-                                            }}
-                                            className={emailStyles.image} />
-                                        <div className={emailStyles.overlay}>
-                                            <IconButton>
-                                                {
-                                                    emailId ? <a href={`${attachment}`} download={true} >
-                                                        <GoArrowDown color="white" size={25} />
                                                     </a> : <DeleteIcon className={emailStyles.deleteIcon}
-                                                        onClick={() => handleDeleteImageAttachment(attachment)}
+                                                        onClick={() => handleDeleteAttachment(attachment)}
                                                     />
                                                 }
                                             </IconButton>
@@ -360,57 +331,11 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                     : null
             }
         </Grid >
-
-    )
-
-    const renderOtherAttachements = (
-        <Box mt={2} alignItems="center">
-            {
-                otherAttachments && otherAttachments.length > 0 ?
-                    otherAttachments.map((attachment, i) => (
-                        <Fragment key={`attachment${i}`}>
-                            <Box alignItems="center" style={{
-                                display: 'flex', justifyContent: 'space-between'
-                            }}>
-                                < AiOutlinePaperClip size={20} />
-                                <Box marginX={1} />
-                                <Box flex="1" >
-                                    <Typography
-                                        variant="body2"
-                                        style={{ overflowWrap: 'break-word', width: "100%" }}
-                                        color="textPrimary">
-                                        {
-                                            emailId ? <a href={`${attachment}`}
-                                                className={emailStyles.emailAttachments} download={emailId ? true : false}>
-                                                {attachment}
-                                            </a> : attachment
-                                        }
-
-                                    </Typography>
-                                </Box>
-                                {
-                                    emailId ? null :
-                                        <IconButton
-                                            title="Remove File"
-                                            color="secondary"
-                                            size="small"
-                                            aria-label="delete picture"
-                                            component="span"
-                                            onClick={() => handleDeleteAttachment(attachment)}
-                                        >
-                                            <DeleteIcon />
-                                        </IconButton>
-                                }
-                            </Box>
-                        </Fragment>
-                    )) : null
-            }
-        </Box >
     )
 
     const onUploadFile = file => {
         if (checkImageUrl(file)) {
-            setImageAttachments((prevState) => ([...prevState, file]));
+            setFileImageAttachments((prevState) => ([...prevState, file]));
         }
         else {
             setOtherAttachments((prevState) => ([...prevState, file]))
@@ -448,9 +373,16 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                     <Box mt={2}>
                                                         <div dangerouslySetInnerHTML={{ __html: initialValues.content || initialValues.message }} />
                                                     </Box>
-                                                    {/* {renderOtherAttachements} */}
                                                     {renderFileThumbnails}
-                                                    {renderImageAttachments}
+                                                    <ImageAttachments
+                                                        imageAttachments={imageAttachments}
+                                                        onImageClick={(attachment) => {
+                                                            setImageSource(attachment)
+                                                            setOpen(true)
+                                                        }}
+                                                        onDelete={handleDeleteImageAttachment}
+                                                        emailId={emailId}
+                                                    />
                                                     <Box mt={2}>
                                                         <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                                     </Box>
@@ -563,7 +495,16 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 doNotShowUploadedFile={true}
                                                             />
                                                         </Box>
-                                                        {renderOtherAttachements}
+                                                        {renderFileThumbnails}
+                                                        <ImageAttachments
+                                                            imageAttachments={fileImageAttachments}
+                                                            onImageClick={(attachment) => {
+                                                                setImageSource(attachment)
+                                                                setOpen(true)
+                                                            }}
+                                                            onDelete={handleDeleteFileImageAttachment}
+                                                            emailId={emailId}
+                                                        />
 
                                                         <Box mt={2} style={{ border: '1px solid #999', minHeight: '220px' }}>
                                                             <RichTextEditor
@@ -602,7 +543,15 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 ]}
                                                                 toolbarConfig={toolbarConfig}
                                                             />
-                                                            {renderImageAttachments}
+                                                            <ImageAttachments
+                                                                imageAttachments={imageAttachments}
+                                                                onImageClick={(attachment) => {
+                                                                    setImageSource(attachment)
+                                                                    setOpen(true)
+                                                                }}
+                                                                onDelete={handleDeleteImageAttachment}
+                                                                emailId={emailId}
+                                                            />
                                                         </Box>
                                                     </Grid>
                                                 </Grid>}
