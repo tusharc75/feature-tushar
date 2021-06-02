@@ -98,6 +98,7 @@ export default function AccountDetailPage(props) {
   const [accountData, setAccountData] = useState<any>({});
   const [relatedContacts, setRelatedContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
+  const [quotes, setQuotes] = useState([]);
   const [projectSales, setProjectSales] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -202,6 +203,16 @@ export default function AccountDetailPage(props) {
               ]
             : []
         );
+        setQuotes(
+          data[sidebarResource.quoteBuilder] &&
+            data[sidebarResource.quoteBuilder][
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.quoteBuilder][
+            sidebarResource[accountResource].replaceAll(" ", "_")
+            ]
+            : []
+        )
         initializeGraphData();
         setRelatedContactsLoading(false);
       });
@@ -645,7 +656,17 @@ export default function AccountDetailPage(props) {
                     permissions={permissions}
                   />
                 )}
-                <QuotesInAccordion recordsPerLine={3} />
+                {
+                  permissions?.quoteBuilder?.isRead && 
+                  (
+                    <QuotesInAccordion 
+                      recordsPerLine={3} 
+                      quotes={quotes}
+                      fetchData={fetchRelatedData}
+                      quoteBuilderPermission = {permissions.quoteBuilder}
+                    />
+                  )
+                }
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {permissions?.lead?.isRead && accountData.staticData?.lead && (
                   <LeadInAccordion

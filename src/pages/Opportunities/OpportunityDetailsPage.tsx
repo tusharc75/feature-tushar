@@ -29,6 +29,7 @@ import MessageDialog from "../../components/Helpers/MessageDialog";
 import AssignSupplierContactsDialog from './AssignSupplierContactsDialog'
 import { BsCheckAll } from "react-icons/bs";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -54,6 +55,7 @@ function OpportunityDetailsPage() {
 
   const [supplierContacts, setSupplierContacts] = useState([])
   const [customerContacts, setCustomerContacts] = useState([])
+  const [quotes, setQuotes] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false)
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false)
 
@@ -206,6 +208,18 @@ function OpportunityDetailsPage() {
             ]
             : []
         );
+        setQuotes(
+          data[sidebarResource.quoteBuilder] &&
+            data[sidebarResource.quoteBuilder][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            ? data[sidebarResource.quoteBuilder][
+            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+            ]
+            : []
+
+        );
+
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -407,6 +421,7 @@ function OpportunityDetailsPage() {
 
   return (
     <>
+    {console.log(permissions)}
       <Layout>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
@@ -571,6 +586,16 @@ function OpportunityDetailsPage() {
                           permissions={permissions}
                         />
                       )}
+                      {
+                        permissions?.quoteBuilder?.isRead && (
+                          <QuotesInAccordion  
+                            recordsPerLine={3}
+                            quotes = {quotes}
+                            fetchData={fetchRelatedData}
+                            quoteBuilderPermission = {permissions.quoteBuilder}
+                          />
+                        )
+                      }
                     </div>
                   </TabPanel>
                   <TabPanel value={currentTabIndex} index={1}>

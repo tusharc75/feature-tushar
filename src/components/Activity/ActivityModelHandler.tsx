@@ -4,31 +4,17 @@ import { CreateCase } from "./Case/CreateCase";
 import { CreateNote } from "./Note/CreateNote";
 import { CreateEmail } from "./Email/CreateEmail";
 import Dialog from "@material-ui/core/Dialog";
-import { useHistory } from "react-router-dom";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
 
 const ActivityModelHandler = (props) => {
-  const {
-    activityType,
-    activityId,
-    fromCalender,
-    setActivityData,
-    fetchBoard,
-    onClose = null
-  } = props;
-  const history = useHistory();
+  const { activityType, activityId, setActivityData, fetchBoard, onClose = null } = props;
 
   const handleClose = () => {
-    if (fromCalender) {
-      fetchBoard();
-      setActivityData(null);
-    } else if (onClose) {
+    setActivityData(null);
+    fetchBoard();
+    if (onClose) {
       onClose()
-    } else {
-      history.push({
-        pathname: "/" + activityType,
-      });
     }
   };
 

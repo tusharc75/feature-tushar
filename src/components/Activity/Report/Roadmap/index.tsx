@@ -12,7 +12,7 @@ import ActivityList from "./ActivityList";
 import CalanderList from "./CalanderList";
 import Loader from "../../../../components/Loader";
 
-export default function Roadmap({ type, filter, activityId }) {
+export default function Roadmap({ type, filter }) {
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById("dayLiner");
