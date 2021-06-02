@@ -1,16 +1,16 @@
 const DefaultFields = [
-    {
-        _id: "1",
-        fieldName: 'qty',
-        fieldLabel: 'Qty',
-        required: true,
-        type: 'decimal',
-        decimalPlaces: 2,
-        sectionName: 'Cost Calculation',
-        isTooltip: false,
-        order: 1,
-        editAble: false,
-    },
+    // {
+    //     _id: "1",
+    //     fieldName: 'qty',
+    //     fieldLabel: 'Qty',
+    //     required: true,
+    //     type: 'decimal',
+    //     decimalPlaces: 2,
+    //     sectionName: 'Cost Calculation',
+    //     isTooltip: false,
+    //     order: 1,
+    //     editAble: false,
+    // },
     //Cost Calculation    
     {
         _id: "2",
