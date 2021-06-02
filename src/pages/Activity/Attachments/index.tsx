@@ -259,27 +259,6 @@ export default function Attachment(props) {
         // customNoRowsOverlay: CustomNoRowsOverlay
     };
 
-    const replaceFieldName = (field) => {
-        switch (field) {
-            case "createdAt":
-                return "createdBy.date";
-
-            case "updatedAt":
-                return "updatedBy.user";
-
-            default:
-                return field;
-        }
-    }
-
-    const replaceFieldNameForSorting = (field) => {
-        const updatedField = replaceFieldName(field);
-
-        if (field !== updatedField) return updatedField;
-
-        return field;
-    }
-
     const getQueryString = () => {
         let deepFilter = `&page=${page}&limit=${limit}`;
 
@@ -288,7 +267,7 @@ export default function Attachment(props) {
 
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
-                    field: replaceFieldName(field),
+                    field: field,
                     term: filters[field].filter
                 })
             });
@@ -296,7 +275,7 @@ export default function Attachment(props) {
         }
 
         if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
 
         if (search) {

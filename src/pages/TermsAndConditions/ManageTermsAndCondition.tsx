@@ -26,7 +26,6 @@ import {
     ContentState,
     convertToRaw,
     convertFromRaw,
-    conte
 } from 'draft-js'
 import { RichTextEditor } from '../../components/RichEditor/RichEditor'
 
