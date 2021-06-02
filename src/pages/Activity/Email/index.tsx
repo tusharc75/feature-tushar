@@ -164,12 +164,12 @@ const Email = () => {
         { field: "to", headerName: "Recipient", show: true, disabled: true, cellRenderer: "recipentRenderer" },
         {
             field: "subject", headerName: "Subject", show: true,
-            cellRenderer: "SubjectRenderer"
+            cellRenderer: "subjectRenderer"
         },
         {
             field: "message", headerName: "Message", show: true,
             // sortable: false,
-            cellRenderer: "MessageRenderer"
+            cellRenderer: "messageRenderer"
         },
         {
             field: "createdBy", headerName: "Created At", show: true,
@@ -296,8 +296,8 @@ const Email = () => {
 
     const frameworkComponents = {
         recipentRenderer: RecipentRenderer,
-        SubjectRenderer: SubjectRenderer,
-        MessageRenderer: MessageRenderer,
+        subjectRenderer: SubjectRenderer,
+        messageRenderer: MessageRenderer,
         createdByDate: CreatedByDateRenderer,
         actionsRenderer: ActionsRenderer,
         customLoadingOverlay: CustomLoadingOverlay,
