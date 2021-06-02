@@ -168,7 +168,7 @@ const Email = () => {
         },
         {
             field: "message", headerName: "Message", show: true,
-            filter: false, sortable: false,
+            // sortable: false,
             cellRenderer: "MessageRenderer"
         },
         {
