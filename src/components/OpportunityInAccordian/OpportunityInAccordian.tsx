@@ -32,7 +32,7 @@ import currencies from "./../../constants/currency_with_country.json";
 import { useData } from "../../StateProvider/Provider";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { HiExternalLink } from 'react-icons/hi';
-import { customerAccount, customerContact } from "../../constants/helpers";
+import { customerAccount, customerContact, supplierContact } from "../../constants/helpers";
 import { MoreVert } from "@material-ui/icons";
 import AssignOpportunityDialog from "../AssignRolesDialog/AssignOpportunityDialog";
 
@@ -222,7 +222,8 @@ export default function OpportunityInAccordian({
                     </Menu>
                   </>
                   :
-                  <IconButton
+                  contactResource !== supplierContact.contactResource && (
+                    <IconButton
                     color="primary"
                     size="small"
                     onClick={() => {
@@ -231,6 +232,8 @@ export default function OpportunityInAccordian({
                   >
                     <ControlPointIcon />
                   </IconButton>
+                  )
+                  
                 }
               </Typography>
             </Grid>
