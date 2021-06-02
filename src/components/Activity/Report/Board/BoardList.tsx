@@ -21,6 +21,7 @@ export const BoardList = ({
   resource,
   fetchBoard,
   handleChangeStatus,
+  loading,
 }) => {
   const {
     state: {
@@ -55,7 +56,7 @@ export const BoardList = ({
   const [{}, drop] = useDrop({
     accept: "move",
     drop: (data: any) => {
-      handleChangeStatus(data.id, status);
+      handleChangeStatus(data.id, status, data.index);
     },
   });
 
@@ -77,34 +78,40 @@ export const BoardList = ({
         onMouseEnter={() => setCreateButton(true)}
         onMouseLeave={() => setCreateButton(false)}
       >
-        {subActivity.map((element, index) => (
-          <BoardBox
-            data={element}
-            key={element?._id}
-            id={element?._id}
-            index={index}
-            type={type}
-            moveCard={moveCard}
-            fetchBoard={fetchBoard}
-            handleActivityOpen={handleActivityOpen}
-          />
-        ))}
+        {!loading ? (
+          <>
+            {subActivity.map((element, index) => (
+              <BoardBox
+                data={element}
+                key={element?._id}
+                id={element?._id}
+                index={index}
+                type={type}
+                moveCard={moveCard}
+                fetchBoard={fetchBoard}
+                handleActivityOpen={handleActivityOpen}
+              />
+            ))}
 
-        <Box
-          p={1}
-          style={{
-            opacity: isCreateButton || status === "To Do" ? 1 : 0,
-          }}
-        >
-          <Button
-            fullWidth
-            style={{ justifyContent: "flex-start" }}
-            startIcon={<Add />}
-            onClick={() => setOpenDialog(true)}
-          >
-            Create {type}
-          </Button>
-        </Box>
+            <Box
+              p={1}
+              style={{
+                opacity: isCreateButton || status === "To Do" ? 1 : 0,
+              }}
+            >
+              <Button
+                fullWidth
+                style={{ justifyContent: "flex-start" }}
+                startIcon={<Add />}
+                onClick={() => setOpenDialog(true)}
+              >
+                Create {type}
+              </Button>
+            </Box>
+          </>
+        ) : (
+          <Box p={1}></Box>
+        )}
       </Box>
 
       {selectedId && (

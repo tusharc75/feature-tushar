@@ -88,8 +88,8 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
     if (id) {
       UpdateTask(id, values)
         .then(({ data }) => {
-          handleClose();
           setSubmitting(false);
+          handleClose();
         })
         .catch((err) => {
           setSubmitting(false);
@@ -98,8 +98,8 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
       values.parentId = null;
       CreateNewTask(values)
         .then(({ data }) => {
-          handleClose();
           setSubmitting(false);
+          handleClose();
         })
         .catch((err) => {
           setSubmitting(false);
