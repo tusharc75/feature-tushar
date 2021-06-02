@@ -16,7 +16,7 @@ import Loader from "../Loader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import {opportunity} from "../../constants/helpers"
+import { opportunity } from "../../constants/helpers"
 const AssignOpportunityDialog = ({
   opportunityDialogOpen,
   onSuccess,
@@ -121,7 +121,7 @@ const AssignOpportunityDialog = ({
           disabled={isAssigning}
           onClick={handleCloseDialog}
           color="primary"
-          size="small" 
+          size="small"
         >
           Cancel
         </Button>
@@ -129,7 +129,7 @@ const AssignOpportunityDialog = ({
           disabled={!selectedOpportunities.length || isAssigning}
           onClick={handleAssignOpportunities}
           color="primary"
-          size="small" 
+          size="small"
         >
           {isAssigning ? <CircularProgress size={22} /> : "Save"}
         </Button>

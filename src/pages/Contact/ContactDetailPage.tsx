@@ -540,13 +540,13 @@ const ContactDetailsPage = (props) => {
                   />
                 )}
                 {permissions?.quoteBuilder?.isRead && (
-                  <QuotesInAccordion 
-                recordsPerLine={3} 
-                quotes = {quotes}
-                fetchData={fetchRelatedData}
-                quoteBuilderPermission = {permissions.quoteBuilder}
-                
-                />)}
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={quotes}
+                    fetchData={fetchRelatedData}
+                    quoteBuilderPermission={permissions.quoteBuilder}
+
+                  />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
                   <LeadInAccordion

@@ -214,15 +214,15 @@ function OpportunityDetailsPage() {
 
         if (data[sidebarResource.lead] &&
           data[sidebarResource.lead][
-            sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
-            
-          ]){
-            let tempName = data[sidebarResource.lead][ sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")][0]
-            setMainPoints(prevState => ({
-              ...prevState,
-              "Parent Lead": `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`
+          sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
+
+          ]) {
+          let tempName = data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")][0]
+          setMainPoints(prevState => ({
+            ...prevState,
+            "Parent Lead": `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`
           }));
-          }
+        }
 
         setQuotes(
           data[sidebarResource.quoteBuilder] &&
@@ -436,7 +436,7 @@ function OpportunityDetailsPage() {
 
   return (
     <>
-    {console.log(permissions)}
+      {console.log(permissions)}
       <Layout>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
@@ -604,11 +604,11 @@ function OpportunityDetailsPage() {
                       )}
                       {
                         permissions?.quoteBuilder?.isRead && (
-                          <QuotesInAccordion  
+                          <QuotesInAccordion
                             recordsPerLine={3}
-                            quotes = {quotes}
+                            quotes={quotes}
                             fetchData={fetchRelatedData}
-                            quoteBuilderPermission = {permissions.quoteBuilder}
+                            quoteBuilderPermission={permissions.quoteBuilder}
                           />
                         )
                       }

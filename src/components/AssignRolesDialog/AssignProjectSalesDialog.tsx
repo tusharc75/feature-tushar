@@ -33,7 +33,7 @@ const AssignProjectSalesDialog = ({
     const [resource, setResource] = useState(null);
     const [id, setId] = useState(null);
     const [addAPI, setaddAPI] = useState(null);
-    
+
 
     useEffect(() => {
         setLoadingProjectSales(true);
