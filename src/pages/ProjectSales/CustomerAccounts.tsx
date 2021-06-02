@@ -405,7 +405,7 @@ const CustomerAccounts = (props) => {
                               isManager={isManager}
                             />
                           )}
-                          <QuotesInAccordion />
+                          {/* <QuotesInAccordion /> */}
                           {/* <ProjectInAccordion
                             recordsPerLine={3}
                             projectSales={null} /> */}
