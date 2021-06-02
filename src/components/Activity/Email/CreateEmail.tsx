@@ -336,6 +336,15 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         </Box >
     )
 
+    const onUploadFile = file => {
+        if (checkImageUrl(file)) {
+            imageAttachments.push(file)
+        }
+        else {
+            setOtherAttachments((prevState) => ([...prevState, file]))
+        }
+    }
+
     return <>
         <CustomDialogHeader title={`${emailId ? "View" : "New"} Email`} onClose={handleClose}></CustomDialogHeader>
         {loading ?
@@ -476,7 +485,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                                 size="small"
                                                                 setFieldValue={(name, file) => {
                                                                     setFieldValue("file", file);
-                                                                    setOtherAttachments((prevState) => ([...prevState, file]))
+                                                                    onUploadFile(file)
                                                                 }}
                                                                 usePublicUrlforFileUpload={true}
                                                                 doNotShowUploadedFile={true}
@@ -531,9 +540,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                             </CustomDialogContent>
                             <CustomDialogFooter>
                                 {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
-                                <Button color="primary" onClick={handleClose}>Cancel</Button>
+                                <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
                                 {!emailId &&
-                                    <Button type="button" color="primary" variant="contained" disabled={sending}
+                                    <Button type="button" size="small" color="primary" variant="contained" disabled={sending}
                                         onClick={(e) => {
 
                                             e.preventDefault()

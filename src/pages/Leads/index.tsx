@@ -2,8 +2,7 @@ import React, { useState, useEffect, useContext, useReducer } from "react";
 import {
   Grid,
   Tooltip,
-  IconButton,
-  TablePagination
+  IconButton
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
@@ -29,18 +28,16 @@ import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import { SiConvertio } from "react-icons/si";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import { isMobile, isTablet } from "react-device-detect";
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
-  CustomLoadingOverlay
+  CustomLoadingOverlay,
+  CommonRendererWithCopy
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
-import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight} from './../../constants/helpers';
 
 const LeadTypes = [
   {
@@ -171,7 +168,6 @@ const Leads = () => {
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -183,9 +179,9 @@ const Leads = () => {
     { field: "company", headerName: "Company", show: true, cellRenderer: "commonRenderer" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-    { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRenderer" },
-    { field: "mobile", headerName: "Mobile", show: true, cellRenderer: "commonRenderer" },
-    { field: "email", headerName: "Email", show: true, cellRenderer: "commonRenderer" },
+    { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRendererWithCopy" },
+    { field: "mobile", headerName: "Mobile", show: true, cellRenderer: "commonRendererWithCopy" },
+    { field: "email", headerName: "Email", show: true, cellRenderer: "commonRendererWithCopy" },
     { field: "owner", headerName: "Owner Alies", show: true, cellRenderer: "commonRenderer" }
   ]);
   //  Grid Variables - End
@@ -256,6 +252,7 @@ const Leads = () => {
     nameRenderer: NameRenderer,
     relatedOpportunityRenderer: RelatedOpportunityRenderer,
     commonRenderer: CommonRenderer,
+    commonRendererWithCopy: CommonRendererWithCopy,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
@@ -264,27 +261,6 @@ const Leads = () => {
     // customLoadingCellRenderer: CustomLoadingCellRenderer,
     // customNoRowsOverlay: CustomNoRowsOverlay
   };
-
-  //  If you want to do something once grid binding done
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-    setColumnApi(params.columnApi)
-  }
-
-  const generateColumns = columns.map((column: any, index) => {
-    return <AgGridColumn
-      key={index}
-      field={column.field}
-      headerName={column.headerName}
-      filter={column.filter ?? "agTextColumnFilter"}
-      cellRenderer={column.cellRenderer ?? null}
-    // floatingFilterComponent={column.floatingFilterComponent ?? null}
-    // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-    //   suppressFilterButton: true,
-    // }}
-    >
-    </AgGridColumn>
-  })
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -326,7 +302,7 @@ const Leads = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
@@ -371,8 +347,10 @@ const Leads = () => {
               owner: u.owner?.optionLabel,
               ownerId: u.owner?.optionValue,
               isAllowedToUpdate: [...u.collaborator ?? [], u.owner].some(
-                (d) => d.optionValue == user?.user?._id
+                (d) => d.optionValue === user?.user?._id
               ),
+
+              convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
               relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
               relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
 
@@ -416,7 +394,7 @@ const Leads = () => {
   const generateLeadToOpportunityButton = ({
     _id,
     concatedName,
-    staticData,
+    convertedToOpportunity,
     [processFieldName]: leadProcess,
     isAllowedToUpdate,
   }) => {
@@ -432,7 +410,7 @@ const Leads = () => {
       dontHavePermissions.push("Opportunity");
     }
 
-    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() == "qualified";
+    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() === "qualified";
 
     return dontHavePermissions.length > 0 ? (
       <>
@@ -446,7 +424,7 @@ const Leads = () => {
           </IconButton>
         </Tooltip>
       </>
-    ) : staticData && staticData["convertedToOpportunity"] ? (
+    ) : convertedToOpportunity ? (
       <>
         <Tooltip className="cursor-stop" title="This lead is already converted to opportunity">
           <IconButton aria-label="Convert to opportunity">
@@ -497,7 +475,7 @@ const Leads = () => {
       }
     } else {
       if (
-        selectedRecords.find((d) => d.ownerId != user.user._id)
+        selectedRecords.find((d) => d.ownerId !== user.user._id)
       ) {
         setShowDeleteWarningConfirmBox(true);
       } else {
@@ -615,95 +593,8 @@ const Leads = () => {
           />
         </div>
 
-        <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
-
-        <div className="ag-theme-material ag-grid-listing-grid">
-          <AgGridReact
-            rowData={dataRows}
-            onGridReady={onGridReady}
-            suppressDragLeaveHidesColumns={true}
-            suppressCellSelection={true}
-            headerHeight={AgGridHeaderHeight}
-            floatingFiltersHeight={AgGridFloatingFiltersHeight}
-            rowHeight={AgGridRowHeight}
-            frameworkComponents={frameworkComponents}
-            defaultColDef={{
-              resizable: true,
-              floatingFilter: true,
-              sortable: true,
-              width: 250,
-              suppressMenu: true,
-              // headerCheckboxSelection: true,
-              // checkboxSelection: true,
-              floatingFilterComponentParams: { suppressFilterButton: true }
-            }}
-            onSortChanged={(e) => {
-              dispatch({ type: "sort", sorting: e.api.getSortModel() })
-            }}
-            onFilterChanged={(e) => {
-              dispatch({ type: "filter", filters: e.api.getFilterModel() });
-            }}
-            enableCellTextSelection={true}
-            ensureDomOrder={false}
-            loadingOverlayComponent={'customLoadingOverlay'}
-            loadingOverlayComponentParams={{
-              loadingMessage: 'Loading...',
-            }}
-            animateRows={false}
-            suppressAnimationFrame={true}
-            suppressMaintainUnsortedOrder={true}
-
-            rowBuffer={limit}
-            // suppressMaxRenderedRowRestriction={true}
-
-            // loadingCellRenderer={'customLoadingCellRenderer'}
-            // loadingCellRendererParams={{
-            //   loadingMessage: 'One moment please...',
-            // }}
-
-            suppressRowClickSelection={true}
-            rowSelection={'multiple'}
-            onSelectionChanged={(event: any) => {
-              dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
-            }}
-            immutableData={true}
-            getRowNodeId={(data) => {
-              return data._id;
-            }}
-          >
-            <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
-              headerCheckboxSelection={true}
-              headerCheckboxSelectionFilteredOnly={true}
-              checkboxSelection={true}
-              resizable={false} sortable={false}
-            >
-            </AgGridColumn>
-
-            {generateColumns}
-
-            <AgGridColumn width={150} headerName="Actions"
-              pinned={(isMobile || isTablet) ? false : "right"}
-              lockPinned={(isMobile || isTablet) ? false : true}
-              resizable={false} sortable={false}
-              filter={false} cellRenderer="actionsRenderer">
-            </AgGridColumn>
-
-          </AgGridReact>
-        </div>
-
-        <TablePagination
-          component="div"
-          count={rowCount}
-          page={page}
-          onChangePage={(event, newPage) => {
-            dispatch({ type: "pageChange", page: newPage })
-          }}
-          rowsPerPage={limit}
-          onChangeRowsPerPage={(event) => {
-            dispatch({ type: "pageSizeChange", limit: event.target.value })
-          }}
-          rowsPerPageOptions={pageSizes}
-        />
+        <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
 
         {isOpen && (
           <ManageLeadDialog

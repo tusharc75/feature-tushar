@@ -15,7 +15,7 @@ const Header = (props) => {
     showConfirmBox,
     canDelete,
     openRolesDialog,
-    rolesActionDiabled,
+    rolesActionDisabled,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -93,7 +93,7 @@ const Header = (props) => {
                 )}
                 {userPermissions.isUpdate && (
                   <MenuItem
-                    disabled={rolesActionDiabled}
+                    disabled={rolesActionDisabled}
                     onClick={() => {
                       openRolesDialog();
                       closeActions();

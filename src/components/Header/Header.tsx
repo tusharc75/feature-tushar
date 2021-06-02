@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
       paddingRight: 0,
-    }
+    },
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -287,7 +287,11 @@ const Header = ({ toggleDrawer }) => {
 
   const logoutUser = async () => {
     try {
-      if (!isEmpty(account)) await instance.logoutPopup();
+      if (!isEmpty(account)) {
+        await instance.logoutPopup({
+          account: account
+        });
+      }
     } catch (e) {
       toastConfig.setToastConfig({ open: true, type: "error", message: "Need to logout from Azure" })
     } finally {
@@ -351,6 +355,7 @@ const Header = ({ toggleDrawer }) => {
         data.map((d, index) => {
           return <div style={{ borderBottom: d.read ? "1px solid lightgrey" : "1px solid white" }}
             className={`${d.read == true ? "" : "light-grey-bg"} p-3 cursor-pointer`}
+            key={index}
             onClick={() => {
               if (d.read == false) {
                 axiosInstance().put("/user/notification/read", {
@@ -361,10 +366,15 @@ const Header = ({ toggleDrawer }) => {
                   toastConfig.setToastConfig(error);
                 })
               }
+
+              handleFullScreenNotificationClose();
+
               if (d?.entity) {
                 handleSelectedEnity(d.entity)
               }
-              history.push(`${d.resourcePath}/${d.resourceId}`)
+
+              history.push(d.resourceId ? `${d.resourcePath}/${d.resourceId}` : d.resourcePath);
+
             }}>
             {
               <>

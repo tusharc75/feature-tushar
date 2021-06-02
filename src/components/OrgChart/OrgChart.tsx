@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from "react-router-dom";
-import { AiOutlineMail } from 'react-icons/ai';
 
 const OrgChart = ({
     positions,
@@ -136,7 +134,7 @@ const OrgChart = ({
                    </div>
            </div>
         </div> `  : `
-        <div class="card">
+        <div class="card cursor-pointer">
             <div class="p-0" data-id='${p.id}' />
             <div class="p-0" data-parent-id='${p.parentId}' />
            <div class="firstinfo">

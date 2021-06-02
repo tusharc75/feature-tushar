@@ -7,8 +7,6 @@ import {
     withStyles
 } from '@material-ui/core';
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
-import { BiFace } from 'react-icons/bi';
-import { FaEye } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -92,7 +90,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                                             <Grid item xs={12} sm={12}>
                                                 {
                                                     <Link className="link" to={`/${contactApi}/detail/${obj._id}`}>
-                                                        <Typography className="detailName"> {`${obj.firstName || ''}  ${obj.lastName || ''}`}{obj.title && <span className="role">( {obj.title} )</span> }</Typography>
+                                                        <Typography className="detailName"> {`${obj.firstName || ''}  ${obj.lastName || ''}`}{obj.title && <span className="role">( {obj.title} )</span>}</Typography>
                                                     </Link>
                                                 }
                                             </Grid>
@@ -100,12 +98,12 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                                         <Grid container>
                                             <Grid item xs={12} sm={12} md={12}>
                                                 {
-                                                    <DisplayData key="2" label='Email'  showCopyToText={true}  icon={<AiOutlineMail size={15} />} value={obj.email || ''} />
+                                                    <DisplayData key="2" label='Email' showCopyToText={true} icon={<AiOutlineMail size={15} />} value={obj.email || ''} />
                                                 }
                                             </Grid>
                                             <Grid item xs={12} sm={12} md={12}>
                                                 {
-                                                    <DisplayData key="3" label='Phone' showCopyToText={true} icon={<BiPhone size={15} />}  value={obj.phone || ''} />
+                                                    <DisplayData key="3" label='Phone' showCopyToText={true} icon={<BiPhone size={15} />} value={obj.phone || ''} />
                                                 }
                                             </Grid>
                                         </Grid>
@@ -165,7 +163,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                 <Box margin={1} className="btn-view gap-1" p={1} display="flex" justifyContent="center"
                     alignItems="center"
                     onClick={() => setMaxRecordsToShow(contacts.length)}>
-                   <FaArrowAltCircleDown size={25} />
+                    <FaArrowAltCircleDown size={25} />
                 </Box>
             </> : null
         }

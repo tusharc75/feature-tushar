@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { makeStyles } from "@material-ui/core/styles";
 import { Typography, Box, Button, ButtonGroup } from "@material-ui/core";
 import { Map } from "@material-ui/icons";
 import grey from "@material-ui/core/colors/grey";
@@ -13,15 +12,7 @@ import ActivityList from "./ActivityList";
 import CalanderList from "./CalanderList";
 import Loader from "../../../../components/Loader";
 
-const useStyles = makeStyles((theme) => ({
-  hover: {
-    "&:hover": {
-      backgroundColor: grey[100],
-    },
-  },
-}));
-
-export default function Roadmap({ type, filter, activityId }) {
+export default function Roadmap({ type, filter }) {
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById("dayLiner");
@@ -86,7 +77,6 @@ export default function Roadmap({ type, filter, activityId }) {
     setSelected(nodeIds);
   };
 
-  const classes = useStyles();
   return activity ? (
     <Box bgcolor="white">
       <Box
@@ -212,18 +202,21 @@ export default function Roadmap({ type, filter, activityId }) {
         <Box>
           <ButtonGroup disableElevation color="primary">
             <Button
+              size="small"
               variant={calendarType === "week" ? "contained" : "outlined"}
               onClick={() => handelChangeCalendarType("week")}
             >
               Weeks
             </Button>
             <Button
+              size="small"
               variant={calendarType === "month" ? "contained" : "outlined"}
               onClick={() => handelChangeCalendarType("month")}
             >
               Months
             </Button>
             <Button
+              size="small"
               variant={calendarType === "quater" ? "contained" : "outlined"}
               onClick={() => handelChangeCalendarType("quater")}
             >

@@ -64,6 +64,11 @@
         justify-content: center;
         flex-direction: column;
     }
+    .chat-box {
+        position: absolute;
+        right: 10px;
+        bottom: 14px;
+    }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
@@ -82,6 +87,7 @@
 @media only screen and (max-width: 959px) {
     .main-container {
         top: 0;
+        margin: 0;
     }
 }
 

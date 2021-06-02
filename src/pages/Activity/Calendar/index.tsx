@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Box, Button, Dialog, Grid, Menu, MenuItem } from "@material-ui/core";
 import { Add, ExpandMore } from "@material-ui/icons";
-import { lowerCase } from "lodash";
-import moment from "moment";
+import { lowerCase, startCase } from "lodash";
+import { useHistory } from "react-router-dom";
+import queryString from "query-string";
+import { isMobile, isTablet } from "react-device-detect";
 
 import MyCalendar from "./MyCalendar";
 import { GetBoard } from "../../../axios/activity";
@@ -15,6 +17,8 @@ import { useData } from "../../../StateProvider/Provider";
 import { CreateTask } from "../../../components/Activity/Task/CreateTask";
 import { CreateCase } from "../../../components/Activity/Case/CreateCase";
 import { CreateEvent } from "../../../components/Activity/Event/CreateEvent";
+import axiosInstance from "../../../axios/axiosInstance";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const BigCalendar = () => {
   const {
@@ -22,7 +26,12 @@ const BigCalendar = () => {
       user: { user },
     },
   } = useData();
-  const [type, setType] = useState("Task");
+  const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { referenceType, referenceId, type: actType } = parsed;
+  const [type, setType] = useState(
+    actType ? startCase(actType.toLocaleString()) : "Task"
+  );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [createType, setCreateType] = useState(null);
   const [filter, setFilter] = useState([]);
@@ -37,11 +46,26 @@ const BigCalendar = () => {
     setAnchorEl(null);
   };
 
-  const joinDateTime = (date, time) => {
-    let d = date.split("T")[0];
-    let t = time.split("T")[1];
+  useEffect(() => {
+    if (referenceType && referenceId) {
+      axiosInstance()
+        .get(
+          `/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`
+        )
+        .then(({ data: { data } }) => {
+          setFilter([
+            { _id: referenceId, type: referenceType, name: data.name },
+          ]);
+        })
+        .catch((err) => {});
+    }
+  }, []);
 
-    return date && time ? new Date(`${d}T${t}`) : "";
+  const joinTime = (date: any, time: any) => {
+    const d = new Date(date).toISOString().split("T")[0];
+    const t = new Date(time).toISOString().split("T")[1];
+
+    return new Date(`${d}T${t}`);
   };
 
   const fetchBoard = useCallback(() => {
@@ -52,21 +76,18 @@ const BigCalendar = () => {
           title: d.name,
           start:
             type === "Event"
-              ? joinDateTime(d.startDate, d.startTime)
-              : d.startDate
-                ? new Date(d.startDate)
-                : moment().toDate(),
+              ? joinTime(d.startDate, d.startTime)
+              : new Date(d.startDate),
+
           end:
             type === "Event"
-              ? joinDateTime(d.endDate, d.endTime)
-              : d.dueDate
-                ? new Date(d.dueDate)
-                : moment().add(20, "days").toDate(),
+              ? joinTime(d.endDate, d.endTime)
+              : new Date(d.dueDate),
         }));
 
         setActivities(newData);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   }, [type, filter]);
 
   useEffect(() => {
@@ -77,6 +98,9 @@ const BigCalendar = () => {
 
   const handleChangeFilter = (value) => {
     setFilter(value);
+    history.replace({
+      search: "",
+    });
   };
 
   const closeDialog = () => {
@@ -143,7 +167,7 @@ const BigCalendar = () => {
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}
-                chip={{ variant: "default", size: "small", color: "default" }}
+                chip={{ size: "small" }}
               />
             </Grid>
           </Grid>
@@ -157,14 +181,20 @@ const BigCalendar = () => {
           <ActivityModelHandler
             fetchBoard={fetchBoard}
             setActivityData={setActivityData}
-            fromCalender={true}
             activityType={activityData.type}
             activityId={activityData.id}
           />
         )}
 
         {createType && (
-          <Dialog open={true} fullWidth maxWidth="md" onClose={closeDialog}>
+          <Dialog
+            fullScreen={isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            open={true}
+            fullWidth
+            maxWidth="md"
+            onClose={closeDialog}
+          >
             {createType === "task" && (
               <CreateTask
                 taskId={null}

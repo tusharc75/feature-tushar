@@ -5,8 +5,7 @@ import {
   Button,
   Menu,
   MenuItem,
-  Grid,
-  TablePagination
+  Grid
 } from "@material-ui/core";
 import { useData } from "../../StateProvider/Provider";
 import { Link } from "react-router-dom";
@@ -34,9 +33,7 @@ import { useHistory } from "react-router-dom";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
 import routes from "./../../components/Helpers/Routes";
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import { isMobile, isTablet } from "react-device-detect";
 import {
   CommonRenderer,
   CreatedByRenderer,
@@ -44,9 +41,8 @@ import {
   CustomLoadingOverlay,
   CommonRendererWithCopy
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomGridHeaderOptions from "../../components/AgGridComponents/CustomGridHeaderOptions";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import { AgGridHeaderHeight, AgGridRowHeight, AgGridFloatingFiltersHeight } from './../../constants/helpers';
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 const ContactTypes = [
   {
@@ -176,7 +172,7 @@ export default function Contact(props) {
   const [singleContactDelete, setSingleContactDelete] = useState({
     id: null,
     show: false,
-    contactName: "",
+    contactedName: "",
   });
 
   const [accountDetails, setAccountDetails] = useState({
@@ -194,20 +190,19 @@ export default function Contact(props) {
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
-  const [columns, setColumns] = useState([
-    { field: "fullName", headerName: "Name", show: true, disabled: true, cellRenderer: "fullNameRenderer" },
+  const columns = [
+    { field: "concatedName", headerName: "Name", show: true, disabled: true, cellRenderer: "concatedNameRenderer" },
     { field: "relatedLead", headerName: "Related Lead", show: true, cellRenderer: "relatedLeadRenderer" },
     { field: "phone", headerName: "Phone", show: true, cellRenderer: "commonRendererWithCopy" },
     { field: "email", headerName: "Email", show: true, cellRenderer: "commonRendererWithCopy" },
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
-    { field: "accountName", headerName: "Account Name", show: true, disabled: true, cellRenderer: "accountNameRenderer" }
-  ]);
+    { field: "accountName", headerName: "Account Name", show: true, cellRenderer: "accountNameRenderer" }
+  ];
   //  Grid Variables - End
 
   const handleFilter = (event, newFilter) => {
@@ -222,7 +217,7 @@ export default function Contact(props) {
 
     if (data) {
       const hasContactPermission = data.find(
-        (d) => d.name == contactPermission
+        (d) => d.name === contactPermission
       );
       if (hasContactPermission) {
         setContactPermissions({
@@ -252,7 +247,7 @@ export default function Contact(props) {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails]);
 
-  const FullNameRenderer = params => <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
+  const ConcatedNameRenderer = params => <Link className="link" to={`/${contactRoute}/detail/${params.data._id}`}>
     {params.value}
   </Link>
 
@@ -274,7 +269,7 @@ export default function Contact(props) {
         setSingleContactDelete({
           show: true,
           id: params.data._id,
-          contactName: params.data.fullName,
+          contactedName: params.data.concatedName,
         })
       }}
       entity="contact"
@@ -282,7 +277,7 @@ export default function Contact(props) {
   </>
 
   const frameworkComponents = {
-    fullNameRenderer: FullNameRenderer,
+    concatedNameRenderer: ConcatedNameRenderer,
     relatedLeadRenderer: RelatedLeadRenderer,
     commonRenderer: CommonRenderer,
     commonRendererWithCopy: CommonRendererWithCopy,
@@ -296,28 +291,6 @@ export default function Contact(props) {
     // customNoRowsOverlay: CustomNoRowsOverlay
   };
 
-  //  If you want to do something once grid binding done
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-    setColumnApi(params.columnApi)
-  }
-
-  const generateColumns = columns.map((column: any, index) => {
-    return <AgGridColumn
-      key={index}
-      field={column.field}
-      headerName={column.headerName}
-      filter={column.filter ?? "agTextColumnFilter"}
-      sortable={column.sortable ?? true}
-      cellRenderer={column.cellRenderer ?? null}
-    // floatingFilterComponent={column.floatingFilterComponent ?? null}
-    // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-    //   suppressFilterButton: true,
-    // }}
-    >
-    </AgGridColumn>
-  })
-
   const replaceFieldName = (field) => {
     switch (field) {
       case "createdBy":
@@ -326,8 +299,8 @@ export default function Contact(props) {
       case "updatedBy":
         return "updatedBy.user.concatedName";
 
-      case "relatedLead":
-        return "staticData.relatedLead.concatedName";
+      case "lead":
+        return "staticData.lead.concatedName";
 
       default:
         return field;
@@ -361,7 +334,7 @@ export default function Contact(props) {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).map(field => {
+      Object.keys(filters).forEach(field => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
@@ -445,7 +418,7 @@ export default function Contact(props) {
         toastConfig.setToastConfig(error);
         dispatch({ type: "loading", loading: false });
       });
-    setSingleContactDelete({ id: null, show: false, contactName: "" });
+    setSingleContactDelete({ id: null, show: false, contactedName: "" });
   };
 
   // ****** ACTIONS BUTTON STUFF *********
@@ -608,9 +581,9 @@ export default function Contact(props) {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={selectedRecords.length == 0}
+                        disabled={selectedRecords.length === 0}
                         onClick={() => {
-                          if (selectedRecords.some((d) => d.canDelete == false)) {
+                          if (selectedRecords.some((d) => d.canDelete === false)) {
                             closeActions();
                             setShowDeleteWarningConfirmBox(true);
                           } else {
@@ -630,123 +603,8 @@ export default function Contact(props) {
         </div>
         <Box component="div">
 
-          <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
-
-          <div className="ag-theme-material ag-grid-listing-grid">
-            <AgGridReact
-              rowData={dataRows}
-              onGridReady={onGridReady}
-              suppressDragLeaveHidesColumns={true}
-              suppressCellSelection={true}
-              headerHeight={AgGridHeaderHeight}
-              floatingFiltersHeight={AgGridFloatingFiltersHeight}
-              rowHeight={AgGridRowHeight}
-              frameworkComponents={frameworkComponents}
-              defaultColDef={{
-                resizable: true,
-                floatingFilter: true,
-                sortable: true,
-                width: 250,
-                suppressMenu: true,
-                // headerCheckboxSelection: true,
-                // checkboxSelection: true,
-                floatingFilterComponentParams: { suppressFilterButton: true }
-              }}
-              onSortChanged={(e) => {
-                dispatch({ type: "sort", sorting: e.api.getSortModel() })
-              }}
-              onFilterChanged={(e) => {
-                dispatch({ type: "filter", filters: e.api.getFilterModel() });
-              }}
-              enableCellTextSelection={true}
-              ensureDomOrder={false}
-              loadingOverlayComponent={'customLoadingOverlay'}
-              loadingOverlayComponentParams={{
-                loadingMessage: 'Loading...',
-              }}
-              animateRows={false}
-              suppressAnimationFrame={true}
-              suppressMaintainUnsortedOrder={true}
-
-              rowBuffer={limit}
-              // suppressMaxRenderedRowRestriction={true}
-
-              // loadingCellRenderer={'customLoadingCellRenderer'}
-              // loadingCellRendererParams={{
-              //   loadingMessage: 'One moment please...',
-              // }}
-
-              suppressRowClickSelection={true}
-              rowSelection={'multiple'}
-              onSelectionChanged={(event: any) => {
-                dispatch({ type: "selection", selectedRecords: event.api.getSelectedRows() })
-              }}
-              immutableData={true}
-              getRowNodeId={(data) => {
-                return data._id;
-              }}
-            >
-              <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
-                headerCheckboxSelection={true}
-                headerCheckboxSelectionFilteredOnly={true}
-                checkboxSelection={true}
-                resizable={false} sortable={false}
-              >
-              </AgGridColumn>
-
-              {generateColumns}
-
-              <AgGridColumn width={100} headerName="Actions"
-                pinned={(isMobile || isTablet) ? false : "right"}
-                lockPinned={(isMobile || isTablet) ? false : true}
-                resizable={false} sortable={false}
-                filter={false} cellRenderer="actionsRenderer">
-              </AgGridColumn>
-
-            </AgGridReact>
-          </div>
-
-          <TablePagination
-            component="div"
-            count={rowCount}
-            page={page}
-            onChangePage={(event, newPage) => {
-              dispatch({ type: "pageChange", page: newPage })
-            }}
-            rowsPerPage={limit}
-            onChangeRowsPerPage={(event) => {
-              dispatch({ type: "pageSizeChange", limit: event.target.value })
-            }}
-            rowsPerPageOptions={pageSizes}
-          />
-
-          {/* <Box component="div" marginY={1}> */}
-          {/* <div className="listing-grid">
-            <DataGrid
-              components={{
-                Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
-              }}
-              rows={loading ? [] : dataRows}
-              columns={columns}
-              loading={loading}
-              disableSelectionOnClick
-              disableMultipleSelection
-              paginationMode="server"
-              pagination
-              onPageChange={handlePage}
-              onPageSizeChange={handlePageSize}
-              pageSize={query.limit}
-              page={query.page}
-              rowCount={rowCount}
-              rowsPerPageOptions={[25, 50, 75]}
-              onSortModelChange={handleSortModelChange}
-              density="compact"
-              filterMode="server"
-              onFilterModelChange={onFilterChange}
-            />
-          </div> */}
-          {/* </Box> */}
+          <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
@@ -781,12 +639,12 @@ export default function Contact(props) {
           {singleContactDelete.show ? (
             <ConfirmationDialog
               open={singleContactDelete.show}
-              message={`Are you sure, you want to delete contact: ${singleContactDelete.contactName} ?`}
+              message={`Are you sure, you want to delete contact: ${singleContactDelete.contactedName} ?`}
               onClose={() =>
                 setSingleContactDelete({
                   id: null,
                   show: false,
-                  contactName: "",
+                  contactedName: "",
                 })
               }
               onOk={handleSingleDeleteContacts}

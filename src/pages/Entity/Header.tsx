@@ -12,8 +12,6 @@ const EntityHeader = (props) => {
     searchVal,
     onCreate,
     entityPermissions,
-    showConfirmBox,
-    canDelete,
     openUserDialog,
     userActionDiabled,
   } = props;
@@ -56,7 +54,7 @@ const EntityHeader = (props) => {
             </Button>
           )}
 
-          {entityPermissions.isDelete || entityPermissions.isUpdate ? (
+          {entityPermissions.isUpdate ? (
             <>
               <Button
                 className={styles.action_submit_btn}

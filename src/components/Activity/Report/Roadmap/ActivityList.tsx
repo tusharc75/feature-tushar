@@ -5,11 +5,13 @@ import { TreeView, TreeItem } from "@material-ui/lab";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import AddIcon from "@material-ui/icons/Add";
+import { isMobile, isTablet } from "react-device-detect";
 
 import ActivityModelHandler from "../../ActivityModelHandler";
 import { CreateTask } from "../../Task/CreateTask";
 import { CreateCase } from "../../Case/CreateCase";
 import { useData } from "../../../../StateProvider/Provider";
+import { CustomDialogTransition } from "../../../../constants/helpers";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -126,13 +128,19 @@ export default function ActivityList(props) {
         <ActivityModelHandler
           fetchBoard={fetchRoadmap}
           setActivityData={setActivityData}
-          fromCalender={true}
           activityType={activityData.type}
           activityId={activityData.id}
         />
       )}
       {isCreate && (
-        <Dialog open={true} fullWidth maxWidth="md" onClose={closeDialog}>
+        <Dialog
+          open={true}
+          fullScreen={isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          fullWidth
+          maxWidth="md"
+          onClose={closeDialog}
+        >
           {type === "task" && (
             <CreateTask
               taskId={null}

@@ -1,16 +1,12 @@
-import { useState, FC, useCallback, useEffect, useContext } from "react";
+import React, { useState, FC, useEffect, useContext, useReducer } from "react";
 import {
-  Checkbox,
-  Tooltip,
-  IconButton,
   Grid,
+  IconButton,
   Link as MuiLink,
+  Tooltip,
 } from "@material-ui/core";
-import { Delete as DeleteIcon } from "@material-ui/icons";
-import { DataGrid } from "@material-ui/data-grid";
-import moment from "moment";
-import { Link } from "react-router-dom";
-
+import { Link, useHistory } from "react-router-dom";
+import { entity, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
@@ -18,357 +14,326 @@ import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import EntityHeader from "./Header";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import {
-  SET_USER,
-  USER_LOADING,
-  SET_SELECTED_ENTITY,
-} from "../../StateProvider/actionTypes";
 import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDialog";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import {
+  CommonRenderer,
+  CreatedByRenderer,
+  UpdatedByRenderer,
+  CustomLoadingOverlay
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
+import CustomContainer from "../../components/CustomContainer";
+import { FaUser } from "react-icons/fa";
 
-let entityTimeout: ReturnType<typeof setTimeout>;
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loading: action.loading
+      }
+
+    case "initialize":
+      return {
+        ...state,
+        dataRows: action.data,
+        rowCount: action.count,
+        loading: false
+      }
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      }
+
+    case "update":
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      }
+
+    case "filter":
+      return {
+        ...state,
+        loading: true,
+        filters: action.filters,
+        page: 0
+      }
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: true
+      }
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loading: true
+      }
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page
+      }
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: true
+      }
+
+    case "complete":
+      return {
+        ...state,
+        loading: false
+      }
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: {},
+  sorting: [],
+  selectedRecords: []
+}
+
+let entityTimeout;
 
 const Entity: FC = () => {
+
+  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+
   const {
-    state: { permissions },
-    dispatch,
+    state: { user, permissions },
   }: any = useData();
-  const [searchVal, setSearchVal] = useState("");
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [usersDialogOpen, setUsersDialogOpen] = useState(false);
-  const [selectedEntities, setSelectedEntities] = useState<any[]>([]);
-
-  const [dataRows, setDataRows] = useState<any[]>([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [users, setUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(false);
-  const [loadingEntities, setLoadingEntities] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllEntities, setCheckAllEntities] = useState(false);
-  const [deleteRec, setDeleteRec] = useState<any>({});
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [
-    showDeleteWarningConfirmBox,
-    setShowDeleteWarningConfirmBox,
-  ] = useState(false);
+  const [renderCount, setRenderCount] = useState(0);
+  const [entityPermissions, setEntityPermissions] = useState({
+    isCreate: false,
+    isUpdate: false,
+    isRead: false,
+    isDelete: false,
+  });
 
-  const fetchEntities = useCallback(() => {
+
+  const [usersDialogOpen, setUsersDialogOpen] = useState(false);
+  const [usersDialogLoding, setUsersDialogLoding] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [singleSelectEntity, setSingleSelectEntity] = useState(null);
+  //  Grid Variables - Start
+  const [gridApi, setGridApi] = useState(null);
+  const [columnApi, setColumnApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  // const [showGridFilters, setShowGridFilters] = useState(true)
+  const [columns, setColumns] = useState([
+    { field: "entityName", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "address", headerName: "Address", show: true, cellRenderer: "commonRenderer" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+  ]);
+  //  Grid Variables - End
+
+
+  const { entityResource, entityApi } = entity;
+
+  useEffect(() => {
+    if (permissions && permissions[entityResource]) {
+      setEntityPermissions(permissions[entityResource]);
+    }
+  }, [permissions]);
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (entityTimeout) {
       clearTimeout(entityTimeout);
     }
 
     entityTimeout = setTimeout(() => {
-      let searchParams: any = { ...query };
-      searchParams = searchVal
-        ? { ...searchParams, search: searchVal }
-        : { ...searchParams };
-      let api = getSearchQuery("/entity", searchParams);
-      setLoadingEntities(true);
-      axiosInstance()
-        .get(api)
-        .then(({ data: { data, count } }) => {
-          getRows(data);
-          setRowCount(count);
-          setCheckAllEntities(false);
-          setLoadingEntities(false);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setLoadingEntities(false);
-        });
-    }, 600);
-    // eslint-disable-next-line
-  }, [searchVal, query]);
+      fetchEntity();
+    }, millisec);
+  }, [search]);
 
   useEffect(() => {
-    fetchEntities();
-  }, [fetchEntities]);
+    if (renderCount > 0) {
+      fetchEntity();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [page, limit, filters, sorting]);
 
-  const fetchEntityUser = () => {
-    setUsersLoading(true);
-    axiosInstance()
-      .get(`/user?filterById=[{"field": "entities.entity", "term": "${selectedEntities[0]}"}]`)
+  useEffect(() => {
+    if (selectedRecords.length === 1) {
+      fetchEntityUser(selectedRecords[0].id);
+    }
+  }, [selectedRecords]);
+
+  const fetchEntityUser = async (entityId) => {
+    setUsersDialogLoding(true)
+    await axiosInstance()
+      .get(`/user?filterById=[{"field": "entities.entity", "term": "${entityId}"}]`)
       .then(({ data: { data } }) => {
         setUsers(data);
-        setUsersLoading(false);
+        setSingleSelectEntity(entityId)
+        setUsersDialogLoding(false)
+
       })
-      .catch((err) => {
-        setUsersLoading(false);
-        toastConfig.setToastConfig(err);
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setUsersDialogLoding(false)
+
       });
   };
+  const NameRenderer = params => <Link className="link"
+    to={`${routes.entityDetails.path}/${params.data._id}`} title={params.value}>
+    {params.value}
+  </Link>;
 
-  useEffect(() => {
-    if (selectedEntities.length === 1) {
-      fetchEntityUser();
-    }
-  }, [selectedEntities]);
+  const ActionsRenderer = params => <>
 
-  const getRows = (data: []) => {
-    const rows = data.length
-      ? data.map((entity: any) => ({
-        id: entity._id,
-        isChecked: false,
-        name: entity.entityName,
-        address: entity.address,
-        createdAt: moment(entity.createdAt).format("MMM Do, YYYY"),
-        createdBy: entity?.createdBy,
-        updatedBy: entity?.updatedBy,
-      }))
-      : [];
-    setDataRows(rows);
-  };
+    {entityPermissions.isUpdate ?
 
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllEntities}
-          onChange={(ev) => {
-            setCheckAllEntities(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              d.isChecked = ev.target.checked;
-              return d;
-            });
-            setDataRows([...gridData]);
+      <Tooltip title="Assign users">
+        <IconButton
+          aria-label="Assign users"
+          onClick={() => {
+            fetchEntityUser(params.data._id)
+            setUsersDialogOpen(true)
           }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev);
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      width: 250,
-      renderCell: (params: any) => (
-        <MuiLink
-          title={params.value}
-          className="text-truncate"
-          component={Link}
-          to={`${routes.entityDetails.path}/${params.row.id}`}
         >
-          {params.value}
-        </MuiLink>
-      ),
-    },
-    {
-      field: "address",
-      headerName: "Address",
-      width: 300,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          {params.value}
-        </p>
-      ),
-    },
-    // {
-    //   field: "createdAt",
-    //   headerName: "Created At",
-    //   width: 150,
-    //   renderCell: (params: any) => (
-    //     <p title={`Created At • ${params.value}`} className="text-truncate">
-    //       {params?.value}
-    //     </p>
-    //   ),
-    // },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      renderCell: (params: any) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params?.value?.user?.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params?.value?.user?.firstName} • ${moment(
-                params?.value?.date?.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      renderCell: (params: any) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="updateBy">
-            {params.value.user.firstName}
-            <span
-              className="updatedAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-      disableColumnMenu: true,
-    },
-
-    // {
-    //   field: "actions",
-    //   headerName: "Actions ",
-    //   disableColumnMenu: true,
-    //   sortable: false,
-    //   filterable: false,
-    //   renderCell: (params: any) => (
-    //     <>
-    //       <span
-    //         title={
-    //           permissions?.entity.isDelete
-    //             ? "Delete"
-    //             : "You can't do this action"
-    //         }
-    //       >
-    //         <IconButton
-    //           disabled={!permissions?.entity.isDelete}
-    //           aria-label="Delete"
-    //           onClick={() => showConfirmBox(params.row)}
-    //         >
-    //           <DeleteIcon fontSize="small" color="error" />
-    //         </IconButton>
-    //       </span>
-    //     </>
-    //   ),
-    //   width: 200,
-    // },
-  ];
-
-  const updateCheckedStatus = (params, ev) => {
-    const gridData = [...dataRows];
-    const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-    gridData[indexOfRecord].isChecked = ev.target.checked;
-
-    setDataRows([...gridData]);
-
-    const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-    if (checkedRecords.length === gridData.length) {
-      setCheckAllEntities(true);
-    } else {
-      setCheckAllEntities(false);
+          <FaUser size={18} className="text-primary" />
+        </IconButton>
+      </Tooltip>
+      :
+      <Tooltip className="cursor-stop" title={`You don't have permission to update this entity`}>
+        <IconButton aria-label="Assign users">
+          <FaUser size={18} className="text-primary" />
+        </IconButton>
+      </Tooltip>
     }
+  </>
 
-    handleSelectedEntities(params.row.id, ev.target.checked);
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    commonRenderer: CommonRenderer,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    customLoadingOverlay: CustomLoadingOverlay,
+    actionsRenderer: ActionsRenderer,
+    customFloatingFilter: CustomFloatingFilter,
+    // customLoadingCellRenderer: CustomLoadingCellRenderer,
+    // customNoRowsOverlay: CustomNoRowsOverlay
   };
 
-  const showConfirmBox = (row) => {
-    setIsConformDialogVisible(true);
-    if (row && row.id) {
-      setDeleteRec(row);
-    }
-  };
 
-  const handleDeleteEntities = async () => {
-    setDeleteLoading(true);
-    let recs = [];
-    if (deleteRec?.id) {
-      recs.push(deleteRec?.id);
-    } else {
-      dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj.id);
-      });
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      default:
+        return field;
     }
-    if (recs && recs.length > 0) {
-      axiosInstance()
-        .put(`/entity/remove`, { ids: [...recs] })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: "success",
-            message: data.message,
-          });
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRec) setDeleteRec({});
-          fetchEntities();
-          fetchUserData();
+  }
+
+
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).map(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
         })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
     }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
   };
+
+  const fetchEntity = () => {
+    const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+
+    axiosInstance()
+      .get(`${entityApi}${queryString}`)
+      .then(({ data: { data, count } }) => {
+
+        let rows = data.map((u) => {
+
+          const { owner, collaborator, createdBy, updatedBy, staticData, ...restProperties } = u;
+
+          let res = {
+            ...restProperties,
+            id: u._id,
+            createdBy: u.createdBy?.user?.concatedName,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date,
+          };
+          return res;
+        });
+
+        dispatch({ type: "initialize", data: rows, count: count });
+        // if (gridApi && rows.length > 0) {
+        //   gridApi.hideOverlay();
+        // }
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+        dispatch({ type: "loading", loading: false });
+      });
+
+  }
 
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
+    dispatch({ type: "search", search: e.target.value });
   };
 
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
-  };
-
-  // Handle entity selection
-  const handleSelectedEntities = (id, isChecked) => {
-    let tempSelectedEntities = [...selectedEntities],
-      curRecIndex = selectedEntities.indexOf(id);
-    if (isChecked && curRecIndex < 0) {
-      tempSelectedEntities = [...selectedEntities, id];
-    } else if (!isChecked && curRecIndex >= 0) {
-      tempSelectedEntities.splice(curRecIndex, 1);
-    }
-    setSelectedEntities(tempSelectedEntities);
-  };
 
   const handleCreate = () => {
     setIsOpen(true);
@@ -377,7 +342,6 @@ const Entity: FC = () => {
   const handleClose = () => {
     setIsOpen(false);
   };
-
   const handleOpenDialog = () => {
     setUsersDialogOpen(true);
   };
@@ -386,143 +350,68 @@ const Entity: FC = () => {
     setUsersDialogOpen(false);
   };
 
-  const fetchUserData = () => {
-    dispatch({ type: USER_LOADING, payload: true });
-    axiosInstance()
-      .get("/user/me")
-      .then(({ data: response }) => {
-        const { data } = response;
-        dispatch({ type: SET_USER, payload: data });
-        if (data?.role?.selectedEntity?._id) {
-          dispatch({
-            type: SET_SELECTED_ENTITY,
-            payload: data.role.selectedEntity._id,
-          });
-        }
-        dispatch({ type: USER_LOADING, payload: false });
-      })
-      .catch((err) => {
-        localStorage.setItem("token", "");
-        dispatch({ type: USER_LOADING, payload: false });
-      });
-  };
-
-  const onFilterChange = useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let deepFilter;
-      switch (params.filterModel.items[0].columnField) {
-        case 'createdBy':
-          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'updatedBy':
-          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
-          break;
-        default:
-          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
-      }
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter
-      }));
-
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
-
+  
   return (
-    <>
-      {isOpen && (
-        <CreateEntity
-          open={isOpen}
-          close={handleClose}
-          fetchData={fetchEntities}
-        />
-      )}
-      {usersDialogOpen && (
-        <AssignUsersDialog
-          entitiesDialogOpen={usersDialogOpen}
-          handleCloseDialog={handleCloseDialog}
-          type="user"
-          ids={selectedEntities}
-          assignedEntity={users}
-          regionalRole={false}
-          onSuccess={() => {
-            fetchEntities();
-            handleCloseDialog();
-          }}
-        />
-      )}
-      <Layout>
-        <Grid container className="headerbox">
+    <Layout>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.entity]} />
         </Grid>
-        <div className="main-container">
-          <div className="header-panel">
-            <EntityHeader
-              onSearch={handleSearch}
-              searchVal={searchVal}
-              entityPermissions={permissions?.entity}
-              onCreate={handleCreate}
-              showConfirmBox={showConfirmBox}
-              openUserDialog={handleOpenDialog}
-              userActionDiabled={selectedEntities.length !== 1} //single select entity can assign user
-              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
-            />
-          </div>
-          <div className="listing-grid">
-            <DataGrid
-              components={{
-                Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
-              }}
-              loading={loadingEntities}
-              rows={loadingEntities ? [] : dataRows}
-              columns={columns}
-              disableSelectionOnClick
-              disableMultipleSelection
-              paginationMode="server"
-              pagination
-              rowCount={rowCount}
-              onPageChange={handlePage}
-              onPageSizeChange={handlePageSize}
-              pageSize={query.limit}
-              page={query.page}
-              onSortModelChange={handleSortModelChange}
-              rowsPerPageOptions={[25, 50, 75]}
-              density="compact"
-              onFilterModelChange={onFilterChange}
-              filterMode="server"
-            />
-          </div>
-        </div>
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
-
-        {isConfirmDialogVisible ? (
-          <ConfirmationDialog
-            open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete entity ${deleteRec.name || ""
-              }?`}
-            onClose={() => {
-              if (deleteRec) setDeleteRec({});
-              setIsConformDialogVisible(false);
+        <Grid
+          item
+          md={8}
+          sm={1}
+          xs={2}>
+          <ImportExportLinks
+            module="entity(s)"
+            api={entityApi}
+            onSuccessfulImport={(isImportedSuccessfully) => {
+              if (isImportedSuccessfully) { fetchEntity(); }
             }}
-            okBtnLoading={deleteLoading}
-            onOk={handleDeleteEntities}
           />
-        ) : null}
-      </Layout>
-    </>
+        </Grid>
+      </Grid>
+
+      <CustomContainer>
+        <div className="header-panel">
+          <EntityHeader
+            onSearch={handleSearch}
+            searchVal={search}
+            entityPermissions={entityPermissions}
+            onCreate={handleCreate}
+            openUserDialog={handleOpenDialog}
+            userActionDiabled={selectedRecords.length !== 1} //single select entity can assign user
+          />
+        </div>
+
+        <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={150} />
+
+        {isOpen && (
+          <CreateEntity
+            open={isOpen}
+            close={handleClose}
+            fetchData={fetchEntity}
+          />
+        )}
+        {usersDialogOpen && !usersDialogLoding && (
+          <AssignUsersDialog
+            entitiesDialogOpen={usersDialogOpen}
+            handleCloseDialog={handleCloseDialog}
+            type="user"
+            ids={[singleSelectEntity]}
+            assignedEntity={users}
+            regionalRole={false}
+            onSuccess={() => {
+              // fetchEntity();
+              handleCloseDialog();
+            }}
+          />
+        )}
+      </CustomContainer >
+    </Layout >
   );
+
 };
 
 export default Entity;

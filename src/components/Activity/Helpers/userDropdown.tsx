@@ -77,16 +77,20 @@ export const UserDropdown = ({
           name: _user.firstName + " " + _user.lastName,
         }));
 
-        let filteredOptions = value.filter(
-          (val) => userData.filter((u) => val.userId === u.userId).length <= 0
-        );
+        if (Array.isArray(value) && value.length) {
+          let filteredOptions = value.filter(
+            (val) => userData.filter((u) => val.userId === u.userId).length <= 0
+          );
 
-        filteredOptions = filteredOptions.map((user) => ({
-          userId: user.userId,
-          name: user.userId,
-        }));
+          filteredOptions = filteredOptions.map((user) => ({
+            userId: user.userId,
+            name: user.userId,
+          }));
 
-        setUsers([...userData, ...filteredOptions]);
+          setUsers([...userData, ...filteredOptions]);
+        } else {
+          setUsers(userData);
+        }
       })
       .catch((err) => {});
   };
@@ -185,6 +189,9 @@ export const UserDropdown = ({
               variant="outlined"
               label={option && option.name}
               {...getTagProps({ index })}
+              disabled={
+                value.findIndex((o) => o.userId === option.userId) !== -1
+              }
             />
           ))
         }
@@ -237,10 +244,10 @@ export const UserDropdown = ({
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="primary">
+            <Button size="small" onClick={handleClose} color="primary">
               Cancel
             </Button>
-            <Button type="submit" color="primary">
+            <Button size="small" type="submit" color="primary">
               Add
             </Button>
           </DialogActions>

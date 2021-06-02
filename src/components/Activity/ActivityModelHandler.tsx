@@ -4,32 +4,22 @@ import { CreateCase } from "./Case/CreateCase";
 import { CreateNote } from "./Note/CreateNote";
 import { CreateEmail } from "./Email/CreateEmail";
 import Dialog from "@material-ui/core/Dialog";
-import { useHistory } from "react-router-dom";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
 const ActivityModelHandler = (props) => {
-  const {
-    activityType,
-    activityId,
-    fromCalender,
-    setActivityData,
-    fetchBoard,
-  } = props;
-  const history = useHistory();
+  const { activityType, activityId, setActivityData, fetchBoard } = props;
 
   const handleClose = () => {
-    if (fromCalender) {
-      fetchBoard();
-      setActivityData(null);
-    } else {
-      history.push({
-        pathname: "/" + activityType,
-      });
-    }
+    setActivityData(null);
+    fetchBoard();
   };
 
   return (
     <Dialog
       open={true}
+      fullScreen={isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       maxWidth={"md"}
       onClose={handleClose}

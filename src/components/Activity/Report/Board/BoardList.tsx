@@ -4,11 +4,14 @@ import { Add } from "@material-ui/icons";
 import { useDrop } from "react-dnd";
 import update from "immutability-helper";
 import { camelCase } from "lodash";
+import { isMobile, isTablet } from "react-device-detect";
 
 import { BoardBox } from "./BoardBox";
 import { CreateTask } from "../../Task/CreateTask";
 import { CreateCase } from "../../Case/CreateCase";
 import { useData } from "../../../../StateProvider/Provider";
+import { CustomDialogTransition } from "../../../../constants/helpers";
+import ActivityModelHandler from "../../ActivityModelHandler";
 
 export const BoardList = ({
   status,
@@ -28,6 +31,7 @@ export const BoardList = ({
   const [subActivity, setSubActivity] = useState([]);
   const [isCreateButton, setCreateButton] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     setSubActivity(activity);
@@ -62,6 +66,10 @@ export const BoardList = ({
     fetchBoard();
   };
 
+  const handleActivityOpen = (id) => {
+    setSelectedId(id);
+  };
+
   return (
     <div ref={ref} style={{ height: "calc(100% - 42px)" }}>
       <Box
@@ -78,6 +86,7 @@ export const BoardList = ({
             type={type}
             moveCard={moveCard}
             fetchBoard={fetchBoard}
+            handleActivityOpen={handleActivityOpen}
           />
         ))}
 
@@ -87,16 +96,33 @@ export const BoardList = ({
             opacity: isCreateButton || status === "To Do" ? 1 : 0,
           }}
         >
-          <Button startIcon={<Add />} onClick={() => setOpenDialog(true)}>
+          <Button
+            fullWidth
+            style={{ justifyContent: "flex-start" }}
+            startIcon={<Add />}
+            onClick={() => setOpenDialog(true)}
+          >
             Create {type}
           </Button>
         </Box>
       </Box>
+
+      {selectedId && (
+        <ActivityModelHandler
+          setActivityData={setSelectedId}
+          activityType={type}
+          fetchBoard={fetchBoard}
+          activityId={selectedId}
+        />
+      )}
+
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
         fullWidth
         maxWidth="md"
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
       >
         {type === "task" ? (
           <CreateTask

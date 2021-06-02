@@ -18,6 +18,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import ProductBuilder from "../../components/productBuilder";
+import { BiArrowBack } from 'react-icons/bi';
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
 
 const ProductBuilderSchema = Yup.object().shape({
@@ -42,32 +43,38 @@ const CreateProductBuilder = () => {
     }, [id]);
 
     const fetchOneProductBuilder = () => {
-        axiosInstance().get(`/productbuilder/` + id).then(({ data: { data } }) => {
-            setIsUpdating(true)
+        axiosInstance().get(`/productBuilder/` + id).then(({ data: { data } }) => {
             setInitialValues(data);
-            setIsUpdating(false)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
     };
 
-    const handleSave = (values) => {    
+    const handleSave = (values) => {
     }
 
+    const refreshProducts = (data) => {
+        console.log(data)
+    }
+
+    const [isAddNewProduct, setIsAddNewProduct] = useState(false);
+    const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
+
     return (<Layout>
-        <Grid container className="headerbox">  
+        <Grid container className="headerbox">
             <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title, path: routes.productBuilder.path },
                 { title: id === "0" ? "New" : initialValues && initialValues.name }]} />
             </Grid>
             <Grid item md={8} sm={1} xs={2}>
                 <ImportExportLinks
-                    module="product(s)"
+                    module="builder"
                     api={"productbuilder"}
                     refrenceId={id}
                     onSuccessfulImport={(isImportedSuccessfully) => {
                         if (isImportedSuccessfully) {
-                            fetchOneProductBuilder();
+                            setIsUpdating(true)
+                            setIsUpdating(false)
                         }
                     }}
                 />
@@ -94,20 +101,30 @@ const CreateProductBuilder = () => {
                                     <Grid item xs={12} sm={3}>
                                     </Grid>
                                     <Grid item xs={12} sm={6} container justify="flex-end">
-                                        {/* <Box>
-                                            <Button disabled={isUpdating} color="primary" onClick={submitForm} variant="contained" >
-                                                Save{isUpdating && <CircularProgress size={24} />}
-                                            </Button>
-                                        </Box> */}
                                         <Box ml={1} >
-                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} >Close</Button>
+                                            <Button size="small" color="primary" variant="contained" onClick={() => history.push({ pathname: routes.productBuilder.path })} startIcon={<BiArrowBack />}>Back</Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
                             </Box>
-
-                            {!isUpdating &&
-                                <ProductBuilder productBuilderId={id} />}
+                            <Box p={1}>
+                                <Grid item xs={6} className="d-flex align-items-center gap-1">
+                                    <Button variant="contained" size="small" color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
+                                    <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
+                                </Grid>
+                            </Box>
+                            <Box mt={1}>
+                                {isUpdating ? null :
+                                    <ProductBuilder
+                                        productBuilderId={id}
+                                        isAddNewProduct={isAddNewProduct}
+                                        setIsAddNewProduct={setIsAddNewProduct}
+                                        isAddExistingProduct={isAddExistingProduct}
+                                        setIsAddExistingProduct={setIsAddExistingProduct}
+                                        refreshProducts={refreshProducts}
+                                        Editable={true}
+                                    />}
+                            </Box>
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

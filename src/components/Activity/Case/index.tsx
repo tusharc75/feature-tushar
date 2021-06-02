@@ -13,6 +13,8 @@ import Dialog from "@material-ui/core/Dialog";
 import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
+import { isMobile, isTablet } from "react-device-detect";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -30,8 +32,8 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     await GetCase(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setCases(data);
-        onSetCount("Case", data.length)
-        setLoading(false);
+        onSetCount("Case", data.length);
+        setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
       .catch((err) => {
         setLoading(false);
@@ -64,7 +66,7 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchCash();
         handleActivityRefresh();
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const handleClose = () => {
@@ -150,6 +152,8 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         maxWidth="md"
         onClose={handleClose}
         fullWidth
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
       >
         <CreateCase
           caseId={caseId}

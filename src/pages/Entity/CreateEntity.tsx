@@ -93,10 +93,10 @@ const CreateEntity = ({ open, close, fetchData }) => {
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button variant="outlined" color="primary" disabled>
+            <Button size="small" variant="outlined" color="primary" disabled>
               Cancel
             </Button>
-            <Button variant="contained" color="primary" disabled>
+            <Button size="small" variant="contained" color="primary" disabled>
               Submit
             </Button>
           </CustomDialogFooter>
@@ -126,6 +126,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
                 <Button
                   variant="outlined"
                   color="primary"
+                  size="small" 
                   disabled={isSubmitting || loading}
                   onClick={close}
                 >
@@ -134,6 +135,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
                 <Button
                   variant="contained"
                   color="primary"
+                  size="small" 
                   onClick={submitForm}
                   disabled={isSubmitting || loading}
                 >

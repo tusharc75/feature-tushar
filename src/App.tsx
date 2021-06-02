@@ -48,6 +48,7 @@ import ProductBuilder from "./pages/ProductBuilder";
 import CreateProductBuilder from "./pages/ProductBuilder/CreateProductBuilder";
 import BrandConfiguration from "./pages/BrandConfiguration";
 import QuoteApproval from "./pages/Quote-Approval";
+import QuoteDetail from "./pages/QuoteBuilderCombined/QuoteDetail";
 import QuoteBuilderPage from "./pages/QuoteBuilder";
 import DOARequest from "./pages/DOA";
 import CurrencyConverter from "./pages/CurrencyConverter";
@@ -71,17 +72,23 @@ import { CustomNotificationCountContext } from "./StateProvider/CustomNotificati
 import axiosInstance from "./axios/axiosInstance";
 import Event from "./pages/Activity/Event";
 import DOAapproval from "./pages/DOA/DOAApproval";
+import QuoteBuilderCombined from "./pages/QuoteBuilderCombined";
 import Reminder from "./pages/Reminder";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import queryString from "query-string";
-import { USER_LOADING, SET_USER, SET_SELECTED_ENTITY } from "./StateProvider/actionTypes";
+import {
+  USER_LOADING,
+  SET_USER,
+  SET_SELECTED_ENTITY,
+} from "./StateProvider/actionTypes";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const {
     state: { user },
-    dispatch
+    dispatch,
   }: any = useData();
 
   const getNotification = async () => {
@@ -100,14 +107,13 @@ function App() {
               .then(({ data: response }) => {
                 const { data } = response;
                 dispatch({ type: SET_USER, payload: data });
-                let prevSelectedEntity = localStorage.getItem("selectedEntity")
-                if (prevSelectedEntity && prevSelectedEntity !== 'null') {
+                let prevSelectedEntity = localStorage.getItem("selectedEntity");
+                if (prevSelectedEntity && prevSelectedEntity !== "null") {
                   dispatch({
                     type: SET_SELECTED_ENTITY,
                     payload: prevSelectedEntity,
                   });
-                }
-                else if (data?.role?.selectedEntity?._id) {
+                } else if (data?.role?.selectedEntity?._id) {
                   dispatch({
                     type: SET_SELECTED_ENTITY,
                     payload: data.role.selectedEntity._id,
@@ -139,7 +145,6 @@ function App() {
   }, []);
 
   const conditionalRedirect = (Comp, location) => {
-
     let redirectToAnotherScreen = null;
     if (location && location.search) {
       const parsedParams = queryString.parse(location.search);
@@ -151,7 +156,12 @@ function App() {
     return !user ? (
       <Comp />
     ) : (
-      <Redirect to={{ pathname: redirectToAnotherScreen ? redirectToAnotherScreen : "/", state: { from: location } }} />
+      <Redirect
+        to={{
+          pathname: redirectToAnotherScreen ? redirectToAnotherScreen : "/",
+          state: { from: location },
+        }}
+      />
     );
   };
 
@@ -342,12 +352,17 @@ function App() {
           <PrivateRoute exact path="/attachment">
             <Attachments />
           </PrivateRoute>
-  
           <PrivateRoute exact path="/calendar">
             <Calender />
           </PrivateRoute>
           <PrivateRoute exact path="/reminder">
             <Reminder />
+          </PrivateRoute>
+          <PrivateRoute path="/case">
+            <Activity type="case" />
+          </PrivateRoute>
+          <PrivateRoute path="/task">
+            <Activity type="task" />
           </PrivateRoute>
           <PrivateRoute exact path={routes.product.path}>
             <Product />
@@ -390,9 +405,9 @@ function App() {
           <PrivateRoute exact path={routes.currencyConverter.path}>
             <CurrencyConverter />
           </PrivateRoute>
-          <Route exact path={"/quote-builder/:id"}>
-            <QuoteBuilderPage />
-          </Route>
+          <PrivateRoute exact path={"/quote-builder/:id"}>
+            <QuoteDetail />
+          </PrivateRoute>
           <Route exact path={"/dashboards"}>
             <KpiDashboard />
           </Route>
@@ -412,10 +427,10 @@ function App() {
           <Route exact path={"/doa-request/:id"}>
             <DOAapproval />
           </Route>
-
-          <PrivateRoute path="/:type">
-            <Activity />
+          <PrivateRoute exact path={"/quote-builder"}>
+            <QuoteBuilderCombined />
           </PrivateRoute>
+          <Route path="*" component={NotFound} />
           {/* <Route exact path="/crm/account" component={Account} /> */}
         </Switch>
       </AnimatePresence>

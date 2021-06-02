@@ -1,27 +1,114 @@
-import React, { useState, FC, useCallback, useEffect, useContext } from "react";
-import { Checkbox, Tooltip, IconButton, Grid } from "@material-ui/core";
+import React, { useState, FC, useEffect, useContext, useReducer } from "react";
+import { Tooltip, IconButton, Grid } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
-import { DataGrid } from "@material-ui/data-grid";
-import moment from "moment";
 import { Link } from "react-router-dom";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import CustomContainer from "../../components/CustomContainer";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { getSearchQuery } from "../../services/util";
 import { useData } from "../../StateProvider/Provider";
-
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CreateRole from "./CreateRole";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import { PERMISSION } from "../../constants/Roles";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
-import { localStorageKeys, roleTypes } from "../../constants/helpers";
+import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import RoleHeader from "./RoleHeader";
+import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer, CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "loading":
+      return {
+        ...state,
+        loading: action.loading
+      }
+
+    case "initialize":
+      return {
+        ...state,
+        dataRows: action.data,
+        rowCount: action.count,
+        loading: false
+      }
+
+    case "selection":
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords,
+      }
+
+    case "update":
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      }
+
+    case "filter":
+      return {
+        ...state,
+        loading: true,
+        filters: action.filters,
+        page: 0
+      }
+
+    case "sort":
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: true
+      }
+
+    case "search":
+      return {
+        ...state,
+        search: action.search,
+        loading: true
+      }
+
+    case "pageChange":
+      return {
+        ...state,
+        page: action.page
+      }
+
+    case "pageSizeChange":
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: true
+      }
+
+    case "complete":
+      return {
+        ...state,
+        loading: false
+      }
+
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: "",
+  filters: {},
+  sorting: [],
+  selectedRecords: []
+}
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
@@ -31,17 +118,11 @@ const Roles: FC = () => {
   const {
     state: { permissions, selectedEntity },
   }: any = useData();
-  const [searchVal, setSearchVal] = useState("");
   const [selectedType, setSelectedType] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
     roleTypes.find((d) => d.key === localStorage.getItem(localStorageKeys.currentSelectedRoleType)).value :
     roleTypes.find((d) => d.key === "Global")?.value);
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
-  const [dataRows, setDataRows] = useState<any[]>([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [loadingRoles, setLoadingRoles] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [checkAllRoles, setCheckAllRoles] = useState(false);
-  const [deleteRec, setDeleteRec] = useState<any>({});
+  const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -50,30 +131,23 @@ const Roles: FC = () => {
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
 
-  const fetchRoles = async () => {
-    let searchParams: any = { ...query, type: selectedType };
-    searchParams = searchVal
-      ? { ...searchParams, search: searchVal }
-      : { ...searchParams };
-    let api = getSearchQuery("/role", searchParams);
-    setLoadingRoles(true);
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data, count } }) => {
-        getRows(data);
-        setRowCount(count);
-        setCheckAllRoles(false);
-        setLoadingRoles(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoadingRoles(false);
-      });
-    // eslint-disable-next-line
-  }
+  //  Grid Variables - Start
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  // const [showGridFilters, setShowGridFilters] = useState(true)
+  const columns = [
+    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+    { field: "description", headerName: "Description", show: true, cellRenderer: "commonRenderer" },
+    { field: "type", headerName: "Type", show: true, sortable: false, filter: false, cellRenderer: "commonRenderer" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+  ];
+  //  Grid Variables - End
 
   useEffect(() => {
-    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
 
     if (roleTimeout) {
       clearTimeout(roleTimeout);
@@ -82,229 +156,153 @@ const Roles: FC = () => {
     roleTimeout = setTimeout(() => {
       fetchRoles();
     }, millisec);
-  }, [searchVal]);
+  }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
       fetchRoles();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [query, selectedType]);
+  }, [page, limit, selectedType, filters, sorting]);
 
-  const getRows = (data: []) => {
-    const rows = data.length
-      ? data.map((role: any) => ({
-        ...role,
-        id: role._id,
-        isChecked: false,
-        name: role.name,
-        description: role.description,
-        type: `${role.type === roleTypes.find((d) => d.key === "Global")?.value ? "Global" : "Regional"} Role`,
-        createdAt: moment(role.createdAt).format("MMM Do, YYYY"),
-        createdBy: role.createdBy,
-        updatedBy: role.updatedBy,
-      }))
-      : [];
+  const NameRenderer = params => <Link
+    title={params.value}
+    className="text-truncate link"
+    to={`${routes.roleDetail.path}/${params.data.id}`}
+  >
+    {params.value}
+  </Link>
 
-    setDataRows(rows);
-  };
-
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllRoles}
-          onChange={(ev) => {
-            setCheckAllRoles(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              d.isChecked = ev.target.checked;
-              return d;
-            });
-            setDataRows([...gridData]);
-          }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          color="primary"
-          checked={params.value}
-          onChange={(ev) => {
-            updateCheckedStatus(params, ev);
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 75,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      width: 200,
-      renderCell: (params: any) => (
-        <Link
-          title={params.value}
-          className="text-truncate link"
-          to={`${routes.roleDetail.path}/${params.row.id}`}
-        >
-          {params.value}
-        </Link>
-      ),
-    },
-    {
-      field: "description",
-      headerName: "Description",
-      width: 300,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          {params.value}
-        </p>
-      ),
-    },
-    {
-      field: "type",
-      headerName: "Type",
-      width: 140,
-      renderCell: (params: any) => (
-        <p title={params.value} className="text-truncate">
-          {params.value}
-        </p>
-      ),
-      sortable: false,
-      filterable: false,
-    },
-    // {
-    //   field: "createdAt",
-    //   headerName: "Created At",
-    //   width: 150,
-    //   renderCell: (params: any) => (
-    //     <p title={`Created At • ${params.value}`} className="text-truncate">
-    //       {params.value}
-    //     </p>
-    //   ),
-    // },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: any) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params.value.user.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params.value.date.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: any) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="updateBy">
-            {params.value.user.firstName}
-            <span
-              title={`${params.value.user.firstName} • ${params.value.date}`}
-              className="updatedAtTime badge-date"
-            >
-              {moment(params.value.date.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      renderCell: (params: any) => (
-        <>
-          {permissions.role.isDelete ? (
-            <span title="Delete Role">
-              {
-                rolePermissionArray.indexOf(params?.row?.permission) >= 0 ? (
-                  <Tooltip
-                    className="cursor-stop"
-                    title={params.row.type === "Global Role" ? "Global brand admin role can not be deleted" : "Regional brand admin role can not be deleted"}
-                  >
-                    <IconButton aria-label="Delete">
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                ) : (<IconButton
-                  aria-label="Delete"
-                  onClick={() => showConfirmBox(params.row)}
-
-                >
-
-                  <DeleteIcon fontSize="small" color="error" />
-
-                </IconButton>)
-              }
-
-            </span>
-          ) : (
+  const ActionsRenderer = params => <>
+    {permissions.role.isDelete ? (
+      <span title="Delete Role">
+        {
+          rolePermissionArray.indexOf(params.data.permission) >= 0 ? (
             <Tooltip
               className="cursor-stop"
-              title="You do not have permission to delete role"
+              title={params.data.type === "Global Role" ? "Global brand admin role can not be deleted" : "Regional brand admin role can not be deleted"}
             >
               <IconButton aria-label="Delete">
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          )}
-        </>
-      ),
+          ) : (<IconButton
+            aria-label="Delete"
+            onClick={() => showConfirmBox(params.data)}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>)
+        }
+      </span>
+    ) : (
+      <Tooltip
+        className="cursor-stop"
+        title="You do not have permission to delete role"
+      >
+        <IconButton aria-label="Delete">
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    )}
+  </>
 
-      width: 200,
-    },
-  ];
-
-  const updateCheckedStatus = (params, ev) => {
-    const gridData = [...dataRows];
-    const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-    gridData[indexOfRecord].isChecked = ev.target.checked;
-
-    setDataRows([...gridData]);
-
-    const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-    if (checkedRecords.length === gridData.length) {
-      setCheckAllRoles(true);
-    } else {
-      setCheckAllRoles(false);
-    }
+  const frameworkComponents = {
+    nameRenderer: NameRenderer,
+    commonRenderer: CommonRenderer,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    actionsRenderer: ActionsRenderer,
+    customLoadingOverlay: CustomLoadingOverlay,
+    customFloatingFilter: CustomFloatingFilter,
+    // customLoadingCellRenderer: CustomLoadingCellRenderer,
+    // customNoRowsOverlay: CustomNoRowsOverlay
   };
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      default:
+        return field;
+    }
+  }
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&type=${selectedType}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+  const fetchRoles = async () => {
+    const queryString = getQueryString();
+    dispatch({ type: "loading", loading: true });
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+
+    axiosInstance()
+      .get(`/role/${queryString}`)
+      .then(({ data: { data, count } }) => {
+
+        let rows = data.map((u) => {
+          const { createdBy, updatedBy, ...restProperties } = u;
+
+          let res = {
+            ...restProperties,
+            id: u._id,
+            type: `${u.type === roleTypes.find((d) => d.key === "Global")?.value ? "Global" : "Regional"} Role`,
+
+            createdBy: u.createdBy?.user?.concatedName,
+            createdByDate: u.createdBy?.date,
+            updatedBy: u.updatedBy?.user?.concatedName,
+            updatedByDate: u.updatedBy?.date,
+          };
+          return res;
+        });
+
+        dispatch({ type: "initialize", data: rows, count: count });
+
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        dispatch({ type: "loading", loading: false });
+      });
+    // eslint-disable-next-line
+  }
 
   const showConfirmBox = (row) => {
     if (row) {
       setIsConformDialogVisible(true);
       if (row && row.id) {
-        setDeleteRec(row);
+        setDeleteRecord(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.allowToDelete === false)) {
+      if (selectedRecords.find((d) => d.allowToDelete === false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -314,18 +312,18 @@ const Roles: FC = () => {
 
   const handleDeleteRole = async () => {
     setDeleteLoading(true);
-    let recs = [];
-    if (deleteRec?.id) {
-      recs.push(deleteRec?.id);
+    let records = [];
+    if (deleteRecord?.id) {
+      records.push(deleteRecord?.id);
     } else {
-      dataRows.forEach((obj) => {
-        if (obj.isChecked) recs.push(obj.id);
+      selectedRecords.forEach((obj) => {
+        records.push(obj.id);
       });
     }
 
-    if (recs && recs.length > 0) {
+    if (records.length > 0) {
       axiosInstance()
-        .put(`/role/remove`, { ids: [...recs] })
+        .put(`/role/remove`, { ids: [...records] })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -334,7 +332,7 @@ const Roles: FC = () => {
           });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
-          if (deleteRec) setDeleteRec({});
+          if (deleteRecord) setDeleteRecord({});
           fetchRoles();
         })
         .catch((error) => {
@@ -346,34 +344,7 @@ const Roles: FC = () => {
   };
 
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
-  };
-
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
-    }
+    dispatch({ type: "search", search: e.target.value });
   };
 
   const handleCreate = () => {
@@ -383,32 +354,12 @@ const Roles: FC = () => {
   const handleClose = () => {
     setIsOpen(false);
   };
-  const handleRoleTypeSel = (filteredValue) => {
+  const handleRoleTypeSelect = (filteredValue) => {
     setSelectedType(filteredValue);
   };
 
-  const onFilterChange = React.useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let field = params.filterModel.items[0].columnField
-      if (params.filterModel.items[0].columnField === 'createdBy') {
-        field = "createdBy.user"
-      }
-      if (params.filterModel.items[0].columnField === 'updatedBy') {
-        field = "updatedBy.user"
-      }
-      const deepFilter = JSON.stringify([{ field: field, term: params.filterModel.items[0].value }])
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter
-      }));
-
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
-
-  const disableDelete = dataRows.some(
-    (o) => o.isChecked && rolePermissionArray.indexOf(o?.permission) >= 0
+  const disableDelete = selectedRecords.some(
+    (o) => rolePermissionArray.indexOf(o?.permission) >= 0
   );
 
   return (
@@ -425,7 +376,7 @@ const Roles: FC = () => {
       )}
       <Layout>
 
-      <Grid container className="headerbox">
+        <Grid container className="headerbox">
           <Grid item md={12} sm={12} xs={12}>
             <CustomBreadCrumbs routes={[routes.role]} />
           </Grid>
@@ -434,41 +385,19 @@ const Roles: FC = () => {
           <div className="header-panel">
             <RoleHeader
               selectedType={selectedType}
-              onTypeChange={handleRoleTypeSel}
+              onTypeChange={handleRoleTypeSelect}
               options={roleTypes}
               onSearch={handleSearch}
-              searchVal={searchVal}
+              search={search}
               rolePermissions={permissions.role}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               canDelete={!disableDelete}
             />
           </div>
-          <div className="listing-grid">
-            <DataGrid
-              components={{
-                Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
-              }}
-              loading={loadingRoles}
-              rows={loadingRoles ? [] : dataRows}
-              columns={columns}
-              disableSelectionOnClick
-              disableMultipleSelection
-              paginationMode="server"
-              pagination
-              rowCount={rowCount}
-              onPageChange={handlePage}
-              onPageSizeChange={handlePageSize}
-              pageSize={query.limit}
-              page={query.page}
-              onSortModelChange={handleSortModelChange}
-              rowsPerPageOptions={[25, 50, 75]}
-              density="compact"
-              onFilterModelChange={onFilterChange}
-              filterMode="server"
-            />
-          </div>
+
+          <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
 
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
@@ -481,10 +410,10 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure, you want to delete role ${deleteRec.name || ""
+            message={`Are you sure, you want to delete role ${deleteRecord.name || ""
               }?`}
             onClose={() => {
-              if (deleteRec) setDeleteRec({});
+              if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}

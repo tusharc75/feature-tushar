@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, Button, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
-import { withStyles, makeStyles } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import { Link } from 'react-router-dom'
-import { useHistory } from 'react-router-dom';
-import { FaEye } from 'react-icons/fa';
 import { BsBuilding } from 'react-icons/bs';
 import { BiPhone } from 'react-icons/bi';
 import { AiOutlineMail } from 'react-icons/ai';
+
 const Accordion = withStyles({
     root: {
         border: "1px solid rgba(0, 0, 0, .125)",
@@ -74,7 +73,6 @@ export default function LeadInAccordion({
     lead
 }) {
 
-    const history = useHistory();
     let recordsPerLineInLargeScreen: 3 | 4 | 6 | 12 = 6;
 
     switch (recordsPerLine) {
@@ -110,7 +108,7 @@ export default function LeadInAccordion({
                             <Box>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => setExpandLead(!expandLead)} >
+                                    onClick={() => setExpandLead(!expandLead)} >
                                     {
                                         expandLead === true ? (
                                             <ExpandLessIcon />
@@ -134,10 +132,8 @@ export default function LeadInAccordion({
                     {
                         expandLead && <>
                             {
-
                                 <Grid container spacing={1}>
                                     {
-
                                         <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen}> <Card className="detailCard">
                                             <CardContent className="detailListing">
                                                 <Grid container className="detailCardHeader">
@@ -197,5 +193,4 @@ export default function LeadInAccordion({
             />
         } */}
     </>
-
 }
