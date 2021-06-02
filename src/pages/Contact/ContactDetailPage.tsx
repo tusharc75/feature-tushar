@@ -16,6 +16,7 @@ import {
   getObjKeysWithValues,
   isObjectEmpty,
   sidebarResource,
+  customerAccount
 } from "./../../constants/helpers";
 import DeleteButton from "../../components/Helpers/DeleteButton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -528,30 +529,30 @@ const ContactDetailsPage = (props) => {
                     contactResource={contactResource}
                   />
                 )}
-                {permissions?.projectSales?.isRead && (
+                {permissions?.projectSales?.isRead && accountResource == customerAccount.accountResource && (
                   <ProjectInAccordion
                     recordsPerLine={3}
                     projectSales={projectSales}
                     type={typeCreateProjectSalesDialog}
                     fetchData={fetchRelatedData}
                     permissions={permissions}
-
+                    isAddProjectSale={true}
                   />
                 )}
                 {permissions?.quoteBuilder?.isRead && (
-                  <QuotesInAccordion 
-                recordsPerLine={3} 
-                quotes = {quotes}
-                fetchData={fetchRelatedData}
-                quoteBuilderPermission = {permissions.quoteBuilder}
-                
-                />)}
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={quotes}
+                    fetchData={fetchRelatedData}
+                    quoteBuilderPermission={permissions.quoteBuilder}
+
+                  />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-                {permissions?.lead?.isRead && contactData.staticData?.lead && (
+                {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
                   <LeadInAccordion
                     recordsPerLine={3}
                     lead={contactData.staticData.lead} />
-                )}
+                )} */}
               </div>
 
             </Paper>

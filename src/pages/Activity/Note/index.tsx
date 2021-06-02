@@ -37,6 +37,7 @@ const Note = () => {
     const [notes, setNotes] = useState([]);
     const [noteData, setNoteData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [noteId, setNoteId] = useState(undefined)
 
     useEffect(() => {
         if (referenceType) {
@@ -163,7 +164,11 @@ const Note = () => {
                     density="compact"
                 />
             </div>
-            {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
+            {noteId !== undefined && <ActivityModelHandler
+                activityType="note"
+                activityId={noteId}
+                onClose={() => setNoteId(undefined)}
+            />}
         </CustomContainer>
         {
             showCreateDialog &&
