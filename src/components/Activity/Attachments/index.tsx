@@ -14,7 +14,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState(false);
@@ -33,9 +33,9 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     setLoading(true);
     let api = `/attachment?relatedTo=${JSON.stringify(relatedTo)}`
     axiosInstance().get(api)
-      .then(({ data: { data } }) => {
+      .then(({ data: { data: { data, count } } }) => {
         setLoading(false);
-        onSetCount("Attachment", data.length)
+        onSetCount("Attachment", count)
         setAttachments(data)
       })
       .catch((error) => {
@@ -67,9 +67,14 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     if (attachmentId) {
       event.stopPropagation();
       axiosInstance()
-        .delete(`/attachment/${attachmentId}`)
+        .put('attachment/deletemany ', { ids: [attachmentId] })
         .then(({ data }) => {
           setAnchorEl(null);
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: "Deleted Succesfully",
+          });
           fetchAttachment();
           handleActivityRefresh();
         })
