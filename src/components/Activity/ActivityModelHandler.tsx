@@ -11,10 +11,12 @@ const ActivityModelHandler = (props) => {
   const { activityType, activityId, setActivityData, fetchBoard, onClose = null } = props;
 
   const handleClose = () => {
-    setActivityData(null);
-    fetchBoard();
     if (onClose) {
       onClose()
+    }
+    else {
+      setActivityData(null);
+      fetchBoard();
     }
   };
 
