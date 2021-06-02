@@ -56,8 +56,6 @@ import {
 import ManageOpportunityDialog from "../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import QuotesInAccordion from "../../components/QuotesInAccordion/QuotesInAccordion";
-import ProductBuilderInAccordion from "../../components/ProductBuilderInAccordion/ProductBuilderInAccordion";
-import LeadInAccordion from "../../components/LeadsInAccordion/LeadsInAccordion";
 import { Link } from "react-router-dom";
 import { BsPerson } from "react-icons/bs";
 import ListItem from "@material-ui/core/ListItem/ListItem";
@@ -85,7 +83,7 @@ export default function AccountDetailPage(props) {
   const history = useHistory();
 
   const {
-    account: { accountApi, accountResource, accountPermission, accountRoute },
+    account: { accountApi, accountResource, accountRoute },
     accountBreadcrumb,
     contact: { contactResource, contactRoute, contactApi },
   } = props;

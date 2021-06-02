@@ -6,9 +6,7 @@ import {
   Button,
   TextField,
   Typography,
-  Checkbox,
   CircularProgress,
-  FormControlLabel,
   useMediaQuery,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
@@ -38,7 +36,7 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import getAzureAcessToken from "../../Azure/getAzureAccessToken";
-import { AuthenticatedTemplate, useAccount, useMsal } from "@azure/msal-react";
+import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
@@ -385,7 +383,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                               label="Start Time"
                               name="startTime"
                               placeholder="08:00 AM"
-                              defaultValue={new Date()}
                               mask="__:__ _M"
                               value={values.startTime}
                               invalidDateMessage="Invalid time format"
@@ -522,21 +519,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                             )}
                         </Fragment>
                       )}
-                      <AuthenticatedTemplate>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              value={true}
-                              name="meeting"
-                              color="primary"
-                              onChange={(e) =>
-                                setFieldValue("meeting", e.target.checked)
-                              }
-                            />
-                          }
-                          label="meeting"
-                        />
-                      </AuthenticatedTemplate>
 
                       {eventId && (
                         <Fragment>

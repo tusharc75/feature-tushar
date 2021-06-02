@@ -30,7 +30,7 @@ const BigCalendar = () => {
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId, type: actType } = parsed;
   const [type, setType] = useState(
-    actType ? startCase(actType.toLocaleString()) : "Task"
+    actType ? startCase(actType.toLocaleString()) : ""
   );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [createType, setCreateType] = useState(null);
@@ -69,20 +69,20 @@ const BigCalendar = () => {
   };
 
   const fetchBoard = useCallback(() => {
-    GetBoard(lowerCase(type), JSON.stringify(filter))
+    GetBoard("", JSON.stringify(filter))
       .then(({ data }) => {
-        const newData = data.map((d) => ({
+        const allActivities = [...data.event, ...data.task, ...data.case];
+
+        const newData = allActivities.map((d) => ({
           ...d,
           title: d.name,
-          start:
-            type === "Event"
-              ? joinTime(d.startDate, d.startTime)
-              : new Date(d.startDate),
+          start: d.hasOwnProperty("startTime")
+            ? joinTime(d.startDate, d.startTime)
+            : new Date(d.startDate),
 
-          end:
-            type === "Event"
-              ? joinTime(d.endDate, d.endTime)
-              : new Date(d.dueDate),
+          end: d.hasOwnProperty("endTime")
+            ? joinTime(d.endDate, d.endTime)
+            : new Date(d.dueDate),
         }));
 
         setActivities(newData);
@@ -126,12 +126,12 @@ const BigCalendar = () => {
                 size="small"
                 color="primary"
                 variant="contained"
-                endIcon={<ExpandMore />}
+                endIcon={<Add />}
               >
-                {`${type}s`}
+                Create Activity
               </Button>
               <Box mr={1} component="span" />
-              <Button
+              {/* <Button
                 aria-controls="simple-menu"
                 aria-haspopup="true"
                 size="small"
@@ -141,7 +141,7 @@ const BigCalendar = () => {
                 startIcon={<Add />}
               >
                 {`Create ${type}`}
-              </Button>
+              </Button> */}
               <Menu
                 id="simple-menu"
                 anchorEl={anchorEl}
@@ -152,13 +152,12 @@ const BigCalendar = () => {
                 {activityOptions.map((item, i) => (
                   <MenuItem
                     key={i}
-                    selected={item === type}
                     onClick={() => {
-                      setType(item);
+                      setCreateType(lowerCase(item));
                       handleClose();
                     }}
                   >
-                    {item}s
+                    {item}
                   </MenuItem>
                 ))}
               </Menu>

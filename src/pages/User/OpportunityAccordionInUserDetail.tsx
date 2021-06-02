@@ -213,10 +213,9 @@ export default function OpportunityAccordionInUserDetail({
                 </>
             </AccordionDetails>
             {
-                opportunities?.length > 0 && opportunities.length > recordsPerLine &&
+                opportunities?.length > 0 && opportunities.length > maxRecordsToShow &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => {
-                    setMaxRecordsToShow(opportunities.length)
-                    // history.push(`/opportunity`)
+                    setMaxRecordsToShow(prevState => prevState + (recordsPerLine * 2))
                 }} p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaArrowAltCircleDown size={25} />
                 </Box>

@@ -211,10 +211,9 @@ export default function AccountAccordionDetail({
                 </>
             </AccordionDetails>
             {
-                accounts?.length > 0 && accounts.length > recordsPerLine &&
+                accounts?.length > 0 && accounts.length > maxRecordsToShow &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => {
-                    // history.push(`/${type === "customer" ? customerAccount.accountResource : supplierAccount.accountResource}`)
-                    setMaxRecordsToShow(accounts.length)
+                    setMaxRecordsToShow(prevState => prevState + (recordsPerLine * 2))
                 }} p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaArrowAltCircleDown size={25} />
                 </Box>
