@@ -57,7 +57,11 @@ const withValueLimit = (inputObj, limitVal) => {
 const formatDecimal = (value, decimalPlaces) => {
   if (value === "" && isNaN(value)) {
     return 0;
-  } else {
+  }
+  else if (parseFloat(value) < 0) {
+    return 0;
+  }
+  else {
     return parseFloat(value.toFixed(decimalPlaces));
   }
 };
@@ -712,6 +716,9 @@ const FormTypes = (props) => {
               );
             }
         }
+        InputProps={{
+          inputProps: { min: 0 }
+        }}
       />
     </InfoLabel>
   ) : type === "percent" ? (
@@ -735,6 +742,7 @@ const FormTypes = (props) => {
           //     setFieldValue(name, values.formattedValue),
           // },
           endAdornment: "%",
+          inputProps: { min: 0 }
         }}
         onChange={
           onChange
@@ -742,7 +750,7 @@ const FormTypes = (props) => {
             : (e) => {
               handleChange(
                 name,
-                e.target.value == "" ? 0 : parseFloat(e.target.value)
+                e.target.value == "" ? 0 : parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
               );
             }
         }
@@ -765,12 +773,15 @@ const FormTypes = (props) => {
             ? onChange
             : (e) => {
               if (fieldData.returnType === "decimal") {
-                handleChange(name, parseFloat(e.target.value));
+                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
               } else {
                 handleChange(name, e.target.value);
               }
             }
         }
+        InputProps={{
+          inputProps: { min: 0 }
+        }}
       />
     </InfoLabel>
   ) : type === "email" ? (
@@ -906,8 +917,11 @@ const FormTypes = (props) => {
             onChange={
               onChange
                 ? onChange
-                : (e) => handleConverterChange(name, _unit, e.target.value)
+                : (e) => handleConverterChange(name, _unit, e.target.value.replace(/[^0-9\.]/g, ''))
             }
+            InputProps={{
+              inputProps: { min: 0 }
+            }}
           />
         </InfoLabel>
       </Grid>
@@ -982,7 +996,7 @@ const FormTypes = (props) => {
                         name,
                         _currency,
                         _unit,
-                        parseFloat(e.target.value)
+                        parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
                       )
                 }
                 InputProps={{
@@ -996,6 +1010,7 @@ const FormTypes = (props) => {
                       )}
                     </InputAdornment>
                   ),
+                  inputProps: { min: 0 }
                 }}
               />
             </InfoLabel>
@@ -1049,6 +1064,7 @@ const FormTypes = (props) => {
                     )}
                   </InputAdornment>
                 ),
+                inputProps: { min: 0 }
               }}
             />
           </InfoLabel>

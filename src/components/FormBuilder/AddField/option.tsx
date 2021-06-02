@@ -14,6 +14,7 @@ import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 
 export const Option = ({ values, setFieldValue }) => {
@@ -68,5 +69,28 @@ export const Option = ({ values, setFieldValue }) => {
                 </Box>
             ))}
         </Box>
+        {(values["type"] === "dropDown" && !values["lookup"]) &&
+            <Box mt={1}>
+                <Autocomplete
+                    id="tags-filled"
+                    options={values["option"] && values["option"]}
+                    getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
+                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    value={values["option"] && values["option"].filter((data) => data.optionValue === values["defaultDropdownOption"]).length
+                        ? values["option"] && values["option"].filter((data) => data.optionValue === values["defaultDropdownOption"])[0]
+                        : ""
+                    }
+                    onChange={(e, val) => { setFieldValue("defaultDropdownOption", val && val.optionValue ? val.optionValue : "") }}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            margin="dense"
+                            variant="outlined"
+                            label="Default Option"
+                            placeholder="Default Option" />
+                    )}
+                />
+            </Box>
+        }
     </Box>);
 }
