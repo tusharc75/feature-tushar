@@ -32,20 +32,26 @@ const AssignProjectSalesDialog = ({
     const [isAssigning, setAssigning] = useState(false);
     const [resource, setResource] = useState(null);
     const [id, setId] = useState(null);
+    const [addAPI, setaddAPI] = useState(null);
+    
 
     useEffect(() => {
         setLoadingProjectSales(true);
         if (type.some(item => item?.type === customerContact.contactResource)) {
             setResource(customerContact.contactResource)
             setId(type.find(item => item.type === customerContact.contactResource).id)
+            setaddAPI("customer-contacts")
         }
-        else if (type.some(item => item?.type === customerAccount.accountResource)) {
-            setResource(customerAccount.accountResource)
-            setId(type.find(item => item.type === customerAccount.accountResource).id)
-        }
-        else {
+        else if (type.some(item => item?.type === opportunity.opportunityResource)) {
             setResource(opportunity.opportunityResource)
             setId(type.find(item => item.type === opportunity.opportunityResource).id)
+            setaddAPI("opportunities")
+        }
+        else {
+            setResource(customerAccount.accountResource)
+            setId(type.find(item => item.type === customerAccount.accountResource).id)
+            setaddAPI("customer-accounts")
+
         }
         let api = type.some(item => item?.type === customerContact.contactResource) ?
             `/project-sales?filterById=[{"field": "staticData.customerAccount", "term": "${type.find(item => item.type === customerAccount.accountResource).id}"}]`
@@ -67,18 +73,17 @@ const AssignProjectSalesDialog = ({
     const handleAssignProjectSales = async () => {
         if (selectedProjectSales.length) {
             setAssigning(true);
-            debugger
             const dataObj = {
                 [resource]: [id],
                 "_ids": selectedProjectSales,
             };
 
             axiosInstance()
-                .put(`/project-sales/add-${kebabCase(resource)}`, dataObj)
+                .put(`/project-sales/add-${addAPI}`, dataObj)
                 .then(() => {
                     setAssigning(false);
                     toastConfig.setToastConfig({
-                        message: `${startCase(type)} added successfully`,
+                        message: `${startCase(resource)} added successfully`,
                         type: "success",
                         open: true,
                     });

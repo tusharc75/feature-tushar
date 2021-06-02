@@ -670,12 +670,12 @@ export default function AccountDetailPage(props) {
                   )
                 }
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-                {permissions?.lead?.isRead && accountData.staticData?.lead && (
+                {/* {permissions?.lead?.isRead && accountData.staticData?.lead && (
                   <LeadInAccordion
                     recordsPerLine={3}
                     lead={accountData.staticData?.lead}
                   />
-                )}
+                )} */}
               </div>
             </Paper>
           </Grid>
