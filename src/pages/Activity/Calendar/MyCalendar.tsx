@@ -1,7 +1,6 @@
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 
-
 const localizer = momentLocalizer(moment);
 
 type Props = {
@@ -11,8 +10,9 @@ type Props = {
 };
 
 const formats = {
-  weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture),
-}
+  weekdayFormat: (date, culture, localizer) =>
+    localizer.format(date, "dddd", culture),
+};
 
 const MyCalendar = (props: Props) => {
   const { activities, setActivityData, type } = props;
