@@ -222,16 +222,16 @@ export default function OpportunityInAccordian({
                     </Menu>
                   </>
                   :
-                    <IconButton
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setShowCreateOpportunityDialog(true);
-                      }}
-                    >
-                      <ControlPointIcon />
-                    </IconButton>
-                  
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      setShowCreateOpportunityDialog(true);
+                    }}
+                  >
+                    <ControlPointIcon />
+                  </IconButton>
+
                 }
               </Typography>
             </Grid>

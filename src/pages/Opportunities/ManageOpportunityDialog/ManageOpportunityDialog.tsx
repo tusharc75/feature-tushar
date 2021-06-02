@@ -64,7 +64,7 @@ export default function ManageOpportunityDialog({
   }: any = useData();
   const [disableOwnerSelection] = useState(
     (!isNew && user.user._id !== dataToUpdate.owner.optionValue) ||
-      disableOwnerAndAccount
+    disableOwnerAndAccount
   );
 
   const [entityData, setEntityData] = useState({
@@ -310,7 +310,7 @@ export default function ManageOpportunityDialog({
                                 {form.sectionFields.map((field, index2) => (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
                                     {field.fieldName ==
-                                    "customerAccountName" ? (
+                                      "customerAccountName" ? (
                                       <Grid container spacing={1}>
                                         <Grid
                                           item
@@ -349,24 +349,24 @@ export default function ManageOpportunityDialog({
                                         </Grid>
                                         {permissions.customerAccount
                                           .isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              title="Create Account"
-                                              className="mt-1"
-                                            >
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddCustomerAccountDialog(
-                                                    true
-                                                  );
-                                                }}
-                                                size="small"
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                title="Create Account"
+                                                className="mt-1"
                                               >
-                                                <AddIcon color="primary" />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowAddCustomerAccountDialog(
+                                                      true
+                                                    );
+                                                  }}
+                                                  size="small"
+                                                >
+                                                  <AddIcon color="primary" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )}
                                         {field?.tooltipMessage ? (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip
