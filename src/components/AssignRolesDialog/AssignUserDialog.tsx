@@ -32,7 +32,6 @@ const AssignUserDialog = ({
 
   useEffect(() => {
     setLoadingUsers(true);
-    console.log(JSON.stringify(assignedUsers))
     axiosInstance()
       .get(`/user`)
       .then(({ data: { data } }) => {

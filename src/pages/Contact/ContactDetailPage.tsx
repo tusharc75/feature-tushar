@@ -525,16 +525,16 @@ const ContactDetailsPage = (props) => {
                     type={typeCreateProjectSalesDialog}
                     fetchData={fetchRelatedData}
                     permissions={permissions}
-
+                    isAddProjectSale={true}
                   />
                 )}
                 <QuotesInAccordion recordsPerLine={3} />
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
-                {permissions?.lead?.isRead && contactData.staticData?.lead && (
+                {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
                   <LeadInAccordion
                     recordsPerLine={3}
                     lead={contactData.staticData.lead} />
-                )}
+                )} */}
               </div>
 
             </Paper>

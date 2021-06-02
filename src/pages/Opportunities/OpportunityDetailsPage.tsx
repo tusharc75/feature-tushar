@@ -106,7 +106,7 @@ function OpportunityDetailsPage() {
 
   useEffect(() => {
     if (opportunityData?.staticData?.customerContact &&
-      opportunityData.staticData?.customerContactslength &&
+      opportunityData.staticData?.customerContact.length &&
       customerContacts && customerContacts.length === 0) fetchCustomerContactData(false)
 
     if (opportunityData?.staticData?.supplierContact &&
@@ -173,10 +173,10 @@ function OpportunityDetailsPage() {
             supplierContacts: true,
             customerContacts: true
           }
-          if (data?.staticData?.supplierContacts && data.staticData.supplierContacts.length === 0) {
+          if (data?.staticData?.supplierContact && data.staticData.supplierContact.length === 0) {
             tempExpanded.supplierContacts = false
           }
-          if (data?.staticData?.customerContacts && data.staticData.customerContacts.length === 0) {
+          if (data?.staticData?.customerContact && data.staticData.customerContact.length === 0) {
             tempExpanded.customerContacts = false
           }
           setExpanded(tempExpanded)
@@ -215,9 +215,10 @@ function OpportunityDetailsPage() {
             sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")
             
           ]){
+            let tempName = data[sidebarResource.lead][ sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")][0]
             setMainPoints(prevState => ({
               ...prevState,
-              "Parent Lead": data[sidebarResource.lead][ sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")][0].lastName
+              "Parent Lead": `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`
           }));
           }
 
@@ -241,7 +242,7 @@ function OpportunityDetailsPage() {
         .get(`supplier-contact?filterById=${filterById}`)
         .then(({ data: { data } }) => {
 
-          let assignedContacts = opportunityData.staticData?.supplierContacts ?? []
+          let assignedContacts = opportunityData.staticData?.supplierContact ?? []
           const updatedContacts = [];
           data.forEach(d => {
             d["isChecked"] = assignedContacts.length > 0 ? assignedContacts.some(item => item?._id === d?._id) : false;
@@ -272,12 +273,12 @@ function OpportunityDetailsPage() {
   const handleContactsEmails = (opportunityData) => {
     let data = []
     if (opportunityData && opportunityData?.staticData) {
-      const { customerContacts, supplierContacts } = opportunityData?.staticData
-      if (customerContacts && customerContacts.length) {
-        data = getContactEmails(customerContacts)
+      const { customerContact, supplierContact } = opportunityData?.staticData
+      if (customerContact && customerContact.length) {
+        data = getContactEmails(customerContact)
       }
-      if (supplierContacts && supplierContacts.length) {
-        data = [...data, ...getContactEmails(supplierContacts)]
+      if (supplierContact && supplierContact.length) {
+        data = [...data, ...getContactEmails(supplierContact)]
       }
       if (data.length > 0) setContactsEmailsData(data)
     }
@@ -584,6 +585,7 @@ function OpportunityDetailsPage() {
                           type={typeCreateProjectSalesDialog}
                           fetchData={fetchRelatedData}
                           permissions={permissions}
+                          isAddProjectSale={true}
                         />
                       )}
                     </div>
@@ -698,7 +700,7 @@ function OpportunityDetailsPage() {
               supplierContacts: supplierContacts, customerContacts: customerContacts,
               notToBeRemoved: opportunityData?.staticData?.notToBeRemoved
             }}
-            assignedContacts={opportunityData.staticData?.customerContacts ?? []}
+            assignedContacts={opportunityData.staticData?.customerContact ?? []}
             contactType="customer"
             notToBeRemovedContacts={notToBeRemovedContacts}
           />

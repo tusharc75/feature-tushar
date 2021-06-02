@@ -16,44 +16,44 @@ import Loader from "../Loader";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-
+import {opportunity} from "../../constants/helpers"
 const AssignOpportunityDialog = ({
-  usersDialogOpen,
+  opportunityDialogOpen,
   onSuccess,
   handleCloseDialog,
-  roleIds,
-  assignedUsers
+  assignedOpportunity,
+  accountId
 }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [users, setUsers] = useState([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [opportunities, setOpportunities] = useState([]);
+  const [loadingOpportunities, setLoadingOpportunities] = useState(false);
+  const [selectedOpportunities, setSelectedOpportunities] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
 
   useEffect(() => {
-    setLoadingUsers(true);
-    console.log(JSON.stringify(assignedUsers))
+    setLoadingOpportunities(true);
     axiosInstance()
-      .get(`/user`)
+      .get(`${opportunity.opportunityApi}?filterById=[{"field":"customerAccountName", "term": "${accountId}"}]`)
       .then(({ data: { data } }) => {
-        setUsers(data.filter(user => !assignedUsers.some(item => item?._id === user?._id)).map(obj => ({ ...obj, isChecked: false })))
-        setLoadingUsers(false);
+        setOpportunities(data.filter(opportunity => !assignedOpportunity.some(item => item?._id === opportunity?._id)).map(obj => ({ ...obj, isChecked: false })))
+        setLoadingOpportunities(false);
+        debugger
       })
       .catch((error) => {
-        setLoadingUsers(false);
+        setLoadingOpportunities(false);
         toastConfig.setToastConfig(error);
       });
     // eslint-disable-next-line
   }, []);
 
 
-  const handleAssignRoles = async () => {
-    if (selectedUsers.length) {
+  const handleAssignOpportunities = async () => {
+    if (selectedOpportunities.length) {
       setAssigning(true);
 
       const dataObj = {
-        users: selectedUsers,
-        roles: roleIds,
+        Opportunities: selectedOpportunities,
+        // roles: roleIds,
       };
 
       await axiosInstance()
@@ -79,41 +79,41 @@ const AssignOpportunityDialog = ({
     <Dialog
       fullWidth
       maxWidth="xs"
-      open={usersDialogOpen}
+      open={opportunityDialogOpen}
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title="Assign Users" />
+      <CustomDialogHeader title="Assign Opportunities" />
       <CustomDialogContent>
-        {loadingUsers ? (
-          <Loader text="Loading Users" />
-        ) : users.length ? (
+        {loadingOpportunities ? (
+          <Loader text="Loading Opportunities" />
+        ) : opportunities.length ? (
           <List style={{ padding: 0 }}>
-            {users.map((user) => (
-              <ListItem divider key={user._id}>
+            {opportunities.map((opportunity) => (
+              <ListItem divider key={opportunity._id}>
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
-                      user.isChecked = e.target.checked
-                      setSelectedUsers(users.filter(r => r.isChecked).map(obj => obj._id))
+                      opportunity.isChecked = e.target.checked
+                      setSelectedOpportunities(opportunities.filter(r => r.isChecked).map(obj => obj._id))
                     }
                     }
-                    checked={user.isChecked}
+                    checked={opportunity.isChecked}
                     inputProps={{
-                      "aria-labelledby": `checkbox-list-label-${user._id}`,
+                      "aria-labelledby": `checkbox-list-label-${opportunity._id}`,
                     }}
                   />
                 </ListItemIcon>
                 <ListItemText
-                  primary={`${user.firstName} ${user.lastName}`}
-                  secondary={user.email}
+                  primary={opportunity.opportunityName}
+                  secondary={opportunity.stage}
                 />
               </ListItem>
             ))}
           </List>
         ) : (
-          <Typography>All Users has been assigned</Typography>
+          <Typography>All Opportunity has been assigned</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
@@ -126,8 +126,8 @@ const AssignOpportunityDialog = ({
           Cancel
         </Button>
         <Button
-          disabled={!selectedUsers.length || isAssigning}
-          onClick={handleAssignRoles}
+          disabled={!selectedOpportunities.length || isAssigning}
+          onClick={handleAssignOpportunities}
           color="primary"
           size="small" 
         >

@@ -34,6 +34,7 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { HiExternalLink } from 'react-icons/hi';
 import { customerAccount, customerContact } from "../../constants/helpers";
 import { MoreVert } from "@material-ui/icons";
+import AssignOpportunityDialog from "../AssignRolesDialog/AssignOpportunityDialog";
 
 const Accordion = withStyles({
   root: {
@@ -134,6 +135,10 @@ export default function OpportunityInAccordian({
     showCreateOpportunityDialog,
     setShowCreateOpportunityDialog,
   ] = useState(false);
+  const [
+    showAddOpportunityDialog,
+    setShowAddOpportunityDialog,
+  ] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
@@ -208,7 +213,7 @@ export default function OpportunityInAccordian({
                       </MenuItem>
                       <MenuItem
                         onClick={() => {
-                          alert()
+                          setShowAddOpportunityDialog(true)
                           handleCloseMenu();
                         }}
                       >
@@ -317,6 +322,18 @@ export default function OpportunityInAccordian({
           contactId={contactId}
           disableOwnerAndAccount={resource === customerAccount.accountResource}
           contactResource={contactResource}
+        />
+      )}
+      {showAddOpportunityDialog && (
+        <AssignOpportunityDialog
+          opportunityDialogOpen={showAddOpportunityDialog}
+          onSuccess={(id) => {
+            setShowAddOpportunityDialog(false);
+            onNewOpportunityAdd(id);
+          }}
+          handleCloseDialog={() => setShowAddOpportunityDialog(false)}
+          assignedOpportunity={opportunities}
+          accountId={accountId}
         />
       )}
     </>

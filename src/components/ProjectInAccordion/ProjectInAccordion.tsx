@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Menu, MenuItem } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
@@ -15,6 +15,11 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import CreateProjectSales from "../../pages/ProjectSales/CreateProjectSales";
+import AssignDataDialog from '../../pages/ProjectSales/AssignDataDialog';
+import { MoreVert } from '@material-ui/icons';
+import { id } from 'date-fns/locale';
+import { customerContact } from '../../constants/helpers';
+import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
 
 const Accordion = withStyles({
     root: {
@@ -75,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 
-export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions }) {
+export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3, projectSales, type, fetchData, permissions, isAddProjectSale=false }) {
     ;
     const [
         showCreateProjectSalesDialog,
@@ -103,10 +108,22 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
     }
 
     const [expandProject, setExpandProject] = useState(expanded);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [
+        showAddProjectSalesDialog,
+        setShowAddProjectSalesDialog,
+      ] = useState(false);
+
     useEffect(() => {
         setExpandProject(projectSales && projectSales?.length !== 0 ? true : false);
     }, [projectSales]);
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
 
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
     return <>
         <Accordion expanded={expandProject} className="omsAccordian accordProject">
             <AccordionSummary
@@ -137,15 +154,52 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                         </Box>
                     </Grid>
                     <Grid item xs={4} container justify="flex-end">
-                        {permissions?.projectSales?.isCreate && (
+                        {permissions?.projectSales?.isCreate && isAddProjectSale ?
+                            <>
+                                <IconButton
+                                    aria-haspopup="true"
+                                    color="primary"
+                                    size="small"
+                                    onClick={handleOpenMenu}
+                                >
+                                    <MoreVert />
+                                </IconButton>
+                                <Menu
+                                    id="menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleCloseMenu}
+                                >
+                                    <MenuItem
+                                        onClick={() => {
+                                            setShowCreateProjectSalesDialog(true);
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Create New
+                                    </MenuItem>
+                                    <MenuItem
+                                        onClick={() => {
+                                            setShowAddProjectSalesDialog(true)
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Add Exisiting
+                                    </MenuItem>
+                                </Menu>
+                            </>
+                            :
                             <IconButton
                                 color="primary"
                                 size="small"
-                                onClick={() => { setShowCreateProjectSalesDialog(true) }}
+                                onClick={() => {
+                                    setShowCreateProjectSalesDialog(true);
+                                }}
                             >
                                 <ControlPointIcon />
                             </IconButton>
-                        )}
+                        }
                     </Grid>
                 </Grid>
             </AccordionSummary>
@@ -211,6 +265,18 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
                 fetchData={fetchData}
                 type={type}
             />
+        )}
+        {showAddProjectSalesDialog && (
+            <AssignProjectSalesDialog
+            projectSalesDialogOpen={showAddProjectSalesDialog}
+            onSuccess={(id) => {
+                setShowAddProjectSalesDialog(false);
+                fetchData()
+            }}
+            handleCloseDialog={() => setShowAddProjectSalesDialog(false)}
+            assignedProjectSales={projectSales}
+            type={type}
+          />
         )}
     </>
 }
