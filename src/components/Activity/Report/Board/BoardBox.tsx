@@ -35,7 +35,9 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
+export const BoardBox = (props) => {
+  const { type, data, id, index, moveCard, fetchBoard, handleActivityOpen } =
+    props;
   const classes = useStyles();
   const history = useHistory();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -82,13 +84,6 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
       isDragging: monitor.isDragging(),
     }),
   });
-
-  const handleActivityOpen = (event) => {
-    history.push({
-      pathname: "/" + type,
-      search: "?activityType=" + type + "&activityId=" + data._id,
-    });
-  };
 
   const handleOpenMenu = (event) => {
     event.stopPropagation();
@@ -142,7 +137,7 @@ export const BoardBox = ({ type, data, id, index, moveCard, fetchBoard }) => {
       }`}
     >
       <Box
-        onClick={handleActivityOpen}
+        onClick={() => handleActivityOpen(id)}
         className={classes.activitybox}
         style={{ opacity }}
       >

@@ -361,8 +361,14 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                 setFieldValue("startTime", date);
                               }}
                               format="DD/MM/YYYY"
-                              error={Boolean(errors["startDate"])}
-                              helperText={errors["startDate"]}
+                              error={
+                                Boolean(touched["startDate"]) &&
+                                Boolean(errors["startDate"])
+                              }
+                              helperText={
+                                Boolean(touched["startDate"]) &&
+                                errors["startDate"]
+                              }
                               InputLabelProps={{
                                 shrink: true,
                               }}
@@ -386,8 +392,14 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                               onChange={(date) =>
                                 setFieldValue("startTime", date)
                               }
-                              error={Boolean(errors["startTime"])}
-                              helperText={errors["startTime"]}
+                              error={
+                                Boolean(touched["startTime"]) &&
+                                Boolean(errors["startTime"])
+                              }
+                              helperText={
+                                Boolean(touched["startTime"]) &&
+                                errors["startTime"]
+                              }
                               InputLabelProps={{
                                 shrink: true,
                               }}
@@ -419,8 +431,13 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                 setFieldValue("endTime", date);
                               }}
                               format="DD/MM/YYYY"
-                              error={Boolean(errors["endDate"])}
-                              helperText={errors["endDate"]}
+                              error={
+                                Boolean(touched["endDate"]) &&
+                                Boolean(errors["endDate"])
+                              }
+                              helperText={
+                                Boolean(touched["endDate"]) && errors["endDate"]
+                              }
                               InputLabelProps={{
                                 shrink: true,
                               }}
@@ -441,8 +458,13 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                               onChange={(date) =>
                                 setFieldValue("endTime", date)
                               }
-                              error={Boolean(errors["endTime"])}
-                              helperText={errors["endTime"]}
+                              error={
+                                Boolean(touched["endTime"]) &&
+                                Boolean(errors["endTime"])
+                              }
+                              helperText={
+                                Boolean(touched["endTime"]) && errors["endTime"]
+                              }
                               InputLabelProps={{
                                 shrink: true,
                               }}

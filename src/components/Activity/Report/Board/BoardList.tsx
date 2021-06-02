@@ -11,6 +11,7 @@ import { CreateTask } from "../../Task/CreateTask";
 import { CreateCase } from "../../Case/CreateCase";
 import { useData } from "../../../../StateProvider/Provider";
 import { CustomDialogTransition } from "../../../../constants/helpers";
+import ActivityModelHandler from "../../ActivityModelHandler";
 
 export const BoardList = ({
   status,
@@ -30,6 +31,7 @@ export const BoardList = ({
   const [subActivity, setSubActivity] = useState([]);
   const [isCreateButton, setCreateButton] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     setSubActivity(activity);
@@ -64,6 +66,10 @@ export const BoardList = ({
     fetchBoard();
   };
 
+  const handleActivityOpen = (id) => {
+    setSelectedId(id);
+  };
+
   return (
     <div ref={ref} style={{ height: "calc(100% - 42px)" }}>
       <Box
@@ -80,6 +86,7 @@ export const BoardList = ({
             type={type}
             moveCard={moveCard}
             fetchBoard={fetchBoard}
+            handleActivityOpen={handleActivityOpen}
           />
         ))}
 
@@ -99,6 +106,16 @@ export const BoardList = ({
           </Button>
         </Box>
       </Box>
+
+      {selectedId && (
+        <ActivityModelHandler
+          setActivityData={setSelectedId}
+          activityType={type}
+          fetchBoard={fetchBoard}
+          activityId={selectedId}
+        />
+      )}
+
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}

@@ -191,7 +191,7 @@ const Opportunities = () => {
     { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
     { field: "stage", headerName: "Stage", show: true, cellRenderer: "commonRenderer" },
-    { field: "closeDate", headerName: "Close Date", show: true, cellRenderer: "commonRenderer" },
+    { field: "closeDate", headerName: "Close Date", show: true, filter: false, cellRenderer: "commonRenderer" },
     { field: "owner", headerName: "Opportunity Owner", show: true, cellRenderer: "commonRenderer" }
   ];
   //  Grid Variables - End

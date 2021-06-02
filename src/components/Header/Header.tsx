@@ -367,11 +367,13 @@ const Header = ({ toggleDrawer }) => {
                 })
               }
 
+              handleFullScreenNotificationClose();
+
               if (d?.entity) {
                 handleSelectedEnity(d.entity)
               }
 
-              history.push(d.resourceId ? `${d.resourcePath}/${d.resourceId}` : d.resourcePath)
+              history.push(d.resourceId ? `${d.resourcePath}/${d.resourceId}` : d.resourcePath);
 
             }}>
             {
