@@ -29,7 +29,7 @@ const AssignOpportunityDialog = ({
   const [opportunities, setOpportunities] = useState([]);
   const [loadingOpportunities, setLoadingOpportunities] = useState(false);
   const [selectedOpportunities, setSelectedOpportunities] = useState([]);
-  const [isAssigning, setAssigning] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   useEffect(() => {
     setLoadingOpportunities(true);
@@ -49,7 +49,7 @@ const AssignOpportunityDialog = ({
 
   const handleAssignOpportunities = async () => {
     if (selectedOpportunities.length) {
-      setAssigning(true);
+      setIsAssigning(true);
 
       const dataObj = {
         "_ids": selectedOpportunities,
@@ -59,7 +59,7 @@ const AssignOpportunityDialog = ({
       await axiosInstance()
         .put(`/opportunity/add-customer-contacts`, dataObj)
         .then(({ data }) => {
-          setAssigning(false);
+          setIsAssigning(false);
           toastConfig.setToastConfig({
             message: data.message,
             type: "success",
@@ -69,7 +69,7 @@ const AssignOpportunityDialog = ({
           onSuccess();
         })
         .catch((error) => {
-          setAssigning(false);
+          setIsAssigning(false);
           toastConfig.setToastConfig(error);
         });
     }
