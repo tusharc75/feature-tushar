@@ -22,9 +22,10 @@ import CustomDataGridNoDataFound from "../../Helpers/DataGridHelpers/CustomDataG
 import CustomDataGridToolbar from "../../Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { getSearchQuery } from '../../../services/util';
 import SearchBox from '../../Helpers/SearchBox'
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
+const ignoreField = ["qty"]
 
 const AddExistingProduct = (props) => {
 
@@ -57,7 +58,9 @@ const AddExistingProduct = (props) => {
             let column = [{ field: 'id', headerName: 'id', hide: true }]
             data.data.forEach((row) => {
                 row.fields.forEach((ele) => {
-                    if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                    if (ignoreField.includes(ele.fieldName)) {
+                    }
+                    else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                         if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
                             ele.displayUnits.forEach((_unit) => {
                                 let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
@@ -137,6 +140,7 @@ const AddExistingProduct = (props) => {
         let rows = product.filter((data) => selectedProduct.includes(data._id))
         rows.forEach((_d) => {
             _d.productId = _d._id
+            _d.qty = 0
             delete _d.id
             delete _d.brand
             delete _d.createdBy
