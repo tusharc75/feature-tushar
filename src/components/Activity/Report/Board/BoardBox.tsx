@@ -39,7 +39,6 @@ export const BoardBox = (props) => {
   const { type, data, id, index, moveCard, fetchBoard, handleActivityOpen } =
     props;
   const classes = useStyles();
-  const history = useHistory();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const ref = React.useRef(null);
 
@@ -163,9 +162,9 @@ export const BoardBox = (props) => {
                       style={{
                         color:
                           new Date(data?.dueDate).getDate() <
-                            new Date().getDate() &&
+                            new Date().getDate() ||
                           new Date(data?.dueDate).getMonth() <
-                            new Date().getMonth() &&
+                            new Date().getMonth() ||
                           new Date(data?.dueDate).getFullYear() <
                             new Date().getFullYear()
                             ? "#dc3545"
@@ -186,9 +185,9 @@ export const BoardBox = (props) => {
                     background: "#eee",
                     color:
                       new Date(data?.dueDate).getDate() <
-                        new Date().getDate() &&
+                        new Date().getDate() ||
                       new Date(data?.dueDate).getMonth() <
-                        new Date().getMonth() &&
+                        new Date().getMonth() ||
                       new Date(data?.dueDate).getFullYear() <
                         new Date().getFullYear()
                         ? "#dc3545"
