@@ -25,6 +25,7 @@ const Note = () => {
     const [filter, setFilter] = useState([]);
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [noteId, setNoteId] = useState(undefined)
 
     useEffect(() => {
         if (referenceType) {
@@ -60,10 +61,11 @@ const Note = () => {
 
 
     const handleActivityOpen = (id) => {
-        history.push({
-            pathname: '/activity/note',
-            search: '?activityType=note&activityId=' + id
-        })
+        // history.push({
+        //     pathname: '/activity/note',
+        //     search: '?activityType=note&activityId=' + id
+        // })
+        setNoteId(id)
     }
 
 
@@ -135,7 +137,11 @@ const Note = () => {
                     density="compact"
                 />
             </div>
-            {activityType !== undefined && <ActivityModelHandler activityType={activityType} activityId={activityId} />}
+            {noteId !== undefined && <ActivityModelHandler
+                activityType="note"
+                activityId={noteId}
+                onClose={() => setNoteId(undefined)}
+            />}
         </CustomContainer>
     </Layout>
 

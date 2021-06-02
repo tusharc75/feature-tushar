@@ -22,7 +22,6 @@ import CustomDataGridNoDataFound from "../../Helpers/DataGridHelpers/CustomDataG
 import CustomDataGridToolbar from "../../Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { getSearchQuery } from '../../../services/util';
 import SearchBox from '../../Helpers/SearchBox'
-import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition} from "../../../constants/helpers";
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
@@ -197,7 +196,7 @@ const AddExistingProduct = (props) => {
     }
 
     return (<Dialog
-        fullScreen={isMobile || isTablet}
+        fullScreen={true}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}

@@ -88,8 +88,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
     if (id) {
       UpdateCase(id, values)
         .then(({ data }) => {
-          handleClose();
           setSubmitting(false);
+          handleClose();
         })
         .catch((err) => {
           setSubmitting(false);
@@ -98,8 +98,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
       values.parentId = null;
       CreateNewCase(values)
         .then(({ data }) => {
-          handleClose();
           setSubmitting(false);
+          handleClose();
         })
         .catch((err) => {
           setSubmitting(false);
