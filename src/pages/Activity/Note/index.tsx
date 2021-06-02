@@ -73,7 +73,7 @@ const Note = () => {
             field: 'name', headerName: 'Title',
             width: 300,
             renderCell: (params) =>
-                <a onClick={() => handleActivityOpen(params.row.id)}>{params.row.name}</a>
+                <a className="link cursor-pointer" onClick={() => handleActivityOpen(params.row.id)}>{params.row.name}</a>
         },
         {
             field: 'createdBy',

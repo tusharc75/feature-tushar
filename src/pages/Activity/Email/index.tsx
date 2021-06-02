@@ -38,6 +38,7 @@ import './email.scss'
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
+import { AddOutlined } from "@material-ui/icons";
 
 const tabs = {
     Inbox: 1,
@@ -154,10 +155,9 @@ const Email = () => {
     const [open, setOpen] = useState(false);
     const [emailId, setEmailId] = useState(null);
     const [currentTab, setCurrentTab] = useState(1)
-    const [totalCount, setTotalCount] = useState(0)
+    const [emailUsersOptions, setEmailUsersOptions] = useState([])
 
     const [gridApi, setGridApi] = useState(null);
-    const [columnApi, setColumnApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -176,6 +176,10 @@ const Email = () => {
     ]);
 
     useEffect(() => {
+        fetchUsersEmails()
+    }, [])
+
+    useEffect(() => {
         if (referenceType) {
             GetReferenceName(referenceType, referenceId)
                 .then(({ data }) => {
@@ -188,7 +192,7 @@ const Email = () => {
 
     useEffect(() => {
         fetchEmails()
-    }, [page, limit, filters, sorting]);
+    }, [page, limit, filters, filter, sorting]);
 
 
     const fetchEmails = async () => {
@@ -200,7 +204,6 @@ const Email = () => {
             gridApi.setRowData([]);
             gridApi.showLoadingOverlay();
         }
-
         await GetEmails(JSON.stringify(filter), queryString)
             .then(({ data, count }) => {
                 let filteredData = []
@@ -216,7 +219,6 @@ const Email = () => {
                     if (currentTab === tabs.Sent && isCreatedByMe) filteredData.push(currentObject)
                     return currentObject
                 })
-                setTotalCount(count)
                 dispatch({ type: "initialize", data: filteredData, count: filteredData.length });
                 setEmailsCopy(data)
             })
@@ -342,6 +344,24 @@ const Email = () => {
         }
     };
 
+    const fetchUsersEmails = () => {
+        axiosInstance()
+            .get("/user")
+            .then(({ data: { data, count } }) => {
+                data = data.reduce((emails, obj) => {
+                    if (obj?.email && emailUsersOptions.indexOf(obj.email) < 0)
+                        emails.push(obj.email);
+                    return emails;
+                }, []);
+                setEmailUsersOptions((prevState) => {
+                    return [...prevState, ...data];
+                });
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }
+
     const handleDeleteEmails = async () => {
         setDeleteLoading(true);
 
@@ -412,14 +432,25 @@ const Email = () => {
                     </Grid>
                     <Grid item xs={9} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
-                            <Box style={{ width: '90%' }}>
-                                <SearchFilter
-                                    handleChangeFilter={handleChangeFilter}
-                                    filter={filter}
-                                    chip={{ size: "small" }}
-                                    dontShowMyActivity={true}
-                                />
-                            </Box>
+                            {/* <Box style={{ width: '70%' }}> */}
+                            <SearchFilter
+                                handleChangeFilter={handleChangeFilter}
+                                filter={filter}
+                                chip={{ size: "small" }}
+                            />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                className={styles.add_submit_btn}
+                                onClick={() => {
+                                    setOpen(true)
+
+                                }}
+                                startIcon={<AddOutlined />}>
+                                Add
+                            </Button>
+                            {/* </Box> */}
                             <Button
                                 className={styles.action_submit_btn}
                                 variant="outlined"
@@ -497,7 +528,12 @@ const Email = () => {
                         onClose={handleClose}
                         fullWidth
                     >
-                        <CreateEmail emailId={emailId} handleClose={handleClose} relatedTo={filter} />
+                        <CreateEmail emailId={emailId}
+                            handleClose={handleClose}
+                            fetchData={fetchEmails}
+                            relatedTo={[{ type: "my", name: user?.user?._id }]}
+                            options={emailUsersOptions}
+                        />
                     </Dialog> : null
             }
         </CustomContainer>

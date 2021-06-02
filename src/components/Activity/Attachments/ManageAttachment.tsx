@@ -34,8 +34,19 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     }, []);
 
     const fetchNoteDetail = async () => {
-        if (attachmentId && attachmentData && attachmentData?._id) {
-            setInitialValues({ name: attachmentData?.name ?? '', fileUrl: attachmentData?.fileUrl ?? '' })
+        if (attachmentId) {
+            setLoading(true)
+            axiosInstance()
+                .get(`/attachment/${attachmentId}`)
+                .then(({ data: { data } }) => {
+                    setLoading(false);
+                    setInitialValues({ name: data?.name ?? '', fileUrl: data?.fileUrl ?? '' })
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    toastConfig.setToastConfig(error);
+                });
+
         }
         else {
             setInitialValues({ name: "", fileUrl: "" })
@@ -210,7 +221,6 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                                     component="span"
                                                     onClick={() => downloadFile(initialValues.fileUrl)}>
                                                     <GoArrowDown
-                                                        style={{ marginTop: '3px' }}
                                                         size={26} />
                                                 </IconButton>) : null
                                         }
