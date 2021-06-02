@@ -227,17 +227,15 @@ export default function OpportunityInAccordian({
                     </Menu>
                   </>
                   :
-                  contactResource !== supplierContact.contactResource && (
-                    <IconButton
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setShowCreateOpportunityDialog(true);
-                      }}
-                    >
-                      <ControlPointIcon />
-                    </IconButton>
-                  )
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      setShowCreateOpportunityDialog(true);
+                    }}
+                  >
+                    <ControlPointIcon />
+                  </IconButton>
 
                 }
               </Typography>
