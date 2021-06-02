@@ -334,6 +334,7 @@ export default function OpportunityInAccordian({
           handleCloseDialog={() => setShowAddOpportunityDialog(false)}
           assignedOpportunity={opportunities}
           accountId={accountId}
+          contactId={contactId}
         />
       )}
     </>

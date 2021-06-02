@@ -564,7 +564,7 @@ function OpportunityDetailsPage() {
                     <div className="p-3">
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContacts)}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.supplierContact)}
                           title="Supplier Contacts"
                           contactApi={supplierContact.contactApi}
                           isExpanded={expanded.supplierContacts}
@@ -579,7 +579,7 @@ function OpportunityDetailsPage() {
                       }
                       {
                         opportunityData && <OpportunityContacts
-                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContacts)}
+                          contacts={_.cloneDeep(opportunityData?.staticData?.customerContact)}
                           title="Customer Contacts"
                           isExpanded={expanded["customerContacts"]}
                           contactApi={customerContact.contactApi}

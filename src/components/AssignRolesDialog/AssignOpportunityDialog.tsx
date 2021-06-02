@@ -22,7 +22,8 @@ const AssignOpportunityDialog = ({
   onSuccess,
   handleCloseDialog,
   assignedOpportunity,
-  accountId
+  accountId,
+  contactId
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [opportunities, setOpportunities] = useState([]);
@@ -37,7 +38,6 @@ const AssignOpportunityDialog = ({
       .then(({ data: { data } }) => {
         setOpportunities(data.filter(opportunity => !assignedOpportunity.some(item => item?._id === opportunity?._id)).map(obj => ({ ...obj, isChecked: false })))
         setLoadingOpportunities(false);
-        debugger
       })
       .catch((error) => {
         setLoadingOpportunities(false);
@@ -52,16 +52,16 @@ const AssignOpportunityDialog = ({
       setAssigning(true);
 
       const dataObj = {
-        Opportunities: selectedOpportunities,
-        // roles: roleIds,
+        "_ids": selectedOpportunities,
+        "customerContact": [contactId]
       };
 
       await axiosInstance()
-        .put(`/user/assign-role`, dataObj)
-        .then(() => {
+        .put(`/opportunity/add-customer-contacts`, dataObj)
+        .then(({ data }) => {
           setAssigning(false);
           toastConfig.setToastConfig({
-            message: "Roles assigned successfully",
+            message: data.message,
             type: "success",
             open: true,
           });
