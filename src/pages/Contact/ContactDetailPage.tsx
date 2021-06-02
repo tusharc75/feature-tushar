@@ -115,7 +115,6 @@ const ContactDetailsPage = (props) => {
         handleAllowToEditList(data);
         setContactData(data);
         getContactFields();
-        console.log(props)
         setTypeCreateProjectSalesDialog([
           { id: id, type: contactResource },
           { id: data?.accountName?.optionValue, type: accountResource }
@@ -383,7 +382,6 @@ const ContactDetailsPage = (props) => {
   };
   return (
     <>
-    {console.log("inside contact",quotes)}
       <Layout>
         {openUpdateDialog && (
           // <UpdateDetailsDialog
