@@ -119,7 +119,7 @@ const intialState = {
     rowCount: 0,
     loading: false,
     page: 0,
-    limit: 2,
+    limit: 25,
     pageSizes: gridPageSizes,
     search: "",
     filters: {},
@@ -340,13 +340,13 @@ export default function Attachment(props) {
         setDeleteLoading(true);
         if (deleteRecord?.id || selectedRecords.length > 0)
             axiosInstance()
-                .put('/attachment/deleteMany ',
+                .put('attachment/deletemany ',
                     { ids: deleteRecord?.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: "success",
-                        message: data.message,
+                        message: "Deleted Succesfully",
                     });
                     setIsConfirmDialogVisible(false);
                     setDeleteLoading(false);
@@ -401,6 +401,7 @@ export default function Attachment(props) {
                                 size="small"
                                 onClick={openActions}
                                 aria-controls="action-menu"
+                                disabled={selectedRecords.length > 0 ? false : true}
                             >
                                 Actions <ExpandMore />
                             </Button>
@@ -462,7 +463,7 @@ export default function Attachment(props) {
             {isConfirmDialogVisible ? (
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure, you want to delete ${deleteRecord?.id ? "this attachment ?" : "these attachments"}`}
+                    message={`Are you sure, you want to delete ${deleteRecord?.id ? deleteRecord?.name ?? 'this attachment' : "these attachments"}`}
                     onClose={() => {
                         if (deleteRecord) setDeleteRecord(null);
                         setIsConfirmDialogVisible(false);

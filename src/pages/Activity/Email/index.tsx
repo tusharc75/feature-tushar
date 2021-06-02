@@ -469,6 +469,7 @@ const Email = () => {
                                 size="small"
                                 onClick={openActions}
                                 aria-controls="action-menu"
+                                disabled={selectedRecords.length > 0 ? false : true}
                             >
                                 Actions <ExpandMore />
                             </Button>

@@ -507,7 +507,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                                             emailId={emailId}
                                                         />
 
-                                                        <Box mt={2} style={{ border: '1px solid #999', minHeight: '220px' }}>
+                                                        <Box style={{ border: '1px solid #999', minHeight: '220px' }}>
                                                             <RichTextEditor
                                                                 style={{ border: "none" }}
                                                                 className={classes.textEditor}
