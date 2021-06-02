@@ -36,18 +36,17 @@ const AssignProjectSalesDialog = ({
     useEffect(() => {
         setLoadingProjectSales(true);
         if (type.some(item => item?.type === customerContact.contactResource)) {
-            setResource("customerContacts")
+            setResource(customerContact.contactResource)
             setId(type.find(item => item.type === customerContact.contactResource).id)
         }
         else if (type.some(item => item?.type === customerAccount.accountResource)) {
-            setResource("customerAccounts")
+            setResource(customerAccount.accountResource)
             setId(type.find(item => item.type === customerAccount.accountResource).id)
         }
         else {
-            setResource("opportunities")
+            setResource(opportunity.opportunityResource)
             setId(type.find(item => item.type === opportunity.opportunityResource).id)
         }
-        debugger
         let api = type.some(item => item?.type === customerContact.contactResource) ?
             `/project-sales?filterById=[{"field": "staticData.customerAccount", "term": "${type.find(item => item.type === customerAccount.accountResource).id}"}]`
             : `/project-sales`
