@@ -164,7 +164,7 @@ const Note = () => {
     }, [filter]);
 
     const NameRenderer = params => (
-        <span className="link" onClick={() => handleActivityOpen(params.data.id)}>
+        <span className="link cursor-pointer" onClick={() => handleActivityOpen(params.data.id)}>
             {params.value}
         </span>
     )

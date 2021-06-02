@@ -16,7 +16,7 @@ import { ViewAll } from '../Helpers/ViewAll'
 import { useData } from "../../../StateProvider/Provider"
 import { isEmpty } from "lodash";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -99,10 +99,18 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
               <Box>
                 <Grid container>
                   <Grid item xs={10} className="d-flex align-items-center gap-1">
-                    <Typography variant="subtitle2">{_email?.subject}</Typography>
+                    <Typography
+                      className="cursor-pointer"
+                      variant="subtitle2"
+                      onClick={(event) => {
+                        setEmailId(_email._id);
+                        setOpen(true)
+                      }}
+                    >{_email?.subject}</Typography>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end" >
-                    <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _email._id)} >
+                    <IconButton size="small" color="primary" aria-label="delete"
+                      onClick={(event) => handleOpenMenu(event, _email._id)} >
                       <MoreHorizIcon />
                     </IconButton>
                   </Grid>
