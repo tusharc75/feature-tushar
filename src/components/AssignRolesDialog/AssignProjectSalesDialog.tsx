@@ -32,7 +32,7 @@ const AssignProjectSalesDialog = ({
     const [isAssigning, setAssigning] = useState(false);
     const [resource, setResource] = useState(null);
     const [id, setId] = useState(null);
-    const [addAPI, setaddAPI] = useState(null);
+    const [addAPI, setAddAPI] = useState(null);
 
 
     useEffect(() => {
@@ -40,17 +40,17 @@ const AssignProjectSalesDialog = ({
         if (type.some(item => item?.type === customerContact.contactResource)) {
             setResource(customerContact.contactResource)
             setId(type.find(item => item.type === customerContact.contactResource).id)
-            setaddAPI("customer-contacts")
+            setAddAPI("customer-contacts")
         }
         else if (type.some(item => item?.type === opportunity.opportunityResource)) {
             setResource(opportunity.opportunityResource)
             setId(type.find(item => item.type === opportunity.opportunityResource).id)
-            setaddAPI("opportunities")
+            setAddAPI("opportunities")
         }
         else {
             setResource(customerAccount.accountResource)
             setId(type.find(item => item.type === customerAccount.accountResource).id)
-            setaddAPI("customer-accounts")
+            setAddAPI("customer-accounts")
 
         }
         let api = type.some(item => item?.type === customerContact.contactResource) ?
