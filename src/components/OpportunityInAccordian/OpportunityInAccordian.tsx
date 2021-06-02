@@ -10,7 +10,9 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Tooltip
+  Tooltip,
+  Menu,
+  MenuItem
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -30,6 +32,9 @@ import currencies from "./../../constants/currency_with_country.json";
 import { useData } from "../../StateProvider/Provider";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { HiExternalLink } from 'react-icons/hi';
+import { customerAccount, customerContact, supplierContact } from "../../constants/helpers";
+import { MoreVert } from "@material-ui/icons";
+import AssignOpportunityDialog from "../AssignRolesDialog/AssignOpportunityDialog";
 
 const Accordion = withStyles({
   root: {
@@ -50,8 +55,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: "#f5f5f5",
-    borderBottom: "1px solid rgba(0, 0, 0, .125)",
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
     "&$expanded": {
       minHeight: 46,
     },
@@ -59,6 +67,7 @@ const AccordionSummary = withStyles({
   content: {
     "&$expanded": {
       margin: "12px 0",
+
     },
   },
   expanded: {},
@@ -130,6 +139,11 @@ export default function OpportunityInAccordian({
     showCreateOpportunityDialog,
     setShowCreateOpportunityDialog,
   ] = useState(false);
+  const [
+    showAddOpportunityDialog,
+    setShowAddOpportunityDialog,
+  ] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     let isExpanded = expandOpportunity;
@@ -138,6 +152,14 @@ export default function OpportunityInAccordian({
 
     setExpandOpportunity(isExpanded);
   }, [opportunities]);
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
   return (
     <>
       <Accordion expanded={expandOpportunity} className="omsAccordian accordOpportunity">
@@ -147,38 +169,77 @@ export default function OpportunityInAccordian({
         >
           <Grid container>
             <Grid item xs={8} alignItems="center">
-              <Box
-                component="div"
-                display="flex"
-                alignItems="center"
-                flexGrow={1}
-              >
-                <IconButton
-                  size="small"
-                  onClick={() => setExpandOpportunity(!expandOpportunity)}
-                >
-                  {expandOpportunity === true ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </IconButton>
-                <strong>Opportunity ({opportunities.length})</strong>
+              <Box display="flex">
+                <Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => setExpandOpportunity(!expandOpportunity)}
+                  >
+                    {expandOpportunity === true ? (
+                      <ExpandLessIcon />
+                    ) : (
+                      <ExpandMoreIcon />
+                    )}
+                  </IconButton>
+                </Box>
+                <Box padding="5px">
+                  <Typography variant="subtitle2">
+                    Opportunity ({opportunities?.length || 0})
+                  </Typography>
+                </Box>
               </Box>
             </Grid>
             <Grid item xs={4} container justify="flex-end" alignItems="center">
               <Typography variant="subtitle2">
-                {opportunityPermissions.isCreate && (
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      setShowCreateOpportunityDialog(true);
-                    }}
-                  >
-                    <ControlPointIcon />
-                  </IconButton>
-                )}
+                {opportunityPermissions.isCreate && contactResource === customerContact.contactResource ?
+                  <>
+                    <IconButton
+                      aria-haspopup="true"
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenMenu}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                    <Menu
+                      id="menu"
+                      anchorEl={anchorEl}
+                      keepMounted
+                      open={Boolean(anchorEl)}
+                      onClose={handleCloseMenu}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          setShowCreateOpportunityDialog(true);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Create New
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          setShowAddOpportunityDialog(true)
+                          handleCloseMenu();
+                        }}
+                      >
+                        Add Exisiting
+                      </MenuItem>
+                    </Menu>
+                  </>
+                  :
+                  contactResource !== supplierContact.contactResource && (
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        setShowCreateOpportunityDialog(true);
+                      }}
+                    >
+                      <ControlPointIcon />
+                    </IconButton>
+                  )
+
+                }
               </Typography>
             </Grid>
           </Grid>
@@ -267,8 +328,21 @@ export default function OpportunityInAccordian({
           resource={resource}
           isRedirectTodetailPage={isRedirect}
           contactId={contactId}
-          disableOwnerAndAccount={true}
+          disableOwnerAndAccount={resource === customerAccount.accountResource}
           contactResource={contactResource}
+        />
+      )}
+      {showAddOpportunityDialog && (
+        <AssignOpportunityDialog
+          opportunityDialogOpen={showAddOpportunityDialog}
+          onSuccess={(id) => {
+            setShowAddOpportunityDialog(false);
+            onNewOpportunityAdd(id);
+          }}
+          handleCloseDialog={() => setShowAddOpportunityDialog(false)}
+          assignedOpportunity={opportunities}
+          accountId={accountId}
+          contactId={contactId}
         />
       )}
     </>
