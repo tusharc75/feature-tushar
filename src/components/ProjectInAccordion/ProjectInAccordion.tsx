@@ -269,7 +269,7 @@ export default function ProjectInAccordion({ expanded = true, recordsPerLine = 3
         {showAddProjectSalesDialog && (
             <AssignProjectSalesDialog
             projectSalesDialogOpen={showAddProjectSalesDialog}
-            onSuccess={(id) => {
+            onSuccess={() => {
                 setShowAddProjectSalesDialog(false);
                 fetchData()
             }}
