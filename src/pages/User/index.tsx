@@ -159,7 +159,7 @@ const User: FC = () => {
     { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
   ];
 
-  const NameRenderer = params => (<>
+  const NameRenderer = params => (<div className="d-flex align-items-center">
     <Link
       title={params.value}
       className="link"
@@ -167,10 +167,10 @@ const User: FC = () => {
     >
       {params.value}
     </Link>
-    {params?.data?.isBrandAdmin ? <Tooltip title="Brand Admin">
+    {params.data.isBrandAdmin ? <Tooltip title="Brand Admin">
       <AccountCircleIcon color="primary" className="ml-2" fontSize="small" />
     </Tooltip> : ""}
-  </>
+  </div>
   );
 
   const StatusRenderer = params => <div style={{ width: 150 }}>

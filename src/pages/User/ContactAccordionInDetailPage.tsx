@@ -209,10 +209,10 @@ export default function ContactAccordionInDetailPage({
                 </>
             </AccordionDetails>
             {
-                contacts?.length > 0 && contacts.length > recordsPerLine &&
+                contacts?.length > 0 && contacts.length > maxRecordsToShow &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => {
                     // history.push(`/${type === "customer" ? "customer-contact" : "supplier-contact"}`)
-                    setMaxRecordsToShow(contacts.length)
+                    setMaxRecordsToShow(prevState => prevState + (recordsPerLine * 2))
                 }} p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaArrowAltCircleDown size={25} />
                 </Box>
