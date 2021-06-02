@@ -222,7 +222,6 @@ export default function OpportunityInAccordian({
                     </Menu>
                   </>
                   :
-                  contactResource !== supplierContact.contactResource && (
                     <IconButton
                       color="primary"
                       size="small"
@@ -232,8 +231,7 @@ export default function OpportunityInAccordian({
                     >
                       <ControlPointIcon />
                     </IconButton>
-                  )
-
+                  
                 }
               </Typography>
             </Grid>

@@ -190,7 +190,6 @@ export default function ManageOpportunityDialog({
     if (contactId && contactResource)
       values.staticData = {
         [contactResource]: [contactId],
-        [resource]: [accountId],
       };
     setLoading(true);
     axiosInstance()
