@@ -172,7 +172,7 @@ const Email = () => {
             cellRenderer: "MessageRenderer"
         },
         {
-            field: "createdAt", headerName: "Created At", show: true,
+            field: "createdBy", headerName: "Created At", show: true,
             filter: false, sortable: false,
             cellRenderer: "createdByDate"
         },
