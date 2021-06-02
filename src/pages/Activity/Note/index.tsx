@@ -103,7 +103,7 @@ const Note = () => {
             width: 300,
             renderCell: (params) =>
                 <a className="link cursor-pointer"
-                onClick={() => handleActivityOpen(params.row)}>{params.row.name}</a>
+                    onClick={() => handleActivityOpen(params.row)}>{params.row.name}</a>
         },
         {
             field: 'createdBy',
@@ -151,7 +151,8 @@ const Note = () => {
                                 className={styles.add_submit_btn}
                                 onClick={() => {
                                     setIsNew(true)
-                                    setShowCreateDialog(true)}}
+                                    setShowCreateDialog(true)
+                                }}
                                 startIcon={<AddOutlined />}>
                                 Add
                                 </Button>
