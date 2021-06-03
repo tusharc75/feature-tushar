@@ -45,19 +45,17 @@ export default function ImageAttachments(props) {
                                                             </a>
                                                         }
                                                     </IconButton>
-                                                    <IconButton >
+                                                    <IconButton onClick={() => onDelete(attachment)}>
                                                         {
-                                                            <DeleteIcon color='error'
-                                                                onClick={() => onDelete(attachment)}
-                                                            />
+                                                            <DeleteIcon color='error' />
+
                                                         }
                                                     </IconButton>
                                                 </></div> :
-                                                <IconButton >
+                                                <IconButton onClick={() => onDelete(attachment)} >
                                                     {
-                                                        <DeleteIcon color='error'
-                                                            onClick={() => onDelete(attachment)}
-                                                        />
+                                                        <DeleteIcon color='error' />
+
                                                     }
                                                 </IconButton>
 
