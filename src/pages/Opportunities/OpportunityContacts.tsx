@@ -38,8 +38,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
     root: {
-        backgroundColor: "#e4e4e4",
-        borderBottom: "1px solid rgba(0, 0, 0, .125)",
+        backgroundColor: "white",
+        borderBottom: "1px solid #f1ece8",
+        background: "#ffffff",
+        fontWeight: "bold",
+        padding: "0px",
         "&$expanded": {
             minHeight: 46,
         },
@@ -151,7 +154,7 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                         </Box>
                     </Box>
                 </Grid>
-                <Grid item xs={4} container justify="flex-end">
+                <Grid item xs={4} container justify="flex-end" >
                     <IconButton
                         color="primary"
                         size="small"
