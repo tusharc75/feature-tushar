@@ -308,33 +308,35 @@ const ProductBuilder = (props) => {
         <Grid container>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
             </Grid>
-            <Grid xs={6} container justify="flex-end">
-                <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    className="float-right"
-                    onClick={openActions}
-                    disabled={selectedProduct.length ? false : true}
-                    aria-controls="action-menu"
-                >Actions <ExpandMore />
-                </Button>
-                <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                >
-                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                    <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
-                </Menu>
-            </Grid>
+            {Editable &&
+                <Grid xs={6} container justify="flex-end">
+                    <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        className="float-right"
+                        onClick={openActions}
+                        disabled={selectedProduct.length ? false : true}
+                        aria-controls="action-menu"
+                    >Actions <ExpandMore />
+                    </Button>
+                    <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left",
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                    >
+                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                        <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
+                    </Menu>
+                </Grid>
+            }
         </Grid>
         <Box height={500} mt={1}>
             {columns &&
