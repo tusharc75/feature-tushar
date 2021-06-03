@@ -705,14 +705,6 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
-        // InputProps={{
-        //   inputComponent: CustomFormat as any,
-        //   inputProps: {
-        //     decimalScale: decimalPlaces ? decimalPlaces : 2,
-        //     onValueChange: (values: any) =>
-        //       setFieldValue(name, values.formattedValue),
-        //   },
-        // }}
         onChange={
           onChange
             ? onChange
@@ -724,7 +716,8 @@ const FormTypes = (props) => {
             }
         }
         InputProps={{
-          inputProps: { min: 0 }
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
       />
     </InfoLabel>
@@ -741,15 +734,9 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         InputProps={{
-          // inputComponent: CustomFormat as any,
-          // inputProps: {
-          //   isAllowed: (props) => withValueLimit(props, 100),
-          //   decimalScale: 2,
-          //   onValueChange: (values: any) =>
-          //     setFieldValue(name, values.formattedValue),
-          // },
           endAdornment: "%",
-          inputProps: { min: 0 }
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
         onChange={
           onChange
@@ -787,7 +774,8 @@ const FormTypes = (props) => {
             }
         }
         InputProps={{
-          inputProps: { min: 0 }
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
       />
     </InfoLabel>
@@ -927,7 +915,8 @@ const FormTypes = (props) => {
                 : (e) => handleConverterChange(name, _unit, e.target.value.replace(/[^0-9\.]/g, ''))
             }
             InputProps={{
-              inputProps: { min: 0 }
+              inputProps: { min: 0 },
+              readOnly: (fieldData && fieldData.isUneditable) ? true : false
             }}
           />
         </InfoLabel>
@@ -1017,7 +1006,8 @@ const FormTypes = (props) => {
                       )}
                     </InputAdornment>
                   ),
-                  inputProps: { min: 0 }
+                  inputProps: { min: 0 },
+                  readOnly: (fieldData && fieldData.isUneditable) ? true : false
                 }}
               />
             </InfoLabel>
@@ -1071,7 +1061,8 @@ const FormTypes = (props) => {
                     )}
                   </InputAdornment>
                 ),
-                inputProps: { min: 0 }
+                inputProps: { min: 0 },
+                readOnly: (fieldData && fieldData.isUneditable) ? true : false
               }}
             />
           </InfoLabel>
