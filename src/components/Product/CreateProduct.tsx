@@ -18,13 +18,15 @@ import IconButton from '@material-ui/core/IconButton';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
+
+const ignoreField = ["qty"]
 
 const CreateProduct = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder } = props;
+    const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -35,13 +37,26 @@ const CreateProduct = (props) => {
     const [sectionName, setSectionName] = useState("");
     const ref = useRef(null);
     const [productTemplate, setProductTemplate] = useState([]);
+    const [isStandardTemplate, setIsStandardTemplate] = useState(false);
 
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
-            setMasterFields(data.map((_f) => _f.fieldData))
+            const _productField: any = []
+            data.forEach((_f) => {
+                if (openFrom === "builder") {
+                    _productField.push(_f.fieldData)
+                }
+                else {
+                    if (!ignoreField.includes(_f.fieldData.fieldName)) {
+                        _productField.push(_f.fieldData)
+                    }
+                }
+            })
+            //setMasterFields(data.map((_f) => _f.fieldData))
+            setMasterFields(_productField)
             const _fields = [];
-            data.map((_f) => _fields.push(_f.fieldData));
+            _productField.map((_f) => _fields.push(_f));
             if (productId) {
                 const newField = _fields;
                 axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
@@ -57,6 +72,7 @@ const CreateProduct = (props) => {
                     });
                     EvaluteproductFields(newField)
                     handleChangeCategory(data.productData.productCategory, false)
+                    setIsStandardTemplate(data.isStandard)
                 }).catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -139,6 +155,7 @@ const CreateProduct = (props) => {
                 data.fields.filter((f) => f.sectionType !== "cost").forEach(_f => {
                     newField.push(_f)
                 })
+                setIsStandardTemplate(data.isStandard)
                 setInitialData({
                     fields: newField,
                     values: { ...getObjKeys('', newField), ...ref.current.values, unit: data.unit },
@@ -173,6 +190,7 @@ const CreateProduct = (props) => {
         setSectionName("")
         setIsAddField(false)
     }
+
 
     return (<Dialog
         maxWidth="md"
@@ -298,7 +316,7 @@ const CreateProduct = (props) => {
                                                                             isvlookupReverse={field.isvlookupReverse}
                                                                             fieldData={field}
                                                                             size="small"
-                                                                            disabled={field.fieldName === "unit" ? true : false}
+                                                                            disabled={field.fieldName === "unit" ? (isStandardTemplate ? false : true) : false}
                                                                         />
                                                                     </Grid>
                                                     ))}

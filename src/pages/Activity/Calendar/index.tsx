@@ -178,7 +178,6 @@ const BigCalendar = () => {
           <MyCalendar
             activities={activities}
             setActivityData={setActivityData}
-            type={lowerCase(type)}
           />
         </div>
         {activityData && (

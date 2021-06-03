@@ -101,7 +101,7 @@ const fileIcons = [
     }
 ]
 
-export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) => {
+export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fetchData = null }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { instance, accounts, inProgress } = useMsal();
@@ -151,7 +151,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
 
     const checkImageUrl = (url) => {
         let extension = url.substring(url.lastIndexOf("."),).toLowerCase()
-        let imageExtensions = [".tif", "tiff", ".bmp", ".jpg", "jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"]
+        let imageExtensions = [".tif", ".tiff", ".bmp", ".jpg", ".jpeg", ".gif", ".png", ".eps", ".raw", ".cr2", ".nef", ".orf", ".sr2"]
         return imageExtensions.indexOf(extension) >= 0
     }
     const fetchEmailDetail = async () => {
@@ -220,6 +220,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                         });
                         setInitialValues(null)
                         setSending(false)
+                        if (fetchData) fetchData()
                         handleClose()
                     })
                     .catch((err) => {
@@ -347,7 +348,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
         {loading ?
             <div className={classes.root}>
                 {[...Array(10).keys()].map(i => (
-                    <Typography style={{ marginLeft: '20px' }} key={`skeleton${i}`} variant="h5">
+                    <Typography style={{ marginLeft: '20px' }} key={`skeleton${i}`} variant="subtitle1">
                         <Skeleton animation="wave" />
                     </Typography>)
                 )}
@@ -506,7 +507,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [] }) =
                                                             emailId={emailId}
                                                         />
 
-                                                        <Box mt={2} style={{ border: '1px solid #999', minHeight: '220px' }}>
+                                                        <Box style={{ border: '1px solid #999', minHeight: '220px' }}>
                                                             <RichTextEditor
                                                                 style={{ border: "none" }}
                                                                 className={classes.textEditor}

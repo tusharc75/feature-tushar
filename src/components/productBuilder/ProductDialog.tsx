@@ -19,14 +19,14 @@ import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
 import TextField from '@material-ui/core/TextField';
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
+import { CustomDialogTransition } from "./../../constants/helpers";
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
 const CreateProduct = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { productData, handleClose, handleSaveProduct } = props;
+    const { productData, handleClose, handleSaveProduct, stage } = props;
     const [masterFields, setMasterFields] = useState([]);
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
