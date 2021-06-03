@@ -1,4 +1,4 @@
-import {useContext, useEffect,Fragment,useState, useCallback} from 'react'
+import React, { useContext, useEffect, Fragment, useState, useCallback } from 'react'
 import { useParams, useHistory } from "react-router-dom";
 import Layout from "../../components/Layout";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
@@ -17,14 +17,14 @@ import ChatRender from '../../components/Chatter';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import EmailDialog from '../QuoteBuilderCombined/EmailDialog'
 import {
-  Grid as GridDropTable,
-  DragDropProvider,
-  Table,
-  TableHeaderRow,
-  TableColumnReordering,
-  TableColumnVisibility,
-  ColumnChooser,
-  Toolbar, 
+    Grid as GridDropTable,
+    DragDropProvider,
+    Table,
+    TableHeaderRow,
+    TableColumnReordering,
+    TableColumnVisibility,
+    ColumnChooser,
+    Toolbar,
 } from '@devexpress/dx-react-grid-material-ui';
 
 import {
@@ -44,22 +44,23 @@ import {
 } from 'draft-js';
 import draftToHtml from 'draftjs-to-html'
 import { SettingsCellTwoTone } from '@material-ui/icons';
+import CustomContainer from '../../components/CustomContainer';
 let termsTimeout;
-var newQuote=false;
-var fetchVersion=false;
+var newQuote = false;
+var fetchVersion = false;
 
 let logo = null;
-const CreatePriceBuilder=(props)=>{
+const CreatePriceBuilder = (props) => {
     //const {id}= props;
     const { id } = useParams();
     //const {id}= {id:"6093cf0fcee24cd4d39ecda8"}
 
-    const [currentVersion,setcurrentVersion]=useState(1);
-    const [versions,setVersions]=useState([]);
+    const [currentVersion, setcurrentVersion] = useState(1);
+    const [versions, setVersions] = useState([]);
     const toastConfig = useContext(CustomToastContext);
-    const [dynamicCol,setDynamicCol]=useState([]);
-    const[ColumnName,setColName]=useState([]);
-    const [dynamicTableData,setDynamicTableData]=useState([])
+    const [dynamicCol, setDynamicCol] = useState([]);
+    const [ColumnName, setColName] = useState([]);
+    const [dynamicTableData, setDynamicTableData] = useState([])
     const [loading, setLoading] = useState(true);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [query, setQuery] = useState({ page: 0, limit: 5 });
@@ -67,30 +68,30 @@ const CreatePriceBuilder=(props)=>{
     const [data, setData] = useState([]);
     const [dataRows, setDataRows] = useState([]);
     const [rowCount, setRowCount] = useState(0);
-    const [RadioIndex,setRadioIndex] =useState(-1);
+    const [RadioIndex, setRadioIndex] = useState(-1);
     const [checkAllAccounts, setCheckAllAccounts] = useState(false);
-    const [loaded,setLoaded]=useState(false);
+    const [loaded, setLoaded] = useState(false);
     const [editRecord, setEditRecord] = useState<any>({})
-    const [tableColumnExtensions,settableColExt] = useState([
-      ]);
-    const [droppedColumns,setDroppedColumns]=useState([])
-    const [QData,setQData]=useState({})
-    const [editRestriction,setEditRestriction]=useState(false);
-    let DOAlimit=0;
-    const [DOAsetup,setDOAsetup]=useState(false)
-    const [DOAapprovalreq,setDOAapprovalreq]=useState(false);
-    const [sendtoCustomer,setsendtoCustomer]=useState(true);
-    const [buttonMessage,setButtonMessage]=useState("Send to Customer");
-    const [QBId,setQBId]=useState("");
-    const [TandC,setTNC]=useState("");
-    const [sendEmail,setSendEmail]=useState(false)
-    var chatterID="0";
-    
-    
-    
-    useEffect(()=>{
+    const [tableColumnExtensions, settableColExt] = useState([
+    ]);
+    const [droppedColumns, setDroppedColumns] = useState([])
+    const [QData, setQData] = useState({})
+    const [editRestriction, setEditRestriction] = useState(false);
+    let DOAlimit = 0;
+    const [DOAsetup, setDOAsetup] = useState(false)
+    const [DOAapprovalreq, setDOAapprovalreq] = useState(false);
+    const [sendtoCustomer, setsendtoCustomer] = useState(true);
+    const [buttonMessage, setButtonMessage] = useState("Send to Customer");
+    const [QBId, setQBId] = useState("");
+    const [TandC, setTNC] = useState("");
+    const [sendEmail, setSendEmail] = useState(false)
+    var chatterID = "0";
+
+
+
+    useEffect(() => {
         fetchDoaLimit();
-    },[])
+    }, [])
 
     useEffect(() => {
         GetQuoteData(0);
@@ -101,8 +102,8 @@ const CreatePriceBuilder=(props)=>{
         fetchTermsAndConditions()
     }, [query, searchVal])
 
-    
-    
+
+
     useEffect(() => {
         console.log("TNC is:");
         console.log(QData);
@@ -110,7 +111,7 @@ const CreatePriceBuilder=(props)=>{
         console.log(data);
         let rows = data?.map((u) => ({
             ...u,
-            isChecked: u._id===QData["TNC"]?true:false,
+            isChecked: u._id === QData["TNC"] ? true : false,
             id: u._id,
         }));
         setDataRows([...rows]);
@@ -123,7 +124,7 @@ const CreatePriceBuilder=(props)=>{
         }
     };
 
-    
+
 
     const handlePageSize = (params) => {
         if (params.pageSize !== query.limit) {
@@ -149,14 +150,14 @@ const CreatePriceBuilder=(props)=>{
         }
     };
 
-    const fetchDoaLimit=()=>{
+    const fetchDoaLimit = () => {
         axiosInstance()
             .get('doa-request/limit')
             .then(({ data }) => {
                 console.log("DOA limit is:");
                 console.log(data);
                 setDOAsetup(data.data.doasetup);
-                DOAlimit=data.data.limit;           
+                DOAlimit = data.data.limit;
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -212,34 +213,35 @@ const CreatePriceBuilder=(props)=>{
                     // disabled={!params.canDelete}
                     checked={params.value}
                     onClick={(ev) => {
-                        if(QData["Quote_Status"]!=="Quote Generated"){
+                        if (QData["Quote_Status"] !== "Quote Generated") {
                             setEditRestriction(true);
                         }
-                        else{
-                        const gridData = dataRows;
-                        const indexOfRecord = gridData.findIndex(
-                            (d) => d.id === params.row.id
-                        );
-                        var prevvalue=gridData[indexOfRecord].isChecked;
-                        for(var i=0;i<gridData.length;i++){
-                            gridData[i].isChecked = false;
-                        }
-                        if(prevvalue){
-                            gridData[indexOfRecord].isChecked = false;
-                            setRadioIndex(-1);
-                        }
-                        else{
-                            gridData[indexOfRecord].isChecked = true;
-                            setRadioIndex(indexOfRecord);
-                        }
+                        else {
+                            const gridData = dataRows;
+                            const indexOfRecord = gridData.findIndex(
+                                (d) => d.id === params.row.id
+                            );
+                            var prevvalue = gridData[indexOfRecord].isChecked;
+                            for (var i = 0; i < gridData.length; i++) {
+                                gridData[i].isChecked = false;
+                            }
+                            if (prevvalue) {
+                                gridData[indexOfRecord].isChecked = false;
+                                setRadioIndex(-1);
+                            }
+                            else {
+                                gridData[indexOfRecord].isChecked = true;
+                                setRadioIndex(indexOfRecord);
+                            }
 
-                        setDataRows([...gridData]);
-                        setTNC(gridData[indexOfRecord]._id);
-                        console.log(gridData[indexOfRecord]._id);
-                        handleUpdate(ColumnName,droppedColumns,gridData[indexOfRecord]._id,"","");
-                        const checkedRecords = gridData.filter((d) => d.isChecked === true);
+                            setDataRows([...gridData]);
+                            setTNC(gridData[indexOfRecord]._id);
+                            console.log(gridData[indexOfRecord]._id);
+                            handleUpdate(ColumnName, droppedColumns, gridData[indexOfRecord]._id, "", "");
+                            const checkedRecords = gridData.filter((d) => d.isChecked === true);
 
-                    }}}
+                        }
+                    }}
                 />
             ),
             disableColumnMenu: true,
@@ -258,57 +260,55 @@ const CreatePriceBuilder=(props)=>{
                 </Link>
             )
         },
-       
+
     ];
 
-    const GetQuoteData=(version)=>{
+    const GetQuoteData = (version) => {
         setDOAapprovalreq(false);
         setsendtoCustomer(true);
         setButtonMessage("Send to Customer");
         setLoaded(false);
         axiosInstance()
-            .get('quote-builder?id='+id+'&version='+version)
+            .get('quote-builder?id=' + id + '&version=' + version)
             .then(({ data }) => {
                 console.log(data.Data);
                 QuoteData(data.Data);
                 setQData(data.Data);
-                chatterID=data.Data.chatter
-                var totalversions=[]
-                if(version===0){
-                setcurrentVersion(data.Data.latestVersion);
+                chatterID = data.Data.chatter
+                var totalversions = []
+                if (version === 0) {
+                    setcurrentVersion(data.Data.latestVersion);
                 }
-                for(var i=1;i<=data.Data.latestVersion;i++){
+                for (var i = 1; i <= data.Data.latestVersion; i++) {
                     totalversions.push(i);
                 }
-                
+
                 setQBId(data.Data._id);
                 setVersions(totalversions);
                 console.log('Chatter ID is:');
                 console.log(chatterID);
                 console.log(data.Data["TotalSellingPrice"]);
-                if(data.Data["TNC"]){
+                if (data.Data["TNC"]) {
                     setTNC(data.Data["TNC"]);
-                
+
                 }
                 console.log(DOAlimit);
                 console.log(data.Data["Quote_Status"]);
                 console.log(DOAsetup);
 
-                if(data.Data["TotalSellingPrice"]>DOAlimit && data.Data["Quote_Status"]==="Quote Generated" && DOAsetup){
+                if (data.Data["TotalSellingPrice"] > DOAlimit && data.Data["Quote_Status"] === "Quote Generated" && DOAsetup) {
                     console.log("Need DOA");
                     setDOAapprovalreq(true);
                     setsendtoCustomer(false);
                     setButtonMessage("Send for DOA");
                 }
-                else if(data.Data["Quote_Status"]==="Sent for DOA" || data.Data["Quote_Status"]==="Sent to Customer" || data.Data["Quote_Status"]==="Accepted by Customer" || data.Data["Quote_Status"]==="Rejected by Customer" )
-                {
+                else if (data.Data["Quote_Status"] === "Sent for DOA" || data.Data["Quote_Status"] === "Sent to Customer" || data.Data["Quote_Status"] === "Accepted by Customer" || data.Data["Quote_Status"] === "Rejected by Customer") {
                     console.log("sent for DOA");
                     setDOAapprovalreq(false);
                     setsendtoCustomer(false);
 
                 }
-                else if(data.Data["Quote_Status"].includes("Rejected by DOA"))
-                {
+                else if (data.Data["Quote_Status"].includes("Rejected by DOA")) {
                     console.log("Rejected by DOA");
                     setDOAapprovalreq(true);
                     setsendtoCustomer(false);
@@ -322,71 +322,71 @@ const CreatePriceBuilder=(props)=>{
             });
 
     }
-    const QuoteData=(data)=>{
-        var TableData=[];
-        var Col=[];
-        var ColName=[];
-        var columnext=[];
-        var KeyValuePairs=[];
+    const QuoteData = (data) => {
+        var TableData = [];
+        var Col = [];
+        var ColName = [];
+        var columnext = [];
+        var KeyValuePairs = [];
         type Type = {
             [key: string]: any;
-          };
-          
-        for (var i=0;i<data.inventory.length;i++){
+        };
+
+        for (var i = 0; i < data.inventory.length; i++) {
             var KeyValue: Type = {};
-            for(var j=0;j<data.inventory[i].length;j++){
-                var DataSet=data.inventory[i][j];
-                if(ColName.indexOf(DataSet.fieldName)===-1){
-                    ColName=[...ColName, DataSet.fieldName];
-                    Col=[...Col,{title:DataSet.fieldName, name:DataSet.fieldName}];
-                    columnext=[...columnext,{ColumnName:DataSet.fieldName, width:100}];
+            for (var j = 0; j < data.inventory[i].length; j++) {
+                var DataSet = data.inventory[i][j];
+                if (ColName.indexOf(DataSet.fieldName) === -1) {
+                    ColName = [...ColName, DataSet.fieldName];
+                    Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
+                    columnext = [...columnext, { ColumnName: DataSet.fieldName, width: 100 }];
                 }
-                KeyValue[DataSet.fieldName]=DataSet.fieldValue;
+                KeyValue[DataSet.fieldName] = DataSet.fieldValue;
             }
-            KeyValuePairs=[...KeyValuePairs,KeyValue];
+            KeyValuePairs = [...KeyValuePairs, KeyValue];
         }
-        if(data.ColumnOrder){
+        if (data.ColumnOrder) {
             setColName(data.ColumnOrder);
         }
-        else{
+        else {
             setColName(ColName);
         }
-        if(data.HiddenColumns){
+        if (data.HiddenColumns) {
             setDroppedColumns(data.HiddenColumns);
         }
-        if(fetchVersion===false && data.Quote_Status==='Quote not generated yet'){
-            newQuote=true;
+        if (fetchVersion === false && data.Quote_Status === 'Quote not generated yet') {
+            newQuote = true;
         }
 
-        for(var j=0;j<KeyValuePairs.length;j++){
-                const DataSet=KeyValuePairs[j];
-                var DataRecord:Type ={};
-                for(var i=0;i<ColName.length;i++){
-                    if(ColName[i] in DataSet){
-                        DataRecord[ColName[i]]=DataSet[ColName[i]];
-                    }
-                    else{
-                        DataRecord[ColName[i]]='-';
-                    }
+        for (var j = 0; j < KeyValuePairs.length; j++) {
+            const DataSet = KeyValuePairs[j];
+            var DataRecord: Type = {};
+            for (var i = 0; i < ColName.length; i++) {
+                if (ColName[i] in DataSet) {
+                    DataRecord[ColName[i]] = DataSet[ColName[i]];
                 }
-                TableData=[...TableData, DataRecord]
+                else {
+                    DataRecord[ColName[i]] = '-';
+                }
+            }
+            TableData = [...TableData, DataRecord]
         }
         setDynamicTableData(TableData);
         setDynamicCol(Col);
         settableColExt(columnext);
     };
 
-   
-    const GeneratePdf=(view,send)=>{
-        const PdfDoc= new jsPDF('p', 'pt', 'a4');
-        
-        var PDFData=[];
-        var PdfCol=[];
-        dynamicTableData.forEach(dataEntry=>{
-            var PdfRow=[];
-            ColumnName.forEach(ColName=>{
-                if(droppedColumns.indexOf(ColName)===-1){
-                    if(PdfCol.indexOf(ColName)==-1){
+
+    const GeneratePdf = (view, send) => {
+        const PdfDoc = new jsPDF('p', 'pt', 'a4');
+
+        var PDFData = [];
+        var PdfCol = [];
+        dynamicTableData.forEach(dataEntry => {
+            var PdfRow = [];
+            ColumnName.forEach(ColName => {
+                if (droppedColumns.indexOf(ColName) === -1) {
+                    if (PdfCol.indexOf(ColName) == -1) {
                         PdfCol.push(ColName);
                     }
                     PdfRow.push(dataEntry[ColName]);
@@ -395,348 +395,350 @@ const CreatePriceBuilder=(props)=>{
             PDFData.push(PdfRow);
         });
         PdfDoc.setFontSize(14);
-        var text="Please find the Quoatation Below:"
+        var text = "Please find the Quoatation Below:"
         var lineHeight = PdfDoc.getLineHeight();
-        var splittedText = PdfDoc.splitTextToSize(text,50)
-        PdfDoc.text(text,20,30);
+        var splittedText = PdfDoc.splitTextToSize(text, 50)
+        PdfDoc.text(text, 20, 30);
         var lines = splittedText.length
-        var blockHeight =(lines-2)*lineHeight;
-        PDFData=[...PDFData,[{content: `Quote Total : ${QData["TotalSellingPrice"]}`, colSpan: PDFData[0].length, 
-        styles: {halign: 'right',valign: 'middle'}
+        var blockHeight = (lines - 2) * lineHeight;
+        PDFData = [...PDFData, [{
+            content: `Quote Total : ${QData["TotalSellingPrice"]}`, colSpan: PDFData[0].length,
+            styles: { halign: 'right', valign: 'middle' }
         }]];
-        autoTable(PdfDoc,{
-            margin:{top:20+blockHeight},
-            head:[PdfCol],
-            body:PDFData,
-            styles: { halign: 'center', cellWidth:'auto',overflow: 'linebreak'},
-            theme:'grid'
+        autoTable(PdfDoc, {
+            margin: { top: 20 + blockHeight },
+            head: [PdfCol],
+            body: PDFData,
+            styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
+            theme: 'grid'
         });
-        let finalY= (PdfDoc as any).lastAutoTable.finalY;
-        if(RadioIndex!==-1){
-            let state=convertFromRaw(JSON.parse(dataRows[RadioIndex].description));
-            let TNC= EditorState.createWithContent(state)
+        let finalY = (PdfDoc as any).lastAutoTable.finalY;
+        if (RadioIndex !== -1) {
+            let state = convertFromRaw(JSON.parse(dataRows[RadioIndex].description));
+            let TNC = EditorState.createWithContent(state)
             var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
-            markup=markup.replaceAll(" ","&nbsp");
-            PdfDoc.html(markup,{callback: function (doc) { 
-                if(view && !send){
-                    doc.output('dataurlnewwindow');
-                }
-                else if(!view && !send){
-                    doc.save();
-                }
-                if(send){
-                    var PDFtoAPIData=doc.output('blob');
-                    console.log("PDF Data is");
-                    console.log(PDFtoAPIData);
-                    const formdata = new FormData();
-                    formdata.append("file", PDFtoAPIData, "Quotation.pdf");
-                    axiosInstance().post('/user/upload/',formdata,{
-                        headers: {
-                          "content-type": "multipart/form-data"
-                        }
-                      })
-                    .then(({data}) => {
+            markup = markup.replaceAll(" ", "&nbsp");
+            PdfDoc.html(markup, {
+                callback: function (doc) {
+                    if (view && !send) {
+                        doc.output('dataurlnewwindow');
+                    }
+                    else if (!view && !send) {
+                        doc.save();
+                    }
+                    if (send) {
+                        var PDFtoAPIData = doc.output('blob');
+                        console.log("PDF Data is");
+                        console.log(PDFtoAPIData);
+                        const formdata = new FormData();
+                        formdata.append("file", PDFtoAPIData, "Quotation.pdf");
+                        axiosInstance().post('/user/upload/', formdata, {
+                            headers: {
+                                "content-type": "multipart/form-data"
+                            }
+                        })
+                            .then(({ data }) => {
+                                console.log("PDF Response is:");
+                                console.log(data);
+                                handleUpdate(ColumnName, droppedColumns, TandC, "", data.fileName);
+                                axiosInstance().post(`/doa-request/create/` + QBId)
+                                    .then(({ data }) => {
+                                        GetQuoteData(currentVersion);
+                                        setButtonMessage("Send to Customer");
+                                    })
+                                    .catch((err) => {
+                                        toastConfig.setToastConfig(err);
+                                    });
+                            })
+                            .catch((err) => {
+                                toastConfig.setToastConfig(err);
+                            });
+
+
+                    }
+
+                }, x: 40, y: finalY + lineHeight, margin: [20, 10, 20, 10]
+            });
+        }
+        else {
+            if (view && !send) {
+                PdfDoc.output('dataurlnewwindow');
+            }
+            else if (!view && !send) {
+                PdfDoc.save('Quation.pdf');
+            }
+            if (send) {
+                var PDFtoAPIData = PdfDoc.output('blob');
+                console.log("PDF Data is");
+                console.log(PDFtoAPIData);
+                const formdata = new FormData();
+                formdata.append("file", PDFtoAPIData, "Quotation.pdf");
+                axiosInstance().post('/user/upload/', formdata, {
+                    headers: {
+                        "content-type": "multipart/form-data"
+                    }
+                })
+                    .then(({ data }) => {
                         console.log("PDF Response is:");
                         console.log(data);
-                        handleUpdate(ColumnName,droppedColumns,TandC,"",data.fileName);
-                        axiosInstance().post(`/doa-request/create/`+QBId)
-                            .then(({data}) => {
+                        handleUpdate(ColumnName, droppedColumns, TandC, "", data.fileName);
+                        axiosInstance().post(`/doa-request/create/` + QBId)
+                            .then(({ data }) => {
                                 GetQuoteData(currentVersion);
                                 setButtonMessage("Send to Customer");
                             })
-                        .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                    });
+                            .catch((err) => {
+                                toastConfig.setToastConfig(err);
+                            });
                     })
                     .catch((err) => {
-                    toastConfig.setToastConfig(err);
+                        toastConfig.setToastConfig(err);
                     });
-        
-        
-                }
-                
-              },x:40,y:finalY+lineHeight,margin:[20,10,20,10]});
-        }
-        else{
-            if(view && !send){
-                PdfDoc.output('dataurlnewwindow');
-        }
-        else if(!view && !send){
-            PdfDoc.save('Quation.pdf');
-        }
-        if(send){
-            var PDFtoAPIData=PdfDoc.output('blob');
-            console.log("PDF Data is");
-            console.log(PDFtoAPIData);
-            const formdata = new FormData();
-            formdata.append("file", PDFtoAPIData, "Quotation.pdf");
-            axiosInstance().post('/user/upload/',formdata,{
-                headers: {
-                  "content-type": "multipart/form-data"
-                }
-              })
-            .then(({data}) => {
-                console.log("PDF Response is:");
-                console.log(data);
-                handleUpdate(ColumnName,droppedColumns,TandC,"",data.fileName);
-                axiosInstance().post(`/doa-request/create/`+QBId)
-                    .then(({data}) => {
-                        GetQuoteData(currentVersion);
-                        setButtonMessage("Send to Customer");
-                    })
-                .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
-            })
-            .catch((err) => {
-            toastConfig.setToastConfig(err);
-            });
 
 
+            }
         }
-    }
-        
 
-        
+
+
     }
 
     const handleChangeVersion = (event) => {
         setcurrentVersion(event.target.value);
-        fetchVersion=true;
-        if(newQuote && event.target.value==Math.max(...versions)){
+        fetchVersion = true;
+        if (newQuote && event.target.value == Math.max(...versions)) {
             GetQuoteData(0);
         }
-        else{
+        else {
             GetQuoteData(event.target.value);
         }
-        
+
     };
 
-    const handlehiddenChange=(values)=>{
-        if(QData["Quote_Status"]!=="Quote Generated"){
+    const handlehiddenChange = (values) => {
+        if (QData["Quote_Status"] !== "Quote Generated") {
             setEditRestriction(true);
         }
-        else{
+        else {
             setDroppedColumns(values);
-            handleUpdate(ColumnName,values,TandC,"","");
+            handleUpdate(ColumnName, values, TandC, "", "");
         }
     }
 
-    const handleorder=(values)=>{
-        if(QData["Quote_Status"]!=="Quote Generated"){
+    const handleorder = (values) => {
+        if (QData["Quote_Status"] !== "Quote Generated") {
             setEditRestriction(true);
         }
-        else{
+        else {
             setColName(values);
-            handleUpdate(values,droppedColumns,TandC,"","");
+            handleUpdate(values, droppedColumns, TandC, "", "");
         }
     }
 
-    const cloneQuote=()=>{
-        axiosInstance().post(`/quote-builder/cloneQuote/`+id+"?version="+currentVersion)
-        .then(({data}) => {
-            GetQuoteData(0);
-        })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const cloneQuote = () => {
+        axiosInstance().post(`/quote-builder/cloneQuote/` + id + "?version=" + currentVersion)
+            .then(({ data }) => {
+                GetQuoteData(0);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
     }
 
-    const handleUpdate=(
+    const handleUpdate = (
         colorder,
         hidecol,
         TNC,
         status,
         PDF
-    )=>{
-        const Update={
-            Columnorder:colorder,
-            HiddenColumns:hidecol,
-            TNC:TNC,
-            status:status===""?QData["Quote_Status"]:status,
-            PDF:PDF
+    ) => {
+        const Update = {
+            Columnorder: colorder,
+            HiddenColumns: hidecol,
+            TNC: TNC,
+            status: status === "" ? QData["Quote_Status"] : status,
+            PDF: PDF
         }
-        
-        axiosInstance().post(`/quote-builder/updateQuote/`+id+"?version="+currentVersion, Update)
-        .then(({data}) => {
 
-        })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+        axiosInstance().post(`/quote-builder/updateQuote/` + id + "?version=" + currentVersion, Update)
+            .then(({ data }) => {
+
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
 
     }
 
 
-    const handleCases=()=>{
-        if(DOAapprovalreq){
-            GeneratePdf(false,true);
+    const handleCases = () => {
+        if (DOAapprovalreq) {
+            GeneratePdf(false, true);
         };
-        if(sendtoCustomer){
+        if (sendtoCustomer) {
             setSendEmail(true);
         }
 
     }
 
-    const onSuccess=()=>{
+    const onSuccess = () => {
         setSendEmail(false)
         console.log("Success");
-        handleUpdate(ColumnName,droppedColumns,TandC,"Sent to Customer","");
+        handleUpdate(ColumnName, droppedColumns, TandC, "Sent to Customer", "");
         GetQuoteData(currentVersion)
     }
 
-    
-    return(
+
+    return (
         <Layout>
             <Grid container className="headerbox">
                 <Grid item xs={12}>
                     <CustomBreadCrumbs routes={[{ title: "Quote Builder" }]} />
                 </Grid>
             </Grid>
-            <div className="header-panel">
-            <Grid className="header-panel">
-                <Grid item xs={6} className="d-flex align-items-center gap-1">
-                    <GiAbstract055 /> <span className="listingHeader">Quote Builder</span>
-                </Grid>
-                <Grid item xs={6} container justify="flex-end">
-                        <Button onClick={() => GeneratePdf(true,false)} variant="contained" size="small" color="primary">View</Button> 
-                        <Button onClick={() => GeneratePdf(false,false)} variant="contained" size="small" color="primary">Download</Button>
-                        <Button onClick={() => handleCases()} disabled={!DOAapprovalreq && !sendtoCustomer} variant="contained" size="small" color="primary">{buttonMessage}</Button>
-                        <Button onClick={() => cloneQuote()} variant="contained" size="small" color="primary">Clone</Button>
-                </Grid>
-            </Grid>
-            </div>
-            <div>
-                <Grid container spacing={2}>
-                    <Grid item xs={6} sm={12} md={8} lg={8} spacing={2}>
-                        <Paper>
-                        Inventory:
+            <CustomContainer>
+                <div className="header-panel">
+                    <Grid>
+                        <Grid item xs={6} className="d-flex align-items-center gap-1">
+                            <GiAbstract055 /> <span className="listingHeader">Quote Builder</span>
+                        </Grid>
+                        <Grid item xs={6} container justify="flex-end">
+                            <Button onClick={() => GeneratePdf(true, false)} variant="contained" size="small" color="primary">View</Button>
+                            <Button onClick={() => GeneratePdf(false, false)} variant="contained" size="small" color="primary">Download</Button>
+                            <Button onClick={() => handleCases()} disabled={!DOAapprovalreq && !sendtoCustomer} variant="contained" size="small" color="primary">{buttonMessage}</Button>
+                            <Button onClick={() => cloneQuote()} variant="contained" size="small" color="primary">Clone</Button>
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item xs={6} sm={12} md={8} lg={8} spacing={2}>
+                            <Paper>
+                                Inventory:
                         {/* <CustomDynamicGrid data={dynamicTableData}
                             columns={dynamicCol}
                         /> */}
-                            <GridDropTable
-                                rows={dynamicTableData}
-                                columns={dynamicCol}
-                            >
-                                <DragDropProvider />
-                                <Table
-                                    columnExtensions={tableColumnExtensions}
-                                />
-                                <TableColumnReordering
-                                order={ColumnName}
-                                onOrderChange={(values)=>handleorder(values)}
-                                />
-                                
-                                <TableHeaderRow />
-                                <TableColumnVisibility
-                                    hiddenColumnNames={droppedColumns}
-                                    onHiddenColumnNamesChange={(values)=>handlehiddenChange(values)}
-                                />
-                                <Toolbar/>
-                                <ColumnChooser/>
-                            </GridDropTable>
+                                <GridDropTable
+                                    rows={dynamicTableData}
+                                    columns={dynamicCol}
+                                >
+                                    <DragDropProvider />
+                                    <Table
+                                        columnExtensions={tableColumnExtensions}
+                                    />
+                                    <TableColumnReordering
+                                        order={ColumnName}
+                                        onOrderChange={(values) => handleorder(values)}
+                                    />
+
+                                    <TableHeaderRow />
+                                    <TableColumnVisibility
+                                        hiddenColumnNames={droppedColumns}
+                                        onHiddenColumnNamesChange={(values) => handlehiddenChange(values)}
+                                    />
+                                    <Toolbar />
+                                    <ColumnChooser />
+                                </GridDropTable>
                             </Paper>
-                        </Grid> 
+                        </Grid>
                         <Grid item xs={6} sm={12} md={4} lg={4} spacing={2}>
                             <Paper>
-                            <Grid container>
-                                <Grid item xs={12}>
-                                    Version:
+                                <Grid container>
+                                    <Grid item xs={12}>
+                                        Version:
                                     <select value={currentVersion}
-                                    onChange={handleChangeVersion}>
-                                        {versions.map((team) => <option key={team} value={team}>{"V-"+team}</option>)}
-                                    </select>
-                                    <div>
-                                    Profitability:{QData["Profitability"]}
-                                    </div>
-                                    <div>
-                                    Total Cost Price: {QData["TotalCost"]}
-                                    </div>
-                                    <div>
-                                    Total Selling Price: {QData["TotalSellingPrice"]}
-                                    </div>
-                                    <div>
-                                    Status: {QData["Quote_Status"]}
-                                    </div>
-                                    <div>
-                                        {/*Please check isLoaded props - Gagandeep*/}
-                                        {loaded && <ChatRender id={QData["chatter"]} isLoaded={false}/>}
-                                    </div>
+                                            onChange={handleChangeVersion}>
+                                            {versions.map((team) => <option key={team} value={team}>{"V-" + team}</option>)}
+                                        </select>
+                                        <div>
+                                            Profitability:{QData["Profitability"]}
+                                        </div>
+                                        <div>
+                                            Total Cost Price: {QData["TotalCost"]}
+                                        </div>
+                                        <div>
+                                            Total Selling Price: {QData["TotalSellingPrice"]}
+                                        </div>
+                                        <div>
+                                            Status: {QData["Quote_Status"]}
+                                        </div>
+                                        <div>
+                                            {/*Please check isLoaded props - Gagandeep*/}
+                                            {loaded && <ChatRender id={QData["chatter"]} isLoaded={false} />}
+                                        </div>
+                                    </Grid>
                                 </Grid>
-                            </Grid> 
-                    </Paper>  
-                </Grid>  
-                    <Grid item xs={6} sm={12} md={8} lg={8} spacing={2}>
-                        <Paper>
-                        Terms and Conditons:
-                        <Grid item xs={6} container justify="flex-end">
-                            <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
-                        </Grid>
-                        <div className="listing-grid">
-                        <DataGrid
-                                components={{
-                                    Toolbar: DataGridCustomToolbar,
-                                    NoRowsOverlay: CustomDataGridNoDataFound,
-                                }}
-                                scrollbarSize={20}
-                                rows={loading ? [] : dataRows}
-                                columns={columns}
-                                loading={loading}
-                                disableSelectionOnClick
-                                disableMultipleSelection
-                                paginationMode="server"
-                                pagination
-                                onPageChange={handlePage}
-                                onPageSizeChange={handlePageSize}
-                                pageSize={query.limit}
-                                page={query.page}
-                                rowCount={rowCount}
-                                rowsPerPageOptions={[25, 50, 75]}
-                                onSortModelChange={handleSortModelChange}
-                                // onRowClick={handleRowClick}
-                                density="compact"
-                                onFilterModelChange={onFilterChange}
-                            />
-                            </div>
                             </Paper>
+                        </Grid>
+                        <Grid item xs={6} sm={12} md={8} lg={8} spacing={2}>
+                            <Paper>
+                                Terms and Conditons:
+                        <Grid item xs={6} container justify="flex-end">
+                                    <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
+                                </Grid>
+                                <div className="listing-grid">
+                                    <DataGrid
+                                        components={{
+                                            Toolbar: DataGridCustomToolbar,
+                                            NoRowsOverlay: CustomDataGridNoDataFound,
+                                        }}
+                                        scrollbarSize={20}
+                                        rows={loading ? [] : dataRows}
+                                        columns={columns}
+                                        loading={loading}
+                                        disableSelectionOnClick
+                                        disableMultipleSelection
+                                        paginationMode="server"
+                                        pagination
+                                        onPageChange={handlePage}
+                                        onPageSizeChange={handlePageSize}
+                                        pageSize={query.limit}
+                                        page={query.page}
+                                        rowCount={rowCount}
+                                        rowsPerPageOptions={[25, 50, 75]}
+                                        onSortModelChange={handleSortModelChange}
+                                        // onRowClick={handleRowClick}
+                                        density="compact"
+                                        onFilterModelChange={onFilterChange}
+                                    />
+                                </div>
+                            </Paper>
+                        </Grid>
+
                     </Grid>
-                    
-                </Grid>
-                
-            </div>
+                </div>
+            </CustomContainer>
             {showCreateDialog ? (
-                            <ManageTermsAndCondition
-                                termsAndCondition={termsAndCondition}
-                                open={showCreateDialog}
-                                handleClose={handleCloseCreateDialog}
-                                fetchData={fetchTermsAndConditions}
-                                editRecord={editRecord}
-                            />
-                        ) : null}
-            
-             <div>
-                 {editRestriction &&
-                <ConfirmationDialog
-                    open={editRestriction}
-                    message={`Cannot change Quote once sent for DOA process or to Customer.Please clone the Quote to make changes.`}
-                    onClose={() => setEditRestriction(false)}
-                    onOk={() => setEditRestriction(false)}
+                <ManageTermsAndCondition
+                    termsAndCondition={termsAndCondition}
+                    open={showCreateDialog}
+                    handleClose={handleCloseCreateDialog}
+                    fetchData={fetchTermsAndConditions}
+                    editRecord={editRecord}
                 />
-            }
-            </div>  
+            ) : null}
+
+            <div>
+                {editRestriction &&
+                    <ConfirmationDialog
+                        open={editRestriction}
+                        message={`Cannot change Quote once sent for DOA process or to Customer.Please clone the Quote to make changes.`}
+                        onClose={() => setEditRestriction(false)}
+                        onOk={() => setEditRestriction(false)}
+                    />
+                }
+            </div>
             <div>
                 {sendEmail && <EmailDialog
-                    handleClose={()=>setSendEmail(false)}
+                    handleClose={() => setSendEmail(false)}
                     success={onSuccess}
-                    id={QData["_id"]}/>
+                    id={QData["_id"]} />
                 }
-            </div>         
+            </div>
 
         </Layout>
 
 
-        );
-    
+    );
+
 }
 
 export default CreatePriceBuilder;

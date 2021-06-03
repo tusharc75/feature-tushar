@@ -62,6 +62,10 @@
   padding-bottom: 2px;
   height: 20px;
 }
+.ag-react-container{
+  display: flex;
+  align-items: center;
+}
 
 * {
   margin: 0;
@@ -635,7 +639,83 @@ body::-webkit-scrollbar-thumb {
 .bgLight {
   background: #f0f0f0;
 }
+.greyBox {
+  background: #f0f0f0;
+  padding: 10px 10px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+}
 
+.quotePanel{
+  background: #dfdfdf;
+  justify-content: center;
+  border-radius: 4px;
+}
+.quoteBox {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background: #ffffff;
+  padding: 10px 10px;
+  border-radius: 4px;
+  margin: 9px;
+  font-weight: bold;
+  row-gap: 6px;
+}
+
+.customDropdownBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #047d1c !important;
+  padding: 0 9px 0px 0;
+  color: #ffffff;
+}
+
+.customSelect {
+  padding: 6px 15px;
+  border: none;
+  background: #d8f4de;
+  /* border-radius: 3px; */
+  border-right: 1px solid white;
+  margin-right: 4px;
+  color: #011b06;
+}
+.termsBox {
+  height: calc(100vh - 10vh);
+}
+
+.productBox{
+  height: calc(100vh - 10vh);
+  overflow: auto;
+}
+.productTable{
+  table {
+    border-collapse: collapse;
+  }
+  & thead {
+    & tr {
+      border-bottom: 1px solid #e4e4e4;
+      background: #53ac65;
+      padding: 4px;
+      & th {
+        padding: 0px 15px !important;
+        color: white;
+      }
+    }
+  }
+
+  & tbody {
+    & tr {
+      border-bottom: 1px solid #e4e4e4;
+      & td {
+        padding: 4px 15px !important;
+        font-size: 0.80rem;
+      }
+    }
+  }
+}
 .google-visualization-orgchart-table {
   margin: 0 auto !important;
 }

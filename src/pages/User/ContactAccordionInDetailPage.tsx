@@ -156,7 +156,7 @@ export default function ContactAccordionInDetailPage({
                                             contacts.slice(0, maxRecordsToShow).map((obj, index) => (
                                                 <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index} >
                                                     <Card className="detailCard">
-                                                        <CardContent className="detailListing">
+                                                        <CardContent className="detailListing userCard">
                                                             <Grid container>
                                                                 <Grid item xs={12} sm={12}>
                                                                     <List>
