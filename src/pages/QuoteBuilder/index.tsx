@@ -15,7 +15,7 @@ import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNo
 import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndCondition';
 import ChatRender from '../../components/Chatter';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import EmailDialog from '../../components/productBuilder/EmailDialog'
+import EmailDialog from '../QuoteBuilderCombined/EmailDialog'
 import {
     Grid as GridDropTable,
     DragDropProvider,

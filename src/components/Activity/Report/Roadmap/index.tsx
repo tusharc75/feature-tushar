@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Typography, Box, Button, ButtonGroup } from "@material-ui/core";
 import { Map } from "@material-ui/icons";
-import grey from "@material-ui/core/colors/grey";
 import moment from "moment";
 
 import { GetRoadmap } from "../../../../axios/activity";
@@ -12,7 +11,7 @@ import ActivityList from "./ActivityList";
 import CalanderList from "./CalanderList";
 import Loader from "../../../../components/Loader";
 
-export default function Roadmap({ type, filter, activityId }) {
+function Roadmap({ type, filter }) {
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById("dayLiner");
@@ -236,3 +235,4 @@ Roadmap.propTypes = {
   filter: PropTypes.any,
   activityId: PropTypes.any,
 };
+export default memo(Roadmap);

@@ -223,12 +223,10 @@ export default function LeadAccordionInUserDetailPage({
                 </>
             </AccordionDetails>
             {
-                leads?.length > 0 && leads.length > recordsPerLine &&
+                leads?.length > 0 && leads.length > maxRecordsToShow &&
                 <Box margin={1} className="btn-view gap-1" onClick={() => {
-                    setMaxRecordsToShow(leads.length)
-                    // history.push(`/lead`)
-                }}
-                    p={1} display="flex" justifyContent="center" alignItems="center">
+                    setMaxRecordsToShow(prevState => prevState + (recordsPerLine * 2))
+                }} p={1} display="flex" justifyContent="center" alignItems="center">
                     <FaArrowAltCircleDown size={25} />
                 </Box>
             }

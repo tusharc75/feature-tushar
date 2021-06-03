@@ -7,6 +7,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Layout from "../../components/Layout";
 import { ListRelatedTo } from "../../components/Activity/Helpers/ListRelatedTo";
+import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
 
 const Reminder = () => {
   const [events, setEvents] = useState([]);
@@ -15,6 +16,7 @@ const Reminder = () => {
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [loadingCases, setLoadingCases] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState(null);
 
   const fetchTasks = useCallback(() => {
     setLoadingTasks(true);
@@ -68,9 +70,9 @@ const Reminder = () => {
         <CalendarToday
           style={{
             color:
-              new Date(data).getDate() < new Date().getDate() &&
-              new Date(data).getMonth() < new Date().getMonth() &&
-              new Date(data).getFullYear() < new Date().getFullYear()
+              new Date(data).getFullYear() < new Date().getFullYear() ||
+              new Date(data).getMonth() < new Date().getMonth() ||
+              new Date(data).getDate() < new Date().getDate()
                 ? "#dc3545"
                 : new Date(data).getDate() === new Date().getDate() &&
                   new Date(data).getMonth() === new Date().getMonth() &&
@@ -84,14 +86,14 @@ const Reminder = () => {
       label={
         type
           ? moment(data).format("MMM, DD HH:MM")
-          : moment(data).format("MMM, DD")
+          : moment(data).format("MMM, DD YYYY")
       }
       style={{
         background: "#dfdfdf",
         color:
-          new Date(data).getDate() < new Date().getDate() &&
-          new Date(data).getMonth() < new Date().getMonth() &&
-          new Date(data).getFullYear() < new Date().getFullYear()
+          new Date(data).getFullYear() < new Date().getFullYear() ||
+          new Date(data).getMonth() < new Date().getMonth() ||
+          new Date(data).getDate() < new Date().getDate()
             ? "#dc3545"
             : new Date(data).getDate() === new Date().getDate() &&
               new Date(data).getMonth() === new Date().getMonth() &&
@@ -104,6 +106,14 @@ const Reminder = () => {
 
   return (
     <>
+      {selectedActivity && (
+        <ActivityModelHandler
+          activityId={selectedActivity.id}
+          setActivityData={setSelectedActivity}
+          activityType={selectedActivity.type}
+          fetchBoard={() => {}}
+        />
+      )}
       <Layout>
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={[{ title: "Reminder" }]} />
@@ -124,9 +134,17 @@ const Reminder = () => {
                         mb={1}
                         bgcolor="#f5f5f5"
                         borderRadius={2}
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          setSelectedActivity({ id: event._id, type: "event" })
+                        }
                       >
                         <Box display="flex" justifyContent="space-between">
-                          <Typography variant="body1" className="text-truncate">
+                          <Typography
+                            variant="body1"
+                            style={{ fontWeight: 500 }}
+                            className="text-truncate"
+                          >
                             {event.name}
                           </Typography>
                           {dynamicChip(event?.startDate, "event")}
@@ -166,9 +184,17 @@ const Reminder = () => {
                         mb={1}
                         bgcolor="#f5f5f5"
                         borderRadius={2}
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          setSelectedActivity({ id: task._id, type: "task" })
+                        }
                       >
                         <Box display="flex" justifyContent="space-between">
-                          <Typography variant="body1" className="text-truncate">
+                          <Typography
+                            variant="body1"
+                            style={{ fontWeight: 500 }}
+                            className="text-truncate"
+                          >
                             {task.name}
                           </Typography>
                           {dynamicChip(task?.dueDate)}
@@ -211,9 +237,17 @@ const Reminder = () => {
                         mb={1}
                         bgcolor="#f5f5f5"
                         borderRadius={2}
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          setSelectedActivity({ id: cas._id, type: "case" })
+                        }
                       >
                         <Box display="flex" justifyContent="space-between">
-                          <Typography variant="body1" className="text-truncate">
+                          <Typography
+                            variant="body1"
+                            style={{ fontWeight: 500 }}
+                            className="text-truncate"
+                          >
                             {cas.name}
                           </Typography>
 
@@ -239,7 +273,7 @@ const Reminder = () => {
                       <Typography>
                         {loadingCases
                           ? "Loading..."
-                          : !events.length
+                          : !cases.length
                           ? "No Cases"
                           : null}
                       </Typography>

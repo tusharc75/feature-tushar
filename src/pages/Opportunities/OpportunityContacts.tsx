@@ -159,10 +159,10 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
             <ContactDetails contacts={contacts} contactApi={contactApi} />
         </AccordionDetails>
         {
-            contacts && contacts.length > 2 ? <>
+            contacts && contacts.length > maxRecordsToShow ? <>
                 <Box margin={1} className="btn-view gap-1" p={1} display="flex" justifyContent="center"
                     alignItems="center"
-                    onClick={() => setMaxRecordsToShow(contacts.length)}>
+                    onClick={() => setMaxRecordsToShow(prevState => prevState + (recordsPerLine * 2))}>
                     <FaArrowAltCircleDown size={25} />
                 </Box>
             </> : null

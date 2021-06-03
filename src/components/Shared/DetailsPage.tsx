@@ -299,6 +299,11 @@ const Details = (props: DetailProps) => {
           ) : (
             <span className={classes.dataValue}> {value} </span>
           )}
+          {
+            fieldData.type === "mobileNumber" && value !== "-" ? (
+              <CopyToClipboard textToCopy={value} />
+            ) : null
+          }
         </Typography>
       );
     }

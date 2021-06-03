@@ -2,18 +2,18 @@ import React from 'react'
 import {
     GridToolbarContainer,
     GridToolbarExport,
-    GridColumnsToolbarButton,
-    GridDensitySelector,
-    GridFilterToolbarButton
+    GridToolbarColumnsButton,
+    GridToolbarDensitySelector,
+    GridToolbarFilterButton
 } from '@material-ui/data-grid';
 
 export default function DataGridCustomToolbar() {
     return (
         <React.Fragment>
             <GridToolbarContainer>
-                <GridColumnsToolbarButton />
-                <GridFilterToolbarButton />
-                <GridDensitySelector />
+                <GridToolbarColumnsButton />
+                <GridToolbarFilterButton />
+                <GridToolbarDensitySelector />
                 {/* <GridToolbarExport /> */}
             </GridToolbarContainer>
         </React.Fragment>

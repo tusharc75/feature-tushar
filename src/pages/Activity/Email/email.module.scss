@@ -1,6 +1,7 @@
 .emailMessageConatiner {
     width: 100%;
     display: flex;
+
     p {
         max-width: 100%;
         margin-right: 3px;
@@ -10,8 +11,7 @@
     // max-width: 65%;
     display: flex;
     p {
-        max-width: 80%;
-        margin-right: 5px;
+        margin-right: 3px;
     }
 }
 .emailCreatedAt {
@@ -45,7 +45,7 @@
 
     .image {
         width: 100%;
-        height: auto;
+        max-height: 250px;
     }
 
     .overlay {
@@ -71,6 +71,60 @@
 
     .deleteIcon {
         color: var(--white);
+    }
+
+    .fileContainer {
+        position: relative;
+        // width: 80%;
+        padding: 5px 0;
+        p {
+            margin-top: 5px;
+            padding: 6px;
+            border-top: 1px solid lightgrey;
+        }
+    }
+
+    .file {
+        display: block;
+        width: 100%;
+        height: 100px;
+    }
+
+    .fileOverlay {
+        padding: 15px;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        width: 100%;
+        opacity: 0;
+        transition: 0.5s ease;
+        background-color: #eee;
+        font-weight: 600;
+        word-wrap: break-word;
+    }
+
+    .fileContainer:hover .fileOverlay {
+        opacity: 1;
+    }
+
+    .text {
+        // color: white;
+        background-color: darkgrey;
+        border: 1px solid black;
+        padding: 8px;
+        position: absolute;
+        bottom: 20%;
+        right: 20%;
+        -webkit-transform: translate(20%, 20%);
+        -ms-transform: translate(20%, 20%);
+        transform: translate(20%, 20%);
+        text-align: center;
+        a {
+            height: 20px;
+        }
     }
 }
 .emailAttachments {
