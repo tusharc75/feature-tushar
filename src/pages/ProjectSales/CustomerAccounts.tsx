@@ -17,8 +17,7 @@ import {
   MenuItem,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import { ExpandMore } from "@material-ui/icons";
-import MoreVert from "@material-ui/icons/MoreVert";
+import { Delete, ExpandMore, MoreVert } from "@material-ui/icons";
 
 import axiosInstance from "../../axios/axiosInstance";
 import CustomerContacts from "./CustomerContacts";
@@ -31,6 +30,7 @@ import ManageContactDialog from "../Contact/ManageContact";
 import { customerAccount, customerContact } from "../../constants/helpers";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
+import ConfirmationDialogRaw from "../../components/Helpers/ConfirmationDialog";
 
 const Accordion = withStyles({
   root: {
@@ -118,7 +118,12 @@ const CustomerAccounts = (props) => {
   const [showContactCreateDialog, setShowContactCreateDialog] = useState(false);
   const [showAccountCreateDialog, setShowAccountCreateDialog] = useState(false);
   const [dialogType, setDialogType] = useState(null);
+  const [currentAccount, setCurrentAccount] = useState(customerAccounts[0]);
   const [accId, setAccId] = useState(null);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [isRemoving, setRemoving] = useState(false);
+  const [deleteRec, setDeleteRec] = useState(null);
+
   useEffect(() => {
     if (!users.length) return;
 
@@ -131,11 +136,17 @@ const CustomerAccounts = (props) => {
     setCollaborators(collabs);
   }, [users]);
 
+  useEffect(() => {
+    if (customerAccounts.length) {
+      setCurrentAccount(customerAccounts[currentTabIndex]);
+    }
+  }, [currentTabIndex, customerContacts]);
+
   /**
    *  Save opportunity data in project sales
    * @param id
    */
-  const saveOppToProject = async (id) => {
+  const saveOppToProject = (id) => {
     const existingData = opportunities.map((o) => o._id);
 
     const dataObj = {
@@ -143,7 +154,7 @@ const CustomerAccounts = (props) => {
       _id: projectId,
     };
 
-    await axiosInstance()
+    axiosInstance()
       .put(`/project-sales/add-opportunity`, dataObj)
       .then(() => {
         setToastConfig({
@@ -158,7 +169,7 @@ const CustomerAccounts = (props) => {
       });
   };
 
-  const saveCustomerAccountToProject = async (id) => {
+  const saveCustomerAccountToProject = (id) => {
     const existingData = customerAccounts.map((contact) => contact._id);
 
     const dataObj = {
@@ -166,7 +177,7 @@ const CustomerAccounts = (props) => {
       _id: projectId,
     };
 
-    await axiosInstance()
+    axiosInstance()
       .put(`/project-sales/add-customer-account`, dataObj)
       .then(() => {
         setToastConfig({
@@ -181,7 +192,7 @@ const CustomerAccounts = (props) => {
       });
   };
 
-  const saveCustomerContactToProject = async (id) => {
+  const saveCustomerContactToProject = (id) => {
     const existingData = customerContacts.map((contact) => contact._id);
 
     const dataObj = {
@@ -189,7 +200,7 @@ const CustomerAccounts = (props) => {
       _id: projectId,
     };
 
-    await axiosInstance()
+    axiosInstance()
       .put(`/project-sales/add-customer-contact`, dataObj)
       .then(() => {
         setToastConfig({
@@ -201,6 +212,43 @@ const CustomerAccounts = (props) => {
       })
       .catch((error) => {
         setToastConfig(error);
+      });
+  };
+
+  const handleRemoveAccount = () => {
+    setShowConfirmBox(true);
+    setDeleteRec(currentAccount._id);
+  };
+
+  const removeAccount = () => {
+    if (!currentAccount) return;
+
+    const id = currentAccount._id;
+
+    const newAccountData = customerAccounts
+      ?.filter((ca) => ca._id !== id)
+      .map((contact) => contact._id);
+
+    setRemoving(true);
+    axiosInstance()
+      .put(`/project-sales/add-customer-account`, {
+        customerAccount: newAccountData,
+        _id: projectId,
+      })
+      .then(() => {
+        setToastConfig({
+          message: `Customer Contact added successfully`,
+          type: "success",
+          open: true,
+        });
+        setRemoving(false);
+        setShowConfirmBox(false);
+        fetchProjectData();
+      })
+      .catch((error) => {
+        setToastConfig(error);
+        setRemoving(false);
+        setShowConfirmBox(false);
       });
   };
 
@@ -216,7 +264,7 @@ const CustomerAccounts = (props) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setDialogType(type);
-    renderMenu(accId)
+    renderMenu(accId);
   };
 
   const renderMenu = (id: string = "") => {
@@ -328,17 +376,34 @@ const CustomerAccounts = (props) => {
             <Box component="span" mx={1} />
             <Typography variant="subtitle1">Customer Accounts</Typography>
             {(permissions.isUpdate && isTeamMember) || isManager ? (
-              <IconButton
-                aria-haspopup="true"
-                color="primary"
-                size="small"
-                className={classes.addBtn}
-                onClick={(e) => {
-                  handleClick(e, "customer-account");
-                }}
-              >
-                <MoreVert />
-              </IconButton>
+              <>
+                <IconButton
+                  aria-haspopup="true"
+                  color="primary"
+                  size="small"
+                  className={classes.addBtn}
+                  onClick={(e) => {
+                    handleClick(e, "customer-account");
+                  }}
+                >
+                  <MoreVert />
+                </IconButton>
+
+                {customerAccounts.length > 0 && (
+                  <IconButton
+                    title="Remove Account"
+                    aria-haspopup="true"
+                    color="primary"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveAccount();
+                    }}
+                  >
+                    <Delete color="error" />
+                  </IconButton>
+                )}
+              </>
             ) : null}
           </AccordionSummary>
           <AccordionDetails>
@@ -417,21 +482,28 @@ const CustomerAccounts = (props) => {
                          */}
 
                         <Grid item xs={12} sm={12} md={4} lg={4}>
-                          <Paper style={{ overflow: "hidden" }}>
+                          <Paper style={{ overflow: "hidden", marginTop: 15 }}>
                             <Box style={{ padding: "0px", maxHeight: "450px" }}>
                               <Box
                                 width="100%"
                                 padding={1}
-                                bgcolor="grey.200"
+                                bgcolor="grey.100"
                                 display="flex"
                                 alignItems="center"
                                 justifyContent="space-between"
+                                boxShadow={2}
                               >
                                 <Typography variant="subtitle2">
-                                  Customer Contacts  ({customerContacts.filter((ca) => ca.accountName === c._id).length})
+                                  Customer Contacts (
+                                  {
+                                    customerContacts.filter(
+                                      (ca) => ca.accountName === c._id
+                                    ).length
+                                  }
+                                  )
                                 </Typography>
                                 {(permissions.isUpdate && isTeamMember) ||
-                                  isManager ? (
+                                isManager ? (
                                   <IconButton
                                     aria-haspopup="true"
                                     color="primary"
@@ -468,21 +540,21 @@ const CustomerAccounts = (props) => {
                                     </BoxWithBorder>
                                   ))
                                 ) : customerContacts.filter(
-                                  (ca) => ca.accountName === c._id
-                                ).length ? (
-                                  <>
-                                    <CustomerContacts
-                                      contacts={customerContacts.filter(
-                                        (ca) => ca.accountName === c._id
-                                      )}
-                                      accountId={c._id}
-                                      accountName={c.accountName}
-                                      contactRoute="customer-contact"
-                                    />
-                                  </>
+                                    (ca) => ca.accountName === c._id
+                                  ).length ? (
+                                  <CustomerContacts
+                                    contacts={customerContacts.filter(
+                                      (ca) => ca.accountName === c._id
+                                    )}
+                                    accountId={c._id}
+                                    accountName={c.accountName}
+                                    contactRoute="customer-contact"
+                                  />
                                 ) : (
-                                  <Box textAlign="center" padding={2}>
-                                    No Contacts
+                                  <Box pb="6px">
+                                    <Typography variant="subtitle1">
+                                      No Contacts
+                                    </Typography>
                                   </Box>
                                 )}
                               </Box>
@@ -500,6 +572,22 @@ const CustomerAccounts = (props) => {
           </AccordionDetails>
         </Accordion>
       </Paper>
+      {showConfirmBox && (
+        <ConfirmationDialogRaw
+          open={showConfirmBox}
+          message={
+            deleteRec
+              ? "Are you sure about removing this account from project?"
+              : null
+          }
+          onClose={() => {
+            setShowConfirmBox(false);
+            setDeleteRec(null);
+          }}
+          onOk={deleteRec ? removeAccount : null}
+          okBtnLoading={isRemoving}
+        />
+      )}
     </>
   );
 };

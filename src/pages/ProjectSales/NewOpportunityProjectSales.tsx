@@ -11,7 +11,7 @@ import {
   initializeDropdownById,
   opportunity,
   simplifyValues,
-  setFieldsInAscendingOrder
+  setFieldsInAscendingOrder,
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -130,6 +130,7 @@ export default function NewOpportunityProjectSales({
   return (
     <Dialog
       maxWidth="md"
+      fullWidth
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
@@ -149,7 +150,7 @@ export default function NewOpportunityProjectSales({
           initialValues={opportunityData.initialValues}
           validationSchema={yupSchema(opportunityData.fields)}
           validateOnMount
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({
             values,
