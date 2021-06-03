@@ -79,7 +79,6 @@ export default function BrandConfiguration(props) {
             });
     }
 
-    const editableFields = brandFields.filter(o => o?.fieldData?.fieldName !== "servicesAccess")
     return <>
         {
             openUpdateDialog && (
@@ -88,7 +87,7 @@ export default function BrandConfiguration(props) {
                     openDialog={openUpdateDialog}
                     onClose={closeUpdateDIalog}
                     data={brandDetails}
-                    fields={editableFields}
+                    fields={brandFields.filter(o => o?.fieldData?.fieldName !== "servicesAccess")}
                     isUpdating={isUpdating}
                     handleUpdate={handleUpdate}
                 />
