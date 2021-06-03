@@ -7,12 +7,14 @@ import {
   ListItemText,
   ListItem,
   ListItemAvatar,
+  IconButton,
 } from "@material-ui/core";
 
 import { Link, useHistory } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 import { BsPerson } from "react-icons/bs";
 import { BiFace } from "react-icons/bi";
+import { Delete } from "@material-ui/icons";
 
 function DisplayData({ key, label, value, icon }) {
   return (
@@ -27,7 +29,13 @@ function DisplayData({ key, label, value, icon }) {
   );
 }
 
-function RelatedContacts({ contacts, accountId, accountName, contactRoute }) {
+function RelatedContacts({
+  contacts,
+  accountId,
+  accountName,
+  contactRoute,
+  handleRemoveContact,
+}) {
   const history = useHistory();
 
   return (
@@ -44,13 +52,26 @@ function RelatedContacts({ contacts, accountId, accountName, contactRoute }) {
                   >
                     <CardContent className="detailListing">
                       <Grid container className="detailCardHeader">
-                        <Grid item xs={12} sm={12}>
+                        <Grid item xs={11}>
                           <Link
                             className="account_name_link f_size"
                             to={`/${contactRoute}/detail/${obj._id}`}
                           >
                             {`${obj.firstName || ""}  ${obj.lastName || ""}`}
                           </Link>
+                        </Grid>
+                        <Grid item xs={1}>
+                          <IconButton
+                            title={`Remove contact: ${obj?.firstName} ${obj?.lastName}`}
+                            aria-haspopup="true"
+                            color="primary"
+                            size="small"
+                            onClick={() => {
+                              handleRemoveContact(obj);
+                            }}
+                          >
+                            <Delete color="error" />
+                          </IconButton>
                         </Grid>
                       </Grid>
                       <Grid container>
