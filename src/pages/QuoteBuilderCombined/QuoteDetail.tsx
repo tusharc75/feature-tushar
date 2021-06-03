@@ -33,9 +33,9 @@ import ManageTermsAndCondition from '../TermsAndConditions/ManageTermsAndConditi
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import {
-    EditorState,
-    convertToRaw,
-    convertFromRaw
+  EditorState,
+  convertToRaw,
+  convertFromRaw
 } from 'draft-js';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -66,30 +66,28 @@ import { isNonNullChain } from "typescript";
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
-      margin: theme.spacing(1),
-      minWidth: 120,
-      maxWidth: 300,
-    },
-    chips: {
-      display: 'flex',
-      flexWrap: 'wrap',
-    },
-    chip: {
-      margin: 2,
-    },
-    noLabel: {
-      marginTop: theme.spacing(3),
-    },
+    margin: theme.spacing(1),
+  },
+  chips: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  chip: {
+    margin: 2,
+  },
+  noLabel: {
+    marginTop: theme.spacing(3),
+  },
 }));
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
-PaperProps: {
-  style: {
-    maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-    width: 250,
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
   },
-},
 };
 
 const recordsPerLine = 3;
@@ -97,8 +95,8 @@ const recordsPerLine = 3;
 
 function QuoteDetail() {
 
-  const DOASteps=["New","Price Builder","Quote Builder","DOA Process","Customer Process","End"]
-  const OtherSteps=["New","Price Builder","Quote Builder","Customer Process","End"]
+  const DOASteps = ["New", "Price Builder", "Quote Builder", "DOA Process", "Customer Process", "End"]
+  const OtherSteps = ["New", "Price Builder", "Quote Builder", "Customer Process", "End"]
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -119,9 +117,9 @@ function QuoteDetail() {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0)
-  const [versions,setVersions]=useState([])
-  const [productBuilderID,setProductBuilderID]=useState("");
-  
+  const [versions, setVersions] = useState([])
+  const [productBuilderID, setProductBuilderID] = useState("");
+
 
   const [supplierContacts, setSupplierContacts] = useState([])
   const [customerContacts, setCustomerContacts] = useState([])
@@ -129,7 +127,7 @@ function QuoteDetail() {
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false)
 
   const [isProcessing, setIsProcessing] = useState(false)
-  const [currentVersion,setcurrentVersion]=useState(0);
+  const [currentVersion, setcurrentVersion] = useState(0);
 
   const [messageDialog, setMessageDialog] = useState({ open: false, message: null })
   const [expanded, setExpanded] = useState({
@@ -140,50 +138,50 @@ function QuoteDetail() {
   const [loadingSupplierAccounts, setLoadingSupplierAccounts] = useState(false);
   const [contactsEmailsData, setContactsEmailsData] = useState([])
   const [notToBeRemovedContacts, setNotToBeRemovedContacts] = useState([])
-  const [PBversionStatus,setPBversionStatus]=useState("")
-  const [loadPB,setLoadPB]=useState(false);
+  const [PBversionStatus, setPBversionStatus] = useState("")
+  const [loadPB, setLoadPB] = useState(false);
 
-  const[Editable,setEditable]=useState(true);
+  const [Editable, setEditable] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [query, setQuery] = useState({ page: 0, limit: 5 });
   const [dataRows, setDataRows] = useState([]);
   const [RadioIndex, setRadioIndex] = useState(-1);
   const [TandC, setTNC] = useState("");
   const [searchVal, setSearchVal] = useState("");
-  const [totalProfit,setTotalProfit]=useState("");
-  const [totalcost,setTotalCost]=useState("");
-  const [totalsale,setTotalSale]=useState("");
-  const [totalmargin,setTotalMargin]=useState("");
+  const [totalProfit, setTotalProfit] = useState("");
+  const [totalcost, setTotalCost] = useState("");
+  const [totalsale, setTotalSale] = useState("");
+  const [totalmargin, setTotalMargin] = useState("");
   const [dynamicTableData, setDynamicTableData] = useState([])
   const [ColumnName, setColName] = useState([]);
-  const [visibleColumns,setVisibleColumnName]=useState([]);
-  const [versionStatus,setversionStatus]=useState("Building Quote");
-    
+  const [visibleColumns, setVisibleColumnName] = useState([]);
+  const [versionStatus, setversionStatus] = useState("Building Quote");
+
   const [data, setData] = useState([]);
-   
+
   const [rowCount, setRowCount] = useState(0);
   const [checkAllAccounts, setCheckAllAccounts] = useState(false);
   const [editRecord, setEditRecord] = useState<any>({})
-  const [DOAreq,setDOAreq]=useState(false);
-  const [Customerreq,setCustomerreq]=useState(true);
+  const [DOAreq, setDOAreq] = useState(false);
+  const [Customerreq, setCustomerreq] = useState(true);
   const [sendEmail, setSendEmail] = useState(false)
-  const[buttonMessage,setButtonMessage]=useState("Send to Customer");
-  const[columnView,setColumnView]=useState([])
-  const[PDF,setPdf]=useState("");
+  const [buttonMessage, setButtonMessage] = useState("Send to Customer");
+  const [columnView, setColumnView] = useState([])
+  const [PDF, setPdf] = useState("");
   const theme = useTheme();
-  const [nextStep,setNextStep]=useState(true);
+  const [nextStep, setNextStep] = useState(true);
 
-  
+
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
-  const [ProcessStatus,setProcessStatus]=useState("New");
-  let logo=null;
-  var companyName="";
-  var companyAddress="";
+  const [ProcessStatus, setProcessStatus] = useState("New");
+  let logo = null;
+  var companyName = "";
+  var companyAddress = "";
   let DOAlimit = 0;
   var DOAsetup = false;
   let termsTimeout;
-  
+
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -203,9 +201,9 @@ function QuoteDetail() {
   });
   const { qbResource, qbApi } = quoteBuilder;
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchDoaLimit()
-  },[])
+  }, [])
 
   useEffect(() => {
     if (permissions) {
@@ -222,290 +220,290 @@ function QuoteDetail() {
 
   useEffect(() => {
     fetchTermsAndConditions()
-}, [query, searchVal,currentVersion])
+  }, [query, searchVal, currentVersion])
 
-useEffect(() => {
+  useEffect(() => {
     console.log("TNC is:");
     console.log("TandC");
     console.log(data);
     let rows = data?.map((u) => ({
-        ...u,
-        isChecked: u._id === TandC ? true : false,
-        id: u._id,
+      ...u,
+      isChecked: u._id === TandC ? true : false,
+      id: u._id,
     }));
     setDataRows([...rows]);
-    for(var i=0;i<rows.length;i++){
-        if(rows[i].isChecked){
-            setRadioIndex(i);
-            break;
-        }
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].isChecked) {
+        setRadioIndex(i);
+        break;
+      }
     }
-}, [data,currentVersion])
+  }, [data, currentVersion])
 
-const fetchTermsAndConditions = () => {
-  if (termsTimeout) {
+  const fetchTermsAndConditions = () => {
+    if (termsTimeout) {
       clearTimeout(termsTimeout);
-  }termsTimeout = setTimeout(() => {
-    setLoading(true);
-    let searchParams = searchVal
+    } termsTimeout = setTimeout(() => {
+      setLoading(true);
+      let searchParams = searchVal
         ? { ...query, search: searchVal }
         : { ...query };
-    let api = getSearchQuery(termsAndCondition.api, searchParams);
-    setLoading(true);
-    axiosInstance()
+      let api = getSearchQuery(termsAndCondition.api, searchParams);
+      setLoading(true);
+      axiosInstance()
         .get(api)
         .then(({ data }) => {
-            setData(data.data);
-            setRowCount(data.count);
-            setCheckAllAccounts(false);
-            setLoading(false);
+          setData(data.data);
+          setRowCount(data.count);
+          setCheckAllAccounts(false);
+          setLoading(false);
         })
         .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setLoading(false);
+          toastConfig.setToastConfig(err);
+          setLoading(false);
         });
-}, 600);
-}
-
-const refreshProducts = (data) => {
-  console.log("Refresh Product Data");
-  fetchDoaLimit();
-  console.log(data)
-
-  if(ProcessStatus==="New" && data.length<1){
-    setNextStep(false);
+    }, 600);
   }
-  productBuilderdatatoQuoteBuilderdata(data);
-  
-  
-}
-  
+
+  const refreshProducts = (data) => {
+    console.log("Refresh Product Data");
+    fetchDoaLimit();
+    console.log(data)
+
+    if (ProcessStatus === "New" && data.length < 1) {
+      setNextStep(false);
+    }
+    productBuilderdatatoQuoteBuilderdata(data);
+
+
+  }
+
   const onFilterChange = useCallback((params) => {
     if (params.filterModel.items[0].value) {
-        setQuery((prevState) => ({
-            ...prevState,
-            [params.filterModel.items[0].columnField]:
-                params.filterModel.items[0].value,
-        }));
+      setQuery((prevState) => ({
+        ...prevState,
+        [params.filterModel.items[0].columnField]:
+          params.filterModel.items[0].value,
+      }));
     } else {
-        setQuery({ page: 0, limit: 25 });
+      setQuery({ page: 0, limit: 25 });
     }
-}, []);
+  }, []);
 
 
-const createImagePDF=(view, send)=>{ 
-  axiosInstance()
-  .get('/user/brandInfo')
-  .then(({ data }) => {
-      companyName=data.data.name;
-      companyAddress=data.data.address
-      if(data.data.logo){
-          fetchImage(data.data.logo,function(dataUri) {
-              logo = dataUri;
-              GeneratePdf(view,send)
+  const createImagePDF = (view, send) => {
+    axiosInstance()
+      .get('/user/brandInfo')
+      .then(({ data }) => {
+        companyName = data.data.name;
+        companyAddress = data.data.address
+        if (data.data.logo) {
+          fetchImage(data.data.logo, function (dataUri) {
+            logo = dataUri;
+            GeneratePdf(view, send)
           });
-      }
-      else{
-          GeneratePdf(view,send)
-      }
-      
-  })
-  .catch((err) => {
-      toastConfig.setToastConfig(err);
-      setLoading(false);
-  });
-  
-}
+        }
+        else {
+          GeneratePdf(view, send)
+        }
 
-const fetchImage=(Url,cb)=> {
-  var image = new Image();
-  image.setAttribute('crossOrigin', 'anonymous'); //getting images from external domain
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setLoading(false);
+      });
 
-  image.onload = function () {
+  }
+
+  const fetchImage = (Url, cb) => {
+    var image = new Image();
+    image.setAttribute('crossOrigin', 'anonymous'); //getting images from external domain
+
+    image.onload = function () {
       var canvas = document.createElement('canvas');
       canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight; 
+      canvas.height = image.naturalHeight;
       console.log(image.naturalWidth);
       //next three lines for white background in case png has a transparent background
       var ctx = canvas.getContext('2d');
       ctx.fillStyle = '#fff';  /// set white fill style
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      canvas.getContext('2d').drawImage(image,0,0);
+      canvas.getContext('2d').drawImage(image, 0, 0);
 
       cb(canvas.toDataURL('image/jpeg'));
-  };
+    };
 
-  image.src = Url;
-}
-
-const GeneratePdf = (view, send) => {
-  const PdfDoc = new jsPDF('p', 'pt', 'a4');
-
-  const pagewidth= PdfDoc.internal.pageSize.width;
-  if(logo!==null){
-  PdfDoc.addImage(logo, 'JPEG', pagewidth-80, 0, 70, 50);
+    image.src = Url;
   }
-  PdfDoc.setFontSize(26);
-  PdfDoc.text(companyName,20,30);
-  PdfDoc.setFontSize(14);
-  PdfDoc.text(companyAddress,20,45);
-  var PDFData = [];
-  var PdfCol = [];
-  dynamicTableData.forEach(dataEntry => {
+
+  const GeneratePdf = (view, send) => {
+    const PdfDoc = new jsPDF('p', 'pt', 'a4');
+
+    const pagewidth = PdfDoc.internal.pageSize.width;
+    if (logo !== null) {
+      PdfDoc.addImage(logo, 'JPEG', pagewidth - 80, 0, 70, 50);
+    }
+    PdfDoc.setFontSize(26);
+    PdfDoc.text(companyName, 20, 30);
+    PdfDoc.setFontSize(14);
+    PdfDoc.text(companyAddress, 20, 45);
+    var PDFData = [];
+    var PdfCol = [];
+    dynamicTableData.forEach(dataEntry => {
       var PdfRow = [];
       ColumnName.forEach(ColName => {
-          if (visibleColumns.indexOf(ColName) !== -1 ) {
-              if (PdfCol.indexOf(ColName) == -1) {
-                  PdfCol.push(ColName);
-              }
-              PdfRow.push(dataEntry[ColName]);
+        if (visibleColumns.indexOf(ColName) !== -1) {
+          if (PdfCol.indexOf(ColName) == -1) {
+            PdfCol.push(ColName);
           }
+          PdfRow.push(dataEntry[ColName]);
+        }
       })
       PDFData.push(PdfRow);
-  });
-  PdfDoc.setFontSize(14);
-  var text = "Please find the Quoatation Below:"
-  var lineHeight = PdfDoc.getLineHeight();
-  var splittedText = PdfDoc.splitTextToSize(text, 50)
-  PdfDoc.text(text, 20, 90);
-  var lines = splittedText.length
-  var blockHeight = (lines) * lineHeight;
-  PDFData = [...PDFData, [{
+    });
+    PdfDoc.setFontSize(14);
+    var text = "Please find the Quoatation Below:"
+    var lineHeight = PdfDoc.getLineHeight();
+    var splittedText = PdfDoc.splitTextToSize(text, 50)
+    PdfDoc.text(text, 20, 90);
+    var lines = splittedText.length
+    var blockHeight = (lines) * lineHeight;
+    PDFData = [...PDFData, [{
       content: `Quote Total : ${totalsale}`, colSpan: PDFData[0].length,
       styles: { halign: 'right', valign: 'middle' }
-  }]];
-  autoTable(PdfDoc, {
+    }]];
+    autoTable(PdfDoc, {
       margin: { top: 20 + blockHeight },
       head: [PdfCol],
       body: PDFData,
       styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
       theme: 'grid'
-  });
-  let finalY = (PdfDoc as any).lastAutoTable.finalY;
-  if (RadioIndex !== -1) {
+    });
+    let finalY = (PdfDoc as any).lastAutoTable.finalY;
+    if (RadioIndex !== -1) {
       let state = convertFromRaw(JSON.parse(dataRows[RadioIndex].description));
       let TNC = EditorState.createWithContent(state)
       var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
       markup = markup.replaceAll(" ", "&nbsp");
       PdfDoc.html(markup, {
-          callback: function (doc) {
-              if (view && !send) {
-                  doc.output('dataurlnewwindow');
-              }
-              else if (!view && !send) {
-                  doc.save();
-              }
-              if (send) {
-                  var PDFtoAPIData = doc.output('blob');
-                  console.log("PDF Data is");
-                  console.log(PDFtoAPIData);
-                  const formdata = new FormData();
-                  formdata.append("file", PDFtoAPIData, "Quotation.pdf");
-                  axiosInstance().post('/user/upload/', formdata, {
-                      headers: {
-                          "content-type": "multipart/form-data"
-                      }
-                  })
-                      .then(({ data }) => {
-                          console.log("PDF Response is:");
-                          console.log(data);
-                          axiosInstance().post(`/doa-request/create/`)
-                              .then(({ data }) => {
-                              })
-                              .catch((err) => {
-                                  toastConfig.setToastConfig(err);
-                              });
-                      })
-                      .catch((err) => {
-                          toastConfig.setToastConfig(err);
-                      });
-
-
-              }
-
-          }, x: 20, y: finalY + lineHeight, margin: [20, 10, 20, 10]
-      });
-  }
-  else {
-      if (view && !send) {
-          PdfDoc.output('dataurlnewwindow');
-      }
-      else if (!view && !send) {
-          PdfDoc.save('Quation.pdf');
-      }
-      if (send) {
-          var PDFtoAPIData = PdfDoc.output('blob');
-          console.log("PDF Data is");
-          console.log(PDFtoAPIData);
-          const formdata = new FormData();
-          formdata.append("file", PDFtoAPIData, "Quotation.pdf");
-          axiosInstance().post('/user/upload/', formdata, {
+        callback: function (doc) {
+          if (view && !send) {
+            doc.output('dataurlnewwindow');
+          }
+          else if (!view && !send) {
+            doc.save();
+          }
+          if (send) {
+            var PDFtoAPIData = doc.output('blob');
+            console.log("PDF Data is");
+            console.log(PDFtoAPIData);
+            const formdata = new FormData();
+            formdata.append("file", PDFtoAPIData, "Quotation.pdf");
+            axiosInstance().post('/user/upload/', formdata, {
               headers: {
-                  "content-type": "multipart/form-data"
+                "content-type": "multipart/form-data"
               }
-          })
+            })
               .then(({ data }) => {
-                  console.log("PDF Response is:");
-                  console.log(data);
-                  if(DOAreq){
-                      handleVersionUpdate(data.fileName,visibleColumns,"Sent for DOA",TandC);
-                  }
-                  else{
-                      handleVersionUpdate(data.fileName,visibleColumns,versionStatus,TandC);
-                  }
-                  
+                console.log("PDF Response is:");
+                console.log(data);
+                axiosInstance().post(`/doa-request/create/`)
+                  .then(({ data }) => {
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                  });
               })
               .catch((err) => {
-                  toastConfig.setToastConfig(err);
+                toastConfig.setToastConfig(err);
               });
 
 
+          }
+
+        }, x: 20, y: finalY + lineHeight, margin: [20, 10, 20, 10]
+      });
+    }
+    else {
+      if (view && !send) {
+        PdfDoc.output('dataurlnewwindow');
       }
-  }
-};
+      else if (!view && !send) {
+        PdfDoc.save('Quation.pdf');
+      }
+      if (send) {
+        var PDFtoAPIData = PdfDoc.output('blob');
+        console.log("PDF Data is");
+        console.log(PDFtoAPIData);
+        const formdata = new FormData();
+        formdata.append("file", PDFtoAPIData, "Quotation.pdf");
+        axiosInstance().post('/user/upload/', formdata, {
+          headers: {
+            "content-type": "multipart/form-data"
+          }
+        })
+          .then(({ data }) => {
+            console.log("PDF Response is:");
+            console.log(data);
+            if (DOAreq) {
+              handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
+            }
+            else {
+              handleVersionUpdate(data.fileName, visibleColumns, versionStatus, TandC);
+            }
 
-const handlePage = (params) => {
-  if (query.page !== params.page) {
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+
+
+      }
+    }
+  };
+
+  const handlePage = (params) => {
+    if (query.page !== params.page) {
       setQuery((prevState) => ({ ...prevState, page: params.page }));
-  }
-};
+    }
+  };
 
 
 
-const handlePageSize = (params) => {
-  if (params.pageSize !== query.limit) {
+  const handlePageSize = (params) => {
+    if (params.pageSize !== query.limit) {
       setQuery({ page: 0, limit: params.pageSize });
+    }
+  };
+
+  const handleCloseCreateDialog = (params) => {
+    setShowCreateDialog(false)
+    setEditRecord({})
+    if (params?.fetchData) fetchTermsAndConditions()
   }
-};
-
-const handleCloseCreateDialog = (params) => {
-  setShowCreateDialog(false)
-  setEditRecord({})
-  if (params?.fetchData) fetchTermsAndConditions()
-}
-
-
-  
 
 
 
-const fetchDoaLimit = () => {
-  axiosInstance()
+
+
+
+  const fetchDoaLimit = () => {
+    axiosInstance()
       .get('doa-request/limit')
       .then(({ data }) => {
-          console.log("DOA limit is:");
-          console.log(data);
-          DOAsetup = data.data.doasetup;
-          DOAlimit = data.data.limit;
-         
+        console.log("DOA limit is:");
+        console.log(data);
+        DOAsetup = data.data.doasetup;
+        DOAlimit = data.data.limit;
+
       })
       .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setLoading(false);
+        toastConfig.setToastConfig(err);
+        setLoading(false);
       });
 
-}
+  }
 
 
   useEffect(() => {
@@ -541,54 +539,54 @@ const fetchDoaLimit = () => {
           console.log(data);
           handleMainPoints(data);
           setHeadingLbl(data.quoteName);
-          var keys=Object.keys(data.versions);
+          var keys = Object.keys(data.versions);
           setVersions(keys);
-          if(version===0){
-            setcurrentVersion(parseInt(keys[keys.length-1]));
-            setPBversionStatus(data.versions[keys[keys.length-1]]["status"]);
-           
-            console.log(data.versions[keys[keys.length-1]]["status"])
-            setProcessStatus(data.versions[keys[keys.length-1]]["processStatus"]);
-            setProductBuilderID(data.versions[keys[keys.length-1]]["productBuilderId"]);
-            setversionStatus(data.versions[keys[keys.length-1]]["status"])
-            if(data.versions[keys[keys.length-1]]["TNC"]){
-              setTNC(data.versions[keys[keys.length-1]]["TNC"])
+          if (version === 0) {
+            setcurrentVersion(parseInt(keys[keys.length - 1]));
+            setPBversionStatus(data.versions[keys[keys.length - 1]]["status"]);
+
+            console.log(data.versions[keys[keys.length - 1]]["status"])
+            setProcessStatus(data.versions[keys[keys.length - 1]]["processStatus"]);
+            setProductBuilderID(data.versions[keys[keys.length - 1]]["productBuilderId"]);
+            setversionStatus(data.versions[keys[keys.length - 1]]["status"])
+            if (data.versions[keys[keys.length - 1]]["TNC"]) {
+              setTNC(data.versions[keys[keys.length - 1]]["TNC"])
             }
-            if(data.versions[keys[keys.length-1]]["acceptedColumns"]){
-              setColumnView(data.versions[keys[keys.length-1]]["acceptedColumns"]);
+            if (data.versions[keys[keys.length - 1]]["acceptedColumns"]) {
+              setColumnView(data.versions[keys[keys.length - 1]]["acceptedColumns"]);
             }
-              
-            if(data.versions[keys[keys.length-1]]["status"]==="Building Quote"){
-              console.log(data.versions[keys[keys.length-1]]["status"])
+
+            if (data.versions[keys[keys.length - 1]]["status"] === "Building Quote") {
+              console.log(data.versions[keys[keys.length - 1]]["status"])
               console.log("Editable True")
               setEditable(true);
             }
-            else{
+            else {
               setEditable(false);
             }
           }
-          else{
+          else {
             setcurrentVersion(version);
             setPBversionStatus(data.versions[version]["status"]);
-            setProcessStatus(data.versions[keys[keys.length-1]]["processStatus"]);
+            setProcessStatus(data.versions[keys[keys.length - 1]]["processStatus"]);
             setProductBuilderID(data.versions[version]["productBuilderId"]);
             setversionStatus(data.versions[version]["status"])
-            if(data.versions[version]["TNC"]){
+            if (data.versions[version]["TNC"]) {
               setTNC(data.versions[version]["TNC"])
             }
-            if(data.versions[version]["acceptedColumns"]){
+            if (data.versions[version]["acceptedColumns"]) {
               setColumnView(data.versions[version]["acceptedColumns"]);
             }
-            if(data.versions[version]["status"]==="Building Quote"){
+            if (data.versions[version]["status"] === "Building Quote") {
               setEditable(true);
             }
-            else{
+            else {
               setEditable(false);
             }
           }
-          
-          
-          
+
+
+
           setAllowedToEdit([...data.collaborator ?? [], data.owner].some(
             (d) => d?.optionValue === user?.user?._id
           ))
@@ -630,10 +628,10 @@ const fetchDoaLimit = () => {
 
           getquoteFields();
           setCustomizedRoutes([
-            {title:"Quote Builder", path:"/quote-builder"},
+            { title: "Quote Builder", path: "/quote-builder" },
             { title: `${data.quoteName}` },
           ]);
-          
+
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -698,59 +696,59 @@ const fetchDoaLimit = () => {
 
   const columnsTNC = [
     {
-        field: "isChecked",
-        headerName: "Select",
-        renderCell: (params) => (
-            <Radio
-                color="primary"
-                // disabled={!params.canDelete}
-                checked={params.value}
-                onClick={(ev) => {
-                        const gridData = dataRows;
-                        const indexOfRecord = gridData.findIndex(
-                            (d) => d.id === params.row.id
-                        );
-                        var prevvalue = gridData[indexOfRecord].isChecked;
-                        for (var i = 0; i < gridData.length; i++) {
-                            gridData[i].isChecked = false;
-                        }
-                        if (prevvalue) {
-                            gridData[indexOfRecord].isChecked = false;
-                            setRadioIndex(-1);
-                        }
-                        else {
-                            gridData[indexOfRecord].isChecked = true;
-                            setRadioIndex(indexOfRecord);
-                        }
+      field: "isChecked",
+      headerName: "Select",
+      renderCell: (params) => (
+        <Radio
+          color="primary"
+          // disabled={!params.canDelete}
+          checked={params.value}
+          onClick={(ev) => {
+            const gridData = dataRows;
+            const indexOfRecord = gridData.findIndex(
+              (d) => d.id === params.row.id
+            );
+            var prevvalue = gridData[indexOfRecord].isChecked;
+            for (var i = 0; i < gridData.length; i++) {
+              gridData[i].isChecked = false;
+            }
+            if (prevvalue) {
+              gridData[indexOfRecord].isChecked = false;
+              setRadioIndex(-1);
+            }
+            else {
+              gridData[indexOfRecord].isChecked = true;
+              setRadioIndex(indexOfRecord);
+            }
 
-                        setDataRows([...gridData]);
-                        setTNC(gridData[indexOfRecord]._id);
-                        handleVersionUpdate(PDF,visibleColumns,versionStatus,gridData[indexOfRecord]._id);
-                        console.log(gridData[indexOfRecord]._id);
-                        const checkedRecords = gridData.filter((d) => d.isChecked === true);
-                }}
-            />
-        ),
-        disableColumnMenu: true,
-        sortable: false,
-        filterable: false,
-        width: 75
+            setDataRows([...gridData]);
+            setTNC(gridData[indexOfRecord]._id);
+            handleVersionUpdate(PDF, visibleColumns, versionStatus, gridData[indexOfRecord]._id);
+            console.log(gridData[indexOfRecord]._id);
+            const checkedRecords = gridData.filter((d) => d.isChecked === true);
+          }}
+        />
+      ),
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      width: 75
     },
     {
-        field: "TACName", headerName: "Name", width: 500,
-        renderCell: (params) => (
-            <Link
-                onClick={() => {
-                    setShowCreateDialog(true);
-                }}>
-                <CustomRenderCell value={params?.value} />
-            </Link>
-        )
+      field: "TACName", headerName: "Name", width: 500,
+      renderCell: (params) => (
+        <Link
+          onClick={() => {
+            setShowCreateDialog(true);
+          }}>
+          <CustomRenderCell value={params?.value} />
+        </Link>
+      )
     },
 
-];
+  ];
 
-  
+
   const fetchCustomerContactData = (showDialog) => {
     const filterById = JSON.stringify([{ "field": "accountName", "term": quoteData?.customerAccountName?.optionValue }])
 
@@ -839,20 +837,20 @@ const fetchDoaLimit = () => {
   };
 
 
-  
+
   const handleSortModelChange = (params) => {
     if (params?.sortModel && params.sortModel.length > 0) {
-        let temp = { ...params.sortModel[0] };
-        setQuery((prevState) => ({
-            ...prevState,
-            page: 0,
-            sortBy: temp.field,
-            orderBy: temp.sort,
-        }));
+      let temp = { ...params.sortModel[0] };
+      setQuery((prevState) => ({
+        ...prevState,
+        page: 0,
+        sortBy: temp.field,
+        orderBy: temp.sort,
+      }));
     }
-};
+  };
 
-  const handleChangeVersion=(event)=>{
+  const handleChangeVersion = (event) => {
     setLoadPB(false)
     setcurrentVersion(event.target.value);
     setProductBuilderID(quoteData["versions"][event.target.value]["productBuilderId"]);
@@ -882,90 +880,89 @@ const fetchDoaLimit = () => {
   // ];
 
 
-  const handleClone=()=>{
+  const handleClone = () => {
     axiosInstance()
-    .post(`${qbApi}/clone/${quoteData._id}`)
-    .then(({ data }) => {
+      .post(`${qbApi}/clone/${quoteData._id}`)
+      .then(({ data }) => {
         history.push(`${qbApi}/${data.data._id}`);
-    })
-    .catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
-  const productBuilderdatatoQuoteBuilderdata=(BuilderData)=>{
-    
+  const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
+
     console.log(BuilderData);
-    const inventory: { fieldName: string; fieldValue: any; }[][]=[];
-    const ignoredKeys=['fields','_id','productId','templateFields','id','string'];
-    var totalCost=0;
-    var totalSellingPrice=0
-    var totalMargin=0
-    var totalProfit=0
-    var CostCurrency=""
-    var SPCurrency=""
-    var MarginCurrency=""
-    var ProfitCurrency=""
-    BuilderData.map((quoteRows: { [x: string]: any; })=>{
-        console.log(quoteRows);
-        const quoteRowKeys= Object.keys(quoteRows);
-        var inventorydata: { fieldName: string; fieldValue: any; }[]=[];
-        quoteRowKeys.map((key)=>{
-            console.log(key);
-            if(ignoredKeys.indexOf(key)===-1){
-                var indexkey=key;
-                var currency=""
-                if (key.includes("_")){
-                    var splitKey=key.split("_")
-                    key=splitKey[0]
-                    currency=splitKey[1]
-                }
-                var fields= quoteRows["fields"]
-                var field= fields.filter((d: { fieldName: string; }) => d.fieldName===key);
-                if(typeof(quoteRows[key])==="object"){
-                    inventorydata.push({
-                        fieldName:field[0].fieldLabel,
-                        fieldValue:quoteRows[key][key]
-                    });
-                }
-                else{
-                    inventorydata.push({
-                        fieldName:field[0].fieldLabel,
-                        fieldValue:quoteRows[indexkey]
-                    });
-                }
-                if(key==='totalCost'){
-                    totalCost=totalCost+quoteRows[indexkey]
-                    CostCurrency=currency.toUpperCase()
-                }
-                else if(key==='totalSalesPrice'){
-                    totalSellingPrice=totalSellingPrice+quoteRows[indexkey]
-                    SPCurrency=currency.toUpperCase()
-                }
-                else if(key==="totalProfit")
-                {
-                    totalProfit=totalProfit+quoteRows[indexkey]
-                    ProfitCurrency=currency.toUpperCase()
-                }
-                else if(key==="totalMargin"){
-                    totalMargin=totalMargin+quoteRows[indexkey]
-                    MarginCurrency=currency.toUpperCase()
-                }
-            }
-        })
-        inventory.push(inventorydata);
+    const inventory: { fieldName: string; fieldValue: any; }[][] = [];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string'];
+    var totalCost = 0;
+    var totalSellingPrice = 0
+    var totalMargin = 0
+    var totalProfit = 0
+    var CostCurrency = ""
+    var SPCurrency = ""
+    var MarginCurrency = ""
+    var ProfitCurrency = ""
+    BuilderData.map((quoteRows: { [x: string]: any; }) => {
+      console.log(quoteRows);
+      const quoteRowKeys = Object.keys(quoteRows);
+      var inventorydata: { fieldName: string; fieldValue: any; }[] = [];
+      quoteRowKeys.map((key) => {
+        console.log(key);
+        if (ignoredKeys.indexOf(key) === -1) {
+          var indexkey = key;
+          var currency = ""
+          if (key.includes("_")) {
+            var splitKey = key.split("_")
+            key = splitKey[0]
+            currency = splitKey[1]
+          }
+          var fields = quoteRows["fields"]
+          var field = fields.filter((d: { fieldName: string; }) => d.fieldName === key);
+          if (typeof (quoteRows[key]) === "object") {
+            inventorydata.push({
+              fieldName: field[0].fieldLabel,
+              fieldValue: quoteRows[key][key]
+            });
+          }
+          else {
+            inventorydata.push({
+              fieldName: field[0].fieldLabel,
+              fieldValue: quoteRows[indexkey]
+            });
+          }
+          if (key === 'totalCost') {
+            totalCost = totalCost + quoteRows[indexkey]
+            CostCurrency = currency.toUpperCase()
+          }
+          else if (key === 'totalSalesPrice') {
+            totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
+            SPCurrency = currency.toUpperCase()
+          }
+          else if (key === "totalProfit") {
+            totalProfit = totalProfit + quoteRows[indexkey]
+            ProfitCurrency = currency.toUpperCase()
+          }
+          else if (key === "totalMargin") {
+            totalMargin = totalMargin + quoteRows[indexkey]
+            MarginCurrency = currency.toUpperCase()
+          }
+        }
+      })
+      inventory.push(inventorydata);
     });
     console.log(inventory);
-    if(ProcessStatus==="Price Builder" && totalSellingPrice<1){
+    if (ProcessStatus === "Price Builder" && totalSellingPrice < 1) {
       setNextStep(false);
     }
-    if(ProcessStatus==="Price Builder" && totalSellingPrice>1){
+    if (ProcessStatus === "Price Builder" && totalSellingPrice > 1) {
       setNextStep(true);
     }
-    setTotalProfit(totalProfit.toString()+" "+ProfitCurrency);
-    setTotalMargin(totalMargin.toString()+" "+MarginCurrency);
-    setTotalSale(totalSellingPrice.toString()+" "+SPCurrency);
-    setTotalCost(totalCost.toString()+" "+CostCurrency);
+    setTotalProfit(totalProfit.toString() + " " + ProfitCurrency);
+    setTotalMargin(totalMargin.toString() + " " + MarginCurrency);
+    setTotalSale(totalSellingPrice.toString() + " " + SPCurrency);
+    setTotalCost(totalCost.toString() + " " + CostCurrency);
     console.log("Check:");
     console.log(DOAsetup);
     console.log(DOAlimit);
@@ -975,23 +972,23 @@ const fetchDoaLimit = () => {
     setDOAreq(false);
     setCustomerreq(true);
 
-    if(DOAsetup && totalSellingPrice>DOAlimit && versionStatus==="Building Quote"){
-        setDOAreq(true);
-        setCustomerreq(false);
-        setButtonMessage("Send for DOA");
+    if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === "Building Quote") {
+      setDOAreq(true);
+      setCustomerreq(false);
+      setButtonMessage("Send for DOA");
     }
-    else if(versionStatus.includes("Rejected by DOA")){
-        setDOAreq(true);
-        setCustomerreq(false);
-        setButtonMessage("Send for DOA");
+    else if (versionStatus.includes("Rejected by DOA")) {
+      setDOAreq(true);
+      setCustomerreq(false);
+      setButtonMessage("Send for DOA");
     }
-    else if(versionStatus==="Sent for DOA"){
-        setDOAreq(false);
-        setCustomerreq(false);
+    else if (versionStatus === "Sent for DOA") {
+      setDOAreq(false);
+      setCustomerreq(false);
     }
-    else if(versionStatus==="Sent to Customer" || versionStatus==="Accepted by Customer" || versionStatus==="Rejected by Customer"){
-        setDOAreq(false);
-        setCustomerreq(false);
+    else if (versionStatus === "Sent to Customer" || versionStatus === "Accepted by Customer" || versionStatus === "Rejected by Customer") {
+      setDOAreq(false);
+      setCustomerreq(false);
     }
     var TableData = [];
     var Col = [];
@@ -999,74 +996,74 @@ const fetchDoaLimit = () => {
     var columnext = [];
     var KeyValuePairs = [];
     type Type = {
-        [key: string]: any;
+      [key: string]: any;
     };
 
     for (var i = 0; i < inventory.length; i++) {
-        var KeyValue: Type = {};
-        for (var j = 0; j < inventory[i].length; j++) {
-            var DataSet = inventory[i][j];
-            if (ColName.indexOf(DataSet.fieldName) === -1) {
-                ColName = [...ColName, DataSet.fieldName];
-                Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
-                columnext = [...columnext, { ColumnName: DataSet.fieldName, width: 100 }];
-            }
-            KeyValue[DataSet.fieldName] = DataSet.fieldValue;
+      var KeyValue: Type = {};
+      for (var j = 0; j < inventory[i].length; j++) {
+        var DataSet = inventory[i][j];
+        if (ColName.indexOf(DataSet.fieldName) === -1) {
+          ColName = [...ColName, DataSet.fieldName];
+          Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
+          columnext = [...columnext, { ColumnName: DataSet.fieldName, width: 100 }];
         }
-        KeyValuePairs = [...KeyValuePairs, KeyValue];
+        KeyValue[DataSet.fieldName] = DataSet.fieldValue;
+      }
+      KeyValuePairs = [...KeyValuePairs, KeyValue];
     }
     setColName(ColName);
-    if(columnView.length>0){
-        setVisibleColumnName(columnView)
+    if (columnView.length > 0) {
+      setVisibleColumnName(columnView)
     }
-    else{
-        setVisibleColumnName(ColName);
+    else {
+      setVisibleColumnName(ColName);
     }
-    
+
 
     for (var j = 0; j < KeyValuePairs.length; j++) {
-        const DataSet = KeyValuePairs[j];
-        var DataRecord: Type = {};
-        for (var i = 0; i < ColName.length; i++) {
-            if (ColName[i] in DataSet) {
-                DataRecord[ColName[i]] = DataSet[ColName[i]];
-            }
-            else {
-                DataRecord[ColName[i]] = '-';
-            }
+      const DataSet = KeyValuePairs[j];
+      var DataRecord: Type = {};
+      for (var i = 0; i < ColName.length; i++) {
+        if (ColName[i] in DataSet) {
+          DataRecord[ColName[i]] = DataSet[ColName[i]];
         }
-        TableData = [...TableData, DataRecord]
+        else {
+          DataRecord[ColName[i]] = '-';
+        }
+      }
+      TableData = [...TableData, DataRecord]
     }
     setDynamicTableData(TableData);
-}
+  }
 
-const handleCases = () => {
+  const handleCases = () => {
     console.log("HandleCases");
     if (DOAreq) {
-        if (!PDF) {
-            GeneratePdf(false, true);
-        }
-        axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
+      if (!PDF) {
+        GeneratePdf(false, true);
+      }
+      axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
         .then(({ data }) => {
-           fetchquoteData(currentVersion)
+          fetchquoteData(currentVersion)
         })
         .catch((err) => {
-            toastConfig.setToastConfig(err);
+          toastConfig.setToastConfig(err);
         });
     };
     if (Customerreq) {
-        if (!PDF) {
-            GeneratePdf(false, true);
-        }
-        setSendEmail(true);
+      if (!PDF) {
+        GeneratePdf(false, true);
+      }
+      setSendEmail(true);
     }
-}
-const handleChangeVisible = (event) => {
+  }
+  const handleChangeVisible = (event) => {
     setVisibleColumnName(event.target.value);
-    handleVersionUpdate(PDF,event.target.value,versionStatus,TandC);
-};
+    handleVersionUpdate(PDF, event.target.value, versionStatus, TandC);
+  };
 
-function getStyles(name, personName, theme) {
+  function getStyles(name, personName, theme) {
     return {
       fontWeight:
         personName.indexOf(name) === -1
@@ -1075,33 +1072,33 @@ function getStyles(name, personName, theme) {
     };
   }
 
-const cloneVersion=()=>{
+  const cloneVersion = () => {
     axiosInstance().post(`/quote-builder/createVersion/${id}?version=${currentVersion}`, data).then(({ data: { data } }) => {
-        fetchquoteData(0);
+      fetchquoteData(0);
     }).catch((error) => {
-        toastConfig.setToastConfig(error);
+      toastConfig.setToastConfig(error);
     });
-}
+  }
 
-const handleVersionUpdate=(PDFfile,Columns,versionStatus,TC)=>{
-    var body={PDF:PDFfile,acceptedColumns:Columns,versionStatus:versionStatus,TNC:TC}
+  const handleVersionUpdate = (PDFfile, Columns, versionStatus, TC) => {
+    var body = { PDF: PDFfile, acceptedColumns: Columns, versionStatus: versionStatus, TNC: TC }
     axiosInstance()
-    .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`,body)
-    .then(({ data }) => {
-        
-    })
-    .catch((err) => {
+      .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
+      .then(({ data }) => {
+
+      })
+      .catch((err) => {
         toastConfig.setToastConfig(err);
         setLoading(false);
-    });
-}
+      });
+  }
 
-const onSuccess = () => {
+  const onSuccess = () => {
     setSendEmail(false)
     console.log("Success");
-    handleVersionUpdate("",visibleColumns, "Sent to Customer", TandC);
+    handleVersionUpdate("", visibleColumns, "Sent to Customer", TandC);
     fetchquoteData(currentVersion);
-}
+  }
 
 
 
@@ -1137,12 +1134,12 @@ const onSuccess = () => {
   return (
     <>
       <Layout>
-        <Grid container direction="row">
+        <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Paper className="subContainer">
+            <Paper>
               {!quoteData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -1169,7 +1166,7 @@ const onSuccess = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                    {quotePermissions.isCreate ?(
+                  {quotePermissions.isCreate ? (
                     <Button
                       variant="contained"
                       color="primary"
@@ -1178,7 +1175,7 @@ const onSuccess = () => {
                     >
                       Clone
                     </Button>
-                    ):null}
+                  ) : null}
                   {allowedToEdit ? (
                     <Button
                       variant="contained"
@@ -1199,12 +1196,9 @@ const onSuccess = () => {
                       onClick={() => setShowConfirmBox(true)}
                     />
                   ) : null}
-                  
+
                 </DetailsPageHeader>
               )}
-
-
-                    
               {loading ? (
                 <Box padding={2}>
                   <Grid container spacing={2}>
@@ -1224,153 +1218,178 @@ const onSuccess = () => {
               ) : (
                 <>
                   <TabPanel value={currentTabIndex} index={0}>
-                    <Box padding="16px">
+                    <Box>
                       <DetailsPage
                         data={quoteData}
                         fields={quoteFields}
                       />
                     </Box>
-                    <div className="p-3">
-                      
-                    </div>
                   </TabPanel>
                   <TabPanel value={currentTabIndex} index={1}>
                     <Activity />
                   </TabPanel>
-                  <Grid>
-                    <select className="customSelect" value={currentVersion} 
-                                        onChange={handleChangeVersion}>
-                                        {versions.map((team) => <option key={team} value={team}>{"Version : " + team}</option>)}
-                    </select>
+                  <div className="m-3">
+                    <Grid container className="d-flex align-items-center form-label-style mb-0">
+                      <Grid item xs={12} sm={6} md={6} className="justify-content-start">
+                        <h4>
+                          Product Information
+                      </h4>
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={6} className="d-flex justify-content-end">
+                        <select className="customSelect mr-1" value={currentVersion}
+                          onChange={handleChangeVersion}>
+                          {versions.map((team) => <option key={team} value={team}>{"Version : " + team}</option>)}
+                        </select>
+                        <Button variant="outlined" type="button" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { cloneVersion() }}>Clone Version {currentVersion} </Button>
+                      </Grid>
                     </Grid>
-                  {DOAreq?
-                  (<Steps 
-                    steps={DOASteps}
-                    currentStep={DOASteps.indexOf(ProcessStatus)}
-                    id= {id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
-                  />):(<Steps 
-                      steps={OtherSteps}
-                      currentStep={OtherSteps.indexOf(ProcessStatus)}
-                      id= {id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
-                  />)}
+                    {ProcessStatus != "New" ? <div>
+                      <Grid>
+                        <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel">
+                          <div className="quoteBox">
+                            <span>Total Profit</span>
+                            <span>{totalProfit}</span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Total Cost Price</span>
+                            <span>{totalcost}</span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Total Selling Price</span>
+                            <span>{totalsale}</span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Total Margin</span>
+                            <span>{totalmargin}</span>
+                          </div>
+                          <div className="quoteBox">
+                            <span>Version Status</span>
+                            <span>{versionStatus}</span>
+                          </div>
+                          <div>
+                          </div>
+                        </Grid>
+                      </Grid>
+                    </div> : null}
+
+                    {DOAreq ?
+                      (<Steps
+                        steps={DOASteps}
+                        currentStep={DOASteps.indexOf(ProcessStatus)}
+                        id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                      />) : (<Steps
+                        steps={OtherSteps}
+                        currentStep={OtherSteps.indexOf(ProcessStatus)}
+                        id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                      />)}
+                  </div>
                 </>
               )}
-              
-            {ProcessStatus!="New"?<Grid>
-                                <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel">
-                                    <div className="quoteBox">
-                                        <span>Total Profit</span>
-                                        <span>{totalProfit}</span>
-                                    </div>
-                                    <div className="quoteBox">
-                                        <span>Total Cost Price</span>
-                                        <span>{totalcost}</span>
-                                    </div>
-                                    <div className="quoteBox">
-                                        <span>Total Selling Price</span>
-                                        <span>{totalsale}</span>
-                                    </div>
-                                    <div className="quoteBox">
-                                        <span>Total Margin</span>
-                                        <span>{totalmargin}</span>
-                                    </div>
-                                    <div className="quoteBox">
-                                        <span>versionStatus</span>
-                                        <span>{versionStatus}</span>
-                                    </div>
-                                    <div>
-                                    </div>
-            </Grid>
-            </Grid>:null}
-            {loadPB?(
-            <Grid>
-                    {ProcessStatus==="New"?
-                    (<><Button variant="outlined" size="small" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true)}}>New</Button>
-                    <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true)}}>Add Existing</Button></>):(null)}
-                    <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { cloneVersion() }}>Clone Version</Button>
-                    {ProcessStatus==="Quote Builder"?(<><Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">View</Button>
-                    <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button></>):null}
-                    {ProcessStatus==="DOA Process" || ProcessStatus==="Customer Process"?(<>
-                      <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />}  variant="contained" size="small" color="primary">{buttonMessage}</Button></>):null}
-                    {ProcessStatus==="Quote Builder"?(<FormControl className={classes.formControl}>
-                        <InputLabel id="demo-mutiple-chip-label">Visible Columns in Quote</InputLabel>
-                    <Select
-                        labelId="demo-mutiple-chip-label"
-                        id="demo-mutiple-chip"
-                        multiple
-                        value={visibleColumns}
-                        onChange={handleChangeVisible}
-                        input={<Input id="select-multiple-chip" />}
-                        renderValue={(selected:any) => (
-                        <div className={classes.chips}>
-                            {selected.map((value) => (
-                                <Chip key={value} label={value} className={classes.chip} />
-                        ))}
-                        </div>
-                )}
-                MenuProps={MenuProps}
-            >
-          {ColumnName.map((name) => (
-                <MenuItem key={name} value={name} style={getStyles(name, visibleColumns, theme)}>
-                <Checkbox checked={visibleColumns.indexOf(name) > -1} />{name}
-                </MenuItem>
-                ))}
-            </Select>
-        </FormControl>):null}
-            
-            
 
-            <ProductBuilder
-              productBuilderId={productBuilderID}
-              isAddNewProduct={isAddNewProduct}
-              setIsAddNewProduct={setIsAddNewProduct}
-              isAddExistingProduct={isAddExistingProduct}
-              setIsAddExistingProduct={setIsAddExistingProduct}
-              refreshProducts={refreshProducts}
-              Editable={ProcessStatus==="Price Builder"?true:false}
-            />
-            {ProcessStatus==="Quote Builder"?
-              (<Box>
-                  <Grid container>
-                                  <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-                                      <Grid container>
-                                          <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center p-2 gap-1" container justify="flex-start">
-                                              <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add Terms & Conditions</Button>
-                                          </Grid>
-                                          <Grid item xs={12} className="listing-grid">
-                                              <DataGrid
-                                                  components={{
-                                                      Toolbar: DataGridCustomToolbar,
-                                                      NoRowsOverlay: CustomDataGridNoDataFound,
-                                                  }}
-                                                  scrollbarSize={20}
-                                                  rows={dataRows}
-                                                  columns={columnsTNC}
-                                                  loading={loading}
-                                                  disableSelectionOnClick
-                                                  disableMultipleSelection
-                                                  paginationMode="server"
-                                                  pagination
-                                                  onPageChange={handlePage}
-                                                  onPageSizeChange={handlePageSize}
-                                                  pageSize={query.limit}
-                                                  page={query.page}
-                                                  rowCount={rowCount}
-                                                  rowsPerPageOptions={[25, 50, 75]}
-                                                  onSortModelChange={handleSortModelChange}
-                                                  onFilterModelChange={onFilterChange}
-                                              />
-                                          </Grid>
-                                      </Grid>
-                                  </Grid>
+              <div className="m-3">
+                {loadPB ? (
+                  <Grid container className="position-relative">
+                    <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center justify-content-start gap-1">
+                      {ProcessStatus === "New" ?
+                        (<span className="productStep">
+                          <Button variant="outlined" size="small" className="mr-1" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
+                          <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
+                        </span>) : (null)}
+
+                      {ProcessStatus === "Quote Builder" ? (
+                        <Grid container>
+                          <Grid item xs={12} md={12} sm={12}>
+                            <FormControl className={classes.formControl}>
+                              <InputLabel id="demo-mutiple-chip-label">Visible Columns in Quote</InputLabel>
+                              <Select
+                                labelId="demo-mutiple-chip-label"
+                                id="demo-mutiple-chip"
+                                multiple
+                                value={visibleColumns}
+                                onChange={handleChangeVisible}
+                                input={<Input id="select-multiple-chip" />}
+                                renderValue={(selected: any) => (
+                                  <div className={classes.chips}>
+                                    {selected.map((value) => (
+                                      <Chip key={value} label={value} className={classes.chip} />
+                                    ))}
+                                  </div>
+                                )}
+                                MenuProps={MenuProps}
+                              >
+                                {ColumnName.map((name) => (
+                                  <MenuItem key={name} value={name} style={getStyles(name, visibleColumns, theme)}>
+                                    <Checkbox checked={visibleColumns.indexOf(name) > -1} />{name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        </Grid>
+                      ) : null}
+                      {ProcessStatus === "DOA Process" || ProcessStatus === "Customer Process" ? (<span className="productStep">
+                        <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></span>) : null}
+                    </Grid>
+                    {ProcessStatus === "Quote Builder" ? (<span>
+                        <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" className="mr-1" startIcon={<AiOutlineEye />} color="primary">View</Button>
+                        <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
+                      </span>)
+                        : null}
+                    <Grid item xs={12} sm={12} md={12}>
+                      <ProductBuilder
+                        productBuilderId={productBuilderID}
+                        isAddNewProduct={isAddNewProduct}
+                        setIsAddNewProduct={setIsAddNewProduct}
+                        isAddExistingProduct={isAddExistingProduct}
+                        setIsAddExistingProduct={setIsAddExistingProduct}
+                        refreshProducts={refreshProducts}
+                        Editable={ProcessStatus === "Price Builder" ? true : false}
+                      />
+                      {ProcessStatus === "Quote Builder" ?
+                        (<Box>
+                          <Grid container>
+                            <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
+                              <Grid container>
+                                <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center p-2 gap-1" container justify="flex-start">
+                                  <Button onClick={() => setShowCreateDialog(true)} variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add Terms & Conditions</Button>
+                                </Grid>
+                                <Grid item xs={12} className="listing-grid">
+                                  <DataGrid
+                                    components={{
+                                      Toolbar: DataGridCustomToolbar,
+                                      NoRowsOverlay: CustomDataGridNoDataFound,
+                                    }}
+                                    scrollbarSize={20}
+                                    rows={dataRows}
+                                    columns={columnsTNC}
+                                    loading={loading}
+                                    disableSelectionOnClick
+                                    disableMultipleSelection
+                                    paginationMode="server"
+                                    pagination
+                                    onPageChange={handlePage}
+                                    onPageSizeChange={handlePageSize}
+                                    pageSize={query.limit}
+                                    page={query.page}
+                                    rowCount={rowCount}
+                                    rowsPerPageOptions={[25, 50, 75]}
+                                    onSortModelChange={handleSortModelChange}
+                                    onFilterModelChange={onFilterChange}
+                                  />
+                                </Grid>
                               </Grid>
-              </Box>):
-              (null)}
-            </Grid>):null}
+                            </Grid>
+                          </Grid>
+                        </Box>) :
+                        (null)}
+                    </Grid>
+                  </Grid>
+                ) : null}
+              </div>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper className="subContainer">
+            <Paper>
               {!quoteData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />
@@ -1402,14 +1421,16 @@ const onSuccess = () => {
             </Paper>
           </Grid>
         </Grid>
-        {showConfirmBox ? (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this opportunity`}
-            onClose={() => setShowConfirmBox(false)}
-            onOk={handleDeleteOpportunity}
-          />
-        ) : null}
+        {
+          showConfirmBox ? (
+            <ConfirmationDialog
+              open={showConfirmBox}
+              message={`Are you sure you want to delete this opportunity`}
+              onClose={() => setShowConfirmBox(false)}
+              onOk={handleDeleteOpportunity}
+            />
+          ) : null
+        }
         {/* {openUpdateDialog ? (
             <ManageOpportunity
               isNew={false}
@@ -1420,42 +1441,44 @@ const onSuccess = () => {
             />
           ): null} */}
 
-        {openUpdateDialog && (
-          <ManageQuoteDialog
-            open={openUpdateDialog}
-            onSuccess={() => {
-              setOpenUpdateDialog(false);
-              fetchquoteData(currentVersion);
-            }}
-            onClose={() => {
-              setOpenUpdateDialog(false);
-            }}
-            isNew={false}
-            dataToUpdate={copyOfquoteDataToUpdate}
-            resource={null}
-            isRedirectTodetailPage={false}
-          // qbApi={qbApi}
-          />
-        )}
+        {
+          openUpdateDialog && (
+            <ManageQuoteDialog
+              open={openUpdateDialog}
+              onSuccess={() => {
+                setOpenUpdateDialog(false);
+                fetchquoteData(currentVersion);
+              }}
+              onClose={() => {
+                setOpenUpdateDialog(false);
+              }}
+              isNew={false}
+              dataToUpdate={copyOfquoteDataToUpdate}
+              resource={null}
+              isRedirectTodetailPage={false}
+            // qbApi={qbApi}
+            />
+          )
+        }
 
-          {
-                showCreateDialog ? (
-                    <ManageTermsAndCondition
-                        termsAndCondition={termsAndCondition}
-                        open={showCreateDialog}
-                        handleClose={handleCloseCreateDialog}
-                        fetchData={fetchTermsAndConditions}
-                        editRecord={editRecord}
-                    />
-                ) : null
-            } 
-            |[
-              {sendEmail && <EmailDialog
-                    handleClose={() => setSendEmail(false)}
-                    success={onSuccess}
-                    id={id}
-                    version={currentVersion} />
-                }
+        {
+          showCreateDialog ? (
+            <ManageTermsAndCondition
+              termsAndCondition={termsAndCondition}
+              open={showCreateDialog}
+              handleClose={handleCloseCreateDialog}
+              fetchData={fetchTermsAndConditions}
+              editRecord={editRecord}
+            />
+          ) : null
+        }
+        {
+          sendEmail && <EmailDialog
+            handleClose={() => setSendEmail(false)}
+            success={onSuccess}
+            id={id}
+            version={currentVersion} />
+        }
 
 
         {
@@ -1465,7 +1488,7 @@ const onSuccess = () => {
             message={messageDialog.message}
           />
         }
-      </Layout>
+      </Layout >
     </>
   );
 }

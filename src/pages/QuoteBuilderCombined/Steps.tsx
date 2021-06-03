@@ -12,6 +12,9 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
+    padding: "26px 10px !important",
+    background: "#fefefe",
+    boxShadow: "3px 4px 8px #cfcdcd"
   },
   backButton: {
     marginRight: theme.spacing(1),
@@ -20,6 +23,11 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
   },
+  stepperNext:{
+    marginTop: "10px",
+    position: "absolute",
+    left: "32%",
+  }
 }));
 
 
@@ -53,11 +61,7 @@ const Steps=(props)=> {
     .catch((error) => {
       toastConfig.setToastConfig(error);
     });
-   
   };
-
-
-
   return (
     <div className={classes.root}>
       <Stepper activeStep={activeStep} alternativeLabel>
@@ -69,12 +73,12 @@ const Steps=(props)=> {
       </Stepper>
       <div>
         {activeStep === steps.length-1 ? (
-          <div>
+          <div className="d-flex align-items-center justify-content-center">
             <Typography className={classes.instructions}>All steps completed</Typography>
           </div>
         ) : (
           <div>
-            <div>
+            <div className={classes.stepperNext}>
               <Button variant="contained" color="primary" onClick={handleNext} disabled={nextStep?false:true}>
                 {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
               </Button>
