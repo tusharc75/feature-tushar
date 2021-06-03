@@ -41,7 +41,7 @@ export default function BrandConfiguration(props) {
     }
     const getBrandFields = (id) => {
         axiosInstance()
-            .get(`/sa-field?brand=${id}&resource=Brand`)
+            .get(`/field?brand=${id}&resource=Brand`)
             .then(({ data: { data } }) => {
                 setBrandFields(data);
                 setLoading(false);
@@ -78,6 +78,7 @@ export default function BrandConfiguration(props) {
                 toastConfig.setToastConfig(error);
             });
     }
+
     return <>
         {
             openUpdateDialog && (
@@ -86,7 +87,7 @@ export default function BrandConfiguration(props) {
                     openDialog={openUpdateDialog}
                     onClose={closeUpdateDIalog}
                     data={brandDetails}
-                    fields={brandFields}
+                    fields={brandFields.filter(o => o?.fieldData?.fieldName !== "servicesAccess")}
                     isUpdating={isUpdating}
                     handleUpdate={handleUpdate}
                 />
@@ -119,7 +120,7 @@ export default function BrandConfiguration(props) {
                                         <Button
                                             variant="contained"
                                             color="primary"
-                                            size="small" 
+                                            size="small"
                                             onClick={handleOpenUpdateDialog}>Edit</Button>
                                     </div>
                                     <Divider />

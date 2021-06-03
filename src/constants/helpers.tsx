@@ -158,6 +158,13 @@ export const profilePage = {
   profilePageRoute: "/profile",
 };
 
+
+export const product = {
+  api: "/product",
+  route: "/product",
+  permission: "product",
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,

@@ -71,11 +71,7 @@ const BigCalendar = () => {
   const fetchBoard = useCallback(() => {
     GetBoard("", JSON.stringify(filter))
       .then(({ data }) => {
-        const allActivities = [
-          ...data.event.data,
-          ...data.task.data,
-          ...data.case.data,
-        ];
+        const allActivities = [...data.event, ...data.task, ...data.case];
 
         const newData = allActivities.map((d) => ({
           ...d,
@@ -177,7 +173,6 @@ const BigCalendar = () => {
           <MyCalendar
             activities={activities}
             setActivityData={setActivityData}
-            type={lowerCase(type)}
           />
         </div>
         {activityData && (

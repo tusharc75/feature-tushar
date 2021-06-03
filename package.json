@@ -41,6 +41,7 @@
     "formik-material-ui-pickers": "0.0.12",
     "framer-motion": "^4.0.2",
     "hot-formula-parser": "^4.0.0",
+    "html-to-draftjs": "^1.5.0",
     "immutability-helper": "^3.1.1",
     "jspdf": "^2.3.1",
     "jspdf-autotable": "^3.5.14",
@@ -89,6 +90,7 @@
   "browserslist": {
     "production": [
       ">0.2%",
+      "last 5 safari version",
       "not dead",
       "not op_mini all"
     ],
