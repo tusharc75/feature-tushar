@@ -488,6 +488,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                                                 errors={errors}
                                                                 touched={touched}
                                                                 size="small"
+                                                                isMultipleUpload={true}
                                                                 setFieldValue={(name, file) => {
                                                                     setFieldValue("file", file);
                                                                     onUploadFile(file)

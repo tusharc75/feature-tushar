@@ -113,6 +113,12 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         }
     }
 
+    const showErrorMessage = (data) => {
+        if (data?.type && data?.message && data?.open) {
+            toastConfig.setToastConfig({ ...data });
+        }
+    }
+
     return <Dialog
         disableBackdropClick={true}
         open={open}
@@ -168,6 +174,8 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         setFieldValue={(name, file) => setFieldValue("file", file)}
                                                         onAppendData={(data) => appendData(data, setFieldValue)}
                                                         doNotShowUploadedFile={true}
+                                                        showErrorMessage={showErrorMessage}
+                                                        fileSizeToAccept={1000000} //size in bytes
                                                     />
                                                 </Box>
                                                 <Box mt={2} >

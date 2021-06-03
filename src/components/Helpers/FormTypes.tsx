@@ -157,6 +157,9 @@ const FormTypes = (props) => {
     doNotShowUploadedFile = false,
     uploadFileUrl = '',
     onAppendData = null,
+    fileSizeToAccept = null, //size in bytes
+    showErrorMessage,
+    isMultipleUpload = false,
     ...rest
   } = props;
 
@@ -244,8 +247,17 @@ const FormTypes = (props) => {
 
   const handleUploadFile = (ev) => {
     if (ev.target.files && ev.target.files.length) {
-      const file = ev.target.files[0];
-      getFileUrl(file);
+      let files = ev.target.files;
+      // const file = ev.target.files[0];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        if (fileSizeToAccept && file.size >= fileSizeToAccept && showErrorMessage) {
+          showErrorMessage({ open: true, type: "error", message: "file must be less than 1 MB" })
+          break
+        }
+        getFileUrl(file);
+      }
       ev.target.value = "";
     }
   };
@@ -1436,6 +1448,7 @@ const FormTypes = (props) => {
           onClick={(e: any) => (e.target.value = null)}
           type="file"
           accept={accept || ""}
+          multiple={isMultipleUpload}
         />
         <label htmlFor={name}>
           <Button
