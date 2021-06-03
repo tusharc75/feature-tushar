@@ -38,7 +38,7 @@ export default function Sidebar({ onItemClick, activeLink, userData, onFetchUser
             id: profileMenuItems.users
         },
         {
-            label: "Setting",
+            label: "Settings",
             show: true,
             icon: <IoSettingsOutline size={20} />,
             id: profileMenuItems.setting
