@@ -21,38 +21,38 @@ export default function ImageAttachments(props) {
                                         <img src={attachment} alt={attachment}
                                             onClick={() => onImageClick(attachment)}
                                             className={emailStyles.image} />
-                                        {isRenderedFrom === false ? 
-                                        (<div className={emailStyles.overlay}>
-                                            <IconButton>
-                                                {
-                                                    emailId ? <a href={`${attachment}`} download={true} >
-                                                        <GoArrowDown color="white" size={25} />
-                                                    </a> : <DeleteIcon className={emailStyles.deleteIcon}
-                                                        onClick={() => onDelete(attachment)}
-                                                    />
-                                                }
-                                            </IconButton>
-                                        </div>)
-                                        : 
-                                        
-                                            emailId ? <div style={{ display: 'flex', justifyContent: 'space-between', width: '30%', float: 'right',marginTop:'5px', bottom: '0' }}>
-                                            <>
-                                                <IconButton style={{ paddingBottom: '1px' }}>
+                                        {isRenderedFrom === false ?
+                                            (<div className={emailStyles.overlay}>
+                                                <IconButton>
                                                     {
-                                                        <a href={`${attachment}`}
-                                                            download={true}>
-                                                            <GetAppIcon />
-                                                        </a>
-                                                    }
-                                                </IconButton>
-                                                <IconButton >
-                                                    {
-                                                        <DeleteIcon color='error'
+                                                        emailId ? <a href={`${attachment}`} download={true} >
+                                                            <GoArrowDown color="white" size={25} />
+                                                        </a> : <DeleteIcon className={emailStyles.deleteIcon}
                                                             onClick={() => onDelete(attachment)}
                                                         />
                                                     }
                                                 </IconButton>
-                                            </></div> :
+                                            </div>)
+                                            :
+
+                                            emailId ? <div style={{ display: 'flex', justifyContent: 'space-between', width: '30%', float: 'right', marginTop: '5px', bottom: '0' }}>
+                                                <>
+                                                    <IconButton style={{ paddingBottom: '1px' }}>
+                                                        {
+                                                            <a href={`${attachment}`}
+                                                                download={true}>
+                                                                <GetAppIcon />
+                                                            </a>
+                                                        }
+                                                    </IconButton>
+                                                    <IconButton >
+                                                        {
+                                                            <DeleteIcon color='error'
+                                                                onClick={() => onDelete(attachment)}
+                                                            />
+                                                        }
+                                                    </IconButton>
+                                                </></div> :
                                                 <IconButton >
                                                     {
                                                         <DeleteIcon color='error'
@@ -61,7 +61,7 @@ export default function ImageAttachments(props) {
                                                     }
                                                 </IconButton>
 
-                                                }
+                                        }
                                     </Paper>
                                 </Grid>
                             </>

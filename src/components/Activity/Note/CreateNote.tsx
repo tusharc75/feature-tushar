@@ -24,7 +24,6 @@ import FormTypes from "../../Helpers/FormTypes";
 import { fileURLToPath } from "url";
 import { IconButton, Paper } from "@material-ui/core";
 import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
-import { GoArrowDown } from "react-icons/go";
 import DeleteIcon from "@material-ui/icons/Delete";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import ImageAttachments from "../Email/ImageAttachments";
@@ -225,14 +224,14 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                                             />
                                                         }
                                                     </IconButton>
-                                                </> : 
-                                                <IconButton >
-                                                    {
-                                                        <DeleteIcon color='error'
-                                                            onClick={() => handleDeleteAttachment(attachment)}
-                                                        />
-                                                    }
-                                                </IconButton>}
+                                                </> :
+                                                    <IconButton >
+                                                        {
+                                                            <DeleteIcon color='error'
+                                                                onClick={() => handleDeleteAttachment(attachment)}
+                                                            />
+                                                        }
+                                                    </IconButton>}
 
                                             </div>
                                         </div>
@@ -349,17 +348,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                         </Box>
 
                                         {noteId && <Fragment>
-                                            {/* {renderFileThumbnails}
-                                            <ImageAttachments
-                                                imageAttachments={imageAttachments}
-                                                onImageClick={(attachment) => {
-                                                    setImageSource(attachment)
-                                                    setOpen(true)
-                                                }}
-                                                onDelete={handleDeleteImageAttachment}
-                                                emailId={noteId}
-                                                isRenderedFromNote={true}
-                                            /> */}
+                                
                                             <Box mt={2}>
                                                 <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                             </Box>

@@ -136,7 +136,7 @@ const intialState = {
 const Note = () => {
     const {
         state: { user, permissions },
-      }: any = useData();
+    }: any = useData();
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
     const parsed = queryString.parse(history.location.search);
@@ -184,7 +184,7 @@ const Note = () => {
         fetchNotes();
     }
 
-    const handleDialogClose =() =>{
+    const handleDialogClose = () => {
         setShowCreateDialog(false);
         setIsNew(false);
     }
@@ -370,8 +370,8 @@ const Note = () => {
                     relatedTo={[{ type: "my", name: user?.user?._id }]}
                     handleClose={handleClose}
                     handleDialogClose={handleDialogClose}
-                    
-                
+
+
                 // noteData={noteData}
                 />
 
