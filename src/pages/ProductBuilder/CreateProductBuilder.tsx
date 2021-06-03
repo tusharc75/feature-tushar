@@ -20,6 +20,8 @@ import routes from "../../components/Helpers/Routes";
 import ProductBuilder from "../../components/productBuilder";
 import { BiArrowBack } from 'react-icons/bi';
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -59,6 +61,12 @@ const CreateProductBuilder = () => {
 
     const [isAddNewProduct, setIsAddNewProduct] = useState(false);
     const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
+
+    const [tabIndex, setTabIndex] = React.useState(0);
+
+    const handleChange = (event, newValue) => {
+        setTabIndex(newValue);
+    };
 
     return (<Layout>
         <Grid container className="headerbox">
@@ -108,23 +116,76 @@ const CreateProductBuilder = () => {
                                 </Grid>
                             </Box>
                             <Box p={1}>
-                                <Grid item xs={6} className="d-flex align-items-center gap-1">
-                                    <Button variant="contained" size="small" color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
-                                    <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
-                                </Grid>
+                                <Tabs className="oms-tab" indicatorColor="primary"
+                                    textColor="primary" value={tabIndex} onChange={handleChange}>
+                                    <Tab label="Product" />
+                                    <Tab label="Cost" />
+                                    {/* <Tab label="All" /> */}
+                                </Tabs>
                             </Box>
-                            <Box mt={1}>
-                                {isUpdating ? null :
-                                    <ProductBuilder
-                                        productBuilderId={id}
-                                        isAddNewProduct={isAddNewProduct}
-                                        setIsAddNewProduct={setIsAddNewProduct}
-                                        isAddExistingProduct={isAddExistingProduct}
-                                        setIsAddExistingProduct={setIsAddExistingProduct}
-                                        refreshProducts={refreshProducts}
-                                        Editable={true}
-                                    />}
-                            </Box>
+                            {tabIndex === 0 && (
+                                <Fragment>
+                                    <Box p={1}>
+                                        <Grid item xs={6} className="d-flex align-items-center gap-1">
+                                            <Button variant="contained" size="small" color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
+                                            <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
+                                        </Grid>
+                                    </Box>
+                                    <Box mt={1}>
+                                        {isUpdating ? null :
+                                            <ProductBuilder
+                                                productBuilderId={id}
+                                                isAddNewProduct={isAddNewProduct}
+                                                setIsAddNewProduct={setIsAddNewProduct}
+                                                isAddExistingProduct={isAddExistingProduct}
+                                                setIsAddExistingProduct={setIsAddExistingProduct}
+                                                refreshProducts={refreshProducts}
+                                                Editable={true}
+                                                stage="product"
+                                            />}
+                                    </Box>
+                                </Fragment>)}
+
+                            {tabIndex === 1 && (
+                                <Fragment>
+                                    <Box mt={1}>
+                                        {isUpdating ? null :
+                                            <ProductBuilder
+                                                productBuilderId={id}
+                                                isAddNewProduct={isAddNewProduct}
+                                                setIsAddNewProduct={setIsAddNewProduct}
+                                                isAddExistingProduct={isAddExistingProduct}
+                                                setIsAddExistingProduct={setIsAddExistingProduct}
+                                                refreshProducts={refreshProducts}
+                                                Editable={true}
+                                                stage="cost"
+                                            />}
+                                    </Box>
+                                </Fragment>)}
+
+                            {tabIndex === 2 && (
+                                <Fragment>
+                                    <Box p={1}>
+                                        <Grid item xs={6} className="d-flex align-items-center gap-1">
+                                            <Button variant="contained" size="small" color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
+                                            <Button className="ml-2" variant="contained" size="small" color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
+                                        </Grid>
+                                    </Box>
+                                    <Box mt={1}>
+                                        {isUpdating ? null :
+                                            <ProductBuilder
+                                                productBuilderId={id}
+                                                isAddNewProduct={isAddNewProduct}
+                                                setIsAddNewProduct={setIsAddNewProduct}
+                                                isAddExistingProduct={isAddExistingProduct}
+                                                setIsAddExistingProduct={setIsAddExistingProduct}
+                                                refreshProducts={refreshProducts}
+                                                Editable={true}
+                                            />}
+                                    </Box>
+                                </Fragment>)}
+
+
                         </Form>)}
                 </Formik>
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}

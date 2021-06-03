@@ -24,7 +24,7 @@ import { Option } from "../AddField/option";
 import { Currency } from "../AddField/currency";
 import { MultipleFormula } from "../AddField/multipleformula";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 
 const FieldSchema = Yup.object().shape({
   fieldLabel: Yup.string()
@@ -103,6 +103,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
             ele.isConverter = values.isConverter
             ele.isFormula = values.isFormula
             ele.isMulitFormula = values.isMulitFormula
+            ele.isUneditable = values.isUneditable
 
             if (fieldData.type === "dropDown" || fieldData.type === "multiSelect" || fieldData.type === "radio" || fieldData.type === "process") {
               values.option.forEach((ele, index) => {
@@ -175,7 +176,7 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
     }
   }
 
-  return (<Dialog 
+  return (<Dialog
     fullScreen={isMobile || isTablet}
     TransitionComponent={CustomDialogTransition}
     aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={true}>
@@ -394,7 +395,6 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                   onChange={(e) => setFieldValue("tooltipMessage", e.target.value.trimStart())}
                 />
               }
-
               <FormControlLabel
                 control={
                   <Checkbox
@@ -405,6 +405,17 @@ export const Properties = ({ handleClose, fieldData, sectionId, section, setSect
                   />
                 }
                 label="Default Value"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="Uneditable"
+                    checked={values["isUneditable"]}
+                    onChange={(e) => setFieldValue("isUneditable", e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Uneditable"
               />
               {values["isDefaultValue"] &&
                 <TextField
