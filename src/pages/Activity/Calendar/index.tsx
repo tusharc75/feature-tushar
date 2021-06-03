@@ -19,6 +19,10 @@ import { CreateCase } from "../../../components/Activity/Case/CreateCase";
 import { CreateEvent } from "../../../components/Activity/Event/CreateEvent";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomDialogTransition } from "../../../constants/helpers";
+import { BiTask } from 'react-icons/bi';
+import { BsBriefcase } from 'react-icons/bs';
+import { VscCalendar } from 'react-icons/vsc';
+
 
 const BigCalendar = () => {
   const {
@@ -94,7 +98,21 @@ const BigCalendar = () => {
     fetchBoard();
   }, [fetchBoard]);
 
-  const activityOptions = ["Task", "Case", "Event"];
+  const activityOptions = [
+    {
+      title: "Task",
+      icon: <BiTask />
+    },
+    {
+      title: "Case",
+      icon: <BsBriefcase />
+    },
+    {
+      title: "Event",
+      icon: <VscCalendar />
+    },
+  ];
+
 
   const handleChangeFilter = (value) => {
     setFilter(value);
@@ -126,22 +144,9 @@ const BigCalendar = () => {
                 size="small"
                 color="primary"
                 variant="contained"
-                endIcon={<Add />}
               >
                 Create Activity
               </Button>
-              <Box mr={1} component="span" />
-              {/* <Button
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                size="small"
-                color="primary"
-                variant="contained"
-                onClick={() => setCreateType(lowerCase(type))}
-                startIcon={<Add />}
-              >
-                {`Create ${type}`}
-              </Button> */}
               <Menu
                 id="simple-menu"
                 anchorEl={anchorEl}
@@ -153,11 +158,11 @@ const BigCalendar = () => {
                   <MenuItem
                     key={i}
                     onClick={() => {
-                      setCreateType(lowerCase(item));
+                      setCreateType(lowerCase(item.title));
                       handleClose();
                     }}
                   >
-                    {item}
+                   {item.icon}<span className="ml-2"></span>{item.title}
                   </MenuItem>
                 ))}
               </Menu>

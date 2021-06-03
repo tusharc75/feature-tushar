@@ -89,6 +89,7 @@ function Roadmap({ type, filter }) {
           display="flex"
           width="100%"
           height="100%"
+        
           style={{ position: "absolute" }}
         >
           <Box
@@ -100,7 +101,7 @@ function Roadmap({ type, filter }) {
             <Box
               height={60}
               bgcolor="grey.200"
-              display="flex"
+              display="flex"            
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <Box p={2} display="flex" alignItems="center">
@@ -113,6 +114,7 @@ function Roadmap({ type, filter }) {
             </Box>
             <div ref={taskScroolRef}>
               <Box
+               
                 style={{
                   position: "absolute",
                   width: "100%",
@@ -197,8 +199,7 @@ function Roadmap({ type, filter }) {
           </Box>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="flex-end">
-        <Box>
+      <Box display="flex" justifyContent="flex-end" className="mt-2">
           <ButtonGroup disableElevation color="primary">
             <Button
               size="small"
@@ -222,7 +223,6 @@ function Roadmap({ type, filter }) {
               Quaters
             </Button>
           </ButtonGroup>
-        </Box>
       </Box>
     </Box>
   ) : (

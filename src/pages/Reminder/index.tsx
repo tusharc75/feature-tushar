@@ -8,6 +8,7 @@ import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
 import Layout from "../../components/Layout";
 import { ListRelatedTo } from "../../components/Activity/Helpers/ListRelatedTo";
 import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
+import { MdDateRange } from 'react-icons/md';
 
 const Reminder = () => {
   const [events, setEvents] = useState([]);
@@ -67,7 +68,7 @@ const Reminder = () => {
     <Chip
       size="small"
       icon={
-        <CalendarToday
+        <MdDateRange size={10}
           style={{
             color:
               new Date(data).getFullYear() < new Date().getFullYear() ||
@@ -80,7 +81,7 @@ const Reminder = () => {
                 ? "#28a745"
                 : "#838485",
           }}
-          fontSize="small"
+          
         />
       }
       label={
