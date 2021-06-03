@@ -53,6 +53,7 @@ const ProjectSalesDetails = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [deleteRec, setDeleteRec] = useState(null);
   const [removeUserRec, setRemoveUserRec] = useState(null);
+  const [isDeleting, setDeleting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
@@ -205,13 +206,16 @@ const ProjectSalesDetails = () => {
 
   const DeleteProject = () => {
     if (deleteRec) {
+      setDeleting(true);
       axiosInstance()
         .put(`/project-sales/remove`, { ids: [deleteRec] })
         .then(({ data }) => {
+          setDeleting(false);
           setShowConfirmBox(false);
           history.goBack();
         })
         .catch((err) => {
+          setDeleting(false);
           setShowConfirmBox(false);
         });
     } else {
@@ -235,14 +239,16 @@ const ProjectSalesDetails = () => {
           .map((user) => user._id),
         _id: id,
       };
-
+      setDeleting(true);
       axiosInstance()
         .put(`/project-sales/add-user`, dataObj)
         .then(() => {
           getSalesData();
+          setDeleting(false);
           setShowConfirmBox(false);
         })
         .catch((error) => {
+          setDeleting(false);
           setShowConfirmBox(false);
           toastConfig.setToastConfig(error);
         });
@@ -348,19 +354,16 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
-                        size="small" 
+                        size="small"
                         onClick={handleOpenUpdateDialog}
                       >
                         Edit
                       </Button>
                     ) : null}
-
-                    <Box component="span" marginX={1} />
-
                     {permissions?.projectSales.isDelete && isManager ? (
                       <DeleteButton
                         text="Delete"
@@ -373,8 +376,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                    !projectSalesFields.length ||
-                    !projectSalesData ? (
+                  !projectSalesFields.length ||
+                  !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -419,8 +422,9 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${node.id
-                                    }`,
+                                  pathname: `${routes[node.route].path}/${
+                                    node.id
+                                  }`,
                                 });
                               }
                             }}
@@ -463,7 +467,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                      isManager ? (
+                    isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -539,8 +543,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-                : ""
+              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+              : ""
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -548,6 +552,7 @@ const ProjectSalesDetails = () => {
             if (removeUserRec) setRemoveUserRec(null);
           }}
           onOk={deleteRec ? DeleteProject : removeUserRec ? RemoveUser : null}
+          okBtnLoading={isDeleting}
         />
       ) : null}
     </>

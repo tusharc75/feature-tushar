@@ -146,6 +146,7 @@ const OrgChart = ({
                    </div>
            </div>
         </div> ` ;
+
         const orgChartDiv = document.getElementById(chartId);
         if (orgChartDiv) {
             chart = new google.visualization.OrgChart(orgChartDiv);
@@ -185,17 +186,21 @@ const OrgChart = ({
                 !p.parentId || p.parentId === "0" ? null : `${p.parentId}`,
                 p.title,
             ]);
+
             data.addRows(orgPositions);
 
             chart.draw(data, {
                 allowHtml: true,
                 nodeClass: "google-visualization-orgchart-node",
+                explorer: {
+                    actions: ['dragToZoom', 'rightClickToReset']
+                }
             });
         }
     };
 
     return (
-        <div id={chartId} className="org-chart" />
+        <div id={chartId} style={{ overflow: "auto" }}></div>
     );
 };
 

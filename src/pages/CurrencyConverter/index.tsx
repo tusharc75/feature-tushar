@@ -135,7 +135,7 @@ const CurrencyConverter = () => {
         </div>
         <div className="listing-grid">
           <Box p={1}>
-            <Grid container>
+            <Grid container className="greyBox">
               <Grid item xs={6}>
                 <Autocomplete
                   multiple

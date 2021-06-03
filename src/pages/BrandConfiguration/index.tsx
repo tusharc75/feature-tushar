@@ -41,7 +41,7 @@ export default function BrandConfiguration(props) {
     }
     const getBrandFields = (id) => {
         axiosInstance()
-            .get(`/sa-field?brand=${id}&resource=Brand`)
+            .get(`/field?brand=${id}&resource=Brand`)
             .then(({ data: { data } }) => {
                 setBrandFields(data);
                 setLoading(false);
@@ -78,6 +78,7 @@ export default function BrandConfiguration(props) {
                 toastConfig.setToastConfig(error);
             });
     }
+
     return <>
         {
             openUpdateDialog && (
@@ -86,7 +87,7 @@ export default function BrandConfiguration(props) {
                     openDialog={openUpdateDialog}
                     onClose={closeUpdateDIalog}
                     data={brandDetails}
-                    fields={brandFields}
+                    fields={brandFields.filter(o => o?.fieldData?.fieldName !== "servicesAccess")}
                     isUpdating={isUpdating}
                     handleUpdate={handleUpdate}
                 />
@@ -96,7 +97,7 @@ export default function BrandConfiguration(props) {
             <Grid container className="headerbox">
                 <CustomBreadCrumbs routes={[routes.brandConfiguration]} />
             </Grid>
-            <Grid container spacing={1} className="detail-container" style={{ padding: '0 50px' }}>
+            <Grid container spacing={1} className="detail-container">
                 <Grid item xs={12} sm={12} lg={12} >
                     <Paper>
                         {
@@ -119,7 +120,7 @@ export default function BrandConfiguration(props) {
                                         <Button
                                             variant="contained"
                                             color="primary"
-                                            size="small" 
+                                            size="small"
                                             onClick={handleOpenUpdateDialog}>Edit</Button>
                                     </div>
                                     <Divider />
