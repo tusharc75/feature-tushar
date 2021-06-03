@@ -41,7 +41,7 @@ const ProductBuilder = (props) => {
     const { productBuilderId,
         isAddNewProduct, setIsAddNewProduct,
         isAddExistingProduct, setIsAddExistingProduct,
-        refreshProducts, Editable } = props;
+        refreshProducts, Editable, stage } = props;
 
     const toastConfig = useContext(CustomToastContext)
 
@@ -60,9 +60,8 @@ const ProductBuilder = (props) => {
         fetchProduct(productBuilderId);
     }, [productBuilderId]);
 
-
     let ActionsColoum: any = {
-        field: "actions", headerName: "Actions ",
+        field: "actions", headerName: "Actions",
         renderCell: (params) => (
             <Fragment>
                 <Tooltip title="Edit" >
@@ -95,6 +94,7 @@ const ProductBuilder = (props) => {
             setColumns(null);
             let column = [{ field: 'id', headerName: 'id', hide: true }]
             data.forEach((row) => {
+                //let _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
                 row.fields.forEach((ele) => {
                     if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                         if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
@@ -163,7 +163,7 @@ const ProductBuilder = (props) => {
                                 )
                             }
                             else {
-                                col.renderCell = (params) => (params.row[ele.fieldName] ?
+                                col.renderCell = (params) => (params.row[ele.fieldName] || params.row[ele.fieldName] === 0 ?
                                     typeof params.row[ele.fieldName] === 'object' ? params.row[ele.fieldName]["optionLabel"] : params.row[ele.fieldName]
                                     : <NoDataCell />)
                             }
@@ -350,10 +350,10 @@ const ProductBuilder = (props) => {
             }
         </Box>
         {isAddNewProduct && <CreateProduct isClone={false} productId={null} handleClose={() => setIsAddNewProduct(false)}
-            isAddInBuilder={true} addProductInBuilder={addProductInBuilder}
+            isAddInBuilder={true} addProductInBuilder={addProductInBuilder} openFrom="builder"
         />}
         {isAddExistingProduct && <AddExistingProduct addProductInBuilder={addProductInBuilder} handleClose={() => setIsAddExistingProduct(false)} />}
-        {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} />}
+        {productData && <ProductDialog productData={productData} handleSaveProduct={handleSaveProduct} handleClose={() => setProductData(null)} stage={stage} />}
         {isAddField && <AddField refrence="builder" section={addFieldData.section}
             fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={addFieldData.fields} />
         }

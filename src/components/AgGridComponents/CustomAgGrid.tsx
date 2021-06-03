@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { TablePagination } from '@material-ui/core';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -6,15 +6,19 @@ import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight } from
 import CustomGridHeaderOptions from './CustomGridHeaderOptions';
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
-    setGridApi, allowSelection = true, allowAction = true, actionWidth = 200 }) {
+    setGridApi, allowSelection = true, allowAction = true, actionWidth = 200, isClientSideGrid = false }) {
 
     const [, setColumns] = useState(columns);
     const [columnApi, setColumnApi] = useState(null);
 
+    const [clientSideGridApi, setClientSideGridApi] = useState(null);
+
     //  If you want to do something once grid binding done
     const onGridReady = (params) => {
         setGridApi(params.api);
-        setColumnApi(params.columnApi)
+        setColumnApi(params.columnApi);
+
+        setClientSideGridApi(params.api);
     }
 
     var customFilterParams = {
@@ -27,30 +31,45 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
     };
 
     const generateColumns = columns.map((column: any, index) => {
-        return <AgGridColumn
-            key={index}
-            field={column.field}
-            headerName={column.headerName}
-            filter={column.filter ?? "agTextColumnFilter"}
-            sortable={column.sortable ?? true}
-            cellRenderer={column.cellRenderer ?? null}
-            minWidth={column.width ?? 250}
-            flex={1}
-            filterParams={customFilterParams}
-            comparator={() => { return 0; }}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
-        >
-        </AgGridColumn >
+        return isClientSideGrid ?
+            <AgGridColumn
+                key={index}
+                field={column.field}
+                headerName={column.headerName}
+                filter={column.filter ?? "agTextColumnFilter"}
+                sortable={column.sortable ?? true}
+                cellRenderer={column.cellRenderer ?? null}
+                minWidth={column.width ?? 250}
+                flex={1}
+            // floatingFilterComponent={column.floatingFilterComponent ?? null}
+            // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+            //   suppressFilterButton: true,
+            // }}
+            ></AgGridColumn>
+            : <AgGridColumn
+                key={index}
+                field={column.field}
+                headerName={column.headerName}
+                filter={column.filter ?? "agTextColumnFilter"}
+                sortable={column.sortable ?? true}
+                cellRenderer={column.cellRenderer ?? null}
+                minWidth={column.width ?? 250}
+                flex={1}
+                filterParams={customFilterParams}
+                comparator={() => { return 0; }}
+            // floatingFilterComponent={column.floatingFilterComponent ?? null}
+            // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+            //   suppressFilterButton: true,
+            // }}
+            >
+            </AgGridColumn>
     })
 
     return (
         <>
             <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
-            <div className="ag-theme-material ag-grid-listing-grid">
+            <div className={`ag-theme-material ag-grid-listing-grid`}>
                 <AgGridReact
                     rowData={dataRows}
                     onGridReady={onGridReady}
@@ -72,10 +91,18 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                         floatingFilterComponentParams: { suppressFilterButton: true }
                     }}
                     onSortChanged={() => {
-                        dispatch({ type: "sort", sorting: columnApi.getColumnState().filter(d => ["asc", "desc"].some(s => s === d.sort)) });
+                        if (!isClientSideGrid) {
+                            dispatch({ type: "sort", sorting: columnApi.getColumnState().filter(d => ["asc", "desc"].some(s => s === d.sort)) });
+                        }
                     }}
                     onFilterChanged={(e) => {
-                        dispatch({ type: "filter", filters: e.api.getFilterModel() });
+                        if (isClientSideGrid) {
+                            clientSideGridApi.paginationGoToPage(0);
+                            dispatch({ type: "count", count: clientSideGridApi.getModel().rootNode.allChildrenCount });
+                            dispatch({ type: "pageChange", page: 0 });
+                        } else {
+                            dispatch({ type: "filter", filters: e.api.getFilterModel() });
+                        }
                     }}
                     enableCellTextSelection={true}
                     ensureDomOrder={false}
@@ -104,6 +131,10 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     getRowNodeId={(data) => {
                         return data._id;
                     }}
+
+                    pagination={true}
+                    suppressPaginationPanel={true}
+                    paginationPageSize={limit}
                 >
                     {
                         allowSelection && <AgGridColumn width={70} filter={false} pinned="left" lockPinned={true}
@@ -134,11 +165,20 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                 count={rowCount}
                 page={page}
                 onChangePage={(event, newPage) => {
-                    dispatch({ type: "pageChange", page: newPage })
+                    dispatch({ type: "pageChange", page: newPage });
+
+                    if (clientSideGridApi) {
+                        clientSideGridApi.paginationGoToPage(newPage);
+                    }
                 }}
                 rowsPerPage={limit}
                 onChangeRowsPerPage={(event) => {
-                    dispatch({ type: "pageSizeChange", limit: event.target.value })
+                    dispatch({ type: "pageSizeChange", limit: event.target.value });
+
+                    if (clientSideGridApi) {
+                        clientSideGridApi.paginationGoToPage(0);
+                        clientSideGridApi.paginationSetPageSize(event.target.value);
+                    }
                 }}
                 rowsPerPageOptions={pageSizes}
             />

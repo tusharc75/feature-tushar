@@ -58,7 +58,7 @@
   border: 1px solid lightgray !important;
 }
 
-.ag-theme-material input[class^='ag-'][type='text']{
+.ag-theme-material input[class^="ag-"][type="text"] {
   padding-bottom: 2px;
   height: 20px;
 }
@@ -306,7 +306,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .ag-grid-listing-grid {
-  height: calc(100vh - 255px);
+  height: calc(100vh - 260px);
   padding: 0 4px 0;
 }
 
@@ -636,3 +636,6 @@ body::-webkit-scrollbar-thumb {
   background: #f0f0f0;
 }
 
+.google-visualization-orgchart-table {
+  margin: 0 auto !important;
+}
