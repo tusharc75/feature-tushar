@@ -237,7 +237,7 @@ const Product = () => {
                     setDeleteRecord(params.data);
                     setShowDeleteConfirmBox(true)
                 }} >
-                    <DeleteIcon fontSize="small" />
+                    <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
             </Tooltip >
         </>
