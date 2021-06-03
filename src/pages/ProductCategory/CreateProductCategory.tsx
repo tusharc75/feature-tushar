@@ -62,7 +62,7 @@ const CreateProductCategory = (props) => {
         else {
             axiosInstance().post(`/product-category`, values).then(({ data: { data } }) => {
                 setLoading(false);
-                handleClose()
+                handleClose(data)
             }).catch((error) => {
                 setLoading(false);
                 toastConfig.setToastConfig(error);

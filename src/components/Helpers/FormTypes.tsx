@@ -42,6 +42,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
+import { imageUploadMaxSize } from "../../constants/helpers";
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -227,12 +228,11 @@ const FormTypes = (props) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
 
-      //  1048576 = 1 MB
-      if (file.size > 1048576) {
+      if (file.size > imageUploadMaxSize.size) {
         setToastConfig({
           open: true,
           type: "error",
-          message: "Image must be less than 1 MB size",
+          message: `Image must be less than ${imageUploadMaxSize.text} size`,
         });
       } else {
         getImageUrl(file);
