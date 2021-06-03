@@ -7,6 +7,8 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CopyToClipboard from '../components/Helpers/CopyToClipboard'
 import { FcApproval } from 'react-icons/fc';
 import { isMobile, isTablet } from "react-device-detect";
+import routes from "./Helpers/Routes";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -80,26 +82,51 @@ const DetailsPageHeader = (props) => {
             Object.keys(mainPoints).map((key, i) => {
               return (
                 <React.Fragment key={i}>
-                  {mainPoints[key] ? (
-                    <Box className={classes.box}>
-                      <Typography
-                        align="center"
-                        variant="subtitle1"
-                        style={{ opacity: 0.9 }}
-                        className={`text-capitalize ${classes.labelColor}`}
-                      >
-                        {key}
-                      </Typography>
-                      <Typography
-                        align="center"
-                        className={classes.labelColor}
-                        style={{ fontWeight: 500 }}
-                      >
-                        {mainPoints[key] || ""}
-                        {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: "white" }} /> : null}
-                      </Typography>
-                    </Box>
-                  ) : null}
+                  {mainPoints[key] ?
+                    (key === "Parent Lead" ?
+                      (
+                        <Box className={classes.box}>
+                          <Typography
+                            align="center"
+                            variant="subtitle1"
+                            style={{ opacity: 0.9 }}
+                            className={`text-capitalize ${classes.labelColor}`}
+                          >
+                            {key}
+                          </Typography>
+                          <Link className="link" title={mainPoints[key].leadName}
+                            to={`${routes.leadDetail.path}/${mainPoints[key].leadId}`}>
+                            {<Typography
+                              align="center"
+                              className={classes.labelColor}
+                              style={{ fontWeight: 500 }}
+                            >
+                              {mainPoints[key].leadName || ""}
+                            </Typography>}
+                          </Link>
+
+                        </Box>
+                      )
+                      : (
+                        <Box className={classes.box}>
+                          <Typography
+                            align="center"
+                            variant="subtitle1"
+                            style={{ opacity: 0.9 }}
+                            className={`text-capitalize ${classes.labelColor}`}
+                          >
+                            {key}
+                          </Typography>
+                          <Typography
+                            align="center"
+                            className={classes.labelColor}
+                            style={{ fontWeight: 500 }}
+                          >
+                            {mainPoints[key] || ""}
+                            {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: "white" }} /> : null}
+                          </Typography>
+                        </Box>
+                      )) : null}
                 </React.Fragment>
               );
             })
