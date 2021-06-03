@@ -54,7 +54,7 @@ function LeadsHeader(props) {
     } = props;
 
     return <Grid className={styles.filter_side_container} container>
-        <Grid item xs={12} className="d-flex align-items-center gap-1">
+        <Grid item xs={12} md={4} sm={5} className="d-flex align-items-center gap-1">
             {icon} <span className="listingHeader">{heading}
             </span>
             {
@@ -71,7 +71,7 @@ function LeadsHeader(props) {
                 </ToggleButtonGroup>
             }
         </Grid>
-        <Grid item xs={12} className="d-flex align-items-center gap-2" justify="flex-end">
+        <Grid item xs={12} md={8} sm={7} className="d-flex align-items-center gap-2" justify="flex-end">
             <SearchBox
                 onSearch={onSearch}
                 searchbox={styles.search_box_input}

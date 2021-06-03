@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../../components/Layout";
@@ -13,7 +13,14 @@ import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
 import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../../components/CustomContainer";
+import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { GoNote } from "react-icons/go";
+import { Button, Dialog } from "@material-ui/core";
+import { AddOutlined } from "@material-ui/icons";
+import { CreateNote } from "../../../components/Activity/Note/CreateNote";
+import { CustomDialogTransition } from "../../../constants/helpers";
+import { isMobile, isTablet } from "react-device-detect";
+import { useData } from "../../../StateProvider/Provider";
 import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
 import {
     CommonRenderer,
@@ -39,6 +46,7 @@ function reducer(state, action) {
                 ...state,
                 dataRows: action.data,
                 rowCount: action.count,
+                page: 0,
                 loading: false
             }
 
@@ -91,6 +99,7 @@ function reducer(state, action) {
                 loading: true
             }
 
+
         case "count":
             return {
                 ...state,
@@ -125,13 +134,18 @@ const intialState = {
 }
 
 const Note = () => {
+    const {
+        state: { user, permissions },
+    }: any = useData();
     const history = useHistory();
+    const toastConfig = useContext(CustomToastContext);
     const parsed = queryString.parse(history.location.search);
     const { referenceType, referenceId, activityType, activityId } = parsed;
-
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [isNew, setIsNew] = useState(false);
     const [filter, setFilter] = useState([]);
-    // const [notes, setNotes] = useState([]);
-    // const [loading, setLoading] = useState(true);
+    const [notes, setNotes] = useState([]);
+    const [noteData, setNoteData] = useState(null);
     const [noteId, setNoteId] = useState(undefined)
 
     //  Grid Variables - Start
@@ -154,6 +168,7 @@ const Note = () => {
                     setFilter([{ "_id": referenceId, "type": referenceType, "name": data.name }])
                 })
                 .catch((err) => {
+                    toastConfig.setToastConfig(err);
                 });
         }
     }, [referenceId]);
@@ -163,8 +178,19 @@ const Note = () => {
         fetchNotes()
     }, [filter]);
 
+    const handleClose = () => {
+        setShowCreateDialog(false);
+        setIsNew(false);
+        fetchNotes();
+    }
+
+    const handleDialogClose = () => {
+        setShowCreateDialog(false);
+        setIsNew(false);
+    }
+
     const NameRenderer = params => (
-        <span className="link cursor-pointer" onClick={() => handleActivityOpen(params.data.id)}>
+        <span className="link cursor-pointer" onClick={() => handleActivityOpen(params.data)}>
             {params.value}
         </span>
     )
@@ -199,7 +225,7 @@ const Note = () => {
             .then(({ data }) => {
 
                 let rows = data.map((u) => {
-                    const { createdBy, updatedBy, relatedTo, parentHierarchy, ...restProperties } = u;
+                    const { createdBy, updatedBy, relatedTo, ...restProperties } = u;
 
                     let res = {
                         ...restProperties,
@@ -213,9 +239,11 @@ const Note = () => {
                     return res;
                 });
 
-                dispatch({ type: "initialize", data: rows, count: data.length });
+                dispatch({ type: "initialize", data: rows, count: data.length, page: 0 });
             })
             .catch((err) => {
+                toastConfig.setToastConfig(err);
+
             });
     };
 
@@ -224,12 +252,14 @@ const Note = () => {
     }
 
 
-    const handleActivityOpen = (id) => {
+    const handleActivityOpen = (data) => {
         // history.push({
         //     pathname: '/activity/note',
         //     search: '?activityType=note&activityId=' + id
         // })
-        setNoteId(id)
+        setShowCreateDialog(true);
+        setNoteData(data);
+
     }
 
 
@@ -274,13 +304,24 @@ const Note = () => {
                     </Grid>
                     <Grid item xs={10} className={styles.filter_side}>
                         <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }} >
-                            <Box style={{ width: '90%' }}>
-                                <SearchFilter
-                                    handleChangeFilter={handleChangeFilter}
-                                    filter={filter}
-                                    chip={{ size: "small" }}
-                                />
-                            </Box>
+                            <SearchFilter
+                                handleChangeFilter={handleChangeFilter}
+                                filter={filter}
+                                chip={{ size: "small" }}
+                            />
+                            <Button
+
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                className={styles.add_submit_btn}
+                                onClick={() => {
+                                    setIsNew(true)
+                                    setShowCreateDialog(true)
+                                }}
+                                startIcon={<AddOutlined />}>
+                                Add
+                                </Button>
                         </Box>
                     </Grid>
                 </Grid>
@@ -313,6 +354,30 @@ const Note = () => {
                 onClose={() => setNoteId(undefined)}
             />}
         </CustomContainer>
+        {
+            showCreateDialog &&
+            <Dialog
+                open={showCreateDialog}
+                fullScreen={isMobile || isTablet}
+                TransitionComponent={CustomDialogTransition}
+                aria-labelledby="customized-dialog-title"
+                maxWidth={"md"}
+                onClose={handleDialogClose}
+                fullWidth
+            >
+                <CreateNote
+                    noteId={isNew ? null : noteData?.id}
+                    relatedTo={[{ type: "my", name: user?.user?._id }]}
+                    handleClose={handleClose}
+                    handleDialogClose={handleDialogClose}
+
+
+                // noteData={noteData}
+                />
+
+
+            </Dialog>
+        }
     </Layout>
 
     );

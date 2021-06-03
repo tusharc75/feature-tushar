@@ -42,6 +42,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
+import { imageUploadMaxSize } from "../../constants/helpers";
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -227,12 +228,11 @@ const FormTypes = (props) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
 
-      //  1048576 = 1 MB
-      if (file.size > 1048576) {
+      if (file.size > imageUploadMaxSize.size) {
         setToastConfig({
           open: true,
           type: "error",
-          message: "Image must be less than 1 MB size",
+          message: `Image must be less than ${imageUploadMaxSize.text} size`,
         });
       } else {
         getImageUrl(file);
@@ -705,14 +705,6 @@ const FormTypes = (props) => {
         value={values[name]}
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
-        // InputProps={{
-        //   inputComponent: CustomFormat as any,
-        //   inputProps: {
-        //     decimalScale: decimalPlaces ? decimalPlaces : 2,
-        //     onValueChange: (values: any) =>
-        //       setFieldValue(name, values.formattedValue),
-        //   },
-        // }}
         onChange={
           onChange
             ? onChange
@@ -724,7 +716,8 @@ const FormTypes = (props) => {
             }
         }
         InputProps={{
-          inputProps: { min: 0 }
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
       />
     </InfoLabel>
@@ -741,15 +734,9 @@ const FormTypes = (props) => {
         error={touched[name] && Boolean(errors[name])}
         helperText={touched[name] && errors[name]}
         InputProps={{
-          // inputComponent: CustomFormat as any,
-          // inputProps: {
-          //   isAllowed: (props) => withValueLimit(props, 100),
-          //   decimalScale: 2,
-          //   onValueChange: (values: any) =>
-          //     setFieldValue(name, values.formattedValue),
-          // },
           endAdornment: "%",
-          inputProps: { min: 0 }
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
         onChange={
           onChange
@@ -787,7 +774,8 @@ const FormTypes = (props) => {
             }
         }
         InputProps={{
-          inputProps: { min: 0 }
+          inputProps: { min: 0 },
+          readOnly: (fieldData && fieldData.isUneditable) ? true : false
         }}
       />
     </InfoLabel>
@@ -927,7 +915,8 @@ const FormTypes = (props) => {
                 : (e) => handleConverterChange(name, _unit, e.target.value.replace(/[^0-9\.]/g, ''))
             }
             InputProps={{
-              inputProps: { min: 0 }
+              inputProps: { min: 0 },
+              readOnly: (fieldData && fieldData.isUneditable) ? true : false
             }}
           />
         </InfoLabel>
@@ -1017,7 +1006,8 @@ const FormTypes = (props) => {
                       )}
                     </InputAdornment>
                   ),
-                  inputProps: { min: 0 }
+                  inputProps: { min: 0 },
+                  readOnly: (fieldData && fieldData.isUneditable) ? true : false
                 }}
               />
             </InfoLabel>
@@ -1071,7 +1061,8 @@ const FormTypes = (props) => {
                     )}
                   </InputAdornment>
                 ),
-                inputProps: { min: 0 }
+                inputProps: { min: 0 },
+                readOnly: (fieldData && fieldData.isUneditable) ? true : false
               }}
             />
           </InfoLabel>

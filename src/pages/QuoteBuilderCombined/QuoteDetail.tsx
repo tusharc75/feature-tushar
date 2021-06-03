@@ -61,7 +61,6 @@ import {
 import { quoteBuilder } from '../../constants/helpers'
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import ProductBuilder from "../../components/productBuilder";
-import { isNonNullChain } from "typescript";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -91,7 +90,7 @@ const MenuProps = {
 };
 
 const recordsPerLine = 3;
-
+const fixedVisibleColumns = ["productName", "qty", "productCategory", "unit", "salesPricePerUnit", "totalSalesPrice", "description"]
 
 function QuoteDetail() {
 
@@ -1013,7 +1012,7 @@ function QuoteDetail() {
       KeyValuePairs = [...KeyValuePairs, KeyValue];
     }
     setColName(ColName);
-    if (columnView.length > 0) {
+    if (columnView.length > 0 ) {
       setVisibleColumnName(columnView)
     }
     else {
@@ -1289,8 +1288,8 @@ function QuoteDetail() {
               <div className="m-3">
                 {loadPB ? (
                   <Grid container className="position-relative">
-                    <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center justify-content-start gap-1">
-                      {ProcessStatus === "New" ?
+                    <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
+                      {ProcessStatus === "New" || ProcessStatus === "Price Builder" ?
                         (<span className="productStep">
                           <Button variant="outlined" size="small" className="mr-1" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
                           <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
@@ -1327,10 +1326,10 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                      {ProcessStatus === "DOA Process" || ProcessStatus === "Customer Process" ? (<span className="productStep">
+                      {ProcessStatus === "DOA Process" || ProcessStatus === "Customer Process" ? (<span className="d-flex align-items-center justify-content-end">
                         <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></span>) : null}
                     </Grid>
-                    {ProcessStatus === "Quote Builder" ? (<span>
+                    {ProcessStatus === "Quote Builder" ? (<span  className="d-flex align-items-center justify-content-end">
                         <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" className="mr-1" startIcon={<AiOutlineEye />} color="primary">View</Button>
                         <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
                       </span>)
@@ -1343,7 +1342,8 @@ function QuoteDetail() {
                         isAddExistingProduct={isAddExistingProduct}
                         setIsAddExistingProduct={setIsAddExistingProduct}
                         refreshProducts={refreshProducts}
-                        Editable={ProcessStatus === "Price Builder" ? true : false}
+                        stage={ProcessStatus === "New" ? "product" : "cost"}
+                        Editable={ProcessStatus === "New" ||  ProcessStatus === "Price Builder" ? true : false}
                       />
                       {ProcessStatus === "Quote Builder" ?
                         (<Box>

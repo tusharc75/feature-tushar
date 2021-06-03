@@ -54,7 +54,7 @@ export default function UserProfile(props) {
                                 placement === "bottom" ? "center top" : "center bottom",
                         }}
                     >
-                        <Paper className="userLinks">
+                        <Paper>
                             <ClickAwayListener onClickAway={onClose}>
                                 <MenuList
                                     autoFocusItem={open}
