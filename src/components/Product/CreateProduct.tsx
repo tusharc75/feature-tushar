@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import { Box, Tooltip, Grid, Button } from '@material-ui/core';
+import AddIcon from "@material-ui/icons/AddCircle";
+import InfoIcon from "@material-ui/icons/Info";
 import { Formik, Form, Field } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -19,12 +19,15 @@ import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import { AddField } from '../FormBuilder/AddField';
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "./../../constants/helpers";
+import { useData } from "../../StateProvider/Provider";
+import CreateProductCategory from "../../pages/ProductCategory/CreateProductCategory";
 
 
 const ignoreField = ["qty"]
 
 const CreateProduct = (props) => {
 
+    const { state: { permissions } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
     const { productId, handleClose, isClone, isAddInBuilder, addProductInBuilder, openFrom } = props;
     const [masterFields, setMasterFields] = useState([]);
@@ -38,6 +41,10 @@ const CreateProduct = (props) => {
     const ref = useRef(null);
     const [productTemplate, setProductTemplate] = useState([]);
     const [isStandardTemplate, setIsStandardTemplate] = useState(false);
+
+    const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
+    const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
+    const [newProductCategoryId, setNewProductCategoryId] = useState(null);
 
 
     useEffect(() => {
@@ -84,6 +91,25 @@ const CreateProduct = (props) => {
                 });
                 EvaluteproductFields(_fields)
             }
+
+            if (_fields.length > 0) {
+                const productCategoryDropdownData = _fields.find(
+                    (d) => d.fieldName === "productCategory"
+                );
+
+                if (productCategoryDropdownData) {
+                    if (!productId) {
+                        setProductCategoryDataSource(productCategoryDropdownData.option);
+                    } else {
+                        let currentContactRemovedDataSource =
+                            productCategoryDropdownData.option.filter(
+                                (d) => d.optionValue !== newProductCategoryId
+                            );
+                        setProductCategoryDataSource(currentContactRemovedDataSource);
+                    }
+                }
+            }
+
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
@@ -191,6 +217,18 @@ const CreateProduct = (props) => {
         setIsAddField(false)
     }
 
+    const initializeProductCategoryDropdown = (values, productCategorySource) => {
+        if (values && values.hasOwnProperty("productCategory")) {
+            const getNewAddedProductCategory = productCategorySource.find(
+                (d) => d.optionValue === newProductCategoryId
+            );
+            if (getNewAddedProductCategory) {
+                values["productCategory"] = getNewAddedProductCategory.optionValue;
+            }
+            return values;
+        }
+        return values;
+    };
 
     return (<Dialog
         maxWidth="md"
@@ -231,7 +269,96 @@ const CreateProduct = (props) => {
                                                     {section.sectionFields && section.sectionFields.map((field) => (
                                                         field.fieldName === "productCategory" ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                                                <FormTypes
+
+                                                                <Grid container spacing={1}>
+                                                                    <Grid
+                                                                        item
+                                                                        xs={
+                                                                            //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
+                                                                            // permissions.productCategory
+                                                                            //     .isCreate
+                                                                            true ? 10
+                                                                                : 11
+                                                                        }
+                                                                        sm={
+                                                                            // permissions.productCategory
+                                                                            //     .isCreate
+                                                                            true ? 10
+                                                                                : 11
+                                                                        }
+                                                                        md={
+                                                                            // permissions.productCategory
+                                                                            //     .isCreate
+                                                                            true ? 10
+                                                                                : 11
+                                                                        }
+                                                                    >
+                                                                        <FormTypes
+                                                                            fields={initialData.fields}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            setFieldValue={setFieldValue}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field.isTooltip}
+                                                                            tooltipMessage={field.tooltipMessage}
+                                                                            decimalPlaces={field.decimalPlaces}
+                                                                            disableClearable
+                                                                            onChange={(e, val) => {
+                                                                                setNewProductCategoryId(null);
+                                                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
+                                                                                handleChangeCategory(val && val.optionValue ? val.optionValue : "", true)
+                                                                            }}
+                                                                            size="small"
+                                                                            values={
+                                                                                newProductCategoryId
+                                                                                    ? initializeProductCategoryDropdown(
+                                                                                        values,
+                                                                                        productCategoryDataSource
+                                                                                    )
+                                                                                    : values
+                                                                            }
+                                                                            options={productCategoryDataSource}
+                                                                        />
+                                                                    </Grid>
+
+                                                                    {
+                                                                        // permissions.productCategory
+                                                                        //     .isCreate
+                                                                        true && (
+                                                                            <Grid item xs={1} sm={1} md={1}>
+                                                                                <Tooltip
+                                                                                    title="Add Product Category"
+                                                                                    className="mt-1"
+                                                                                >
+                                                                                    <IconButton
+                                                                                        onClick={() => { setShowAddProductCategoryDialog(true); }}
+                                                                                        size="small"
+                                                                                    >
+                                                                                        <AddIcon color="primary" />
+                                                                                    </IconButton>
+                                                                                </Tooltip>
+                                                                            </Grid>
+                                                                        )
+                                                                    }
+                                                                    {field?.tooltipMessage ? (
+                                                                        <Grid item xs={1} sm={1} md={1}>
+                                                                            <Tooltip
+                                                                                title={
+                                                                                    field?.tooltipMessage ?? ""
+                                                                                }
+                                                                            >
+                                                                                <InfoIcon color="disabled" />
+                                                                            </Tooltip>
+                                                                        </Grid>
+                                                                    ) : null}
+                                                                </Grid>
+
+
+                                                                {/* <FormTypes
                                                                     fields={initialData.fields}
                                                                     values={values}
                                                                     errors={errors}
@@ -252,7 +379,8 @@ const CreateProduct = (props) => {
                                                                         handleChangeCategory(val && val.optionValue ? val.optionValue : "", true)
                                                                     }}
                                                                     size="small"
-                                                                />  </Grid> :
+                                                                /> */}
+                                                            </Grid> :
                                                             field.fieldName === "productTemplate" ?
                                                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                     <FormTypes
@@ -346,6 +474,33 @@ const CreateProduct = (props) => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
         {isAddField && <AddField fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={initialData.fields} />}
+
+        {
+            showAddProductCategoryDialog && <CreateProductCategory
+                productCategoryId={null}
+                handleClose={(data) => {
+
+                    if (data?._id) {
+                        setProductCategoryDataSource((prevState) => {
+                            return [
+                                ...prevState,
+                                {
+                                    optionValue: data._id,
+                                    optionLabel: data.name,
+                                    order: productCategoryDataSource.length,
+                                    default: false,
+                                },
+                            ];
+                        });
+                        setNewProductCategoryId(data._id);
+                        handleChangeCategory(data._id, true)
+                    }
+                    setShowAddProductCategoryDialog(false);
+                    // fetchProductCategory();
+
+                }}
+            />
+        }
     </Dialog>
     );
 }

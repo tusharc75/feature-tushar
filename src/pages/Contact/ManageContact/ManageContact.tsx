@@ -55,7 +55,6 @@ export default function ManageContact(props) {
   const disableOwnerSelection =
     !isNew && user.user._id !== contactData.initialValues.owner;
 
-  console.log(disableOwnerSelection);
   //  Owner, Collaborator Code - Start
   const [formsData, setFormsData] = useState([]);
   const [
