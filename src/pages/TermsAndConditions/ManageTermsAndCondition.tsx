@@ -18,12 +18,14 @@ import FormTypes from '../../components/Helpers/FormTypes'
 import CustomButton from "../../components/Helpers/CustomButton";
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
+import { CustomDialogTransition } from "./../../constants/helpers";
+import htmlToDraft from 'html-to-draftjs';
 
 import {
     EditorState,
+    ContentState,
     convertToRaw,
-    convertFromRaw
+    convertFromRaw,
 } from 'draft-js'
 import { RichTextEditor } from '../../components/RichEditor/RichEditor'
 
@@ -43,9 +45,6 @@ const useStyles = makeStyles((theme) => ({
     },
     fileUpload: {
         width: '50%'
-    },
-    link: {
-
     }
 }));
 
@@ -104,6 +103,15 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
         }
     };
 
+    const appendData = (htmlData, setFieldValue) => {
+        if (htmlData) {
+            const blocksFromHtml = htmlToDraft(htmlData);
+            const { contentBlocks, entityMap } = blocksFromHtml;
+            const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
+            const editorState = EditorState.createWithContent(contentState);
+            setFieldValue('editorState', editorState)
+        }
+    }
 
     return <Dialog
         disableBackdropClick={true}
@@ -151,12 +159,15 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         isTooltip={true}
                                                         required={false}
                                                         type="fileUpload"
-                                                        accept=".doc, .docs, .docx"
+                                                        accept=".docx"
+                                                        uploadFileUrl="/doc-parser"
                                                         values={values}
                                                         errors={errors}
                                                         touched={touched}
                                                         size="small"
                                                         setFieldValue={(name, file) => setFieldValue("file", file)}
+                                                        onAppendData={(data) => appendData(data, setFieldValue)}
+                                                        doNotShowUploadedFile={true}
                                                     />
                                                 </Box>
                                                 <Box mt={2} >
