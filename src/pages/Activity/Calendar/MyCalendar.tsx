@@ -6,7 +6,7 @@ const localizer = momentLocalizer(moment);
 type Props = {
   activities: any[];
   setActivityData: any;
-  type: string;
+  type?: string;
 };
 
 const formats = {
@@ -15,7 +15,7 @@ const formats = {
 };
 
 const MyCalendar = (props: Props) => {
-  const { activities, setActivityData, type } = props;
+  const { activities, setActivityData } = props;
   return (
     <Calendar
       defaultDate={moment().toDate()}
@@ -27,7 +27,7 @@ const MyCalendar = (props: Props) => {
       popup={true}
       onSelectEvent={(event: any) => {
         setActivityData({
-          type,
+          type: event.type.toLowerCase(),
           id: event._id,
         });
       }}
