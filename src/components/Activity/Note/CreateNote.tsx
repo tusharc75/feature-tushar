@@ -26,6 +26,7 @@ import { IconButton, Paper } from "@material-ui/core";
 import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
 import { GoArrowDown } from "react-icons/go";
 import DeleteIcon from "@material-ui/icons/Delete";
+import GetAppIcon from '@material-ui/icons/GetApp';
 import ImageAttachments from "../Email/ImageAttachments";
 import ImagePreview from "../Email/ImagePreview";
 
@@ -69,7 +70,7 @@ const fileIcons = [
     }
 ]
 
-export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
+export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }) => {
 
     const [initialValues, setInitialValues] = useState(null);
     const [fileImageAttachments, setFileImageAttachments] = useState([])
@@ -207,23 +208,33 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                                             <Typography variant="subtitle2" >
                                                 {attachment ? attachment.substring(attachment.lastIndexOf("/") + 1,) : "attachment"}
                                             </Typography>
-                                            <span style={{display:'flex'}}>
-                                            <IconButton >
-                                                {
-                                                    <a href={`${attachment}`}
-                                                    download={true}>
-                                                    <GoArrowDown color="green" size={21} />
-                                                </a>
-                                                }
-                                            </IconButton>
-                                            <IconButton >
-                                                {
-                                                       <DeleteIcon className={emailStyles.deleteIcon} color='error'
-                                                        onClick={() => handleDeleteAttachment(attachment)}
-                                                    />
-                                                }
-                                            </IconButton>
-                                            </span>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '50%', float: 'right', bottom: '0' }}>
+                                                {noteId ? <>
+                                                    <IconButton style={{ paddingBottom: '1px' }}>
+                                                        {
+                                                            <a href={`${attachment}`}
+                                                                download={true}>
+                                                                <GetAppIcon />
+                                                            </a>
+                                                        }
+                                                    </IconButton>
+                                                    <IconButton >
+                                                        {
+                                                            <DeleteIcon color='error'
+                                                                onClick={() => handleDeleteAttachment(attachment)}
+                                                            />
+                                                        }
+                                                    </IconButton>
+                                                </> : 
+                                                <IconButton >
+                                                    {
+                                                        <DeleteIcon color='error'
+                                                            onClick={() => handleDeleteAttachment(attachment)}
+                                                        />
+                                                    }
+                                                </IconButton>}
+
+                                            </div>
                                         </div>
                                     </Paper>
                                 </Grid>
@@ -240,7 +251,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
     return (initialValues && <Formik initialValues={initialValues} validationSchema={NoteSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
             <>
-                <CustomDialogHeader onClose={handleClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
+                <CustomDialogHeader onClose={handleDialogClose} title={`${noteId ? "Edit" : "New"} Note`}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate >
                         <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -288,6 +299,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                                             }}
                                             onDelete={handleDeleteFileImageAttachment}
                                             emailId={noteId}
+                                            isRenderedFrom={true}
                                         />
                                         <Box mt={2}>
                                             <RichTextEditor
@@ -332,6 +344,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                                                 }}
                                                 onDelete={handleDeleteImageAttachment}
                                                 emailId={noteId}
+                                                isRenderedFrom={true}
                                             />
                                         </Box>
 
@@ -364,8 +377,8 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
                     </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                    <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
-                    <Button size="small" type="button" color="primary" variant="contained" onClick={submitForm}>Save </Button>
+                    <Button size="small" color="primary" onClick={handleDialogClose}>Cancel</Button>
+                    <Button size="small" type="button" color="primary" variant="contained" onClick={submitForm}>Save</Button>
                 </CustomDialogFooter>
                 {
                     open ?
@@ -394,5 +407,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose }) => {
 CreateNote.propTypes = {
     relatedTo: PropTypes.any,
     taskId: PropTypes.any,
-    handleClose: PropTypes.any
+    handleClose: PropTypes.any,
+    handleDialogClose: PropTypes.any
 }

@@ -46,6 +46,7 @@ function reducer(state, action) {
                 ...state,
                 dataRows: action.data,
                 rowCount: action.count,
+                page: 0,
                 loading: false
             }
 
@@ -183,6 +184,11 @@ const Note = () => {
         fetchNotes();
     }
 
+    const handleDialogClose =() =>{
+        setShowCreateDialog(false);
+        setIsNew(false);
+    }
+
     const NameRenderer = params => (
         <span className="link cursor-pointer" onClick={() => handleActivityOpen(params.data)}>
             {params.value}
@@ -219,7 +225,7 @@ const Note = () => {
             .then(({ data }) => {
 
                 let rows = data.map((u) => {
-                    const { createdBy, updatedBy, relatedTo, parentHierarchy, ...restProperties } = u;
+                    const { createdBy, updatedBy, relatedTo, ...restProperties } = u;
 
                     let res = {
                         ...restProperties,
@@ -233,7 +239,7 @@ const Note = () => {
                     return res;
                 });
 
-                dispatch({ type: "initialize", data: rows, count: data.length });
+                dispatch({ type: "initialize", data: rows, count: data.length, page: 0 });
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -356,13 +362,16 @@ const Note = () => {
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 maxWidth={"md"}
-                onClose={handleClose}
+                onClose={handleDialogClose}
                 fullWidth
             >
                 <CreateNote
                     noteId={isNew ? null : noteData?.id}
                     relatedTo={[{ type: "my", name: user?.user?._id }]}
                     handleClose={handleClose}
+                    handleDialogClose={handleDialogClose}
+                    
+                
                 // noteData={noteData}
                 />
 
