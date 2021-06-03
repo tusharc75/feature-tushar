@@ -165,10 +165,17 @@ const CreateProduct = (props) => {
             axiosInstance().get(`/product-template/template/` + value).then(({ data: { data } }) => {
                 setProductTemplate(data.data)
                 if (isChange) {
+                    let defaultproductTemplate = ""
+                    if (data.data.length) {
+                        defaultproductTemplate = data.data[0].optionValue
+                    }
                     setInitialData({
                         fields: initialData.fields,
-                        values: { ...ref.current.values, productTemplate: "" },
+                        values: { ...ref.current.values, productTemplate: defaultproductTemplate },
                     });
+                    if (defaultproductTemplate !== "") {
+                        handleChangeTemplate(defaultproductTemplate)
+                    }
                 }
             });
         }
