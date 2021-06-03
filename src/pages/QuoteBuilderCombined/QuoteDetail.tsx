@@ -44,6 +44,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 import draftToHtml from 'draftjs-to-html';
+import Steps from './Steps'
 
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from './EmailDialog'
@@ -58,9 +59,7 @@ import {
   getObjKeysWithValues, processFieldName, formatAmountWithCurrency
 } from "../../constants/helpers";
 import { quoteBuilder } from '../../constants/helpers'
-import CustomSteps from "../../components/CustomSteps/CustomSteps";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import { BsCheckAll } from "react-icons/bs";
 import ProductBuilder from "../../components/productBuilder";
 import { isNonNullChain } from "typescript";
 
@@ -95,10 +94,11 @@ PaperProps: {
 
 const recordsPerLine = 3;
 
+
 function QuoteDetail() {
 
-  const ProductBuilderComponent = useRef(null);
-  
+  const DOASteps=["New","Price Builder","Quote Builder","DOA Process","Customer Process","End"]
+  const OtherSteps=["New","Price Builder","Quote Builder","Customer Process","End"]
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -171,8 +171,12 @@ function QuoteDetail() {
   const[columnView,setColumnView]=useState([])
   const[PDF,setPdf]=useState("");
   const theme = useTheme();
+  const [nextStep,setNextStep]=useState(true);
 
   
+  const [isAddNewProduct, setIsAddNewProduct] = useState(false);
+  const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
+  const [ProcessStatus,setProcessStatus]=useState("New");
   let logo=null;
   var companyName="";
   var companyAddress="";
@@ -198,6 +202,10 @@ function QuoteDetail() {
     isDelete: false,
   });
   const { qbResource, qbApi } = quoteBuilder;
+
+  useEffect(()=>{
+    fetchDoaLimit()
+  },[])
 
   useEffect(() => {
     if (permissions) {
@@ -257,6 +265,19 @@ const fetchTermsAndConditions = () => {
             setLoading(false);
         });
 }, 600);
+}
+
+const refreshProducts = (data) => {
+  console.log("Refresh Product Data");
+  fetchDoaLimit();
+  console.log(data)
+
+  if(ProcessStatus==="New" && data.length<1){
+    setNextStep(false);
+  }
+  productBuilderdatatoQuoteBuilderdata(data);
+  
+  
 }
   
   const onFilterChange = useCallback((params) => {
@@ -477,6 +498,7 @@ const fetchDoaLimit = () => {
           console.log(data);
           DOAsetup = data.data.doasetup;
           DOAlimit = data.data.limit;
+         
       })
       .catch((err) => {
           toastConfig.setToastConfig(err);
@@ -512,27 +534,33 @@ const fetchDoaLimit = () => {
   const fetchquoteData = (version) => {
     if (selectedEntity) {
       setLoadPB(false);
-      fetchDoaLimit();
       setLoading(true);
       axiosInstance()
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
+          console.log(data);
           handleMainPoints(data);
           setHeadingLbl(data.quoteName);
           var keys=Object.keys(data.versions);
           setVersions(keys);
           if(version===0){
             setcurrentVersion(parseInt(keys[keys.length-1]));
-            setPBversionStatus(data.versions[keys[keys.length-1]]["versionStatus"]);
-            // if(ProductBuilderComponent){
-            //   const productBuilderdata=ProductBuilderComponent.current.fetchProduct(data.versions[keys[keys.length-1]]["productBuilderId"]);
-            //   console.log("productBuilderdata is");
-            //   console.log(productBuilderdata);
-            // }
-            
-            //productBuilderdatatoQuoteBuilderdata(productBuilderdata);
+            setPBversionStatus(data.versions[keys[keys.length-1]]["status"]);
+           
+            console.log(data.versions[keys[keys.length-1]]["status"])
+            setProcessStatus(data.versions[keys[keys.length-1]]["processStatus"]);
             setProductBuilderID(data.versions[keys[keys.length-1]]["productBuilderId"]);
-            if(data.versions[keys[keys.length-1]]["versionStatus"]==="Building Quote"){
+            setversionStatus(data.versions[keys[keys.length-1]]["status"])
+            if(data.versions[keys[keys.length-1]]["TNC"]){
+              setTNC(data.versions[keys[keys.length-1]]["TNC"])
+            }
+            if(data.versions[keys[keys.length-1]]["acceptedColumns"]){
+              setColumnView(data.versions[keys[keys.length-1]]["acceptedColumns"]);
+            }
+              
+            if(data.versions[keys[keys.length-1]]["status"]==="Building Quote"){
+              console.log(data.versions[keys[keys.length-1]]["status"])
+              console.log("Editable True")
               setEditable(true);
             }
             else{
@@ -541,11 +569,17 @@ const fetchDoaLimit = () => {
           }
           else{
             setcurrentVersion(version);
-            setPBversionStatus(data.versions[version]["versionStatus"]);
-            // const productBuilderdata=ProductBuilderComponent.current.fetchProduct(data.versions[version]["productBuilderId"]);
-            // productBuilderdatatoQuoteBuilderdata(productBuilderdata);
+            setPBversionStatus(data.versions[version]["status"]);
+            setProcessStatus(data.versions[keys[keys.length-1]]["processStatus"]);
             setProductBuilderID(data.versions[version]["productBuilderId"]);
-            if(data.versions[version]["versionStatus"]==="Building Quote"){
+            setversionStatus(data.versions[version]["status"])
+            if(data.versions[version]["TNC"]){
+              setTNC(data.versions[version]["TNC"])
+            }
+            if(data.versions[version]["acceptedColumns"]){
+              setColumnView(data.versions[version]["acceptedColumns"]);
+            }
+            if(data.versions[version]["status"]==="Building Quote"){
               setEditable(true);
             }
             else{
@@ -824,8 +858,8 @@ const fetchDoaLimit = () => {
     setProductBuilderID(quoteData["versions"][event.target.value]["productBuilderId"]);
     setPBversionStatus(quoteData["versions"][event.target.value]["versionStatus"]);
     console.log(quoteData["versions"][event.target.value]["productBuilderId"])
-    const productBuilderdata=ProductBuilderComponent.current.fetchProduct(quoteData["versions"][event.target.value]["productBuilderId"]);
-    productBuilderdatatoQuoteBuilderdata(productBuilderdata);
+    //const productBuilderdata=ProductBuilderComponent.current.fetchProduct(quoteData["versions"][event.target.value]["productBuilderId"]);
+    //productBuilderdatatoQuoteBuilderdata(productBuilderdata);
     setLoadPB(true);
   }
   // const quickLinks = [
@@ -860,9 +894,10 @@ const fetchDoaLimit = () => {
   };
 
   const productBuilderdatatoQuoteBuilderdata=(BuilderData)=>{
+    
     console.log(BuilderData);
     const inventory: { fieldName: string; fieldValue: any; }[][]=[];
-    const ignoredKeys=['fields','_id','productId','templateFields','id'];
+    const ignoredKeys=['fields','_id','productId','templateFields','id','string'];
     var totalCost=0;
     var totalSellingPrice=0
     var totalMargin=0
@@ -921,7 +956,12 @@ const fetchDoaLimit = () => {
         inventory.push(inventorydata);
     });
     console.log(inventory);
-
+    if(ProcessStatus==="Price Builder" && totalSellingPrice<1){
+      setNextStep(false);
+    }
+    if(ProcessStatus==="Price Builder" && totalSellingPrice>1){
+      setNextStep(true);
+    }
     setTotalProfit(totalProfit.toString()+" "+ProfitCurrency);
     setTotalMargin(totalMargin.toString()+" "+MarginCurrency);
     setTotalSale(totalSellingPrice.toString()+" "+SPCurrency);
@@ -976,7 +1016,7 @@ const fetchDoaLimit = () => {
         KeyValuePairs = [...KeyValuePairs, KeyValue];
     }
     setColName(ColName);
-    if(columnView){
+    if(columnView.length>0){
         setVisibleColumnName(columnView)
     }
     else{
@@ -1062,6 +1102,9 @@ const onSuccess = () => {
     handleVersionUpdate("",visibleColumns, "Sent to Customer", TandC);
     fetchquoteData(currentVersion);
 }
+
+
+
 
 
   const handleUpdateOpportunity = (supplierAccounts) => {
@@ -1160,50 +1203,6 @@ const onSuccess = () => {
                 </DetailsPageHeader>
               )}
 
-              {
-                steps.length > 0 &&
-                <div className="stepper-box">
-                  <div className="mainview">
-                    <CustomSteps steps={steps} active={activeStep} />
-                  </div>
-                  <div className="actionview">
-                    <div className="d-flex justify-content-center">
-                      {
-                        activeStep !== steps.length ?
-                          isProcessing ? <Button variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={true}
-                            onClick={() => { }}>
-                            Processing...
-                    </Button> :
-                            <Button variant="contained"
-                              color="primary"
-                              size="small"
-                              disabled={!steps[activeStep].canCompleteManually}
-                              onClick={() => {
-                                setIsProcessing(true)
-                                const updatedData = {
-                                  ...getObjKeysWithValues(quoteData, quoteFields.map((f) => { return f.fieldData })),
-                                  process: steps[activeStep].text,
-                                  _id: quoteData._id
-                                };
-
-                                axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
-                                  setActiveStep(activeStep + 1)
-                                  setIsProcessing(false)
-                                }).catch((error) => {
-                                  toastConfig.setToastConfig(error);
-                                  setIsProcessing(false)
-                                })
-                              }}>
-                              <BsCheckAll />&nbsp; Mark {steps[activeStep].text} as Completed
-                  </Button> : ""
-                      }
-                    </div>
-                  </div>
-                </div>
-              }
 
                     
               {loading ? (
@@ -1238,15 +1237,26 @@ const onSuccess = () => {
                   <TabPanel value={currentTabIndex} index={1}>
                     <Activity />
                   </TabPanel>
-                </>
-              )}
-              <Grid>
-              <select className="customSelect" value={currentVersion} 
+                  <Grid>
+                    <select className="customSelect" value={currentVersion} 
                                         onChange={handleChangeVersion}>
                                         {versions.map((team) => <option key={team} value={team}>{"Version : " + team}</option>)}
-            </select>
-            </Grid>
-            <Grid>
+                    </select>
+                    </Grid>
+                  {DOAreq?
+                  (<Steps 
+                    steps={DOASteps}
+                    currentStep={DOASteps.indexOf(ProcessStatus)}
+                    id= {id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                  />):(<Steps 
+                      steps={OtherSteps}
+                      currentStep={OtherSteps.indexOf(ProcessStatus)}
+                      id= {id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                  />)}
+                </>
+              )}
+              
+            {ProcessStatus!="New"?<Grid>
                                 <Grid item xs={12} md={12} sm={12} className="d-flex align-items-center gap-1 quotePanel">
                                     <div className="quoteBox">
                                         <span>Total Profit</span>
@@ -1271,17 +1281,18 @@ const onSuccess = () => {
                                     <div>
                                     </div>
             </Grid>
-            </Grid>
+            </Grid>:null}
+            {loadPB?(
             <Grid>
-                    {Editable?
-                    (<><Button variant="outlined" size="small" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { ProductBuilderComponent.current.setIsAddNewProduct(true)}}>New</Button>
-                    <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { ProductBuilderComponent.current.setIsAddExistingProduct(true)}}>Add Existing</Button></>):(null)}
+                    {ProcessStatus==="New"?
+                    (<><Button variant="outlined" size="small" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true)}}>New</Button>
+                    <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true)}}>Add Existing</Button></>):(null)}
                     <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { cloneVersion() }}>Clone Version</Button>
-                    <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">View</Button>
-                    <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
-                    <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />}  variant="contained" size="small" color="primary">{buttonMessage}</Button>    
-                    
-                    {Editable?(<FormControl className={classes.formControl}>
+                    {ProcessStatus==="Quote Builder"?(<><Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" startIcon={<AiOutlineEye />} color="primary">View</Button>
+                    <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button></>):null}
+                    {ProcessStatus==="DOA Process" || ProcessStatus==="Customer Process"?(<>
+                      <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />}  variant="contained" size="small" color="primary">{buttonMessage}</Button></>):null}
+                    {ProcessStatus==="Quote Builder"?(<FormControl className={classes.formControl}>
                         <InputLabel id="demo-mutiple-chip-label">Visible Columns in Quote</InputLabel>
                     <Select
                         labelId="demo-mutiple-chip-label"
@@ -1307,13 +1318,18 @@ const onSuccess = () => {
             </Select>
         </FormControl>):null}
             
-            {loadPB?(<ProductBuilder
-                ref={ProductBuilderComponent}
-                productBuilderId={productBuilderID}
-                Editable={PBversionStatus==="Building Quote"?true:false}
-                
-            />):(null)}
-            {Editable?
+            
+
+            <ProductBuilder
+              productBuilderId={productBuilderID}
+              isAddNewProduct={isAddNewProduct}
+              setIsAddNewProduct={setIsAddNewProduct}
+              isAddExistingProduct={isAddExistingProduct}
+              setIsAddExistingProduct={setIsAddExistingProduct}
+              refreshProducts={refreshProducts}
+              Editable={ProcessStatus==="Price Builder"?true:false}
+            />
+            {ProcessStatus==="Quote Builder"?
               (<Box>
                   <Grid container>
                                   <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
@@ -1350,7 +1366,7 @@ const onSuccess = () => {
                               </Grid>
               </Box>):
               (null)}
-            </Grid>
+            </Grid>):null}
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
