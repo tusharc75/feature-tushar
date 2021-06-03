@@ -10,13 +10,14 @@ import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { AiOutlineMail } from 'react-icons/ai';
+import { AiOutlineAccountBook, AiOutlineMail, AiOutlineUser } from 'react-icons/ai';
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
 import { BiPhone } from 'react-icons/bi';
 import MuiAccordion from "@material-ui/core/Accordion";
 import MuiAccordionSummary from "@material-ui/core/AccordionSummary";
 import MuiAccordionDetails from "@material-ui/core/AccordionDetails";
 import { FaArrowAltCircleDown } from 'react-icons/fa';
+import { supplierAccount, supplierContact } from '../../constants/helpers';
 
 const Accordion = withStyles({
     root: {
@@ -74,7 +75,7 @@ function DisplayData({ key, label, value, icon, showCopyToText = false }) {
     </div>
 }
 export default function OpportunityContacts({ contacts, title, onAddContact,
-    contactApi, onSetExpanded, isExpanded, recordsPerLine }) {
+    contactApi, onSetExpanded, isExpanded, recordsPerLine, accounts = null }) {
 
     const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine)
     function ContactDetails({ contacts, contactApi, }) {
@@ -96,12 +97,19 @@ export default function OpportunityContacts({ contacts, title, onAddContact,
                                             </Grid>
                                         </Grid>
                                         <Grid container>
-                                            <Grid item xs={12} sm={12} md={12}>
+                                            <Grid item xs={12} sm={6} md={6}>
                                                 {
                                                     <DisplayData key="2" label='Email' showCopyToText={true} icon={<AiOutlineMail size={15} />} value={obj.email || ''} />
                                                 }
                                             </Grid>
-                                            <Grid item xs={12} sm={12} md={12}>
+                                            {(supplierContact.contactApi === contactApi) && <Grid item xs={12} sm={6} md={6}>
+                                                {<Link className="link" to={`/${supplierAccount.accountApi}/detail/${obj.accountName}`}>
+                                                    <DisplayData key="2" label='Supplier Account' showCopyToText={true} icon={<AiOutlineUser size={15} />} value={accounts.find(item => item.optionValue === obj.accountName).optionLabel || ''} />
+                                                </Link>
+
+                                                }
+                                            </Grid>}
+                                            <Grid item xs={12} sm={6} md={6}>
                                                 {
                                                     <DisplayData key="3" label='Phone' showCopyToText={true} icon={<BiPhone size={15} />} value={obj.phone || ''} />
                                                 }
