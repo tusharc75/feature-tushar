@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, Fragment } from "react";
 import { DataGrid, GridToolbar } from "@material-ui/data-grid";
 import Grid from "@material-ui/core/Grid";
 import Button from '@material-ui/core/Button';
@@ -20,6 +20,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import currencyList from "../../constants/currency_with_country.json";
+import CustomButton from '../../components/Helpers/CustomButton'
 
 const useStyles = makeStyles((theme) => ({
   tdWidth: {
@@ -36,6 +37,7 @@ const CurrencyConverter = () => {
   const [currency, setCurrency] = useState([]);
   const [isApiUpdate, setIsApiUpdate] = useState(false);
   const [option, setOption] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchConverter();
@@ -59,7 +61,6 @@ const CurrencyConverter = () => {
       return false
     }
 
-    console.log(option)
     let is_valid = true;
     option.forEach((_option) => {
       for (var _currency in _option) {
@@ -113,11 +114,22 @@ const CurrencyConverter = () => {
     setOption(newOptions)
   }
 
+
+  const getcurrencyrates = () => {
+    setLoading(true)
+    axiosInstance().post(`/converter/getcurrencyrates`, { currency: currency }).then(({ data: { data } }) => {
+      setOption(data)
+      setLoading(false)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
+
   const classes = useStyles();
 
   return (
     <Layout>
-     <Grid container className="headerbox">
+      <Grid container className="headerbox">
         <Grid item md={12} sm={12} xs={12}>
           <CustomBreadCrumbs routes={[routes.currencyConverter]} />
         </Grid>
@@ -176,42 +188,55 @@ const CurrencyConverter = () => {
           </Box>
           <Box p={1}>
             {(option && option.length > 0) &&
-              <Box border={1} p={1} borderColor="grey.300"  >
-                <table>
-                  <thead>
-                    <tr>
-                      <th>
-                      </th>
-                      {currency.map((_unit, index) => (
-                        <th key={index} className={classes.tdWidth}>{_unit}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currency.map((_unit, i) => (
-                      <tr key={i}>
-                        <th style={{ paddingRight: 10 }}>
-                          {_unit}
+              <Fragment>
+                <Grid container>
+                  <Grid xs={12} container justify="flex-end">
+                    <CustomButton
+                      loading={loading}
+                      variant="contained"
+                      color="primary"
+                      onClick={getcurrencyrates}
+                      size="small"
+                    > Fetch Rates</CustomButton>
+                  </Grid>
+                </Grid>
+                <Box mt={1} border={1} p={1} borderColor="grey.300"  >
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>
                         </th>
                         {currency.map((_unit, index) => (
-                          <td className={classes.tdWidth} key={index}>
-                            <TextField
-                              id="standard-basic"
-                              type="number"
-                              variant="outlined"
-                              margin="dense"
-                              fullWidth
-                              style={{ margin: 0 }}
-                              value={option && option[i] && option[i][_unit]}
-                              onChange={(event) => onChangeValue(i, _unit, parseFloat(event.target.value))}
-                            />
-                          </td>
+                          <th key={index} className={classes.tdWidth}>{_unit}</th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </Box>}
+                    </thead>
+                    <tbody>
+                      {currency.map((_unit, i) => (
+                        <tr key={i}>
+                          <th style={{ paddingRight: 10 }}>
+                            {_unit}
+                          </th>
+                          {currency.map((_unit, index) => (
+                            <td className={classes.tdWidth} key={index}>
+                              <TextField
+                                id="standard-basic"
+                                type="number"
+                                variant="outlined"
+                                margin="dense"
+                                fullWidth
+                                style={{ margin: 0 }}
+                                value={option && option[i] && option[i][_unit]}
+                                onChange={(event) => onChangeValue(i, _unit, parseFloat(event.target.value))}
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Box>
+              </Fragment>}
           </Box>
         </div>
       </CustomContainer>
