@@ -94,8 +94,13 @@ const ProductBuilder = (props) => {
             setColumns(null);
             let column = [{ field: 'id', headerName: 'id', hide: true }]
             data.forEach((row) => {
-                //let _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
-                row.fields.forEach((ele) => {
+                let _fields = row.fields;
+                if (stage) {
+                    if (stage === "product") {
+                        _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
+                    }
+                }
+                _fields.forEach((ele) => {
                     if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                         if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
                             ele.displayUnits.forEach((_unit) => {
