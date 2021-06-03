@@ -493,6 +493,7 @@ const CreateProduct = (props) => {
                             ];
                         });
                         setNewProductCategoryId(data._id);
+                        handleChangeCategory(data._id, true)
                     }
                     setShowAddProductCategoryDialog(false);
                     // fetchProductCategory();
