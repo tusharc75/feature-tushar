@@ -364,9 +364,6 @@ const ProjectSalesDetails = () => {
                         Edit
                       </Button>
                     ) : null}
-
-                    <Box component="span" marginX={1} />
-
                     {permissions?.projectSales.isDelete && isManager ? (
                       <DeleteButton
                         text="Delete"

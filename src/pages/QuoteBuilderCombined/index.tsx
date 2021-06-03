@@ -549,12 +549,11 @@ const QuoteBuilders = () => {
   return (
     <>
       <Layout>
-        <Grid container>
+        <Grid container className="headerbox">
           <Grid item md={12} sm={12} xs={12}>
-            <CustomBreadCrumbs routes={[{title:"Quote Builder"}]} />
+            <CustomBreadCrumbs routes={[{ title: "Quote Builder" }]} />
           </Grid>
         </Grid>
-
         {/* Tables Begins Here */}
         <CustomContainer>
           <div className="header-panel">

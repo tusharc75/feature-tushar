@@ -126,16 +126,17 @@ export default function OrgChartContainer({ data, onClick }) {
 
     return (
         <Fragment>
-            <div className="custom-orgchart w-100 d-flex justify-content-center">
-                <OrgChart
-                    positions={positions}
-                    getOrgChart={getOrgChart}
-                    chartId={chartId}
-                    // update={update}
-                    onClickNode={onClickNode}
-                    google={google}
-                />
-            </div>
+            {/* <div className="custom-orgchart w-100 d-flex justify-content-center"> */}
+            <OrgChart
+                positions={positions}
+                getOrgChart={getOrgChart}
+                chartId={chartId}
+                // update={update}
+                onClickNode={onClickNode}
+                google={google}
+            />
+            {/* </div> */}
+
             {/* <ToastContainer position="bottom-right" /> */}
             {/* <div className="ui menu">
                 <div className="item">
