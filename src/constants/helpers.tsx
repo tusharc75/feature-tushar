@@ -119,6 +119,12 @@ export const entity = {
   entityResource: "entity", //  Key of sidebar object
   entityApi: "/entity",
 };
+
+export const productTemplate = {
+  productTemplateResource: "productTemplate",
+  productTemplateApi: "/product-template"
+}
+
 export const quoteBuilder = {
   qbResource: "quoteBuilder",
   qbApi: "/quote-builder"
