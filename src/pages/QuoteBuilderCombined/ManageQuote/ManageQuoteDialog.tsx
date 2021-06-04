@@ -45,6 +45,9 @@ export default function ManageQuoteDialog({
   dataToUpdate,
   accountId,
   resource, // either called from customer account or supplier account
+  contactId = null,
+  opportunityId = null,
+  accountResource = null,
   isRedirectTodetailPage,
   userId = null,
 }) {
@@ -73,6 +76,7 @@ export default function ManageQuoteDialog({
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
   const [accountData, setAccountData] = useState([]);
   const [newAddedAccountId, setNewAddedAccountId] = useState(null)
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -159,9 +163,23 @@ export default function ManageQuoteDialog({
           //  If this dialog opens from account details screen, make that account preselected
 
           if (
-            accountId && ["customerAccountName", "supplierAccountName"].some((d) => d === _f.fieldData.fieldName)) {
+            accountId && _f.fieldData.fieldName === "customerAccountName") {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
+
+          if ( contactId && _f.fieldData.fieldName === "customerContactName"){
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, contactId)
+          }
+            
+
+          if (
+            opportunityId && ["opportunity"].some(
+              (d) => d === _f.fieldData.fieldName
+            )
+          ){
+            _f = initializeDropdownById(_f, _f.fieldData.fieldName, opportunityId)
+          }
+
 
           if (!isNew && _f.fieldData.fieldName === "currency") {
             setCurrencySymbol(
@@ -193,7 +211,7 @@ export default function ManageQuoteDialog({
 
   const handleCreateQuote = (values) => {
     // values.closeDate = "03/03/2021"
-    if (accountId) values["supplierAccountName"] = [accountId]
+    if (accountId && accountResource !== customerAccount.accountResource) values["supplierAccountName"] = [accountId]
     setLoading(true);
     axiosInstance()
       .post(`${qbApi}?entity=${selectedEntity}`, values)
@@ -512,6 +530,9 @@ export default function ManageQuoteDialog({
                                           fullWidth
                                           isTooltip={true}
                                           size="small"
+                                          imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          } : null}
                                         />
                                       )}
                                   </Grid>
@@ -581,7 +602,7 @@ export default function ManageQuoteDialog({
                     color="primary"
                     size="small"
                     disabled={
-                      Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                      uploadingImageOrFileProgress > 0 || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                       Object.values(simplifyValues(values, entityData.fields)).toString()
                     }
                     onClick={(e) => {
@@ -610,5 +631,7 @@ ManageQuoteDialog.propTypes = {
   isNew: PropTypes.bool,
   dataToUpdate: PropTypes.any,
   accountId: PropTypes.string,
+  contactId: PropTypes.string,
+  accountResource: PropTypes.string,
   isRedirectToDetailPage: PropTypes.bool,
 };

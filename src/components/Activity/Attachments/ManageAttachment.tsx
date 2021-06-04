@@ -28,7 +28,8 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [isDownloading, setIsDownloading] = useState(false);
     const toastConfig = useContext(CustomToastContext);
-
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+    
     useEffect(() => {
         fetchNoteDetail();
     }, []);
@@ -176,6 +177,9 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                             touched={touched}
                                             size="small"
                                             setFieldValue={(fname, file) => setFieldValue("fileUrl", file)}
+                                            imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                            }}
                                         />
                                     </Grid>
                                     <Grid item xs={2}>
@@ -236,7 +240,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                     <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
                     <CustomButton
                         type="button" color="primary"
-                        disabled={loading}
+                        disabled={loading || uploadingImageOrFileProgress > 0}
                         loading={loading}
                         variant="contained" onClick={submitForm}>Save</CustomButton>
                 </CustomDialogFooter>
