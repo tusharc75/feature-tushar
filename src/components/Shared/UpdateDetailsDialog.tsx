@@ -150,7 +150,7 @@ const UpdateDetailsDialog = (props) => {
                               required={field.fieldData.required}
                               isTooltip={field.fieldData.isTooltip}
                               tooltipMessage={field.fieldData.tooltipMessage}
-                              imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                              imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.fieldData.type) ? (completePercentage) => {
                                 setUploadingImageOrFileProgress(completePercentage);
                               } : null}
                             />
