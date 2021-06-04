@@ -39,6 +39,7 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
     const history = useHistory();
     const [formsData, setFormsData] = useState([]);
     const [reportsToDataSource, setReportsToDataSource] = useState([]);
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     const getInitialData = useCallback(() => {
         setLoading(true);
@@ -215,6 +216,9 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                                                                         fullWidth
                                                                         isTooltip={true}
                                                                         size="small"
+                                                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                            setUploadingImageOrFileProgress(completePercentage);
+                                                                        } : null}
                                                                     />
                                                                 }
 
@@ -242,7 +246,7 @@ export default function ManageUserDialog({ open, close, onSuccess, isNew, userId
                                     color="primary"
                                     size="small"
                                     onClick={submitForm}
-                                    disabled={isSubmitting || loading}
+                                    disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                                 >
                                     {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                                 </Button>

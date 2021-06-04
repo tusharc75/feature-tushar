@@ -59,6 +59,8 @@ export default function ManageLeadDialog({
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+
   useEffect(() => {
     const ownerCollabOptions = leadData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
@@ -212,8 +214,8 @@ export default function ManageLeadDialog({
           isNew
             ? "Create Lead"
             : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName]
-                .filter((f) => f)
-                .join(" ")}`
+              .filter((f) => f)
+              .join(" ")}`
         }
         onClose={onClose}
       />
@@ -228,7 +230,7 @@ export default function ManageLeadDialog({
           initialValues={leadData.initialValues}
           validationSchema={yupSchema(leadData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,
@@ -314,6 +316,9 @@ export default function ManageLeadDialog({
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
+                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        } : null}
                                       />
                                     )}
                                   </Grid>
@@ -344,12 +349,12 @@ export default function ManageLeadDialog({
                   color="primary"
                   disabled={
                     // loading || Object.keys(errors).length > 0 ? true : false
-                    Object.values(
+                    uploadingImageOrFileProgress > 0 || Object.values(
                       simplifyValues(leadData.initialValues, leadData.fields)
                     ).toString() ===
-                      Object.values(
-                        simplifyValues(values, leadData.fields)
-                      ).toString() || loading
+                    Object.values(
+                      simplifyValues(values, leadData.fields)
+                    ).toString() || loading
                   }
                   onClick={(e) => {
                     e.preventDefault();

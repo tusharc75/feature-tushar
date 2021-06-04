@@ -82,6 +82,7 @@ export default function ManageOpportunityDialog({
     useState(false);
   const [accountData, setAccountData] = useState([]);
   const [newAddedAccountId, setNewAddedAccountId] = useState(null);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -535,6 +536,9 @@ export default function ManageOpportunityDialog({
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
+                                        imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        } : null}
                                       />
                                     )}
                                   </Grid>
@@ -602,7 +606,7 @@ export default function ManageOpportunityDialog({
                     variant="contained"
                     color="primary"
                     disabled={
-                      Object.values(
+                      uploadingImageOrFileProgress > 0 || Object.values(
                         simplifyValues(
                           entityData.initialValues,
                           entityData.fields
