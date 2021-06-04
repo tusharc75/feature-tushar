@@ -147,14 +147,13 @@ export default function TermsAndCondition(props) {
     }, [page, limit, filters, sorting, search]);
 
     const TermsConditionNameRenderer = params => (
-        <Link className={`${styles.terms_name_link}`}
-            style={{ pointerEvents: actionsPermissions.isUpdate ? "" : "none" }}
+        <span className={`${actionsPermissions.isUpdate ? "link" : ""} cursor-pointer`}
             onClick={() => {
                 setShowCreateDialog(true);
                 setEditRecord(_.cloneDeep(params.data))
             }}>
             <CustomRenderCell value={params?.value} />
-        </Link>
+        </span>
     )
 
     const ActionsRenderer = params => (

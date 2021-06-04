@@ -217,13 +217,6 @@ export default function Attachment(props) {
     const ActionsRenderer = params => (
         (
             <>
-                <Tooltip title="Delete">
-                    <IconButton
-                        aria-label="Delete"
-                        onClick={() => showConfirmBox(params.data)}>
-                        <DeleteIcon fontSize="small" color="error" />
-                    </IconButton>
-                </Tooltip>
                 <Tooltip title="Download">
                     <IconButton
                         aria-label="Download"
@@ -231,6 +224,13 @@ export default function Attachment(props) {
                         onClick={() => downloadFile(params.data.fileUrl)}
                     >
                         <GoArrowDown size={18} />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete">
+                    <IconButton
+                        aria-label="Delete"
+                        onClick={() => showConfirmBox(params.data)}>
+                        <DeleteIcon fontSize="small" color="error" />
                     </IconButton>
                 </Tooltip>
             </>
@@ -317,7 +317,6 @@ export default function Attachment(props) {
     const handleClose = () => {
         setOpen(false)
         setAttachmentData(null)
-        fetchAttachments()
     }
     const showConfirmBox = (row) => {
         if (row) {
@@ -450,6 +449,7 @@ export default function Attachment(props) {
                         relatedTo={[{ type: "my", name: user?.user?._id }]}
                         handleClose={handleClose}
                         attachmentData={attachmentData}
+                        fetchData={fetchAttachments}
                     />
                 </Dialog>
                 : null
@@ -457,7 +457,7 @@ export default function Attachment(props) {
             {isConfirmDialogVisible ? (
                 <ConfirmationDialog
                     open={isConfirmDialogVisible}
-                    message={`Are you sure, you want to delete ${deleteRecord?.id ? deleteRecord?.name ?? 'this attachment' : "these attachments"}`}
+                    message={`Are you sure, you want to delete ${deleteRecord?.id ? deleteRecord?.name ?? 'this attachment ?' : "these attachments ?"}`}
                     onClose={() => {
                         if (deleteRecord) setDeleteRecord(null);
                         setIsConfirmDialogVisible(false);
