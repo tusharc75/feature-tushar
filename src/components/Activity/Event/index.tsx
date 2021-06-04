@@ -4,7 +4,6 @@ import Grid from "@material-ui/core/Grid";
 import { CreateEvent } from "./CreateEvent";
 import { GetEvent, DeleteEvent } from "../../../axios/activity";
 import Typography from "@material-ui/core/Typography";
-import moment from "moment";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import IconButton from "@material-ui/core/IconButton";
@@ -14,7 +13,7 @@ import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "../../../constants/helpers";
+import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
 
 export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -66,7 +65,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchEvent();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleClose = () => {
@@ -101,7 +100,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                       {_event.name}
                     </Typography>
                     <span className="activity-date">
-                      End Date : {moment(_event.endDate).format("MMM DD YYYY")}
+                      End Date : {displayDate(_event.endDate)}
                     </span>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">

@@ -34,6 +34,7 @@ import { FaUserAltSlash, FaUserCheck } from "react-icons/fa";
 import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import { dateFormat } from "../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
   actionBtn: {
@@ -218,7 +219,7 @@ export default function Doa() {
         isChecked: false,
         name: `${user.firstName} ${user.lastName}`,
         email: user.email,
-        createdAt: moment(user.createdAt).format("MMM Do, YYYY"),
+        createdAt: moment(user.createdAt).format(dateFormat),
         status: user.blocked ? user.blocked : false,
       }))
       : [];
@@ -445,8 +446,8 @@ export default function Doa() {
 
   return (
     <Layout>
-       <Grid container className="headerbox">
-           <CustomBreadCrumbs routes={[routes.doa]} />
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={[routes.doa]} />
       </Grid>
       {/* Tables Begins Here */}
       <Container>
@@ -521,7 +522,7 @@ export default function Doa() {
                   <>
                     <Button
                       color="inherit"
-                      size="small" 
+                      size="small"
                       className={classes.actionBtn}
                       onClick={() => setOpen(true)}
                     >
@@ -537,7 +538,7 @@ export default function Doa() {
                   <React.Fragment>
                     <div className={classes.no_doa}>No DOA created </div>
                     <Button
-                      size="small" 
+                      size="small"
                       color="inherit"
                       className={classes.actionBtn}
                       onClick={() => setOpen(true)}

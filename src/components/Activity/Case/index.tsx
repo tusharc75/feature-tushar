@@ -14,7 +14,7 @@ import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "../../../constants/helpers";
+import { dateFormat, CustomDialogTransition } from "../../../constants/helpers";
 
 export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -66,7 +66,7 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchCash();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleClose = () => {
@@ -101,7 +101,7 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                       {_case.name}
                     </Typography>
                     <span className="activity-date">
-                      Due Date : {moment(_case.dueDate).format("MMM DD YYYY")}
+                      Due Date : {moment(_case.dueDate).format(dateFormat)}
                     </span>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">
