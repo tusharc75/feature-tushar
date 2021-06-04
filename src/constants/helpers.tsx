@@ -35,6 +35,8 @@ export const validations = {
 export const imageUploadMaxSize = { size: 1048576 * 2, text: "2 MB" };
 export const documentUploadMaxSize = { size: 1048576 * 10, text: "10 MB" };
 
+export const termsAndConditionFileUploadMaxSize = { size: 1048576, text: "1 MB" }
+
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
 
@@ -736,12 +738,3 @@ export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
 }
 
-export const validImageSize = 2 //MB
-
-export const IsValidImageSize = (fileSize) => {
-  return IsValidFileSize(fileSize, validImageSize)
-}
-export const IsValidFileSize = (fileSize, sizeToCheck) => {
-  //sizeToCheck in MB
-  return ((fileSize / 1024 / 1024) > sizeToCheck)
-}

@@ -42,7 +42,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
-import { IsValidFileSize, IsValidImageSize, validImageSize } from "../../constants/helpers"
+import { imageUploadMaxSize, documentUploadMaxSize } from "../../constants/helpers"
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -159,7 +159,7 @@ const FormTypes = (props) => {
     doNotShowUploadedFile = false,
     uploadFileUrl = '',
     onAppendData = null,
-    fileSizeToAccept = 10, //size in MB
+    documentUploadSize = { size: documentUploadMaxSize.size, text: documentUploadMaxSize.text },
     isMultipleUpload = false,
     ...rest
   } = props;
@@ -232,11 +232,11 @@ const FormTypes = (props) => {
       const file = event.target.files[0];
 
       //  1048576 = 1 MB
-      if (IsValidImageSize(file.size)) {
+      if (file.size >= imageUploadMaxSize.size) {
         setToastConfig({
           open: true,
           type: "error",
-          message: `Image must be less than ${validImageSize} MB size`,
+          message: `Image must be less than ${imageUploadMaxSize.text} MB size`,
         });
       } else {
         getImageUrl(file);
@@ -253,8 +253,11 @@ const FormTypes = (props) => {
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
-        if (IsValidFileSize(file.size, fileSizeToAccept)) {
-          setToastConfig({ open: true, type: "error", message: `file must be less than ${fileSizeToAccept} MB` })
+        if (file.size > documentUploadSize.size) {
+          setToastConfig({
+            open: true, type: "error",
+            message: `file must be less than ${documentUploadSize.text} size`
+          })
           break
         }
         getFileUrl(file);
