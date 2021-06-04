@@ -169,7 +169,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         setFieldValue={(name, file) => setFieldValue("file", file)}
                                                         onAppendData={(data) => appendData(data, setFieldValue)}
                                                         doNotShowUploadedFile={true}
-                                                        documentUploadSize={termsAndConditionFileUploadMaxSize} //size in bytes
+                                                        fileUploadMaxSize={termsAndConditionFileUploadMaxSize} //size in bytes
                                                     />
                                                 </Box>
                                                 <Box mt={2} >

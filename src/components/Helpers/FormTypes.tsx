@@ -159,7 +159,7 @@ const FormTypes = (props) => {
     doNotShowUploadedFile = false,
     uploadFileUrl = '',
     onAppendData = null,
-    documentUploadSize = { size: documentUploadMaxSize.size, text: documentUploadMaxSize.text },
+    fileUploadMaxSize = { size: documentUploadMaxSize.size, text: documentUploadMaxSize.text },
     isMultipleUpload = false,
     ...rest
   } = props;
@@ -253,10 +253,10 @@ const FormTypes = (props) => {
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
-        if (file.size > documentUploadSize.size) {
+        if (file.size > fileUploadMaxSize.size) {
           setToastConfig({
             open: true, type: "error",
-            message: `file must be less than ${documentUploadSize.text} size`
+            message: `file must be less than ${fileUploadMaxSize.text} size`
           })
           break
         }
