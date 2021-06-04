@@ -42,7 +42,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
-import { imageUploadMaxSize } from "../../constants/helpers";
+import { imageUploadMaxSize, documentUploadMaxSize } from "../../constants/helpers"
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -71,6 +71,7 @@ const CustomFormat = (props: NumberFormatCustomProps) => {
   const { inputRef, onChange, ...other } = props;
   return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
 };
+
 
 const InfoLabel = ({
   children,
@@ -158,6 +159,8 @@ const FormTypes = (props) => {
     doNotShowUploadedFile = false,
     uploadFileUrl = '',
     onAppendData = null,
+    fileUploadMaxSize = { size: documentUploadMaxSize.size, text: documentUploadMaxSize.text },
+    isMultipleUpload = false,
     ...rest
   } = props;
 
@@ -228,6 +231,7 @@ const FormTypes = (props) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
 
+      //  1048576 = 1 MB
       if (file.size > imageUploadMaxSize.size) {
         setToastConfig({
           open: true,
@@ -244,8 +248,20 @@ const FormTypes = (props) => {
 
   const handleUploadFile = (ev) => {
     if (ev.target.files && ev.target.files.length) {
-      const file = ev.target.files[0];
-      getFileUrl(file);
+      let files = ev.target.files;
+      // const file = ev.target.files[0];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        if (file.size > fileUploadMaxSize.size) {
+          setToastConfig({
+            open: true, type: "error",
+            message: `file must be less than ${fileUploadMaxSize.text} size`
+          })
+          break
+        }
+        getFileUrl(file);
+      }
       ev.target.value = "";
     }
   };
@@ -1427,6 +1443,7 @@ const FormTypes = (props) => {
           onClick={(e: any) => (e.target.value = null)}
           type="file"
           accept={accept || ""}
+          multiple={isMultipleUpload}
         />
         <label htmlFor={name}>
           <Button
@@ -1459,17 +1476,21 @@ const FormTypes = (props) => {
                       : "No file choosen"}
               </Typography>
             </Box>
-            <IconButton
-              disabled={Boolean(!values[name])}
-              title="Remove File"
-              color="secondary"
-              size="small"
-              aria-label="delete picture"
-              component="span"
-              onClick={() => setFieldValue(name, "")}
-            >
-              <DeleteIcon />
-            </IconButton>
+            {
+              values[name] ?
+                <IconButton
+                  disabled={Boolean(!values[name])}
+                  title="Remove File"
+                  color="secondary"
+                  size="small"
+                  aria-label="delete picture"
+                  component="span"
+                  onClick={() => setFieldValue(name, "")}
+                >
+                  <DeleteIcon />
+                </IconButton> : null
+            }
+
           </>}
       </Box>
     </Fragment>

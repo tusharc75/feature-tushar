@@ -15,11 +15,9 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import CreateNewDialog from "./CreateNewDialog";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
     CreatedByRenderer,
-    UpdatedByRenderer,
-    CustomLoadingOverlay
+    UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 
@@ -109,11 +107,7 @@ const ProductBuilder = () => {
         nameRenderer: NameRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
-        customFloatingFilter: CustomFloatingFilter,
-        // customLoadingCellRenderer: CustomLoadingCellRenderer,
-        // customNoRowsOverlay: CustomNoRowsOverlay
+        actionsRenderer: ActionsRenderer
     };
 
     return (<Layout>

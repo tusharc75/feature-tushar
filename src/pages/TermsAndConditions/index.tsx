@@ -26,11 +26,6 @@ import { termsAndCondition, gridPageSizes, isObjectEmpty } from '../../constants
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import _ from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
-import { AgGridColumn } from 'ag-grid-react';
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import {
-    CustomLoadingOverlay
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 function reducer(state, action) {
@@ -152,14 +147,13 @@ export default function TermsAndCondition(props) {
     }, [page, limit, filters, sorting, search]);
 
     const TermsConditionNameRenderer = params => (
-        <Link className={`${styles.terms_name_link}`}
-            style={{ pointerEvents: actionsPermissions.isUpdate ? "" : "none" }}
+        <span className={`${actionsPermissions.isUpdate ? "link" : ""} cursor-pointer`}
             onClick={() => {
                 setShowCreateDialog(true);
                 setEditRecord(_.cloneDeep(params.data))
             }}>
             <CustomRenderCell value={params?.value} />
-        </Link>
+        </span>
     )
 
     const ActionsRenderer = params => (
@@ -250,11 +244,7 @@ export default function TermsAndCondition(props) {
 
     const frameworkComponents = {
         termsConditionNameRenderer: TermsConditionNameRenderer,
-        actionsRenderer: ActionsRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
-        customFloatingFilter: CustomFloatingFilter,
-        // customLoadingCellRenderer: CustomLoadingCellRenderer,
-        // customNoRowsOverlay: CustomNoRowsOverlay
+        actionsRenderer: ActionsRenderer
     };
 
     const getQueryString = () => {

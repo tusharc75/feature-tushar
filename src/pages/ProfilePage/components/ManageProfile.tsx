@@ -15,6 +15,7 @@ import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import { HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
 import { HiOutlinePencilAlt } from 'react-icons/hi';
+import { imageUploadMaxSize } from "../../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
     profileEdit: {
@@ -115,7 +116,15 @@ export default function ManageProfile(props) {
     const handleUploadImage = (event) => {
         if (event.target.files && event.target.files.length) {
             const file = event.target.files[0];
-            getImageUrl(file);
+            if (file.size > imageUploadMaxSize.size) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: `Image must be less than ${imageUploadMaxSize.text} size`,
+                });
+            } else {
+                getImageUrl(file);
+            }
         }
     };
 
