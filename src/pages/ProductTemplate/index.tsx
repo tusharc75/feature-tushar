@@ -32,6 +32,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+
 function reducer(state, action) {
     switch (action.type) {
         case "loading":
@@ -192,6 +194,13 @@ const ProductTemplate: FC = () => {
 
     const ActionsRenderer = params => <>
 
+        {
+            <Tooltip title="Clone">
+                <IconButton aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
+                    <FileCopyIcon fontSize="small" color="primary" />
+                </IconButton>
+            </Tooltip>
+        }
         {/* {productTemplatePermissions.isUpdate ? */}
         { true ?
             <Tooltip title="Delete" >
@@ -354,7 +363,7 @@ const ProductTemplate: FC = () => {
         <Layout>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
-                    <CustomBreadCrumbs routes={[routes.entity]} />
+                    <CustomBreadCrumbs routes={[routes.productTemplate]} />
                 </Grid>
                 <Grid
                     item
