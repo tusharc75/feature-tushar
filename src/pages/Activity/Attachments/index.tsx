@@ -27,10 +27,8 @@ import {
     gridPageSizes,
     isObjectEmpty,
 } from "../../../constants/helpers";
-import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
 import {
     CommonRenderer,
-    CustomLoadingOverlay,
     CommonRendererWithCopy
 } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { GoArrowDown } from "react-icons/go"
@@ -252,11 +250,7 @@ export default function Attachment(props) {
         commonRendererWithCopy: CommonRendererWithCopy,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
-        customFloatingFilter: CustomFloatingFilter,
-        // customLoadingCellRenderer: CustomLoadingCellRenderer,
-        // customNoRowsOverlay: CustomNoRowsOverlay
+        actionsRenderer: ActionsRenderer
     };
 
     const getQueryString = () => {

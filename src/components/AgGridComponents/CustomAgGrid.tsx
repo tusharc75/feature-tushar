@@ -2,8 +2,108 @@ import React, { useState, useEffect } from 'react'
 import { TablePagination } from '@material-ui/core';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight } from '../../constants/helpers';
+import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes } from '../../constants/helpers';
 import CustomGridHeaderOptions from './CustomGridHeaderOptions';
+import { CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+
+export function reducer(state, action) {
+    switch (action.type) {
+        case "loading":
+            return {
+                ...state,
+                loading: action.loading
+            }
+
+        case "initialize":
+            return {
+                ...state,
+                dataRows: action.data,
+                rowCount: action.count,
+                loading: false
+            }
+
+        case "selection":
+            return {
+                ...state,
+                selectedRecords: action.selectedRecords,
+            }
+
+        case "update":
+            return {
+                ...state,
+                dataRows: action.data,
+                loading: false
+            }
+
+        case "filter":
+            return {
+                ...state,
+                loading: true,
+                filters: action.filters,
+                page: 0
+            }
+
+        case "sort":
+            return {
+                ...state,
+                sorting: action.sorting,
+                loading: true
+            }
+
+        case "search":
+            return {
+                ...state,
+                search: action.search,
+                loading: true
+            }
+
+        case "pageChange":
+            return {
+                ...state,
+                page: action.page
+            }
+
+        case "pageSizeChange":
+            return {
+                ...state,
+                limit: action.limit,
+                page: 0,
+                loading: true
+            }
+
+        case "count":
+            return {
+                ...state,
+                rowCount: action.count,
+                loading: false
+            }
+
+        case "complete":
+            return {
+                ...state,
+                loading: false
+            }
+
+        default:
+            break;
+    }
+
+    return state;
+}
+
+export const intialState = {
+    dataRows: [],
+    rowCount: 0,
+    loading: false,
+    page: 0,
+    limit: gridPageSizes[0],
+    pageSizes: gridPageSizes,
+    search: "",
+    filters: {},
+    sorting: [],
+    selectedRecords: []
+}
 
 export default function CustomAgGrid({ columns, dataRows, frameworkComponents, dispatch, rowCount, limit, pageSizes, page,
     setGridApi, allowSelection = true, allowAction = true, actionWidth = 200, isClientSideGrid = false }) {
@@ -69,7 +169,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
         <>
             <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
-            <div className={`ag-theme-material ag-grid-listing-grid`}>
+            <div className="ag-theme-material ag-grid-listing-grid">
                 <AgGridReact
                     rowData={dataRows}
                     onGridReady={onGridReady}
@@ -79,7 +179,13 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     headerHeight={AgGridHeaderHeight}
                     floatingFiltersHeight={AgGridFloatingFiltersHeight}
                     rowHeight={AgGridRowHeight}
-                    frameworkComponents={frameworkComponents}
+                    frameworkComponents={{
+                        ...frameworkComponents,
+                        customLoadingOverlay: CustomLoadingOverlay,
+                        customFloatingFilter: CustomFloatingFilter,
+                        // customLoadingCellRenderer: CustomLoadingCellRenderer,
+                        // customNoRowsOverlay: CustomNoRowsOverlay
+                    }}
                     enableCellChangeFlash={false}
                     defaultColDef={{
                         resizable: true,
@@ -129,7 +235,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     }}
                     immutableData={true}
                     getRowNodeId={(data) => {
-                        return data._id;
+                        return data._id ?? data.id;
                     }}
 
                     pagination={true}

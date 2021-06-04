@@ -15,8 +15,8 @@ import {
   MenuItem,
   Tooltip,
 } from "@material-ui/core";
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import { Delete } from "@material-ui/icons";
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+import { RemoveCircleOutline } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import MuiAccordion from "@material-ui/core/Accordion";
@@ -26,7 +26,7 @@ import MoreVert from "@material-ui/icons/MoreVert";
 import { Link, useHistory } from "react-router-dom";
 import { IoCalendarOutline } from "react-icons/io5";
 import { BiCustomize } from "react-icons/bi";
-import { FaEye } from "react-icons/fa";
+import { FaArrowAltCircleDown } from "react-icons/fa";
 
 import { displayDate } from "../../services/util";
 import routes from "./../../components/Helpers/Routes";
@@ -35,12 +35,11 @@ import NewOpportunityProjectSales from "./NewOpportunityProjectSales";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { useData } from '../../StateProvider/Provider';
+import { useData } from "../../StateProvider/Provider";
 
 const Accordion = withStyles({
   root: {
-    border: "1px solid rgba(0, 0, 0, .125) !important",
-    boxShadow: "none",
+    border: "1px solid rgba(0, 0, 0, .125)",
     "&:not(:last-child)": {
       borderBottom: 0,
     },
@@ -56,8 +55,11 @@ const Accordion = withStyles({
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: "#f5f5f5",
-    borderBottom: "1px solid rgba(0, 0, 0, .125)",
+    backgroundColor: "white",
+    borderBottom: "1px solid #f1ece8",
+    background: "#ffffff",
+    fontWeight: "bold",
+    padding: "0px",
     "&$expanded": {
       minHeight: 46,
     },
@@ -77,13 +79,13 @@ const AccordionDetails = withStyles((theme) => ({
   },
 }))(MuiAccordionDetails);
 
-function DisplayData({ label, value, icon }) {
+function DisplayData({ key, label, value, icon }) {
   return (
     <div style={{ flexGrow: 1 }}>
       <List>
-        <ListItem>
+        <ListItem key={key}>
           <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value} secondary={label} />
+          <ListItemText primary={value ? value : "-"} secondary={label} />
         </ListItem>
       </List>
     </div>
@@ -132,6 +134,7 @@ export default function OpportunityAccordianProjectSales({
       break;
   }
   const { setToastConfig } = useContext(CustomToastContext);
+  const [maxRecordsToShow, setMaxRecordsToShow] = useState(recordsPerLine);
   const [expandOpportunity, setExpandOpportunity] = useState(expanded);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -148,13 +151,13 @@ export default function OpportunityAccordianProjectSales({
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    let isExpanded = expandOpportunity;
-    if (opportunities.length === 0 && isExpanded) isExpanded = false;
-    else if (opportunities.length > 0 && !isExpanded) isExpanded = true;
+  // useEffect(() => {
+  //   let isExpanded = expandOpportunity;
+  //   if (opportunities.length === 0 && isExpanded) isExpanded = false;
+  //   else if (opportunities.length > 0 && !isExpanded) isExpanded = true;
 
-    setExpandOpportunity(isExpanded);
-  }, [opportunities]);
+  //   setExpandOpportunity(isExpanded);
+  // }, [opportunities]);
 
   const handleRemove = (rec) => {
     setShowConfirmBox(true);
@@ -210,6 +213,7 @@ export default function OpportunityAccordianProjectSales({
       </Menu>
       <Accordion
         expanded={expandOpportunity}
+        className="omsAccordian accordOpportunity"
         onChange={() => setExpandOpportunity(!expandOpportunity)}
       >
         <AccordionSummary
@@ -254,125 +258,135 @@ export default function OpportunityAccordianProjectSales({
           <>
             {expandOpportunity && (
               <>
-                {opportunities && opportunities.length ? (
+                {opportunities && opportunities?.length ? (
                   <Grid container spacing={1}>
-                    {opportunities.map((obj, index) => (
-                      <Grid
-                        item
-                        xs={12}
-                        sm={12}
-                        md={recordsPerLineInLargeScreen}
-                        key={index}
-                      >
-                        <Card style={{ minWidth: "100%" }}>
-                          <CardContent className="detailListing">
-                            <Grid container className="detailCardHeader">
-                              <Grid item xs={12} sm={8}>
-                                {
-                                  obj.entity === selectedEntity ? (
+                    {opportunities
+                      .slice(0, maxRecordsToShow)
+                      .map((obj, index) => (
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          md={recordsPerLineInLargeScreen}
+                          key={index}
+                        >
+                          <Card className="detailCard">
+                            <CardContent className="detailListing">
+                              <Grid container className="detailCardHeader">
+                                <Grid item xs={7} sm={8}>
+                                  {obj.entity === selectedEntity ? (
                                     <Link
                                       className="link"
                                       to={`${routes.opportunityDetail.path}/${obj._id}`}
                                     >
-                                      <Typography>
-                                        {obj?.opportunityName}{" "}
+                                      <Typography className="detailName">
+                                        {obj?.opportunityName}
                                       </Typography>
                                     </Link>
-
-                                  ) : <span className="d-flex gap-2 align-items-center">
-                                    <Typography>{obj.opportunityName}</Typography> <Tooltip title={`${obj.opportunityName} belongs to different entity`}>
-                                      <InfoOutlinedIcon fontSize="small" />
-                                    </Tooltip>
-                                  </span>
-                                }
-
-                              </Grid>
-                              <Grid item xs={12} sm={4}>
-                                {obj?.amount ? (
-                                  <Box display="flex" alignItems="center">
-                                    <Typography className="amount">
-                                      {
-                                        currencies.find(
-                                          (d) =>
-                                            d.currencyCode == obj["currency"]
-                                        )?.symbolNative
-                                      }
-                                      &nbsp;{obj?.amount ?? ""}
-                                    </Typography>
-                                    {(permissions.isUpdate && isTeamMember) ||
+                                  ) : (
+                                    <span className="d-flex gap-2 align-items-center">
+                                      <Typography className="detailName">
+                                        {obj.opportunityName}
+                                      </Typography>{" "}
+                                      <Tooltip
+                                        title={`${obj.opportunityName} belongs to different entity`}
+                                      >
+                                        <InfoOutlinedIcon fontSize="small" />
+                                      </Tooltip>
+                                    </span>
+                                  )}
+                                </Grid>
+                                <Grid item xs={5} sm={4}>
+                                  {obj?.amount ? (
+                                    <Box display="flex" alignItems="center">
+                                      <Typography className="amount">
+                                        {
+                                          currencies.find(
+                                            (d) =>
+                                              d.currencyCode == obj["currency"]
+                                          )?.symbolNative
+                                        }
+                                        &nbsp;{obj?.amount ?? ""}
+                                      </Typography>
+                                      {(permissions.isUpdate && isTeamMember) ||
                                       isManager ? (
-                                      <>
-                                        <Box ml={1} />
-                                        <IconButton
-                                          title={`Remove opportunity ${obj.opportunityName}`}
-                                          size="small"
-                                          onClick={() => handleRemove(obj)}
-                                        >
-                                          <Delete
-                                            fontSize="small"
-                                            color="error"
-                                          />
-                                        </IconButton>
-                                      </>
-                                    ) : null}
-                                  </Box>
-                                ) : (
-                                  ""
-                                )}
+                                        <>
+                                          <Box ml={1} />
+                                          <IconButton
+                                            title={`Remove opportunity ${obj.opportunityName}`}
+                                            size="small"
+                                            onClick={() => handleRemove(obj)}
+                                          >
+                                            <RemoveCircleOutline
+                                              fontSize="small"
+                                              color="error"
+                                            />
+                                          </IconButton>
+                                        </>
+                                      ) : null}
+                                    </Box>
+                                  ) : (
+                                    ""
+                                  )}
+                                </Grid>
                               </Grid>
-                            </Grid>
-                            <Grid container>
-                              <Grid item xs={12} sm={12}>
-                                {obj?.stage ? (
-                                  <DisplayData
-                                    label="Stage"
-                                    value={obj?.stage ?? ""}
-                                    icon={<BiCustomize size={20} />}
-                                  />
-                                ) : (
-                                  ""
-                                )}
+                              <Grid container>
+                                <Grid item xs={12} sm={6} md={6}>
+                                  {obj?.stage ? (
+                                    <DisplayData
+                                      key={index}
+                                      label="Stage"
+                                      value={obj?.stage ?? ""}
+                                      icon={<BiCustomize size={15} />}
+                                    />
+                                  ) : (
+                                    ""
+                                  )}
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                  {obj.closeDate ? (
+                                    <DisplayData
+                                      key={index}
+                                      label="Closing Date"
+                                      value={displayDate(obj.closeDate)}
+                                      icon={<IoCalendarOutline size={15} />}
+                                    />
+                                  ) : (
+                                    ""
+                                  )}
+                                </Grid>
                               </Grid>
-                              <Grid item xs={12} sm={12}>
-                                {obj.closeDate ? (
-                                  <DisplayData
-                                    label="Closing Date"
-                                    value={displayDate(obj.closeDate)}
-                                    icon={<IoCalendarOutline size={20} />}
-                                  />
-                                ) : (
-                                  ""
-                                )}
-                              </Grid>
-                            </Grid>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    ))}
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
                   </Grid>
-                ) : null}
+                ) : (
+                  <Typography variant="subtitle1">
+                    No Opportunities To Show
+                  </Typography>
+                )}
               </>
             )}
           </>
         </AccordionDetails>
-        <Box
-          margin={1}
-          className="btn-view gap-1"
-          onClick={() =>
-            history.push(`/opportunity`, {
-              accountId: accountId,
-              accountName: accountName,
-              resource: `${resource}`,
-            })
-          }
-          p={1}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <FaEye /> View All &#8599;
-        </Box>
-        <Box margin={1} />
+        {opportunities?.length > 0 && opportunities.length > maxRecordsToShow && (
+          <Box
+            margin={1}
+            className="btn-view gap-1"
+            onClick={() => {
+              setMaxRecordsToShow(
+                (prevState) => prevState + recordsPerLine * 2
+              );
+            }}
+            p={1}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <FaArrowAltCircleDown size={25} />
+          </Box>
+        )}
       </Accordion>
       {showConfirmBox ? (
         <ConfirmationDialog

@@ -17,6 +17,7 @@ import InputField from "../../components/Helpers/InputField";
 import { useHistory } from "react-router-dom";
 import { getObjKeys, yupSchema } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import { useData } from "../../StateProvider/Provider";
 
 interface InitialData {
   fields: any[];
@@ -24,6 +25,11 @@ interface InitialData {
 }
 
 const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
+  const {
+    state: {
+      user: { user },
+    },
+  } = useData();
   const theme = useTheme();
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
@@ -49,7 +55,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
           fields: fieldsData,
           values: getObjKeys("", fieldsData),
         });
-        setLoading(false);
+        setTimeout(() => setLoading(false), 500);
       })
       .catch((err) => {
         setLoading(false);
@@ -61,11 +67,11 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
     var tempStaticData = {};
     if (type) {
       type.map((d: any) => {
-        tempStaticData[d.type] = [d.id]
+        tempStaticData[d.type] = [d.id];
       });
     }
-    tempStaticData["user"] = [values?.projectManager]
-    values.staticData = tempStaticData
+    tempStaticData["user"] = [values?.projectManager, user._id];
+    values.staticData = tempStaticData;
     axiosInstance()
       .post("/project-Sales", values)
       .then(({ data }) => {
@@ -74,8 +80,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
         fetchData();
         if (type) {
           close();
-        }
-        else {
+        } else {
           history.push(`/project-sales/detail/${newId}`, {
             managerId: data.data?.projectManager,
           });
@@ -149,7 +154,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
                 <Button
                   variant="outlined"
                   color="primary"
-                  size="small" 
+                  size="small"
                   disabled={isSubmitting || loading}
                   onClick={close}
                 >
@@ -158,7 +163,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
                 <Button
                   variant="contained"
                   color="primary"
-                  size="small" 
+                  size="small"
                   onClick={submitForm}
                   disabled={isSubmitting || loading}
                 >

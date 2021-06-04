@@ -179,6 +179,23 @@ const ProductTemplate = () => {
                                             onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                         />
                                     </Grid>
+                                    <Grid item xs={12} sm={1}>
+                                        <Box mt={0.5}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        name="isStandard"
+                                                        checked={values["isStandard"]}
+                                                        onChange={(e) => {
+                                                            setFieldValue("isStandard", e.target.checked)
+                                                        }}
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Standard"
+                                            />
+                                        </Box>
+                                    </Grid>
                                     <Grid item xs={12} sm={2}>
                                         <Autocomplete
                                             options={productUnit}
@@ -203,23 +220,6 @@ const ProductTemplate = () => {
                                                 />
                                             )}
                                         />
-                                    </Grid>
-                                    <Grid item xs={12} sm={1}>
-                                        <Box mt={0.5}>
-                                            <FormControlLabel
-                                                control={
-                                                    <Checkbox
-                                                        name="isStandard"
-                                                        checked={values["isStandard"]}
-                                                        onChange={(e) => {
-                                                            setFieldValue("isStandard", e.target.checked)
-                                                        }}
-                                                        color="primary"
-                                                    />
-                                                }
-                                                label="Standard"
-                                            />
-                                        </Box>
                                     </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {!values["isStandard"] && <Autocomplete

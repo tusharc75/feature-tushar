@@ -569,6 +569,7 @@ export default function ManageQuoteDialog({
                     type="button"
                     variant="outlined"
                     color="primary"
+                    size="small"
                     onClick={onClose}
                   >
                     Cancel
@@ -578,6 +579,7 @@ export default function ManageQuoteDialog({
                     loading={loading}
                     variant="contained"
                     color="primary"
+                    size="small"
                     disabled={
                       Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                       Object.values(simplifyValues(values, entityData.fields)).toString()

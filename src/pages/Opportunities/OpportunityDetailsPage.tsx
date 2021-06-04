@@ -220,7 +220,7 @@ function OpportunityDetailsPage() {
           let tempName = data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(" ", "_")][0]
           setMainPoints(prevState => ({
             ...prevState,
-            "Parent Lead": `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`
+            "Parent Lead": { leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`, leadId: tempName._id }
           }));
         }
 
@@ -558,7 +558,7 @@ function OpportunityDetailsPage() {
                     <Box padding="16px">
                       <DetailsPage
                         data={opportunityData}
-                        fields={opportunityFields}
+                        fields={opportunityFields.filter(currentField => currentField.fieldData?.fieldName !== "supplierAccountName")}
                       />
                     </Box>
                     <div className="p-3">
@@ -575,6 +575,7 @@ function OpportunityDetailsPage() {
                             setExpanded({ ...expanded, supplierContacts: !expanded.supplierContacts })
                           }}
                           recordsPerLine={recordsPerLine}
+                          accounts={_.cloneDeep(opportunityData?.supplierAccountName)}
                         />
                       }
                       {
