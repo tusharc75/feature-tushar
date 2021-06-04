@@ -246,7 +246,7 @@ const QuoteBuilders = () => {
   };
 
   const QuoteNameRenderer = params => <Link className="link" title={params.value}
-    to={`quote-builder/${params.data._id}`}>
+    to={`${routes.quoteBuilder.path}/${params.data._id}`}>
     {params.value}
   </Link>
 
