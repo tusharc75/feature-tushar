@@ -40,7 +40,7 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat } from "../../../constants/helpers"
+import { dateFormatForInputControl } from "../../../constants/helpers"
 
 const EventSchema = Yup.object().shape({
   name: Yup.string().required("Please enter event name").min(3, "Too Short"),
@@ -359,7 +359,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                 setFieldValue("startDate", date);
                                 setFieldValue("startTime", date);
                               }}
-                              format={dateFormat}
+                              format={dateFormatForInputControl}
                               error={
                                 Boolean(touched["startDate"]) &&
                                 Boolean(errors["startDate"])
@@ -428,7 +428,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                 setFieldValue("endDate", date);
                                 setFieldValue("endTime", date);
                               }}
-                              format={dateFormat}
+                              format={dateFormatForInputControl}
                               error={
                                 Boolean(touched["endDate"]) &&
                                 Boolean(errors["endDate"])

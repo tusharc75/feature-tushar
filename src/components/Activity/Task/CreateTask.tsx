@@ -37,7 +37,7 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat } from "../../../constants/helpers"
+import { dateFormat, dateFormatForInputControl } from "../../../constants/helpers"
 
 const TaskSchema = Yup.object().shape({
   name: Yup.string().required("Please enter task name"),
@@ -275,7 +275,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                               inputVariant="outlined"
                               fullWidth
                               margin="dense"
-                              format={dateFormat}
+                              format={dateFormatForInputControl}
                               minDate={
                                 initialValues.parentData &&
                                 initialValues.parentData.startDate
@@ -301,7 +301,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                                 initialValues.parentData &&
                                 initialValues.parentData.dueDate
                               }
-                              format={dateFormat}
+                              format={dateFormatForInputControl}
                             />
                           </Box>
                           {id && (
