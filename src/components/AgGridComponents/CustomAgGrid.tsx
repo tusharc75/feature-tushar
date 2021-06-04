@@ -69,7 +69,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
         <>
             <CustomGridHeaderOptions columns={columns} setColumns={setColumns} columnApi={columnApi} />
 
-            <div className={`ag-theme-material ag-grid-listing-grid`}>
+            <div className="ag-theme-material ag-grid-listing-grid">
                 <AgGridReact
                     rowData={dataRows}
                     onGridReady={onGridReady}
