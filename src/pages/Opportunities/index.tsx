@@ -27,12 +27,10 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { useHistory } from "react-router-dom";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
   CommonRenderer,
   CreatedByRenderer,
-  UpdatedByRenderer,
-  CustomLoadingOverlay
+  UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
@@ -207,11 +205,7 @@ const Opportunities = () => {
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    customFloatingFilter: CustomFloatingFilter,
     commonRenderer: CommonRenderer
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
   };
 
   const replaceFieldName = (field) => {

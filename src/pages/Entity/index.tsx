@@ -6,14 +6,12 @@ import {
   Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { entity, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
+import { entity, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import EntityHeader from "./Header";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -21,10 +19,8 @@ import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDi
 import {
   CommonRenderer,
   CreatedByRenderer,
-  UpdatedByRenderer,
-  CustomLoadingOverlay
+  UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -151,11 +147,7 @@ const Entity: FC = () => {
     commonRenderer: CommonRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    actionsRenderer: ActionsRenderer,
-    customFloatingFilter: CustomFloatingFilter,
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
+    actionsRenderer: ActionsRenderer
   };
 
 

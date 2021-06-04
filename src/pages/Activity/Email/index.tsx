@@ -23,10 +23,6 @@ import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail'
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
-import {
-    CustomLoadingOverlay
-} from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import {
     gridPageSizes,
     isObjectEmpty,
@@ -302,11 +298,7 @@ const Email = () => {
         subjectRenderer: SubjectRenderer,
         messageRenderer: MessageRenderer,
         createdByDate: CreatedByDateRenderer,
-        actionsRenderer: ActionsRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
-        customFloatingFilter: CustomFloatingFilter,
-        // customLoadingCellRenderer: CustomLoadingCellRenderer,
-        // customNoRowsOverlay: CustomNoRowsOverlay
+        actionsRenderer: ActionsRenderer
     };
 
     const getQueryString = () => {

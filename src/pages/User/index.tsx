@@ -2,12 +2,10 @@ import React, { useState, FC, useEffect, useContext, useReducer } from "react";
 import { Tooltip, IconButton, Grid, Chip } from "@material-ui/core";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { Link } from "react-router-dom";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
   CommonRenderer,
   CommonRendererWithCopy,
   CreatedByRenderer,
-  CustomLoadingOverlay,
   UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import axiosInstance from "../../axios/axiosInstance";
@@ -238,11 +236,7 @@ const User: FC = () => {
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    customFloatingFilter: CustomFloatingFilter,
     commonRenderer: CommonRenderer
-    //  customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
   };
 
   const replaceFieldName = (field) => {

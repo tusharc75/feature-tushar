@@ -26,11 +26,6 @@ import { termsAndCondition, gridPageSizes, isObjectEmpty } from '../../constants
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import _ from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
-import { AgGridColumn } from 'ag-grid-react';
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import {
-    CustomLoadingOverlay
-} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 
 function reducer(state, action) {
@@ -250,11 +245,7 @@ export default function TermsAndCondition(props) {
 
     const frameworkComponents = {
         termsConditionNameRenderer: TermsConditionNameRenderer,
-        actionsRenderer: ActionsRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
-        customFloatingFilter: CustomFloatingFilter,
-        // customLoadingCellRenderer: CustomLoadingCellRenderer,
-        // customNoRowsOverlay: CustomNoRowsOverlay
+        actionsRenderer: ActionsRenderer
     };
 
     const getQueryString = () => {
