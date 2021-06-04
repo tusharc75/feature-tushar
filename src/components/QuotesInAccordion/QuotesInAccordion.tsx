@@ -154,7 +154,11 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                     )
                                 }
                             </IconButton>
-                            <strong>Quotes ({quotes?.length || 0})</strong>
+                            <Box padding="5px">
+                                <Typography variant="subtitle2">
+                                    Quotes ({quotes?.length || 0})
+                                </Typography>
+                            </Box>
                         </Box>
 
 
