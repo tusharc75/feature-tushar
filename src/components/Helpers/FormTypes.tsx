@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import React, { Fragment, useContext, useEffect } from "react";
 import {
   Avatar,
   Box,
@@ -161,6 +161,7 @@ const FormTypes = (props) => {
     onAppendData = null,
     fileUploadMaxSize = { size: documentUploadMaxSize.size, text: documentUploadMaxSize.text },
     isMultipleUpload = false,
+    imageOrFileUploadCompletePercentage,
     ...rest
   } = props;
 
@@ -272,16 +273,18 @@ const FormTypes = (props) => {
     let formData = new FormData();
     formData.append("file", file);
     setImgUploading(true);
+    if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(1); }
     axiosInstance()
       .post("/user/upload-public", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (pE) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
           setImageUploadProgress(completedPercent);
-
+          if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(completedPercent); }
           if (completedPercent === 100) {
             setTimeout(() => {
               setImageUploadProgress(0);
+              if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
             }, 4000);
           }
         },
@@ -294,6 +297,7 @@ const FormTypes = (props) => {
         setImgUploading(false);
         setToastConfig(err);
         setImageUploadProgress(0);
+        if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
       });
   };
 
@@ -304,6 +308,7 @@ const FormTypes = (props) => {
     formData.append("file", file);
     setFileUploading(true);
     let uploadUrl = usePublicUrlforFileUpload ? "/user/upload-public" : uploadFileUrl ? uploadFileUrl : "/user/upload"
+    if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(1); }
     axiosInstance()
       .post(uploadUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -311,7 +316,9 @@ const FormTypes = (props) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
           setFileUploadProgress(completedPercent);
 
+          if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(completedPercent); }
           if (completedPercent === 100) {
+            if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
             setTimeout(() => {
               setFileUploadProgress(0);
             }, 4000);
@@ -331,6 +338,7 @@ const FormTypes = (props) => {
         setFileUploading(false);
         setToastConfig(err);
         setFileUploadProgress(0);
+        if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
       });
   };
 

@@ -73,6 +73,9 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     setOpen(false);
     handleActivityRefresh();
   };
+  const handleDialogClose = () => {
+    setOpen(false);
+}
 
   return (
     <Box className="activityDetailBox">
@@ -149,7 +152,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={handleClose}
+        onClose={handleDialogClose}
         fullWidth
         fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
@@ -158,6 +161,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           noteId={noteId}
           handleClose={handleClose}
           relatedTo={relatedTo}
+          handleDialogClose={handleDialogClose}
         />
       </Dialog>
     </Box>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from "react-router-dom";
-import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@material-ui/core'
+import { Grid, Box, IconButton, Typography, Card, CardContent, List, ListItem, ListItemAvatar, ListItemText, Tooltip, MenuItem, Menu } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MuiAccordion from "@material-ui/core/Accordion";
@@ -19,6 +19,7 @@ import currencies from "./../../constants/currency_with_country.json";
 import { displayDate } from '../../services/util';
 import { HiExternalLink } from 'react-icons/hi';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
+import { MoreVert } from "@material-ui/icons";
 
 const Accordion = withStyles({
     root: {
@@ -77,7 +78,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission }) {
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null }) {
     const history = useHistory();
     const {
         state: { selectedEntity },
@@ -104,6 +105,9 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
     const [expandQuote, setExpandQuote] = useState(expanded);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [showAddExistingDialog, setShowAddExistingDialog] = useState(false);
+
     const onSuccess = () => {
         setShowCreateDialog(false);
         fetchData();
@@ -115,6 +119,14 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
         setExpandQuote(isExpanded);
     }, [quotes]);
+
+    const handleOpenMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
     return <>
         <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
             <AccordionSummary
@@ -141,14 +153,52 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                     )
                                 }
                             </IconButton>
-                            <strong>Quotes ({quotes?.length || 0})</strong>
+                            <Box padding="5px">
+                                <Typography variant="subtitle2">
+                                    Quotes ({quotes?.length || 0})
+                                </Typography>
+                            </Box>
                         </Box>
 
 
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems='center'>
-                        {quoteBuilderPermission.isCreate &&
-                            <IconButton
+                        {quoteBuilderPermission.isCreate ? 
+                            <>
+                                <IconButton
+                                    aria-haspopup="true"
+                                    color="primary"
+                                    size="small"
+                                    onClick={handleOpenMenu}
+                                >
+                                    <MoreVert />
+                                </IconButton>
+                                <Menu
+                                    id="menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleCloseMenu}
+                                >
+                                    <MenuItem
+                                        onClick={() => {
+                                            setShowCreateDialog(true);
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Create New
+                          </MenuItem>
+                                    {/* <MenuItem
+                                        onClick={() => {
+                                            setShowAddExistingDialog(true)
+                                            handleCloseMenu();
+                                        }}
+                                    >
+                                        Add Exisiting
+                          </MenuItem> */}
+                                </Menu>
+                            </>
+                            : <IconButton
                                 color="primary"
                                 size="small"
                                 onClick={() => { setShowCreateDialog(true) }}
@@ -238,6 +288,11 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                 dataToUpdate={null}
                 resource={null}
                 onSuccess={onSuccess}
+                accountId={accountId}
+                contactId={contactId}
+                opportunityId={opportunityId}
+                accountResource={accountResource}
+
             />
         }
     </>

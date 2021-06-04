@@ -55,6 +55,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
     const [loading, setLoading] = useState(false)
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     useEffect(() => {
         if (editRecord && editRecord?._id) {
@@ -170,6 +171,9 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         onAppendData={(data) => appendData(data, setFieldValue)}
                                                         doNotShowUploadedFile={true}
                                                         fileUploadMaxSize={termsAndConditionFileUploadMaxSize} //size in bytes
+                                                        imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                            setUploadingImageOrFileProgress(completePercentage);
+                                                        }}
                                                     />
                                                 </Box>
                                                 <Box mt={2} >
@@ -192,6 +196,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                 variant="contained"
                                 color="primary"
                                 loading={loading}
+                                disabled={uploadingImageOrFileProgress > 0}
                                 onClick={() => {
                                     if (Object.keys(errors).length) {
                                         Object.keys(errors).forEach(key => {

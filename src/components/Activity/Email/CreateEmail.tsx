@@ -116,6 +116,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
     const [imageSource, setImageSource] = useState(null);
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false)
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     const toolbarConfig = {
         display: ['INLINE_STYLE_BUTTONS', 'BLOCK_ALIGNMENT_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'LINK_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
@@ -504,6 +505,9 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                                                 }}
                                                                 usePublicUrlforFileUpload={true}
                                                                 doNotShowUploadedFile={true}
+                                                                imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                                }}
                                                             />
                                                         </Box>
                                                         {renderFileThumbnails}
@@ -574,7 +578,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                 {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
                                 <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
                                 {!emailId &&
-                                    <Button type="button" size="small" color="primary" variant="contained" disabled={sending}
+                                    <Button type="button" size="small" color="primary" variant="contained" disabled={sending || uploadingImageOrFileProgress > 0}
                                         onClick={(e) => {
 
                                             e.preventDefault()
