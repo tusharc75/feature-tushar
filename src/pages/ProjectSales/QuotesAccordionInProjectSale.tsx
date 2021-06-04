@@ -83,7 +83,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, permissions, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, projectId, addExisting, fetchProjectData, isTeamMember, isManager, onNewQuoteAdd }) {
+export default function QuotesAccordionInProjectSale({ expanded = true, recordsPerLine = 2, quotes, permissions, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, projectId, addExisting, fetchProjectData, isTeamMember, isManager, onNewQuoteAdd }) {
     const history = useHistory();
     const {
         state: { selectedEntity },
