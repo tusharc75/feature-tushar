@@ -63,6 +63,7 @@ export default function ManageContact(props) {
   ] = useState([]);
   const [ownerDataSource, setOwnerDataSource] = useState([]);
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
+  const [reportsToMainDataSource, setReportsToMainDataSource] = useState([]);
   const [reportsToDataSource, setReportsToDataSource] = useState([]);
 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
@@ -89,15 +90,16 @@ export default function ManageContact(props) {
       );
       if (reportsToDropdownData) {
         if (isNew) {
-          setReportsToDataSource(reportsToDropdownData.option);
+          setReportsToMainDataSource(reportsToDropdownData.option);
         } else {
           let currentContactRemovedDataSource =
             reportsToDropdownData.option.filter(
               (d) => d.optionValue !== contactId
             );
-          setReportsToDataSource(currentContactRemovedDataSource);
+          setReportsToMainDataSource(currentContactRemovedDataSource);
         }
       }
+
       setFormsData(setFieldsInAscendingOrder(contactData.fields));
     }
   }, [contactData.fields]);
@@ -121,6 +123,10 @@ export default function ManageContact(props) {
   };
   //  Owner, Collaborator Code - End
 
+  const onReportsToDropdownOpen = (selectedAccount) => {
+    setReportsToDataSource(reportsToMainDataSource.filter(d => d.parentAccount === selectedAccount));
+  };
+
   const onSubmit = (values) => {
     handleSubmit(values, false);
   };
@@ -132,6 +138,7 @@ export default function ManageContact(props) {
       );
       if (getNewAddedAccount) {
         values["accountName"] = getNewAddedAccount.optionValue;
+        values["reportsTo"] = "";
       }
       return values;
     }
@@ -287,12 +294,15 @@ export default function ManageContact(props) {
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountSource}
-                                            setFieldValue={setFieldValue}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={true}
                                             size="small"
                                             doNotShowInfoTooltip={true}
+                                            onChange={(e, value) => {
+                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                              setFieldValue("reportsTo", "")
+                                            }}
                                           />
                                         </Grid>
                                         {permissions[accountResource]
@@ -338,6 +348,7 @@ export default function ManageContact(props) {
                                         fullWidth
                                         isTooltip={true}
                                         size="small"
+                                        onOpen={() => onReportsToDropdownOpen(values.accountName)}
                                       />
                                     ) : (
                                       <FormTypes
