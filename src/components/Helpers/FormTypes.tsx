@@ -159,7 +159,7 @@ const FormTypes = (props) => {
     doNotShowUploadedFile = false,
     uploadFileUrl = '',
     onAppendData = null,
-    fileUploadMaxSize = { size: documentUploadMaxSize.size, text: documentUploadMaxSize.text },
+    fileUploadMaxSize = { ...documentUploadMaxSize },
     isMultipleUpload = false,
     imageOrFileUploadCompletePercentage,
     ...rest
