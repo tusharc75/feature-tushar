@@ -4,7 +4,6 @@ import Grid from "@material-ui/core/Grid";
 import { CreateNote } from "./CreateNote";
 import { GetNote, DeleteNote } from "../../../axios/activity";
 import Typography from "@material-ui/core/Typography";
-import moment from "moment";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import IconButton from "@material-ui/core/IconButton";
@@ -14,7 +13,7 @@ import { ListRelatedTo } from "../Helpers/ListRelatedTo";
 import { ViewAll } from "../Helpers/ViewAll";
 import ActivityLoader from "../../Helpers/ActivityLoader";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "../../../constants/helpers";
+import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
 
 export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -66,7 +65,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchNote();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleClose = () => {
@@ -105,7 +104,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     </Typography>
                     <span className="activity-date">
                       Created :{" "}
-                      {moment(_note.createdBy.date).format("MMM DD YYYY")}
+                      {displayDate(_note.createdBy.date)}
                     </span>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">

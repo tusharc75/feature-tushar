@@ -22,12 +22,13 @@ import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
 import styles from "../../Leads/Header.module.scss";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
+import { displayDate } from "../../../constants/helpers"
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
 
 const Note = () => {
     const {
-        state: { user,permissions },
+        state: { user, permissions },
     }: any = useData();
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
@@ -70,7 +71,7 @@ const Note = () => {
                 });
         }
     }, [referenceId]);
-    
+
 
 
     useEffect(() => {
@@ -105,25 +106,25 @@ const Note = () => {
 
     const CreatedAtDateRenderer = params => (
         <span style={{ marginLeft: 5, fontSize: 12 }}>
-            { moment(params.value).format("ddd MM/DD")}
+            { displayDate(params.value)}
         </span>
     )
 
     const UpdatedAtDateRenderer = params => (
         <span style={{ marginLeft: 5, fontSize: 12 }}>
-            { moment(params.value).format("ddd MM/DD")}
+            {displayDate(params.value)}
         </span>
     )
-    
+
     const ActionsRenderer = params => <>
-    <GridDeleteIcon
-      hasDeletePermission={ permissions.note.isDelete}
-      ownerId={params.data.createdBy}
-      userId={user?.user?._id}
-      onDelete={() => showConfirmBox(params.data)}
-      entity="note"
-    />
-  </>
+        <GridDeleteIcon
+            hasDeletePermission={permissions.note.isDelete}
+            ownerId={params.data.createdBy}
+            userId={user?.user?._id}
+            onDelete={() => showConfirmBox(params.data)}
+            entity="note"
+        />
+    </>
     const frameworkComponents = {
         nameRenderer: NameRenderer,
         createdAtDateRenderer: CreatedAtDateRenderer,
@@ -169,30 +170,30 @@ const Note = () => {
 
     const handleDeleteNote = async () => {
         if (deleteRecord.id || selectedRecords.length > 0) {
-          setOkButtonLoading(true);
-    
-          axiosInstance()
-            .put(`/note/deletemany`,
-              { ids: deleteRecord.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
-            .then(({ data }) => {
-              toastConfig.setToastConfig({
-                open: true,
-                type: "success",
-                message: data.message,
-              });
-              setIsConformDialogVisible(false);
-              setOkButtonLoading(false);
-              if (deleteRecord.id) { setDeleteRecord({ id: null, name: null }); }
-              fetchNotes();
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-              setIsConformDialogVisible(false);
-              setOkButtonLoading(false);
-            });
+            setOkButtonLoading(true);
+
+            axiosInstance()
+                .put(`/note/deletemany`,
+                    { ids: deleteRecord.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: "success",
+                        message: data.message,
+                    });
+                    setIsConformDialogVisible(false);
+                    setOkButtonLoading(false);
+                    if (deleteRecord.id) { setDeleteRecord({ id: null, name: null }); }
+                    fetchNotes();
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                    setIsConformDialogVisible(false);
+                    setOkButtonLoading(false);
+                });
         }
-      };
-    
+    };
+
 
     const handleChangeFilter = (value) => {
         setFilter(value)
@@ -211,20 +212,20 @@ const Note = () => {
 
     const showConfirmBox = (row) => {
         if (row) {
-          setIsConformDialogVisible(true);
-          if (row) {
-            setDeleteRecord({ id: row.id, name: row.concatedName });
-          }
-        } else {
-          if (
-            selectedRecords.find((d) => d.ownerId !== user.user._id)
-          ) {
-            setShowDeleteWarningConfirmBox(true);
-          } else {
             setIsConformDialogVisible(true);
-          }
+            if (row) {
+                setDeleteRecord({ id: row.id, name: row.concatedName });
+            }
+        } else {
+            if (
+                selectedRecords.find((d) => d.ownerId !== user.user._id)
+            ) {
+                setShowDeleteWarningConfirmBox(true);
+            } else {
+                setIsConformDialogVisible(true);
+            }
         }
-      };
+    };
 
 
     return (<Layout>
@@ -293,13 +294,13 @@ const Note = () => {
                                     Delete
                                     </MenuItem>
                             </Menu>
-                            </Box>
+                        </Box>
                     </Grid>
                 </Grid>
             </div>
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false} 
+                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
                 isClientSideGrid={true} />
 
             {noteId !== undefined && <ActivityModelHandler
@@ -309,19 +310,19 @@ const Note = () => {
             />}
         </CustomContainer>
         {
-          isConfirmDialogVisible ? (
-            <ConfirmationDialog
-              open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete Note ${deleteRecord.name || ""
-                }?`}
-              onClose={() => {
-                if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
-                setIsConformDialogVisible(false);
-              }}
-              okBtnLoading={okButtonLoading}
-              onOk={handleDeleteNote}
-            />
-          ) : null
+            isConfirmDialogVisible ? (
+                <ConfirmationDialog
+                    open={isConfirmDialogVisible}
+                    message={`Are you sure, you want to delete Note ${deleteRecord.name || ""
+                        }?`}
+                    onClose={() => {
+                        if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
+                        setIsConformDialogVisible(false);
+                    }}
+                    okBtnLoading={okButtonLoading}
+                    onOk={handleDeleteNote}
+                />
+            ) : null
         }
         {
             showCreateDialog &&

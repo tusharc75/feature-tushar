@@ -20,6 +20,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import routes from "../../components/Helpers/Routes";
 import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import { dateFormat } from "../../constants/helpers"
 
 const ProductCost = () => {
 
@@ -92,10 +93,10 @@ const ProductCost = () => {
                     className="createdAtTime badge-date"
                     title={`${params.row.createdBy.user.firstName} • ${moment(
                         params.row.createdBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
+                    ).format(dateFormat)}`}
                 >
                     {moment(params.row.createdBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
+                        dateFormat
                     )}
                 </span>
             </h5>) : <NoDataCell />
@@ -113,11 +114,9 @@ const ProductCost = () => {
                     className="updatedAtTime badge-date"
                     title={`${params.row.updatedBy.user.firstName} • ${moment(
                         params.row.updatedBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
+                    ).format(dateFormat)}`}
                 >
-                    {moment(params.row.updatedBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
-                    )}
+                    {moment(params.row.updatedBy.date.slice(0, 10)).format(dateFormat)}
                 </span>
             </h5>) : <NoDataCell />
         },
