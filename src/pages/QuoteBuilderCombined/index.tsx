@@ -24,16 +24,14 @@ import {
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { useHistory } from "react-router-dom";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
-  CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import "./style.scss";
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import QuoteHeader from "./QuoteHeader";
 import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
 
@@ -48,97 +46,6 @@ const QuoteType = [
     value: 2,
   },
 ];
-
-function reducer(state, action) {
-  switch (action.type) {
-    case "loading":
-      return {
-        ...state,
-        loading: action.loading
-      }
-
-    case "initialize":
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count,
-        loading: false
-      }
-
-    case "selection":
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords,
-      }
-
-    case "update":
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      }
-
-    case "filter":
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      }
-
-    case "sort":
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      }
-
-    case "search":
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      }
-
-    case "pageChange":
-      return {
-        ...state,
-        page: action.page
-      }
-
-    case "pageSizeChange":
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      }
-
-    case "complete":
-      return {
-        ...state,
-        loading: false
-      }
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: "",
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-}
 
 const QuoteBuilders = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -277,11 +184,8 @@ const QuoteBuilders = () => {
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    customFloatingFilter: CustomFloatingFilter,
     commonRenderer: CommonRenderer
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
+
   };
 
   const replaceFieldName = (field) => {
@@ -370,7 +274,7 @@ const QuoteBuilders = () => {
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
             const { owner, collaborator, createdBy, updatedBy, customerAccountName,
-              supplierAccountName, staticData, ...restProperties } = u;
+               ...restProperties } = u;
 
 
             let res = {
@@ -381,7 +285,6 @@ const QuoteBuilders = () => {
               ownerId: u.owner?.optionValue,
 
               canDelete: u.owner?.optionValue === user?.user._id,
-              stage: u.stage,
               closeDate: u?.closeDate ? displayDate(u.closeDate) : "",
 
               customerAccountName: u.customerAccountName?.optionLabel,

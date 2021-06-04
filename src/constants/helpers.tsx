@@ -103,6 +103,7 @@ export const sidebarResource = {
   email: "Email",
   attachment: "Attachment",
   case: "Case",
+  productTemplate:"Product Template"
 };
 
 export const lead = {

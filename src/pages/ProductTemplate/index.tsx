@@ -25,7 +25,7 @@ import {
     CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -33,97 +33,6 @@ import { GiAbstract055 } from 'react-icons/gi';
 import SearchBox from '../../components/Helpers/SearchBox'
 import { ExpandMore } from "@material-ui/icons";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-
-function reducer(state, action) {
-    switch (action.type) {
-        case "loading":
-            return {
-                ...state,
-                loading: action.loading
-            }
-
-        case "initialize":
-            return {
-                ...state,
-                dataRows: action.data,
-                rowCount: action.count,
-                loading: false
-            }
-
-        case "selection":
-            return {
-                ...state,
-                selectedRecords: action.selectedRecords,
-            }
-
-        case "update":
-            return {
-                ...state,
-                dataRows: action.data,
-                loading: false
-            }
-
-        case "filter":
-            return {
-                ...state,
-                loading: true,
-                filters: action.filters,
-                page: 0
-            }
-
-        case "sort":
-            return {
-                ...state,
-                sorting: action.sorting,
-                loading: true
-            }
-
-        case "search":
-            return {
-                ...state,
-                search: action.search,
-                loading: true
-            }
-
-        case "pageChange":
-            return {
-                ...state,
-                page: action.page
-            }
-
-        case "pageSizeChange":
-            return {
-                ...state,
-                limit: action.limit,
-                page: 0,
-                loading: true
-            }
-
-        case "complete":
-            return {
-                ...state,
-                loading: false
-            }
-
-        default:
-            break;
-    }
-
-    return state;
-}
-
-const intialState = {
-    dataRows: [],
-    rowCount: 0,
-    loading: false,
-    page: 0,
-    limit: 25,
-    pageSizes: gridPageSizes,
-    search: "",
-    filters: {},
-    sorting: [],
-    selectedRecords: []
-}
 
 let productTemplateTimeout;
 
@@ -135,7 +44,6 @@ const ProductTemplate: FC = () => {
     const {
         state: { user, permissions },
     }: any = useData();
-    const [isOpen, setIsOpen] = useState(false);
     const [renderCount, setRenderCount] = useState(0);
     const [productTemplatePermissions, setProductTemplatePermissions] = useState({
         isCreate: false,
@@ -161,11 +69,11 @@ const ProductTemplate: FC = () => {
     //  Grid Variables - End
 
 
-    const { productTemplateApi, productTemplateResource } = productTemplate;
+    const { productTemplateApi } = productTemplate;
 
     useEffect(() => {
-        if (permissions && permissions[productTemplateResource]) {
-            setProductTemplatePermissions(permissions[productTemplateResource]);
+        if (permissions && permissions.productTemplate) {
+            setProductTemplatePermissions(permissions.productTemplate);
         }
     }, [permissions]);
 
@@ -201,8 +109,7 @@ const ProductTemplate: FC = () => {
                 </IconButton>
             </Tooltip>
         }
-        {/* {productTemplatePermissions.isUpdate ? */}
-        { true ?
+        {productTemplatePermissions.isUpdate ?
             <Tooltip title="Delete" >
                 <IconButton aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
@@ -226,11 +133,7 @@ const ProductTemplate: FC = () => {
         commonRenderer: CommonRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
         actionsRenderer: ActionsRenderer,
-        customFloatingFilter: CustomFloatingFilter,
-        // customLoadingCellRenderer: CustomLoadingCellRenderer,
-        // customNoRowsOverlay: CustomNoRowsOverlay
     };
 
 
@@ -272,7 +175,7 @@ const ProductTemplate: FC = () => {
         else {
             ids = selectedRecords.map(d => d._id);
         }
-        axiosInstance().put(`/product-template/remove`, { "ids": ids }).then(({ data }) => {
+        axiosInstance().put(`${routes.productTemplate.path}/remove`, { "ids": ids }).then(({ data }) => {
             fetchProductTemplate();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
@@ -328,7 +231,7 @@ const ProductTemplate: FC = () => {
 
                 let rows = data.map((u) => {
 
-                    const { owner, collaborator, createdBy, updatedBy, staticData, ...restProperties } = u;
+                    const {  createdBy, updatedBy, staticData, ...restProperties } = u;
 
                     let res = {
                         ...restProperties,
