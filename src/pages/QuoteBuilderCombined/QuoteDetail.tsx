@@ -1456,6 +1456,8 @@ function QuoteDetail() {
               dataToUpdate={copyOfquoteDataToUpdate}
               resource={null}
               isRedirectTodetailPage={false}
+              contactId={null}
+              opportunityId={null}
             // qbApi={qbApi}
             />
           )
