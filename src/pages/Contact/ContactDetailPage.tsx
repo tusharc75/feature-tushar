@@ -539,14 +539,19 @@ const ContactDetailsPage = (props) => {
                     isAddProjectSale={true}
                   />
                 )}
-                {permissions?.quoteBuilder?.isRead && (
-                  <QuotesInAccordion
-                    recordsPerLine={3}
-                    quotes={quotes}
-                    fetchData={fetchRelatedData}
-                    quoteBuilderPermission={permissions.quoteBuilder}
+                {
+                accountResource === customerAccount.accountResource &&
+                  permissions?.quoteBuilder?.isRead && (
+                    <QuotesInAccordion
+                      recordsPerLine={3}
+                      quotes={quotes}
+                      fetchData={fetchRelatedData}
+                      quoteBuilderPermission={permissions.quoteBuilder}
+                      accountId={contactData?.accountName?.optionValue}
+                      contactId={id}
+                      accountResource={accountResource}
 
-                  />)}
+                    />)}
                 {/* <ProductBuilderInAccordion recordsPerLine={3} /> */}
                 {/* {permissions?.lead?.isRead && contactData.staticData?.lead && (
                   <LeadInAccordion
