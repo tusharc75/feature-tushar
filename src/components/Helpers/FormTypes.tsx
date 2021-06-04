@@ -232,11 +232,11 @@ const FormTypes = (props) => {
       const file = event.target.files[0];
 
       //  1048576 = 1 MB
-      if (file.size >= imageUploadMaxSize.size) {
+      if (file.size > imageUploadMaxSize.size) {
         setToastConfig({
           open: true,
           type: "error",
-          message: `Image must be less than ${imageUploadMaxSize.text} MB size`,
+          message: `Image must be less than ${imageUploadMaxSize.text} size`,
         });
       } else {
         getImageUrl(file);
