@@ -5,9 +5,10 @@ import FormTypes from "./FormTypes";
 import { setFieldsInAscendingOrder } from "../../constants/helpers";
 
 const InputField = (props) => {
-  const { fieldsData, errors, touched, values, setFieldValue, ...rest } = props;
+  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
@@ -78,6 +79,9 @@ const InputField = (props) => {
                           }
                           : null
                       }
+                      imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                        onImageUploadCompletePercentage(completePercentage);
+                      } : null}
                     />
                   </Grid>
                 ))}

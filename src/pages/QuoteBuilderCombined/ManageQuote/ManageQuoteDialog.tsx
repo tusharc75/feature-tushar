@@ -76,6 +76,7 @@ export default function ManageQuoteDialog({
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
   const [accountData, setAccountData] = useState([]);
   const [newAddedAccountId, setNewAddedAccountId] = useState(null)
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -529,6 +530,9 @@ export default function ManageQuoteDialog({
                                           fullWidth
                                           isTooltip={true}
                                           size="small"
+                                          imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          } : null}
                                         />
                                       )}
                                   </Grid>
@@ -598,7 +602,7 @@ export default function ManageQuoteDialog({
                     color="primary"
                     size="small"
                     disabled={
-                      Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
+                      uploadingImageOrFileProgress > 0 || Object.values(simplifyValues(entityData.initialValues, entityData.fields)).toString() ===
                       Object.values(simplifyValues(values, entityData.fields)).toString()
                     }
                     onClick={(e) => {
