@@ -4,6 +4,7 @@ import { TreeView, TreeItem } from "@material-ui/lab";
 import moment from "moment";
 import { useState } from "react";
 import ActivityModelHandler from "../../ActivityModelHandler";
+import { displayDate } from "../../../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
   label: {
@@ -56,9 +57,9 @@ export default function CalanderList(props) {
             title={
               data.status +
               " - " +
-              moment(data.startDate).format("YYYY/MM/DD") +
+              displayDate(data.startDate) +
               " - " +
-              moment(data.dueDate).format("YYYY/MM/DD")
+              displayDate(data.dueDate)
             }
             placement="right"
           >
@@ -72,11 +73,11 @@ export default function CalanderList(props) {
                 position: "absolute",
                 left:
                   (100 * moment(data.startDate).diff(startDate, "days")) /
-                    totalDay +
+                  totalDay +
                   "%",
                 right:
                   (100 * endDate.diff(moment(data.dueDate), "days")) /
-                    totalDay +
+                  totalDay +
                   "%",
               }}
               bgcolor="secondary.main"
