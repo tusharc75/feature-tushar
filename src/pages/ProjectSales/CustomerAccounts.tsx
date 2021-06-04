@@ -541,7 +541,7 @@ const CustomerAccounts = (props) => {
                             permissions.isRead && (
                               <QuotesAccordionInProjectSale 
                                 expanded={true}
-                                quotes={quotes}
+                                quotes={quotes.filter((q) => q.customerAccountName === c._id)}
                                 recordsPerLine={3}
                                 accountId={c._id}
                                 accountResource={"customerAccount"}
