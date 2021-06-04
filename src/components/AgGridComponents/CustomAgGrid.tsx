@@ -4,6 +4,8 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes } from '../../constants/helpers';
 import CustomGridHeaderOptions from './CustomGridHeaderOptions';
+import { CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 
 export function reducer(state, action) {
     switch (action.type) {
@@ -177,7 +179,13 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     headerHeight={AgGridHeaderHeight}
                     floatingFiltersHeight={AgGridFloatingFiltersHeight}
                     rowHeight={AgGridRowHeight}
-                    frameworkComponents={frameworkComponents}
+                    frameworkComponents={{
+                        ...frameworkComponents,
+                        customLoadingOverlay: CustomLoadingOverlay,
+                        customFloatingFilter: CustomFloatingFilter,
+                        // customLoadingCellRenderer: CustomLoadingCellRenderer,
+                        // customNoRowsOverlay: CustomNoRowsOverlay
+                    }}
                     enableCellChangeFlash={false}
                     defaultColDef={{
                         resizable: true,
@@ -227,7 +235,7 @@ export default function CustomAgGrid({ columns, dataRows, frameworkComponents, d
                     }}
                     immutableData={true}
                     getRowNodeId={(data) => {
-                        return data._id;
+                        return data._id ?? data.id;
                     }}
 
                     pagination={true}

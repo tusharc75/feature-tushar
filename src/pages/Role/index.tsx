@@ -16,8 +16,7 @@ import { PERMISSION } from "../../constants/Roles";
 import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import RoleHeader from "./RoleHeader";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer, CustomLoadingOverlay } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -210,11 +209,7 @@ const Roles: FC = () => {
     commonRenderer: CommonRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    customFloatingFilter: CustomFloatingFilter,
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
+    actionsRenderer: ActionsRenderer
   };
 
   const replaceFieldName = (field) => {

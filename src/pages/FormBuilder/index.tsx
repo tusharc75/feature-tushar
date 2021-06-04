@@ -1,57 +1,59 @@
-import React, { useEffect, useState, useContext } from "react";
-import { DataGrid, GridToolbar } from "@material-ui/data-grid";
+import React, { useEffect, useState, useContext, useReducer } from "react";
 import Grid from "@material-ui/core/Grid";
 import { Link } from "react-router-dom";
 import Layout from "../../components/Layout";
-import { Autocomplete } from "@material-ui/lab";
-import { Box, TextField, Typography } from "@material-ui/core";
-import Loader from "../../components/Loader";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../components/CustomContainer";
-import DetailsPageHeader from "../../components/DetailsPageHeader";
 import { FaWpforms } from 'react-icons/fa';
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
+
 const FormBuilder = () => {
 
-
   const toastConfig = useContext(CustomToastContext)
-  const [brandResource, setBrandResource] = useState([]);
-  const [loading, setLoading] = useState(false);
+
+  //  Grid Variables - Start
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  // const [showGridFilters, setShowGridFilters] = useState(true)
+  const columns = [
+    { field: "resource", headerName: "Resource", show: true, disabled: true, cellRenderer: "resourceRenderer" },
+  ];
+  //  Grid Variables - End
+
+  const ResourceRenderer = params => <Link className="link"
+    to={"/form-builder/resource?resource=" + params.data.resource}>
+    {params.data.resource}
+  </Link>
 
   useEffect(() => {
     fetchGetBrandResource();
   }, []);
 
-
-  const fetchGetBrandResource = async () => {
-    setLoading(true)
-    axiosInstance().get(`/sa-formbuilder/resource`).then(({ data: { data } }) => {
-      setBrandResource(data);
-      setLoading(false)
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+  const frameworkComponents = {
+    resourceRenderer: ResourceRenderer
   };
 
+  const fetchGetBrandResource = () => {
+    dispatch({ type: "loading", loading: true });
 
-  const columns = [
-    {
-      field: "resource",
-      headerName: "Resource",
-      flex: 1,
-      renderCell: (params) => (
-        <Link className="link"
-          to={"/form-builder/resource?resource=" + params.row.resource}>
-          {" "}
-          {params.row.resource}
-        </Link>
-      ),
-    },
-  ];
+    if (gridApi) {
+      gridApi.setRowData([]);
+      gridApi.showLoadingOverlay();
+    }
+
+    axiosInstance().get(`/sa-formbuilder/resource`).then(({ data: { data } }) => {
+      dispatch({ type: "initialize", data: data, count: data.length });
+
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      dispatch({ type: "loading", loading: false });
+    });
+  };
 
   return (
     <Layout>
@@ -69,23 +71,10 @@ const FormBuilder = () => {
             </div>
           </Grid>
         </Grid>
-        <div className="listing-grid">
-          <DataGrid
-            components={{
-              Toolbar: CustomDataGridToolbar,
-              NoRowsOverlay: CustomDataGridNoDataFound,
-            }}
-            rows={brandResource}
-            columns={columns.map((column) => ({
-              ...column,
-              disableClickEventBubbling: true,
-            }))}
-            loading={loading}
-            pageSize={25}
-            pagination
-            density="compact"
-          />
-        </div>
+
+        <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+          dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
+          isClientSideGrid={true} />
 
       </CustomContainer>
     </Layout>
