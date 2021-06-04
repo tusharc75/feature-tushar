@@ -45,7 +45,7 @@ const CreateProduct = (props) => {
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
-
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
@@ -448,6 +448,9 @@ const CreateProduct = (props) => {
                                                                             fieldData={field}
                                                                             size="small"
                                                                             disabled={field.fieldName === "unit" ? (isStandardTemplate ? false : true) : false}
+                                                                            imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                                setUploadingImageOrFileProgress(completePercentage);
+                                                                            } : null}
                                                                         />
                                                                     </Grid>
                                                     ))}
@@ -465,6 +468,7 @@ const CreateProduct = (props) => {
                                 variant="contained"
                                 color="primary"
                                 type="submit"
+                                disabled={uploadingImageOrFileProgress > 0}
                                 // disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
                                 //     Object.values(simplifyValues(values, initialData.fields)).toString()}
                                 onClick={submitForm}

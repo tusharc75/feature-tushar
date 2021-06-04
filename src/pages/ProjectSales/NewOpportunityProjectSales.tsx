@@ -51,6 +51,7 @@ export default function NewOpportunityProjectSales({
   const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(opportunityData.fields));
@@ -150,7 +151,7 @@ export default function NewOpportunityProjectSales({
           initialValues={opportunityData.initialValues}
           validationSchema={yupSchema(opportunityData.fields)}
           validateOnMount
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({
             values,
@@ -329,6 +330,9 @@ export default function NewOpportunityProjectSales({
                                       fullWidth
                                       isTooltip={true}
                                       size="small"
+                                      imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                        setUploadingImageOrFileProgress(completePercentage);
+                                      } : null}
                                     />
                                   )}
                                 </Grid>
@@ -376,7 +380,7 @@ export default function NewOpportunityProjectSales({
                   variant="contained"
                   color="primary"
                   disabled={
-                    Object.values(
+                    uploadingImageOrFileProgress > 0 || Object.values(
                       simplifyValues(
                         opportunityData.initialValues,
                         opportunityData.fields

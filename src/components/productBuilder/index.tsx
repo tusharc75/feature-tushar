@@ -30,7 +30,7 @@ const ProductBuilder = (props) => {
     const { productBuilderId,
         isAddNewProduct, setIsAddNewProduct,
         isAddExistingProduct, setIsAddExistingProduct,
-        refreshProducts, Editable, stage } = props;
+        refreshProducts, Editable, stage, Deletable} = props;
 
     const toastConfig = useContext(CustomToastContext)
 
@@ -153,7 +153,7 @@ const ProductBuilder = (props) => {
                             col.width = 180
                             if (ele.fieldName === "productName") {
                                 col.renderCell = (params) => (
-                                    Editable ?
+                                    Editable||Deletable ?
                                         (<Link className="link" onClick={() => { setProductData(params.row) }}   >
                                             {params.row.productName}
                                         </Link>) : (<>{params.row.productName}</>)

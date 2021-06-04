@@ -38,10 +38,10 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomNotificationCountContext } from "../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import routes from "../Helpers/Routes"
-import moment from 'moment'
 import { useAccount, useMsal } from "@azure/msal-react";
 import { isEmpty } from "lodash";
 import { FiCheckCircle } from 'react-icons/fi';
+import { displayCardDate } from "../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -389,7 +389,7 @@ const Header = ({ toggleDrawer }) => {
               <>
                 <h4>{d.title}</h4>
                 <h5>{d.description}</h5>
-                <h6 className="pull-right">{moment(d.date).format("MMM DD YYYY")}</h6>
+                <h6 className="pull-right">{displayCardDate(d?.date)}</h6>
               </>
             }
           </div>
@@ -397,24 +397,24 @@ const Header = ({ toggleDrawer }) => {
       }
 
       <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
-          <Typography onClick={() => {
-            axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
-              let updatedNotificationList = [];
-              notificationList.map(notification => {
-                notification.read = true;
-                updatedNotificationList.push(notification);
-              })
-
-              setNotificationList(updatedNotificationList);
-              toastConfig.setToastConfig({ open: true, message: data.message, type: "success" })
-
-              setFullScreenNotificationAnchorEl(null);
-              setMobileScreenNotificationAnchorEl(null);
-            }).catch((error) => {
-              toastConfig.setToastConfig(error)
+        <Typography onClick={() => {
+          axiosInstance().put("/user/notification/all-read", { toggle: true }).then(({ data }) => {
+            let updatedNotificationList = [];
+            notificationList.map(notification => {
+              notification.read = true;
+              updatedNotificationList.push(notification);
             })
 
-          }} className="cursor-pointer"><FiCheckCircle />Mark all as read</Typography>
+            setNotificationList(updatedNotificationList);
+            toastConfig.setToastConfig({ open: true, message: data.message, type: "success" })
+
+            setFullScreenNotificationAnchorEl(null);
+            setMobileScreenNotificationAnchorEl(null);
+          }).catch((error) => {
+            toastConfig.setToastConfig(error)
+          })
+
+        }} className="cursor-pointer"><FiCheckCircle />Mark all as read</Typography>
       </div>
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>

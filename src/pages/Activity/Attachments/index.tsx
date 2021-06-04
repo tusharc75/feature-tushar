@@ -21,11 +21,11 @@ import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import { Delete as DeleteIcon } from "@material-ui/icons";
-import moment from 'moment'
 import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
 import {
     gridPageSizes,
     isObjectEmpty,
+    displayDate
 } from "../../../constants/helpers";
 import {
     CommonRenderer,
@@ -238,10 +238,10 @@ export default function Attachment(props) {
     )
 
     const CreatedByRenderer = params => (
-        <span>{moment(params.data.createdByDate).format("DD/MM/YYYY hh:mm A")}</span>
+        <span>{displayDate(params.data?.createdByDate)}</span>
     )
     const UpdatedByRenderer = params => (
-        < span > {moment(params.data.updatedAtDate).format("DD/MM/YYYY hh:mm A")}</span>
+        < span > {displayDate(params.data?.updatedAtDate)}</span>
     )
 
     const frameworkComponents = {

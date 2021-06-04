@@ -31,6 +31,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
     fields: [],
     values: {},
   });
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const history = useHistory();
 
   useEffect(() => {
@@ -119,6 +120,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    onImageUploadCompletePercentage={setUploadingImageOrFileProgress}
                   />
                 </Form>
               </CustomDialogContent>
@@ -126,7 +128,7 @@ const CreateEntity = ({ open, close, fetchData }) => {
                 <Button
                   variant="outlined"
                   color="primary"
-                  size="small" 
+                  size="small"
                   disabled={isSubmitting || loading}
                   onClick={close}
                 >
@@ -135,15 +137,15 @@ const CreateEntity = ({ open, close, fetchData }) => {
                 <Button
                   variant="contained"
                   color="primary"
-                  size="small" 
+                  size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading}
+                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>
               </CustomDialogFooter>
             </>
-           
+
           )}
         </Formik>
       )}
