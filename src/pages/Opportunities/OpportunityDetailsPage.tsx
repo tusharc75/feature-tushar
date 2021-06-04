@@ -558,7 +558,7 @@ function OpportunityDetailsPage() {
                     <Box padding="16px">
                       <DetailsPage
                         data={opportunityData}
-                        fields={opportunityFields}
+                        fields={opportunityFields.filter(currentField => currentField.fieldData?.fieldName !== "supplierAccountName")}
                       />
                     </Box>
                     <div className="p-3">

@@ -17,15 +17,16 @@ import "./styles/responsive-styles.scss"
 import "./styles/rbc-calender.scss";
 import "./styles/vis-network/vis-network.min.css"
 import { Integrations } from "@sentry/tracing";
+import { CustomNotificationCountProvider } from "./StateProvider/CustomNotificationCountContext/CustomNotificationCountContext";
 
 Sentry.init({
-    dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
-    integrations: [new Integrations.BrowserTracing()],
+  dsn: "https://b9188e1338604e7c9e6a0bdd2978b210@o718098.ingest.sentry.io/5780577",
+  integrations: [new Integrations.BrowserTracing()],
 
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
 });
 
 
@@ -35,9 +36,11 @@ ReactDOM.render(
     <Router>
       <Provider>
         <CustomToastProvider>
-          <MsalProvider instance={AzureInstance}>
-            <App />
-          </MsalProvider>
+          <CustomNotificationCountProvider>
+            <MsalProvider instance={AzureInstance}>
+              <App />
+            </MsalProvider>
+          </CustomNotificationCountProvider>
         </CustomToastProvider>
       </Provider>
     </Router>

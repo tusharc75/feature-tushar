@@ -122,7 +122,8 @@ const CustomerAccounts = (props) => {
   const [accId, setAccId] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [isRemoving, setRemoving] = useState(false);
-  const [deleteRec, setDeleteRec] = useState(null);
+  const [accountDeleteRec, setAccountDeleteRec] = useState(null);
+  const [contactDeleteRec, setContactDeleteRec] = useState(null);
 
   useEffect(() => {
     if (!users.length) return;
@@ -181,7 +182,7 @@ const CustomerAccounts = (props) => {
       .put(`/project-sales/add-customer-account`, dataObj)
       .then(() => {
         setToastConfig({
-          message: `Customer Contact added successfully`,
+          message: `Customer Account added successfully`,
           type: "success",
           open: true,
         });
@@ -217,7 +218,7 @@ const CustomerAccounts = (props) => {
 
   const handleRemoveAccount = () => {
     setShowConfirmBox(true);
-    setDeleteRec(currentAccount._id);
+    setAccountDeleteRec(currentAccount._id);
   };
 
   const removeAccount = () => {
@@ -237,7 +238,44 @@ const CustomerAccounts = (props) => {
       })
       .then(() => {
         setToastConfig({
-          message: `Customer Contact added successfully`,
+          message: `Customer Account removed successfully`,
+          type: "success",
+          open: true,
+        });
+        setRemoving(false);
+        setShowConfirmBox(false);
+        fetchProjectData();
+      })
+      .catch((error) => {
+        setToastConfig(error);
+        setRemoving(false);
+        setShowConfirmBox(false);
+      });
+  };
+
+  const handleRemoveContact = (data) => {
+    setShowConfirmBox(true);
+    setContactDeleteRec(data);
+  };
+
+  const removeContact = () => {
+    if (!contactDeleteRec) return;
+
+    const id = contactDeleteRec._id;
+
+    const newContactData = customerContacts
+      ?.filter((c) => c._id !== id)
+      .map((contact) => contact._id);
+
+    setRemoving(true);
+    axiosInstance()
+      .put(`/project-sales/add-customer-contact`, {
+        customerContact: newContactData,
+        _id: projectId,
+      })
+      .then(() => {
+        setToastConfig({
+          message: `Customer Contact removed successfully`,
           type: "success",
           open: true,
         });
@@ -389,20 +427,24 @@ const CustomerAccounts = (props) => {
                   <MoreVert />
                 </IconButton>
 
-                {customerAccounts.length > 0 && (
-                  <IconButton
-                    title="Remove Account"
-                    aria-haspopup="true"
-                    color="primary"
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveAccount();
-                    }}
-                  >
-                    <Delete color="error" />
-                  </IconButton>
-                )}
+                <Box component="span" mx={1} />
+                {customerAccounts.length > 0 &&
+                  opportunities.filter(
+                    (o) => o.customerAccountName === currentAccount?._id
+                  ).length < 1 && (
+                    <IconButton
+                      title={`Remove Account: ${currentAccount?.accountName}`}
+                      aria-haspopup="true"
+                      color="primary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveAccount();
+                      }}
+                    >
+                      <Delete color="error" />
+                    </IconButton>
+                  )}
               </>
             ) : null}
           </AccordionSummary>
@@ -549,6 +591,7 @@ const CustomerAccounts = (props) => {
                                     accountId={c._id}
                                     accountName={c.accountName}
                                     contactRoute="customer-contact"
+                                    handleRemoveContact={handleRemoveContact}
                                   />
                                 ) : (
                                   <Box pb="6px">
@@ -576,15 +619,23 @@ const CustomerAccounts = (props) => {
         <ConfirmationDialogRaw
           open={showConfirmBox}
           message={
-            deleteRec
+            accountDeleteRec
               ? "Are you sure about removing this account from project?"
+              : contactDeleteRec
+              ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
               : null
           }
           onClose={() => {
             setShowConfirmBox(false);
-            setDeleteRec(null);
+            setAccountDeleteRec(null);
           }}
-          onOk={deleteRec ? removeAccount : null}
+          onOk={
+            accountDeleteRec
+              ? removeAccount
+              : contactDeleteRec
+              ? removeContact
+              : null
+          }
           okBtnLoading={isRemoving}
         />
       )}

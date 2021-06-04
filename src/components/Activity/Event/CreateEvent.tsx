@@ -118,6 +118,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
   const handleSave = async (values) => {
     setSubmitting(true);
     values.relatedTo = relatedTo;
+    if (!isEmpty(azureAccount)) {
+      values.azureId = azureAccount.homeAccountId;
+      values.graphToken = await getAzureAcessToken(instance);
+    }
     if (eventId) {
       UpdateEvent(eventId, values)
         .then(({ data }) => {
@@ -129,10 +133,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
           setSubmitting(false);
         });
     } else {
-      if (!isEmpty(azureAccount)) {
-        values.azureId = azureAccount.homeAccountId;
-        values.graphToken = await getAzureAcessToken(instance);
-      }
       if (relatedTo) {
         CreateNewEvent(values)
           .then(({ data }) => {

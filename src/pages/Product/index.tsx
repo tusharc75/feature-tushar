@@ -1,9 +1,8 @@
-import { useState, useEffect, Fragment, useContext, useCallback, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer } from "react";
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { DataGrid } from "@material-ui/data-grid";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
@@ -12,29 +11,20 @@ import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
 import CreateProduct from "../../components/Product/CreateProduct";
-import moment from "moment";
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import { GiAbstract055 } from 'react-icons/gi';
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
-import { getSearchQuery } from '../../services/util';
 import routes from "../../components/Helpers/Routes";
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import { product, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell'
 import {
-    CommonRenderer,
     CreatedByRenderer,
-    UpdatedByRenderer,
-    CustomLoadingOverlay,
-    CommonRendererWithCopy
+    UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 
 function reducer(state, action) {
@@ -237,7 +227,7 @@ const Product = () => {
                     setDeleteRecord(params.data);
                     setShowDeleteConfirmBox(true)
                 }} >
-                    <DeleteIcon fontSize="small" />
+                    <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
             </Tooltip >
         </>
@@ -279,9 +269,7 @@ const Product = () => {
         productNameRenderer: ProductNameRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
-        customFloatingFilter: CustomFloatingFilter,
+        actionsRenderer: ActionsRenderer
     };
 
 
