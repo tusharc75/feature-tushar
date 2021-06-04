@@ -32,15 +32,12 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import routes from "./../../components/Helpers/Routes";
 import {
-  gridPageSizes,
   isObjectEmpty
 } from "../../constants/helpers";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
-  CustomLoadingOverlay,
   CommonRendererWithCopy
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
@@ -256,11 +253,7 @@ export default function Account(props) {
     masterAccountRenderer: MasterAccountRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    customFloatingFilter: CustomFloatingFilter,
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
+    actionsRenderer: ActionsRenderer
   };
 
   const replaceFieldName = (field) => {

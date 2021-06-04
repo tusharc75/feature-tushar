@@ -27,12 +27,10 @@ import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import { SiConvertio } from "react-icons/si";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
-  CustomLoadingOverlay,
   CommonRendererWithCopy
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
@@ -163,11 +161,7 @@ const Leads = () => {
     commonRendererWithCopy: CommonRendererWithCopy,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    customFloatingFilter: CustomFloatingFilter,
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
+    actionsRenderer: ActionsRenderer
   };
 
   const replaceFieldName = (field) => {

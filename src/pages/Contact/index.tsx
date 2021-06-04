@@ -32,12 +32,10 @@ import { useHistory } from "react-router-dom";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import { Chip } from "@material-ui/core";
 import routes from "./../../components/Helpers/Routes";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
   CommonRenderer,
   CreatedByRenderer,
   UpdatedByRenderer,
-  CustomLoadingOverlay,
   CommonRendererWithCopy
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
@@ -192,11 +190,7 @@ export default function Contact(props) {
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
     accountNameRenderer: AccountNameRenderer,
-    actionsRenderer: ActionsRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    customFloatingFilter: CustomFloatingFilter,
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
+    actionsRenderer: ActionsRenderer
   };
 
   const replaceFieldName = (field) => {

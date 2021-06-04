@@ -20,10 +20,6 @@ import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
 import styles from "../../Leads/Header.module.scss";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import {
-    CustomLoadingOverlay
-} from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
 
 const Note = () => {
     const {
@@ -102,9 +98,7 @@ const Note = () => {
     const frameworkComponents = {
         nameRenderer: NameRenderer,
         createdAtDateRenderer: CreatedAtDateRenderer,
-        updatedAtDateRenderer: UpdatedAtDateRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
-        customFloatingFilter: CustomFloatingFilter
+        updatedAtDateRenderer: UpdatedAtDateRenderer
     }
 
     const fetchNotes = async () => {
@@ -158,32 +152,6 @@ const Note = () => {
 
     }
 
-
-    // const columns = [
-    //     { field: 'id', headerName: 'id', hide: true },
-    //     {
-    //         field: 'name', headerName: 'Title',
-    //         width: 300,
-    //         renderCell: (params) =>
-    //             <a onClick={() => handleActivityOpen(params.row.id)}>{params.row.name}</a>
-    //     },
-    //     {
-    //         field: 'createdBy',
-    //         headerName: 'Created At',
-    //         width: 200,
-    //         renderCell: (params) =>
-    //             <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>
-    //     },
-    //     {
-    //         field: 'updatedAt',
-    //         headerName: 'Updated At',
-    //         width: 200,
-    //         renderCell: (params) =>
-    //             <span>{moment(params.row.updatedAt).format("DD/MM/YYYY hh:mm A")}</span>
-    //     },
-    // ];
-
-
     return (<Layout>
         <Grid container className="headerbox">
             <Grid item xs={12}>
@@ -226,23 +194,6 @@ const Note = () => {
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                 dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
                 isClientSideGrid={true} />
-
-            {/* <div className="listing-grid">
-                <DataGrid
-                    components={{
-                        Toolbar: CustomDataGridToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    loading={loading}
-                    rows={notes}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={10}
-                    density="compact"
-                />
-            </div> */}
-
 
             {noteId !== undefined && <ActivityModelHandler
                 activityType="note"
