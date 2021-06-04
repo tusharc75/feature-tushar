@@ -42,6 +42,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
+import { IsValidFileSize, IsValidImageSize, validImageSize } from "../../constants/helpers"
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -70,6 +71,7 @@ const CustomFormat = (props: NumberFormatCustomProps) => {
   const { inputRef, onChange, ...other } = props;
   return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
 };
+
 
 const InfoLabel = ({
   children,
@@ -157,7 +159,7 @@ const FormTypes = (props) => {
     doNotShowUploadedFile = false,
     uploadFileUrl = '',
     onAppendData = null,
-    fileSizeToAccept = null, //size in bytes
+    fileSizeToAccept = 10, //size in MB
     showErrorMessage,
     isMultipleUpload = false,
     ...rest
@@ -231,11 +233,11 @@ const FormTypes = (props) => {
       const file = event.target.files[0];
 
       //  1048576 = 1 MB
-      if (file.size > 1048576) {
+      if (IsValidImageSize(file.size)) {
         setToastConfig({
           open: true,
           type: "error",
-          message: "Image must be less than 1 MB size",
+          message: `Image must be less than ${validImageSize} MB size`,
         });
       } else {
         getImageUrl(file);
@@ -252,8 +254,8 @@ const FormTypes = (props) => {
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
-        if (fileSizeToAccept && file.size >= fileSizeToAccept && showErrorMessage) {
-          showErrorMessage({ open: true, type: "error", message: "file must be less than 1 MB" })
+        if (IsValidFileSize(file.size, fileSizeToAccept)) {
+          setToastConfig({ open: true, type: "error", message: `file must be less than ${fileSizeToAccept} MB` })
           break
         }
         getFileUrl(file);
@@ -1481,17 +1483,21 @@ const FormTypes = (props) => {
                       : "No file choosen"}
               </Typography>
             </Box>
-            <IconButton
-              disabled={Boolean(!values[name])}
-              title="Remove File"
-              color="secondary"
-              size="small"
-              aria-label="delete picture"
-              component="span"
-              onClick={() => setFieldValue(name, "")}
-            >
-              <DeleteIcon />
-            </IconButton>
+            {
+              values[name] ?
+                <IconButton
+                  disabled={Boolean(!values[name])}
+                  title="Remove File"
+                  color="secondary"
+                  size="small"
+                  aria-label="delete picture"
+                  component="span"
+                  onClick={() => setFieldValue(name, "")}
+                >
+                  <DeleteIcon />
+                </IconButton> : null
+            }
+
           </>}
       </Box>
     </Fragment>

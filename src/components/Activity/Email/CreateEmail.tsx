@@ -37,6 +37,7 @@ import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
 import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
 import ImageAttachments from './ImageAttachments'
+import { IsValidImageSize, validImageSize } from "../../../constants/helpers"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -254,7 +255,15 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
     const handleUploadImage = (event) => {
         if (event.target.files && event.target.files.length) {
             const file = event.target.files[0];
-            getImageUrl(file);
+            if (IsValidImageSize(file.size)) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: `Image must be less than ${validImageSize} MB size`,
+                });
+            } else {
+                getImageUrl(file);
+            }
         }
     };
 

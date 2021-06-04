@@ -175,7 +175,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         onAppendData={(data) => appendData(data, setFieldValue)}
                                                         doNotShowUploadedFile={true}
                                                         showErrorMessage={showErrorMessage}
-                                                        fileSizeToAccept={1000000} //size in bytes
+                                                        fileSizeToAccept={1} //size in MB
                                                     />
                                                 </Box>
                                                 <Box mt={2} >

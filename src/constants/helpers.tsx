@@ -115,9 +115,9 @@ export const entity = {
   entityResource: "entity", //  Key of sidebar object
   entityApi: "/entity",
 };
-export const quoteBuilder={
-  qbResource:"quoteBuilder",
-  qbApi:"/quote-builder"
+export const quoteBuilder = {
+  qbResource: "quoteBuilder",
+  qbApi: "/quote-builder"
 }
 
 export const supplierAccount = {
@@ -704,4 +704,14 @@ export const setFieldsInAscendingOrder = (fieldsToOrder) => {
 
 export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
+}
+
+export const validImageSize = 2 //MB
+
+export const IsValidImageSize = (fileSize) => {
+  return IsValidFileSize(fileSize, validImageSize)
+}
+export const IsValidFileSize = (fileSize, sizeToCheck) => {
+  //sizeToCheck in MB
+  return ((fileSize / 1024 / 1024) > sizeToCheck)
 }

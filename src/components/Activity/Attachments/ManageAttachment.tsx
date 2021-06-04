@@ -21,7 +21,7 @@ const AttachmentSchema = Yup.object().shape({
     fileUrl: Yup.string().required("please upload attachment"),
 });
 
-export default function ManageAttachment({ relatedTo, attachmentId, handleClose, attachmentData = null }) {
+export default function ManageAttachment({ relatedTo, attachmentId, handleClose, fetchData = null, attachmentData = null }) {
 
     const [initialValues, setInitialValues] = useState(null);
     const [loading, setLoading] = useState(false)
@@ -75,6 +75,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                     showSuccessMessage(data.message)
                     setLoading(false);
                     handleClose()
+                    if (fetchData) fetchData()
                 })
                 .catch((error) => {
                     setLoading(false);
@@ -88,6 +89,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                     showSuccessMessage(data.message)
                     setLoading(false);
                     handleClose()
+                    if (fetchData) fetchData()
                 })
                 .catch((error) => {
                     setLoading(false);
