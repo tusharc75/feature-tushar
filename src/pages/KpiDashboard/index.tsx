@@ -21,6 +21,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import CreateNewDialog from "./CreateNewDialog";
 import EditIcon from '@material-ui/icons/Edit';
+import { dateFormat } from "../../constants/helpers"
 
 const KpiDashboard = () => {
 
@@ -82,10 +83,10 @@ const KpiDashboard = () => {
                     className="createdAtTime badge-date"
                     title={`${params.row.createdBy.user.firstName} • ${moment(
                         params.row.createdBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
+                    ).format(dateFormat)}`}
                 >
                     {moment(params.row.createdBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
+                        dateFormat
                     )}
                 </span>
             </h5>) : <NoDataCell />
@@ -103,10 +104,10 @@ const KpiDashboard = () => {
                     className="updatedAtTime badge-date"
                     title={`${params.row.updatedBy.user.firstName} • ${moment(
                         params.row.updatedBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
+                    ).format(dateFormat)}`}
                 >
                     {moment(params.row.updatedBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
+                        dateFormat
                     )}
                 </span>
             </h5>) : <NoDataCell />
@@ -116,17 +117,17 @@ const KpiDashboard = () => {
             renderCell: (params) => (
                 <Fragment>
                     <Tooltip title="Edit" >
-                        <IconButton aria-label="Delete" onClick={() => { history.push('/dashboard-edit/'+params.row._id)}} >
+                        <IconButton aria-label="Delete" onClick={() => { history.push('/dashboard-edit/' + params.row._id) }} >
                             <EditIcon fontSize="small" />
                         </IconButton>
                     </Tooltip >
-                    
+
                     <Tooltip title="Delete" >
                         <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}  >
                             <DeleteIcon fontSize="small" color="error" />
                         </IconButton>
                     </Tooltip >
-                    
+
                 </Fragment>
             ),
             width: 200,

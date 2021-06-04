@@ -105,7 +105,7 @@ export const sidebarResource = {
   email: "Email",
   attachment: "Attachment",
   case: "Case",
-  productTemplate:"Product Template"
+  productTemplate: "Product Template"
 };
 
 export const lead = {
@@ -447,11 +447,24 @@ export const initializeDropdownById = (field, fieldName, id) => {
 
   return field;
 };
+export const dateFormat = "MM/DD/YYYY"
+export const dateTimeFormat = "MM/DD/YYYY hh:mm A"
+export const cardDateFormat = "MMM,DD YYYY"
+
 export const yyyyMMDD = (dateToBeFormatted) => {
   return dateToBeFormatted
-    ? moment(dateToBeFormatted).format("YYYY-MM-DD")
+    ? moment(dateToBeFormatted).format(cardDateFormat)
     : dateToBeFormatted;
 };
+
+export const displayDate = date => {
+  return date ? moment(date).format(dateFormat) : date
+}
+
+export const displayCardDate = date => {
+  return date ? moment(date).format(cardDateFormat) : date
+}
+
 
 export const materialTableIcons: any = {
   Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
