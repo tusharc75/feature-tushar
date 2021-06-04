@@ -37,7 +37,7 @@ import CustomDialogContent from "../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat } from "../../../constants/helpers"
+import { dateFormatForInputControl } from "../../../constants/helpers"
 
 const CaseSchema = Yup.object().shape({
   name: Yup.string().required("Please enter case name"),
@@ -276,7 +276,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                               inputVariant="outlined"
                               fullWidth
                               margin="dense"
-                              format={dateFormat}
+                              format={dateFormatForInputControl}
                               minDate={
                                 initialValues.parentData &&
                                 initialValues.parentData.startDate
@@ -297,7 +297,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status }) => {
                               inputVariant="outlined"
                               fullWidth
                               margin="dense"
-                              format={dateFormat}
+                              format={dateFormatForInputControl}
                               minDate={values.startDate}
                               maxDate={
                                 initialValues.parentData &&
