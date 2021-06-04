@@ -18,7 +18,6 @@ export function reducer(state, action) {
                 ...state,
                 dataRows: action.data,
                 rowCount: action.count,
-                page: 0,
                 loading: false
             }
 
