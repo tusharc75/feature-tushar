@@ -185,14 +185,14 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                     >
                                         Create New
                           </MenuItem>
-                                    <MenuItem
+                                    {/* <MenuItem
                                         onClick={() => {
                                             setShowAddExistingDialog(true)
                                             handleCloseMenu();
                                         }}
                                     >
                                         Add Exisiting
-                          </MenuItem>
+                          </MenuItem> */}
                                 </Menu>
                             </>
                             : <IconButton
