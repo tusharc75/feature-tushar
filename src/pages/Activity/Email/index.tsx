@@ -34,6 +34,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
 import { AddOutlined } from "@material-ui/icons";
+import { displayDate } from "../../../constants/helpers"
 
 const tabs = {
     Inbox: 1,
@@ -290,7 +291,7 @@ const Email = () => {
 
     const CreatedByDateRenderer = params => (
         <span className={emailStyles.emailCreatedAt}>
-            { moment(params.data.createdByDate).format("ddd MM/DD")}
+            { displayDate(params.data?.createdByDate)}
         </span >)
 
     const frameworkComponents = {

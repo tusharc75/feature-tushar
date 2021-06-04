@@ -31,6 +31,7 @@ const CreateProduct = (props) => {
     const [productFields, setProductFields] = useState([]);
     const [loading, setLoading] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     const [isAddField, setIsAddField] = useState(false);
     const [fields, setFields] = useState([]);
@@ -50,7 +51,7 @@ const CreateProduct = (props) => {
                 _fields.push(_f)
             }
         })
-        
+
         _fields = _.orderBy(_fields, 'order', 'asc');
         _fields = _.sortBy(_fields, function (item) {
             return levalOrderBy.indexOf(item.leval)
@@ -224,6 +225,9 @@ const CreateProduct = (props) => {
                                                                     fieldData={field}
                                                                     size="small"
                                                                     disabled={['unit', 'productCategory', 'productTemplate'].includes(field.fieldName) ? true : false}
+                                                                    imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                        setUploadingImageOrFileProgress(completePercentage);
+                                                                    } : null}
                                                                 />
                                                             </Grid>
                                                     ))}
@@ -242,6 +246,7 @@ const CreateProduct = (props) => {
                                 color="primary"
                                 type="submit"
                                 onClick={submitForm}
+                                disabled={uploadingImageOrFileProgress > 0}
                             > Save</CustomButton>
                         </CustomDialogFooter>
                     </Fragment>

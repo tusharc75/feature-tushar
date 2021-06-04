@@ -3,6 +3,7 @@ import moment from "moment";
 import { AiOutlineLoading } from "react-icons/ai";
 import CustomRenderCell from "../Helpers/CustomRenderCell";
 import NoDataCell from "../Helpers/NoDataCell";
+import { dateFormat } from "../../constants/helpers"
 
 export const CommonRenderer = params => <CustomRenderCell value={params.value} />;
 
@@ -11,10 +12,10 @@ export const CommonRendererWithCopy = params => <CustomRenderCell value={params.
 export const CreatedByRenderer = params => params.value ? (
     <h5 className="createBy" title={`${params.value} • ${moment(
         params.data.createdByDate.slice(0, 10)
-    ).format("MMM Do, YYYY")}`}>
+    ).format(dateFormat)}`}>
         {params.value}
         <span className="createdAtTime badge-date">
-            {moment(params.data.createdByDate.slice(0, 10)).format("MMM Do, YYYY")}
+            {moment(params.data.createdByDate.slice(0, 10)).format(dateFormat)}
         </span>
     </h5>
 ) : (
@@ -24,10 +25,10 @@ export const CreatedByRenderer = params => params.value ? (
 export const UpdatedByRenderer = params => params.value ? (
     <h5 className="updateBy" title={`${params.value} • ${moment(
         params.data.updatedByDate.slice(0, 10)
-    ).format("MMM Do, YYYY")}`}>
+    ).format(dateFormat)}`}>
         {params.value}
         <span className="updatedAtTime badge-date">
-            {moment(params.data.updatedByDate.slice(0, 10)).format("MMM Do, YYYY")}
+            {moment(params.data.updatedByDate.slice(0, 10)).format(dateFormat)}
         </span>
     </h5>
 ) : (

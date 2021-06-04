@@ -656,13 +656,15 @@ export default function AccountDetailPage(props) {
                   />
                 )}
                 {
-                  permissions?.quoteBuilder?.isRead &&
+                  permissions?.quoteBuilder?.isRead && accountResource == customerAccount.accountResource &&
                   (
                     <QuotesInAccordion
                       recordsPerLine={3}
                       quotes={quotes}
                       fetchData={fetchRelatedData}
                       quoteBuilderPermission={permissions.quoteBuilder}
+                      accountId={id}
+                      accountResource={accountResource}
                     />
                   )
                 }
