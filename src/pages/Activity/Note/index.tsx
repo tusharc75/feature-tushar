@@ -116,9 +116,6 @@ const Note = () => {
     )
     
     const ActionsRenderer = params => <>
-    {console.log("logged in",user?.user)}
-    {console.log("owner",params.data.id)}
-    {console.log(selectedRecords.id)}
     <GridDeleteIcon
       hasDeletePermission={ permissions.note.isDelete}
       ownerId={params.data.createdBy}
