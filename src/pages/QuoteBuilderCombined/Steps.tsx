@@ -41,11 +41,7 @@ const Steps=(props)=> {
     const toastConfig = useContext(CustomToastContext);
 
     
-    const getStepContent=(stepIndex)=> {
-    console.log(steps[stepIndex]);
-    return(steps[stepIndex]);
-    }
-
+    
   
 
 
@@ -56,6 +52,20 @@ const Steps=(props)=> {
       const nextStep=activeStep+1
       console.log(nextStep);
       activeStep=activeStep+1;
+      Refresh(version)
+    })
+    .catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
+  const handleBack = () => {
+    axiosInstance()
+    .post(`quote-builder/updateprocess/${id}?version=${version}`,{processStatus:steps[activeStep-1]})
+    .then(({ data }) => {
+      const nextStep=activeStep-1
+      console.log(nextStep);
+      activeStep=activeStep-1;
       Refresh(version)
     })
     .catch((error) => {
@@ -79,9 +89,13 @@ const Steps=(props)=> {
         ) : (
           <div>
             <div className={classes.stepperNext}>
+              {activeStep===1||activeStep===2?(<Button variant="contained" color="primary" onClick={handleBack} >
+                Back
+              </Button>):(null)}
               <Button variant="contained" color="primary" onClick={handleNext} disabled={nextStep?false:true}>
                 {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
               </Button>
+              
             </div>
           </div>
         )}
