@@ -160,7 +160,6 @@ const FormTypes = (props) => {
     uploadFileUrl = '',
     onAppendData = null,
     fileSizeToAccept = 10, //size in MB
-    showErrorMessage,
     isMultipleUpload = false,
     ...rest
   } = props;
