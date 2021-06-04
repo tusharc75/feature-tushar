@@ -19,6 +19,8 @@ import currencies from "./../../constants/currency_with_country.json";
 import { displayDate } from '../../services/util';
 import { HiExternalLink } from 'react-icons/hi';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
+import { isJSDocNullableType, isNonNullChain } from 'typescript';
+import { isNullOrUndefined } from 'util';
 
 const Accordion = withStyles({
     root: {
@@ -77,7 +79,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission }) {
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource=null }) {
     const history = useHistory();
     const {
         state: { selectedEntity },
@@ -238,6 +240,11 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                 dataToUpdate={null}
                 resource={null}
                 onSuccess={onSuccess}
+                accountId={accountId}
+                contactId={contactId}
+                opportunityId={opportunityId}
+                accountResource={accountResource}
+
             />
         }
     </>

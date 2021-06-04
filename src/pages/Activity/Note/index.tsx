@@ -6,6 +6,7 @@ import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
 import { useHistory } from "react-router-dom";
 import queryString from 'query-string';
 import { GetReferenceName, GetNotes } from "../../../axios/activity";
+import axiosInstance from '../../../axios/axiosInstance';
 import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import ActivityModelHandler from "../../../components/Activity/ActivityModelHandler";
@@ -15,7 +16,8 @@ import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpe
 import CustomContainer from "../../../components/CustomContainer";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { GoNote } from "react-icons/go";
-import { Button, Dialog } from "@material-ui/core";
+import { ExpandMore } from "@material-ui/icons";
+import { Button, Dialog, Menu, MenuItem } from "@material-ui/core";
 import { AddOutlined } from "@material-ui/icons";
 import { CreateNote } from "../../../components/Activity/Note/CreateNote";
 import { CustomDialogTransition } from "../../../constants/helpers";
@@ -32,6 +34,8 @@ import {
 import styles from "../../Leads/Header.module.scss";
 import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
 import { gridPageSizes } from "../../../constants/helpers";
+import GridDeleteIcon from "../../../components/Helpers/GridDeleteIcon";
+import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 
 function reducer(state, action) {
     switch (action.type) {
@@ -143,15 +147,21 @@ const Note = () => {
     const { referenceType, referenceId, activityType, activityId } = parsed;
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [isNew, setIsNew] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
     const [filter, setFilter] = useState([]);
     const [notes, setNotes] = useState([]);
+    const [okButtonLoading, setOkButtonLoading] = useState(false);
+    const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+    const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
+    const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
     const [noteData, setNoteData] = useState(null);
     const [noteId, setNoteId] = useState(undefined)
+    const [open, setOpen] = useState(false);
 
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
     // const [showGridFilters, setShowGridFilters] = useState(true)
     const columns = [
@@ -177,6 +187,15 @@ const Note = () => {
     useEffect(() => {
         fetchNotes()
     }, [filter]);
+
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+        console.log(selectedRecords)
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
 
     const handleClose = () => {
         setShowCreateDialog(false);
@@ -206,11 +225,24 @@ const Note = () => {
             { moment(params.value).format("ddd MM/DD")}
         </span>
     )
-
+    
+    const ActionsRenderer = params => <>
+    {console.log("logged in",user?.user)}
+    {console.log("owner",params.data.id)}
+    {console.log(selectedRecords.id)}
+    <GridDeleteIcon
+      hasDeletePermission={ permissions.note.isDelete}
+      ownerId={params.data.createdBy}
+      userId={user?.user?._id}
+      onDelete={() => showConfirmBox(params.data)}
+      entity="note"
+    />
+  </>
     const frameworkComponents = {
         nameRenderer: NameRenderer,
         createdAtDateRenderer: CreatedAtDateRenderer,
-        updatedAtDateRenderer: UpdatedAtDateRenderer
+        updatedAtDateRenderer: UpdatedAtDateRenderer,
+        actionsRenderer: ActionsRenderer,
     }
 
     const fetchNotes = async () => {
@@ -231,7 +263,7 @@ const Note = () => {
                         ...restProperties,
                         id: u._id,
 
-                        createdBy: u.createdBy?.user?.concatedName,
+                        createdBy: u.createdBy?.user,
                         createdByDate: u.createdBy?.date,
                         updatedBy: u.updatedBy?.user?.concatedName,
                         updatedByDate: u.updatedBy?.date,
@@ -247,6 +279,33 @@ const Note = () => {
             });
     };
 
+    const handleDeleteNote = async () => {
+        if (deleteRecord.id || selectedRecords.length > 0) {
+          setOkButtonLoading(true);
+    
+          axiosInstance()
+            .put(`/note/deletemany`,
+              { ids: deleteRecord.id ? [deleteRecord.id] : selectedRecords.map(d => d._id) })
+            .then(({ data }) => {
+              toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: data.message,
+              });
+              setIsConformDialogVisible(false);
+              setOkButtonLoading(false);
+              if (deleteRecord.id) { setDeleteRecord({ id: null, name: null }); }
+              fetchNotes();
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+              setIsConformDialogVisible(false);
+              setOkButtonLoading(false);
+            });
+        }
+      };
+    
+
     const handleChangeFilter = (value) => {
         setFilter(value)
     }
@@ -261,6 +320,24 @@ const Note = () => {
         setNoteData(data);
 
     }
+
+    const showConfirmBox = (row) => {
+        if (row) {
+          setIsConformDialogVisible(true);
+          if (row) {
+            setDeleteRecord({ id: row.id, name: row.concatedName });
+            console.log(deleteRecord)
+          }
+        } else {
+          if (
+            selectedRecords.find((d) => d.ownerId !== user.user._id)
+          ) {
+            setShowDeleteWarningConfirmBox(true);
+          } else {
+            setIsConformDialogVisible(true);
+          }
+        }
+      };
 
 
     // const columns = [
@@ -322,13 +399,45 @@ const Note = () => {
                                 startIcon={<AddOutlined />}>
                                 Add
                                 </Button>
-                        </Box>
+                            {/* </Box> */}
+                            <Button
+                                className={styles.action_submit_btn}
+                                variant="outlined"
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                aria-controls="action-menu"
+                                disabled={selectedRecords.length > 0 ? false : true}
+                            >
+                                Actions <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left",
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}>
+                                <MenuItem
+                                    onClick={() => {
+                                        showConfirmBox(null);
+                                        closeActions();
+                                    }}
+                                >
+                                    Delete
+                                    </MenuItem>
+                            </Menu>
+                            </Box>
                     </Grid>
                 </Grid>
             </div>
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
+                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={true} allowSelection={true} actionWidth={100}
                 isClientSideGrid={true} />
 
             {/* <div className="listing-grid">
@@ -354,6 +463,21 @@ const Note = () => {
                 onClose={() => setNoteId(undefined)}
             />}
         </CustomContainer>
+        {
+          isConfirmDialogVisible ? (
+            <ConfirmationDialog
+              open={isConfirmDialogVisible}
+              message={`Are you sure, you want to delete Note ${deleteRecord.name || ""
+                }?`}
+              onClose={() => {
+                if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
+                setIsConformDialogVisible(false);
+              }}
+              okBtnLoading={okButtonLoading}
+              onOk={handleDeleteNote}
+            />
+          ) : null
+        }
         {
             showCreateDialog &&
             <Dialog

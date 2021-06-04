@@ -668,6 +668,8 @@ const QuoteBuilders = () => {
           dataToUpdate={null}
           resource={null}
           isRedirectTodetailPage={true}
+          contactId={null}
+          opportunityId={null}
         />
       )}
     </>

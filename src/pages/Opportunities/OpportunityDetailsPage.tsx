@@ -610,6 +610,7 @@ function OpportunityDetailsPage() {
                             quotes={quotes}
                             fetchData={fetchRelatedData}
                             quoteBuilderPermission={permissions.quoteBuilder}
+                            opportunityId={id}
                           />
                         )
                       }
