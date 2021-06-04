@@ -214,7 +214,6 @@ const Note = () => {
           setIsConformDialogVisible(true);
           if (row) {
             setDeleteRecord({ id: row.id, name: row.concatedName });
-            console.log(deleteRecord)
           }
         } else {
           if (
@@ -226,31 +225,6 @@ const Note = () => {
           }
         }
       };
-
-
-    // const columns = [
-    //     { field: 'id', headerName: 'id', hide: true },
-    //     {
-    //         field: 'name', headerName: 'Title',
-    //         width: 300,
-    //         renderCell: (params) =>
-    //             <a onClick={() => handleActivityOpen(params.row.id)}>{params.row.name}</a>
-    //     },
-    //     {
-    //         field: 'createdBy',
-    //         headerName: 'Created At',
-    //         width: 200,
-    //         renderCell: (params) =>
-    //             <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>
-    //     },
-    //     {
-    //         field: 'updatedAt',
-    //         headerName: 'Updated At',
-    //         width: 200,
-    //         renderCell: (params) =>
-    //             <span>{moment(params.row.updatedAt).format("DD/MM/YYYY hh:mm A")}</span>
-    //     },
-    // ];
 
 
     return (<Layout>

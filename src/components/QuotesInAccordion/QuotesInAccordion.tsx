@@ -19,7 +19,6 @@ import currencies from "./../../constants/currency_with_country.json";
 import { displayDate } from '../../services/util';
 import { HiExternalLink } from 'react-icons/hi';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { isJSDocNullableType, isNonNullChain } from 'typescript';
 import { MoreVert } from "@material-ui/icons";
 
 const Accordion = withStyles({
