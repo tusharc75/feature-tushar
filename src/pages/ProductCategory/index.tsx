@@ -30,11 +30,9 @@ import {
 } from "../../constants/helpers";
 import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
-    CommonRenderer,
     CreatedByRenderer,
     UpdatedByRenderer,
-    CustomLoadingOverlay,
-    CommonRendererWithCopy
+    CustomLoadingOverlay
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
@@ -179,7 +177,6 @@ const ProductCategory = () => {
 
     const frameworkComponents = {
         nameRenderer: NameRenderer,
-        commonRenderer: CommonRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
         actionsRenderer: ActionsRenderer,
