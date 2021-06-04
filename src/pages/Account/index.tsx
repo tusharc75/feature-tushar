@@ -44,7 +44,7 @@ import {
   CommonRendererWithCopy
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 
 const AccTypes = [
   {
@@ -57,98 +57,6 @@ const AccTypes = [
   },
 ];
 
-
-function reducer(state, action) {
-  switch (action.type) {
-    case "loading":
-      return {
-        ...state,
-        loading: action.loading
-      }
-
-    case "initialize":
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count,
-        loading: false
-      }
-
-    case "selection":
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords,
-      }
-
-    case "update":
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      }
-
-    case "filter":
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      }
-
-    case "sort":
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      }
-
-    case "search":
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      }
-
-    case "pageChange":
-      return {
-        ...state,
-        page: action.page
-      }
-
-    case "pageSizeChange":
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      }
-
-    case "complete":
-      return {
-        ...state,
-        loading: false
-      }
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: "",
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-}
-
 let accountTimeout;
 export default function Account(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -160,7 +68,6 @@ export default function Account(props) {
   const {
     state: { user, permissions },
   }: any = useData();
-  const [accountData, setAccountData] = useState([]);
   const [cloneId, setCloneId] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
