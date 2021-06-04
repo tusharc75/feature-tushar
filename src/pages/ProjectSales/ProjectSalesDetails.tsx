@@ -149,7 +149,7 @@ const ProjectSalesDetails = () => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
       ["End Date"]: data.endDate ? new Date(data.endDate).toDateString() : "",
-      ["Value"]: data.value || "",
+      ["Amount"]: data.amount || "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
         : "",

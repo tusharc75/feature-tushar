@@ -89,7 +89,8 @@ body {
   display: grid;
   place-items: center;
   background-color: #ffffff;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1600 800'%3E%3Cg %3E%3Cpolygon fill='%23d0d6d9' points='1600 160 0 460 0 350 1600 50'/%3E%3Cpolygon fill='%23a2adb3' points='1600 260 0 560 0 450 1600 150'/%3E%3Cpolygon fill='%2373858c' points='1600 360 0 660 0 550 1600 250'/%3E%3Cpolygon fill='%23455c66' points='1600 460 0 760 0 650 1600 350'/%3E%3Cpolygon fill='%23163340' points='1600 800 0 800 0 750 1600 450'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url(./../assets/svg/bg1.svg);
+  // background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1600 800'%3E%3Cg %3E%3Cpolygon fill='%23d0d6d9' points='1600 160 0 460 0 350 1600 50'/%3E%3Cpolygon fill='%23a2adb3' points='1600 260 0 560 0 450 1600 150'/%3E%3Cpolygon fill='%2373858c' points='1600 360 0 660 0 550 1600 250'/%3E%3Cpolygon fill='%23455c66' points='1600 460 0 760 0 650 1600 350'/%3E%3Cpolygon fill='%23163340' points='1600 800 0 800 0 750 1600 450'/%3E%3C/g%3E%3C/svg%3E");
   background-attachment: fixed;
   background-size: cover;
 }
@@ -736,4 +737,26 @@ body::-webkit-scrollbar-thumb {
 }
 .position-absolute{
   position: absolute;
+}
+.imgLogin{
+  height: 52vh;
+  margin-top: 0px;
+}
+.loginSidebar{
+  height: 100%;
+  background-image: url(./../assets/svg/bg2.svg);
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loginHeader{
+  color: #102414;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 16px 20px;
+    width: 74%;
 }
