@@ -77,6 +77,8 @@ export default function ManageQuoteDialog({
   const [accountData, setAccountData] = useState([]);
   const [newAddedAccountId, setNewAddedAccountId] = useState(null)
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
+  const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
+  const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
 
   useEffect(() => {
     let ownerCollaboratorOptions = entityData.fields.filter(
@@ -94,6 +96,13 @@ export default function ManageQuoteDialog({
     }
 
     sortArray();
+
+    const customerContactDropdownData = entityData.fields.find(
+      (d) => d.fieldName === "customerContactName"
+    );
+    if (customerContactDropdownData) {
+      setCustomerContactMainDataSource(customerContactDropdownData.option);
+    }
 
     return () => {
       setOwnerCollaboratorData([])
@@ -137,6 +146,10 @@ export default function ManageQuoteDialog({
     );
   };
 
+  const onCustomerContactDropdownOpen = (selectedAccount) => {
+    setCustomerContactDataSource(customerContactMainDataSource.filter(d => d.parentAccount === selectedAccount));
+  };
+
   useEffect(() => {
     getQuoteFields();
 
@@ -167,16 +180,16 @@ export default function ManageQuoteDialog({
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
           }
 
-          if ( contactId && _f.fieldData.fieldName === "customerContactName"){
+          if (contactId && _f.fieldData.fieldName === "customerContactName") {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, contactId)
           }
-            
+
 
           if (
             opportunityId && ["opportunity"].some(
               (d) => d === _f.fieldData.fieldName
             )
-          ){
+          ) {
             _f = initializeDropdownById(_f, _f.fieldData.fieldName, opportunityId)
           }
 
@@ -348,12 +361,16 @@ export default function ManageQuoteDialog({
                                               name={field.fieldName}
                                               type={field.type}
                                               options={accountData}
-                                              setFieldValue={setFieldValue}
+                                              // setFieldValue={setFieldValue}
                                               required={field.required}
                                               fullWidth
                                               isTooltip={true}
                                               size="small"
                                               doNotShowInfoTooltip={true}
+                                              onChange={(e, value) => {
+                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                                setFieldValue("customerContactName", "")
+                                              }}
                                             />
                                           </Grid>
                                           {
@@ -374,6 +391,22 @@ export default function ManageQuoteDialog({
                                               </Grid> : null
                                           }
                                         </Grid>
+                                      ) : field.fieldName === "customerContactName" ? (
+                                        <FormTypes
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={customerContactDataSource}
+                                          setFieldValue={setFieldValue}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={true}
+                                          size="small"
+                                          onOpen={() => onCustomerContactDropdownOpen(values.customerAccountName)}
+                                        />
                                       ) : field.fieldName === "owner" ? (
                                         <FormTypes
                                           values={values}
@@ -578,6 +611,7 @@ export default function ManageQuoteDialog({
                         updateAccountDropdown(data);
 
                         setFieldValue("customerAccountName", data._id);
+                        setFieldValue("customerContactName", "");
                       }}
                       isRedirectToDetailPage={false}
                     />
