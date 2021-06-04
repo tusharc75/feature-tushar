@@ -17,22 +17,11 @@ import { Menu, MenuItem } from "@material-ui/core";
 import { AddField } from '../FormBuilder/AddField';
 import ConfirmationDialog from '../Helpers/ConfirmationDialog'
 import CustomDataGridNoDataFound from "../../components/Helpers/CustomDataGridNoDataFound";
-import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import ImportExportLinks from "../Product/ImportExportLinks";
 var _ = require('lodash');
 
-const useStyles = makeStyles((theme) => ({
-    alignButtons: {
-        top: "16px",
-        left: "36%",
-        display: "flex",
-        alignItems: "center",
-        gap: "6px",
-        justifyContent: "center",
-        position: "absolute"
-    }
-}));
 
 var levalOrderBy = ["product", "product-custom", "template", "cost", "builder", "builder-custom"]
 
@@ -82,20 +71,23 @@ const ProductBuilder = (props) => {
         filterable: false,
     }
 
-
     const fetchProduct = (id) => {
         setLoading(true)
         axiosInstance().get(`/productbuilder/getproduct/` + id).then(({ data: { data } }) => {
-            data = data.data?.map((u) => ({
+            data = data.data?.map((u, index) => ({
                 ...u,
                 id: u._id,
+                srno: index + 1
             }));
             refreshProducts(data)
             setColumns(null);
-            let column = [{ field: 'id', headerName: 'id', hide: true }]
+            let column = [{ field: 'id', headerName: 'id', hide: true },
+            { field: 'srno', headerName: 'Sr.', width: 50, sortable: false, filterable: false, disableColumnMenu: true, }]
             data.forEach((row) => {
                 let _fields = row.fields;
+                console.log(_fields)
                 if (stage) {
+                    //|| (t.leval === "template" && t.sectionType !== "cost")
                     if (stage === "product") {
                         _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
                     }
@@ -306,10 +298,20 @@ const ProductBuilder = (props) => {
 
     return (<Box p={1} pt={0}>
         <Grid container>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
+            <Grid item xs={4} className="d-flex align-items-center gap-1">
             </Grid>
             {Editable &&
-                <Grid xs={6} container justify="flex-end">
+                <Grid xs={8} container justify="flex-end">
+                    <ImportExportLinks
+                        module="builder"
+                        api={"productbuilder"}
+                        refrenceId={productBuilderId}
+                        onSuccessfulImport={(isImportedSuccessfully) => {
+                            if (isImportedSuccessfully) {
+                                fetchProduct(productBuilderId)
+                            }
+                        }}
+                    />
                     <Button
                         variant="outlined"
                         color="default"
