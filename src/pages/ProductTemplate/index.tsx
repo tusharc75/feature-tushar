@@ -145,7 +145,6 @@ const ProductTemplate: FC = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [selectedTemplate, setSelectedTemplate] = useState([]);
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -193,11 +192,12 @@ const ProductTemplate: FC = () => {
 
     const ActionsRenderer = params => <>
 
-        {productTemplatePermissions.isUpdate ?
+        {/* {productTemplatePermissions.isUpdate ? */}
+        { true ?
             <Tooltip title="Delete" >
-                <IconButton aria-label="Delete" onClick={()=>{
-                    console.log(params)
-                    debugger
+                <IconButton aria-label="Delete" onClick={() => {
+                    setDeleteRecord(params.data);
+                    setShowDeleteConfirmBox(true)
                 }}>
                     <DeleteIcon
                         fontSize="small" color="error" />
@@ -261,14 +261,18 @@ const ProductTemplate: FC = () => {
             ids.push(deleteRecord._id)
         }
         else {
-            ids = selectedTemplate;
+            ids = selectedRecords.map(d => d._id);
         }
-        axiosInstance().put(`/product-template/remove`, { "ids": ids }).then(() => {
+        axiosInstance().put(`/product-template/remove`, { "ids": ids }).then(({ data }) => {
             fetchProductTemplate();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
-            setSelectedTemplate([])
             setAnchorEl(null)
+            toastConfig.setToastConfig({
+                open: true,
+                type: "success",
+                message: data.message,
+            });
         }).catch((error) => {
             toastConfig.setToastConfig(error)
         });
@@ -386,7 +390,7 @@ const ProductTemplate: FC = () => {
                                 color="default"
                                 size="small"
                                 onClick={openActions}
-                                disabled={selectedTemplate.length ? false : true}
+                                disabled={selectedRecords.length ? false : true}
                                 aria-controls="action-menu"
                             >Actions <ExpandMore />
                             </Button>
