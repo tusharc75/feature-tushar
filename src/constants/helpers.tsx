@@ -447,9 +447,9 @@ export const initializeDropdownById = (field, fieldName, id) => {
 
   return field;
 };
-export const dateFormat = "MM/DD/YYYY"
-export const dateTimeFormat = "MM/DD/YYYY hh:mm A"
-export const cardDateFormat = "MMM,DD YYYY"
+export const dateFormat = "MM/dd/yyyy"
+export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
+export const cardDateFormat = "MMM,dd yyyy"
 
 export const yyyyMMDD = (dateToBeFormatted) => {
   return dateToBeFormatted
