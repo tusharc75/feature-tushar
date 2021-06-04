@@ -40,8 +40,17 @@ const CreateProduct = (props) => {
 
     useEffect(() => {
         let _fields = [];
-        productData.fields.map((_f) => _fields.push(_f));
-
+        productData.fields.forEach((_f) => {
+            if (stage === "product") {
+                if (_f.leval === "product" || _f.leval === "product-custom") {
+                    _fields.push(_f)
+                }
+            }
+            else {
+                _fields.push(_f)
+            }
+        })
+        
         _fields = _.orderBy(_fields, 'order', 'asc');
         _fields = _.sortBy(_fields, function (item) {
             return levalOrderBy.indexOf(item.leval)

@@ -94,8 +94,13 @@ const ProductBuilder = (props) => {
             setColumns(null);
             let column = [{ field: 'id', headerName: 'id', hide: true }]
             data.forEach((row) => {
-                //let _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
-                row.fields.forEach((ele) => {
+                let _fields = row.fields;
+                if (stage) {
+                    if (stage === "product") {
+                        _fields = row.fields.filter((t) => t.leval === "product" || t.leval === "product-custom")
+                    }
+                }
+                _fields.forEach((ele) => {
                     if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                         if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
                             ele.displayUnits.forEach((_unit) => {
@@ -303,33 +308,35 @@ const ProductBuilder = (props) => {
         <Grid container>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
             </Grid>
-            <Grid xs={6} container justify="flex-end">
-                <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    className="float-right"
-                    onClick={openActions}
-                    disabled={selectedProduct.length ? false : true}
-                    aria-controls="action-menu"
-                >Actions <ExpandMore />
-                </Button>
-                <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                >
-                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                    <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
-                </Menu>
-            </Grid>
+            {Editable &&
+                <Grid xs={6} container justify="flex-end">
+                    <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        className="float-right"
+                        onClick={openActions}
+                        disabled={selectedProduct.length ? false : true}
+                        aria-controls="action-menu"
+                    >Actions <ExpandMore />
+                    </Button>
+                    <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left",
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                    >
+                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                        <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
+                    </Menu>
+                </Grid>
+            }
         </Grid>
         <Box height={500} mt={1}>
             {columns &&

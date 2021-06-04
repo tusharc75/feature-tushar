@@ -30,7 +30,9 @@
   color: white;
   text-align: center;
   font-size: 20px;
-  padding-top: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .chat-box-body {
   position: relative;
@@ -173,7 +175,7 @@
     float: right;
     background: #363256;
     color: white;
-  
+
     & ::after {
       content: "";
       position: absolute;
