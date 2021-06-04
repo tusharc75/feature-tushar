@@ -182,7 +182,7 @@ const CustomerAccounts = (props) => {
       .put(`/project-sales/add-customer-account`, dataObj)
       .then(() => {
         setToastConfig({
-          message: `Customer Contact added successfully`,
+          message: `Customer Account added successfully`,
           type: "success",
           open: true,
         });

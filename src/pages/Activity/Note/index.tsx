@@ -6,12 +6,9 @@ import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
 import { useHistory } from "react-router-dom";
 import queryString from 'query-string';
 import { GetReferenceName, GetNotes } from "../../../axios/activity";
-import { DataGrid } from "@material-ui/data-grid";
 import moment from "moment";
 import ActivityModelHandler from "../../../components/Activity/ActivityModelHandler";
 import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
-import CustomDataGridToolbar from "../../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
-import CustomDataGridNoDataFound from "../../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import CustomContainer from "../../../components/CustomContainer";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { GoNote } from "react-icons/go";
@@ -21,126 +18,17 @@ import { CreateNote } from "../../../components/Activity/Note/CreateNote";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
-import CustomFloatingFilter from '../../../components/AgGridComponents/CustomAgGridFilter'
-import {
-    CommonRenderer,
-    CreatedByRenderer,
-    UpdatedByRenderer,
-    CustomLoadingOverlay,
-    CommonRendererWithCopy
-} from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import styles from "../../Leads/Header.module.scss";
-import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
-import { gridPageSizes } from "../../../constants/helpers";
-
-function reducer(state, action) {
-    switch (action.type) {
-        case "loading":
-            return {
-                ...state,
-                loading: action.loading
-            }
-
-        case "initialize":
-            return {
-                ...state,
-                dataRows: action.data,
-                rowCount: action.count,
-                page: 0,
-                loading: false
-            }
-
-        case "selection":
-            return {
-                ...state,
-                selectedRecords: action.selectedRecords,
-            }
-
-        case "update":
-            return {
-                ...state,
-                dataRows: action.data,
-                loading: false
-            }
-
-        case "filter":
-            return {
-                ...state,
-                loading: true,
-                filters: action.filters,
-                page: 0
-            }
-
-        case "sort":
-            return {
-                ...state,
-                sorting: action.sorting,
-                loading: true
-            }
-
-        case "search":
-            return {
-                ...state,
-                search: action.search,
-                loading: true
-            }
-
-        case "pageChange":
-            return {
-                ...state,
-                page: action.page
-            }
-
-        case "pageSizeChange":
-            return {
-                ...state,
-                limit: action.limit,
-                page: 0,
-                loading: true
-            }
-
-
-        case "count":
-            return {
-                ...state,
-                rowCount: action.count,
-                loading: false
-            }
-
-        case "complete":
-            return {
-                ...state,
-                loading: false
-            }
-
-        default:
-            break;
-    }
-
-    return state;
-}
-
-const intialState = {
-    dataRows: [],
-    rowCount: 0,
-    loading: false,
-    page: 0,
-    limit: 25,
-    pageSizes: gridPageSizes,
-    search: "",
-    filters: {},
-    sorting: [],
-    selectedRecords: []
-}
+import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
 
 const Note = () => {
     const {
-        state: { user, permissions },
+        state: { user },
     }: any = useData();
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
     const parsed = queryString.parse(history.location.search);
-    const { referenceType, referenceId, activityType, activityId } = parsed;
+    const { referenceType, referenceId } = parsed;
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [isNew, setIsNew] = useState(false);
     const [filter, setFilter] = useState([]);
@@ -216,6 +104,8 @@ const Note = () => {
     const fetchNotes = async () => {
         // setLoading(true)
 
+        dispatch({ type: "loading", loading: true });
+
         if (gridApi) {
             gridApi.setRowData([]);
             gridApi.showLoadingOverlay();
@@ -239,11 +129,11 @@ const Note = () => {
                     return res;
                 });
 
-                dispatch({ type: "initialize", data: rows, count: data.length, page: 0 });
+                dispatch({ type: "initialize", data: rows, count: data.length });
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
-
+                dispatch({ type: "loading", loading: false });
             });
     };
 
@@ -261,32 +151,6 @@ const Note = () => {
         setNoteData(data);
 
     }
-
-
-    // const columns = [
-    //     { field: 'id', headerName: 'id', hide: true },
-    //     {
-    //         field: 'name', headerName: 'Title',
-    //         width: 300,
-    //         renderCell: (params) =>
-    //             <a onClick={() => handleActivityOpen(params.row.id)}>{params.row.name}</a>
-    //     },
-    //     {
-    //         field: 'createdBy',
-    //         headerName: 'Created At',
-    //         width: 200,
-    //         renderCell: (params) =>
-    //             <span>{moment(params.row.createdBy.date).format("DD/MM/YYYY hh:mm A")}</span>
-    //     },
-    //     {
-    //         field: 'updatedAt',
-    //         headerName: 'Updated At',
-    //         width: 200,
-    //         renderCell: (params) =>
-    //             <span>{moment(params.row.updatedAt).format("DD/MM/YYYY hh:mm A")}</span>
-    //     },
-    // ];
-
 
     return (<Layout>
         <Grid container className="headerbox">
@@ -330,23 +194,6 @@ const Note = () => {
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                 dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowAction={false} allowSelection={false}
                 isClientSideGrid={true} />
-
-            {/* <div className="listing-grid">
-                <DataGrid
-                    components={{
-                        Toolbar: CustomDataGridToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    loading={loading}
-                    rows={notes}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={10}
-                    density="compact"
-                />
-            </div> */}
-
 
             {noteId !== undefined && <ActivityModelHandler
                 activityType="note"

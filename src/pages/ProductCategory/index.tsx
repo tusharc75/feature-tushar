@@ -1,42 +1,30 @@
-import React, { useState, useEffect, Fragment, useContext, useCallback, useReducer } from "react";
+import React, { useState, useEffect, Fragment, useContext, useReducer } from "react";
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { DataGrid } from "@material-ui/data-grid";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import moment from "moment";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import CreateProductCategory from "./CreateProductCategory";
 import routes from "../../components/Helpers/Routes";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
 import { ExpandMore } from "@material-ui/icons";
 import { Menu, MenuItem } from "@material-ui/core";
 import SearchBox from '../../components/Helpers/SearchBox'
-import { getSearchQuery } from '../../services/util';
 import {
     gridPageSizes,
     isObjectEmpty
 } from "../../constants/helpers";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
 import {
-    CommonRenderer,
     CreatedByRenderer,
-    UpdatedByRenderer,
-    CustomLoadingOverlay,
-    CommonRendererWithCopy
+    UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 
@@ -179,14 +167,9 @@ const ProductCategory = () => {
 
     const frameworkComponents = {
         nameRenderer: NameRenderer,
-        commonRenderer: CommonRenderer,
         createdByRenderer: CreatedByRenderer,
         updatedByRenderer: UpdatedByRenderer,
-        actionsRenderer: ActionsRenderer,
-        customLoadingOverlay: CustomLoadingOverlay,
-        customFloatingFilter: CustomFloatingFilter,
-        // customLoadingCellRenderer: CustomLoadingCellRenderer,
-        // customNoRowsOverlay: CustomNoRowsOverlay
+        actionsRenderer: ActionsRenderer
     };
 
     const replaceFieldName = (field) => {
@@ -284,79 +267,6 @@ const ProductCategory = () => {
         });
     }
 
-    // const columns = [
-    //     { field: 'id', headerName: 'id', hide: true },
-    //     {
-    //         field: "name",
-    //         headerName: "Product Category",
-    //         width: 300,
-    //         renderCell: (params) => (
-    //             <Link className="link" onClick={() => { setProductCategoryId(params.row.id); setOpen(true); }
-    //             } >
-    //                 {params.row.name}
-    //             </Link >
-    //         )
-    //     },
-    //     {
-    //         field: "createdBy",
-    //         headerName: "Created By",
-    //         width: 300,
-    //         disableColumnMenu: true,
-    //         sortable: false,
-    //         filterable: false,
-    //         renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
-    //             {params.row.createdBy.user.firstName}
-    //             <span
-    //                 className="createdAtTime badge-date"
-    //                 title={`${params.row.createdBy.user.firstName} • ${moment(
-    //                     params.row.createdBy.date.slice(0, 10)
-    //                 ).format('MMM Do, YYYY')}`}
-    //             >
-    //                 {moment(params.row.createdBy.date.slice(0, 10)).format(
-    //                     'MMM Do, YYYY'
-    //                 )}
-    //             </span>
-    //         </h5>) : <NoDataCell />
-    //     },
-    //     {
-    //         field: "updatedBy",
-    //         headerName: "Updated By",
-    //         width: 300,
-    //         disableColumnMenu: true,
-    //         sortable: false,
-    //         filterable: false,
-    //         renderCell: (params) => params?.row && params?.row?.updatedBy && params?.row?.updatedBy?.user ? (<h5 className="createBy">
-    //             {params.row.updatedBy.user.firstName}
-    //             <span
-    //                 className="updatedAtTime badge-date"
-    //                 title={`${params.row.updatedBy.user.firstName} • ${moment(
-    //                     params.row.updatedBy.date.slice(0, 10)
-    //                 ).format('MMM Do, YYYY')}`}
-    //             >
-    //                 {moment(params.row.updatedBy.date.slice(0, 10)).format(
-    //                     'MMM Do, YYYY'
-    //                 )}
-    //             </span>
-    //         </h5>) : <NoDataCell />
-    //     },
-    //     {
-    //         field: "actions", headerName: "Actions ",
-    //         renderCell: (params) => (
-    //             <Fragment>
-    //                 <Tooltip title="Delete" >
-    //                     <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}  >
-    //                         <DeleteIcon fontSize="small" color="error" />
-    //                     </IconButton>
-    //                 </Tooltip >
-    //             </Fragment>
-    //         ),
-    //         width: 200,
-    //         disableColumnMenu: true,
-    //         sortable: false,
-    //         filterable: false,
-    //     }
-    // ];
-
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -368,43 +278,6 @@ const ProductCategory = () => {
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
     };
-
-    // const onFilterChange = useCallback((params) => {
-    //     if (params.filterModel.items[0].value) {
-    //         setQuery((prevState) => ({
-    //             ...prevState,
-    //             [params.filterModel.items[0].columnField]:
-    //                 params.filterModel.items[0].value,
-    //         }));
-    //     } else {
-    //         setQuery({ page: 0, limit: 25 });
-    //     }
-    // }, []);
-
-    // const handlePage = (params) => {
-    //     if (query.page !== params.page) {
-    //         setQuery((prevState) => ({ ...prevState, page: params.page }));
-    //     }
-    // };
-
-    // const handlePageSize = (params) => {
-    //     if (params.pageSize !== query.limit) {
-    //         setQuery({ page: 0, limit: params.pageSize });
-    //     }
-    // };
-
-    // const handleSortModelChange = (params) => {
-    //     if (params?.sortModel && params.sortModel.length > 0) {
-    //         let temp = { ...params.sortModel[0] };
-    //         setQuery((prevState) => ({
-    //             ...prevState,
-    //             page: 0,
-    //             sortBy: temp.field,
-    //             orderBy: temp.sort,
-    //         }));
-    //     }
-    // }
-
 
     return (<Layout>
         <Grid container className="headerbox">
@@ -455,33 +328,6 @@ const ProductCategory = () => {
 
             <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
                 dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
-
-            {/* <div className="listing-grid">
-                <DataGrid
-                    checkboxSelection
-                    components={{
-                        Toolbar: CustomDataGridToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    scrollbarSize={20}
-                    loading={loading}
-                    onSelectionModelChange={(e) => setSelectedCategory(e.selectionModel)}
-                    rows={loading ? [] : productCategory}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={query.limit}
-                    rowCount={rowCount}
-                    page={query.page}
-                    paginationMode="server"
-                    pagination
-                    onPageChange={handlePage}
-                    onPageSizeChange={handlePageSize}
-                    onSortModelChange={handleSortModelChange}
-                    density="compact"
-                    onFilterModelChange={onFilterChange}
-                />
-            </div> */}
 
             {showDeleteConfirmBox &&
                 <ConfirmationDialog

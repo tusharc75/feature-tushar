@@ -22,7 +22,7 @@ import moment from "moment";
 import currencies from "./currency_with_country.json";
 import { TransitionProps } from "@material-ui/core/transitions";
 import { Slide } from "@material-ui/core";
-import { orderBy } from 'lodash';
+import { orderBy } from "lodash";
 
 export const vapidKey =
   "BFFucJ4GMNzUKVU5HaI5BsGDi0Au6MqKIr7SlzDbY6s_2JX6y3Qu5E8dMXhLpmZLwDpheOyDBxtbOmxuFH8WZe4";
@@ -127,8 +127,8 @@ export const productTemplate = {
 
 export const quoteBuilder = {
   qbResource: "quoteBuilder",
-  qbApi: "/quote-builder"
-}
+  qbApi: "/quote-builder",
+};
 
 export const supplierAccount = {
   accountApi: "supplier-account",
@@ -168,7 +168,6 @@ export const profilePage = {
   profilePageRoute: "/profile",
 };
 
-
 export const product = {
   api: "/product",
   route: "/product",
@@ -186,7 +185,7 @@ export const profileMenuItems = {
 export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
   const obj = {};
   for (const key of arr) {
-    let value = key.isDefaultValue ? key.defaultValue : val
+    let value = key.isDefaultValue ? key.defaultValue : val;
     if (key.type === "dropDown") {
       const option = key.option?.find((data: any) => data.default === true);
       obj[key.fieldName] = value ? value : option ? option.optionValue : "";
@@ -200,25 +199,34 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === "switch" || key.type === "checkBox") {
       obj[key.fieldName] = value ? value : false;
-    } else if (key.type !== "currencyAmount" && (key.type === "converter" || key.isConverter === true)) {
+    } else if (
+      key.type !== "currencyAmount" &&
+      (key.type === "converter" || key.isConverter === true)
+    ) {
       key.displayUnits.forEach((_unit) => {
-        obj[key.fieldName + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;
+        obj[key.fieldName + "_" + _unit.toLowerCase()] =
+          value && value !== "" ? parseFloat(value) : value;
       });
     } else if (key.type === "currencyAmount") {
       key.displayCurrency.forEach((_currency) => {
         if (key.isConverter && key.displayUnits.length) {
           key.displayUnits.forEach((_unit) => {
-            obj[key.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
+            obj[
+              key.fieldName +
+                "_" +
+                _currency.toLowerCase() +
+                "_" +
+                _unit.toLowerCase()
+            ] = value && value !== "" ? parseFloat(value) : value;
           });
-        }
-        else {
-          obj[key.fieldName + "_" + _currency.toLowerCase()] = value && value !== "" ? parseFloat(value) : value;;
+        } else {
+          obj[key.fieldName + "_" + _currency.toLowerCase()] =
+            value && value !== "" ? parseFloat(value) : value;
         }
       });
     } else if (key.type === "decimal") {
-      obj[key.fieldName] = value && value !== "" ? parseFloat(value) : value;;
-    }
-    else {
+      obj[key.fieldName] = value && value !== "" ? parseFloat(value) : value;
+    } else {
       obj[key.fieldName] = value;
     }
   }
@@ -232,8 +240,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -275,30 +283,38 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .url("Enter valid url eg. https://www.hostname.com")
-          .required(`${input.fieldLabel} is required`)
-        : yup.string().url("Enter valid url eg. https://www.hostname.com");
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            )
+            .required(`${input.fieldLabel} is required`)
+        : yup
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            );
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
         ? yup
-          .array()
-          .required(`${input.fieldLabel} is required`)
-          .length(1, "Select at least one service access")
+            .array()
+            .required(`${input.fieldLabel} is required`)
+            .length(1, "Select at least one service access")
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -309,7 +325,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? yup.boolean().required(`${input.fieldLabel} is required`)
         : yup.boolean();
-    } else if (input.type !== "currencyAmount" && (input.type === "converter" || input.isConverter === true)) {
+    } else if (
+      input.type !== "currencyAmount" &&
+      (input.type === "converter" || input.isConverter === true)
+    ) {
       input.displayUnits.forEach((_unit) => {
         schema[input.fieldName + "_" + _unit.toLowerCase()] = input.required
           ? yup.string().required(`${input.fieldLabel} is required`)
@@ -319,15 +338,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       input.displayCurrency.forEach((_currency) => {
         if (input.isConverter && input.displayUnits.length) {
           input.displayUnits.forEach((_unit) => {
-            schema[input.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()] = input.required
+            schema[
+              input.fieldName +
+                "_" +
+                _currency.toLowerCase() +
+                "_" +
+                _unit.toLowerCase()
+            ] = input.required
               ? yup.string().required(`${input.fieldLabel} is required`)
               : yup.string();
           });
-        }
-        else {
-          schema[input.fieldName + "_" + _currency.toLowerCase()] = input.required
-            ? yup.string().required(`${input.fieldLabel} is required`)
-            : yup.string();
+        } else {
+          schema[input.fieldName + "_" + _currency.toLowerCase()] =
+            input.required
+              ? yup.string().required(`${input.fieldLabel} is required`)
+              : yup.string();
         }
       });
     } else if (input.type === "date") {
@@ -608,7 +633,10 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
 
   // Check if that currency's country has multiple language,
   //  And if it has "en", then pick that one, or else take first of the array of languages
-  if (currencyData.languages.length > 0 && currencyData.languages.some(d => d !== language)) {
+  if (
+    currencyData.languages.length > 0 &&
+    currencyData.languages.some((d) => d !== language)
+  ) {
     language = currencyData.languages[0];
   }
 
@@ -680,17 +708,15 @@ export const graphOptions = {
   },
 };
 
-
 export const CustomDialogTransition = React.forwardRef(function Transition(
   props: TransitionProps & { children?: React.ReactElement<any, any> },
-  ref: React.Ref<unknown>,
+  ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 //  Don't use this for details screen as the model being passed is different
 export const setFieldsInAscendingOrder = (fieldsToOrder) => {
-
   const sections = [];
   const fieldsInAscendingOrder = orderBy(fieldsToOrder, ["order", "asc"]);
 
@@ -710,8 +736,8 @@ export const setFieldsInAscendingOrder = (fieldsToOrder) => {
   });
 
   return customData;
-}
+};
 
 export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
-}
+};

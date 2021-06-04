@@ -1,49 +1,95 @@
-import React, { useState, useEffect, Fragment, useContext } from "react";
-import Box from '@material-ui/core/Box';
+import React, { useState, useEffect, Fragment, useContext, useReducer } from "react";
 import Grid from '@material-ui/core/Grid';
 import Layout from "../../components/Layout";
 import Button from '@material-ui/core/Button';
-import { useHistory } from "react-router-dom";
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { DataGrid } from "@material-ui/data-grid";
 import AddIcon from "@material-ui/icons/Add";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import NoDataCell from "../../components/Helpers/NoDataCell";
 import { Link } from 'react-router-dom'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../axios/axiosInstance";
-import moment from "moment";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import routes from "../../components/Helpers/Routes";
 import CreateNewDialog from "./CreateNewDialog";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import {
+    CreatedByRenderer,
+    UpdatedByRenderer
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import CustomAgGrid, { intialState, reducer } from "../../components/AgGridComponents/CustomAgGrid";
 
 const ProductBuilder = () => {
 
     const toastConfig = useContext(CustomToastContext)
-    const history = useHistory();
-    const [loading, setLoading] = useState(true);
     const [isCreate, setIsCreate] = useState(false);
-    const [productBuilder, setProductBuilder] = useState([]);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
+
+    //  Grid Variables - Start
+    const [gridApi, setGridApi] = useState(null);
+    const [state, dispatch] = useReducer(reducer, intialState);
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+    // const [showGridFilters, setShowGridFilters] = useState(true)
+    const columns = [
+        { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
+        { field: "createdBy", headerName: "Created By", show: true, sortable: false, cellRenderer: "createdByRenderer" },
+        { field: "updatedBy", headerName: "Updated By", show: true, sortable: false, cellRenderer: "updatedByRenderer" },
+    ];
+    //  Grid Variables - End
 
     useEffect(() => {
         fetchProductBuilder();
     }, []);
 
+    const NameRenderer = params => <Link className="link" to={`${routes.productBuilder.path}/${params.data.id}`} >
+        {params.data.name}
+    </Link>
+
+    const ActionsRenderer = params => <Fragment>
+        <Tooltip title="Delete" >
+            <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}  >
+                <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+        </Tooltip >
+    </Fragment>
+
     const fetchProductBuilder = () => {
-        setLoading(true)
+
+        dispatch({ type: "loading", loading: true });
+
+        if (gridApi) {
+            gridApi.setRowData([]);
+            gridApi.showLoadingOverlay();
+        }
+
         axiosInstance().get(`/productbuilder`).then(({ data: { data } }) => {
-            setProductBuilder(data);
-            setLoading(false)
+
+            let rows = data.map((u) => {
+                const { createdBy, updatedBy, ...restProperties } = u;
+
+                let res = {
+                    ...restProperties,
+                    id: u._id,
+
+                    name: u.name,
+                    createdBy: u.createdBy?.user?.concatedName,
+                    createdByDate: u.createdBy?.date,
+                    updatedBy: u.updatedBy?.user?.concatedName,
+                    updatedByDate: u.updatedBy?.date,
+                }
+
+                return res;
+            });
+
+            dispatch({ type: "initialize", data: rows, count: data.length });
+
         }).catch((error) => {
             toastConfig.setToastConfig(error);
+            dispatch({ type: "loading", loading: false });
         });
     };
 
@@ -57,79 +103,12 @@ const ProductBuilder = () => {
         });
     }
 
-
-    const columns = [
-        { field: 'id', headerName: 'id', hide: true },
-        {
-            field: "name",
-            headerName: "Name",
-            width: 300,
-            renderCell: (params) => (
-                <Link className="link" to={`${routes.productBuilder.path}/${params.row.id}`} >
-                    {params.row.name}
-                </Link>
-            )
-        },
-        {
-            field: "createdBy",
-            headerName: "Created By",
-            width: 300,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => params?.row && params?.row?.createdBy ? (<h5 className="createBy">
-                {params.row.createdBy.user.firstName}
-                <span
-                    className="createdAtTime badge-date"
-                    title={`${params.row.createdBy.user.firstName} • ${moment(
-                        params.row.createdBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
-                >
-                    {moment(params.row.createdBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
-                    )}
-                </span>
-            </h5>) : <NoDataCell />
-        },
-        {
-            field: "updatedBy",
-            headerName: "Updated By",
-            width: 300,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => params?.row && params?.row?.updatedBy && params?.row?.updatedBy?.user ? (<h5 className="createBy">
-                {params.row.updatedBy.user.firstName}
-                <span
-                    className="updatedAtTime badge-date"
-                    title={`${params.row.updatedBy.user.firstName} • ${moment(
-                        params.row.updatedBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
-                >
-                    {moment(params.row.updatedBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
-                    )}
-                </span>
-            </h5>) : <NoDataCell />
-        },
-        {
-            field: "actions", headerName: "Actions ",
-            renderCell: (params) => (
-                <Fragment>
-                    <Tooltip title="Delete" >
-                        <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.row); setShowDeleteConfirmBox(true) }}  >
-                            <DeleteIcon fontSize="small" color="error" />
-                        </IconButton>
-                    </Tooltip >
-                </Fragment>
-            ),
-            width: 200,
-            disableColumnMenu: true,
-            sortable: false,
-            filterable: false,
-        }
-    ];
-
+    const frameworkComponents = {
+        nameRenderer: NameRenderer,
+        createdByRenderer: CreatedByRenderer,
+        updatedByRenderer: UpdatedByRenderer,
+        actionsRenderer: ActionsRenderer
+    };
 
     return (<Layout>
         <Grid container className="headerbox">
@@ -148,21 +127,11 @@ const ProductBuilder = () => {
                     </Grid>
                 </Grid>
             </div>
-            <div className="listing-grid">
-                <DataGrid
-                    components={{
-                        Toolbar: CustomDataGridToolbar,
-                        NoRowsOverlay: CustomDataGridNoDataFound,
-                    }}
-                    loading={loading}
-                    rows={productBuilder}
-                    disableSelectionOnClick
-                    disableMultipleSelection
-                    columns={columns}
-                    pageSize={25}
-                    density="compact"
-                />
-            </div>
+
+            <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+                dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} allowSelection={false} actionWidth={100}
+                isClientSideGrid={true} />
+
             {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
