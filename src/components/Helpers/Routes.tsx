@@ -172,6 +172,10 @@ const routes = {
     title: "Product Template",
     path: "/product-template"
   },
+  quoteBuilder: {
+    title: "Quote Builder",
+    path: "/quote-builder"
+  },
 };
 
 export default routes;
