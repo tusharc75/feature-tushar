@@ -78,6 +78,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
     const [isUploading, setUploading] = useState(false);
     const [imageSource, setImageSource] = useState(null);
     const [open, setOpen] = useState(false)
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     useEffect(() => {
         fetchNoteDetail();
@@ -287,6 +288,9 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                                 }}
                                                 usePublicUrlforFileUpload={true}
                                                 doNotShowUploadedFile={true}
+                                                imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                }}
                                             />
                                         </Grid>
                                         {renderFileThumbnails}
@@ -348,7 +352,7 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                         </Box>
 
                                         {noteId && <Fragment>
-                                
+
                                             <Box mt={2}>
                                                 <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                             </Box>
@@ -366,8 +370,9 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                     </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
-                    <Button size="small" color="primary" onClick={handleDialogClose}>Cancel</Button>
-                    <Button size="small" type="button" color="primary" variant="contained" onClick={submitForm}>Save</Button>
+                    <Button size="small" type="button" color="primary" onClick={handleDialogClose}>Cancel</Button>
+                    <Button size="small" type="button" color="primary" variant="contained" onClick={submitForm}
+                        disabled={uploadingImageOrFileProgress > 0}>Save</Button>
                 </CustomDialogFooter>
                 {
                     open ?
