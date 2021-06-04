@@ -20,6 +20,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import { useData } from "../../../StateProvider/Provider";
 import styles from "../../Leads/Header.module.scss";
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
+import { displayDate } from "../../../constants/helpers"
 
 const Note = () => {
     const {
@@ -85,13 +86,13 @@ const Note = () => {
 
     const CreatedAtDateRenderer = params => (
         <span style={{ marginLeft: 5, fontSize: 12 }}>
-            { moment(params.value).format("ddd MM/DD")}
+            { displayDate(params.value)}
         </span>
     )
 
     const UpdatedAtDateRenderer = params => (
         <span style={{ marginLeft: 5, fontSize: 12 }}>
-            { moment(params.value).format("ddd MM/DD")}
+            {displayDate(params.value)}
         </span>
     )
 

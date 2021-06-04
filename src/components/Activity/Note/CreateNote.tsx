@@ -9,7 +9,6 @@ import MomentUtils from '@date-io/moment';
 import TextField from '@material-ui/core/TextField';
 import * as Yup from "yup";
 import { GetNote, CreateNewNote, UpdateNote, GetNoteDetail } from "../../../axios/activity";
-import moment from "moment";
 import RichTextEditor from 'react-rte';
 import axiosInstance from '../../../axios/axiosInstance';
 import { BsFillImageFill } from 'react-icons/bs'
@@ -28,7 +27,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import ImageAttachments from "../Email/ImageAttachments";
 import ImagePreview from "../Email/ImagePreview";
-
+import { displayDate } from "../../../constants/helpers"
 
 const NoteSchema = Yup.object().shape({
     name: Yup.string()
@@ -348,15 +347,15 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose }
                                         </Box>
 
                                         {noteId && <Fragment>
-                                
+
                                             <Box mt={2}>
                                                 <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                             </Box>
                                             {initialValues.createdBy && initialValues.createdBy.date && <Box mt={1} color="text.secondary">
-                                                <Typography variant="body2">Created {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                                <Typography variant="body2">Created {displayDate(initialValues.createdBy.date)}</Typography>
                                             </Box>}
                                             {initialValues.updatedBy && initialValues.updatedBy.date && <Box mt={1} color="text.secondary">
-                                                <Typography variant="body2">Updated {moment(initialValues.updatedBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                                <Typography variant="body2">Updated {displayDate(initialValues.updatedBy.date)}</Typography>
                                             </Box>}
                                         </Fragment>}
                                     </Grid>

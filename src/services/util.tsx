@@ -1,4 +1,5 @@
 import moment from "moment";
+import { dateFormat } from "../constants/helpers"
 export const validateEmail = (value) => {
   var reg = /^([A-Za-z0-9_\-.])+([A-Za-z0-9_\-.])+([A-Za-z]{2,4})$/;
 
@@ -32,15 +33,15 @@ export const getErrorMessage = (err) => {
 };
 
 export const displayDate = (date) => {
-  return date ? moment(date).format("MMM-DD-YYYY") : "";
+  return date ? moment(date).format(dateFormat) : "";
 };
 
-export const getBordActionUrl = (type) =>{
-  switch (type.toLowerCase()){
+export const getBordActionUrl = (type) => {
+  switch (type.toLowerCase()) {
     case "task":
-      return {update:"task/",delete:"task/"}
+      return { update: "task/", delete: "task/" }
     default:
-      return {update:"activity/field/",delete:""}
+      return { update: "activity/field/", delete: "" }
   }
 
 }

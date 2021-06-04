@@ -37,7 +37,7 @@ import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
 import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
 import ImageAttachments from './ImageAttachments'
-import { imageUploadMaxSize } from "../../../constants/helpers"
+import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -397,7 +397,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                                         <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                                     </Box>
                                                     <Box mt={1} color="text.secondary">
-                                                        <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                                        <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
                                                     </Box>
                                                 </Fragment> :
                                                 <Grid container spacing={3}>

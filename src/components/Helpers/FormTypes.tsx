@@ -42,7 +42,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
-import { imageUploadMaxSize, documentUploadMaxSize } from "../../constants/helpers"
+import { imageUploadMaxSize, documentUploadMaxSize, dateFormat } from "../../constants/helpers"
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -1524,7 +1524,7 @@ const FormTypes = (props) => {
           name={name}
           label={label}
           onChange={(date) => setFieldValue(name, date ? date : "")}
-          format="MM/dd/yyyy"
+          format={dateFormat}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           InputLabelProps={{
