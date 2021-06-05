@@ -31,6 +31,7 @@ import { customerAccount, customerContact } from "../../constants/helpers";
 import ManageAccountDialog from "../Account/ManageAccount";
 import ProjectInAccordion from "../../components/ProjectInAccordion/ProjectInAccordion";
 import ConfirmationDialogRaw from "../../components/Helpers/ConfirmationDialog";
+import QuotesAccordionInProjectSale from "./QuotesAccordionInProjectSale";
 
 const Accordion = withStyles({
   root: {
@@ -99,6 +100,7 @@ const CustomerAccounts = (props) => {
     handleOpenDialog,
     customerAccounts,
     opportunities,
+    quotes,
     permissions,
     fetchProjectData,
     customerContacts,
@@ -160,6 +162,29 @@ const CustomerAccounts = (props) => {
       .then(() => {
         setToastConfig({
           message: `Opportunity added successfully`,
+          type: "success",
+          open: true,
+        });
+        fetchProjectData();
+      })
+      .catch((error) => {
+        setToastConfig(error);
+      });
+  };
+
+  const saveQuoteToProject = (id) => {
+    const existingData = quotes.map((o) => o._id);
+
+    const dataObj = {
+      quoteBuilder: [id, ...existingData],
+      _id: projectId,
+    };
+
+    axiosInstance()
+      .put(`/project-sales/add-quote`, dataObj)
+      .then(() => {
+        setToastConfig({
+          message: `Quote added successfully`,
           type: "success",
           open: true,
         });
@@ -512,6 +537,27 @@ const CustomerAccounts = (props) => {
                               isManager={isManager}
                             />
                           )}
+                          {
+                            permissions.isRead && (
+                              <QuotesAccordionInProjectSale 
+                                expanded={true}
+                                quotes={quotes.filter((q) => q.customerAccountName === c._id)}
+                                recordsPerLine={3}
+                                accountId={c._id}
+                                accountResource={"customerAccount"}
+                                permissions={permissions}
+                                projectId={projectId}
+                                addExisting={handleOpenDialog}
+                                fetchProjectData={fetchProjectData}
+                                isTeamMember={isTeamMember}
+                                isManager={isManager}
+                                onNewQuoteAdd={(id) => {
+                                  saveQuoteToProject(id);
+                                }}
+                              
+                              />
+                            )
+                          }
                           {/* <QuotesInAccordion /> */}
                           {/* <ProjectInAccordion
                             recordsPerLine={3}
