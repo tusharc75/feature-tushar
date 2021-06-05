@@ -18,6 +18,8 @@ import {
 import { GiAbstract055 } from 'react-icons/gi';
 import { AiOutlineEye } from 'react-icons/ai';
 import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
+import Activity from "../../components/Activity";
+import { quoteBuilder } from "../../constants/helpers";
 
 
 
@@ -201,7 +203,18 @@ const DOAApproval=()=>{
                     </Paper>
                     </Grid>
                  <Grid item xs={12} sm={12} md={4} lg={4}>
-                     <ChatRender id={QData["chatter"]} isLoaded={true}/>
+                     {/* <ChatRender id={QData["chatter"]} isLoaded={true}/> */}
+                     <Activity
+                    relatedTo={[
+                      {
+                        type: "DOA",
+                        referenceId: QData["quoteBuilderId"],
+                        access: true,
+                      },
+                    ]}
+                    handleActivityRefresh={() => { }}
+                    
+                  />
                  </Grid>
              </Grid>
         </Layout>
