@@ -149,7 +149,7 @@ function QuoteDetail() {
   const [query, setQuery] = useState({ page: 0, limit: 5 });
   const [dataRows, setDataRows] = useState([]);
   const [RadioIndex, setRadioIndex] = useState(-1);
-  const [TandC, setTNC] = useState("");
+  const [TandC, setTNC] = useState([]);
   const [searchVal, setSearchVal] = useState("");
   const [totalProfit, setTotalProfit] = useState("");
   const [totalcost, setTotalCost] = useState("");
@@ -180,8 +180,8 @@ function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [ProcessStatus, setProcessStatus] = useState("New");
   let logo = null;
-  var companyName = "";
-  var companyAddress = "";
+  let companyName="";
+  let companyAddress="";
   const[DOAlimit,setDOALimit] = useState(0);
   const[DOAsetup,setDOAsetup] = useState(false);
   const[lastUser,setLastUser]=useState(true);
@@ -233,7 +233,7 @@ function QuoteDetail() {
     console.log(data);
     let rows = data?.map((u) => ({
       ...u,
-      isChecked: u._id === TandC ? true : false,
+      isChecked: TandC.includes(u._id) ? true : false,
       id: u._id,
     }));
     setDataRows([...rows]);
@@ -281,6 +281,17 @@ function QuoteDetail() {
     if(ProcessStatus==="New" && data.length>0){
       setNextStep(true);
     }
+    if(ProcessStatus==="Price Builder" && data.length===0){
+      axiosInstance()
+      .post(`quote-builder/updateprocess/${id}?version=${currentVersion}`,{processStatus:"New"})
+      .then(({ data }) => {
+
+      fetchquoteData(currentVersion);
+    })
+    .catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+    }
     productBuilderdatatoQuoteBuilderdata(data);
 
 
@@ -303,8 +314,8 @@ function QuoteDetail() {
     axiosInstance()
       .get('/user/brandInfo')
       .then(({ data }) => {
-        companyName = data.data.name;
-        companyAddress = data.data.address
+        companyName=data.data.name;
+        companyAddress=data.data.address;
         if (data.data.logo) {
           fetchImage(data.data.logo, function (dataUri) {
             logo = dataUri;
@@ -380,23 +391,20 @@ function QuoteDetail() {
       serialNumber=serialNumber+1;
     });
     PdfDoc.setFontSize(10);
-    PdfDoc.text(`Quote Id: ${productBuilderID}`,20,100);
-    PdfDoc.text(`Currency: ${quoteData.currency}`,20,115);
-    PdfDoc.text(`Date: ${displayDate(date)}`,285,100);
+    PdfDoc.text(`Quote Id: ${productBuilderID}`,285,100);
+    PdfDoc.text(`Currency: ${quoteData.currency}`,285,115);
+    PdfDoc.text(`Date: ${displayDate(date)}`,285,130);
     PdfDoc.setFontSize(8);
-    PdfDoc.text("Bill To:",20,135)
-    PdfDoc.text("Ship To:",285,135)
+    PdfDoc.text("Bill To:",20,100)
     PdfDoc.setFontSize(12);
-    PdfDoc.text(quoteData.customerContactName[0].optionLabel,20,150);
-    PdfDoc.text(quoteData.customerContactName[0].optionLabel,285,150);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,162);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel,285,162);
+    PdfDoc.text(quoteData.customerContactName[0].optionLabel,20,115);
+    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,127);
     
     
     var text = "Please find the Quoatation Below:"
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50)
-    PdfDoc.text(text, 20, 195);
+    PdfDoc.text(text, 20, 180);
     var lines = splittedText.length
     var blockHeight = (lines) * lineHeight;
     PDFData = [...PDFData, [{
@@ -404,7 +412,7 @@ function QuoteDetail() {
       styles: { halign: 'right', valign: 'middle' }
     }]];
     autoTable(PdfDoc, {
-      margin: { top: 135 + blockHeight },
+      margin: { top: 120 + blockHeight,left: 20,right:20},
       head: [PdfCol],
       body: PDFData,
       styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
@@ -584,7 +592,6 @@ function QuoteDetail() {
 
           if (version === 0) {
             setcurrentVersion(parseInt(keys[keys.length - 1]));
-            setPBversionStatus(data.versions[keys[keys.length - 1]]["status"]);
 
             console.log(data.versions[keys[keys.length - 1]]["processStatus"])
             setProcessStatus(data.versions[keys[keys.length - 1]]["processStatus"]);
@@ -610,7 +617,6 @@ function QuoteDetail() {
           }
           else {
             setcurrentVersion(version);
-            setPBversionStatus(data.versions[version]["status"]);
             console.log(data.versions[version]["processStatus"])
             setProcessStatus(data.versions[version]["processStatus"]);
             setProductBuilderID(data.versions[version]["productBuilderId"]);
@@ -771,21 +777,23 @@ function QuoteDetail() {
               (d) => d.id === params.row.id
             );
             var prevvalue = gridData[indexOfRecord].isChecked;
-            for (var i = 0; i < gridData.length; i++) {
-              gridData[i].isChecked = false;
-            }
+            let newTNC=TandC
             if (prevvalue) {
               gridData[indexOfRecord].isChecked = false;
-              setRadioIndex(-1);
+              const index= newTNC.indexOf(gridData[indexOfRecord]._id)
+              newTNC.splice(index,1);
             }
             else {
               gridData[indexOfRecord].isChecked = true;
+              newTNC.push(gridData[indexOfRecord]._id)
               setRadioIndex(indexOfRecord);
             }
-
+            if(newTNC.length===0){
+              setRadioIndex(-1);
+            }
             setDataRows([...gridData]);
-            setTNC(gridData[indexOfRecord]._id);
-            handleVersionUpdate(PDF, visibleColumns, versionStatus, gridData[indexOfRecord]._id);
+            setTNC(newTNC);
+            handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
             console.log(gridData[indexOfRecord]._id);
             const checkedRecords = gridData.filter((d) => d.isChecked === true);
           }}
@@ -916,7 +924,9 @@ function QuoteDetail() {
     setLoadPB(false)
     setcurrentVersion(event.target.value);
     setProductBuilderID(quoteData["versions"][event.target.value]["productBuilderId"]);
-    setPBversionStatus(quoteData["versions"][event.target.value]["versionStatus"]);
+    setversionStatus(quoteData["versions"][event.target.value]["status"])
+    console.log("On version Change:");
+    console.log(quoteData["versions"][event.target.value]["status"]);
     setProcessStatus(quoteData["versions"][event.target.value]["processStatus"]);
     console.log(quoteData["versions"][event.target.value]["productBuilderId"])
     //const productBuilderdata=ProductBuilderComponent.current.fetchProduct(quoteData["versions"][event.target.value]["productBuilderId"]);
@@ -959,7 +969,7 @@ function QuoteDetail() {
     var optionstoSet=[]
     console.log(BuilderData);
     const inventory: { fieldName: string; fieldValue: any; }[][] = [];
-    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string'];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string','srno'];
     var totalCost = 0;
     var totalSellingPrice = 0
     var totalMargin = 0
@@ -1050,7 +1060,7 @@ function QuoteDetail() {
     else if (versionStatus.includes("Rejected by DOA")) {
       setDOAreq(true);
       setCustomerreq(false);
-      setButtonMessage("Send for DOA");
+      setButtonMessage("Re-Send for DOA");
     }
     else if (versionStatus === "Sent for DOA") {
       setDOAreq(false);
@@ -1077,12 +1087,6 @@ function QuoteDetail() {
           ColName = [...ColName, DataSet.fieldName];
           if(DataSet.fieldName.includes("Sales Price"))
           defaultSelectColumns.push(DataSet.fieldName);
-          if(DataSet.fieldName.includes("Margin") || DataSet.fieldName.includes("Profit") || DataSet.fieldName.includes("Commission")|| DataSet.fieldName.includes("Cost")){
-            //Rejected Fields
-          } else{
-            console.log("Adding in Options");
-            optionstoSet.push(DataSet.fieldName);
-          }
           Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
           columnext = [...columnext, { ColumnName: DataSet.fieldName, width: 100 }];
         }
@@ -1356,10 +1360,12 @@ function QuoteDetail() {
                         steps={DOASteps}
                         currentStep={DOASteps.indexOf(ProcessStatus)}
                         id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                        versionStatus={versionStatus}
                       />) : (<Steps
                         steps={OtherSteps}
                         currentStep={OtherSteps.indexOf(ProcessStatus)}
                         id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                        versionStatus={versionStatus}
                       />)}
                   </div>
                 </>
@@ -1370,7 +1376,7 @@ function QuoteDetail() {
                   <Grid container className="position-relative">
                     <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
                       {ProcessStatus === "New" ?
-                        (<span className="m-2">
+                        (<span className="productStep">
                           <Button variant="outlined" size="small" className="mr-1" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
                           <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
                         </span>) : (null)}
@@ -1396,7 +1402,7 @@ function QuoteDetail() {
                                 )}
                                 MenuProps={MenuProps}
                               >
-                                {options.map((name) => (
+                                {ColumnName.map((name) => (
                                   <MenuItem key={name} value={name} style={getStyles(name, visibleColumns, theme)}>
                                     <Checkbox checked={visibleColumns.indexOf(name) > -1} />{name}
                                   </MenuItem>
@@ -1423,8 +1429,7 @@ function QuoteDetail() {
                         setIsAddExistingProduct={setIsAddExistingProduct}
                         refreshProducts={refreshProducts}
                         stage={ProcessStatus === "New" ? "product" : "cost"}
-                        Editable={ProcessStatus === "Price Builder" ? true : false}
-                        Deletable={ProcessStatus === "Price Builder"? true:false}
+                        Editable={ProcessStatus === "Price Builder" || ProcessStatus==="New" ? true : false}
                       />
                       {ProcessStatus === "Quote Builder" ?
                         (<Box>
