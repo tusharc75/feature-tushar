@@ -281,6 +281,17 @@ function QuoteDetail() {
     if(ProcessStatus==="New" && data.length>0){
       setNextStep(true);
     }
+    if(ProcessStatus==="Price Builder" && data.length===0){
+      axiosInstance()
+      .post(`quote-builder/updateprocess/${id}?version=${currentVersion}`,{processStatus:"New"})
+      .then(({ data }) => {
+
+      fetchquoteData(currentVersion);
+    })
+    .catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+    }
     productBuilderdatatoQuoteBuilderdata(data);
 
 
@@ -584,7 +595,6 @@ function QuoteDetail() {
 
           if (version === 0) {
             setcurrentVersion(parseInt(keys[keys.length - 1]));
-            setPBversionStatus(data.versions[keys[keys.length - 1]]["status"]);
 
             console.log(data.versions[keys[keys.length - 1]]["processStatus"])
             setProcessStatus(data.versions[keys[keys.length - 1]]["processStatus"]);
@@ -610,7 +620,6 @@ function QuoteDetail() {
           }
           else {
             setcurrentVersion(version);
-            setPBversionStatus(data.versions[version]["status"]);
             console.log(data.versions[version]["processStatus"])
             setProcessStatus(data.versions[version]["processStatus"]);
             setProductBuilderID(data.versions[version]["productBuilderId"]);
@@ -916,7 +925,9 @@ function QuoteDetail() {
     setLoadPB(false)
     setcurrentVersion(event.target.value);
     setProductBuilderID(quoteData["versions"][event.target.value]["productBuilderId"]);
-    setPBversionStatus(quoteData["versions"][event.target.value]["versionStatus"]);
+    setversionStatus(quoteData["versions"][event.target.value]["status"])
+    console.log("On version Change:");
+    console.log(quoteData["versions"][event.target.value]["status"]);
     setProcessStatus(quoteData["versions"][event.target.value]["processStatus"]);
     console.log(quoteData["versions"][event.target.value]["productBuilderId"])
     //const productBuilderdata=ProductBuilderComponent.current.fetchProduct(quoteData["versions"][event.target.value]["productBuilderId"]);
@@ -1050,7 +1061,7 @@ function QuoteDetail() {
     else if (versionStatus.includes("Rejected by DOA")) {
       setDOAreq(true);
       setCustomerreq(false);
-      setButtonMessage("Send for DOA");
+      setButtonMessage("Re-Send for DOA");
     }
     else if (versionStatus === "Sent for DOA") {
       setDOAreq(false);
@@ -1077,12 +1088,6 @@ function QuoteDetail() {
           ColName = [...ColName, DataSet.fieldName];
           if(DataSet.fieldName.includes("Sales Price"))
           defaultSelectColumns.push(DataSet.fieldName);
-          if(DataSet.fieldName.includes("Margin") || DataSet.fieldName.includes("Profit") || DataSet.fieldName.includes("Commission")|| DataSet.fieldName.includes("Cost")){
-            //Rejected Fields
-          } else{
-            console.log("Adding in Options");
-            optionstoSet.push(DataSet.fieldName);
-          }
           Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
           columnext = [...columnext, { ColumnName: DataSet.fieldName, width: 100 }];
         }
@@ -1356,10 +1361,12 @@ function QuoteDetail() {
                         steps={DOASteps}
                         currentStep={DOASteps.indexOf(ProcessStatus)}
                         id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                        versionStatus={versionStatus}
                       />) : (<Steps
                         steps={OtherSteps}
                         currentStep={OtherSteps.indexOf(ProcessStatus)}
                         id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                        versionStatus={versionStatus}
                       />)}
                   </div>
                 </>
@@ -1396,7 +1403,7 @@ function QuoteDetail() {
                                 )}
                                 MenuProps={MenuProps}
                               >
-                                {options.map((name) => (
+                                {ColumnName.map((name) => (
                                   <MenuItem key={name} value={name} style={getStyles(name, visibleColumns, theme)}>
                                     <Checkbox checked={visibleColumns.indexOf(name) > -1} />{name}
                                   </MenuItem>
@@ -1406,7 +1413,7 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                      {(ProcessStatus === "DOA Process" && versionStatus==="Building Quote" )||(ProcessStatus === "Customer Process" && versionStatus!=="Sent to Customer")? (<span className="d-flex align-items-center justify-content-end">
+                      {(ProcessStatus === "DOA Process" && (versionStatus==="Building Quote" || versionStatus.includes("Rejected")) )||(ProcessStatus === "Customer Process" && versionStatus!=="Sent to Customer")? (<span className="d-flex align-items-center justify-content-end">
                         <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></span>) : null}
                     </Grid>
                     {ProcessStatus === "Quote Builder" ? (<span  className="d-flex align-items-center justify-content-end">
@@ -1423,8 +1430,7 @@ function QuoteDetail() {
                         setIsAddExistingProduct={setIsAddExistingProduct}
                         refreshProducts={refreshProducts}
                         stage={ProcessStatus === "New" ? "product" : "cost"}
-                        Editable={ProcessStatus === "Price Builder" ? true : false}
-                        Deletable={ProcessStatus === "Price Builder"? true:false}
+                        Editable={ProcessStatus === "Price Builder" || ProcessStatus==="New" ? true : false}
                       />
                       {ProcessStatus === "Quote Builder" ?
                         (<Box>
