@@ -26,7 +26,7 @@ function CustomDialogComponent({ title, open, onClose, children }) {
             <CustomDialogContent>{children}</CustomDialogContent>
 
             <CustomDialogFooter>
-                <Button color="primary" size="small" onClick={onClose}>Cancel</Button>
+                <Button color="primary" size="small" onClick={onClose}>Close</Button>
             </CustomDialogFooter>
         </Dialog>
     )
