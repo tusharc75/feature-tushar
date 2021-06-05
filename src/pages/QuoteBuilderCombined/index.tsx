@@ -392,8 +392,8 @@ const QuoteBuilders = () => {
                   <ImportExportLinks
                     module="quotes"
                     api={qbApi}
-                    onSuccessfulImport={(isImportedSuccessfully) => {
-                      if (isImportedSuccessfully) { fetchQuoteBuilder(); }
+                    afterImportCompleted={() => {
+                      fetchQuoteBuilder();
                     }}
                   />
                 </Grid>

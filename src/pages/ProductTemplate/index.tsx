@@ -275,8 +275,8 @@ const ProductTemplate: FC = () => {
                     <ImportExportLinks
                         module="productTemplateApi(s)"
                         api={productTemplateApi}
-                        onSuccessfulImport={(isImportedSuccessfully) => {
-                            if (isImportedSuccessfully) { fetchProductTemplate(); }
+                        afterImportCompleted={() => {
+                            fetchProductTemplate();
                         }}
                     />
                 </Grid>
