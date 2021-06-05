@@ -275,7 +275,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                               inputVariant="outlined"
                               fullWidth
                               margin="dense"
-                              format={dateFormatForInputControl}
+                              format={dateFormat}
                               minDate={
                                 initialValues.parentData &&
                                 initialValues.parentData.startDate
@@ -301,7 +301,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status }) => {
                                 initialValues.parentData &&
                                 initialValues.parentData.dueDate
                               }
-                              format={dateFormatForInputControl}
+                              format={dateFormat}
                             />
                           </Box>
                           {id && (
