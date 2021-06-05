@@ -267,8 +267,8 @@ const Entity: FC = () => {
           <ImportExportLinks
             module="entity(s)"
             api={entityApi}
-            onSuccessfulImport={(isImportedSuccessfully) => {
-              if (isImportedSuccessfully) { fetchEntity(); }
+            afterImportCompleted={() => {
+              fetchEntity();
             }}
           />
         </Grid>
