@@ -485,6 +485,7 @@ const QuoteBuilders = () => {
           isRedirectTodetailPage={true}
           contactId={null}
           opportunityId={null}
+          disableOwnerDropDown={true}
         />
       )}
     </>

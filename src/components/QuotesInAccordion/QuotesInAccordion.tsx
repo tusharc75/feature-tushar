@@ -20,6 +20,8 @@ import { displayDate } from '../../services/util';
 import { HiExternalLink } from 'react-icons/hi';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
 import { MoreVert } from "@material-ui/icons";
+import { customerAccount, customerContact } from '../../constants/helpers';
+import AssignQuoteDialog from './AssignQuoteDialog';
 
 const Accordion = withStyles({
     root: {
@@ -78,7 +80,7 @@ function DisplayData({ key, label, value, icon }) {
     </div>
 }
 
-export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null }) {
+export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2, quotes, fetchData, quoteBuilderPermission, accountId = null, resource = null, contactId = null, opportunityId = null, accountResource = null, isRenderedInCustomerContact = false, isCreateOwnerDisable = true }) {
     const history = useHistory();
     const {
         state: { selectedEntity },
@@ -163,7 +165,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
 
                     </Grid>
                     <Grid item xs={4} container justify="flex-end" alignItems='center'>
-                        {quoteBuilderPermission.isCreate ? 
+                        {quoteBuilderPermission.isCreate ?
                             <>
                                 <IconButton
                                     aria-haspopup="true"
@@ -188,14 +190,15 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                                     >
                                         Create New
                           </MenuItem>
-                                    {/* <MenuItem
+                                    {isRenderedInCustomerContact && <MenuItem
+
                                         onClick={() => {
                                             setShowAddExistingDialog(true)
                                             handleCloseMenu();
                                         }}
                                     >
                                         Add Exisiting
-                          </MenuItem> */}
+                                    </MenuItem>}
                                 </Menu>
                             </>
                             : <IconButton
@@ -292,7 +295,22 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                 contactId={contactId}
                 opportunityId={opportunityId}
                 accountResource={accountResource}
+                disableOwnerDropDown={isCreateOwnerDisable}
 
+            />
+        }
+        {
+            showAddExistingDialog &&
+            <AssignQuoteDialog
+                quoteDialogOpen={showAddExistingDialog}
+                handleCloseDialog={() => setShowAddExistingDialog(false)}
+                onSuccess={() => {
+                    setShowAddExistingDialog(false);
+                    fetchData()
+                }}
+                assignedQuotes={quotes}
+                accountId={accountId}
+                contactId={contactId}
             />
         }
     </>
