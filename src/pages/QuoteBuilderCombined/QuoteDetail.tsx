@@ -172,6 +172,7 @@ function QuoteDetail() {
   const [PDF, setPdf] = useState("");
   const theme = useTheme();
   const [nextStep, setNextStep] = useState(true);
+  const [redCard,setRedCard]=useState(false);
 
 
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
@@ -291,8 +292,6 @@ function QuoteDetail() {
     });
     }
     productBuilderdatatoQuoteBuilderdata(data);
-
-
   }
 
   const onFilterChange = useCallback((params) => {
@@ -459,11 +458,11 @@ function QuoteDetail() {
               }
             })
               .then(({ data }) => {
+                handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
                 console.log("PDF Response is:");
                 console.log(data);
                 if (DOAreq) {
                   console.log(data);
-                  handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
                   axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
                   .then(({ data }) => {
                     fetchquoteData(currentVersion)
@@ -472,15 +471,10 @@ function QuoteDetail() {
                     toastConfig.setToastConfig(err);
                   });
                 }
-                else {
-                  handleVersionUpdate(data.fileName, visibleColumns, versionStatus, TandC);
-                }
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
               });
-
-
           }
 
         }, x: 20, y: finalY + 50, margin: [20, 10, 20, 10]
@@ -506,20 +500,18 @@ function QuoteDetail() {
           }
         })
           .then(({ data }) => {
+            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
             console.log("PDF Response is:");
             console.log(data);
-            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
             if (DOAreq) {
               axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
               .then(({ data }) => {
-                
                 fetchquoteData(currentVersion)
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
               });
             }
-
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -988,7 +980,9 @@ function QuoteDetail() {
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     setOptions([]);
+    setRedCard(false);
     var optionstoSet=[]
+    var invalidqty=false;
     console.log(BuilderData);
     const inventory: { fieldName: string; fieldValue: any; }[][] = [];
     const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string','srno'];
@@ -1006,6 +1000,11 @@ function QuoteDetail() {
       var inventorydata: { fieldName: string; fieldValue: any; }[] = [];
       quoteRowKeys.map((key) => {
         console.log(key);
+        if(key==='qty'){
+          if(quoteRows[key]===0){
+            invalidqty=true;
+          }
+        }
         if (ignoredKeys.indexOf(key) === -1) {
           var indexkey = key;
           var currency = ""
@@ -1062,11 +1061,27 @@ function QuoteDetail() {
     setTotalMargin(totalMargin.toString() + " " + MarginCurrency);
     setTotalSale(totalSellingPrice.toString() + " " + SPCurrency);
     setTotalCost(totalCost.toString() + " " + CostCurrency);
+    if(totalSellingPrice<totalCost){
+      setRedCard(true);
+    }
     console.log("Check:");
     console.log(DOAsetup);
     console.log(DOAlimit);
     console.log(versionStatus)
     console.log(totalSellingPrice)
+
+    if(ProcessStatus==="Price Builder"){
+      if(!invalidqty){
+        setNextStep(true);
+      }
+      else{
+        setNextStep(false);
+      }
+    }
+    else{
+      setNextStep(true);
+    }
+    
     setButtonMessage("Send to Customer");
     setDOAreq(false);
     setCustomerreq(true);
@@ -1355,10 +1370,17 @@ function QuoteDetail() {
                             <span>Total Cost Price</span>
                             <span>{totalcost}</span>
                           </div>
-                          <div className="quoteBox">
+                          {redCard?
+                          (<div className="redQuoteBox">
+                            <span>Total Selling Price</span>
+                            <span>{totalsale}</span>
+                          </div>):(
+                          <div className="quoteBox" >
                             <span>Total Selling Price</span>
                             <span>{totalsale}</span>
                           </div>
+
+                          )}
                           <div className="quoteBox">
                             <span>Total Margin</span>
                             <span>{totalmargin}</span>
