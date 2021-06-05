@@ -1,17 +1,13 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "@material-ui/core";
 import {
-  MsalAuthenticationTemplate,
   useAccount,
-  useMsal,
+  useMsal
 } from "@azure/msal-react";
 import {
   AuthenticatedTemplate,
   UnauthenticatedTemplate,
 } from "@azure/msal-react";
-import { InteractionType } from "@azure/msal-browser";
-import getAzureAcessToken from "./getAzureAccessToken";
-import AzureInstance from "../../AzureInstance";
 import { SiMicrosoftoffice } from "react-icons/si";
 
 function ErrorComponent({ error }) {

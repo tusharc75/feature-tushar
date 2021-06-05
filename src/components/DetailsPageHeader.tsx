@@ -1,12 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import { Grid, Typography, Box, Avatar, Paper, Tooltip } from "@material-ui/core";
+import { Grid, Typography, Box, Paper, Tooltip } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CopyToClipboard from '../components/Helpers/CopyToClipboard'
 import { FcApproval } from 'react-icons/fc';
-import { isMobile, isTablet } from "react-device-detect";
 import routes from "./Helpers/Routes";
 import { Link } from "react-router-dom";
 
