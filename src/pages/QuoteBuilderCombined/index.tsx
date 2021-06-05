@@ -1,38 +1,39 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useReducer } from "react";
 import {
   Grid,
-  IconButton,
-  Tooltip,
-  Checkbox,
-  Chip,
+  Chip
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import DeleteIcon from "@material-ui/icons/Delete";
-import { DataGrid } from "@material-ui/data-grid";
 import { useData } from "../../StateProvider/Provider";
 import Layout from "../../components/Layout";
 import axiosInstance from "../../axios/axiosInstance";
-import { getSearchQuery, displayDate } from "../../services/util";
-import QuoteHeader from "./QuoteHeader";
+import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
-import "./style.scss";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
-import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { GiHiveMind } from "react-icons/gi";
-import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
 import {
-  quoteBuilder,
+  gridPageSizes,
+  isObjectEmpty,
+  customerAccount,
+  supplierAccount,
+  quoteBuilder
 } from "../../constants/helpers";
-import moment from "moment";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import CustomDataGridNoDataFound from "../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { useHistory } from "react-router-dom";
-import CustomDataGridToolbar from "../../components/Helpers/DataGridHelpers/CustomDataGridToolbar";
+import {
+  CommonRenderer,
+  CreatedByRenderer,
+  UpdatedByRenderer,
+} from "../../components/AgGridComponents/CustomAgGridCellRenderers";
+import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
+import "./style.scss";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import QuoteHeader from "./QuoteHeader";
+import ManageQuoteDialog from "./ManageQuote/ManageQuoteDialog";
 
 let quoteTimeout;
 const QuoteType = [
@@ -52,19 +53,12 @@ const QuoteBuilders = () => {
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
-  const [searchVal, setSearchVal] = useState("");
-  const [query, setQuery] = useState({ page: 0, limit: 25 });
   const [selectedType, setSelectedType] = useState(1);
-  const [checkAllQuotes, setCheckAllQuotes] = useState(false);
-  const [dataRows, setDataRows] = useState([]);
-  const [rowCount, setRowCount] = useState(0);
   const [renderCount, setRenderCount] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [QuoteData, setQuoteData] = useState([]);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRec, setDeleteRec] = useState<any>({});
-  const [QuotePermissions, setQuotePermissions] = useState({
+  const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [quotePermissions, setQuotePermissions] = useState({
     isCreate: false,
     isUpdate: false,
     isRead: false,
@@ -78,7 +72,7 @@ const QuoteBuilders = () => {
     showDeleteWarningConfirmBox,
     setShowDeleteWarningConfirmBox,
   ] = useState(false);
-  const [singleQuoteDelete, setsingleQuoteDelete] = useState({
+  const [singleQuoteDelete, setSingleQuoteDelete] = useState({
     id: null,
     show: false,
     quoteName: "",
@@ -91,6 +85,21 @@ const QuoteBuilders = () => {
 
   const { qbResource, qbApi } = quoteBuilder;
 
+  //  Grid Variables - Start
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
+  const columns = [
+    { field: "quoteName", headerName: "Quote Name", show: true, disabled: true, cellRenderer: "quoteNameRenderer" },
+    { field: "customerAccountName", headerName: "Customer Account Name", show: true, cellRenderer: "customerAccountNameRenderer" },
+    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
+    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+    { field: "closeDate", headerName: "Close Date", show: true, filter: false, cellRenderer: "commonRenderer" },
+    { field: "owner", headerName: "Quote Owner", show: true, cellRenderer: "commonRenderer" }
+  ];
+  //  Grid Variables - End
+
   useEffect(() => {
     if (permissions && permissions[qbResource]) {
       setQuotePermissions(permissions[qbResource]);
@@ -102,52 +111,25 @@ const QuoteBuilders = () => {
   }, [permissions]);
 
   useEffect(() => {
-    let millisec = Object.keys(searchVal).length > 0 ? 600 : 5;
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (quoteTimeout) {
       clearTimeout(quoteTimeout);
     }
 
     quoteTimeout = setTimeout(() => {
-      fetchOpportunities();
+      fetchQuoteBuilder();
     }, millisec);
     // eslint-disable-next-line
-  }, [searchVal]);
+  }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchOpportunities();
+      fetchQuoteBuilder();
     } else setRenderCount((preCount) => preCount + 1);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails]);
 
-
-    return () => {
-      setRenderCount(0);
-    }
-  }, [query, selectedType, selectedEntity, accountDetails]);
-
-  useEffect(() => {
-    let rows = QuoteData?.map((u) => {
-      let res = {
-        ...u,
-        isChecked: false,
-        id: u._id,
-        canDelete: u.owner?.optionValue === user?.user._id,
-        owner: u.owner?.optionLabel ? u.owner.optionLabel : "",
-        stage: u.stage ? u.stage : "",
-        closeDate: u?.closeDate ? displayDate(u.closeDate) : "",
-        // accountName: u?.accountName?.optionLabel || ''
-      };
-      return res;
-    });
-    setDataRows([...rows]);
-
-    return () => {
-      setDataRows([])
-    }
-
-  }, [QuoteData]);
-
-  const handleSingleDeleteOpportunity = async () => {
-    setLoading(true);
+  const handleSingleDeleteQuote = async () => {
+    dispatch({ type: "loading", loading: true });
 
     axiosInstance()
       .put(`${qbApi}/remove?entity=${selectedEntity}`, {
@@ -159,329 +141,200 @@ const QuoteBuilders = () => {
           type: "success",
           message: data.message,
         });
-        fetchOpportunities();
-        setLoading(false);
+        fetchQuoteBuilder();
+        dispatch({ type: "loading", loading: false });
+        setSingleQuoteDelete({ id: null, show: false, quoteName: "" });
+
+      })
+      .catch((error) => {
+        dispatch({ type: "loading", loading: false });
+        toastConfig.setToastConfig(error);
       });
-    setsingleQuoteDelete({ id: null, show: false, quoteName: "" });
   };
-  const fetchOpportunities = async () => {
+
+  const QuoteNameRenderer = params => <Link className="link" title={params.value}
+    to={`${routes.quoteBuilder.path}/${params.data._id}`}>
+    {params.value}
+  </Link>
+
+  const CustomerAccountNameRenderer = params => <Link className="link" title={params.value}
+    to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
+  >
+    {params.value}
+  </Link>
+
+
+  const ActionsRenderer = params => <>
+    <GridDeleteIcon
+      hasDeletePermission={quotePermissions.isDelete}
+      ownerId={params.data.ownerId}
+      userId={user?.user?._id}
+      onDelete={() => setSingleQuoteDelete({
+        show: true,
+        id: params.data._id,
+        quoteName: `${params.data.quoteName}`,
+      })}
+      entity="quote"
+    />
+  </>
+
+  const frameworkComponents = {
+    quoteNameRenderer: QuoteNameRenderer,
+    customerAccountNameRenderer: CustomerAccountNameRenderer,
+    createdByRenderer: CreatedByRenderer,
+    updatedByRenderer: UpdatedByRenderer,
+    actionsRenderer: ActionsRenderer,
+    commonRenderer: CommonRenderer
+
+  };
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case "createdBy":
+        return "createdBy.user.concatedName";
+
+      case "updatedBy":
+        return "updatedBy.user.concatedName";
+
+      default:
+        return field;
+    }
+  }
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case "owner":
+        return "owner.optionLabel";
+
+      case "customerAccountName":
+        return "customerAccountName.optionLabel";
+
+      case "supplierAccountName":
+        return "supplierAccountName.optionLabel";
+
+      default:
+        return field;
+    }
+  }
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&filterQuotes=${selectedType}`;
+
     if (selectedEntity) {
-      setLoading(true);
-      let searchParams: any = {
-        ...query,
-        entity: selectedEntity,
-        filterQuotes: selectedType,
-      };
-      searchParams = searchVal
-        ? { ...searchParams, search: searchVal }
-        : { ...searchParams };
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`
+    }
 
-      if (accountDetails.accountId) {
-        if (accountDetails.resource === "customerAccountName") {
-          searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: accountDetails.accountId }]);
-        } else if (accountDetails.resource === "supplierAccountName") {
-          searchParams["filterById"] = JSON.stringify([{ field: accountDetails.resource, term: { $in: [accountDetails.accountId] } }]);
-        }
+    if (accountDetails.accountId) {
+      if (accountDetails.resource === customerAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName("customerAccountName"), term: accountDetails.accountId }])}`
+      } else if (accountDetails.resource === supplierAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName("supplierAccountName"), term: { $in: [accountDetails.accountId] } }])}`
+      }
+    }
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).map(field => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        })
+      });
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+
+    return deepFilter;
+  };
+
+  const fetchQuoteBuilder = async () => {
+    if (selectedEntity) {
+      const queryString = getQueryString();
+      dispatch({ type: "loading", loading: true });
+
+      if (gridApi) {
+        gridApi.setRowData([]);
+        gridApi.showLoadingOverlay();
       }
 
-      let api = getSearchQuery(qbApi, searchParams);
-      try {
-        axiosInstance()
-          .get(api)
-          .then(({ data }) => {
-            setRowCount(data.count);
-            setQuoteData(data.data);
-            setCheckAllQuotes(false);
-            setLoading(false);
+      axiosInstance()
+        .get(`${qbApi}${queryString}`)
+        .then(({ data: { data, count } }) => {
+          let rows = data.map((u) => {
+            const { owner, collaborator, createdBy, updatedBy, customerAccountName,
+               ...restProperties } = u;
+
+
+            let res = {
+              ...restProperties,
+              id: u._id,
+
+              owner: u.owner?.optionLabel,
+              ownerId: u.owner?.optionValue,
+
+              canDelete: u.owner?.optionValue === user?.user._id,
+              closeDate: u?.closeDate ? displayDate(u.closeDate) : "",
+
+              customerAccountName: u.customerAccountName?.optionLabel,
+              customerAccountId: u.customerAccountName?.optionValue,
+
+              createdBy: u.createdBy?.user?.concatedName,
+              createdByDate: u.createdBy?.date,
+              updatedBy: u.updatedBy?.user?.concatedName,
+              updatedByDate: u.updatedBy?.date
+            };
+            return res;
           });
-      } catch (err) {
-        setLoading(false);
-      }
+
+          dispatch({ type: "initialize", data: rows, count: count });
+          // if (gridApi && rows.length > 0) {
+          //   gridApi.hideOverlay();
+          // }
+        })
+        .catch((error) => {
+          dispatch({ type: "loading", loading: false });
+          toastConfig.setToastConfig(error);
+        });
     }
   }
 
   const handleSearch = (e) => {
-    if (query.page !== 0) {
-      setQuery((prevState) => ({ ...prevState, page: 0 }));
-    }
-    setSearchVal(e.target.value);
+    dispatch({ type: "search", search: e.target.value });
   };
 
-  const handleOpportunityTypeSel = (filterValues) => {
+  const handleQuoteBuilderTypeSel = (filterValues) => {
     setSelectedType(filterValues);
   };
 
   const onSuccess = () => {
     setshowCreateQuoteDialog(false);
-    fetchOpportunities();
+    fetchQuoteBuilder();
   };
-
-  const columns = [
-    {
-      field: "isChecked",
-      headerName: "Checkbox",
-      renderHeader: () => (
-        <Checkbox
-          color="primary"
-          checked={checkAllQuotes}
-          onChange={(ev) => {
-            setCheckAllQuotes(ev.target.checked);
-            const gridData = dataRows;
-            gridData.map((d) => {
-              d.isChecked = ev.target.checked;
-              return d;
-            });
-            setDataRows([...gridData]);
-          }}
-        />
-      ),
-      renderCell: (params) => (
-        <Checkbox
-          // color="primary"
-          // checked={params.value}
-          // onChange={(ev) => {
-          //   updateCheckedStatus(params, ev)
-
-          // }}
-
-          color="primary"
-          // disabled={!params.canDelete}
-          checked={params.value}
-          onChange={(ev) => {
-            const gridData = dataRows;
-            const indexOfRecord = gridData.findIndex(
-              (d) => d.id === params.row.id
-            );
-            gridData[indexOfRecord].isChecked = ev.target.checked;
-
-            setDataRows([...gridData]);
-
-            const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-            if (checkedRecords.length === gridData.length) {
-              setCheckAllQuotes(true);
-            } else {
-              setCheckAllQuotes(false);
-            }
-          }}
-        />
-      ),
-      disableColumnMenu: true,
-      width: 75,
-      sortable: false,
-      filterable: false,
-    },
-    {
-      field: "quoteName",
-      headerName: "Quote Name",
-      width: 400,
-      renderCell: (params) => getFirstName(params.row),
-    },
-    {
-      field: "supplierAccountName",
-      headerName: "Supplier Account Name",
-      width: 300,
-      hide: true,
-      renderCell: (params) =>
-        params?.row?.supplierAccountName.length > 0 ? (
-          <>
-            <h5 className="createBy">
-              <Link className="link"
-                to={`${routes.supplierAccount.path}/detail/${params?.row?.supplierAccountName[0].optionValue}`}
-              >
-                {params?.row?.supplierAccountName[0].optionLabel}
-              </Link>
-              {
-                params?.row?.supplierAccountName.length > 1 &&
-                <span className="createdAtTime badge-date">
-                  {`+${params?.row?.supplierAccountName.length - 1} more..`}
-                </span>
-              }
-            </h5>
-          </>
-        ) : <NoDataCell />
-    },
-    {
-      field: "customerAccountName",
-      headerName: "Customer Account Name",
-      width: 300,
-      renderCell: (params) => (
-        <Link
-          className="link"
-          to={`${routes.customerAccount.path}/detail/${params?.row?.customerAccountName?.optionValue}`}
-        >
-          {params?.row?.customerAccountName?.optionLabel
-            ? params.row.customerAccountName.optionLabel
-            : ""}
-        </Link>
-      ),
-    },
-    {
-      field: "createdBy",
-      headerName: "Created By",
-      width: 250,
-      disableColumnMenu: true,
-      renderCell: (params) =>
-        params?.value && params?.value?.user ? (
-          <h5 className="createBy">
-            {params.value.user.firstName}
-            <span
-              className="createdAtTime badge-date"
-              title={`${params.value.user.firstName} • ${moment(
-                params?.value?.date?.slice(0, 10)
-              ).format("MMM Do, YYYY")}`}
-            >
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-      // renderCell: (params) => <CustomRenderCell value={params?.value?.createdBy?.optionLabel} />
-    },
-    {
-      field: "updatedBy",
-      headerName: "Updated By",
-      width: 250,
-      renderCell: (params) =>
-        params?.value?.user ? (
-          <h5 className="updateBy">
-            {params.value.user.firstName}
-            <span title={params.value.date} className="updatedAtTime badge-date">
-              {moment(params?.value?.date?.slice(0, 10)).format("MMM Do, YYYY")}
-            </span>
-          </h5>
-        ) : (
-          <NoDataCell />
-        ),
-
-      // renderCell: (params) => <CustomRenderCell value={params?.value?.updatedBy?.optionLabel} />
-    },
-    {
-      field: "closeDate",
-      headerName: "Close Date",
-      width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
-    },
-    // { field: "status", headerName: "Lead Status", width: 200 },
-    {
-      field: "owner",
-      headerName: "Opportunity Owner",
-      width: 250,
-      renderCell: (params) => <CustomRenderCell value={params?.value} />,
-    },
-    {
-      field: "actions",
-      headerName: "Actions ",
-      renderCell: (params) => (
-        <>
-          {QuotePermissions.isDelete ? (
-            params.row.canDelete ? (
-              <Tooltip title="Delete">
-                <IconButton
-                  aria-label="Delete"
-                  onClick={() =>
-                    setsingleQuoteDelete({
-                      show: true,
-                      id: params.row._id,
-                      quoteName: `${params.row.quoteName}`,
-                    })
-                  }
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                className="cursor-stop"
-                title="You must be the owner of this opportunity to get the delete functionality"
-              >
-                <IconButton aria-label="Delete">
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            )
-          ) : (
-            <Tooltip
-              className="cursor-stop"
-              title="You do not have permission to delete opportunity"
-            >
-              <IconButton aria-label="Delete">
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            </Tooltip>
-          )}
-        </>
-      ),
-      disableColumnMenu: true,
-      sortable: false,
-      filterable: false,
-      width: 200,
-    },
-  ];
 
   const showConfirmBox = (row) => {
     if (row) {
       setIsConformDialogVisible(true);
       if (row && row._id) {
-        setDeleteRec(row);
+        setDeleteRecord(row);
       }
     } else {
-      if (dataRows.find((d) => d.isChecked && d.canDelete === false)) {
+      if (selectedRecords.find((d) => d.canDelete === false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
       }
-    }
-  };
-  const getFirstName = (tData) => {
-    return (
-      <Link
-        className="nameLink"
-        to={`quote-builder/${tData._id}`}
-      >
-        <span className="text-capitalize">{tData.quoteName}</span>
-      </Link>
-    );
-  };
-
-  // const updateCheckedStatus = (params, ev) => {
-  //   const gridData = [...dataRows];
-  //   const indexOfRecord = gridData.findIndex((d) => d.id === params.row.id);
-  //   gridData[indexOfRecord].isChecked = ev.target.checked;
-
-  //   setDataRows([...gridData]);
-
-  //   const checkedRecords = gridData.filter((d) => d.isChecked === true);
-
-  //   if (checkedRecords.length === gridData.length) {
-  //     setCheckAllQuotes(true);
-  //   } else {
-  //     setCheckAllQuotes(false);
-  //   }
-  // };
-
-  const handlePage = (params) => {
-    if (query.page !== params.page) {
-      setQuery((prevState) => ({ ...prevState, page: params.page }));
-    }
-  };
-
-  const handlePageSize = (params) => {
-    if (params.pageSize !== query.limit) {
-      setQuery({ page: 0, limit: params.pageSize });
-    }
-  };
-
-  const handleSortModelChange = (params) => {
-    if (params?.sortModel && params.sortModel.length > 0) {
-      let temp = { ...params.sortModel[0] };
-      setQuery((prevState) => ({
-        ...prevState,
-        page: 0,
-        sortBy: temp.field,
-        orderBy: temp.sort,
-      }));
     }
   };
 
@@ -489,18 +342,18 @@ const QuoteBuilders = () => {
     setshowCreateQuoteDialog(true);
   };
 
-  const handleDeleteOpportunity = async () => {
+  const handleDeleteQuote = async () => {
     setDeleteLoading(true);
-    let recs = [];
-    if (deleteRec?._id) {
-      recs.push(deleteRec?._id);
+    let recordsToDelete = [];
+    if (deleteRecord?._id) {
+      recordsToDelete.push(deleteRecord?._id);
     } else {
-      recs = dataRows.filter((obj) => obj.isChecked).map((o) => o._id);
+      recordsToDelete = selectedRecords.map((o) => o._id);
     }
-    if (recs && recs.length > 0) {
+    if (recordsToDelete.length > 0) {
       axiosInstance()
         .put(`${qbApi}/remove?entity=${selectedEntity}`, {
-          ids: [...recs],
+          ids: recordsToDelete,
         })
         .then(({ data }) => {
           toastConfig.setToastConfig({
@@ -510,8 +363,8 @@ const QuoteBuilders = () => {
           });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
-          if (deleteRec) setDeleteRec({});
-          fetchOpportunities();
+          if (deleteRecord) setDeleteRecord({});
+          fetchQuoteBuilder();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -521,50 +374,47 @@ const QuoteBuilders = () => {
     }
   };
 
-  const onFilterChange = useCallback((params) => {
-    if (params.filterModel.items[0].value) {
-      let deepFilter;
-      switch (params.filterModel.items[0].columnField) {
-        case 'createdBy':
-          deepFilter = JSON.stringify([{ field: "createdBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'updatedBy':
-          deepFilter = JSON.stringify([{ field: "updatedBy.user.concatedName", term: params.filterModel.items[0].value }])
-          break;
-        case 'name':
-          deepFilter = JSON.stringify([{ field: "firstName", term: params.filterModel.items[0].value }, { field: "middleName", term: params.filterModel.items[0].value }, { field: "lastName", term: params.filterModel.items[0].value }])
-          break;
-        default:
-          deepFilter = JSON.stringify([{ field: params.filterModel.items[0].columnField, term: params.filterModel.items[0].value }])
-      }
-      setQuery((prevState) => ({
-        ...prevState,
-        deepFilter
-      }));
-
-    } else {
-      setQuery({ page: 0, limit: 25 });
-    }
-  }, []);
   return (
     <>
       <Layout>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[{ title: "Quote Builder" }]} />
+          <Grid item md={4} sm={11} xs={10}>
+            <CustomBreadCrumbs routes={[routes.quoteBuilder]} />
+          </Grid>
+          <Grid
+            item
+            md={8}
+            sm={1}
+            xs={2}>
+            <Grid container direction="row">
+              <Grid item xs={12} sm={12}>
+                <Grid container justify="flex-end">
+                  <ImportExportLinks
+                    module="quotes"
+                    api={qbApi}
+                    onSuccessfulImport={(isImportedSuccessfully) => {
+                      if (isImportedSuccessfully) { fetchQuoteBuilder(); }
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
         </Grid>
+
         {/* Tables Begins Here */}
         <CustomContainer>
           <div className="header-panel">
             <QuoteHeader
               selectedType={selectedType}
-              onTypeChange={handleOpportunityTypeSel}
+              onTypeChange={handleQuoteBuilderTypeSel}
               options={QuoteType}
               onSearch={handleSearch}
-              searchVal={searchVal}
-              QuotePermissions={QuotePermissions}
+              searchVal={search}
+              QuotePermissions={quotePermissions}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
-              canDelete={dataRows.filter((d) => d.isChecked).length === 0}
+              canDelete={selectedRecords.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
               heading="Quote Builder"
             >
@@ -581,32 +431,8 @@ const QuoteBuilders = () => {
             </QuoteHeader>
           </div>
 
-
-          <div className="listing-grid">
-            <DataGrid
-              components={{
-                Toolbar: CustomDataGridToolbar,
-                NoRowsOverlay: CustomDataGridNoDataFound,
-              }}
-              rows={loading ? [] : dataRows}
-              columns={columns}
-              loading={loading}
-              disableSelectionOnClick
-              disableMultipleSelection
-              paginationMode="server"
-              pagination
-              onPageChange={handlePage}
-              onPageSizeChange={handlePageSize}
-              pageSize={query.limit}
-              page={query.page}
-              rowCount={rowCount}
-              rowsPerPageOptions={[25, 50, 75]}
-              onSortModelChange={handleSortModelChange}
-              density="compact"
-              onFilterModelChange={onFilterChange}
-              filterMode="server"
-            />
-          </div>
+          <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
+            dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100} />
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
@@ -618,38 +444,29 @@ const QuoteBuilders = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure, you want to delete ${deleteRec?.quoteName ? "Opportunity" : "Opportunities"
-                }   ${deleteRec.quoteName || ""}?`}
+              message={`Are you sure, you want to delete ${deleteRecord?.quoteName ? "Quote" : "Quotes"
+                }   ${deleteRecord.quoteName || ""}?`}
               onClose={() => {
-                if (deleteRec) setDeleteRec({});
+                if (deleteRecord) setDeleteRecord({});
                 setIsConformDialogVisible(false);
               }}
               okBtnLoading={deleteLoading}
-              onOk={handleDeleteOpportunity}
+              onOk={handleDeleteQuote}
             />
           ) : null}
-          {/* {
-            showCreateQuoteDialog && <ManageOpportunityMain
-              open={showCreateQuoteDialog}
-              onClose={() => setshowCreateQuoteDialog(false)}
-              onSuccess={() => {
-                setshowCreateQuoteDialog(false);
-                fetchOpportunities()
-              }}
-            />
-          } */}
+
           {singleQuoteDelete.show ? (
             <ConfirmationDialog
               open={singleQuoteDelete.show}
-              message={`Are you sure, you want to delete contact: ${singleQuoteDelete.quoteName} ?`}
+              message={`Are you sure, you want to delete Quote: ${singleQuoteDelete.quoteName} ?`}
               onClose={() =>
-                setsingleQuoteDelete({
+                setSingleQuoteDelete({
                   id: null,
                   show: false,
                   quoteName: "",
                 })
               }
-              onOk={handleSingleDeleteOpportunity}
+              onOk={handleSingleDeleteQuote}
             />
           ) : null}
         </CustomContainer>
@@ -666,6 +483,8 @@ const QuoteBuilders = () => {
           dataToUpdate={null}
           resource={null}
           isRedirectTodetailPage={true}
+          contactId={null}
+          opportunityId={null}
         />
       )}
     </>

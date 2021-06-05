@@ -40,6 +40,7 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
+import { dateFormat } from "../../../constants/helpers"
 
 const EventSchema = Yup.object().shape({
   name: Yup.string().required("Please enter event name").min(3, "Too Short"),
@@ -76,7 +77,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
         .then(({ data }) => {
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setInitialValues({
         name: "",
@@ -118,6 +119,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
   const handleSave = async (values) => {
     setSubmitting(true);
     values.relatedTo = relatedTo;
+    if (!isEmpty(azureAccount)) {
+      values.azureId = azureAccount.homeAccountId;
+      values.graphToken = await getAzureAcessToken(instance);
+    }
     if (eventId) {
       UpdateEvent(eventId, values)
         .then(({ data }) => {
@@ -129,10 +134,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
           setSubmitting(false);
         });
     } else {
-      if (!isEmpty(azureAccount)) {
-        values.azureId = azureAccount.homeAccountId;
-        values.graphToken = await getAzureAcessToken(instance);
-      }
       if (relatedTo) {
         CreateNewEvent(values)
           .then(({ data }) => {
@@ -358,7 +359,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                 setFieldValue("startDate", date);
                                 setFieldValue("startTime", date);
                               }}
-                              format="DD/MM/YYYY"
+                              format={dateFormat}
                               error={
                                 Boolean(touched["startDate"]) &&
                                 Boolean(errors["startDate"])
@@ -427,7 +428,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                                 setFieldValue("endDate", date);
                                 setFieldValue("endTime", date);
                               }}
-                              format="DD/MM/YYYY"
+                              format={dateFormat}
                               error={
                                 Boolean(touched["endDate"]) &&
                                 Boolean(errors["endDate"])
@@ -563,7 +564,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose }) => {
                         .then(({ data }) => {
                           handleClose();
                         })
-                        .catch((err) => {})
+                        .catch((err) => { })
                     }
                   >
                     Delete

@@ -6,14 +6,12 @@ import {
   Tooltip,
 } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { entity, gridPageSizes, isObjectEmpty } from "../../constants/helpers";
+import { entity, isObjectEmpty } from "../../constants/helpers";
 import axiosInstance from "../../axios/axiosInstance";
 import Layout from "../../components/Layout";
 import routes from "./../../components/Helpers/Routes";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import EntityHeader from "./Header";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import MessageDialog from "../../components/Helpers/MessageDialog";
 import { useData } from "../../StateProvider/Provider";
 import CreateEntity from "./CreateEntity";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -21,105 +19,12 @@ import AssignUsersDialog from "../../components/AssignRolesDialog/AssignEntityDi
 import {
   CommonRenderer,
   CreatedByRenderer,
-  UpdatedByRenderer,
-  CustomLoadingOverlay
+  UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomFloatingFilter from '../../components/AgGridComponents/CustomAgGridFilter'
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
 import { FaUser } from "react-icons/fa";
-
-function reducer(state, action) {
-  switch (action.type) {
-    case "loading":
-      return {
-        ...state,
-        loading: action.loading
-      }
-
-    case "initialize":
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count,
-        loading: false
-      }
-
-    case "selection":
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords,
-      }
-
-    case "update":
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      }
-
-    case "filter":
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      }
-
-    case "sort":
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      }
-
-    case "search":
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      }
-
-    case "pageChange":
-      return {
-        ...state,
-        page: action.page
-      }
-
-    case "pageSizeChange":
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      }
-
-    case "complete":
-      return {
-        ...state,
-        loading: false
-      }
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: "",
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-}
 
 let entityTimeout;
 
@@ -242,11 +147,7 @@ const Entity: FC = () => {
     commonRenderer: CommonRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    actionsRenderer: ActionsRenderer,
-    customFloatingFilter: CustomFloatingFilter,
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
+    actionsRenderer: ActionsRenderer
   };
 
 
@@ -350,7 +251,7 @@ const Entity: FC = () => {
     setUsersDialogOpen(false);
   };
 
-  
+
   return (
     <Layout>
       <Grid container className="headerbox">

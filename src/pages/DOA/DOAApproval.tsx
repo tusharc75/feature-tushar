@@ -43,20 +43,25 @@ const DOAApproval=()=>{
 
 
     useEffect(()=>{
-        fetchDOA()
+        fetchQuote()
     },[]);
 
     
 
-    const fetchDOA=()=>{
+    const fetchDOA=(user)=>{
         axiosInstance()
-            .get('doa-request/limit')
+            .post('doa-request/limit',{user:user})
             .then(({ data }) => {
                 console.log("DOA limit is:");
                 console.log(data);
                 DOAsetup=data.data.doasetup;
-                DOALimit=data.data.limit;     
-                fetchQuote();      
+                DOALimit=data.data.limit;   
+                if(DOALimit<data.TotalSellingPrice && DOAsetup){
+                    setneedDOA(true);
+                    setButton("Send for DOA");
+                }  
+                setLoading(false);
+                     
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -75,10 +80,7 @@ const DOAApproval=()=>{
                     setColumns(data.Columns);
                     setRows(data.Rows);
                     setSellingPrice(data.TotalSellingPrice);
-                    if(DOALimit<data.TotalSellingPrice && DOAsetup){
-                        setneedDOA(true);
-                        setButton("Send for DOA");
-                    }
+                    fetchDOA(data.Quotedby);
                     setPDFName(data.PDF)
                     setChatid(data.chatter);
                     console.log(data.chatter);
@@ -86,7 +88,7 @@ const DOAApproval=()=>{
                     if(data.Quote_Status!=="Sent for DOA"){
                         setQStatus(false);
                     }
-                    setLoading(false);
+                    
             })
             .catch((err)=>{
                     console.log(err);

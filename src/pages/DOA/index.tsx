@@ -20,6 +20,7 @@ import { GiAbstract055 } from 'react-icons/gi';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import CustomContainer from "../../components/CustomContainer";
 import EditIcon from '@material-ui/icons/Edit';
+import { dateFormat } from "../../constants/helpers"
 
 const DOARequest = () => {
 
@@ -30,7 +31,7 @@ const DOARequest = () => {
     const [productBuilder, setProductBuilder] = useState([]);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteRecord, setDeleteRecord] = useState(null)
-    const [replied,setReplied]=useState(false);
+    const [replied, setReplied] = useState(false);
 
     useEffect(() => {
         fetchProductBuilder();
@@ -68,9 +69,9 @@ const DOARequest = () => {
             filterable: false,
             renderCell: (params) => (
                 <>
-                {params.row.QuotedBy.firstName}
+                    {params.row.QuotedBy.firstName}
                 </>
-            ) 
+            )
         },
         {
             field: "RequestedBy",
@@ -85,10 +86,10 @@ const DOARequest = () => {
                     className="updatedAtTime badge-date"
                     title={`${params.row.RequestedBy.firstName} • ${moment(
                         params.row.RequestedBy.date.slice(0, 10)
-                    ).format('MMM Do, YYYY')}`}
+                    ).format(dateFormat)}`}
                 >
                     {moment(params.row.RequestedBy.date.slice(0, 10)).format(
-                        'MMM Do, YYYY'
+                        dateFormat
                     )}
                 </span>
             </h5>) : <NoDataCell />

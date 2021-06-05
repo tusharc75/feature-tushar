@@ -21,6 +21,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { Skeleton } from "@material-ui/lab";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
+import { displayDate } from "../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -155,8 +156,7 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] === true ? "Yes" : "No";
     } else if (input.type === "date") {
       text = values[input.fieldName]
-        ? new Date(values[input.fieldName]).toDateString()
-        : "-";
+        ? displayDate(values[input.fieldName]) : "-";
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : "-";
     }
@@ -233,7 +233,7 @@ const Details = (props: DetailProps) => {
           <Typography className={classes.fieldText} variant="body2">
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
-                data[fieldData.fieldName].map((_val: any) => (
+                data[fieldData.fieldName].map((_val: any, i) => (
                   <React.Fragment key={_val.optionValue}>
                     <Link
                       to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue
@@ -247,7 +247,7 @@ const Details = (props: DetailProps) => {
                     // }
                     >
                       <span className={classes.dataValue}>
-                        {_val.optionLabel}
+                        {_val.optionLabel}{i < (data[fieldData.fieldName].length - 1) ? "," : ""}
                       </span>
                     </Link>
                   </React.Fragment>
@@ -287,7 +287,11 @@ const Details = (props: DetailProps) => {
           {fieldData.type === "url" || fieldData.type === "email" ? (
             <>
               <MuiLink
-                href={fieldData.type === "email" ? `mailto:${value}` : value}
+                href={
+                  fieldData.type === "email"
+                    ? `mailto:${value}`
+                    : `https://${value}`
+                }
                 target="_blank"
               >
                 <span className={classes.dataValue}> {value} </span>
@@ -299,11 +303,9 @@ const Details = (props: DetailProps) => {
           ) : (
             <span className={classes.dataValue}> {value} </span>
           )}
-          {
-            fieldData.type === "mobileNumber" && value !== "-" ? (
-              <CopyToClipboard textToCopy={value} />
-            ) : null
-          }
+          {fieldData.type === "mobileNumber" && value !== "-" ? (
+            <CopyToClipboard textToCopy={value} />
+          ) : null}
         </Typography>
       );
     }

@@ -8,6 +8,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
 import { grey } from '@material-ui/core/colors';
+import { dateFormat } from "../../../../constants/helpers"
 let dayname = moment.weekdaysShort();
 
 const useStyles = makeStyles((theme) => ({
@@ -172,7 +173,7 @@ export default function BigCalander({ type, activity }) {
                                         <Box pl={1} pt={1}>
                                             <Typography className={_day.month == month ? classes.fontBold : ""}>{_day.day}</Typography>
                                         </Box>
-                                        {(activity.filter((data) => moment(data.dueDate).format("YYYY-MM-DD") === (year + "-" + (_day.month.toString()).padStart(2, "0") + "-" + (_day.day.toString()).padStart(2, "0")))).map((_data, key) => (
+                                        {(activity.filter((data) => moment(data.dueDate).format(dateFormat) === (year + "-" + (_day.month.toString()).padStart(2, "0") + "-" + (_day.day.toString()).padStart(2, "0")))).map((_data, key) => (
                                             key === 0 &&
                                             <Box style={{ cursor: "pointer" }} key={key} onClick={() => handleActivityOpen(_data._id)}>
                                                 <Typography className={classes.calTask}>{_data.name}</Typography>

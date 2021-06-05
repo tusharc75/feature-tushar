@@ -37,6 +37,7 @@ import { Paper } from '@material-ui/core'
 import Skeleton from '@material-ui/lab/Skeleton';
 import { csvIcon, docIcon, textFile1Icon, textFileIcon, pdfFileIcon, pptIcon, excelSheetIcon } from "../../../assets/file_icons/index"
 import ImageAttachments from './ImageAttachments'
+import { imageUploadMaxSize, dateTimeFormat } from "../../../constants/helpers"
 
 const emailSchemaHelper = Yup.array().transform(function (value, originalValue) {
     if (this.isType(value) && value !== null) {
@@ -115,6 +116,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
     const [imageSource, setImageSource] = useState(null);
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false)
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     const toolbarConfig = {
         display: ['INLINE_STYLE_BUTTONS', 'BLOCK_ALIGNMENT_BUTTONS', 'BLOCK_TYPE_BUTTONS', 'LINK_BUTTONS', 'BLOCK_TYPE_DROPDOWN', 'HISTORY_BUTTONS'],
@@ -254,7 +256,15 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
     const handleUploadImage = (event) => {
         if (event.target.files && event.target.files.length) {
             const file = event.target.files[0];
-            getImageUrl(file);
+            if (file.size > imageUploadMaxSize.size) {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "error",
+                    message: `Image must be less than ${imageUploadMaxSize.text} size`,
+                });
+            } else {
+                getImageUrl(file);
+            }
         }
     };
 
@@ -388,7 +398,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                                         <RelatedToDispay relatedTo={initialValues.relatedTo} />
                                                     </Box>
                                                     <Box mt={1} color="text.secondary">
-                                                        <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format("MMM DD YYYY hh:mm A")}</Typography>
+                                                        <Typography variant="body2">Sended {moment(initialValues.createdBy.date).format(dateTimeFormat)}</Typography>
                                                     </Box>
                                                 </Fragment> :
                                                 <Grid container spacing={3}>
@@ -488,12 +498,16 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                                                 errors={errors}
                                                                 touched={touched}
                                                                 size="small"
+                                                                isMultipleUpload={true}
                                                                 setFieldValue={(name, file) => {
                                                                     setFieldValue("file", file);
                                                                     onUploadFile(file)
                                                                 }}
                                                                 usePublicUrlforFileUpload={true}
                                                                 doNotShowUploadedFile={true}
+                                                                imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                                }}
                                                             />
                                                         </Box>
                                                         {renderFileThumbnails}
@@ -564,7 +578,7 @@ export const CreateEmail = ({ relatedTo, emailId, handleClose, options = [], fet
                                 {/* <Typography color="textSecondary"> {!emailId && <> Mail will sent from {azureAccount?.username} </>}</Typography> */}
                                 <Button color="primary" size="small" onClick={handleClose}>Cancel</Button>
                                 {!emailId &&
-                                    <Button type="button" size="small" color="primary" variant="contained" disabled={sending}
+                                    <Button type="button" size="small" color="primary" variant="contained" disabled={sending || uploadingImageOrFileProgress > 0}
                                         onClick={(e) => {
 
                                             e.preventDefault()

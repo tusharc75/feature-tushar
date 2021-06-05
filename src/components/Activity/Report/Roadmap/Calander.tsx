@@ -2,6 +2,7 @@ import React, { useEffect, memo } from "react";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import moment from "moment";
+import { dateFormat } from "../../../../constants/helpers"
 
 const DaysBetweenDates = function (calendarType, startDate, endDate) {
   var dateList = [];
@@ -10,7 +11,7 @@ const DaysBetweenDates = function (calendarType, startDate, endDate) {
       endDate > startDate ||
       startDate.format("M") === endDate.format("M")
     ) {
-      dateList.push(startDate.format("YYYY-MM-DD"));
+      dateList.push(startDate.format(dateFormat));
       startDate.add(1, "month");
     }
   } else {
@@ -88,108 +89,108 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
       >
         {calendarType === "week"
           ? Array.from(dates, (date, index) => {
-              return (
-                <Box
-                  key={index}
-                  borderColor="grey.300"
-                  minWidth={moment(date).daysInMonth() * dayPixel}
+            return (
+              <Box
+                key={index}
+                borderColor="grey.300"
+                minWidth={moment(date).daysInMonth() * dayPixel}
+              >
+                <Typography
+                  variant="caption"
+                  color="textSecondary"
+                  display="block"
                 >
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    display="block"
-                  >
-                    {moment(date).format("MMM YYYY").toUpperCase()}
-                  </Typography>
-                  {Array.from(
-                    Array(moment(date).daysInMonth()),
-                    (data, index) => {
-                      return (
-                        <div
-                          key={index}
-                          style={{
-                            minWidth: dayPixel,
-                            maxWidth: dayPixel,
-                            textAlign: "center",
-                            float: "left",
-                            borderLeft: "1px solid #dfdfdf",
-                          }}
+                  {moment(date).format("MMM YYYY").toUpperCase()}
+                </Typography>
+                {Array.from(
+                  Array(moment(date).daysInMonth()),
+                  (data, index) => {
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          minWidth: dayPixel,
+                          maxWidth: dayPixel,
+                          textAlign: "center",
+                          float: "left",
+                          borderLeft: "1px solid #dfdfdf",
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          color={"textSecondary"}
+                          display="block"
                         >
-                          <Typography
-                            variant="body2"
-                            color={"textSecondary"}
-                            display="block"
-                          >
-                            {
-                              moment(
-                                moment(date).format("YYYY-MM") +
-                                  "-" +
-                                  (index + 1)
-                              ).format("ddd")[0]
-                            }
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color={"textSecondary"}
-                            display="block"
-                          >
-                            {moment(
-                              moment(date).format("YYYY-MM") + "-" + (index + 1)
-                            ).format("D")}
-                          </Typography>
-                        </div>
-                      );
-                    }
-                  )}
-                </Box>
-              );
-            })
+                          {
+                            moment(
+                              moment(date).format("YYYY-MM") +
+                              "-" +
+                              (index + 1)
+                            ).format("ddd")[0]
+                          }
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color={"textSecondary"}
+                          display="block"
+                        >
+                          {moment(
+                            moment(date).format("YYYY-MM") + "-" + (index + 1)
+                          ).format("D")}
+                        </Typography>
+                      </div>
+                    );
+                  }
+                )}
+              </Box>
+            );
+          })
           : null}
         {calendarType === "month"
           ? Array.from(dates, (date, index) => {
-              return (
-                <Box
-                  key={index}
-                  p={2}
-                  display="inline"
-                  minWidth={moment(date).daysInMonth() * dayPixel}
-                  border={1}
-                  borderColor="grey.300"
-                  textAlign="center"
-                >
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    display="block"
-                  >
-                    {moment(date).format("MMM YYYY").toUpperCase()}
-                  </Typography>
-                </Box>
-              );
-            })
-          : null}
-        {calendarType === "quater"
-          ? dates.map((date, index) => (
+            return (
               <Box
                 key={index}
                 p={2}
                 display="inline"
-                minWidth={dayPixel * parseInt(date.days)}
+                minWidth={moment(date).daysInMonth() * dayPixel}
                 border={1}
                 borderColor="grey.300"
                 textAlign="center"
               >
-                <Typography variant="body2" display="block">
-                  {(
-                    moment(date.q_s_date).format("MMM") +
-                    " - " +
-                    moment(date.q_e_date).format("MMM") +
-                    " " +
-                    moment(date.q_s_date).format("YYYY")
-                  ).toUpperCase()}
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  display="block"
+                >
+                  {moment(date).format("MMM YYYY").toUpperCase()}
                 </Typography>
               </Box>
-            ))
+            );
+          })
+          : null}
+        {calendarType === "quater"
+          ? dates.map((date, index) => (
+            <Box
+              key={index}
+              p={2}
+              display="inline"
+              minWidth={dayPixel * parseInt(date.days)}
+              border={1}
+              borderColor="grey.300"
+              textAlign="center"
+            >
+              <Typography variant="body2" display="block">
+                {(
+                  moment(date.q_s_date).format("MMM") +
+                  " - " +
+                  moment(date.q_e_date).format("MMM") +
+                  " " +
+                  moment(date.q_s_date).format("YYYY")
+                ).toUpperCase()}
+              </Typography>
+            </Box>
+          ))
           : null}
       </Box>
     )

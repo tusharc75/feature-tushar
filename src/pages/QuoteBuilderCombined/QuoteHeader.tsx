@@ -26,7 +26,7 @@ function QuoteHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState("All Opportunities");
+  const [filter, setFilter] = useState("All Quotes");
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {

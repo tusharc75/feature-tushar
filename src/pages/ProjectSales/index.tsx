@@ -16,12 +16,10 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import { gridPageSizes, isObjectEmpty } from "../../constants/helpers";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomFloatingFilter from "../../components/AgGridComponents/CustomAgGridFilter";
 import {
   CommonRenderer,
   CreatedByRenderer,
-  UpdatedByRenderer,
-  CustomLoadingOverlay,
+  UpdatedByRenderer
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import "./style.scss";
@@ -240,11 +238,7 @@ const ProjectSales: FC = () => {
     commonRenderer: CommonRenderer,
     createdByRenderer: CreatedByRenderer,
     updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    customLoadingOverlay: CustomLoadingOverlay,
-    customFloatingFilter: CustomFloatingFilter,
-    // customLoadingCellRenderer: CustomLoadingCellRenderer,
-    // customNoRowsOverlay: CustomNoRowsOverlay
+    actionsRenderer: ActionsRenderer
   };
 
   //  If you want to do something once grid binding done
