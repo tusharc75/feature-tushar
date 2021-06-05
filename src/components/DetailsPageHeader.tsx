@@ -37,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
 
 const DetailsPageHeader = (props) => {
   const { mainPoints, heading, children, showHeading, loading, isApproved } = props;
+
   const classes = useStyles();
   return (
     <>

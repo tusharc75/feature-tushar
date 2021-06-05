@@ -28,7 +28,7 @@ import {
     convertFromRaw,
 } from 'draft-js'
 import { RichTextEditor } from '../../components/RichEditor/RichEditor'
-import { termsAndConditionFileUploadMaxSize } from "../../constants/helpers"
+import { documentUploadMaxSize } from "../../constants/helpers"
 
 const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string()
@@ -55,6 +55,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
     const [loading, setLoading] = useState(false)
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     useEffect(() => {
         if (editRecord && editRecord?._id) {
@@ -169,7 +170,10 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         setFieldValue={(name, file) => setFieldValue("file", file)}
                                                         onAppendData={(data) => appendData(data, setFieldValue)}
                                                         doNotShowUploadedFile={true}
-                                                        fileUploadMaxSize={termsAndConditionFileUploadMaxSize} //size in bytes
+                                                        fileUploadMaxSize={documentUploadMaxSize} //size in bytes
+                                                        imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                                            setUploadingImageOrFileProgress(completePercentage);
+                                                        }}
                                                     />
                                                 </Box>
                                                 <Box mt={2} >
@@ -192,6 +196,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                 variant="contained"
                                 color="primary"
                                 loading={loading}
+                                disabled={uploadingImageOrFileProgress > 0}
                                 onClick={() => {
                                     if (Object.keys(errors).length) {
                                         Object.keys(errors).forEach(key => {

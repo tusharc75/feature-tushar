@@ -20,6 +20,10 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "flex-end",
   },
+  custom_root: {
+    paddingTop: 5,
+    paddingRight: 5
+  },
   linksContainer: {
     display: "flex",
     alignItems: "center",
@@ -30,6 +34,10 @@ const useStyles = makeStyles((theme) => ({
   },
   links: {
     color: theme.palette.info.light, //  textDark
+    fontSize: 15,
+  },
+  custom_links: {
+    color: theme.palette.primary.main, //  textDark
     fontSize: 15,
   },
   linkDivider: {
@@ -43,7 +51,13 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     right: "0",
     color: "white"
+  },
+  custom_expandIcon: {
+    position: "absolute",
+    right: "0",
+    color: "black"
   }
+
 
 }));
 
@@ -162,11 +176,11 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
   );
 
   return (
-    <div className={`${classes.root} `}>
+    <div className={module !== "builder" ? classes.root : classes.custom_root}>
       <div className={classes.linksContainer}>
         <label
           htmlFor="importFromExcel"
-          className={`${classes.links} cursor-pointer`}
+          className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}
         >
           {ImportInput}
           Import from Excel
@@ -178,7 +192,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
         />
         <label
           onClick={exportToExcel}
-          className={`${classes.links} cursor-pointer`}
+          className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}
         >
           Export to Excel
         </label>
@@ -189,7 +203,7 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
         />
         <label
           onClick={() => setIsSelection(true)}
-          className={`${classes.links} cursor-pointer`}
+          className={`${module !== "builder" ? classes.links : classes.custom_links} cursor-pointer`}
         >
           Download Template
         </label>
@@ -238,10 +252,9 @@ export default function ImportExportLinks({ module, api, refrenceId, onSuccessfu
       </Menu>
       {isMobile && (
         <IconButton onClick={handleClick}>
-          <IoIosArrowDropdown className={classes.expandIcon} />
+          <IoIosArrowDropdown className={module !== "builder" ? classes.expandIcon : classes.custom_expandIcon} />
         </IconButton>
       )}
-
       {isSelection && <SelectionDialog handleClose={() => setIsSelection(false)} api={api} />}
     </div>
   );

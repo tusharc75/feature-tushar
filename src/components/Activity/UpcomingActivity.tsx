@@ -4,9 +4,8 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { GetUpcomingActivity } from "../../axios/activity";
 import Chip from '@material-ui/core/Chip';
-import moment from "moment";
 import { ListRelatedTo } from './Helpers/ListRelatedTo'
-
+import { displayDate } from "../../constants/helpers"
 
 const UpcomingActivity = (props) => {
 
@@ -52,7 +51,7 @@ const UpcomingActivity = (props) => {
                                     <ListRelatedTo relatedTo={_activity.relatedTo} originRelatedTo={relatedTo} />
                                 </Grid>
                                 <Grid item xs={6} container justify="flex-end">
-                                    <Typography variant="caption" > {_activity.dueDate ? moment(_activity.dueDate).format("MMM DD YYYY") : "No Due Date"}</Typography>
+                                    <Typography variant="caption" > {_activity.dueDate ? displayDate(_activity?.dueDate) : "No Due Date"}</Typography>
                                 </Grid>
                             </Grid>
                         </Box>

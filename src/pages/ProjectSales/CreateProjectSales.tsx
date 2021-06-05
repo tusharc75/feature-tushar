@@ -39,6 +39,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
     fields: [],
     values: {},
   });
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
   const history = useHistory();
 
   useEffect(() => {
@@ -147,6 +148,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    onImageUploadCompletePercentage={setUploadingImageOrFileProgress}
                   />
                 </Form>
               </CustomDialogContent>
@@ -165,7 +167,7 @@ const CreateProjectSales = ({ open, close, fetchData, type = null }) => {
                   color="primary"
                   size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading}
+                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
                 </Button>

@@ -30,7 +30,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import AssignDataDialog from "./AssignDataDialog";
 import CustomerAccounts from "./CustomerAccounts";
 import CustomNodalStructure from "../../components/CustomNodalStructure/CustomNodalStructure";
-import { formatAmountWithCurrency } from "../../constants/helpers";
+import { displayCardDate, formatAmountWithCurrency } from "../../constants/helpers";
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -48,6 +48,7 @@ const ProjectSalesDetails = () => {
   const [customerAccounts, setCustomerAccounts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
+  const [quotes, setQuotes] = useState([]);
   const [currentAccountId, setCurrentAccountId] = useState("");
   const [headingLbl, setHeadingLbl] = useState("");
   const [mainPoints, setMainPoints] = useState(null);
@@ -121,6 +122,7 @@ const ProjectSalesDetails = () => {
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
       setOpportunities(data.staticData?.opportunity);
+      setQuotes(data.staticData?.quoteBuilder);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
       setLoading(false);
@@ -148,8 +150,8 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
-      ["End Date"]: data.endDate ? new Date(data.endDate).toDateString() : "",
-      ["Value"]: data.value || "",
+      ["Amount"]: data.amount || "",
+      ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
         : "",
@@ -283,6 +285,8 @@ const ProjectSalesDetails = () => {
           : [];
       case "opportunity":
         return opportunities.length ? opportunities.map((t) => t._id) : [];
+      case "quote-builder":
+        return quotes.length ? quotes.map((t) => t._id) : [];
 
       default:
         return [];
@@ -354,7 +358,7 @@ const ProjectSalesDetails = () => {
                     showHeading={true}
                   >
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <Button
                         variant="contained"
                         color="primary"
@@ -376,8 +380,8 @@ const ProjectSalesDetails = () => {
                 )}
                 <Box>
                   {loading ||
-                  !projectSalesFields.length ||
-                  !projectSalesData ? (
+                    !projectSalesFields.length ||
+                    !projectSalesData ? (
                     <Grid container spacing={2} style={{ padding: "16px" }}>
                       <CommonSkeleton lenArray={[...Array(7).keys()]} />
                     </Grid>
@@ -422,9 +426,8 @@ const ProjectSalesDetails = () => {
                             onClick={(node) => {
                               if (node && routes[node.route]) {
                                 history.push({
-                                  pathname: `${routes[node.route].path}/${
-                                    node.id
-                                  }`,
+                                  pathname: `${routes[node.route].path}/${node.id
+                                    }`,
                                 });
                               }
                             }}
@@ -467,7 +470,7 @@ const ProjectSalesDetails = () => {
                   >
                     <Typography variant="subtitle2">Project Team</Typography>
                     {(permissions?.projectSales.isUpdate && isTeamMember) ||
-                    isManager ? (
+                      isManager ? (
                       <IconButton
                         color="primary"
                         size="small"
@@ -528,6 +531,7 @@ const ProjectSalesDetails = () => {
             customerAccounts={customerAccounts}
             customerContacts={customerContacts}
             opportunities={opportunities}
+            quotes={quotes}
             permissions={permissions?.projectSales}
             fetchProjectData={getSalesData}
             projectId={id}
@@ -543,8 +547,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName}`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
-              : ""
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName}`
+                : ""
           }
           onClose={() => {
             setShowConfirmBox(false);

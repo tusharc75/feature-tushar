@@ -21,11 +21,11 @@ import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../../constants/helpers";
 import { Delete as DeleteIcon } from "@material-ui/icons";
-import moment from 'moment'
 import CustomAgGrid from "../../../components/AgGridComponents/CustomAgGrid";
 import {
     gridPageSizes,
     isObjectEmpty,
+    displayDate
 } from "../../../constants/helpers";
 import {
     CommonRenderer,
@@ -219,15 +219,18 @@ export default function Attachment(props) {
             <>
                 <Tooltip title="Download">
                     <IconButton
+                        size="small"
                         aria-label="Download"
+                        color="primary"
                         disabled={isDownloading}
                         onClick={() => downloadFile(params.data.fileUrl)}
                     >
-                        <GoArrowDown size={18} />
+                        <GoArrowDown size={26} />
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Delete">
                     <IconButton
+                        size="small"
                         aria-label="Delete"
                         onClick={() => showConfirmBox(params.data)}>
                         <DeleteIcon fontSize="small" color="error" />
@@ -238,10 +241,10 @@ export default function Attachment(props) {
     )
 
     const CreatedByRenderer = params => (
-        <span>{moment(params.data.createdByDate).format("DD/MM/YYYY hh:mm A")}</span>
+        <span>{displayDate(params.data?.createdByDate)}</span>
     )
     const UpdatedByRenderer = params => (
-        < span > {moment(params.data.updatedAtDate).format("DD/MM/YYYY hh:mm A")}</span>
+        < span > {displayDate(params.data?.updatedAtDate)}</span>
     )
 
     const frameworkComponents = {

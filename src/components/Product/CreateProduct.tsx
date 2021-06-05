@@ -45,7 +45,7 @@ const CreateProduct = (props) => {
     const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
     const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
     const [newProductCategoryId, setNewProductCategoryId] = useState(null);
-
+    const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=Product`).then(({ data: { data } }) => {
@@ -276,7 +276,6 @@ const CreateProduct = (props) => {
                                                     {section.sectionFields && section.sectionFields.map((field) => (
                                                         field.fieldName === "productCategory" ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-
                                                                 <Grid container spacing={1}>
                                                                     <Grid
                                                                         item
@@ -331,7 +330,6 @@ const CreateProduct = (props) => {
                                                                             options={productCategoryDataSource}
                                                                         />
                                                                     </Grid>
-
                                                                     {
                                                                         // permissions.productCategory
                                                                         //     .isCreate
@@ -363,8 +361,6 @@ const CreateProduct = (props) => {
                                                                         </Grid>
                                                                     ) : null}
                                                                 </Grid>
-
-
                                                                 {/* <FormTypes
                                                                     fields={initialData.fields}
                                                                     values={values}
@@ -452,6 +448,9 @@ const CreateProduct = (props) => {
                                                                             fieldData={field}
                                                                             size="small"
                                                                             disabled={field.fieldName === "unit" ? (isStandardTemplate ? false : true) : false}
+                                                                            imageOrFileUploadCompletePercentage={["imageUpload", "fileUpload"].some(s => s === field.type) ? (completePercentage) => {
+                                                                                setUploadingImageOrFileProgress(completePercentage);
+                                                                            } : null}
                                                                         />
                                                                     </Grid>
                                                     ))}
@@ -469,6 +468,7 @@ const CreateProduct = (props) => {
                                 variant="contained"
                                 color="primary"
                                 type="submit"
+                                disabled={uploadingImageOrFileProgress > 0}
                                 // disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
                                 //     Object.values(simplifyValues(values, initialData.fields)).toString()}
                                 onClick={submitForm}

@@ -311,6 +311,7 @@ const Activity = (props) => {
             noteId={null}
             handleClose={handleClose}
             relatedTo={relatedTo}
+            handleDialogClose={handleClose}
           />
         ) : null}
         {type === "Email" ? (
