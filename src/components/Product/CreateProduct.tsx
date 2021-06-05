@@ -276,7 +276,6 @@ const CreateProduct = (props) => {
                                                     {section.sectionFields && section.sectionFields.map((field) => (
                                                         field.fieldName === "productCategory" ?
                                                             <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-
                                                                 <Grid container spacing={1}>
                                                                     <Grid
                                                                         item
@@ -331,7 +330,6 @@ const CreateProduct = (props) => {
                                                                             options={productCategoryDataSource}
                                                                         />
                                                                     </Grid>
-
                                                                     {
                                                                         // permissions.productCategory
                                                                         //     .isCreate
@@ -363,8 +361,6 @@ const CreateProduct = (props) => {
                                                                         </Grid>
                                                                     ) : null}
                                                                 </Grid>
-
-
                                                                 {/* <FormTypes
                                                                     fields={initialData.fields}
                                                                     values={values}

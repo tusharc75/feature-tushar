@@ -30,10 +30,6 @@ const ProductTemplateSchema = Yup.object().shape({
         .min(3, "Too Short!")
         .max(50, "Too Long")
         .required("Template name is required"),
-    // productCategory: Yup.string()
-    //     .required("Product category is required"),
-    unit: Yup.string()
-        .required("Unit is required"),
 });
 
 
@@ -103,14 +99,15 @@ const ProductTemplate = () => {
 
     const handleSave = (values) => {
         let data: any = {}
-        data.name = values.name;
-        data.unit = values.unit;
+        data.name = values.name; 
         data.isStandard = values.isStandard;
         if (data.isStandard) {
             data.productCategory = null;
+            data.unit = null;
         }
         else {
             data.productCategory = values.productCategory;
+            data.unit = values.unit;
         }
         let fields: any = []
         let order = 0;
@@ -151,6 +148,19 @@ const ProductTemplate = () => {
         }
     }
 
+    function validate(values) {
+        const errors = {};
+        if (!values.isStandard) {
+            if (!values.productCategory || values.productCategory === "") {
+                errors["productCategory"] = "Product category is required";
+            }
+            if (!values.unit || values.unit === "") {
+                errors["unit"] = "Unit is required";
+            }
+        }
+        return errors;
+    }
+
     return (<Layout>
         <Grid container className="headerbox">
             <Grid item xs={12}>
@@ -159,7 +169,7 @@ const ProductTemplate = () => {
         </Grid>
         <CustomContainer>
             {(initialValues && productCategory && productUnit) ?
-                <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave}>
+                <Formik initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
                     {({ submitForm, touched, errors, setFieldValue, values }) => (
                         <Form>
                             <Box p={1} bgcolor="white">
@@ -196,31 +206,6 @@ const ProductTemplate = () => {
                                             />
                                         </Box>
                                     </Grid>
-                                    <Grid item xs={12} sm={2}>
-                                        <Autocomplete
-                                            options={productUnit}
-                                            getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
-                                            getOptionSelected={(option: any, val) => option.optionLabel === val}
-                                            value={productUnit.filter((data) => data.optionLabel === values["unit"]).length
-                                                ? productUnit.filter((data) => data.optionLabel === values["unit"])[0]
-                                                : ""
-                                            }
-                                            onChange={(e, val) => setFieldValue("unit", val && val.optionLabel ? val.optionLabel : "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    margin="dense"
-                                                    name="unit"
-                                                    label="Unit"
-                                                    variant="outlined"
-                                                    error={touched["unit"] && Boolean(errors["unit"])}
-                                                    helperText={touched["unit"] && errors["unit"]}
-                                                    required={true}
-                                                    fullWidth
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
                                     <Grid item xs={12} sm={3}>
                                         {!values["isStandard"] && <Autocomplete
                                             options={productCategory}
@@ -246,7 +231,32 @@ const ProductTemplate = () => {
                                             )}
                                         />}
                                     </Grid>
-                                    <Grid item xs={12} sm={3} container justify="flex-end">
+                                    <Grid item xs={12} sm={3}>
+                                        {!values["isStandard"] && <Autocomplete
+                                            options={productUnit}
+                                            getOptionLabel={(option: any) => (option ? option.optionLabel : "")}
+                                            getOptionSelected={(option: any, val) => option.optionLabel === val}
+                                            value={productUnit.filter((data) => data.optionLabel === values["unit"]).length
+                                                ? productUnit.filter((data) => data.optionLabel === values["unit"])[0]
+                                                : ""
+                                            }
+                                            onChange={(e, val) => setFieldValue("unit", val && val.optionLabel ? val.optionLabel : "")}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    margin="dense"
+                                                    name="unit"
+                                                    label="Unit"
+                                                    variant="outlined"
+                                                    error={touched["unit"] && Boolean(errors["unit"])}
+                                                    helperText={touched["unit"] && errors["unit"]}
+                                                    required={true}
+                                                    fullWidth
+                                                />
+                                            )}
+                                        />}
+                                    </Grid>
+                                    <Grid item xs={12} sm={2} container justify="flex-end">
                                         <Box>
                                             <Button disabled={isUpdating} color="primary" size="small" onClick={submitForm} variant="contained" >
                                                 Save{isUpdating && <CircularProgress size={24} />}

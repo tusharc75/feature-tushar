@@ -1,5 +1,4 @@
-import React, { useRef, useState, useEffect, Fragment, useContext } from "react";
-import Box from '@material-ui/core/Box';
+import React, { useState, useEffect, Fragment, useContext } from "react";
 import Button from '@material-ui/core/Button';
 import { Formik, Form, Field } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -9,17 +8,15 @@ import Dialog from '@material-ui/core/Dialog'
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomButton from '../../components/Helpers/CustomButton'
-import TextField from '@material-ui/core/TextField';
-import * as Yup from "yup";
 import { useHistory } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition} from "./../../constants/helpers";
-
-const ProductCategorySchema = Yup.object().shape({
-    name: Yup.string()
-        .required("please enter name"),
-});
+import { CustomDialogTransition } from "./../../constants/helpers";
+import _ from 'lodash';
+import InputField from "../../components/Helpers/InputField";
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../constants/helpers";
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
+import { Box } from '@material-ui/core';
 
 
 const CreateProductCategory = (props) => {
@@ -27,25 +24,33 @@ const CreateProductCategory = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { productCategoryId, handleClose } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData, setInitialData] = useState({ name: "" });
+    const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const history = useHistory();
 
     useEffect(() => {
-        fetchProductCategoryDetail();
-    }, [productCategoryId]);
-
-    const fetchProductCategoryDetail = async () => {
-        if (productCategoryId) {
-            axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
-                setInitialData({ name: data.name });
-            }).catch((error) => {
+        axiosInstance().get("/field?resource=Product Category").then(({ data: { data } }) => {
+            const fieldsData = data.map((d: any) => d.fieldData);
+            if (productCategoryId) {
+                axiosInstance().get(`/product-category/` + productCategoryId).then(({ data: { data } }) => {
+                    setInitialData({
+                        fields: fieldsData,
+                        values: getObjKeysWithValues(data, fieldsData),
+                    });
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+            }
+            else {
+                setInitialData({
+                    fields: fieldsData,
+                    values: getObjKeys("", fieldsData),
+                });
+            }
+        })
+            .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
-        }
-        else {
-            setInitialData({ name: "" })
-        }
-    };
+    }, [productCategoryId]);
 
 
     const handleSubmit = (values) => {
@@ -71,59 +76,58 @@ const CreateProductCategory = (props) => {
     };
 
     return (<Dialog
-        maxWidth="xs"
+        maxWidth="md"
         fullScreen={isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
         fullWidth
     >
-        <Formik
-            enableReinitialize={true}
-            initialValues={initialData}
-            validationSchema={ProductCategorySchema}
-            validateOnMount
-            onSubmit={handleSubmit}>
-            {({ values,
-                errors,
-                touched,
-                setFieldValue,
-                submitForm,
-            }) => (
-                <Fragment>
-                    <CustomDialogHeader title={productCategoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={handleClose}></CustomDialogHeader>
-                    <CustomDialogContent>
-                        <Form autoComplete="off" autoCorrect="off" noValidate >
-                            <Box p={1}>
-                                <TextField
-                                    variant="outlined"
-                                    type="text"
-                                    label="Name"
-                                    required={true}
-                                    name="name"
+        {initialData && initialData.fields.length ?
+            <Formik
+                enableReinitialize={true}
+                initialValues={initialData.values}
+                validationSchema={yupSchema(initialData.fields)}
+                validateOnMount
+                onSubmit={handleSubmit}>
+                {({ values,
+                    errors,
+                    touched,
+                    setFieldValue,
+                    submitForm,
+                }) => (
+                    <Fragment>
+                        <CustomDialogHeader title={productCategoryId ? "Update " + routes.productCategory.title : "Create " + routes.productCategory.title} onClose={handleClose}></CustomDialogHeader>
+                        <CustomDialogContent>
+                            <Form autoComplete="off" autoCorrect="off" noValidate >
+                                <InputField
+                                    errors={errors}
+                                    values={values}
+                                    setFieldValue={setFieldValue}
+                                    touched={touched}
+                                    fieldsData={initialData.fields}
+                                    size="small"
                                     fullWidth
-                                    margin="dense"
-                                    value={values["name"]}
-                                    error={touched["name"] && Boolean(errors["name"])}
-                                    helperText={touched["name"] && errors["name"]}
-                                    onChange={(e) => setFieldValue("name", e.target.value.trimStart())}
                                 />
-                            </Box>
-                        </Form>
-                    </CustomDialogContent>
-                    <CustomDialogFooter>
-                        <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
-                        <CustomButton
-                            loading={loading}
-                            variant="contained"
-                            color="primary"
-                            type="submit"
-                            onClick={submitForm}
-                        > Save</CustomButton>
-                    </CustomDialogFooter>
-                </Fragment>
-            )}
-        </Formik>
+                            </Form>
+                        </CustomDialogContent>
+                        <CustomDialogFooter>
+                            <Button size="small" color="primary" onClick={handleClose}>Cancel</Button>
+                            <CustomButton
+                                loading={loading}
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                onClick={submitForm}
+                            > Save</CustomButton>
+                        </CustomDialogFooter>
+                    </Fragment>
+                )}
+            </Formik>
+            :
+            <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>}
     </Dialog>
     );
 }

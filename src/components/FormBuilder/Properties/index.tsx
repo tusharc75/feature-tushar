@@ -42,8 +42,8 @@ const LookupResource = [
   { name: "Role", value: "Role" },
   { name: "Lead", value: "Lead" },
   { name: "Opportunity", value: "Opportunity" },
-  { name: "Product Category", value: "ProductCategory" },
-  { name: "Product Template", value: "ProductTemplate" },
+  { name: "Product Category", value: "Product Category" },
+  { name: "Product Template", value: "Product Template" },
 ]
 
 export const Properties = ({ handleClose, fieldData, sectionId, section, setSection }) => {
