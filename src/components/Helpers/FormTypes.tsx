@@ -43,6 +43,8 @@ import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
 import { imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl } from "../../constants/helpers"
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import CurrencyDialog from '../productBuilder/CurrencyDialog';
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -162,6 +164,7 @@ const FormTypes = (props) => {
     fileUploadMaxSize = { ...documentUploadMaxSize },
     isMultipleUpload = false,
     imageOrFileUploadCompletePercentage,
+    changeField,
     ...rest
   } = props;
 
@@ -173,6 +176,8 @@ const FormTypes = (props) => {
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
   const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
   const { setToastConfig } = useContext(CustomToastContext);
+
+  const [isCurrencyDialog, setIsCurrencyDialog] = React.useState(false);
 
   const fetch = React.useMemo(
     () =>
@@ -529,12 +534,12 @@ const FormTypes = (props) => {
   };
 
   const handleCurrency = (data, name, _currency, value) => {
-    let indexCurrency = data.currency.indexOf(_currency);
     if (data.isMulitFormula) {
       handleMulitFormula(data, {
         [name + "_" + _currency.toLowerCase()]: value,
       });
     }
+    let indexCurrency = data.currency.indexOf(_currency);
     if (indexCurrency >= 0) {
       for (var x_currency in data.currencyoption[indexCurrency]) {
         if (
@@ -630,6 +635,22 @@ const FormTypes = (props) => {
       }
     }
   };
+
+  const handleCurrencyAdd = (field, currency) => {
+    if (field.isConverter) {
+      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase() + "_" + field.displayUnits[0].toLowerCase();
+      field.displayCurrency.push(currency)
+      handleCurrencyConverter(field, field.fieldName, field.displayCurrency[0], field.displayUnits[0], values[_fieldName]);
+    }
+    else {
+      let _fieldName = field.fieldName + "_" + field.displayCurrency[0].toLowerCase();
+      field.displayCurrency.push(currency)
+      handleCurrency(field, field.fieldName, field.displayCurrency[0], values[_fieldName])
+    }
+
+    changeField(field, currency)
+    setIsCurrencyDialog(false)
+  }
 
   return type === "singleLine" ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
@@ -948,147 +969,173 @@ const FormTypes = (props) => {
   ) : type === "currencyAmount" ? (
     fieldData.displayCurrency.map((_currency, i) =>
       fieldData.isConverter && fieldData.displayUnits.length ? (
-        fieldData.displayUnits.map((_unit, i) => (
+        fieldData.displayUnits.map((_unit, j) => (
           <Grid key={_unit} item xs={12} sm={6} md={6}>
-            <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-              <TextField
-                {...rest}
-                variant="outlined"
-                type="number"
-                label={label + " " + _currency + "/" + _unit}
-                name={
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                }
-                required={required}
-                value={
-                  values[
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                  ]
-                }
-                error={
-                  touched[
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                  ] &&
-                  Boolean(
-                    errors[
-                    name +
-                    "_" +
-                    _currency.toLowerCase() +
-                    "_" +
-                    _unit.toLowerCase()
-                    ]
-                  )
-                }
-                helperText={
-                  touched[
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                  ] &&
-                  errors[
-                  name +
-                  "_" +
-                  _currency.toLowerCase() +
-                  "_" +
-                  _unit.toLowerCase()
-                  ]
-                }
-                onChange={
-                  onChange
-                    ? onChange
-                    : (e) =>
-                      handleCurrencyChangeWithConverter(
-                        name,
-                        _currency,
-                        _unit,
-                        parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
+            <Box display="flex" >
+              <Box flexGrow={1}  >
+                <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+                  <TextField
+                    {...rest}
+                    variant="outlined"
+                    type="number"
+                    label={label + " " + _currency + "/" + _unit}
+                    name={
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                    }
+                    required={required}
+                    value={
+                      values[
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                      ]
+                    }
+                    error={
+                      touched[
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                      ] &&
+                      Boolean(
+                        errors[
+                        name +
+                        "_" +
+                        _currency.toLowerCase() +
+                        "_" +
+                        _unit.toLowerCase()
+                        ]
                       )
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      {_.result(
-                        _.find(currencyList, function (obj) {
-                          return obj.currencyCode === _currency;
-                        }),
-                        "symbolNative"
-                      )}
-                    </InputAdornment>
-                  ),
-                  inputProps: { min: 0 },
-                  readOnly: (fieldData && fieldData.isUneditable) ? true : false
-                }}
-              />
-            </InfoLabel>
+                    }
+                    helperText={
+                      touched[
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                      ] &&
+                      errors[
+                      name +
+                      "_" +
+                      _currency.toLowerCase() +
+                      "_" +
+                      _unit.toLowerCase()
+                      ]
+                    }
+                    onChange={
+                      onChange
+                        ? onChange
+                        : (e) =>
+                          handleCurrencyChangeWithConverter(
+                            name,
+                            _currency,
+                            _unit,
+                            parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
+                          )
+                    }
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          {_.result(
+                            _.find(currencyList, function (obj) {
+                              return obj.currencyCode === _currency;
+                            }),
+                            "symbolNative"
+                          )}
+                        </InputAdornment>
+                      ),
+                      inputProps: { min: 0 },
+                      readOnly: (fieldData && fieldData.isUneditable) ? true : false
+                    }}
+                  />
+                </InfoLabel>
+              </Box>
+              {i === 0 &&
+                <Box>
+                  <Tooltip title="Add Currency" className="mt-1">
+                    <IconButton onClick={() => { setIsCurrencyDialog(true) }} color="primary" size="small"  >
+                      <ControlPointIcon />
+                    </IconButton>
+                  </Tooltip>
+                  {isCurrencyDialog && <CurrencyDialog handleCurrencyAdd={handleCurrencyAdd} fieldData={fieldData} handleClose={() => setIsCurrencyDialog(false)} />}
+                </Box>}
+            </Box>
           </Grid>
         ))
       ) : (
         <Grid key={_currency} item xs={12} sm={6} md={6}>
-          <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
-            <TextField
-              {...rest}
-              variant="outlined"
-              type="number"
-              label={label + " " + _currency}
-              name={name + "_" + _currency.toLowerCase()}
-              required={required}
-              value={values[name + "_" + _currency.toLowerCase()]}
-              error={
-                touched[name + "_" + _currency.toLowerCase()] &&
-                Boolean(errors[name + "_" + _currency.toLowerCase()])
-              }
-              helperText={
-                touched[name + "_" + _currency.toLowerCase()] &&
-                errors[name + "_" + _currency.toLowerCase()]
-              }
-              onChange={
-                onChange
-                  ? onChange
-                  : (e) => {
-                    if (fieldData.displayCurrency.length > 1) {
-                      handleCurrencyChange(
-                        name,
-                        _currency,
-                        parseFloat(e.target.value)
-                      );
-                    } else {
-                      handleChange(
-                        name + "_" + _currency.toLowerCase(),
-                        parseFloat(e.target.value)
-                      );
-                    }
+          <Box display="flex" >
+            <Box flexGrow={1}  >
+              <InfoLabel info={tooltipMessage} isTooltip={isTooltip}>
+                <TextField
+                  {...rest}
+                  variant="outlined"
+                  type="number"
+                  label={label + " " + _currency}
+                  name={name + "_" + _currency.toLowerCase()}
+                  required={required}
+                  value={values[name + "_" + _currency.toLowerCase()]}
+                  error={
+                    touched[name + "_" + _currency.toLowerCase()] &&
+                    Boolean(errors[name + "_" + _currency.toLowerCase()])
                   }
-              }
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    {_.result(
-                      _.find(currencyList, function (obj) {
-                        return obj.currencyCode === _currency;
-                      }),
-                      "symbolNative"
-                    )}
-                  </InputAdornment>
-                ),
-                inputProps: { min: 0 },
-                readOnly: (fieldData && fieldData.isUneditable) ? true : false
-              }}
-            />
-          </InfoLabel>
+                  helperText={
+                    touched[name + "_" + _currency.toLowerCase()] &&
+                    errors[name + "_" + _currency.toLowerCase()]
+                  }
+                  onChange={
+                    onChange
+                      ? onChange
+                      : (e) => {
+                        if (fieldData.displayCurrency.length > 1) {
+                          handleCurrencyChange(
+                            name,
+                            _currency,
+                            parseFloat(e.target.value)
+                          );
+                        } else {
+                          handleChange(
+                            name + "_" + _currency.toLowerCase(),
+                            parseFloat(e.target.value)
+                          );
+                        }
+                      }
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        {_.result(
+                          _.find(currencyList, function (obj) {
+                            return obj.currencyCode === _currency;
+                          }),
+                          "symbolNative"
+                        )}
+                      </InputAdornment>
+                    ),
+                    inputProps: { min: 0 },
+                    readOnly: (fieldData && fieldData.isUneditable) ? true : false
+                  }}
+                />
+              </InfoLabel>
+            </Box>
+            {i === 0 &&
+              <Box>
+                <Tooltip title="Add Currency" className="mt-1">
+                  <IconButton onClick={() => { setIsCurrencyDialog(true) }} color="primary" size="small"  >
+                    <ControlPointIcon />
+                  </IconButton>
+                </Tooltip>
+                {isCurrencyDialog && <CurrencyDialog handleCurrencyAdd={handleCurrencyAdd} fieldData={fieldData} handleClose={() => setIsCurrencyDialog(false)} />}
+              </Box>}
+          </Box>
         </Grid>
       )
     )
