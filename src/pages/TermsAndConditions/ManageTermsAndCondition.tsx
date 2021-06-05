@@ -28,7 +28,7 @@ import {
     convertFromRaw,
 } from 'draft-js'
 import { RichTextEditor } from '../../components/RichEditor/RichEditor'
-import { termsAndConditionFileUploadMaxSize } from "../../constants/helpers"
+import { documentUploadMaxSize } from "../../constants/helpers"
 
 const termsAndConditionSchema = Yup.object().shape({
     TACName: Yup.string()
@@ -170,7 +170,7 @@ const TermsAndCondition = ({ handleClose, open, termsAndCondition, fetchData, ed
                                                         setFieldValue={(name, file) => setFieldValue("file", file)}
                                                         onAppendData={(data) => appendData(data, setFieldValue)}
                                                         doNotShowUploadedFile={true}
-                                                        fileUploadMaxSize={termsAndConditionFileUploadMaxSize} //size in bytes
+                                                        fileUploadMaxSize={documentUploadMaxSize} //size in bytes
                                                         imageOrFileUploadCompletePercentage={(completePercentage) => {
                                                             setUploadingImageOrFileProgress(completePercentage);
                                                         }}

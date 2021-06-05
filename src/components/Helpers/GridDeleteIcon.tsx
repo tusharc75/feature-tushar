@@ -11,19 +11,18 @@ export default function GridDeleteIcon({ hasDeletePermission, ownerId, userId, o
                 hasDeletePermission ?
                     ownerId == userId ?
                         <Tooltip title="Delete" >
-                            <IconButton aria-label="Delete" onClick={onDelete}>
-                                <DeleteIcon
-                                    fontSize="small" color="error" />
+                            <IconButton size="small" aria-label="Delete" onClick={onDelete}>
+                                <DeleteIcon color="error" />
                             </IconButton>
                         </Tooltip> :
                         <Tooltip className="cursor-stop" title={`You must be the owner of this ${entity} to get the delete functionality`}>
-                            <IconButton aria-label="Delete">
-                                <DeleteIcon fontSize="small" />
+                            <IconButton size="small" aria-label="Delete">
+                                <DeleteIcon />
                             </IconButton>
                         </Tooltip> :
                     <Tooltip className="cursor-stop" title={`You do not have permission to delete ${entity}`}>
-                        <IconButton aria-label="Delete">
-                            <DeleteIcon fontSize="small" />
+                        <IconButton size="small" aria-label="Delete">
+                            <DeleteIcon />
                         </IconButton>
                     </Tooltip>
             }

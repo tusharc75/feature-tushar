@@ -110,7 +110,7 @@ const intialState = {
 let termsTimeout
 
 const Product = () => {
-    
+
     const toastConfig = useContext(CustomToastContext)
     const [open, setOpen] = useState(false);
     const [productId, setProductId] = useState(null);
@@ -216,18 +216,19 @@ const Product = () => {
         <>
             <Tooltip title="Clone">
                 <IconButton
+                    size="small"
                     aria-label="Clone"
                     onClick={() => { OpenProduct(params.data._id); setIsClone(true) }}
                 >
-                    <FileCopyIcon fontSize="small" color="primary" />
+                    <FileCopyIcon color="primary" />
                 </IconButton>
             </Tooltip>
             <Tooltip title="Delete">
-                <IconButton aria-label="Delete" onClick={() => {
+                <IconButton size="small" aria-label="Delete" onClick={() => {
                     setDeleteRecord(params.data);
                     setShowDeleteConfirmBox(true)
                 }} >
-                    <DeleteIcon fontSize="small" color="error" />
+                    <DeleteIcon color="error" />
                 </IconButton>
             </Tooltip >
         </>

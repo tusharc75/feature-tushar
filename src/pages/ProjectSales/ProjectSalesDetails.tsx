@@ -150,8 +150,8 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
+      ["Amount"]: data.amount || "",
       ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
-      ["Value"]: data.value || "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
         : "",

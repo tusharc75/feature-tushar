@@ -21,6 +21,8 @@ import menu_icon from "./svg/menu_icon.svg";
 import ai_robot from "./svg/artificial_intelligence-pana.svg";
 import contacts_placeholder from "./svg/contacts_placeholder.svg";
 import timeline_placeholder from "./svg/timeline_placeholder.svg";
+import logoPng from './svg/logo.png';
+import imgComputer from './svg/bglaptop.svg';
 
 export const SVG = (name) => {
   switch (name) {
@@ -72,7 +74,10 @@ export const SVG = (name) => {
       return contacts_placeholder;
     case "Timepline Placeholder":
       return timeline_placeholder;
-
+    case "LogoPng":
+      return logoPng;
+    case "imgComputer":
+      return imgComputer;
     default:
       return;
   }
