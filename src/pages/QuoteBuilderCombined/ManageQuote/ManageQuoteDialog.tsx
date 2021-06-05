@@ -50,6 +50,7 @@ export default function ManageQuoteDialog({
   accountResource = null,
   isRedirectTodetailPage,
   userId = null,
+  disableOwnerDropDown = false,
 }) {
   const { qbApi } = quoteBuilder;
   const toastConfig = useContext(CustomToastContext);
@@ -424,7 +425,7 @@ export default function ManageQuoteDialog({
                                           fullWidth
                                           isTooltip={true}
                                           size="small"
-                                          disabled={disableOwnerSelection}
+                                          disabled={disableOwnerDropDown}
                                           onOpen={() => {
                                             onOwnerDropdownOpen(
                                               values["collaborator"]
@@ -671,4 +672,5 @@ ManageQuoteDialog.propTypes = {
   contactId: PropTypes.string,
   accountResource: PropTypes.string,
   isRedirectToDetailPage: PropTypes.bool,
+  disableOwnerDropDown: PropTypes.bool,
 };

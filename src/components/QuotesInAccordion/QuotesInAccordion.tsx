@@ -292,6 +292,7 @@ export default function QuotesInAccordion({ expanded = true, recordsPerLine = 2,
                 contactId={contactId}
                 opportunityId={opportunityId}
                 accountResource={accountResource}
+                disableOwnerDropDown={true}
 
             />
         }
