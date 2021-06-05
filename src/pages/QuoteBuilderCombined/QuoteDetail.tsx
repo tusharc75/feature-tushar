@@ -829,6 +829,7 @@ function QuoteDetail() {
         <Link
           onClick={() => {
             setShowCreateDialog(true);
+            setEditRecord(_.cloneDeep(params.data))
           }}>
           <CustomRenderCell value={params?.value} />
         </Link>
@@ -988,6 +989,7 @@ function QuoteDetail() {
     setRedCard(false);
     var optionstoSet=[]
     var invalidqty=false;
+    var invalidPrice=false;
     console.log(BuilderData);
     const inventory: { fieldName: string; fieldValue: any; }[][] = [];
     const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
@@ -1001,6 +1003,7 @@ function QuoteDetail() {
     var ProfitCurrency = ""
     BuilderData.map((quoteRows: { [x: string]: any; }) => {
       console.log(quoteRows);
+      var hasTSP=false
       const quoteRowKeys = Object.keys(quoteRows);
       var inventorydata: { fieldName: string; fieldValue: any; }[] = [];
       quoteRowKeys.map((key) => {
@@ -1041,6 +1044,7 @@ function QuoteDetail() {
             else if (key === 'totalSalesPrice') {
               totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
               SPCurrency = currency.toUpperCase()
+              hasTSP=false;
             }
             else if (key === "totalProfit") {
               totalProfit = totalProfit + quoteRows[indexkey]
@@ -1053,6 +1057,9 @@ function QuoteDetail() {
           }
         }
       })
+      if(!hasTSP){
+        invalidPrice=true
+      }
       inventory.push(inventorydata);
     });
     console.log(inventory);
@@ -1076,7 +1083,7 @@ function QuoteDetail() {
     console.log(totalSellingPrice)
 
     if(ProcessStatus==="Price Builder"){
-      if(!invalidqty){
+      if(!invalidqty || !invalidPrice){
         setNextStep(true);
       }
       else{
