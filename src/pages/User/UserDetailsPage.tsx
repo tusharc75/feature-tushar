@@ -84,6 +84,7 @@ const UserDetailsPage = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
+  const [doaType, setDoaType] = useState(null);
   const [doaDialogOpen, setDoaDialogOpen] = useState(false);
   const [userList, setUserList] = useState<any[]>([]);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
@@ -194,6 +195,7 @@ const UserDetailsPage = () => {
 
         setDoa(doaData);
         setDoaCurrency(data.doaCurrency)
+        setDoaType(data.doaType)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -912,6 +914,7 @@ const UserDetailsPage = () => {
           onClose={() => {
             setDoaDialogOpen(false);
           }}
+          doaType={doaType}
         />
       )}
 

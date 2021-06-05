@@ -10,7 +10,6 @@ import {
     IconButton,
     Grid,
 } from "@material-ui/core";
-import { Link } from 'react-router-dom'
 import { ExpandMore, AddOutlined } from "@material-ui/icons";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog'
 import SearchBox from '../../components/Helpers/SearchBox'
@@ -26,98 +25,8 @@ import { termsAndCondition, gridPageSizes, isObjectEmpty } from '../../constants
 import ManageTermsAndCondition from './ManageTermsAndCondition'
 import _ from 'lodash'
 import { IoDocumentTextOutline } from 'react-icons/io5';
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
+import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
 
-function reducer(state, action) {
-    switch (action.type) {
-        case "loading":
-            return {
-                ...state,
-                loading: action.loading
-            }
-
-        case "initialize":
-            return {
-                ...state,
-                dataRows: action.data,
-                rowCount: action.count,
-                loading: false
-            }
-
-        case "selection":
-            return {
-                ...state,
-                selectedRecords: action.selectedRecords,
-            }
-
-        case "update":
-            return {
-                ...state,
-                dataRows: action.data,
-                loading: false
-            }
-
-        case "filter":
-            return {
-                ...state,
-                loading: true,
-                filters: action.filters,
-                page: 0
-            }
-
-        case "sort":
-            return {
-                ...state,
-                sorting: action.sorting,
-                loading: true
-            }
-
-        case "search":
-            return {
-                ...state,
-                search: action.search,
-                loading: true
-            }
-
-        case "pageChange":
-            return {
-                ...state,
-                page: action.page
-            }
-
-        case "pageSizeChange":
-            return {
-                ...state,
-                limit: action.limit,
-                page: 0,
-                loading: true
-            }
-
-        case "complete":
-            return {
-                ...state,
-                loading: false
-            }
-
-        default:
-            break;
-    }
-
-    return state;
-}
-
-const intialState = {
-    dataRows: [],
-    rowCount: 0,
-    loading: false,
-    page: 0,
-    limit: 25,
-    pageSizes: gridPageSizes,
-    search: "",
-    filters: {},
-    sorting: [],
-    selectedRecords: []
-}
 let termsTimeout
 export default function TermsAndCondition(props) {
 
@@ -132,7 +41,6 @@ export default function TermsAndCondition(props) {
     const [editRecord, setEditRecord] = useState<any>({})
 
     const [gridApi, setGridApi] = useState(null);
-    const [columnApi, setColumnApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -159,21 +67,20 @@ export default function TermsAndCondition(props) {
     const ActionsRenderer = params => (
         <>
             <Tooltip title="Delete">
-                <IconButton aria-label="Delete" onClick={() => {
+                <IconButton size="small" aria-label="Delete" onClick={() => {
                     setDeleteRec(params.data);
                     setShowDeleteConfirmBox(true)
                 }}
                     disabled={actionsPermissions.isDelete ? false : true}
                 >
-                    <DeleteIcon fontSize="small"
-                        color={actionsPermissions.isDelete ? "error" : "disabled"}
+                    <DeleteIcon color={actionsPermissions.isDelete ? "error" : "disabled"}
                     />
                 </IconButton>
             </Tooltip >
         </>
     )
 
-    const [columns, setColumns] = useState([
+    const [columns] = useState([
         { field: "TACName", headerName: "Name", show: true, disabled: true, cellRenderer: "termsConditionNameRenderer" },
     ]);
 
@@ -253,7 +160,7 @@ export default function TermsAndCondition(props) {
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
-            Object.keys(filters).map(field => {
+            Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: field,
                     term: filters[field].filter

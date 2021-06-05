@@ -174,6 +174,7 @@ export default function Account(props) {
     {accountPermissions.isCreate ? (
       <Tooltip title="Clone">
         <IconButton
+          size="small"
           aria-label="Clone"
           onClick={() => {
             cloneAccount(params.data._id);
@@ -187,7 +188,7 @@ export default function Account(props) {
         className="cursor-stop"
         title="You do not have permission to clone/create an account"
       >
-        <IconButton aria-label="Clone">
+        <IconButton aria-label="Clone" size="small">
           <FileCopyIcon fontSize="small" />
         </IconButton>
       </Tooltip>
@@ -523,10 +524,8 @@ export default function Account(props) {
             <ImportExportLinks
               module="account(s)"
               api={accountApi}
-              onSuccessfulImport={(isImportedSuccessfully) => {
-                if (isImportedSuccessfully) {
-                  fetchAccounts();
-                }
+              afterImportCompleted={() => {
+                fetchAccounts();
               }}
             />
           </Grid>

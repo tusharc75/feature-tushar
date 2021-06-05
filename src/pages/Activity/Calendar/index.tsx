@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Box, Button, Dialog, Grid, Menu, MenuItem } from "@material-ui/core";
-import { Add, ExpandMore } from "@material-ui/icons";
+import {
+  Box,
+  Button,
+  Dialog,
+  Grid,
+  Menu,
+  MenuItem,
+  Typography,
+} from "@material-ui/core";
 import { lowerCase, startCase } from "lodash";
 import { useHistory } from "react-router-dom";
 import queryString from "query-string";
@@ -19,10 +26,9 @@ import { CreateCase } from "../../../components/Activity/Case/CreateCase";
 import { CreateEvent } from "../../../components/Activity/Event/CreateEvent";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomDialogTransition } from "../../../constants/helpers";
-import { BiTask } from 'react-icons/bi';
-import { BsBriefcase } from 'react-icons/bs';
-import { VscCalendar } from 'react-icons/vsc';
-
+import { BiTask } from "react-icons/bi";
+import { BsBriefcase } from "react-icons/bs";
+import { VscCalendar } from "react-icons/vsc";
 
 const BigCalendar = () => {
   const {
@@ -101,18 +107,17 @@ const BigCalendar = () => {
   const activityOptions = [
     {
       title: "Task",
-      icon: <BiTask />
+      icon: <BiTask />,
     },
     {
       title: "Case",
-      icon: <BsBriefcase />
+      icon: <BsBriefcase />,
     },
     {
       title: "Event",
-      icon: <VscCalendar />
+      icon: <VscCalendar />,
     },
   ];
-
 
   const handleChangeFilter = (value) => {
     setFilter(value);
@@ -136,17 +141,40 @@ const BigCalendar = () => {
       <CustomContainer>
         <div className="bgLight">
           <Grid container className="greyBox">
-            <Grid item xs={12} sm={3}>
-              <Button
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                onClick={handleClick}
-                size="small"
-                color="primary"
-                variant="contained"
-              >
-                Create Activity
-              </Button>
+            <Grid item xs={12} sm={5}>
+              <Box display="flex" alignItems="center">
+                <Button
+                  aria-controls="simple-menu"
+                  aria-haspopup="true"
+                  onClick={handleClick}
+                  size="small"
+                  color="primary"
+                  variant="contained"
+                >
+                  Create Activity
+                </Button>
+                <Box component="span" mx={1} />
+                {["Event", "Task", "Case"].map((item) => (
+                  <>
+                    <Box display="flex">
+                      {item} <Box component="span" ml={1} />
+                      <Box
+                        width={16}
+                        height={16}
+                        bgcolor={
+                          item === "Event"
+                            ? "#E65100"
+                            : item === "Task"
+                            ? "#3949AB"
+                            : "#BF360C"
+                        }
+                        borderRadius={50}
+                      />
+                    </Box>
+                    <Box component="span" ml={1} />
+                  </>
+                ))}
+              </Box>
               <Menu
                 id="simple-menu"
                 anchorEl={anchorEl}
@@ -162,12 +190,14 @@ const BigCalendar = () => {
                       handleClose();
                     }}
                   >
-                   {item.icon}<span className="ml-2"></span>{item.title}
+                    {item.icon}
+                    <span className="ml-2"></span>
+                    {item.title}
                   </MenuItem>
                 ))}
               </Menu>
             </Grid>
-            <Grid item xs={12} sm={9}>
+            <Grid item xs={12} sm={7}>
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}

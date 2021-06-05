@@ -1,26 +1,21 @@
 import React, { useState, useRef, useContext } from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
-
 import {
   Slide,
   AppBar,
   Toolbar,
   IconButton,
-  Button,
   Menu,
   MenuItem,
   Box,
   Badge,
-  InputBase,
   Chip,
   Typography,
   useMediaQuery,
   ButtonBase,
-  Popover,
-  Grid,
+  Popover
 } from "@material-ui/core";
 import {
-  Search,
   Menu as MenuIcon,
   MoreVert as MoreIcon,
   Clear as ClearIcon,
@@ -151,7 +146,10 @@ const useStyles = makeStyles((theme) => ({
     background: "#047d1c",
     textAlign: "center",
     color: "white",
-    padding: "5px"
+    padding: "5px",
+    display: "flex !important",
+    alignItems: "center !important",
+    justifyContent: "center"
   }
 }));
 
@@ -414,7 +412,7 @@ const Header = ({ toggleDrawer }) => {
             toastConfig.setToastConfig(error)
           })
 
-        }} className="cursor-pointer"><FiCheckCircle />Mark all as read</Typography>
+        }} className="cursor-pointer"><FiCheckCircle className="mr-2 pt-1" size={16}/><span>Mark all as read</span></Typography>
       </div>
 
       {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>

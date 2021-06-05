@@ -80,11 +80,9 @@ const CreateProductBuilder = () => {
                     module="builderheader"
                     api={"productbuilder"}
                     refrenceId={id}
-                    onSuccessfulImport={(isImportedSuccessfully) => {
-                        if (isImportedSuccessfully) {
-                            setIsUpdating(true)
-                            setIsUpdating(false)
-                        }
+                    afterImportCompleted={() => {
+                        setIsUpdating(true)
+                        setIsUpdating(false)
                     }}
                 /> */}
             </Grid>

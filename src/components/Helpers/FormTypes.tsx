@@ -321,9 +321,7 @@ const FormTypes = (props) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
           setFileUploadProgress(completedPercent);
 
-          if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(completedPercent); }
           if (completedPercent === 100) {
-            if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
             setTimeout(() => {
               setFileUploadProgress(0);
             }, 4000);
@@ -331,6 +329,7 @@ const FormTypes = (props) => {
         },
       })
       .then(({ data }) => {
+        if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
         if (uploadFileUrl) {
           onAppendData(data)
         }
@@ -1536,13 +1535,12 @@ const FormTypes = (props) => {
                 <IconButton
                   disabled={Boolean(!values[name])}
                   title="Remove File"
-                  color="secondary"
                   size="small"
                   aria-label="delete picture"
                   component="span"
                   onClick={() => setFieldValue(name, "")}
                 >
-                  <DeleteIcon />
+                  <DeleteIcon color="error" />
                 </IconButton> : null
             }
 

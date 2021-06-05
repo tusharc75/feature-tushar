@@ -101,11 +101,10 @@ const ProductTemplate: FC = () => {
     </Link>;
 
     const ActionsRenderer = params => <>
-
         {
             <Tooltip title="Clone">
-                <IconButton aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
-                    <FileCopyIcon fontSize="small" color="primary" />
+                <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
+                    <FileCopyIcon color="primary" />
                 </IconButton>
             </Tooltip>
         }
@@ -231,7 +230,7 @@ const ProductTemplate: FC = () => {
 
                 let rows = data.map((u) => {
 
-                    const {  createdBy, updatedBy, staticData, ...restProperties } = u;
+                    const { createdBy, updatedBy, staticData, ...restProperties } = u;
 
                     let res = {
                         ...restProperties,
@@ -276,8 +275,8 @@ const ProductTemplate: FC = () => {
                     <ImportExportLinks
                         module="productTemplateApi(s)"
                         api={productTemplateApi}
-                        onSuccessfulImport={(isImportedSuccessfully) => {
-                            if (isImportedSuccessfully) { fetchProductTemplate(); }
+                        afterImportCompleted={() => {
+                            fetchProductTemplate();
                         }}
                     />
                 </Grid>

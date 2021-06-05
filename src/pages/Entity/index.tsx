@@ -124,19 +124,20 @@ const Entity: FC = () => {
 
       <Tooltip title="Assign users">
         <IconButton
+          size="small"
           aria-label="Assign users"
           onClick={() => {
             fetchEntityUser(params.data._id)
             setUsersDialogOpen(true)
           }}
         >
-          <FaUser size={18} className="text-primary" />
+          <FaUser className="text-primary" />
         </IconButton>
       </Tooltip>
       :
       <Tooltip className="cursor-stop" title={`You don't have permission to update this entity`}>
-        <IconButton aria-label="Assign users">
-          <FaUser size={18} className="text-primary" />
+        <IconButton size="small" aria-label="Assign users">
+          <FaUser className="text-primary" />
         </IconButton>
       </Tooltip>
     }
@@ -266,8 +267,8 @@ const Entity: FC = () => {
           <ImportExportLinks
             module="entity(s)"
             api={entityApi}
-            onSuccessfulImport={(isImportedSuccessfully) => {
-              if (isImportedSuccessfully) { fetchEntity(); }
+            afterImportCompleted={() => {
+              fetchEntity();
             }}
           />
         </Grid>

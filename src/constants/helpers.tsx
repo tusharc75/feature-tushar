@@ -35,8 +35,6 @@ export const validations = {
 export const imageUploadMaxSize = { size: 1048576 * 2, text: "2 MB" };
 export const documentUploadMaxSize = { size: 1048576 * 10, text: "10 MB" };
 
-export const termsAndConditionFileUploadMaxSize = { size: 1048576, text: "1 MB" }
-
 export const accountTemplateFileName = "Accounts-Template.xlsx";
 export const accountImportErrorFileName = "Accounts-Errors.xlsx";
 
@@ -105,7 +103,7 @@ export const sidebarResource = {
   email: "Email",
   attachment: "Attachment",
   case: "Case",
-  productTemplate: "Product Template"
+  productTemplate: "Product Template",
 };
 
 export const lead = {
@@ -125,8 +123,8 @@ export const entity = {
 
 export const productTemplate = {
   productTemplateResource: "productTemplate",
-  productTemplateApi: "/product-template"
-}
+  productTemplateApi: "/product-template",
+};
 
 export const quoteBuilder = {
   qbResource: "quoteBuilder",
@@ -216,10 +214,10 @@ export const getObjKeys = (val: string | boolean = "", arr: any[]) => {
           key.displayUnits.forEach((_unit) => {
             obj[
               key.fieldName +
-              "_" +
-              _currency.toLowerCase() +
-              "_" +
-              _unit.toLowerCase()
+                "_" +
+                _currency.toLowerCase() +
+                "_" +
+                _unit.toLowerCase()
             ] = value && value !== "" ? parseFloat(value) : value;
           });
         } else {
@@ -243,8 +241,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     typeof data === "string"
       ? data
       : typeof data === "object"
-        ? data.optionValue
-        : "";
+      ? data.optionValue
+      : "";
 
   for (const key of arr) {
     if (key.type === "switch" || key.type === "checkBox") {
@@ -286,38 +284,35 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === "name") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === "url") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .matches(
-            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-            "Enter valid URL"
-          )
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            )
+            .required(`${input.fieldLabel} is required`)
         : yup
-          .string()
-          .matches(
-            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-            "Enter valid URL"
-          );
+            .string()
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              "Enter valid URL"
+            );
     } else if (input.type === "mobileNumber") {
       schema[input.fieldName] = input.required
         ? yup
-          .string()
-          .min(10, "Mobile number is too short")
-          .required(`${input.fieldLabel} is required`)
+            .string()
+            .min(10, "Mobile number is too short")
+            .required(`${input.fieldLabel} is required`)
         : yup.string().min(10, "Mobile Number is too short");
     } else if (input.type === "multiSelect") {
       schema[input.fieldName] = input.required
-        ? yup
-          .array()
-          .required(`${input.fieldLabel} is required`)
-          .length(1, "Select at least one service access")
+        ? yup.array().required(`${input.fieldLabel} is required`)
         : yup.array();
     } else if (input.type === "email") {
       schema[input.fieldName] =
@@ -343,13 +338,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           input.displayUnits.forEach((_unit) => {
             schema[
               input.fieldName +
-              "_" +
-              _currency.toLowerCase() +
-              "_" +
-              _unit.toLowerCase()
+                "_" +
+                _currency.toLowerCase() +
+                "_" +
+                _unit.toLowerCase()
             ] = input.required
-                ? yup.string().required(`${input.fieldLabel} is required`)
-                : yup.string();
+              ? yup.string().required(`${input.fieldLabel} is required`)
+              : yup.string();
           });
         } else {
           schema[input.fieldName + "_" + _currency.toLowerCase()] =
@@ -447,9 +442,9 @@ export const initializeDropdownById = (field, fieldName, id) => {
 
   return field;
 };
-export const dateFormat = "MM/DD/YYYY"
-export const dateTimeFormat = "MM/DD/YYYY hh:mm A"
-export const cardDateFormat = "MMM,DD YYYY"
+export const dateFormat = "MM/DD/YYYY";
+export const dateTimeFormat = "MM/DD/YYYY hh:mm A";
+export const cardDateFormat = "MMM,DD YYYY";
 
 export const dateFormatForInputControl = "MM/dd/yyyy";
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
@@ -462,13 +457,12 @@ export const yyyyMMDD = (dateToBeFormatted) => {
 };
 
 export const displayDate = (date) => {
-  return date ? moment(date).format(dateFormat) : date
-}
+  return date ? moment(date).format(dateFormat) : date;
+};
 
-export const displayCardDate = date => {
-  return date ? moment(date).format(cardDateFormat) : date
-}
-
+export const displayCardDate = (date) => {
+  return date ? moment(date).format(cardDateFormat) : date;
+};
 
 export const materialTableIcons: any = {
   Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
@@ -760,5 +754,4 @@ export const setFieldsInAscendingOrder = (fieldsToOrder) => {
 
 export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
-}
-
+};

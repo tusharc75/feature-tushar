@@ -32,7 +32,7 @@ import currencies from "./../../constants/currency_with_country.json";
 import { useData } from "../../StateProvider/Provider";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { HiExternalLink } from 'react-icons/hi';
-import { customerAccount, customerContact, supplierContact } from "../../constants/helpers";
+import { customerAccount, customerContact } from "../../constants/helpers";
 import { MoreVert } from "@material-ui/icons";
 import AssignOpportunityDialog from "../AssignRolesDialog/AssignOpportunityDialog";
 
@@ -274,7 +274,7 @@ export default function OpportunityInAccordian({
                               </Grid>
                               <Grid item xs={5} sm={4}>
                                 <Typography className="amount">
-                                  {obj?.amount ? currencies.find(d => d.currencyCode == obj["currency"])?.symbolNative : ''}
+                                  {obj?.amount ? currencies.find(d => d.currencyCode === obj["currency"])?.symbolNative : ''}
                                                                         &nbsp;{obj?.amount ?? ''}</Typography>
                               </Grid>
                             </Grid>

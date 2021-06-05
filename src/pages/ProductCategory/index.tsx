@@ -160,8 +160,8 @@ const ProductCategory = () => {
 
     const ActionsRenderer = params => <Fragment>
         <Tooltip title="Delete">
-            <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}  >
-                <DeleteIcon fontSize="small" color="error" />
+            <IconButton size="small" aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}  >
+                <DeleteIcon color="error" />
             </IconButton>
         </Tooltip >
     </Fragment>
@@ -289,10 +289,8 @@ const ProductCategory = () => {
                 <ImportExportLinks
                     module="product category"
                     api={"product-category"}
-                    onSuccessfulImport={(isImportedSuccessfully) => {
-                        if (isImportedSuccessfully) {
-                            fetchProductCategory();
-                        }
+                    afterImportCompleted={() => {
+                        fetchProductCategory();
                     }}
                 />
             </Grid>
