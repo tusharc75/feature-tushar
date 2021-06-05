@@ -22,6 +22,7 @@ import { BiArrowBack } from 'react-icons/bi';
 import ImportExportLinks from "../../components/Product/ImportExportLinks";
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import FormTypes from "../../components/Helpers/FormTypes";
 
 const ProductBuilderSchema = Yup.object().shape({
     name: Yup.string()
@@ -89,7 +90,11 @@ const CreateProductBuilder = () => {
         <CustomContainer>
             {initialValues ?
                 <Formik initialValues={initialValues} validationSchema={ProductBuilderSchema} onSubmit={handleSave}>
-                    {({ submitForm }) => (
+                    {({ values,
+                        errors,
+                        touched,
+                        setFieldValue,
+                        submitForm, }) => (
                         <Form>
                             <Box p={1} bgcolor="white">
                                 <Grid container spacing={1}>
@@ -102,9 +107,27 @@ const CreateProductBuilder = () => {
                                             label="Name"
                                             name="name"
                                             variant="outlined"
+                                            disabled={true}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={3}>
+                                    <Grid item xs={12} sm={3} >
+                                        <Box mt={1}>
+                                            <FormTypes
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={"Currency"}
+                                                name="currency"
+                                                type="currency"
+                                                setFieldValue={setFieldValue}
+                                                required={true}
+                                                fullWidth
+                                                isTooltip={false}
+                                                tooltipMessage={""}
+                                                size="small"
+                                                disabled={true}
+                                            />
+                                        </Box>
                                     </Grid>
                                     <Grid item xs={12} sm={6} container justify="flex-end">
                                         <Box ml={1} >
