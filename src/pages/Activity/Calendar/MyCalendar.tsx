@@ -25,6 +25,24 @@ const MyCalendar = (props: Props) => {
       formats={formats}
       style={{ height: "100vh" }}
       popup={true}
+      eventPropGetter={(obj) => {
+        console.log(obj.type);
+        const newStyles = {
+          backgroundColor:
+            obj.type === "Event"
+              ? "#E65100"
+              : obj.type === "Task"
+              ? "#3949AB"
+              : "#BF360C",
+          color: "white",
+          borderRadius: "0px",
+          border: "none",
+        };
+
+        return {
+          style: newStyles,
+        };
+      }}
       onSelectEvent={(event: any) => {
         setActivityData({
           type: event.type.toLowerCase(),
