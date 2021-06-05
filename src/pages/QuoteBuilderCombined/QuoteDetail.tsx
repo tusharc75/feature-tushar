@@ -400,6 +400,8 @@ function QuoteDetail() {
     PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
     PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
     PdfDoc.text(`Date: ${displayDate(date)}`, 285, 130);
+    PdfDoc.text(`Quote Expiry Date: ${displayDate(quoteData.expiryDate)}`,285,145);
+    PdfDoc.text(`Inco Terms: ${quoteData.incoTerms}`,285,160);
     PdfDoc.setFontSize(8);
     PdfDoc.text("Bill To:", 20, 100)
     PdfDoc.setFontSize(12);
@@ -408,7 +410,7 @@ function QuoteDetail() {
     var text = "Please find the Quoatation Below:"
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50)
-    PdfDoc.text(text, 20, 180);
+    PdfDoc.text(text, 20, 200);
     var lines = splittedText.length
     var blockHeight = (lines) * lineHeight;
     PDFData = [...PDFData, [{
@@ -416,7 +418,7 @@ function QuoteDetail() {
       styles: { halign: 'right', valign: 'middle' }
     }]];
     autoTable(PdfDoc, {
-      margin: { top: 120 + blockHeight, left: 20, right: 20 },
+      margin: { top: 140 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
       body: PDFData,
       styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
@@ -831,7 +833,12 @@ function QuoteDetail() {
         <Link
           onClick={() => {
             setShowCreateDialog(true);
-            setEditRecord(_.cloneDeep(params.data))
+            const gridData = dataRows;
+            const indexOfRecord = gridData.findIndex(
+              (d) => d.id === params.row.id
+            );
+
+            setEditRecord(_.cloneDeep(gridData[indexOfRecord]));
           }}>
           <CustomRenderCell value={params?.value} />
         </Link>
@@ -860,7 +867,7 @@ function QuoteDetail() {
   const handleMainPoints = (data) => {
     let mainPoint = {};
     mainPoint["Account Name"] = data?.accountName?.optionLabel || "";
-    mainPoint["Close Date"] = yyyyMMDD(data.closeDate);
+    mainPoint["Expiry Date"] = yyyyMMDD(data.closeDate);
     mainPoint["Amount"] = data?.amount ? formatAmountWithCurrency(data?.currency, data?.amount) : "";
     mainPoint["Quote Owner"] = data?.owner?.optionLabel || "";
 
@@ -1091,9 +1098,6 @@ function QuoteDetail() {
       else{
         setNextStep(false);
       }
-    }
-    else{
-      setNextStep(true);
     }
     
     setButtonMessage("Send to Customer");
