@@ -89,7 +89,7 @@ const Steps=(props)=> {
         ) : (
           <div>
             <div className={classes.stepperNext}>
-              {activeStep===1||activeStep===2?(<Button variant="contained" color="primary" onClick={handleBack} >
+              {activeStep===1||activeStep===2?(<Button variant="contained" color="primary" className="mr-2" onClick={handleBack} >
                 Back
               </Button>):(null)}
               <Button variant="contained" color="primary" onClick={handleNext} disabled={nextStep?false:true}>

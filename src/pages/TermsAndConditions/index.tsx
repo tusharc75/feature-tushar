@@ -159,14 +159,13 @@ export default function TermsAndCondition(props) {
     const ActionsRenderer = params => (
         <>
             <Tooltip title="Delete">
-                <IconButton aria-label="Delete" onClick={() => {
+                <IconButton size="small" aria-label="Delete" onClick={() => {
                     setDeleteRec(params.data);
                     setShowDeleteConfirmBox(true)
                 }}
                     disabled={actionsPermissions.isDelete ? false : true}
                 >
-                    <DeleteIcon fontSize="small"
-                        color={actionsPermissions.isDelete ? "error" : "disabled"}
+                    <DeleteIcon color={actionsPermissions.isDelete ? "error" : "disabled"}
                     />
                 </IconButton>
             </Tooltip >
