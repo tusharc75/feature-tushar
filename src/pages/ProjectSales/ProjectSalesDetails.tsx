@@ -48,6 +48,7 @@ const ProjectSalesDetails = () => {
   const [customerAccounts, setCustomerAccounts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
+  const [quotes, setQuotes] = useState([]);
   const [currentAccountId, setCurrentAccountId] = useState("");
   const [headingLbl, setHeadingLbl] = useState("");
   const [mainPoints, setMainPoints] = useState(null);
@@ -121,6 +122,7 @@ const ProjectSalesDetails = () => {
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
       setOpportunities(data.staticData?.opportunity);
+      setQuotes(data.staticData?.quoteBuilder);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
       setLoading(false);
@@ -148,8 +150,8 @@ const ProjectSalesDetails = () => {
   const handleMainPoints = (data) => {
     let tempMp = {
       ["Project Name"]: data.projectName || "",
+      ["Amount"]: data.amount || "",
       ["End Date"]: data.endDate ? displayCardDate(data.endDate) : "",
-      ["Value"]: data.value || "",
       ["Project Probability"]: data?.projectProbability
         ? `${data.projectProbability}%`
         : "",
@@ -283,6 +285,8 @@ const ProjectSalesDetails = () => {
           : [];
       case "opportunity":
         return opportunities.length ? opportunities.map((t) => t._id) : [];
+      case "quote-builder":
+        return quotes.length ? quotes.map((t) => t._id) : [];
 
       default:
         return [];
@@ -527,6 +531,7 @@ const ProjectSalesDetails = () => {
             customerAccounts={customerAccounts}
             customerContacts={customerContacts}
             opportunities={opportunities}
+            quotes={quotes}
             permissions={permissions?.projectSales}
             fetchProjectData={getSalesData}
             projectId={id}

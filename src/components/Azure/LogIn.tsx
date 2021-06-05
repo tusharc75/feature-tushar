@@ -44,7 +44,7 @@ const LogIn = (props) => {
           startIcon={<SiMicrosoftoffice />}
           fullWidth
           variant="contained"
-          color="primary"
+          color="secondary"
           onClick={() => instance.loginPopup()}
         >
           Office 365 Login
