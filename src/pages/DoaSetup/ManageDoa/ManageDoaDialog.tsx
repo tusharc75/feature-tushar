@@ -342,7 +342,7 @@ const DoaDialog = ({ userSelected, onSuccess, userList, doa, doaCurrency, doaTyp
                                                                                                 } >
                                                                                                 <Add />
                                                                                             </IconButton>
-                                                                                            <IconButton size="small" aria-label="delete" style={{ color: "#f44336"}} onClick={() => arrayHelpers.remove(index)} >
+                                                                                            <IconButton size="small" aria-label="delete" style={{ color: "#f44336" }} onClick={() => arrayHelpers.remove(index)} >
                                                                                                 <Delete />
                                                                                             </IconButton>
                                                                                         </ButtonGroup>
