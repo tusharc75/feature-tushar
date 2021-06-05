@@ -102,6 +102,10 @@ export default function ManageQuoteDialog({
     );
     if (customerContactDropdownData) {
       setCustomerContactMainDataSource(customerContactDropdownData.option);
+
+      if (!isNew) {
+        setCustomerContactDataSource(customerContactDropdownData.option.filter(d => d.parentAccount === dataToUpdate.customerAccountName.optionValue));
+      }
     }
 
     return () => {
@@ -112,7 +116,6 @@ export default function ManageQuoteDialog({
     }
 
   }, [entityData.fields]);
-
 
   const sortArray = () => {
     const sections = [];

@@ -45,7 +45,7 @@ import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 import draftToHtml from 'draftjs-to-html';
 import Steps from './Steps'
-
+import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from './EmailDialog'
 import {
@@ -347,8 +347,11 @@ function QuoteDetail() {
 
   const GeneratePdf = (view, send) => {
     const PdfDoc = new jsPDF('p', 'pt', 'a4');
+    let date =new Date();
 
     const pagewidth = PdfDoc.internal.pageSize.width;
+    console.log("Page width is");
+    console.log(pagewidth)
     if (logo !== null) {
       PdfDoc.addImage(logo, 'JPEG', pagewidth - 80, 0, 70, 50);
     }
@@ -356,10 +359,15 @@ function QuoteDetail() {
     PdfDoc.text(companyName, 20, 30);
     PdfDoc.setFontSize(14);
     PdfDoc.text(companyAddress, 20, 45);
+    PdfDoc.setLineWidth(3);    
+    PdfDoc.line(10, 70, 260, 70);
+    PdfDoc.line(330, 70, 580, 70);
+    PdfDoc.text("Quotation",265,75) 
     var PDFData = [];
-    var PdfCol = [];
+    var PdfCol = ["S. No."];
+    var serialNumber=1;
     dynamicTableData.forEach(dataEntry => {
-      var PdfRow = [];
+      var PdfRow = [serialNumber];
       ColumnName.forEach(ColName => {
         if (visibleColumns.indexOf(ColName) !== -1) {
           if (PdfCol.indexOf(ColName) == -1) {
@@ -369,12 +377,26 @@ function QuoteDetail() {
         }
       })
       PDFData.push(PdfRow);
+      serialNumber=serialNumber+1;
     });
-    PdfDoc.setFontSize(14);
+    PdfDoc.setFontSize(10);
+    PdfDoc.text(`Quote Id: ${productBuilderID}`,20,100);
+    PdfDoc.text(`Currency: ${quoteData.currency}`,20,115);
+    PdfDoc.text(`Date: ${displayDate(date)}`,285,100);
+    PdfDoc.setFontSize(8);
+    PdfDoc.text("Bill To:",20,135)
+    PdfDoc.text("Ship To:",285,135)
+    PdfDoc.setFontSize(12);
+    PdfDoc.text(quoteData.customerContactName[0].optionLabel,20,150);
+    PdfDoc.text(quoteData.customerContactName[0].optionLabel,285,150);
+    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,162);
+    PdfDoc.text(quoteData.customerAccountName.optionLabel,285,162);
+    
+    
     var text = "Please find the Quoatation Below:"
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50)
-    PdfDoc.text(text, 20, 90);
+    PdfDoc.text(text, 20, 195);
     var lines = splittedText.length
     var blockHeight = (lines) * lineHeight;
     PDFData = [...PDFData, [{
@@ -382,14 +404,21 @@ function QuoteDetail() {
       styles: { halign: 'right', valign: 'middle' }
     }]];
     autoTable(PdfDoc, {
-      margin: { top: 20 + blockHeight },
+      margin: { top: 135 + blockHeight },
       head: [PdfCol],
       body: PDFData,
       styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
       theme: 'grid'
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
+    
     if (RadioIndex !== -1) {
+      PdfDoc.setDrawColor(0, 0, 0);
+      PdfDoc.setFontSize(14);
+      PdfDoc.setLineWidth(3);    
+      PdfDoc.line(10, finalY+20, 220, finalY+20);
+      PdfDoc.line(370, finalY+20, 580, finalY+20);
+      PdfDoc.text("Terms and Conditions",225,finalY+25)
       let state = convertFromRaw(JSON.parse(dataRows[RadioIndex].description));
       let TNC = EditorState.createWithContent(state)
       var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
@@ -430,7 +459,7 @@ function QuoteDetail() {
 
           }
 
-        }, x: 20, y: finalY + lineHeight, margin: [20, 10, 20, 10]
+        }, x: 20, y: finalY + 50, margin: [20, 10, 20, 10]
       });
     }
     else {
@@ -641,6 +670,9 @@ function QuoteDetail() {
           // }
 
           setquoteData(modifiedData);
+          console.log(modifiedData);
+          console.log(modifiedData);
+
 
           let tempExpanded = {
             supplierContacts: true,
@@ -1338,7 +1370,7 @@ function QuoteDetail() {
                   <Grid container className="position-relative">
                     <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
                       {ProcessStatus === "New" ?
-                        (<span className="productStep">
+                        (<span className="m-2">
                           <Button variant="outlined" size="small" className="mr-1" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
                           <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
                         </span>) : (null)}

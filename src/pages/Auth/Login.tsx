@@ -28,11 +28,11 @@ import { isEmpty } from "lodash";
 import getAzureAcessToken from "../../components/Azure/getAzureAccessToken";
 import { AzureLogin } from "../../components/Azure/Azure";
 import { SiMicrosoftoffice } from "react-icons/si";
-
+import { SVG } from "../../assets";
 const useStyles = makeStyles((theme) => ({
   container: {
-    height: "90vh",
-    width: "90vw",
+    height: "85vh",
+    width: "80vw",
     overflow: "hidden",
   },
   grid: {
@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     width: "100%",
     padding: "30px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
   },
   logo: {
     width: "150px",
@@ -153,30 +156,34 @@ const Login = () => {
     <div className="login-bg">
       <Paper elevation={10} className={classes.container}>
         <Grid container className={classes.grid}>
-          <Grid item sm={4}>
-            <Box
-              width={"100%"}
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              height="100%"
-              bgcolor={theme.palette.primary.main}
-              color="white"
-            >
-              <Typography variant="h3">e-Quipt</Typography>
-              <Typography variant="subtitle1">
-                Empower Your Bussiness
-              </Typography>
+          <Grid item sm={5} className="loginSidebar">
+            <Box>
+              <div className="loginHeader">
+                {/* <Typography variant="h3">e-Quipt</Typography>
+                <Typography variant="subtitle1">
+                  Empower Your Bussiness
+              </Typography> */}
+                {/* <Box className="mt-3 font-size-3">
+                  <b>B2B Planning to execution at your fingerprints</b> <br />
+                  <span>e-Platform that integrates &amp; accelerates B2B Sales and Operations to eliminate wasteful time</span>
+                </Box> */}
+              </div>
+
+              <img className="imgLogin" src={SVG("imgComputer")}></img>
             </Box>
           </Grid>
 
-          <Grid item sm={8} className={classes.formSide}>
-            <Box textAlign="center" mt={5}>
-              <Typography variant="h5" color="textSecondary">
+          <Grid item sm={7} className={classes.formSide}>
+            <Box textAlign="center">
+              {/* <Typography variant="h5" color="textSecondary">
                 Login
-              </Typography>
-
+              </Typography> */}
+              <img
+                className={classes.logo}
+                src={SVG("Logo")}
+                alt="equip logo"
+                title="eQuipt Logo"
+              />
               <Box my={4} />
 
               <Formik
@@ -207,7 +214,7 @@ const Login = () => {
                         onChange={(e) => setFieldValue("email", e.target.value)}
                       />
                     </Box>
-                    <Box mb={3}>
+                    <Box>
                       <TextField
                         style={{ width: 300 }}
                         variant="outlined"
@@ -225,13 +232,19 @@ const Login = () => {
                         }
                       />
                     </Box>
-
-                    <Box width={300}>
+                    <Box width={300} mt={1}>
+                      <Box textAlign="right">
+                        <MuiLink component={Link} to="/forget-password">
+                          Forgot Password?
+                        </MuiLink>
+                      </Box>
+                    </Box>
+                    <Box width={300} className="mt-2">
                       <Button
                         disabled={isSubmitting}
                         fullWidth
                         variant="contained"
-                        color="primary"
+                        color="secondary"
                         onClick={submitForm}
                       >
                         {isSubmitting ? (
@@ -241,15 +254,7 @@ const Login = () => {
                         )}
                       </Button>
 
-                      <Box textAlign="right" mt={1}>
-                        <MuiLink component={Link} to="/forget-password">
-                          Forgot Password?
-                        </MuiLink>
-                      </Box>
-                    </Box>
-
-                    <Box width={300} mt={5}>
-                      <Box>
+                      <Box className="mt-2">
                         <AuthenticatedTemplate>
                           {invalidAzureLogin ? (
                             <span>Not authorized loging out in {counter}</span>
@@ -277,8 +282,8 @@ const Login = () => {
             </Box>
           </Grid>
         </Grid>
-      </Paper>
-    </div>
+      </Paper >
+    </div >
   );
 };
 

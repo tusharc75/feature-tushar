@@ -27,6 +27,7 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
 import CustomRenderCell from "../../components/Helpers/CustomRenderCell";
+import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 
 
 function reducer(state, action) {
@@ -159,8 +160,8 @@ const ProductCategory = () => {
 
     const ActionsRenderer = params => <Fragment>
         <Tooltip title="Delete">
-            <IconButton aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}  >
-                <DeleteIcon fontSize="small" color="error" />
+            <IconButton size="small" aria-label="Delete" onClick={() => { setDeleteRecord(params.data); setShowDeleteConfirmBox(true) }}  >
+                <DeleteIcon color="error" />
             </IconButton>
         </Tooltip >
     </Fragment>
@@ -281,8 +282,19 @@ const ProductCategory = () => {
 
     return (<Layout>
         <Grid container className="headerbox">
-            <Grid item md={12} sm={12} xs={12}>
+            <Grid item md={4} sm={11} xs={10}>
                 <CustomBreadCrumbs routes={[{ title: routes.productCategory.title }]} />
+            </Grid>
+            <Grid item md={8} sm={1} xs={2}>
+                <ImportExportLinks
+                    module="product category"
+                    api={"product-category"}
+                    onSuccessfulImport={(isImportedSuccessfully) => {
+                        if (isImportedSuccessfully) {
+                            fetchProductCategory();
+                        }
+                    }}
+                />
             </Grid>
         </Grid>
         <CustomContainer>

@@ -42,7 +42,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import axiosInstance from "../../axios/axiosInstance";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import currencyList from "../../constants/currency_with_country.json";
-import { imageUploadMaxSize, documentUploadMaxSize, dateFormat } from "../../constants/helpers"
+import { imageUploadMaxSize, documentUploadMaxSize, dateFormatForInputControl } from "../../constants/helpers"
 
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
@@ -316,9 +316,7 @@ const FormTypes = (props) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
           setFileUploadProgress(completedPercent);
 
-          if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(completedPercent); }
           if (completedPercent === 100) {
-            if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
             setTimeout(() => {
               setFileUploadProgress(0);
             }, 4000);
@@ -326,6 +324,7 @@ const FormTypes = (props) => {
         },
       })
       .then(({ data }) => {
+        if (imageOrFileUploadCompletePercentage) { imageOrFileUploadCompletePercentage(0); }
         if (uploadFileUrl) {
           onAppendData(data)
         }
@@ -1489,13 +1488,12 @@ const FormTypes = (props) => {
                 <IconButton
                   disabled={Boolean(!values[name])}
                   title="Remove File"
-                  color="secondary"
                   size="small"
                   aria-label="delete picture"
                   component="span"
                   onClick={() => setFieldValue(name, "")}
                 >
-                  <DeleteIcon />
+                  <DeleteIcon color="error" />
                 </IconButton> : null
             }
 
@@ -1532,7 +1530,7 @@ const FormTypes = (props) => {
           name={name}
           label={label}
           onChange={(date) => setFieldValue(name, date ? date : "")}
-          format={dateFormat}
+          format={dateFormatForInputControl}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           InputLabelProps={{

@@ -180,15 +180,16 @@ const Roles: FC = () => {
               className="cursor-stop"
               title={params.data.type === "Global Role" ? "Global brand admin role can not be deleted" : "Regional brand admin role can not be deleted"}
             >
-              <IconButton aria-label="Delete">
-                <DeleteIcon fontSize="small" />
+              <IconButton size="small" aria-label="Delete">
+                <DeleteIcon />
               </IconButton>
             </Tooltip>
           ) : (<IconButton
+            size="small"
             aria-label="Delete"
             onClick={() => showConfirmBox(params.data)}
           >
-            <DeleteIcon fontSize="small" color="error" />
+            <DeleteIcon color="error" />
           </IconButton>)
         }
       </span>

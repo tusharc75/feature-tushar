@@ -254,6 +254,7 @@ const Email = () => {
     const ActionsRenderer = params => <>
         <Tooltip title="Delete">
             <IconButton
+                size="small"
                 aria-label="Delete"
                 onClick={() => showConfirmBox(params.data)}>
                 <DeleteIcon fontSize="small" color="error" />

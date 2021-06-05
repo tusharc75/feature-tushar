@@ -219,15 +219,18 @@ export default function Attachment(props) {
             <>
                 <Tooltip title="Download">
                     <IconButton
+                        size="small"
                         aria-label="Download"
+                        color="primary"
                         disabled={isDownloading}
                         onClick={() => downloadFile(params.data.fileUrl)}
                     >
-                        <GoArrowDown size={18} />
+                        <GoArrowDown size={26} />
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Delete">
                     <IconButton
+                        size="small"
                         aria-label="Delete"
                         onClick={() => showConfirmBox(params.data)}>
                         <DeleteIcon fontSize="small" color="error" />
