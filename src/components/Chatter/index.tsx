@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import './style.scss'
 import SendIcon from '@material-ui/icons/Send';
 import { CgSearchLoading } from 'react-icons/cg';
 import { makeStyles } from '@material-ui/core';
