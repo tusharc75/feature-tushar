@@ -457,8 +457,8 @@ const Leads = () => {
           <ImportExportLinks
             module="lead(s)"
             api={leadApi}
-            onSuccessfulImport={(isImportedSuccessfully) => {
-              if (isImportedSuccessfully) { fetchLeads(); }
+            afterImportCompleted={() => {
+              fetchLeads();
             }}
           />
         </Grid>

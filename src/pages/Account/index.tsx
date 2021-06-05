@@ -524,10 +524,8 @@ export default function Account(props) {
             <ImportExportLinks
               module="account(s)"
               api={accountApi}
-              onSuccessfulImport={(isImportedSuccessfully) => {
-                if (isImportedSuccessfully) {
-                  fetchAccounts();
-                }
+              afterImportCompleted={() => {
+                fetchAccounts();
               }}
             />
           </Grid>
