@@ -1644,6 +1644,7 @@ function QuoteDetail() {
                 columns={versionStatusData.columns}
                 disableSelectionOnClick
                 disableMultipleSelection
+                disableColumnFilter
                 hideFooter
               />
             </div>
