@@ -48,9 +48,6 @@ import Steps from './Steps'
 import { displayDate } from "../../services/util";
 import AddIcon from "@material-ui/icons/Add";
 import EmailDialog from './EmailDialog'
-import {
-  Radio
-} from "@material-ui/core";
 
 import _, { isNull } from "lodash";
 import {
@@ -62,6 +59,9 @@ import { quoteBuilder } from '../../constants/helpers'
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import ProductBuilder from "../../components/productBuilder";
 import { DatasetController } from "chart.js";
+import CustomDialogComponent from '../../components/CustomDialog/CustomDialogComponent';
+import InfoIcon from "@material-ui/icons/Info";
+import { AnyObject } from "yup/lib/types";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -104,8 +104,8 @@ function QuoteDetail() {
     state: { user, selectedEntity, permissions },
   }: any = useData();
 
-  var defaultSelectColumns=["Product Name","Description","Unit","Qty"];
-  const [options,setOptions]=useState([]);
+  var defaultSelectColumns = ["Product Name", "Description", "Unit", "Qty"];
+  const [options, setOptions] = useState([]);
   const [headingLbl, setHeadingLbl] = useState("");
   const [loading, setLoading] = useState(true);
   const [quoteData, setquoteData] = useState(null);
@@ -149,7 +149,7 @@ function QuoteDetail() {
   const [query, setQuery] = useState({ page: 0, limit: 5 });
   const [dataRows, setDataRows] = useState([]);
   const [RadioIndex, setRadioIndex] = useState(-1);
-  const [TandC, setTNC] = useState("");
+  const [TandC, setTNC] = useState([]);
   const [searchVal, setSearchVal] = useState("");
   const [totalProfit, setTotalProfit] = useState("");
   const [totalcost, setTotalCost] = useState("");
@@ -159,7 +159,7 @@ function QuoteDetail() {
   const [ColumnName, setColName] = useState([]);
   const [visibleColumns, setVisibleColumnName] = useState([]);
   const [versionStatus, setversionStatus] = useState("Building Quote");
-  const [DOAneeded,setDOAneeded]=useState(false);
+  const [DOAneeded, setDOAneeded] = useState(false);
 
   const [data, setData] = useState([]);
 
@@ -180,11 +180,14 @@ function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [ProcessStatus, setProcessStatus] = useState("New");
   let logo = null;
-  var companyName = "";
-  var companyAddress = "";
-  const[DOAlimit,setDOALimit] = useState(0);
-  const[DOAsetup,setDOAsetup] = useState(false);
-  const[lastUser,setLastUser]=useState(true);
+  let companyName = "";
+  let companyAddress = "";
+  const [DOAlimit, setDOALimit] = useState(0);
+  const [DOAsetup, setDOAsetup] = useState(false);
+  const [lastUser, setLastUser] = useState(true);
+  const [showVersionsDialog, setShowVersionsDialog] = useState(false)
+  const [versionStatusData, setVersionStatusData] = useState({ columns: [], data: [] })
+
   let termsTimeout;
 
 
@@ -233,7 +236,7 @@ function QuoteDetail() {
     console.log(data);
     let rows = data?.map((u) => ({
       ...u,
-      isChecked: u._id === TandC ? true : false,
+      isChecked: TandC.includes(u._id) ? true : false,
       id: u._id,
     }));
     setDataRows([...rows]);
@@ -275,11 +278,22 @@ function QuoteDetail() {
     fetchDoaLimit();
     console.log(data)
 
-    if (ProcessStatus === "New" && data.length===0) {
+    if (ProcessStatus === "New" && data.length === 0) {
       setNextStep(false);
     }
-    if(ProcessStatus==="New" && data.length>0){
+    if (ProcessStatus === "New" && data.length > 0) {
       setNextStep(true);
+    }
+    if (ProcessStatus === "Price Builder" && data.length === 0) {
+      axiosInstance()
+        .post(`quote-builder/updateprocess/${id}?version=${currentVersion}`, { processStatus: "New" })
+        .then(({ data }) => {
+
+          fetchquoteData(currentVersion);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
     }
     productBuilderdatatoQuoteBuilderdata(data);
 
@@ -303,8 +317,9 @@ function QuoteDetail() {
     axiosInstance()
       .get('/user/brandInfo')
       .then(({ data }) => {
-        companyName = data.data.name;
-        companyAddress = data.data.address
+        console.log(data);
+        companyName=data.data.name;
+        companyAddress=data.data.address;
         if (data.data.logo) {
           fetchImage(data.data.logo, function (dataUri) {
             logo = dataUri;
@@ -347,11 +362,12 @@ function QuoteDetail() {
 
   const GeneratePdf = (view, send) => {
     const PdfDoc = new jsPDF('p', 'pt', 'a4');
-    let date =new Date();
+    let date = new Date();
 
     const pagewidth = PdfDoc.internal.pageSize.width;
     console.log("Page width is");
-    console.log(pagewidth)
+    console.log(pagewidth);
+    console.log(logo);
     if (logo !== null) {
       PdfDoc.addImage(logo, 'JPEG', pagewidth - 80, 0, 70, 50);
     }
@@ -359,13 +375,13 @@ function QuoteDetail() {
     PdfDoc.text(companyName, 20, 30);
     PdfDoc.setFontSize(14);
     PdfDoc.text(companyAddress, 20, 45);
-    PdfDoc.setLineWidth(3);    
+    PdfDoc.setLineWidth(3);
     PdfDoc.line(10, 70, 260, 70);
     PdfDoc.line(330, 70, 580, 70);
-    PdfDoc.text("Quotation",265,75) 
+    PdfDoc.text("Quotation", 265, 75)
     var PDFData = [];
     var PdfCol = ["S. No."];
-    var serialNumber=1;
+    var serialNumber = 1;
     dynamicTableData.forEach(dataEntry => {
       var PdfRow = [serialNumber];
       ColumnName.forEach(ColName => {
@@ -377,26 +393,21 @@ function QuoteDetail() {
         }
       })
       PDFData.push(PdfRow);
-      serialNumber=serialNumber+1;
+      serialNumber = serialNumber + 1;
     });
     PdfDoc.setFontSize(10);
-    PdfDoc.text(`Quote Id: ${productBuilderID}`,20,100);
-    PdfDoc.text(`Currency: ${quoteData.currency}`,20,115);
-    PdfDoc.text(`Date: ${displayDate(date)}`,285,100);
+    PdfDoc.text(`Quote Id: ${productBuilderID}`, 285, 100);
+    PdfDoc.text(`Currency: ${quoteData.currency}`, 285, 115);
+    PdfDoc.text(`Date: ${displayDate(date)}`, 285, 130);
     PdfDoc.setFontSize(8);
-    PdfDoc.text("Bill To:",20,135)
-    PdfDoc.text("Ship To:",285,135)
+    PdfDoc.text("Bill To:", 20, 100)
     PdfDoc.setFontSize(12);
-    PdfDoc.text(quoteData.customerContactName[0].optionLabel,20,150);
-    PdfDoc.text(quoteData.customerContactName[0].optionLabel,285,150);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,162);
-    PdfDoc.text(quoteData.customerAccountName.optionLabel,285,162);
-    
+    PdfDoc.text(quoteData.customerAccountName.optionLabel,20,115);
     
     var text = "Please find the Quoatation Below:"
     var lineHeight = PdfDoc.getLineHeight();
     var splittedText = PdfDoc.splitTextToSize(text, 50)
-    PdfDoc.text(text, 20, 195);
+    PdfDoc.text(text, 20, 180);
     var lines = splittedText.length
     var blockHeight = (lines) * lineHeight;
     PDFData = [...PDFData, [{
@@ -404,14 +415,14 @@ function QuoteDetail() {
       styles: { halign: 'right', valign: 'middle' }
     }]];
     autoTable(PdfDoc, {
-      margin: { top: 135 + blockHeight },
+      margin: { top: 120 + blockHeight, left: 20, right: 20 },
       head: [PdfCol],
       body: PDFData,
       styles: { halign: 'center', cellWidth: 'auto', overflow: 'linebreak' },
       theme: 'grid'
     });
     let finalY = (PdfDoc as any).lastAutoTable.finalY;
-    
+    console.log(RadioIndex);
     if (RadioIndex !== -1) {
       PdfDoc.setDrawColor(0, 0, 0);
       PdfDoc.setFontSize(14);
@@ -419,11 +430,21 @@ function QuoteDetail() {
       PdfDoc.line(10, finalY+20, 220, finalY+20);
       PdfDoc.line(370, finalY+20, 580, finalY+20);
       PdfDoc.text("Terms and Conditions",225,finalY+25)
-      let state = convertFromRaw(JSON.parse(dataRows[RadioIndex].description));
-      let TNC = EditorState.createWithContent(state)
-      var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
-      markup = markup.replaceAll(" ", "&nbsp");
-      PdfDoc.html(markup, {
+      var finalmarkup=""
+      console.log(TandC);
+      for(var tc=0;tc<TandC.length;tc++){
+        var SelectTNC:AnyObject= dataRows.filter((d: { _id: string}) => d._id ===TandC[tc] );
+        console.log(SelectTNC);
+        finalmarkup=finalmarkup+`<h1><strong>${SelectTNC[0].TACName}:</strong></h1>`
+        let state = convertFromRaw(JSON.parse(SelectTNC[0].description));
+        let TNC = EditorState.createWithContent(state)
+        var markup = draftToHtml(convertToRaw(TNC.getCurrentContent()));
+        finalmarkup=finalmarkup+markup+'<br>'
+      }
+      
+    
+      finalmarkup = finalmarkup.replaceAll(" ", "&nbsp");
+      PdfDoc.html(finalmarkup, {
         callback: function (doc) {
           if (view && !send) {
             doc.output('dataurlnewwindow');
@@ -445,12 +466,20 @@ function QuoteDetail() {
               .then(({ data }) => {
                 console.log("PDF Response is:");
                 console.log(data);
-                axiosInstance().post(`/doa-request/create/`)
+                if (DOAreq) {
+                  console.log(data);
+                  handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
+                  axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
                   .then(({ data }) => {
+                    fetchquoteData(currentVersion)
                   })
                   .catch((err) => {
                     toastConfig.setToastConfig(err);
                   });
+                }
+                else {
+                  handleVersionUpdate(data.fileName, visibleColumns, versionStatus, TandC);
+                }
               })
               .catch((err) => {
                 toastConfig.setToastConfig(err);
@@ -463,6 +492,7 @@ function QuoteDetail() {
       });
     }
     else {
+      console.log("I am here");
       if (view && !send) {
         PdfDoc.output('dataurlnewwindow');
       }
@@ -483,11 +513,16 @@ function QuoteDetail() {
           .then(({ data }) => {
             console.log("PDF Response is:");
             console.log(data);
+            handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
             if (DOAreq) {
-              handleVersionUpdate(data.fileName, visibleColumns, "Sent for DOA", TandC);
-            }
-            else {
-              handleVersionUpdate(data.fileName, visibleColumns, versionStatus, TandC);
+              axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
+              .then(({ data }) => {
+                
+                fetchquoteData(currentVersion)
+              })
+              .catch((err) => {
+                toastConfig.setToastConfig(err);
+              });
             }
 
           })
@@ -527,12 +562,12 @@ function QuoteDetail() {
 
   const fetchDoaLimit = () => {
     axiosInstance()
-      .post('doa-request/limit',{})
+      .post('doa-request/limit', {})
       .then(({ data }) => {
         console.log("DOA limit is:");
         console.log(data);
         setDOAsetup(data.data.doasetup);
-        setDOALimit(data.data.limit?data.data.limit:0);
+        setDOALimit(data.data.limit ? data.data.limit : 0);
         setLastUser(data.data.lastUser);
       })
       .catch((err) => {
@@ -579,17 +614,16 @@ function QuoteDetail() {
           setHeadingLbl(data.quoteName);
           var keys = Object.keys(data.versions);
           setVersions(keys);
-          var ps="";
-          var s=""
+          var ps = "";
+          var s = ""
 
           if (version === 0) {
             setcurrentVersion(parseInt(keys[keys.length - 1]));
-            setPBversionStatus(data.versions[keys[keys.length - 1]]["status"]);
 
             console.log(data.versions[keys[keys.length - 1]]["processStatus"])
             setProcessStatus(data.versions[keys[keys.length - 1]]["processStatus"]);
-            ps=data.versions[keys[keys.length - 1]]["processStatus"]
-            s=data.versions[keys[keys.length - 1]]["status"]
+            ps = data.versions[keys[keys.length - 1]]["processStatus"]
+            s = data.versions[keys[keys.length - 1]]["status"]
             setProductBuilderID(data.versions[keys[keys.length - 1]]["productBuilderId"]);
             setversionStatus(data.versions[keys[keys.length - 1]]["status"])
             if (data.versions[keys[keys.length - 1]]["TNC"]) {
@@ -610,7 +644,6 @@ function QuoteDetail() {
           }
           else {
             setcurrentVersion(version);
-            setPBversionStatus(data.versions[version]["status"]);
             console.log(data.versions[version]["processStatus"])
             setProcessStatus(data.versions[version]["processStatus"]);
             setProductBuilderID(data.versions[version]["productBuilderId"]);
@@ -627,20 +660,20 @@ function QuoteDetail() {
             else {
               setEditable(false);
             }
-            ps=data.versions[version]["processStatus"]
-            s=data.versions[version]["status"]
+            ps = data.versions[version]["processStatus"]
+            s = data.versions[version]["status"]
           }
           console.log(ps);
           console.log(s);
           console.log(s.includes("Accepted"));
-          console.log(ps==="DOA Process");
-          if(ps==="DOA Process" && !s.includes("Accepted")){
+          console.log(ps === "DOA Process");
+          if (ps === "DOA Process" && !s.includes("Accepted")) {
             setNextStep(false);
           }
-          if(ps==="DOA Process" && s.includes("Accepted")){
+          if (ps === "DOA Process" && s.includes("Accepted")) {
             setNextStep(true);
           }
-          if(ps==="Customer Process"){
+          if (ps === "Customer Process") {
             setNextStep(false);
           }
 
@@ -692,7 +725,7 @@ function QuoteDetail() {
             { title: `${data.quoteName}` },
           ]);
 
-          
+
 
         })
         .catch((error) => {
@@ -761,7 +794,7 @@ function QuoteDetail() {
       field: "isChecked",
       headerName: "Select",
       renderCell: (params) => (
-        <Radio
+        <Checkbox
           color="primary"
           // disabled={!params.canDelete}
           checked={params.value}
@@ -771,21 +804,23 @@ function QuoteDetail() {
               (d) => d.id === params.row.id
             );
             var prevvalue = gridData[indexOfRecord].isChecked;
-            for (var i = 0; i < gridData.length; i++) {
-              gridData[i].isChecked = false;
-            }
+            let newTNC = TandC
             if (prevvalue) {
               gridData[indexOfRecord].isChecked = false;
-              setRadioIndex(-1);
+              const index = newTNC.indexOf(gridData[indexOfRecord]._id)
+              newTNC.splice(index, 1);
             }
             else {
               gridData[indexOfRecord].isChecked = true;
+              newTNC.push(gridData[indexOfRecord]._id)
               setRadioIndex(indexOfRecord);
             }
-
+            if (newTNC.length === 0) {
+              setRadioIndex(-1);
+            }
             setDataRows([...gridData]);
-            setTNC(gridData[indexOfRecord]._id);
-            handleVersionUpdate(PDF, visibleColumns, versionStatus, gridData[indexOfRecord]._id);
+            setTNC(newTNC);
+            handleVersionUpdate(PDF, visibleColumns, versionStatus, newTNC);
             console.log(gridData[indexOfRecord]._id);
             const checkedRecords = gridData.filter((d) => d.isChecked === true);
           }}
@@ -916,7 +951,9 @@ function QuoteDetail() {
     setLoadPB(false)
     setcurrentVersion(event.target.value);
     setProductBuilderID(quoteData["versions"][event.target.value]["productBuilderId"]);
-    setPBversionStatus(quoteData["versions"][event.target.value]["versionStatus"]);
+    setversionStatus(quoteData["versions"][event.target.value]["status"])
+    console.log("On version Change:");
+    console.log(quoteData["versions"][event.target.value]["status"]);
     setProcessStatus(quoteData["versions"][event.target.value]["processStatus"]);
     console.log(quoteData["versions"][event.target.value]["productBuilderId"])
     //const productBuilderdata=ProductBuilderComponent.current.fetchProduct(quoteData["versions"][event.target.value]["productBuilderId"]);
@@ -956,10 +993,10 @@ function QuoteDetail() {
 
   const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
     setOptions([]);
-    var optionstoSet=[]
+    var optionstoSet = []
     console.log(BuilderData);
     const inventory: { fieldName: string; fieldValue: any; }[][] = [];
-    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string'];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
     var totalCost = 0;
     var totalSellingPrice = 0
     var totalMargin = 0
@@ -984,33 +1021,36 @@ function QuoteDetail() {
           }
           var fields = quoteRows["fields"]
           var field = fields.filter((d: { fieldName: string; }) => d.fieldName === key);
-          if (typeof (quoteRows[key]) === "object") {
-            inventorydata.push({
-              fieldName: field[0].fieldLabel,
-              fieldValue: quoteRows[key][key]
-            });
-          }
-          else {
-            inventorydata.push({
-              fieldName: field[0].fieldLabel,
-              fieldValue: quoteRows[indexkey]
-            });
-          }
-          if (key === 'totalCost') {
-            totalCost = totalCost + quoteRows[indexkey]
-            CostCurrency = currency.toUpperCase()
-          }
-          else if (key === 'totalSalesPrice') {
-            totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
-            SPCurrency = currency.toUpperCase()
-          }
-          else if (key === "totalProfit") {
-            totalProfit = totalProfit + quoteRows[indexkey]
-            ProfitCurrency = currency.toUpperCase()
-          }
-          else if (key === "totalMargin") {
-            totalMargin = totalMargin + quoteRows[indexkey]
-            MarginCurrency = currency.toUpperCase()
+          console.log(field);
+          if(typeof(field[0])!=="undefined"){
+            if (typeof (quoteRows[key]) === "object") {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[key][key]
+              });
+            }
+            else {
+              inventorydata.push({
+                fieldName: field[0].fieldLabel,
+                fieldValue: quoteRows[indexkey]
+              });
+            }
+            if (key === 'totalCost') {
+              totalCost = totalCost + quoteRows[indexkey]
+              CostCurrency = currency.toUpperCase()
+            }
+            else if (key === 'totalSalesPrice') {
+              totalSellingPrice = totalSellingPrice + quoteRows[indexkey]
+              SPCurrency = currency.toUpperCase()
+            }
+            else if (key === "totalProfit") {
+              totalProfit = totalProfit + quoteRows[indexkey]
+              ProfitCurrency = currency.toUpperCase()
+            }
+            else if (key === "totalMargin") {
+              totalMargin = totalMargin + quoteRows[indexkey]
+              MarginCurrency = currency.toUpperCase()
+            }
           }
         }
       })
@@ -1035,10 +1075,10 @@ function QuoteDetail() {
     setButtonMessage("Send to Customer");
     setDOAreq(false);
     setCustomerreq(true);
-    if((DOAsetup && totalSellingPrice > DOAlimit) && !lastUser){
+    if ((DOAsetup && totalSellingPrice > DOAlimit) && !lastUser) {
       setDOAneeded(true);
     }
-    else{
+    else {
       setDOAneeded(false);
     }
     if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === "Building Quote" && !lastUser) {
@@ -1046,11 +1086,11 @@ function QuoteDetail() {
       setCustomerreq(false);
       setButtonMessage("Send for DOA");
     }
-    
+
     else if (versionStatus.includes("Rejected by DOA")) {
       setDOAreq(true);
       setCustomerreq(false);
-      setButtonMessage("Send for DOA");
+      setButtonMessage("Re-Send for DOA");
     }
     else if (versionStatus === "Sent for DOA") {
       setDOAreq(false);
@@ -1075,14 +1115,8 @@ function QuoteDetail() {
         var DataSet = inventory[i][j];
         if (ColName.indexOf(DataSet.fieldName) === -1) {
           ColName = [...ColName, DataSet.fieldName];
-          if(DataSet.fieldName.includes("Sales Price"))
-          defaultSelectColumns.push(DataSet.fieldName);
-          if(DataSet.fieldName.includes("Margin") || DataSet.fieldName.includes("Profit") || DataSet.fieldName.includes("Commission")|| DataSet.fieldName.includes("Cost")){
-            //Rejected Fields
-          } else{
-            console.log("Adding in Options");
-            optionstoSet.push(DataSet.fieldName);
-          }
+          if (DataSet.fieldName.includes("Sales Price"))
+            defaultSelectColumns.push(DataSet.fieldName);
           Col = [...Col, { title: DataSet.fieldName, name: DataSet.fieldName }];
           columnext = [...columnext, { ColumnName: DataSet.fieldName, width: 100 }];
         }
@@ -1092,7 +1126,7 @@ function QuoteDetail() {
     }
     setColName(ColName);
     setOptions(optionstoSet);
-    if (columnView.length > 0 ) {
+    if (columnView.length > 0) {
       setVisibleColumnName(columnView)
     }
     else {
@@ -1120,19 +1154,12 @@ function QuoteDetail() {
     console.log("HandleCases");
     if (DOAreq) {
       if (!PDF) {
-        GeneratePdf(false, true);
+        createImagePDF(false, true);
       }
-      axiosInstance().post(`/doa-request/create/${id}?version=${currentVersion}`)
-        .then(({ data }) => {
-          fetchquoteData(currentVersion)
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
     };
     if (Customerreq) {
       if (!PDF) {
-        GeneratePdf(false, true);
+        createImagePDF(false, true);
       }
       setSendEmail(true);
     }
@@ -1163,7 +1190,7 @@ function QuoteDetail() {
     var body = { PDF: PDFfile, acceptedColumns: Columns, versionStatus: versionStatus, TNC: TC }
     axiosInstance()
       .post(`quote-builder/updateVersion/${id}?version=${currentVersion}`, body)
-      .then(({ data }) => {
+      .then(({ data }) => { 
 
       })
       .catch((err) => {
@@ -1208,6 +1235,15 @@ function QuoteDetail() {
   let selectedSupplierAccounts = []
   if (quoteData?.supplierAccountName && quoteData.supplierAccountName.length) {
     selectedSupplierAccounts = quoteData.supplierAccountName.map(s => s.optionValue)
+  }
+
+  const getVersionStatus = () => {
+    axiosInstance().get("").then(({ data: { data } }) => {
+      setShowVersionsDialog(true);
+      setVersionStatusData(data);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
   }
 
   return (
@@ -1315,6 +1351,7 @@ function QuoteDetail() {
                       </h4>
                       </Grid>
                       <Grid item xs={12} sm={6} md={6} className="d-flex justify-content-end">
+                        {/* <Button variant="outlined" type="button" size="small" startIcon={<InfoIcon />} color="primary" onClick={() => { getVersionStatus() }}>Version status </Button> */}
                         <select className="customSelect mr-1" value={currentVersion}
                           onChange={handleChangeVersion}>
                           {versions.map((team) => <option key={team} value={team}>{"Version : " + team}</option>)}
@@ -1356,10 +1393,12 @@ function QuoteDetail() {
                         steps={DOASteps}
                         currentStep={DOASteps.indexOf(ProcessStatus)}
                         id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                        versionStatus={versionStatus}
                       />) : (<Steps
                         steps={OtherSteps}
                         currentStep={OtherSteps.indexOf(ProcessStatus)}
                         id={id} version={currentVersion} Refresh={fetchquoteData} nextStep={nextStep}
+                        versionStatus={versionStatus}
                       />)}
                   </div>
                 </>
@@ -1370,7 +1409,7 @@ function QuoteDetail() {
                   <Grid container className="position-relative">
                     <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
                       {ProcessStatus === "New" ?
-                        (<span className="m-2">
+                        (<span className="productStep">
                           <Button variant="outlined" size="small" className="mr-1" startIcon={<AiFillPlusCircle />} color="primary" onClick={() => { setIsAddNewProduct(true) }}>New</Button>
                           <Button variant="outlined" size="small" startIcon={<BiLayerPlus />} color="primary" onClick={() => { setIsAddExistingProduct(true) }}>Add Existing</Button>
                         </span>) : (null)}
@@ -1396,7 +1435,7 @@ function QuoteDetail() {
                                 )}
                                 MenuProps={MenuProps}
                               >
-                                {options.map((name) => (
+                                {ColumnName.map((name) => (
                                   <MenuItem key={name} value={name} style={getStyles(name, visibleColumns, theme)}>
                                     <Checkbox checked={visibleColumns.indexOf(name) > -1} />{name}
                                   </MenuItem>
@@ -1406,10 +1445,10 @@ function QuoteDetail() {
                           </Grid>
                         </Grid>
                       ) : null}
-                      {(ProcessStatus === "DOA Process" && versionStatus==="Building Quote" )||(ProcessStatus === "Customer Process" && versionStatus!=="Sent to Customer")? (<span className="d-flex align-items-center justify-content-end">
+                      {(ProcessStatus === "DOA Process" && versionStatus === "Building Quote") || (ProcessStatus === "Customer Process" && versionStatus !== "Sent to Customer") ? (<span className="d-flex align-items-center justify-content-end">
                         <Button onClick={() => handleCases()} disabled={!DOAreq && !Customerreq} startIcon={<BiMailSend />} variant="contained" size="small" color="primary">{buttonMessage}</Button></span>) : null}
                     </Grid>
-                    {ProcessStatus === "Quote Builder" ? (<span  className="d-flex align-items-center justify-content-end">
+                    {ProcessStatus !== "New" && ProcessStatus!=="Price Builder" ? (<span  className="d-flex align-items-center justify-content-end">
                         <Button onClick={() => createImagePDF(true, false)} variant="outlined" size="small" className="mr-1" startIcon={<AiOutlineEye />} color="primary">View</Button>
                         <Button onClick={() => createImagePDF(false, false)} variant="outlined" size="small" startIcon={<FiDownloadCloud />} color="primary">Download</Button>
                       </span>)
@@ -1423,8 +1462,7 @@ function QuoteDetail() {
                         setIsAddExistingProduct={setIsAddExistingProduct}
                         refreshProducts={refreshProducts}
                         stage={ProcessStatus === "New" ? "product" : "cost"}
-                        Editable={ProcessStatus === "Price Builder" ? true : false}
-                        Deletable={ProcessStatus === "Price Builder"? true:false}
+                        Editable={ProcessStatus === "Price Builder" || ProcessStatus === "New" ? true : false}
                       />
                       {ProcessStatus === "Quote Builder" ?
                         (<Box>
@@ -1571,6 +1609,17 @@ function QuoteDetail() {
             onClose={() => { setMessageDialog({ open: false, message: null }) }}
             message={messageDialog.message}
           />
+        }
+
+        {
+          showVersionsDialog && <CustomDialogComponent
+            title="Version(s) Information"
+            open={showVersionsDialog}
+            onClose={() => { setShowVersionsDialog(false) }}
+          >
+            Data
+
+          </CustomDialogComponent>
         }
       </Layout >
     </>

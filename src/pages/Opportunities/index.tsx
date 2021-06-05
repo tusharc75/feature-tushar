@@ -421,8 +421,8 @@ const Opportunities = () => {
                   <ImportExportLinks
                     module="opportunities"
                     api={opportunityApi}
-                    onSuccessfulImport={(isImportedSuccessfully) => {
-                      if (isImportedSuccessfully) { fetchOpportunities(); }
+                    afterImportCompleted={() => {
+                      fetchOpportunities();
                     }}
                   />
                 </Grid>

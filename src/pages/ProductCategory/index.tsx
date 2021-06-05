@@ -289,10 +289,8 @@ const ProductCategory = () => {
                 <ImportExportLinks
                     module="product category"
                     api={"product-category"}
-                    onSuccessfulImport={(isImportedSuccessfully) => {
-                        if (isImportedSuccessfully) {
-                            fetchProductCategory();
-                        }
+                    afterImportCompleted={() => {
+                        fetchProductCategory();
                     }}
                 />
             </Grid>
